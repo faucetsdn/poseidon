@@ -12,22 +12,34 @@ Nothing to see here yet, move along...
 
 # Install Instructions
 
-Nothing to see here yet, move along...
+```
+git clone https://github.com/Lab41/poseidon.git
+cd poseidon
+make
+```
 
 # Required Dependencies
 
-Nothing to see here yet, move along...
+- Docker
+- make
 
 # Usage Examples
 
-Nothing to see here yet, move along...
+```
+make run
+```
 
 # Documentation
 - [Docs](https://github.com/Lab41/poseidon/tree/master/docs)
 
 # Tests
 
-Nothing to see here yet, move along...
+Tests are currently written in py.test for Python.  The tests are automatically run when building the dockerfile.
+
+They can also be tested using:
+```
+make test
+```
 
 # Contributing to Poseidon
 
