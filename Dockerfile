@@ -12,12 +12,15 @@ RUN apk add --update \
 ADD . /poseidon
 WORKDIR /poseidon
 RUN pip install -r poseidon/requirements.txt
-RUN py.test -v --cov=poseidon --cov-report term-missing
+
+# build documentation
 RUN sphinx-apidoc -o docs poseidon -F && cd docs && make html && make man
 
 ENV PYTHONUNBUFFERED 0
-
 EXPOSE 8000
 
 ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:8000"]
 CMD ["poseidon.poseidon:api"]
+
+# run tests
+RUN py.test -v --cov=poseidon --cov-report term-missing
