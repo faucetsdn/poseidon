@@ -1,4 +1,5 @@
 falcon
 gunicorn
 pytest
+pytest-cov
 pytest-falcon
