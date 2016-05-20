@@ -1,0 +1,36 @@
+swagger: '2.0'
+info:
+  title: Poseidon API
+  description: This contains the documentation and a functional Poseidon API testing sandbox.
+  version: 0.1.0-dev
+host: mydomain
+schemes:
+  - http
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /quote:
+    get:
+      summary: Quote
+      description: >
+        This endpoint returns a quote.
+      produces:
+        - application/json
+      tags:
+        - Meta
+      responses:
+        '200':
+          description: Returns a JSON string of a quote
+  /version:
+    get:
+      summary: Version
+      description: >
+        This endpoint returns the current version and build information.
+      produces:
+        - application/json
+      tags:
+        - Meta
+      responses:
+        '200':
+          description: Returns a JSON string of the version and build
