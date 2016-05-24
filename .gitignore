@@ -63,3 +63,6 @@ target/
 
 # swap files
 *.swp
+
+# OSX crap
+.DS_Store
