@@ -2,7 +2,7 @@ swagger: '2.0'
 info:
   title: Poseidon API
   description: This contains the documentation and a functional Poseidon API testing sandbox.
-  version: 0.1.0-dev
+  version: v0.1.0-dev
 host: mydomain
 schemes:
   - http

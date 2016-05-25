@@ -57,7 +57,16 @@ def test_swagger_api_get(client):
         if r_type.strip() == 'text/yaml':
             resp_type = r_type
     assert resp_type == 'text/yaml'
-    # !! TODO write a test to ensure the version matches
+    body = resp.body
+    lines = body.split("\n")
+    version = 'x'
+    with open('/poseidon/VERSION', 'r') as f:
+        version = f.read()
+    body_version = 'y'
+    for line in lines:
+        if line.startswith("  version: "):
+            body_version = line.split("  version: ")[1]
+    assert version.strip() == body_version.strip()
 
 def test_quote_resource_get(client):
     """
@@ -86,3 +95,7 @@ def test_version_resource_get(client):
         if r_type.strip() == 'application/json':
             resp_type = r_type
     assert resp_type == 'application/json'
+    version = ''
+    with open('/poseidon/VERSION', 'r') as f:
+        version = f.read()
+    assert version.strip() == resp.json['version']
