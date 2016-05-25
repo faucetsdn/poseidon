@@ -1,4 +1,4 @@
-run: clean depends build
+run: clean depends build docs
 	@ if [ ! -z "${DOCKER_HOST}" ]; then \
 		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
 		docker_url=http://$$docker_host; \
@@ -19,21 +19,35 @@ run: clean depends build
 
 test: build
 
-docs: build
-	docker run --name poseidon-docs -w /poseidon/docs/_build/html -Pd --entrypoint "python" poseidon -m SimpleHTTPServer
+docs: clean-docs build
+	@ if [ ! -z "${DOCKER_HOST}" ]; then \
+		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
+		docker_url=http://$$docker_host; \
+	else \
+		echo "No DOCKER_HOST environment variable set."; \
+		exit 1; \
+	fi; \
+	docker run --name poseidon-docs -w /poseidon/docs/_build/html -Pd --entrypoint "python" poseidon -m SimpleHTTPServer; \
+	port=$$(docker port poseidon-docs 8000/tcp | sed 's/^.*://'); \
+	doc_url=$$docker_url:$$port; \
+	echo; \
+	echo "The docs can be accessed here: $$doc_url"; \
+	echo
 
 build: depends
 	cd api && docker build -t poseidon-api .
 	docker build -t poseidon .
 
 clean-all: clean depends
-	docker rmi poseidon
-	docker rmi poseidon-api
+	@docker rmi poseidon
+	@docker rmi poseidon-api
 
-clean: depends
-	docker ps -aqf "name=poseidon" | xargs docker rm -f
-	docker ps -aqf "name=poseidon-api" | xargs docker rm -f
-	docker ps -aqf "name=poseidon-docs" | xargs docker rm -f
+clean-docs: depends
+	@docker ps -aqf "name=poseidon-docs" | xargs docker rm -f
+
+clean: clean-docs depends
+	@docker ps -aqf "name=poseidon" | xargs docker rm -f
+	@docker ps -aqf "name=poseidon-api" | xargs docker rm -f
 
 depends:
 	@echo
@@ -41,4 +55,4 @@ depends:
 	@echo
 	docker -v
 
-.PHONY: run test docs build clean clean-all depends
+.PHONY: run test docs build clean clean-all clean-docs depends

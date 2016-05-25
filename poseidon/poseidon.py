@@ -27,6 +27,7 @@ import json
 
 from falcon_cors import CORS
 from os import environ
+from subprocess import call, check_output
 
 def get_allowed():
     rest_url = ""
@@ -65,13 +66,34 @@ class SwaggerAPI:
 
 class VersionResource:
     """Serve up the current version and build information"""
+    version_file = '/poseidon/VERSION'
     def on_get(self, req, resp):
         """Handles GET requests"""
         version = {}
-        # TODO
-        # version number
-        # build number (docker container ID)
-        # commit version (git commit ID)
+        # get version number (from VERSION file)
+        try:
+            with open(self.version_file, 'r') as f:
+                version['version'] = f.read().strip()
+        except: # pragma: no cover
+            pass
+        # get commit id (git commit ID)
+        try:
+            cmd = "git -C /poseidon rev-parse HEAD"
+            commit_id = check_output(cmd, shell=True)
+            cmd = "git -C /poseidon diff-index --quiet HEAD --"
+            dirty = call(cmd, shell=True)
+            if dirty != 0:
+                version['commit'] = commit_id.strip()+"-dirty"
+            else:
+                version['commit'] = commit_id.strip()
+        except: # pragma: no cover
+            pass
+        # get runtime id (docker container ID)
+        try:
+            if "HOSTNAME" in environ:
+                version['runtime'] = environ['HOSTNAME']
+        except: # pragma: no cover
+            pass
         resp.body = json.dumps(version)
 
 class QuoteResource:
