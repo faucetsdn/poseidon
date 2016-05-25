@@ -2,6 +2,7 @@ FROM alpine:3.3
 MAINTAINER Charlie Lewis <clewis@iqt.org>
 
 RUN apk add --update \
+    git \
     make \
     python \
     python-dev \
