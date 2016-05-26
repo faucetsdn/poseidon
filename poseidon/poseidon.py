@@ -47,7 +47,7 @@ public_cors = CORS(allow_all_origins=True)
 
 class SwaggerAPI:
     """Serve up swagger API"""
-    swagger_file = '/poseidon/poseidon/swagger.yaml'
+    swagger_file = 'poseidon/swagger.yaml'
     def on_get(self, req, resp):
         """Handles GET requests"""
         resp.content_type = 'text/yaml'
