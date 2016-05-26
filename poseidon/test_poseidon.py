@@ -60,7 +60,7 @@ def test_swagger_api_get(client):
     body = resp.body
     lines = body.split("\n")
     version = 'x'
-    with open('/poseidon/VERSION', 'r') as f:
+    with open('../VERSION', 'r') as f:
         version = f.read()
     body_version = 'y'
     for line in lines:
@@ -96,6 +96,6 @@ def test_version_resource_get(client):
             resp_type = r_type
     assert resp_type == 'application/json'
     version = ''
-    with open('/poseidon/VERSION', 'r') as f:
+    with open('../VERSION', 'r') as f:
         version = f.read()
     assert version.strip() == resp.json['version']
