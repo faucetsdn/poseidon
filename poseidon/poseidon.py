@@ -60,7 +60,7 @@ class SwaggerAPI:
                 f.write(newdata)
 
             with open(self.swagger_file, 'r') as f:
-               resp.body = f.read()
+                resp.body = f.read()
         except: # pragma: no cover
             resp.body = ""
 
@@ -98,17 +98,19 @@ class VersionResource:
 
 class QuoteResource:
     """Serve up quotes"""
-    def on_get(self, req, resp):
-        """Handles GET requests"""
-        quote = {
+    def __init__(self):
+        self.quote = {
             'quote': 'I\'ve always been more interested in the future than in the past.',
             'author': 'Grace Hopper'
         }
-
-        resp.body = json.dumps(quote)
+    def on_get(self, req, resp):
+        """Handles GET requests"""
+        resp.body = json.dumps(self.quote)
 
 # create callable WSGI app instance for gunicorn
 api = falcon.API(middleware=[cors.middleware])
+
+# routes
 api.add_route('/v1/quote', QuoteResource())
 api.add_route('/v1/version', VersionResource())
 api.add_route('/swagger.yaml', SwaggerAPI())
