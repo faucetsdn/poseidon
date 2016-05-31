@@ -21,15 +21,15 @@ Created on 17 May 2016
 @author: Charlie Lewis
 """
 
-from os import environ
-from poseidon import QuoteResource
-from poseidon import SwaggerAPI
-from poseidon import VersionResource
-
 import falcon
 import json
 import poseidon
 import pytest
+
+from os import environ
+from poseidon import QuoteResource
+from poseidon import SwaggerAPI
+from poseidon import VersionResource
 
 application = falcon.API()
 application.add_route('/v1/quote', QuoteResource())

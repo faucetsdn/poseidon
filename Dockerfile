@@ -23,5 +23,8 @@ EXPOSE 8000
 ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:8000"]
 CMD ["poseidon.poseidon:api"]
 
+# run linter
+RUN pylint --disable=all --enable=classes --disable=W poseidon
+
 # run tests
 RUN py.test -v --cov=poseidon --cov-report term-missing
