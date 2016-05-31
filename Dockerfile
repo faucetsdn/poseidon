@@ -13,7 +13,7 @@ RUN apk add --update \
 
 ADD . /poseidon
 WORKDIR /poseidon
-RUN pip install -r poseidon/requirements.txt
+RUN pip install -r poseidon/requirements.txt && rm -rf /root/.cache/pip/*
 
 # build documentation
 RUN sphinx-apidoc -o docs poseidon -F && cd docs && make html && make man
