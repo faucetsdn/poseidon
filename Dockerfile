@@ -8,6 +8,7 @@ RUN apk add --update \
     python-dev \
     py-pip \
     py-sphinx \
+    tcpdump \
     && rm -rf /var/cache/apk/*
 
 ADD . /poseidon
@@ -24,7 +25,7 @@ ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:8000"]
 CMD ["poseidon.poseidon:api"]
 
 # run linter
-RUN pylint --disable=all --enable=classes --disable=W poseidon
+#RUN pylint --disable=all --enable=classes --disable=W poseidon
 
 # run tests
 RUN py.test -v --cov=poseidon --cov-report term-missing
