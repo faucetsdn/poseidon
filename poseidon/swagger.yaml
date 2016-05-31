@@ -10,6 +10,31 @@ basePath: /v1
 produces:
   - application/json
 paths:
+  /pcap/{pcap_file}/{output_type}:
+    get:
+      summary: Parse PCAP Files
+      description: >
+        This endpoint returns a parsed PCAP file in another format.
+      parameters:
+        - in: path
+          name: pcap_file
+          description: path to the PCAP file stored in /tmp
+          required: true
+          type: string
+          format: string
+        - in: path
+          name: output_type
+          description: type of file to parse, currently expects PCAP
+          required: true
+          type: string
+          format: string
+      produces:
+        - text/text
+      tags:
+        - Data
+      responses:
+        '200':
+          description: Returns a string of the new format of the parsed PCAP file.
   /quote:
     get:
       summary: Quote
