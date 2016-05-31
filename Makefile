@@ -1,4 +1,4 @@
-run: clean depends build docs
+run: clean depends build docs notebooks
 	@ if [ ! -z "${DOCKER_HOST}" ]; then \
 		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
 		docker_url=http://$$docker_host; \
@@ -19,6 +19,21 @@ run: clean depends build docs
 
 test: build
 
+notebooks: clean-notebooks build
+	@ if [ ! -z "${DOCKER_HOST}" ]; then \
+		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
+		docker_url=http://$$docker_host; \
+	else \
+		echo "No DOCKER_HOST environment variable set."; \
+		exit 1; \
+	fi; \
+	docker run --name poseidon-notebooks -w /notebooks -dP -v "$$(pwd):/notebooks" poseidon-notebooks jupyter notebook --ip=0.0.0.0 --no-browser; \
+	port=$$(docker port poseidon-notebooks 8888/tcp | sed 's/^.*://'); \
+	notebook_url=$$docker_url:$$port; \
+	echo; \
+	echo "The notebooks can be accessed here: $$notebook_url"; \
+	echo
+
 docs: clean-docs build
 	@ if [ ! -z "${DOCKER_HOST}" ]; then \
 		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
@@ -27,7 +42,7 @@ docs: clean-docs build
 		echo "No DOCKER_HOST environment variable set."; \
 		exit 1; \
 	fi; \
-	docker run --name poseidon-docs -w /poseidon/docs/_build/html -Pd --entrypoint "python" poseidon -m SimpleHTTPServer; \
+	docker run --name poseidon-docs -w /poseidon/docs/_build/html -dP --entrypoint "python" poseidon -m SimpleHTTPServer; \
 	port=$$(docker port poseidon-docs 8000/tcp | sed 's/^.*://'); \
 	doc_url=$$docker_url:$$port; \
 	echo; \
@@ -36,6 +51,7 @@ docs: clean-docs build
 
 build: depends
 	cd api && docker build -t poseidon-api .
+	docker build -t poseidon-notebooks -f Dockerfile.notebooks .
 	docker build -t poseidon .
 
 clean-all: clean depends
@@ -45,7 +61,10 @@ clean-all: clean depends
 clean-docs: depends
 	@docker ps -aqf "name=poseidon-docs" | xargs docker rm -f
 
-clean: clean-docs depends
+clean-notebooks: depends
+	@docker ps -aqf "name=poseidon-notebooks" | xargs docker rm -f
+
+clean: clean-docs clean-notebooks depends
 	@docker ps -aqf "name=poseidon" | xargs docker rm -f
 	@docker ps -aqf "name=poseidon-api" | xargs docker rm -f
 
@@ -55,4 +74,4 @@ depends:
 	@echo
 	docker -v
 
-.PHONY: run test docs build clean clean-all clean-docs depends
+.PHONY: run test docs build notebooks clean clean-all clean-notebooks clean-docs depends

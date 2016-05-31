@@ -1,0 +1,3 @@
+FROM jupyter/notebook
+ADD poseidon/requirements.txt requirements.txt
+RUN pip2 install -r requirements.txt
