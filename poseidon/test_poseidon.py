@@ -27,14 +27,16 @@ import poseidon
 import pytest
 
 from os import environ
+from poseidon import PCAPResource
 from poseidon import QuoteResource
 from poseidon import SwaggerAPI
 from poseidon import VersionResource
 
 application = falcon.API()
+application.add_route('/v1/pcap/{pcap_file}/{output_type}', PCAPResource())
 application.add_route('/v1/quote', QuoteResource())
-application.add_route('/swagger.yaml', SwaggerAPI())
 application.add_route('/v1/version', VersionResource())
+application.add_route('/swagger.yaml', SwaggerAPI())
 
 # exposes the application for testing
 @pytest.fixture
@@ -99,3 +101,12 @@ def test_version_resource_get(client):
     with open('VERSION', 'r') as f:
         version = f.read()
     assert version.strip() == resp.json['version']
+
+def test_pcap_resource_get(client):
+    """
+    Tests the on_get function of the PCAPResource class.
+    """
+    resp = client.get('/v1/pcap/foo.pcap/pcap')
+    assert resp.status == falcon.HTTP_OK
+    resp = client.get('/v1/pcap/foo.foo/pcap')
+    assert resp.status == falcon.HTTP_OK

@@ -107,10 +107,23 @@ class QuoteResource:
         """Handles GET requests"""
         resp.body = json.dumps(self.quote)
 
+class PCAPResource:
+    """Serve up parsed PCAP files"""
+    def on_get(self, req, resp, pcap_file, output_type):
+        resp.content_type = 'text/text'
+        try:
+            if output_type == "pcap" and pcap_file.split(".")[1] == "pcap":
+                resp.body = check_output(["/usr/sbin/tcpdump", "-r", "/tmp/"+pcap_file, "-ne", "-tttt"])
+            else:
+                resp.body = "not a pcap"
+        except: # pragma: no cover
+            resp.body = "failed"
+
 # create callable WSGI app instance for gunicorn
 api = falcon.API(middleware=[cors.middleware])
 
 # routes
 api.add_route('/v1/quote', QuoteResource())
 api.add_route('/v1/version', VersionResource())
+api.add_route('/v1/pcap/{pcap_file}/{output_type}', PCAPResource())
 api.add_route('/swagger.yaml', SwaggerAPI())
