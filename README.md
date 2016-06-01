@@ -1,4 +1,5 @@
 # Poseidon
+![Poseidon Logo](/docs/fork.png)
 
 [![Build Status](https://drone.io/github.com/Lab41/poseidon/status.png)](https://drone.io/github.com/Lab41/poseidon/latest)
 
