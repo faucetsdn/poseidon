@@ -25,6 +25,7 @@ import pika
 import subprocess
 import sys
 
+
 def get_path():
     path = None
     try:
@@ -33,7 +34,9 @@ def get_path():
         print "no path provided, quitting."
     return path
 
+
 def connections():
+    """Handle connection setup to rabbitmq service"""
     channel = None
     connection = None
     try:
@@ -47,7 +50,12 @@ def connections():
         print "unable to connect to rabbitmq, quitting."
     return channel, connection
 
+
 def parse_header(line):
+    """Parse output of tcpdump of pcap file, extract:
+        time
+        date
+        """
     ret_dict = {}
     h = line.split()
     date = h[0]
@@ -63,15 +71,21 @@ def parse_header(line):
         #do something else
     return ret_dict
 
+
 def parse_data(line):
+    """Parse hex data from tcpdump of pcap file"""
     ret_str = ''
-    h,d = line.split(':', 1)
-    ret_str = d.strip().replace(' ','')
+    h, d = line.split(':', 1)
+    ret_str = d.strip().replace(' ', '')
     return ret_str
 
 def return_packet(line_source):
+    """Create a packet dictionary
+    'data' field -> ascii hex values of the packet header and data
+    'time' field -> time of packet capture
+    'date' field -> date of packet capture
+    'raw_header' field -> raw storage of the tcpdump header"""
     ret_data = ''
-    expecting_header = True
     ret_header = {}
     ret_dict = {}
     for line in line_source:
@@ -79,7 +93,7 @@ def return_packet(line_source):
         is_header = not line_strip.startswith('0x')
         if is_header:
             #parse header
-            ret_header = parse_header(line)
+            ret_header = parse_header(line_strip)
             if not ret_data:
                 #no data read, just update the header
                 ret_dict.update(ret_header)
@@ -93,14 +107,16 @@ def return_packet(line_source):
             data = parse_data(line_strip)
             ret_data = ret_data + data
 
+
 def run_tool(path):
+    """Tool entry point"""
     routing_key = "tcpdump_hex_parser"+path.replace("/", ".")
     print "processing pcap results..."
     channel, connection = connections()
     proc = subprocess.Popen('tcpdump -nn -tttt -xx -r '+path, shell=True, stdout=subprocess.PIPE)
     for packet in return_packet(proc.stdout):
         message = str(packet)
-        if channel != None:
+        if channel is not None:
             channel.basic_publish(exchange='topic_recs',
                                   routing_key=routing_key,
                                   body=message)
