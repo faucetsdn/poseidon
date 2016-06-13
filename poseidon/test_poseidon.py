@@ -21,20 +21,22 @@ Created on 17 May 2016
 @author: Charlie Lewis
 """
 
-from os import environ
-from poseidon import QuoteResource
-from poseidon import SwaggerAPI
-from poseidon import VersionResource
-
 import falcon
 import json
 import poseidon
 import pytest
 
+from os import environ
+from poseidon import PCAPResource
+from poseidon import QuoteResource
+from poseidon import SwaggerAPI
+from poseidon import VersionResource
+
 application = falcon.API()
+application.add_route('/v1/pcap/{pcap_file}/{output_type}', PCAPResource())
 application.add_route('/v1/quote', QuoteResource())
-application.add_route('/swagger.yaml', SwaggerAPI())
 application.add_route('/v1/version', VersionResource())
+application.add_route('/swagger.yaml', SwaggerAPI())
 
 # exposes the application for testing
 @pytest.fixture
@@ -57,7 +59,16 @@ def test_swagger_api_get(client):
         if r_type.strip() == 'text/yaml':
             resp_type = r_type
     assert resp_type == 'text/yaml'
-    # !! TODO write a test to ensure the version matches
+    body = resp.body
+    lines = body.split("\n")
+    version = 'x'
+    with open('VERSION', 'r') as f:
+        version = f.read()
+    body_version = 'y'
+    for line in lines:
+        if line.startswith("  version: "):
+            body_version = line.split("  version: ")[1]
+    assert version.strip() == body_version.strip()
 
 def test_quote_resource_get(client):
     """
@@ -86,3 +97,16 @@ def test_version_resource_get(client):
         if r_type.strip() == 'application/json':
             resp_type = r_type
     assert resp_type == 'application/json'
+    version = ''
+    with open('VERSION', 'r') as f:
+        version = f.read()
+    assert version.strip() == resp.json['version']
+
+def test_pcap_resource_get(client):
+    """
+    Tests the on_get function of the PCAPResource class.
+    """
+    resp = client.get('/v1/pcap/foo.pcap/pcap')
+    assert resp.status == falcon.HTTP_OK
+    resp = client.get('/v1/pcap/foo.foo/pcap')
+    assert resp.status == falcon.HTTP_OK
