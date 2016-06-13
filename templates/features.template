@@ -1,0 +1,5 @@
+[info]
+name = Feature generation from PCAPs
+
+[service]
+schedule = {"all":"hourly"}
