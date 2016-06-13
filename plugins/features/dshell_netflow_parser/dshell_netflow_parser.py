@@ -34,6 +34,7 @@ def get_path():
     return path
 
 def connections():
+    """Handle connection setup to rabbitmq service"""
     channel = None
     connection = None
     try:
@@ -49,6 +50,7 @@ def connections():
 
 
 def run_tool(path):
+    """Tool entry point"""
     routing_key = "dshell_netflow_parser"+path.replace("/", ".")
     print "processing pcap results..."
     subprocess.Popen('/Dshell/dshell-decode -o /tmp/results.out -d netflow '+path,
