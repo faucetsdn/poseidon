@@ -15,6 +15,12 @@ ADD . /poseidon
 WORKDIR /poseidon
 RUN pip install -r poseidon/requirements.txt && rm -rf /root/.cache/pip/*
 
+# install dependencies of plugins for tests
+RUN for file in $(find plugins/* -name "requirements.txt"); \
+    do \
+        pip install -r $file; \
+    done
+
 # build documentation
 RUN sphinx-apidoc -o docs poseidon -F && cd docs && make html && make man
 
@@ -28,4 +34,4 @@ CMD ["poseidon.poseidon:api"]
 #RUN pylint --disable=all --enable=classes --disable=W poseidon
 
 # run tests
-RUN py.test -v --cov=poseidon --cov-report term-missing
+RUN py.test -v --cov=poseidon --cov=plugins --cov-report term-missing
