@@ -64,6 +64,6 @@ def test_return_packet():
     for packet in packets:
         assert type(packet) == type({})
         assert packet['data'] == "e04b2935564f91db53445460918933d0"
-        assert packet['raw_header'] == "2015-05-20 12:41:45.812393 IP 0.0.0.0 > 0.0.0.0: ESP(spi=0xb1ced15c,seq=0x30), length 184\n"
+        assert packet['raw_header'] == "2015-05-20 12:41:45.812393 IP 0.0.0.0 > 0.0.0.0: ESP(spi=0xb1ced15c,seq=0x30), length 184"
         assert packet['date'] == "2015-05-20"
         assert packet['time'] == "12:41:45.812393"
