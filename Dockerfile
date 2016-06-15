@@ -22,7 +22,8 @@ RUN for file in $(find plugins/* -name "requirements.txt"); \
     done
 
 # build documentation
-RUN sphinx-apidoc -o docs poseidon -F && cd docs && make html && make man
+RUN ln -s /poseidon/plugins /poseidon/poseidon/plugins
+RUN sphinx-apidoc -o docs poseidon -F --follow-links && cd docs && make html && make man
 
 ENV PYTHONUNBUFFERED 0
 EXPOSE 8000
