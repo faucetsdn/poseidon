@@ -63,6 +63,11 @@ def parse_header(line):
     ret_dict['raw_header'] = line
     ret_dict['date'] = date
     ret_dict['time'] = time
+    ret_dict['src_ip'] = h[3]
+    ret_dict['dest_ip'] = h[5].split(":")[0]
+    ret_dict['protocol'] = h[6]
+    ret_dict['ethernet_type'] = h[2]
+    ret_dict['length'] = int(h[8])
     if h[2] == 'IP':
         #do something meaningful
         pass
@@ -72,11 +77,12 @@ def parse_header(line):
     return ret_dict
 
 
-def parse_data(line):
+def parse_data(line, length):
     """Parse hex data from tcpdump of pcap file"""
     ret_str = ''
     h, d = line.split(':', 1)
     ret_str = d.strip().replace(' ', '')
+    ret_str = ret_str[:-(2*length)]
     return ret_str
 
 def return_packet(line_source):
@@ -104,7 +110,7 @@ def return_packet(line_source):
                 yield ret_dict
         else:
             #concatenate the data
-            data = parse_data(line_strip)
+            data = parse_data(line_strip, ret_header['length'])
             ret_data = ret_data + data
 
 
