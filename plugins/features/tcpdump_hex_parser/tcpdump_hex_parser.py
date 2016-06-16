@@ -67,14 +67,14 @@ def parse_header(line):
     if "." in src_a[-1]:
         port_a = src_a[-1].split('.')
         ret_dict['src_port'] = port_a[-1]
-        ret_dict['src_ip'] = h[3].split('.')[:-1]
+        ret_dict['src_ip'] = ".".join(h[3].split('.')[:-1])
     else:
         ret_dict['src_ip'] = h[3]
     dest_a = h[5].split(".", 3)
     if "." in dest_a[-1]:
         port_a = dest_a[-1].split('.')
         ret_dict['dest_port'] = port_a[-1].split(":")[0]
-        ret_dict['dest_ip'] = h[5].split('.')[:-1]
+        ret_dict['dest_ip'] = ".".join(h[5].split('.')[:-1])
     else:
         ret_dict['dest_ip'] = h[5].split(":")[0]
     ret_dict['protocol'] = h[6]
