@@ -67,7 +67,10 @@ def parse_header(line):
     ret_dict['dest_ip'] = h[5].split(":")[0]
     ret_dict['protocol'] = h[6]
     ret_dict['ethernet_type'] = h[2]
-    ret_dict['length'] = int(h[8])
+    try:
+        ret_dict['length'] = int(h[-1])
+    except:
+        ret_dict['length'] = 0
     if h[2] == 'IP':
         #do something meaningful
         pass
