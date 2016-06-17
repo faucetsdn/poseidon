@@ -55,6 +55,13 @@ def parse_header(line):
     """Parse output of tcpdump of pcap file, extract:
         time
         date
+        ethernet_type
+        protocol
+        source ip
+        source port (if it exists)
+        destination ip
+        destination port (if it exists)
+        length of the data
         """
     ret_dict = {}
     h = line.split()
@@ -106,6 +113,13 @@ def return_packet(line_source):
     'data' field -> ascii hex values of the packet header and data
     'time' field -> time of packet capture
     'date' field -> date of packet capture
+    'ethernet_type' field -> type of ethernet of packet capture
+    'protocol' field -> protocol of packet capture
+    'src_ip' field -> source ip address of packet capture
+    'src_port' field -> source port of packet capture
+    'dest_ip' field -> destination ip address of packet capture
+    'dest_port' field -> destination port of packet capture
+    'length' field -> length of data in packet capture
     'raw_header' field -> raw storage of the tcpdump header"""
     ret_data = ''
     ret_header = {}
