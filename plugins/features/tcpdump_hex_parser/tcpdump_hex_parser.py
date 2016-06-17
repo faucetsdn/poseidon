@@ -97,7 +97,8 @@ def parse_data(line, length):
     ret_str = ''
     h, d = line.split(':', 1)
     ret_str = d.strip().replace(' ', '')
-    ret_str = ret_str[:-(2*length)]
+    if length != 0:
+        ret_str = ret_str[:-(2*length)]
     return ret_str
 
 def return_packet(line_source):

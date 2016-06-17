@@ -53,12 +53,18 @@ def test_parse_header():
     assert ret_dict['protocol'] == "ESP(spi=0xb1ced15c,seq=0x30),"
     assert ret_dict['length'] == 184
 
+    ret_dict = parse_header("2015-05-20 12:41:45.812393 IP 0.0.0.0.80 > 0.0.0.0.80: ESP(spi=0xb1ced15c,seq=0x30), length 184")
+    assert ret_dict['src_ip'] == "0.0.0.0"
+    assert ret_dict['dest_ip'] == "0.0.0.0"
+    assert ret_dict['src_port'] == "80"
+    assert ret_dict['dest_port'] == "80"
+
 def test_parse_data():
     ret_str = parse_data("\t0x0080:  e04b 2935 564f 91db 5344 5460 9189 33d0", 0)
     assert type(ret_str) == type("")
-    #hex_pattern = re.compile(r'[0-9a-fA-F]+')
-    #m = re.search(hex_pattern, ret_str)
-    #assert m
+    hex_pattern = re.compile(r'[0-9a-fA-F]+')
+    m = re.search(hex_pattern, ret_str)
+    assert m
 
 def test_return_packet():
     lines = []
