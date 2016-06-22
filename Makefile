@@ -13,7 +13,7 @@ run: clean depends build docs notebooks
 	port=$$(docker port poseidon 8000/tcp | sed 's/^.*://'); \
 	poseidon_url=$$docker_url:$$port; \
 	echo "The API can be accessed here: $$api_url"; \
-	echo "Poseidon can be accessed here: $$poseidon_url"; \
+	echo "poseidon can be accessed here: $$poseidon_url"; \
 	echo
 
 test: build
@@ -48,7 +48,7 @@ docs: clean-docs build
 build: depends
 	cd api && docker build -t poseidon-api .
 	docker build -t poseidon-notebooks -f Dockerfile.notebooks .
-	docker build -t poseidon .
+	docker build -t poseidon  .
 
 clean-all: clean depends
 	@docker rmi poseidon
