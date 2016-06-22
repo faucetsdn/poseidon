@@ -55,6 +55,13 @@ def parse_header(line):
     """Parse output of tcpdump of pcap file, extract:
         time
         date
+        ethernet_type
+        protocol
+        source ip
+        source port (if it exists)
+        destination ip
+        destination port (if it exists)
+        length of the data
         """
     ret_dict = {}
     h = line.split()
@@ -63,6 +70,26 @@ def parse_header(line):
     ret_dict['raw_header'] = line
     ret_dict['date'] = date
     ret_dict['time'] = time
+    src_a = h[3].split(".", 3)
+    if "." in src_a[-1]:
+        port_a = src_a[-1].split('.')
+        ret_dict['src_port'] = port_a[-1]
+        ret_dict['src_ip'] = ".".join(h[3].split('.')[:-1])
+    else:
+        ret_dict['src_ip'] = h[3]
+    dest_a = h[5].split(".", 3)
+    if "." in dest_a[-1]:
+        port_a = dest_a[-1].split('.')
+        ret_dict['dest_port'] = port_a[-1].split(":")[0]
+        ret_dict['dest_ip'] = ".".join(h[5].split('.')[:-1])
+    else:
+        ret_dict['dest_ip'] = h[5].split(":")[0]
+    ret_dict['protocol'] = h[6]
+    ret_dict['ethernet_type'] = h[2]
+    try:
+        ret_dict['length'] = int(line.split(' length ')[1].split(':')[0])
+    except:
+        ret_dict['length'] = 0
     if h[2] == 'IP':
         #do something meaningful
         pass
@@ -72,11 +99,13 @@ def parse_header(line):
     return ret_dict
 
 
-def parse_data(line):
+def parse_data(line, length):
     """Parse hex data from tcpdump of pcap file"""
     ret_str = ''
     h, d = line.split(':', 1)
     ret_str = d.strip().replace(' ', '')
+    if length != 0:
+        ret_str = ret_str[:-(2*length)]
     return ret_str
 
 def return_packet(line_source):
@@ -84,6 +113,13 @@ def return_packet(line_source):
     'data' field -> ascii hex values of the packet header and data
     'time' field -> time of packet capture
     'date' field -> date of packet capture
+    'ethernet_type' field -> type of ethernet of packet capture
+    'protocol' field -> protocol of packet capture
+    'src_ip' field -> source ip address of packet capture
+    'src_port' field -> source port of packet capture
+    'dest_ip' field -> destination ip address of packet capture
+    'dest_port' field -> destination port of packet capture
+    'length' field -> length of data in packet capture
     'raw_header' field -> raw storage of the tcpdump header"""
     ret_data = ''
     ret_header = {}
@@ -104,7 +140,7 @@ def return_packet(line_source):
                 yield ret_dict
         else:
             #concatenate the data
-            data = parse_data(line_strip)
+            data = parse_data(line_strip, ret_header['length'])
             ret_data = ret_data + data
 
 
