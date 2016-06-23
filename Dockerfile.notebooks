@@ -8,6 +8,3 @@ RUN for file in $(find poseidon/* -name "requirements.txt"); \
     do \
         pip install -r $file; \
     done
-
-#ADD poseidonRest/requirements.txt requirements.txt
-#RUN pip2 install -r requirements.txt
