@@ -1,7 +1,0 @@
-falcon
-falcon-cors
-gunicorn
-pylint
-pytest
-pytest-cov
-pytest-falcon

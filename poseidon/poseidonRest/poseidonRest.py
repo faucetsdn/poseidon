@@ -67,7 +67,6 @@ class SwaggerAPI:
 
 class VersionResource:
     """Serve up the current version and build information"""
-    #version_file = '../../VERSION'
     version_file = 'VERSION'
     def on_get(self, req, resp):
         """Handles GET requests"""
