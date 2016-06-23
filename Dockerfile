@@ -11,9 +11,15 @@ RUN apk add --update \
     tcpdump \
     && rm -rf /var/cache/apk/*
 
-ADD . /poseidonRest
-WORKDIR /poseidonRest
-RUN pip install -r poseidonRest/requirements.txt && rm -rf /root/.cache/pip/*
+ADD . /poseidonWork
+WORKDIR /poseidonWork
+RUN pip install pip --upgrade
+
+# install dependencies of plugins for poseidon
+RUN for file in $(find poseidon/* -name "requirements.txt"); \
+    do \
+        pip install -r $file; \
+    done
 
 # install dependencies of plugins for tests
 RUN for file in $(find plugins/* -name "requirements.txt"); \
@@ -22,17 +28,17 @@ RUN for file in $(find plugins/* -name "requirements.txt"); \
     done
 
 # build documentation
-#RUN ln -s /poseidon/plugins /poseidon/poseidon/plugins
-RUN sphinx-apidoc -o docs poseidonRest -F && cd docs && make html && make man
+RUN ln -s /poseidonWork/plugins /poseidonWork/poseidon/poseidonRest/plugins
+RUN sphinx-apidoc -o docs poseidon -F --follow-links && cd docs && make html && make man
 
 ENV PYTHONUNBUFFERED 0
 EXPOSE 8000
 
 ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:8000"]
-CMD ["poseidonRest.poseidonRest:api"]
+CMD ["poseidon.poseidonRest.poseidonRest:api"]
 
 # run linter
 #RUN pylint --disable=all --enable=classes --disable=W poseidonRest
 
 # run tests
-RUN py.test -v --cov=poseidonRest --cov=plugins --cov-report term-missing
+RUN py.test -v --cov=poseidon/poseidonRest --cov=plugins --cov-report term-missing
