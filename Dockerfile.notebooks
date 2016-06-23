@@ -1,3 +1,13 @@
 FROM jupyter/notebook
-ADD poseidon/requirements.txt requirements.txt
-RUN pip2 install -r requirements.txt
+
+ADD . /poseidonJupyter
+WORKDIR /poseidonJupyter
+
+# install dependencies of plugins for poseidon
+RUN for file in $(find poseidon/* -name "requirements.txt"); \
+    do \
+        pip install -r $file; \
+    done
+
+#ADD poseidonRest/requirements.txt requirements.txt
+#RUN pip2 install -r requirements.txt

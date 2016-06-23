@@ -15,7 +15,7 @@
 #   limitations under the License.
 
 """
-Test module for poseidon.py
+Test module for poseidonRest.py
 
 Created on 17 May 2016
 @author: Charlie Lewis
@@ -23,14 +23,14 @@ Created on 17 May 2016
 
 import falcon
 import json
-import poseidon
+import poseidonRest
 import pytest
 
 from os import environ
-from poseidon import PCAPResource
-from poseidon import QuoteResource
-from poseidon import SwaggerAPI
-from poseidon import VersionResource
+from poseidonRest import PCAPResource
+from poseidonRest import QuoteResource
+from poseidonRest import SwaggerAPI
+from poseidonRest import VersionResource
 
 application = falcon.API()
 application.add_route('/v1/pcap/{pcap_file}/{output_type}', PCAPResource())
@@ -38,14 +38,17 @@ application.add_route('/v1/quote', QuoteResource())
 application.add_route('/v1/version', VersionResource())
 application.add_route('/swagger.yaml', SwaggerAPI())
 
+
 # exposes the application for testing
 @pytest.fixture
 def app():
     return application
 
+
 def test_get_allowed():
     environ['ALLOW_ORIGIN'] = "http://test:80"
-    allow_origin, rest_url = poseidon.get_allowed()
+    allow_origin, rest_url = poseidonRest.get_allowed()
+
 
 def test_swagger_api_get(client):
     """
@@ -62,6 +65,7 @@ def test_swagger_api_get(client):
     body = resp.body
     lines = body.split("\n")
     version = 'x'
+    #with open('../../VERSION', 'r') as f:
     with open('VERSION', 'r') as f:
         version = f.read()
     body_version = 'y'
@@ -69,6 +73,7 @@ def test_swagger_api_get(client):
         if line.startswith("  version: "):
             body_version = line.split("  version: ")[1]
     assert version.strip() == body_version.strip()
+
 
 def test_quote_resource_get(client):
     """
@@ -83,7 +88,9 @@ def test_quote_resource_get(client):
             resp_type = r_type
     assert resp_type == 'application/json'
     assert resp.json['author'] == 'Grace Hopper'
-    assert resp.json['quote'] == 'I\'ve always been more interested in the future than in the past.'
+    assert resp.json['quote'] == 'I\'ve always been more interested in ' + \
+        'the future than in the past.'
+
 
 def test_version_resource_get(client):
     """
@@ -98,9 +105,11 @@ def test_version_resource_get(client):
             resp_type = r_type
     assert resp_type == 'application/json'
     version = ''
+    #with open('../../VERSION', 'r') as f:
     with open('VERSION', 'r') as f:
         version = f.read()
     assert version.strip() == resp.json['version']
+
 
 def test_pcap_resource_get(client):
     """

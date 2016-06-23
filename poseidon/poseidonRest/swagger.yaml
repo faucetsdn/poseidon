@@ -1,0 +1,61 @@
+swagger: '2.0'
+info:
+  title: PoseidonRest API
+  description: This contains the documentation and a functional PoseidonRest API testing sandbox.
+  version: v0.1.0-dev
+host: mydomain
+schemes:
+  - http
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /pcap/{pcap_file}/{output_type}:
+    get:
+      summary: Parse PCAP Files
+      description: >
+        This endpoint returns a parsed PCAP file in another format.
+      parameters:
+        - in: path
+          name: pcap_file
+          description: path to the PCAP file stored in /tmp
+          required: true
+          type: string
+          format: string
+        - in: path
+          name: output_type
+          description: type of file to parse, currently expects PCAP
+          required: true
+          type: string
+          format: string
+      produces:
+        - text/text
+      tags:
+        - Data
+      responses:
+        '200':
+          description: Returns a string of the new format of the parsed PCAP file.
+  /quote:
+    get:
+      summary: Quote
+      description: >
+        This endpoint returns a quote.
+      produces:
+        - application/json
+      tags:
+        - Meta
+      responses:
+        '200':
+          description: Returns a JSON string of a quote
+  /version:
+    get:
+      summary: Version
+      description: >
+        This endpoint returns the current version and build information.
+      produces:
+        - application/json
+      tags:
+        - Meta
+      responses:
+        '200':
+          description: Returns a JSON string of the version and build
