@@ -59,6 +59,13 @@ def test_parse_header():
     assert ret_dict['src_port'] == "80"
     assert ret_dict['dest_port'] == "80"
 
+    ret_dict = parse_header("2016-06-10 13:10:38.684973 IP 10.80.210.10.53 > 10.48.81.28.52573: 2560 1/0/0 CNAME registry-origin.docker.io. (68)")
+    assert ret_dict['src_ip'] == "10.80.210.10"
+    assert ret_dict['src_port'] == "53"
+    assert ret_dict['dest_ip'] == "10.48.81.28"
+    assert ret_dict['dest_port'] == "52573"
+    assert ret_dict['length'] == 68
+
 def test_parse_data():
     ret_str = parse_data("\t0x0080:  e04b 2935 564f 91db 5344 5460 9189 33d0", 0)
     assert type(ret_str) == type("")
