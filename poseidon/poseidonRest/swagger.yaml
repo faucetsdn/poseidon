@@ -59,3 +59,79 @@ paths:
       responses:
         '200':
           description: Returns a JSON string of the version and build
+  /nbca/{resource}:
+    get:
+      summary: North Bound Controller Abstraction
+      description: >
+        This endpoint talks to the north bound controller abstraction layer
+      parameters:
+        - in: path
+          name: resource
+          description: information to pass to the nbca tasking
+          required: true
+          type: string
+          format: string
+      produces:
+        - text/text
+      tags:
+        - Data
+      responses:
+        '200':
+          description: Returns something
+/action/{resource}:
+  get:
+    summary: action
+    description: >
+      This endpoint talks to the action
+    parameters:
+      - in: path
+        name: resource
+        description: information to pass to the action
+        required: true
+        type: string
+        format: string
+    produces:
+      - text/text
+    tags:
+      - Data
+    responses:
+      '200':
+        description: Returns something
+  /config/{resource}:
+    get:
+      summary: config
+      description: >
+        This endpoint talks to the config
+      parameters:
+        - in: path
+          name: resource
+          description: information to pass to the config
+          required: true
+          type: string
+          format: string
+      produces:
+        - text/text
+      tags:
+        - Data
+      responses:
+        '200':
+          description: Returns something
+  /history/{resource}:
+    get:
+      summary: history
+      description: >
+        This endpoint talks to the history
+      parameters:
+        - in: path
+          name: resource
+          description: information to pass to history
+          required: true
+          type: string
+          format: string
+      produces:
+        - text/text
+      tags:
+        - Data
+      responses:
+        '200':
+          description: Returns something

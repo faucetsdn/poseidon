@@ -29,6 +29,11 @@ from falcon_cors import CORS
 from os import environ
 from subprocess import call, check_output
 
+from poseidonNbca.poseidonNbca import poseidonNbca
+from poseidonConfig.poseidonConfig import poseidonConfig
+from poseidonHistory.poseidonHistory import poseidonHistory
+from poseidonAction.poseidonAction import poseidonAction
+
 
 def get_allowed():
     rest_url = ""
@@ -106,12 +111,16 @@ class QuoteResource:
     """Serve up quotes"""
 
     def __init__(self):
+        self.times = 0
         self.quote = {
-            'quote': 'I\'ve always been more interested in the future than in the past.',
+            'quote': 'I\'ve always been more interested in the future' +
+            ' than in the past.',
             'author': 'Grace Hopper'}
 
     def on_get(self, req, resp):
         """Handles GET requests"""
+        self.times = self.times+1
+        self.quote['times'] = self.times
         resp.body = json.dumps(self.quote)
 
 
@@ -123,7 +132,11 @@ class PCAPResource:
         try:
             if output_type == "pcap" and pcap_file.split(".")[1] == "pcap":
                 resp.body = check_output(
-                    ["/usr/sbin/tcpdump", "-r", "/tmp/" + pcap_file, "-ne", "-tttt"])
+                    ["/usr/sbin/tcpdump",
+                     "-r",
+                     "/tmp/" + pcap_file,
+                     "-ne",
+                     "-tttt"])
             else:
                 resp.body = "not a pcap"
         except:  # pragma: no cover
@@ -136,6 +149,12 @@ api = falcon.API(middleware=[cors.middleware])
 api.add_route('/v1/quote', QuoteResource())
 api.add_route('/v1/version', VersionResource())
 api.add_route('/v1/pcap/{pcap_file}/{output_type}', PCAPResource())
+
+api.add_route('/v1/nbca/{resource}', poseidonNbca())
+api.add_route('/v1/config/{resource}', poseidonConfig())
+api.add_route('/v1/history{resource}', poseidonHistory())
+api.add_route('/v1/action/{resource}', poseidonAction())
+
 api.add_route('/swagger.yaml', SwaggerAPI())
 
 print "done"
