@@ -116,11 +116,11 @@ def parse_header(line):
             ret_dict['length'] = 0
 
     if h[2] == 'IP':
-        #do something meaningful
+        # do something meaningful
         pass
     else:
         pass
-        #do something else
+        # do something else
     return ret_dict
 
 
@@ -130,8 +130,9 @@ def parse_data(line, length):
     h, d = line.split(':', 1)
     ret_str = d.strip().replace(' ', '')
     if length != 0:
-        ret_str = ret_str[:-(2*length)]
+        ret_str = ret_str[:-(2 * length)]
     return ret_str
+
 
 def return_packet(line_source):
     """Create a packet dictionary
@@ -153,28 +154,31 @@ def return_packet(line_source):
         line_strip = line.strip()
         is_header = not line_strip.startswith('0x')
         if is_header:
-            #parse header
+            # parse header
             ret_header = parse_header(line_strip)
             if not ret_data:
-                #no data read, just update the header
+                # no data read, just update the header
                 ret_dict.update(ret_header)
             else:
-                #put the data into the structure and yeild
+                # put the data into the structure and yeild
                 ret_dict['data'] = ret_data
-                ret_data=''
+                ret_data = ''
                 yield ret_dict
         else:
-            #concatenate the data
+            # concatenate the data
             data = parse_data(line_strip, ret_header['length'])
             ret_data = ret_data + data
 
 
 def run_tool(path):
     """Tool entry point"""
-    routing_key = "tcpdump_hex_parser"+path.replace("/", ".")
+    routing_key = "tcpdump_hex_parser" + path.replace("/", ".")
     print "processing pcap results..."
     channel, connection = connections()
-    proc = subprocess.Popen('tcpdump -nn -tttt -xx -r '+path, shell=True, stdout=subprocess.PIPE)
+    proc = subprocess.Popen(
+        'tcpdump -nn -tttt -xx -r ' + path,
+        shell=True,
+        stdout=subprocess.PIPE)
     for packet in return_packet(proc.stdout):
         message = str(packet)
         if channel is not None:

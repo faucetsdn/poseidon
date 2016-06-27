@@ -41,4 +41,4 @@ CMD ["poseidon.poseidonRest.poseidonRest:api"]
 #RUN pylint --disable=all --enable=classes --disable=W poseidonRest
 
 # run tests
-RUN py.test -v --cov=poseidon/poseidonRest --cov=plugins --cov-report term-missing
+RUN py.test -v --cov=poseidon/poseidonRest --cov=plugins --cov-report term-missing --cov-config .coveragerc
