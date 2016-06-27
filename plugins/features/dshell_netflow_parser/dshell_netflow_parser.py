@@ -25,6 +25,7 @@ import pika
 import subprocess
 import sys
 
+
 def get_path():
     path = None
     try:
@@ -32,6 +33,7 @@ def get_path():
     except:
         print "no path provided, quitting."
     return path
+
 
 def connections():
     """Handle connection setup to rabbitmq service"""
@@ -51,10 +53,13 @@ def connections():
 
 def run_tool(path):
     """Tool entry point"""
-    routing_key = "dshell_netflow_parser"+path.replace("/", ".")
+    routing_key = "dshell_netflow_parser" + path.replace("/", ".")
     print "processing pcap results..."
-    subprocess.Popen('/Dshell/dshell-decode -o /tmp/results.out -d netflow '+path,
-                     shell=True, stdout=subprocess.PIPE).wait()
+    subprocess.Popen(
+        '/Dshell/dshell-decode -o /tmp/results.out -d netflow ' +
+        path,
+        shell=True,
+        stdout=subprocess.PIPE).wait()
 
     channel, connection = connections()
     print "sending pcap results..."
@@ -82,9 +87,10 @@ def run_tool(path):
                     data["duration"] = fields[15].strip()
                     data["tool"] = "dshell_netflow"
                     message = str(data)
-                    
+
                     if channel:
-                        channel.basic_publish(exchange='topic_recs', routing_key=routing_key,body=message)
+                        channel.basic_publish(
+                            exchange='topic_recs', routing_key=routing_key, body=message)
                         print " [x] Sent %r:%r" % (routing_key, message)
                 except:
                     pass

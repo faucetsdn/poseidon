@@ -27,10 +27,12 @@ import sys
 from dshell_netflow_parser import get_path
 from dshell_netflow_parser import run_tool
 
+
 def test_get_path():
     get_path()
     sys.argv = []
     get_path()
+
 
 def test_run_tool():
     with open('/tmp/test', 'w') as f:
@@ -40,4 +42,3 @@ def test_run_tool():
     with open('/tmp/results.out', 'w') as f:
         f.write("2015-05-20 19:41:59.300879      0.0.0.0 ->    0.0.0.0  (US -> US)  TCP    1940   49152     0      0        0        0  0.0000s")
     run_tool('/tmp/results.out')
-

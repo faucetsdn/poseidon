@@ -29,14 +29,15 @@ from falcon_cors import CORS
 from os import environ
 from subprocess import call, check_output
 
+
 def get_allowed():
     rest_url = ""
     if "ALLOW_ORIGIN" in environ:
         allow_origin = environ["ALLOW_ORIGIN"]
         host_port = allow_origin.split("//")[1]
         host = host_port.split(":")[0]
-        port = str(int(host_port.split(":")[1])+1)
-        rest_url = host+":"+port
+        port = str(int(host_port.split(":")[1]) + 1)
+        rest_url = host + ":" + port
     else:
         allow_origin = ""
     return allow_origin, rest_url
@@ -45,9 +46,11 @@ allow_origin, rest_url = get_allowed()
 cors = CORS(allow_origins_list=[allow_origin])
 public_cors = CORS(allow_all_origins=True)
 
+
 class SwaggerAPI:
     """Serve up swagger API"""
     swagger_file = 'poseidon/poseidonRest/swagger.yaml'
+
     def on_get(self, req, resp):
         """Handles GET requests"""
         resp.content_type = 'text/yaml'
@@ -61,13 +64,14 @@ class SwaggerAPI:
 
             with open(self.swagger_file, 'r') as f:
                 resp.body = f.read()
-        except: # pragma: no cover
+        except:  # pragma: no cover
             resp.body = ""
 
 
 class VersionResource:
     """Serve up the current version and build information"""
     version_file = 'VERSION'
+
     def on_get(self, req, resp):
         """Handles GET requests"""
         version = {}
@@ -75,49 +79,54 @@ class VersionResource:
         try:
             with open(self.version_file, 'r') as f:
                 version['version'] = f.read().strip()
-        except: # pragma: no cover
+        except:  # pragma: no cover
             pass
         # get commit id (git commit ID)
         try:
-            cmd = "git -C /poseidonRest rev-parse HEAD"
+            cmd = "git -C poseidon rev-parse HEAD"
             commit_id = check_output(cmd, shell=True)
-            cmd = "git -C /poseidonRest diff-index --quiet HEAD --"
+            cmd = "git -C poseidon diff-index --quiet HEAD --"
             dirty = call(cmd, shell=True)
             if dirty != 0:
-                version['commit'] = commit_id.strip()+"-dirty"
+                version['commit'] = commit_id.strip() + "-dirty"
             else:
                 version['commit'] = commit_id.strip()
-        except: # pragma: no cover
+        except:  # pragma: no cover
             pass
         # get runtime id (docker container ID)
         try:
             if "HOSTNAME" in environ:
                 version['runtime'] = environ['HOSTNAME']
-        except: # pragma: no cover
+        except:  # pragma: no cover
             pass
         resp.body = json.dumps(version)
 
+
 class QuoteResource:
     """Serve up quotes"""
+
     def __init__(self):
         self.quote = {
             'quote': 'I\'ve always been more interested in the future than in the past.',
-            'author': 'Grace Hopper'
-        }
+            'author': 'Grace Hopper'}
+
     def on_get(self, req, resp):
         """Handles GET requests"""
         resp.body = json.dumps(self.quote)
 
+
 class PCAPResource:
     """Serve up parsed PCAP files"""
+
     def on_get(self, req, resp, pcap_file, output_type):
         resp.content_type = 'text/text'
         try:
             if output_type == "pcap" and pcap_file.split(".")[1] == "pcap":
-                resp.body = check_output(["/usr/sbin/tcpdump", "-r", "/tmp/"+pcap_file, "-ne", "-tttt"])
+                resp.body = check_output(
+                    ["/usr/sbin/tcpdump", "-r", "/tmp/" + pcap_file, "-ne", "-tttt"])
             else:
                 resp.body = "not a pcap"
-        except: # pragma: no cover
+        except:  # pragma: no cover
             resp.body = "failed"
 
 # create callable WSGI app instance for gunicorn
