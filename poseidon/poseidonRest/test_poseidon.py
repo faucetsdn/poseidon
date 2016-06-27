@@ -117,3 +117,4 @@ def test_pcap_resource_get(client):
     assert resp.status == falcon.HTTP_OK
     resp = client.get('/v1/pcap/foo.foo/pcap')
     assert resp.status == falcon.HTTP_OK
+

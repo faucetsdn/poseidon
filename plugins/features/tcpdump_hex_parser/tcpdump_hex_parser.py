@@ -86,10 +86,17 @@ def parse_header(line):
         ret_dict['dest_ip'] = h[5].split(":")[0]
     ret_dict['protocol'] = h[6]
     ret_dict['ethernet_type'] = h[2]
+
     try:
-        ret_dict['length'] = int(line.split(' length ')[1].split(':')[0])
+        if ret_dict['src_port'] == '53' or ret_dict['dst_port'] == '53':
+            # if dns traffic
+            ret_dict['length'] = int(h[-1][1:-1])
     except:
-        ret_dict['length'] = 0
+        try:
+            ret_dict['length'] = int(line.split(' length ')[1].split(':')[0])
+        except:
+            ret_dict['length'] = 0
+
     if h[2] == 'IP':
         #do something meaningful
         pass
