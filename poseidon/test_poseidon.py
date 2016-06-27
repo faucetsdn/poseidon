@@ -110,3 +110,39 @@ def test_pcap_resource_get(client):
     assert resp.status == falcon.HTTP_OK
     resp = client.get('/v1/pcap/foo.foo/pcap')
     assert resp.status == falcon.HTTP_OK
+
+
+
+
+
+def test_pa_addr_resource_get(client):
+    """
+    Tests the on_get function of the PoseidonActiveAddrResource class.
+    """
+    resp = client.get('/v1/pa/get_addr/info/0.0.0.0')
+    assert resp.status == falcon.HTTP_OK
+    assert resp.body == "Information from db about addr"
+
+def test_ph_db_access_resource_get(client):  
+    """
+    Tests the on_get function of the PoseidonHistoryDBResource class.
+    """
+    resp = client.get('/v1/ph/db_access/SELECT 0.0.0.0 FROM machines')
+    assert resp.status == falcon.HTTP_OK
+    assert resp.body == "Info from db based on query"
+
+def test_pc_db_resource_get(client):
+    """
+    Tests the on_get function of the PoseidonConfigDBResource class.
+    """
+    resp = client.get('/v1/pc/db_loc')
+    assert resp.status == falcon.HTTP_OK
+    assert resp.body == "Here is where the db is"
+
+def test_pc_vcontrol_resource_get(client):
+    """
+    Tests the on_get function of the PoseidonConfigVControlResource class.
+    """
+    resp = client.get('/v1/pc/vcontrol')
+    assert resp.status == falcon.HTTP_OK
+    assert resp.body == "Here is where the vcontrol daemon is"

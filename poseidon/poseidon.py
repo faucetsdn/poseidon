@@ -119,6 +119,47 @@ class PCAPResource:
         except: # pragma: no cover
             resp.body = "failed"
 
+
+
+class PoseidonActiveAddrResource:
+    """Serve up info from database about given address"""
+    def on_get(self, req, resp, addr):
+        try:
+            resp.body = "Information from db about addr"
+        except:
+            resp.body = "failed"
+
+class PoseidonHistoryDBResource:
+    """Serve up information from database"""
+    def on_get(self, req, resp, query):
+        from sqlalchemy import sessionmaker # obviously move
+        Session = sessionmaker(bind=engine)
+        for row in Session.query()
+
+        # for local docker container subprocess.Popen("docker exec -it <name> <db command>", shell=True).wait()
+        resp.body = "Info from db based on query"
+
+# remove if no direct access to database
+class PoseidonConfigDBResource:
+    """Serve up database location"""
+    def on_get(self, req, resp):
+        resp.body = "Here is where the db is"
+
+class PoseidonHConfigDBCredentialsResource:
+    def on_get(self, req, resp, role, pass):
+        # this needs to be changed so pass isn't in url
+        # connect to db container
+        # ALTER ROLE role PASSWORD 'pass'
+        resp.body = "Credentials updated"
+
+class PoseidonConfigVControlResource:
+    """Serve up vcontrol daemon location"""
+    def on_get(self, req, resp, daemon):
+        # set endpoint for vents
+        resp.body = "Thanks for the update"
+
+
+
 # create callable WSGI app instance for gunicorn
 api = falcon.API(middleware=[cors.middleware])
 
@@ -127,3 +168,9 @@ api.add_route('/v1/quote', QuoteResource())
 api.add_route('/v1/version', VersionResource())
 api.add_route('/v1/pcap/{pcap_file}/{output_type}', PCAPResource())
 api.add_route('/swagger.yaml', SwaggerAPI())
+
+api.add_route('/v1/pa/get_addr_info/{addr}', PoseidonActiveAddrResource())
+api.add_route('/v1/ph/db_access/{db_query}', PoseidonHistoryDBResource())
+api.add_route('/v1/pc/db_loc', PoseidonConfigDBResource())
+api.add_route('/v1/pc/db_cred/{role}/{new_pass}', PoseidonHConfigDBCredentialsResource())
+api.add_route('/v1/pc/vcontrol/{daemon}', PoseidonConfigVControlResource())
