@@ -18,7 +18,7 @@
 Test module for tcpdump_hex_parser.py
 
 Created on 13 June 2016
-@author: Charlie Lewis
+@author: Charlie Lewis, Travis Lanham
 """
 
 import pytest
@@ -59,12 +59,33 @@ def test_parse_header():
     assert ret_dict['src_port'] == "80"
     assert ret_dict['dest_port'] == "80"
 
-    ret_dict = parse_header("2016-06-10 13:10:38.684973 IP 10.80.210.10.53 > 10.48.81.28.52573: 2560 1/0/0 CNAME registry-origin.docker.io. (68)")
-    assert ret_dict['src_ip'] == "10.80.210.10"
+    ret_dict = parse_header("2015-05-20 13:10:38.684973 IP 350.137.451.220.53 > 136.145.402.267.52573: 2560 1/0/0 CNAME registry-origin.docker.io. (68)")
+    assert ret_dict['src_ip'] == "350.137.451.220"
     assert ret_dict['src_port'] == "53"
-    assert ret_dict['dest_ip'] == "10.48.81.28"
+    assert ret_dict['dest_ip'] == "136.145.402.267"
     assert ret_dict['dest_port'] == "52573"
     assert ret_dict['length'] == 68
+    assert 'dns_resolved' not in ret_dict
+
+    ret_dict = parse_header("2015-05-20 13:10:38.611239 IP 350.137.451.220.53 > 136.145.402.267.1: 2816 4/0/0 CNAME registry-origin.docker.io., A 52.72.134.131, A 54.236.140.140, A 52.22.123.154 (116)")
+    assert ret_dict['src_ip'] == "350.137.451.220"
+    assert ret_dict['src_port'] == "53"
+    assert ret_dict['dest_ip'] == "136.145.402.267"
+    assert ret_dict['dest_port'] == "1"
+    assert ret_dict['length'] == 116
+    assert "52.72.134.131" in ret_dict['dns_resolved']
+    assert "54.236.140.140" in ret_dict['dns_resolved']
+    assert "52.22.123.154" in ret_dict['dns_resolved']
+
+    ret_dict = parse_header("2015-05-20 13:10:53.740027 IP 350.137.451.220.53 > 136.145.402.267.505: 9846 2/0/0 AAAA 00:1408:10:195::2374, AAAA 2600:108:10:193::2374 (99)")
+    assert ret_dict['src_ip'] == "350.137.451.220"
+    assert ret_dict['src_port'] == "53"
+    assert ret_dict['dest_ip'] == "136.145.402.267"
+    assert ret_dict['dest_port'] == "505"
+    assert ret_dict['length'] == 99
+    assert "00:1408:10:195::2374" in ret_dict['dns_resolved']
+    assert "2600:108:10:193::2374" in ret_dict['dns_resolved']
+
 
 def test_parse_data():
     ret_str = parse_data("\t0x0080:  e04b 2935 564f 91db 5344 5460 9189 33d0", 0)
