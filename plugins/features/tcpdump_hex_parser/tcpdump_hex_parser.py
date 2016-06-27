@@ -62,6 +62,7 @@ def parse_header(line):
         destination ip
         destination port (if it exists)
         length of the data
+        resolved addresses (if they exist, for dns traffic only)
         """
     ret_dict = {}
     h = line.split()
@@ -86,10 +87,34 @@ def parse_header(line):
         ret_dict['dest_ip'] = h[5].split(":")[0]
     ret_dict['protocol'] = h[6]
     ret_dict['ethernet_type'] = h[2]
+
     try:
-        ret_dict['length'] = int(line.split(' length ')[1].split(':')[0])
+        """
+        If the packet is a DNS request or response, parse it
+        correctly for length and if response from DNS server then
+        parse the addresses resolved, add to list, and enter in return
+        directory. 'A' if for resolved IPv4, 'AAAA' for IPv6
+        """
+        if ret_dict['src_port'] == '53' or ret_dict['dst_port'] == '53':
+            ret_dict['length'] = int(h[-1][1:-1])
+            if ret_dict['src_port'] == '53':
+                resolved_addrs = []
+                if ' A ' in line:
+                    for addr in line.split(' A ')[1:]:
+                        clean_addr = addr.replace(',', '').split()[0]
+                        resolved_addrs.append(clean_addr)
+                if ' AAAA ' in line:
+                    for addr in line.split(' AAAA ')[1:]:
+                        clean_addr = addr.replace(',', '').split()[0]
+                        resolved_addrs.append(clean_addr)
+                if resolved_addrs:
+                    ret_dict['dns_resolved'] = resolved_addrs
     except:
-        ret_dict['length'] = 0
+        try:
+            ret_dict['length'] = int(line.split(' length ')[1].split(':')[0])
+        except:
+            ret_dict['length'] = 0
+
     if h[2] == 'IP':
         # do something meaningful
         pass

@@ -142,6 +142,7 @@ class PCAPResource:
         except:  # pragma: no cover
             resp.body = "failed"
 
+
 # create callable WSGI app instance for gunicorn
 api = falcon.API(middleware=[cors.middleware])
 
