@@ -47,7 +47,7 @@ public_cors = CORS(allow_all_origins=True)
 
 class SwaggerAPI:
     """Serve up swagger API"""
-    swagger_file = 'poseidon/swagger.yaml'
+    swagger_file = 'poseidon/poseidonRest/swagger.yaml'
     def on_get(self, req, resp):
         """Handles GET requests"""
         resp.content_type = 'text/yaml'
@@ -64,6 +64,7 @@ class SwaggerAPI:
         except: # pragma: no cover
             resp.body = ""
 
+
 class VersionResource:
     """Serve up the current version and build information"""
     version_file = 'VERSION'
@@ -78,9 +79,9 @@ class VersionResource:
             pass
         # get commit id (git commit ID)
         try:
-            cmd = "git -C /poseidon rev-parse HEAD"
+            cmd = "git -C /poseidonRest rev-parse HEAD"
             commit_id = check_output(cmd, shell=True)
-            cmd = "git -C /poseidon diff-index --quiet HEAD --"
+            cmd = "git -C /poseidonRest diff-index --quiet HEAD --"
             dirty = call(cmd, shell=True)
             if dirty != 0:
                 version['commit'] = commit_id.strip()+"-dirty"
@@ -169,8 +170,12 @@ api.add_route('/v1/version', VersionResource())
 api.add_route('/v1/pcap/{pcap_file}/{output_type}', PCAPResource())
 api.add_route('/swagger.yaml', SwaggerAPI())
 
+<<<<<<< HEAD:poseidon/poseidon.py
 api.add_route('/v1/pa/get_addr_info/{addr}', PoseidonActiveAddrResource())
 api.add_route('/v1/ph/db_access/{db_query}', PoseidonHistoryDBResource())
 api.add_route('/v1/pc/db_loc', PoseidonConfigDBResource())
 api.add_route('/v1/pc/db_cred/{role}/{new_pass}', PoseidonHConfigDBCredentialsResource())
 api.add_route('/v1/pc/vcontrol/{daemon}', PoseidonConfigVControlResource())
+=======
+print "done"
+>>>>>>> dcca5dbc11c675e357463af52ca280e1e40e76b4:poseidon/poseidonRest/poseidonRest.py
