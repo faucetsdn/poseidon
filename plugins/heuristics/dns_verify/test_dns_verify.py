@@ -83,7 +83,3 @@ def test_dns_packet_validation():
                 'data': '3c111c2565390b6539303037b65370f',
                 'dest_ip': '350.137.451.220'}"""
     assert verify_dns_record(ch, method, properties, body) == "TODO: signaling packet of interest"
-
-if __name__ == '__main__':
-    test_dns_record_class()
-    test_dns_packet_validation()
