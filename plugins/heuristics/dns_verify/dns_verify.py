@@ -93,6 +93,7 @@ class DNSRecord:
 
 
 resolved_addresses = DNSRecord()
+network_machines = []
 
 
 def verify_dns_record(ch, method, properties, body):
@@ -112,10 +113,9 @@ def verify_dns_record(ch, method, properties, body):
         for addr in packet['dns_resolved']:
             resolved_addresses.add(addr)
     else:
-        # otherwise, make sure the address has been seen before
-        if packet['dest_port'] == '80':
+        # if outbound traffic to non-resolved ip, flag
+        if packet['dest_ip'] not in network_machines:
             if packet['dest_ip'] not in resolved_addresses:
-                # activity of interest - possible that no dns lookup occurred
                 return "TODO: signaling packet of interest"
 
 """

@@ -29,6 +29,7 @@ import time
 from dns_verify import DNSRecord
 from dns_verify import verify_dns_record
 from dns_verify import resolved_addresses
+from dns_verify import network_machines
 
 
 def test_dns_record_class():
@@ -71,6 +72,7 @@ def test_dns_packet_validation():
     assert '70.80.90.100' in resolved_addresses
     assert '00:1408:10:195::2374' in resolved_addresses
 
+    network_machines.append("136.145.402.267")
     body = """{'src_port' : '1',
                 'raw_header': '1998-10-10 18:10:53.650447 IP 136.145.402.267.1 > 350.137.451.220.80: Flags [.] ack abc, win def length 90', 
                 'ethernet_type': 'IP',
