@@ -14,14 +14,14 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Created on 17 May 2016
+Test module for dshell_netflow_parser.py
+
+Created on 28 June 2016
 @author: dgrossman
 """
+import pytest
+from Onos import Onos
 
 
-class Onos:
-
-    def __init__(self):
-        self.modName = 'onos'
-
-    pass
+def test_Onos():
+    Onos()
