@@ -16,9 +16,9 @@
 
 
 """
-Take parsed pcaps and add all resolved addresses to
-database to reference new traffic against to determine
-whether a dns lookup has occured for dest address.
+Take parsed pcaps and add all resolved addresses from dns
+to reference new traffic against to determine
+whether a dns lookup has occured recently for dest address.
 
 Created on 22 June 2016
 @author: Travis Lanham, Charlie Lewis
@@ -61,11 +61,18 @@ print ' [*] Waiting for logs. To exit press CTRL+C'
 
 
 class DNSRecord:
+    """
+    Class to keep track of resolved dns
+    requests - stores resolved addresses with
+    a time-to-live so they will be removed from
+    the dict after that time expires.
+    """
     def __init__(self):
         self.addrs = {}
 
-    # 30 min default duration
-    def add(self, addr, duration=1800):
+    # 7 min default duration - approx time of
+    # os dns cache with long ttl
+    def add(self, addr, duration=420):
         self.addrs[addr] = time.time() + duration
 
     def __contains__(self, addr):
