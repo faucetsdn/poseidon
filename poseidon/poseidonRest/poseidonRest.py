@@ -146,11 +146,13 @@ class PCAPResource:
 # create callable WSGI app instance for gunicorn
 api = falcon.API(middleware=[cors.middleware])
 
+#make sure to update the yaml file when you add a new route
 # routes
 api.add_route('/v1/quote', QuoteResource())
 api.add_route('/v1/version', VersionResource())
 api.add_route('/v1/pcap/{pcap_file}/{output_type}', PCAPResource())
 
+# access to the other components of poseidonRest
 api.add_route('/v1/nbca/{resource}', poseidonNbca())
 api.add_route('/v1/config/{resource}', poseidonConfig())
 api.add_route('/v1/history{resource}', poseidonHistory())
