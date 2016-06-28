@@ -26,13 +26,11 @@ Created on 22 June 2016
 
 
 import pika
-import socket
-import struct
-import ast
-import time
 import copy
+import time
+import ast
 
-
+"""
 wait = True
 while wait:
     try:
@@ -59,6 +57,7 @@ for binding_key in binding_keys:
                        routing_key=binding_key)
 
 print ' [*] Waiting for logs. To exit press CTRL+C'
+"""
 
 
 class DNSRecord:
@@ -112,6 +111,7 @@ def verify_dns_record(ch, method, properties, body):
                 # activity of interest - possible that no dns lookup occurred
                 return "TODO: signaling packet of interest"
 
-
-#channel.basic_consume(verify_dns_record, queue=queue_name, no_ack=True)
-#channel.start_consuming()
+"""
+channel.basic_consume(verify_dns_record, queue=queue_name, no_ack=True)
+channel.start_consuming()
+"""
