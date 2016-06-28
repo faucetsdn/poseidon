@@ -13,21 +13,18 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
 """
-Test module for poseidonRest.py
+Test module for PoseidonHistory.py
 
-Created on 17 May 2016
-@author: Charlie Lewis
+Created on 28 June 2016
+@author: dgrossman
 """
-
 import falcon
 import pytest
-
-from poseidonNbca import poseidonNbca
+from PoseidonHistory import PoseidonHistory
 
 application = falcon.API()
-application.add_route('/v1/Nbca/{resource}', poseidonNbca())
+application.add_route('/v1/history/{resource}', PoseidonHistory())
 
 
 # exposes the application for testing
@@ -38,7 +35,7 @@ def app():
 
 def test_pcap_resource_get(client):
     """
-    Tests the poseidonHisotry class
+    Tests the PoseidonHisotry class
     """
-    resp = client.get('/v1/Nbca/someNbcaRequest')
+    resp = client.get('/v1/history/someHistoryRequest')
     assert resp.status == falcon.HTTP_OK
