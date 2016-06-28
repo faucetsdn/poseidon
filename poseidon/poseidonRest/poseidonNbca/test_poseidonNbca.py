@@ -15,30 +15,30 @@
 #   limitations under the License.
 
 """
-Test module for dshell_netflow_parser.py
+Test module for poseidonRest.py
 
-Created on 13 June 2016
-@author: Charlie Lewis, Abhi Ganesh
+Created on 17 May 2016
+@author: Charlie Lewis
 """
 
+import falcon
 import pytest
-import sys
 
-from dshell_netflow_parser import get_path
-from dshell_netflow_parser import run_tool
+from poseidonNbca import poseidonNbca
 
-
-def test_get_path():
-    get_path()
-    sys.argv = []
-    get_path()
+application = falcon.API()
+application.add_route('/v1/Nbca/{resource}', poseidonNbca())
 
 
-def test_run_tool():
-    with open('/tmp/test', 'w') as f:
-        f.write("this is a test file")
-    run_tool('/tmp/test')
+# exposes the application for testing
+@pytest.fixture
+def app():
+    return application
 
-    with open('/tmp/results.out', 'w') as f:
-        f.write("2015-05-20 19:41:59.300879      0.0.0.0 ->    0.0.0.0  (US -> US)  TCP    1940   49152     0      0        0        0  0.0000s")
-    run_tool('/tmp/results.out')
+
+def test_pcap_resource_get(client):
+    """
+    Tests the poseidonHisotry class
+    """
+    resp = client.get('/v1/Nbca/someNbcaRequest')
+    assert resp.status == falcon.HTTP_OK

@@ -16,7 +16,6 @@
 
 """
 Test module for tcpdump_hex_parser.py
-
 Created on 13 June 2016
 @author: Charlie Lewis, Travis Lanham
 """
