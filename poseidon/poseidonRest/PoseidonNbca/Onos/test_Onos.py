@@ -14,7 +14,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Test module for dshell_netflow_parser.py
+Test module for Onos.py
 
 Created on 28 June 2016
 @author: dgrossman

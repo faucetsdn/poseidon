@@ -15,7 +15,6 @@
 #   limitations under the License.
 """
 Test module for PoseidonHistory.py
-
 Created on 28 June 2016
 @author: dgrossman
 """

@@ -22,6 +22,6 @@ Created on 17 May 2016
 class Onos:
 
     def __init__(self):
-        self.modName = 'onos'
+        self.modName = 'Onos'
 
     pass
