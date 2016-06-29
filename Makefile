@@ -9,11 +9,11 @@ run: clean depends build docs notebooks
 	docker run --name poseidon-api -dP poseidon-api >/dev/null; \
 	port=$$(docker port poseidon-api 8080/tcp | sed 's/^.*://'); \
 	api_url=$$docker_url:$$port; \
-	docker run --name poseidon -dP -e ALLOW_ORIGIN=$$api_url poseidon >/dev/null; \
-	port=$$(docker port poseidon 8000/tcp | sed 's/^.*://'); \
+	docker run --name poseidon-rest -dP -e ALLOW_ORIGIN=$$api_url poseidon-rest >/dev/null; \
+	port=$$(docker port poseidon-rest 8000/tcp | sed 's/^.*://'); \
 	poseidon_url=$$docker_url:$$port; \
 	echo "The API can be accessed here: $$api_url"; \
-	echo "poseidon can be accessed here: $$poseidon_url"; \
+	echo "poseidon-rest can be accessed here: $$poseidon_url"; \
 	echo
 
 test: build
@@ -39,7 +39,7 @@ docs: clean-docs build
 		echo "No DOCKER_HOST environment variable set."; \
 		exit 1; \
 	fi; \
-	docker run --name poseidon-docs -w /poseidon/docs/_build/html -dP --entrypoint "python" poseidon -m SimpleHTTPServer >/dev/null; \
+	docker run --name poseidon-docs -w /poseidon/docs/_build/html -dP --entrypoint "python" poseidon-rest -m SimpleHTTPServer >/dev/null; \
 	port=$$(docker port poseidon-docs 8000/tcp | sed 's/^.*://'); \
 	doc_url=$$docker_url:$$port; \
 	echo; \
@@ -48,10 +48,10 @@ docs: clean-docs build
 build: depends
 	cd api && docker build -t poseidon-api .
 	docker build -t poseidon-notebooks -f Dockerfile.notebooks .
-	docker build -t poseidon  .
+	docker build -t poseidon-rest  -f Dockerfile.rest .
 
 clean-all: clean depends
-	@docker rmi poseidon
+	@docker rmi poseidon-rest
 	@docker rmi poseidon-api
 
 clean-docs: depends
