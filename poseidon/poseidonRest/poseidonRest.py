@@ -175,7 +175,7 @@ api.add_route('/v1/pcap/{pcap_file}/{output_type}', PCAPResource())
 api.add_route('/v1/config/{resource}', PoseidonConfig())
 api.add_route('/v1/history{resource}', PoseidonHistory())
 api.add_route('/v1/action/{resource}', PoseidonAction())
-api.add_route('/v1/nbca/{resource}', PoseidonNbca())
+#api.add_route('/v1/nbca/{resource}', PoseidonNbca())
 
 # add the functionality for a remote call to trigger scanning
 # the internal switch state
