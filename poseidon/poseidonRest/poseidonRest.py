@@ -30,7 +30,7 @@ from falcon_cors import CORS
 from PoseidonAction.PoseidonAction import PoseidonAction
 from PoseidonConfig.PoseidonConfig import PoseidonConfig
 from PoseidonHistory.PoseidonHistory import PoseidonHistory
-from PoseidonNbca.PoseidonNbca import PoseidonNbca
+#from PoseidonNbca.PoseidonNbca import PoseidonNbca
 
 
 def get_allowed():
