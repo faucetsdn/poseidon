@@ -19,6 +19,8 @@
 Take parsed pcaps and add all resolved addresses from dns
 to reference new traffic against to determine
 whether a dns lookup has occured recently for dest address.
+Maintains a dict of machine_addr->DNSRecord for each machine,
+where the DNSRecord is a time store for resolved addresses.
 
 Created on 22 June 2016
 @author: Travis Lanham, Charlie Lewis
@@ -63,61 +65,78 @@ print ' [*] Waiting for logs. To exit press CTRL+C'
 class DNSRecord:
     """
     Class to keep track of resolved dns
-    requests - stores resolved addresses with
+    requests for a machine with address addr
+    - stores resolved addresses with
     a time-to-live so they will be removed from
     the dict after that time expires.
     """
-    def __init__(self):
-        self.addrs = {}
+    def __init__(self, addr):
+        self.name = addr
+        self.resolved = {}
 
     # 7 min default duration - approx time of
     # os dns cache with long ttl
     def add(self, addr, duration=420):
-        self.addrs[addr] = time.time() + duration
+        self.resolved[addr] = time.time() + duration
 
     def __contains__(self, addr):
-        if addr not in self.addrs:
+        """
+        Checks if address is in the resolved
+        dict. If time is expired, deletes
+        entry and returns False.
+        """
+        if addr not in self.resolved:
             return False
-        if time.time() < self.addrs[addr]:
+        if time.time() < self.resolved[addr]:
             return True
         else:
-            del self.addrs[addr]
+            del self.resolved[addr]
             return False
 
     def __iter__(self):
-        for a in copy.deepcopy(self.addrs):
-            if time.time() < self.addrs[a]:
+        """
+        Returns valid addresses from resolved
+        dict, if time is expired then deletes
+        and does not yield.
+        """
+        for a in copy.deepcopy(self.resolved):
+            if time.time() < self.resolved[a]:
                 yield a
             else:
-                del self.addrs[a]
+                del self.resolved[a]
 
 
-resolved_addresses = DNSRecord()
 network_machines = []
+dns_records = {}
 
 
 def verify_dns_record(ch, method, properties, body):
     """
     Takes parsed packet as string, if dns packet then
-    adds resolved addresses to record of addresses,
-    otherwise checks that outbound request ip is in
-    record.
-
-    NOTE: outgoing check only looks if destination port
-    if 80 (for regular HTTP traffic), should be improved.
+    adds resolved addresses to record of addresses for that machine,
+    otherwise checks that the source address is in-network
+    (out of network to in-network traffic isn't applicable to dns validation)
+    and flags if it destination address was not resolved by the machine.
     """
-    global resolved_addresses
     global network_machines
-    
+    global dns_records
+
     packet = ast.literal_eval(body)
-    if 'dns_resolved' in packet:
-        # if dns packet then update resolved addresses
-        for addr in packet['dns_resolved']:
-            resolved_addresses.add(addr)
-    else:
-        # if outbound traffic to non-resolved ip, flag
-        if packet['dest_ip'] not in network_machines:
-            if packet['dest_ip'] not in resolved_addresses:
+    src_addr = packet['src_ip']
+    if src_addr in network_machines:
+        if 'dns_resolved' in packet:
+            # if dns packet then update resolved addresses
+            if src_addr in dns_records:
+                for addr in packet['dns_resolved']:
+                    dns_records[src_addr].add(addr)
+            else:
+                new_record = DNSRecord(src_addr)
+                for addr in packet['dns_resolved']:
+                    new_record.add(addr)
+                dns_records[src_addr] = new_record
+        else:
+            # if outbound traffic to non-resolved ip, flag
+            if packet['dest_ip'] not in dns_records[src_addr]:
                 return "TODO: signaling packet of interest"
 
 """
