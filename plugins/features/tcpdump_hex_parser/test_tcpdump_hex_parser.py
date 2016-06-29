@@ -66,7 +66,7 @@ def test_parse_header():
     assert ret_dict['length'] == 68
     assert 'dns_resolved' not in ret_dict
 
-    ret_dict = parse_header("2015-05-20 13:10:38.611239 IP 350.137.451.220.53 > 136.145.402.267.1: 2816 4/0/0 CNAME registry-origin.docker.io., A 52.72.134.131, A 54.236.140.140, A 52.22.123.154 (116)")
+    ret_dict = parse_header("2015-05-20 13:10:38.611239 NOTIP 350.137.451.220.53 > 136.145.402.267.1: 2816 4/0/0 CNAME registry-origin.docker.io., A 52.72.134.131, A 54.236.140.140, A 52.22.123.154 (116)")
     assert ret_dict['src_ip'] == "350.137.451.220"
     assert ret_dict['src_port'] == "53"
     assert ret_dict['dest_ip'] == "136.145.402.267"
@@ -92,6 +92,13 @@ def test_parse_data():
     hex_pattern = re.compile(r'[0-9a-fA-F]+')
     m = re.search(hex_pattern, ret_str)
     assert m
+
+    ret_str = parse_data("\t0x0070:  ac4b 2925 164f 916b 5244 5470 1189 3dd0", 10)
+    assert type(ret_str) == type("")
+    hex_pattern = re.compile(r'[0-9a-fA-F]+')
+    m = re.search(hex_pattern, ret_str)
+    assert m
+
 
 def test_return_packet():
     lines = []

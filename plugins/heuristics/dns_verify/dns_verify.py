@@ -106,8 +106,10 @@ def verify_dns_record(ch, method, properties, body):
     NOTE: outgoing check only looks if destination port
     if 80 (for regular HTTP traffic), should be improved.
     """
-    packet = ast.literal_eval(body)
     global resolved_addresses
+    global network_machines
+    
+    packet = ast.literal_eval(body)
     if 'dns_resolved' in packet:
         # if dns packet then update resolved addresses
         for addr in packet['dns_resolved']:
