@@ -33,7 +33,7 @@ def app():
     return application
 
 
-def test_pcap_resource_get(client):
+def test_PoseidonNbca(client):
     """
     Tests the PoseidonHisotry class
     """
