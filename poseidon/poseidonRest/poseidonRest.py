@@ -30,7 +30,7 @@ from falcon_cors import CORS
 from PoseidonAction.PoseidonAction import PoseidonAction
 from PoseidonConfig.PoseidonConfig import PoseidonConfig
 from PoseidonHistory.PoseidonHistory import PoseidonHistory
-#from PoseidonNbca.PoseidonNbca import PoseidonNbca
+from PoseidonNbca.PoseidonNbca import PoseidonNbca
 
 
 def get_allowed():
@@ -172,10 +172,10 @@ api.add_route('/v1/version', VersionResource())
 api.add_route('/v1/pcap/{pcap_file}/{output_type}', PCAPResource())
 
 # access to the other components of PoseidonRest
+api.add_route('/v1/nbca/{resource}', PoseidonNbca())
 api.add_route('/v1/config/{resource}', PoseidonConfig())
 api.add_route('/v1/history{resource}', PoseidonHistory())
 api.add_route('/v1/action/{resource}', PoseidonAction())
-#api.add_route('/v1/nbca/{resource}', PoseidonNbca())
 
 # add the functionality for a remote call to trigger scanning
 # the internal switch state
