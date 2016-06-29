@@ -15,8 +15,15 @@
 #   limitations under the License.
 """
 Created on 17 May 2016
-@author: dgrossman
+@author: dgrossman, lanhamt
 """
+
+import ConfigParser
+import os
+
+
+config = ConfigParser.ConfigParser()
+config.readfp(os.getcwd() + 'templates/config.template')
 
 
 class PoseidonConfig:
@@ -25,9 +32,9 @@ class PoseidonConfig:
     def __init__(self):
         self.modName = 'PoseidonConfig'
 
-    def on_get(self, req, resp, resource):
+    def on_get(self, req, resp, section, field):
         resp.content_type = 'text/text'
         try:
-            resp.body = self.modName + ' found: %s' % (resource)
+            resp.body = config.get(section, field) # self.modName + ' found: %s' % (resource)
         except:  # pragma: no cover
             pass

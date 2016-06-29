@@ -1,0 +1,7 @@
+[database]
+user = user
+password = pass
+
+[vcontrol]
+api_url = http://google.com
+

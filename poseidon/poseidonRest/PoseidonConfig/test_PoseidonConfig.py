@@ -17,14 +17,14 @@
 Test module for PoseidonConfig.py
 
 Created on 28 June 2016
-@author: dgrossman
+@author: dgrossman, lanhamt
 """
 import falcon
 import pytest
 from PoseidonConfig import PoseidonConfig
 
 application = falcon.API()
-application.add_route('/v1/Config/{resource}', PoseidonConfig())
+application.add_route('/v1/Config/{section}/{field}', PoseidonConfig())
 
 
 # exposes the application for testing
@@ -35,7 +35,8 @@ def app():
 
 def test_pcap_resource_get(client):
     """
-    Tests the PoseidonHisotry class
+    Tests the PoseidonConfig class
     """
-    resp = client.get('/v1/Config/someConfigRequest')
+    resp = client.get('/v1/Config/database/password')
     assert resp.status == falcon.HTTP_OK
+    assert resp.body == "pass"
