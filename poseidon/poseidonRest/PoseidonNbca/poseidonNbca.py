@@ -20,6 +20,7 @@ Created on 17 May 2016
 
 
 class PoseidonNbca:
+    """PoseidonNbca """
 
     def __init__(self):
         self.modName = 'PoseidonNbca'
