@@ -27,7 +27,7 @@ application = falcon.API()
 application.add_route('/v1/Nbca/{resource}', PoseidonNbca())
 
 
-# exposes the application for testing
+ exposes the application for testing
 @pytest.fixture
 def app():
     return application
