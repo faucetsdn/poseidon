@@ -18,7 +18,7 @@
 Tcpdump hex parser plugin
 
 Created on 13 June 2016
-@author: Charlie Lewis, David Grossman
+@author: Charlie Lewis, David Grossman, Travis Lanham
 """
 
 import pika
