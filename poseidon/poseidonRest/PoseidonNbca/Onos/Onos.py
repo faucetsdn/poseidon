@@ -13,32 +13,15 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
 """
-Test module for poseidonRest.py
-
 Created on 17 May 2016
-@author: Charlie Lewis
+@author: dgrossman
 """
 
-import falcon
-import pytest
 
-from poseidonNbca import poseidonNbca
+class Onos:
 
-application = falcon.API()
-application.add_route('/v1/Nbca/{resource}', poseidonNbca())
+    def __init__(self):
+        self.modName = 'Onos'
 
-
-# exposes the application for testing
-@pytest.fixture
-def app():
-    return application
-
-
-def test_pcap_resource_get(client):
-    """
-    Tests the poseidonHisotry class
-    """
-    resp = client.get('/v1/Nbca/someNbcaRequest')
-    assert resp.status == falcon.HTTP_OK
+    pass

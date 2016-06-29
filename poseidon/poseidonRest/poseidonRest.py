@@ -13,26 +13,24 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
 """
 This example is a test of a usable API demonstrating the test and documentation
 workflow for the code base.
 
 Created on 17 May 2016
-@author: Charlie Lewis
+@author: Charlie Lewis, dgrossman
 """
+import json
+from os import environ
+from subprocess import call
+from subprocess import check_output
 
 import falcon
-import json
-
 from falcon_cors import CORS
-from os import environ
-from subprocess import call, check_output
-
-from poseidonNbca.poseidonNbca import poseidonNbca
-from poseidonConfig.poseidonConfig import poseidonConfig
-from poseidonHistory.poseidonHistory import poseidonHistory
-from poseidonAction.poseidonAction import poseidonAction
+from PoseidonAction.PoseidonAction import PoseidonAction
+from PoseidonConfig.PoseidonConfig import PoseidonConfig
+from PoseidonHistory.PoseidonHistory import PoseidonHistory
+from PoseidonNbca.PoseidonNbca import PoseidonNbca
 
 
 def get_allowed():
@@ -107,6 +105,27 @@ class VersionResource:
         resp.body = json.dumps(version)
 
 
+class Poll2Callback:
+    """query the switch to determine if anything has changed,
+       this functionality is needed as we do not want to modify
+       a controller."""
+
+    def __init__(self):
+        self.retval = {}
+        self.times = 0
+
+    def on_get(self, req, resp):
+        """Haneles Get requests"""
+        # TODO make calls to get switch state,
+        # TODO compare to previous switch state
+        # TODO schedule something to occur for updated flows
+        self.retval['times'] = self.times
+        # TODO change response to something reflecting success of traversal
+        self.retval['resp'] = 'ok'
+        self.times = self.times + 1
+        resp.body = json.dumps(self.retval)
+
+
 class QuoteResource:
     """Serve up quotes"""
 
@@ -119,7 +138,7 @@ class QuoteResource:
 
     def on_get(self, req, resp):
         """Handles GET requests"""
-        self.times = self.times+1
+        self.times = self.times + 1
         self.quote['times'] = self.times
         resp.body = json.dumps(self.quote)
 
@@ -146,17 +165,21 @@ class PCAPResource:
 # create callable WSGI app instance for gunicorn
 api = falcon.API(middleware=[cors.middleware])
 
-#make sure to update the yaml file when you add a new route
+# make sure to update the yaml file when you add a new route
 # routes
 api.add_route('/v1/quote', QuoteResource())
 api.add_route('/v1/version', VersionResource())
 api.add_route('/v1/pcap/{pcap_file}/{output_type}', PCAPResource())
 
-# access to the other components of poseidonRest
-api.add_route('/v1/nbca/{resource}', poseidonNbca())
-api.add_route('/v1/config/{resource}', poseidonConfig())
-api.add_route('/v1/history{resource}', poseidonHistory())
-api.add_route('/v1/action/{resource}', poseidonAction())
+# access to the other components of PoseidonRest
+api.add_route('/v1/nbca/{resource}', PoseidonNbca())
+api.add_route('/v1/config/{resource}', PoseidonConfig())
+api.add_route('/v1/history{resource}', PoseidonHistory())
+api.add_route('/v1/action/{resource}', PoseidonAction())
+
+# add the functionality for a remote call to trigger scanning
+# the internal switch state
+api.add_route('/v1/p2c', Poll2Callback())
 
 api.add_route('/swagger.yaml', SwaggerAPI())
 
