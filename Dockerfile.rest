@@ -29,7 +29,6 @@ RUN for file in $(find plugins/* -name "requirements.txt"); \
 
 # copy templates to tmp
 RUN mkdir -p /tmp/poseidon/templates
-RUN ls /poseidonWork
 RUN cp -r /poseidonWork/templates /tmp/poseidon/
 
 # build documentation
