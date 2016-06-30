@@ -85,6 +85,14 @@ def test_parse_header():
     assert "00:1408:10:195::2374" in ret_dict['dns_resolved']
     assert "2600:108:10:193::2374" in ret_dict['dns_resolved']
 
+    ret_dict = parse_header("1989-01-01 00:00:00.123 IP6 a::b:c:d:e.90 > q::w:e:r:t.78 0* PTD 1/3/4 length 20")
+    assert ret_dict['length'] == 20
+    assert ret_dict['src_ip'] == "a::b:c:d:e"
+    assert ret_dict['src_port'] == "90"
+    assert ret_dict['dest_ip'] == "q::w:e:r:t"
+    assert ret_dict['dest_port'] == "78"
+
+
 
 def test_parse_data():
     ret_str = parse_data("\t0x0080:  e04b 2935 564f 91db 5344 5460 9189 33d0", 0)
@@ -98,6 +106,7 @@ def test_parse_data():
     hex_pattern = re.compile(r'[0-9a-fA-F]+')
     m = re.search(hex_pattern, ret_str)
     assert m
+    assert ret_str == "ac4b2925164f"
 
 
 def test_return_packet():

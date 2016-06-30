@@ -26,13 +26,16 @@ import ConfigParser
 import os
 
 
+template_path = '/tmp/poseidon/templates'
+
+
 class PoseidonConfig:
     """Poseidon Config Rest Interface"""
 
     def __init__(self):
         self.modName = 'PoseidonConfig'
         self.config = ConfigParser.ConfigParser()
-        self.config.readfp(open('/tmp/poseidon/templates/config.template'))
+        self.config.readfp(open(template_path + '/config.template'))
 
     def on_get(self, req, resp, section, field):
         """
