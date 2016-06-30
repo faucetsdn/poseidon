@@ -154,6 +154,17 @@ def test_analyze_pcap():
                     'length': 180,
                     'raw_header': '1992-11-02 12:09:45.456789 IP q.w.e.r.2 > 24.56.78.90.42: Flags [.] ack hi, syn 8sb2 length 180 GET'}"""
 
+    out_to_out = """{'src_port': '2',
+                    'dest_port': '42',
+                    'src_ip': 'q.w.e.r',
+                    'dest_ip': 'e.v.i.l',
+                    'time': '12:09:45.456789',
+                    'date': '1992-11-02',
+                    'protocol': 'Flags',
+                    'data': '238746924700101001010001000d01010',
+                    'length': 20,
+                    'raw_header': '1992-11-02 12:09:45.456789 IP q.w.e.r.2 > e.v.i.l.42: Flags [.] syn hi, ack 8sb2 length 20 POST'}"""
+
     network_machines.append('136.145.402.267')
     network_machines.append('24.56.78.90')
     network_machines.append('350.137.451.220')
@@ -191,3 +202,5 @@ def test_analyze_pcap():
     for mac, freq in f.get_machine_node("350.137.451.220").get_machines_received_from():
         three_rec[mac] = freq
     assert three_rec["136.145.402.267"] == 1
+
+    analyze_pcap(ch, method, properties, out_to_out, f)
