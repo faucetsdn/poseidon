@@ -37,6 +37,14 @@ def test_pcap_resource_get(client):
     """
     Tests the PoseidonConfig class
     """
-    resp = client.get('/v1/Config/database/password')
+    resp = client.get('/v1/Config/rest config test/key1')
     assert resp.status == falcon.HTTP_OK
-    assert resp.body == "pass"
+    assert resp.body == "trident"
+
+    resp = client.get('/v1/Config/rest config test/key2')
+    assert resp.status == falcon.HTTP_OK
+    assert resp.body == "theseus"
+
+    resp = client.get('/v1/Config/rest config test/double key')
+    assert resp.status == falcon.HTTP_OK
+    assert resp.body == "atlas horses"
