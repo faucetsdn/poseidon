@@ -35,18 +35,6 @@ paths:
       responses:
         '200':
           description: Returns a string of the new format of the parsed PCAP file.
-  /quote:
-    get:
-      summary: Quote
-      description: >
-        This endpoint returns a quote.
-      produces:
-        - application/json
-      tags:
-        - Meta
-      responses:
-        '200':
-          description: Returns a JSON string of a quote
   /version:
     get:
       summary: Version
@@ -78,25 +66,25 @@ paths:
       responses:
         '200':
           description: Returns something
-/action/{resource}:
-  get:
-    summary: action
-    description: >
-      This endpoint talks to the action
-    parameters:
-      - in: path
-        name: resource
-        description: information to pass to the action
-        required: true
-        type: string
-        format: string
-    produces:
-      - text/text
-    tags:
-      - Data
-    responses:
-      '200':
-        description: Returns something
+  /action/{resource}:
+    get:
+      summary: action
+      description: >
+        This endpoint talks to the action
+      parameters:
+        - in: path
+          name: resource
+          description: information to pass to the action
+          required: true
+          type: string
+          format: string
+      produces:
+        - text/text
+      tags:
+        - Data
+      responses:
+        '200':
+          description: Returns something
   /config/{resource}:
     get:
       summary: config
@@ -135,3 +123,15 @@ paths:
       responses:
         '200':
           description: Returns something
+  /p2c:
+    get:
+      summary: Poll to Callback
+      description: >
+        This endpoint fetches latest controller state
+      produces:
+        - application/json
+      tags:
+        - Meta
+      responses:
+        '200':
+          description: Returns a JSON string

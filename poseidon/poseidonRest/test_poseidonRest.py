@@ -26,13 +26,11 @@ import poseidonRest
 import pytest
 from poseidonRest import PCAPResource
 from poseidonRest import Poll2Callback
-from poseidonRest import QuoteResource
 from poseidonRest import SwaggerAPI
 from poseidonRest import VersionResource
 
 application = falcon.API()
 application.add_route('/v1/pcap/{pcap_file}/{output_type}', PCAPResource())
-application.add_route('/v1/quote', QuoteResource())
 application.add_route('/v1/version', VersionResource())
 application.add_route('/v1/p2c', Poll2Callback())
 application.add_route('/swagger.yaml', SwaggerAPI())
@@ -71,23 +69,6 @@ def test_swagger_api_get(client):
         if line.startswith("  version: "):
             body_version = line.split("  version: ")[1]
     assert version.strip() == body_version.strip()
-
-
-def test_quote_resource_get(client):
-    """
-    Tests the on_get function of the QuoteResource class.
-    """
-    resp = client.get('/v1/quote')
-    assert resp.status == falcon.HTTP_OK
-    resp_type = None
-    resp_types = resp.headers['Content-Type'].split(';')
-    for r_type in resp_types:
-        if r_type.strip() == 'application/json':
-            resp_type = r_type
-    assert resp_type == 'application/json'
-    assert resp.json['author'] == 'Grace Hopper'
-    assert resp.json['quote'] == 'I\'ve always been more interested in ' + \
-        'the future than in the past.'
 
 
 def test_version_resource_get(client):

@@ -24,6 +24,9 @@ from os import environ
 from subprocess import call
 from subprocess import check_output
 
+from PoseidonPlanner.PoseidonPlanner import PoseidonPlanner
+from PoseidonSurvey.PoseidonSurvey import PoseidonSurvey
+
 
 class PoseidonMain:
 
@@ -33,3 +36,13 @@ class PoseidonMain:
 
     def goTime(self):
         return True
+
+
+def main():
+    pMain = PoseidonMain()
+    pPlanner = PoseidonPlanner()
+    pSurvey = PoseidonSurvey()
+    pass
+
+if __name__ == "main":
+    main()

@@ -126,23 +126,6 @@ class Poll2Callback:
         resp.body = json.dumps(self.retval)
 
 
-class QuoteResource:
-    """Serve up quotes"""
-
-    def __init__(self):
-        self.times = 0
-        self.quote = {
-            'quote': 'I\'ve always been more interested in the future' +
-            ' than in the past.',
-            'author': 'Grace Hopper'}
-
-    def on_get(self, req, resp):
-        """Handles GET requests"""
-        self.times = self.times + 1
-        self.quote['times'] = self.times
-        resp.body = json.dumps(self.quote)
-
-
 class PCAPResource:
     """Serve up parsed PCAP files"""
 
@@ -167,7 +150,6 @@ api = falcon.API(middleware=[cors.middleware])
 
 # make sure to update the yaml file when you add a new route
 # routes
-api.add_route('/v1/quote', QuoteResource())
 api.add_route('/v1/version', VersionResource())
 api.add_route('/v1/pcap/{pcap_file}/{output_type}', PCAPResource())
 
