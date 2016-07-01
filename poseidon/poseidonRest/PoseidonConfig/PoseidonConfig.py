@@ -45,6 +45,6 @@ class PoseidonConfig:
         """
         resp.content_type = 'text/text'
         try:
-            resp.body = self.config.get(section, field) # self.modName + ' found: %s' % (resource)
+            resp.body = self.config.get(section, field)
         except:  # pragma: no cover
             pass

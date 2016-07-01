@@ -17,7 +17,7 @@
 poseidonMain
 
 Created on 29 May 2016
-@author: dgrossman
+@author: dgrossman, lanhamt
 """
 import json
 from os import environ
@@ -28,7 +28,6 @@ from subprocess import check_output
 class PoseidonMain:
 
     def __init__(self):
-        print "poseidonMain"
         self.modName = 'PoseidonMain'
 
     def goTime(self):
