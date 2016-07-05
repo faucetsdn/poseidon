@@ -3,17 +3,21 @@ run: clean depends build docs notebooks
 		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
 		docker_url=http://$$docker_host; \
 	else \
-		echo "No DOCKER_HOST environment variable set."; \
-		exit 1; \
+		if [ ! -z "${DOCKERFORMAC}" ]; then \
+			docker_url=http://localhost; \
+		else \
+			echo "No DOCKER_HOST environment variable set."; \
+			exit 1; \
+		fi; \
 	fi; \
 	docker run --name poseidon-api -dP poseidon-api >/dev/null; \
 	port=$$(docker port poseidon-api 8080/tcp | sed 's/^.*://'); \
 	api_url=$$docker_url:$$port; \
-	docker run --name poseidon-rest -dP -e ALLOW_ORIGIN=$$api_url poseidon-rest >/dev/null; \
-	port=$$(docker port poseidon-rest 8000/tcp | sed 's/^.*://'); \
+	docker run --name poseidon-monitor -dP -e ALLOW_ORIGIN=$$api_url poseidon-monitor >/dev/null; \
+	port=$$(docker port poseidon-monitor 8000/tcp | sed 's/^.*://'); \
 	poseidon_url=$$docker_url:$$port; \
 	echo "The API can be accessed here: $$api_url"; \
-	echo "poseidon-rest can be accessed here: $$poseidon_url"; \
+	echo "poseidon-monitor can be accessed here: $$poseidon_url"; \
 	echo
 
 test: build
@@ -23,8 +27,12 @@ notebooks: clean-notebooks build
 		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
 		docker_url=http://$$docker_host; \
 	else \
-		echo "No DOCKER_HOST environment variable set."; \
-		exit 1; \
+		if [ ! -z "${DOCKERFORMAC}" ]; then \
+			docker_url=http://localhost; \
+		else \
+			echo "No DOCKER_HOST environment variable set."; \
+			exit 1; \
+		fi; \
 	fi; \
 	docker run --name poseidon-notebooks -w /notebooks -dP -v "$$(pwd):/notebooks" poseidon-notebooks jupyter notebook --ip=0.0.0.0 --no-browser >/dev/null; \
 	port=$$(docker port poseidon-notebooks 8888/tcp | sed 's/^.*://'); \
@@ -36,10 +44,14 @@ docs: clean-docs build
 		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
 		docker_url=http://$$docker_host; \
 	else \
-		echo "No DOCKER_HOST environment variable set."; \
-		exit 1; \
+		if [ ! -z "${DOCKERFORMAC}" ]; then \
+			docker_url=http://localhost; \
+		else \
+			echo "No DOCKER_HOST environment variable set."; \
+			exit 1; \
+		fi; \
 	fi; \
-	docker run --name poseidon-docs -w /poseidon/docs/_build/html -dP --entrypoint "python" poseidon-rest -m SimpleHTTPServer >/dev/null; \
+	docker run --name poseidon-docs -w /poseidon/docs/_build/html -dP --entrypoint "python" poseidon-monitor -m SimpleHTTPServer >/dev/null; \
 	port=$$(docker port poseidon-docs 8000/tcp | sed 's/^.*://'); \
 	doc_url=$$docker_url:$$port; \
 	echo; \
@@ -48,10 +60,10 @@ docs: clean-docs build
 build: depends
 	cd api && docker build -t poseidon-api .
 	docker build -t poseidon-notebooks -f Dockerfile.notebooks .
-	docker build -t poseidon-rest  -f Dockerfile.rest .
+	docker build -t poseidon-monitor  -f Dockerfile.monitor .
 
 clean-all: clean depends
-	@docker rmi poseidon-rest
+	@docker rmi poseidon-monitor
 	@docker rmi poseidon-api
 
 clean-docs: depends

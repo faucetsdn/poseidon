@@ -14,20 +14,28 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Created on 17 May 2016
+Test module for Action.py
+
+Created on 28 Jun 2016
 @author: dgrossman
 """
+import falcon
+import pytest
+from Action import Action
+
+application = falcon.API()
+application.add_route('/v1/Action/{resource}', Action())
 
 
-class PoseidonNbca:
-    """PoseidonNbca """
+# exposes the application for testing
+@pytest.fixture
+def app():
+    return application
 
-    def __init__(self):
-        self.modName = 'PoseidonNbca'
 
-    def on_get(self, req, resp, resource):
-        resp.content_type = 'text/text'
-        try:
-            resp.body = self.modName + ' found: %s' % (resource)
-        except:  # pragma: no cover
-            pass
+def test_pcap_resource_get(client):
+    """
+    Tests the Action class
+    """
+    resp = client.get('/v1/Action/someActionRequest')
+    assert resp.status == falcon.HTTP_OK

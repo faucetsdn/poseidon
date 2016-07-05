@@ -14,28 +14,20 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Test module for PoseidonNbca.py
-
-Created on 28 June 2016
+Created on 17 May 2016
 @author: dgrossman
 """
-import falcon
-import pytest
-from PoseidonNbca import PoseidonNbca
-
-application = falcon.API()
-application.add_route('/v1/Nbca/{resource}', PoseidonNbca())
 
 
-# exposes the application for testing
-@pytest.fixture
-def app():
-    return application
+class Config:
+    """Poseidon Config Rest Interface"""
 
+    def __init__(self):
+        self.modName = 'Config'
 
-def test_PoseidonNbca(client):
-    """
-    Tests the PoseidonHisotry class
-    """
-    resp = client.get('/v1/Nbca/someNbcaRequest')
-    assert resp.status == falcon.HTTP_OK
+    def on_get(self, req, resp, resource):
+        resp.content_type = 'text/text'
+        try:
+            resp.body = self.modName + ' found: %s' % (resource)
+        except:  # pragma: no cover
+            pass

@@ -26,11 +26,12 @@ from subprocess import call
 from subprocess import check_output
 
 import falcon
+from Action.Action import Action
+from Config.Config import Config
+from ControllerPolling.ControllerPolling import ControllerPolling
 from falcon_cors import CORS
-from PoseidonAction.PoseidonAction import PoseidonAction
-from PoseidonConfig.PoseidonConfig import PoseidonConfig
-from PoseidonHistory.PoseidonHistory import PoseidonHistory
-from PoseidonNbca.PoseidonNbca import PoseidonNbca
+from NodeHistory.NodeHistory import NodeHistory
+from NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import NorthBoundControllerAbstraction
 
 
 def get_allowed():
@@ -52,7 +53,7 @@ public_cors = CORS(allow_all_origins=True)
 
 class SwaggerAPI:
     """Serve up swagger API"""
-    swagger_file = 'poseidon/poseidonRest/swagger.yaml'
+    swagger_file = 'poseidon/poseidonMonitor/swagger.yaml'
 
     def on_get(self, req, resp):
         """Handles GET requests"""
@@ -105,27 +106,6 @@ class VersionResource:
         resp.body = json.dumps(version)
 
 
-class Poll2Callback:
-    """query the switch to determine if anything has changed,
-       this functionality is needed as we do not want to modify
-       a controller."""
-
-    def __init__(self):
-        self.retval = {}
-        self.times = 0
-
-    def on_get(self, req, resp):
-        """Haneles Get requests"""
-        # TODO make calls to get switch state,
-        # TODO compare to previous switch state
-        # TODO schedule something to occur for updated flows
-        self.retval['times'] = self.times
-        # TODO change response to something reflecting success of traversal
-        self.retval['resp'] = 'ok'
-        self.times = self.times + 1
-        resp.body = json.dumps(self.retval)
-
-
 class PCAPResource:
     """Serve up parsed PCAP files"""
 
@@ -154,14 +134,14 @@ api.add_route('/v1/version', VersionResource())
 api.add_route('/v1/pcap/{pcap_file}/{output_type}', PCAPResource())
 
 # access to the other components of PoseidonRest
-api.add_route('/v1/nbca/{resource}', PoseidonNbca())
-api.add_route('/v1/config/{resource}', PoseidonConfig())
-api.add_route('/v1/history{resource}', PoseidonHistory())
-api.add_route('/v1/action/{resource}', PoseidonAction())
+api.add_route('/v1/nbca/{resource}', NorthBoundControllerAbstraction())
+api.add_route('/v1/config/{resource}', Config())
+api.add_route('/v1/history{resource}', NodeHistory())
+api.add_route('/v1/action/{resource}', Action())
 
 # add the functionality for a remote call to trigger scanning
 # the internal switch state
-api.add_route('/v1/p2c', Poll2Callback())
+api.add_route('/v1/polling', ControllerPolling())
 
 api.add_route('/swagger.yaml', SwaggerAPI())
 

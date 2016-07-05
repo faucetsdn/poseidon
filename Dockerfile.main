@@ -28,17 +28,17 @@ RUN for file in $(find plugins/* -name "requirements.txt"); \
     done
 
 # build documentation
-RUN ln -s /poseidonWork/plugins /poseidonWork/poseidon/poseidonRest/plugins
+RUN ln -s /poseidonWork/plugins /poseidonWork/poseidon/poseidonMain/plugins
 RUN sphinx-apidoc -o docs poseidon -F --follow-links && cd docs && make html && make man
 
 ENV PYTHONUNBUFFERED 0
 EXPOSE 8000
 
 ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:8000"]
-CMD ["poseidon.poseidonRest.poseidonRest:api"]
+CMD ["poseidon.poseidonMain.poseidonMain:api"]
 
 # run linter
-#RUN pylint --disable=all --enable=classes --disable=W poseidonRest
+#RUN pylint --disable=all --enable=classes --disable=W poseidonMain
 
 # run tests
-RUN py.test -v --cov=poseidon/poseidonRest --cov=plugins --cov-report term-missing --cov-config .coveragerc
+RUN py.test -v --cov=poseidon/poseidonMain --cov=plugins --cov-report term-missing --cov-config .coveragerc

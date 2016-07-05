@@ -14,17 +14,17 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Test module for PoseidonAction.py
+Test module for NorthBoundControllerAbstraction.py
 
-Created on 28 Jun 2016
+Created on 28 June 2016
 @author: dgrossman
 """
 import falcon
 import pytest
-from PoseidonAction import PoseidonAction
+from NorthBoundControllerAbstraction import NorthBoundControllerAbstraction
 
 application = falcon.API()
-application.add_route('/v1/Action/{resource}', PoseidonAction())
+application.add_route('/v1/Nbca/{resource}', NorthBoundControllerAbstraction())
 
 
 # exposes the application for testing
@@ -33,9 +33,9 @@ def app():
     return application
 
 
-def test_pcap_resource_get(client):
+def test_NorthBoundControllerAbstraction(client):
     """
     Tests the PoseidonHisotry class
     """
-    resp = client.get('/v1/Action/someActionRequest')
+    resp = client.get('/v1/Nbca/someNbcaRequest')
     assert resp.status == falcon.HTTP_OK

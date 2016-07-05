@@ -123,7 +123,7 @@ paths:
       responses:
         '200':
           description: Returns something
-  /p2c:
+  /polling:
     get:
       summary: Poll to Callback
       description: >

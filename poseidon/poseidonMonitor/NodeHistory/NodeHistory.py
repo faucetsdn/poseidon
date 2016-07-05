@@ -14,28 +14,19 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Test module for PoseidonConfig.py
-
-Created on 28 June 2016
+Created on 17 May 2016
 @author: dgrossman
 """
-import falcon
-import pytest
-from PoseidonConfig import PoseidonConfig
-
-application = falcon.API()
-application.add_route('/v1/Config/{resource}', PoseidonConfig())
 
 
-# exposes the application for testing
-@pytest.fixture
-def app():
-    return application
+class NodeHistory:
 
+    def __init__(self):
+        self.modName = 'NodeHistory'
 
-def test_pcap_resource_get(client):
-    """
-    Tests the PoseidonHisotry class
-    """
-    resp = client.get('/v1/Config/someConfigRequest')
-    assert resp.status == falcon.HTTP_OK
+    def on_get(self, req, resp, resource):
+        resp.content_type = 'text/text'
+        try:
+            resp.body = self.modName + ' found: %s' % (resource)
+        except:  # pragma: no cover
+            pass

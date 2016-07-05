@@ -14,16 +14,17 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Test module for PoseidonHistory.py
-Created on 28 June 2016
+Test module for ControllerPolling.py
+
+Created on 5 July 2016
 @author: dgrossman
 """
 import falcon
 import pytest
-from PoseidonHistory import PoseidonHistory
+from ControllerPolling import ControllerPolling
 
 application = falcon.API()
-application.add_route('/v1/history/{resource}', PoseidonHistory())
+application.add_route('/v1/Polling', ControllerPolling())
 
 
 # exposes the application for testing
@@ -32,9 +33,15 @@ def app():
     return application
 
 
-def test_pcap_resource_get(client):
+def test_p2c(client):
     """
-    Tests the PoseidonHisotry class
+    Tests ControllerPolling
     """
-    resp = client.get('/v1/history/someHistoryRequest')
+    resp = client.get('/v1/Polling')
     assert resp.status == falcon.HTTP_OK
+    resp_type = None
+    resp_types = resp.headers['Content-Type'].split(';')
+    for r_type in resp_types:
+        if r_type.strip() == 'application/json':
+            resp_type = r_type
+    assert resp_type == 'application/json'

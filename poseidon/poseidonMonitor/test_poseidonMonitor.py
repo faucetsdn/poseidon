@@ -14,7 +14,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Test module for poseidonRest.py
+Test module for poseidonMonitor.py
 
 Created on 17 May 2016
 @author: Charlie Lewis
@@ -22,17 +22,15 @@ Created on 17 May 2016
 from os import environ
 
 import falcon
-import poseidonRest
+import poseidonMonitor
 import pytest
-from poseidonRest import PCAPResource
-from poseidonRest import Poll2Callback
-from poseidonRest import SwaggerAPI
-from poseidonRest import VersionResource
+from poseidonMonitor import PCAPResource
+from poseidonMonitor import SwaggerAPI
+from poseidonMonitor import VersionResource
 
 application = falcon.API()
 application.add_route('/v1/pcap/{pcap_file}/{output_type}', PCAPResource())
 application.add_route('/v1/version', VersionResource())
-application.add_route('/v1/p2c', Poll2Callback())
 application.add_route('/swagger.yaml', SwaggerAPI())
 
 
@@ -44,7 +42,7 @@ def app():
 
 def test_get_allowed():
     environ['ALLOW_ORIGIN'] = "http://test:80"
-    allow_origin, rest_url = poseidonRest.get_allowed()
+    allow_origin, rest_url = poseidonMonitor.get_allowed()
 
 
 def test_swagger_api_get(client):
@@ -87,20 +85,6 @@ def test_version_resource_get(client):
     with open('VERSION', 'r') as f:
         version = f.read()
     assert version.strip() == resp.json['version']
-
-
-def test_p2c(client):
-    """
-    Tests the on_get function of the VersionResource class.
-    """
-    resp = client.get('/v1/p2c')
-    assert resp.status == falcon.HTTP_OK
-    resp_type = None
-    resp_types = resp.headers['Content-Type'].split(';')
-    for r_type in resp_types:
-        if r_type.strip() == 'application/json':
-            resp_type = r_type
-    assert resp_type == 'application/json'
 
 
 def test_pcap_resource_get(client):

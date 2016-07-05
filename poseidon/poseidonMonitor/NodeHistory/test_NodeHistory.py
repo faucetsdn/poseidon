@@ -14,20 +14,27 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Created on 17 May 2016
+Test module for NodeHistory.py
+Created on 28 June 2016
 @author: dgrossman
 """
+import falcon
+import pytest
+from NodeHistory import NodeHistory
+
+application = falcon.API()
+application.add_route('/v1/history/{resource}', NodeHistory())
 
 
-class PoseidonAction:
-    """Poseidon Action Rest Interface"""
+# exposes the application for testing
+@pytest.fixture
+def app():
+    return application
 
-    def __init__(self):
-        self.modName = 'PoseidonAction'
 
-    def on_get(self, req, resp, resource):
-        resp.content_type = 'text/text'
-        try:
-            resp.body = self.modName + ' found: %s' % (resource)
-        except:  # pragma: no cover
-            resp.body = "failed"
+def test_pcap_resource_get(client):
+    """
+    Tests the Hisotry class
+    """
+    resp = client.get('/v1/history/someHistoryRequest')
+    assert resp.status == falcon.HTTP_OK
