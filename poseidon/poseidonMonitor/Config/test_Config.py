@@ -35,11 +35,7 @@ def app():
 
 def test_pcap_resource_get(client):
     """
-<<<<<<< HEAD:poseidon/poseidonMonitor/Config/test_Config.py
     Tests the Config class
-=======
-    Tests the PoseidonConfig class
->>>>>>> eb82051dbd7dca113f4b41cc8d0ca86000b05225:poseidon/poseidonRest/PoseidonConfig/test_PoseidonConfig.py
     """
     resp = client.get('/v1/Config/rest config test/key1')
     assert resp.status == falcon.HTTP_OK
