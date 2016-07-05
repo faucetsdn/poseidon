@@ -1,0 +1,11 @@
+[database]
+user = user
+password = pass
+
+[vcontrol]
+api_url = http://google.com
+
+[rest config test]
+key1 = trident
+key2 = theseus
+double key = atlas horses

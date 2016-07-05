@@ -71,22 +71,33 @@ def parse_header(line):
     ret_dict['raw_header'] = line
     ret_dict['date'] = date
     ret_dict['time'] = time
-    src_a = h[3].split(".", 3)
-    if "." in src_a[-1]:
-        port_a = src_a[-1].split('.')
-        ret_dict['src_port'] = port_a[-1]
-        ret_dict['src_ip'] = ".".join(h[3].split('.')[:-1])
-    else:
-        ret_dict['src_ip'] = h[3]
-    dest_a = h[5].split(".", 3)
-    if "." in dest_a[-1]:
-        port_a = dest_a[-1].split('.')
-        ret_dict['dest_port'] = port_a[-1].split(":")[0]
-        ret_dict['dest_ip'] = ".".join(h[5].split('.')[:-1])
-    else:
-        ret_dict['dest_ip'] = h[5].split(":")[0]
-    ret_dict['protocol'] = h[6]
     ret_dict['ethernet_type'] = h[2]
+
+    if h[2] == 'IP6':
+        """
+        Conditional formatting based on ethernet type.
+        IPv4 format: 0.0.0.0.port
+        IPv6 format: 0::0:0:0:0.port
+        """
+        ret_dict['src_port'] = h[3].split('.')[-1]
+        ret_dict['src_ip'] = h[3].split('.')[0]
+
+        ret_dict['dest_port'] = h[5].split('.')[-1].split(":")[0]
+        ret_dict['dest_ip'] = h[5].split('.')[0]
+    else:
+        if len(h[3].split('.')) > 4:
+            ret_dict['src_port'] = h[3].split('.')[-1]
+            ret_dict['src_ip'] = '.'.join(h[3].split('.')[:-1])
+        else:
+            ret_dict['src_ip'] = h[3]
+
+        if len(h[5].split('.')) > 4:
+            ret_dict['dest_port'] = h[5].split('.')[-1].split(":")[0]
+            ret_dict['dest_ip'] = '.'.join(h[5].split('.')[:-1])
+        else:
+            ret_dict['dest_ip'] = h[5].split(":")[0]
+
+    ret_dict['protocol'] = h[6]
 
     try:
         """
@@ -115,12 +126,6 @@ def parse_header(line):
         except:
             ret_dict['length'] = 0
 
-    if h[2] == 'IP':
-        # do something meaningful
-        pass
-    else:
-        pass
-        # do something else
     return ret_dict
 
 

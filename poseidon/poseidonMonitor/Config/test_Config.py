@@ -17,14 +17,14 @@
 Test module for Config.py
 
 Created on 28 June 2016
-@author: dgrossman
+@author: dgrossman, lanhamt
 """
 import falcon
 import pytest
 from Config import Config
 
 application = falcon.API()
-application.add_route('/v1/Config/{resource}', Config())
+application.add_route('/v1/Config/{section}/{field}', Config())
 
 
 # exposes the application for testing
@@ -35,7 +35,20 @@ def app():
 
 def test_pcap_resource_get(client):
     """
+<<<<<<< HEAD:poseidon/poseidonMonitor/Config/test_Config.py
     Tests the Config class
+=======
+    Tests the PoseidonConfig class
+>>>>>>> eb82051dbd7dca113f4b41cc8d0ca86000b05225:poseidon/poseidonRest/PoseidonConfig/test_PoseidonConfig.py
     """
-    resp = client.get('/v1/Config/someConfigRequest')
+    resp = client.get('/v1/Config/rest config test/key1')
     assert resp.status == falcon.HTTP_OK
+    assert resp.body == "trident"
+
+    resp = client.get('/v1/Config/rest config test/key2')
+    assert resp.status == falcon.HTTP_OK
+    assert resp.body == "theseus"
+
+    resp = client.get('/v1/Config/rest config test/double key')
+    assert resp.status == falcon.HTTP_OK
+    assert resp.body == "atlas horses"

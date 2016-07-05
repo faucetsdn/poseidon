@@ -14,9 +14,18 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
+Rest module for PoseidonConfig. Delivers
+settings from the poseidon configuration
+file.
+
 Created on 17 May 2016
-@author: dgrossman
+@author: dgrossman, lanhamt
 """
+import ConfigParser
+import os
+
+
+template_path = '/tmp/poseidon/templates'
 
 
 class Config:
@@ -24,10 +33,18 @@ class Config:
 
     def __init__(self):
         self.modName = 'Config'
+        self.config = ConfigParser.ConfigParser()
+        self.config.readfp(open(template_path + '/config.template'))
 
-    def on_get(self, req, resp, resource):
+    def on_get(self, req, resp, section, field):
+        """
+        Requests should have a section of the config
+        file and variable/field in that section to be
+        returned in the response body.
+        """
         resp.content_type = 'text/text'
         try:
-            resp.body = self.modName + ' found: %s' % (resource)
+            # self.modName + ' found: %s' % (resource)
+            resp.body = self.config.get(section, field)
         except:  # pragma: no cover
             pass
