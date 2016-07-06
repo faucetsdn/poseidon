@@ -25,12 +25,6 @@ import pytest
 from poseidonMain import PoseidonMain
 
 
-# exposes the application for testing
-@pytest.fixture
-def app():
-    return application
-
-
 def test_poseidonMain_goTime():
     """
     Tests goTime
