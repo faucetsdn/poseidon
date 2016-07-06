@@ -17,7 +17,7 @@
 Test module for poseidonMain.py
 
 Created on 29 May 2016
-@author: dgrossman
+@author: dgrossman, tlanham
 """
 from os import environ
 
