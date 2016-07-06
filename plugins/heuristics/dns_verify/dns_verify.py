@@ -36,7 +36,7 @@ import ast
 wait = True
 while wait:
     try:
-        connection = pika.BlockingConnection(pila.ConnectionParameters(host='rabbitmq'))
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq'))
         channel = connection.channel()
         channel.exchange_declare(exchange='topic_recs', type='topic')
         result = channel.queue_declare(exclusive=True)

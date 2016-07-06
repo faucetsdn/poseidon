@@ -17,12 +17,18 @@
 Test module for poseidonMain.py
 
 Created on 29 May 2016
-@author: dgrossman
+@author: dgrossman, tlanham
 """
 from os import environ
 
 import pytest
 from poseidonMain import PoseidonMain
+
+
+# exposes the application for testing
+@pytest.fixture
+def app():
+    return application
 
 
 def test_poseidonMain_goTime():
