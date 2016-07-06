@@ -21,21 +21,54 @@ Created on 28 June 2016
 """
 import falcon
 import pytest
-from Config import Config
+from Config import FullConfig
+from Config import SectionConfig
+from Config import FieldConfig
+
 
 application = falcon.API()
-application.add_route('/v1/Config/{section}/{field}', Config())
+application.add_route('/v1/Config', FullConfig())
+application.add_route('/v1/Config/{section}', SectionConfig())
+application.add_route('/v1/Config/{section}/{field}', FieldConfig())
 
 
-# exposes the application for testing
+# exposes the application for testingtt
 @pytest.fixture
 def app():
     return application
 
 
-def test_pcap_resource_get(client):
+def test_config_full_get(client):
     """
-    Tests the Config class
+    Tests retrieving the entire config file.
+    """
+    resp = client.get('/v1/Config')
+    assert resp.status == falcon.HTTP_OK
+    resp_type = None
+    resp_types = resp.headers['Content-Type'].split(';')
+    for r_type in resp_types:
+        if r_type.strip() == 'application/json':
+            resp_type = r_type
+    assert resp_type == 'application/json'
+    assert resp.body == '"[database]\\nuser = user\\npassword = pass\\n\\n[vcontrol]\\napi_url = http://google.com\\n\\n[rest config test]\\nkey1 = trident\\nkey2 = theseus\\ndouble key = atlas horses\\n"'
+
+
+def test_config_section_get(client):
+    """
+    Tests retrieving a section in the config file.
+    """
+    resp = client.get('/v1/Config/rest config test')
+    assert resp.status == falcon.HTTP_OK
+    assert resp.body == '[["key1", "trident"], ["key2", "theseus"], ["double key", "atlas horses"]]'
+
+    resp = client.get('/v1/Config/not_a_section')
+    assert resp.status == falcon.HTTP_OK
+    assert resp.body == "Failed to find section: not_a_section in config file."
+
+
+def test_config_field_get(client):
+    """
+    Tests retrieving field from a section in the config file.
     """
     resp = client.get('/v1/Config/rest config test/key1')
     assert resp.status == falcon.HTTP_OK
@@ -48,3 +81,7 @@ def test_pcap_resource_get(client):
     resp = client.get('/v1/Config/rest config test/double key')
     assert resp.status == falcon.HTTP_OK
     assert resp.body == "atlas horses"
+
+    resp = client.get('/v1/Config/bad_section/not_a_key')
+    assert resp.status == falcon.HTTP_OK
+    assert resp.body == "Failed to find field: not_a_key in section: bad_section."

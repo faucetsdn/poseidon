@@ -31,11 +31,11 @@ import ast
 import time
 from collections import defaultdict
 
-"""
+
 wait = True
 while wait:
     try:
-        connection = pika.BlockingConnection(pila.ConnectionParameters(host='rabbitmq'))
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
         channel = connection.channel()
         channel.exchange_declare(exchange='topic_recs', type='topic')
         result = channel.queue_declare(exclusive=True)
@@ -58,7 +58,7 @@ for binding_key in binding_keys:
                        routing_key=binding_key)
 
 print ' [*] Waiting for logs. To exit press CTRL+C'
-"""
+
 
 class MachineNode:
     """
@@ -194,7 +194,6 @@ def analyze_pcap(ch, method, properties, body, flow):
         # neither machine in network (list needs to be updated)
         pass
 
-"""
+
 channel.basic_consume(analyzePcap, queue=queue_name, no_ack=True)
 channel.start_consuming()
-"""
