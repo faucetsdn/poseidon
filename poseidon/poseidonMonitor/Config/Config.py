@@ -16,12 +16,11 @@
 """
 Rest module for PoseidonConfig. Delivers
 settings from the poseidon configuration
-file. 
+file.
 
 Created on 17 May 2016
 @author: dgrossman, lanhamt
 """
-
 import ConfigParser
 import os
 
@@ -29,11 +28,11 @@ import os
 template_path = '/tmp/poseidon/templates'
 
 
-class PoseidonConfig:
+class Config:
     """Poseidon Config Rest Interface"""
 
     def __init__(self):
-        self.modName = 'PoseidonConfig'
+        self.modName = 'Config'
         self.config = ConfigParser.ConfigParser()
         self.config.readfp(open(template_path + '/config.template'))
 
@@ -45,6 +44,7 @@ class PoseidonConfig:
         """
         resp.content_type = 'text/text'
         try:
-            resp.body = self.config.get(section, field) # self.modName + ' found: %s' % (resource)
+            # self.modName + ' found: %s' % (resource)
+            resp.body = self.config.get(section, field)
         except:  # pragma: no cover
             pass

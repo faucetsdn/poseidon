@@ -14,17 +14,17 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Test module for PoseidonNbca.py
+Test module for NorthBoundControllerAbstraction.py
 
 Created on 28 June 2016
 @author: dgrossman
 """
 import falcon
 import pytest
-from PoseidonNbca import PoseidonNbca
+from NorthBoundControllerAbstraction import NorthBoundControllerAbstraction
 
 application = falcon.API()
-application.add_route('/v1/Nbca/{resource}', PoseidonNbca())
+application.add_route('/v1/Nbca/{resource}', NorthBoundControllerAbstraction())
 
 
 # exposes the application for testing
@@ -33,7 +33,7 @@ def app():
     return application
 
 
-def test_PoseidonNbca(client):
+def test_NorthBoundControllerAbstraction(client):
     """
     Tests the PoseidonHisotry class
     """

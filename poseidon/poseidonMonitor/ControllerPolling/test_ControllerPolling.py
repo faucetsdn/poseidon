@@ -14,17 +14,17 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Test module for PoseidonConfig.py
+Test module for ControllerPolling.py
 
-Created on 28 June 2016
-@author: dgrossman, lanhamt
+Created on 5 July 2016
+@author: dgrossman
 """
 import falcon
 import pytest
-from PoseidonConfig import PoseidonConfig
+from ControllerPolling import ControllerPolling
 
 application = falcon.API()
-application.add_route('/v1/Config/{section}/{field}', PoseidonConfig())
+application.add_route('/v1/Polling', ControllerPolling())
 
 
 # exposes the application for testing
@@ -33,18 +33,15 @@ def app():
     return application
 
 
-def test_pcap_resource_get(client):
+def test_p2c(client):
     """
-    Tests the PoseidonConfig class
+    Tests ControllerPolling
     """
-    resp = client.get('/v1/Config/rest config test/key1')
+    resp = client.get('/v1/Polling')
     assert resp.status == falcon.HTTP_OK
-    assert resp.body == "trident"
-
-    resp = client.get('/v1/Config/rest config test/key2')
-    assert resp.status == falcon.HTTP_OK
-    assert resp.body == "theseus"
-
-    resp = client.get('/v1/Config/rest config test/double key')
-    assert resp.status == falcon.HTTP_OK
-    assert resp.body == "atlas horses"
+    resp_type = None
+    resp_types = resp.headers['Content-Type'].split(';')
+    for r_type in resp_types:
+        if r_type.strip() == 'application/json':
+            resp_type = r_type
+    assert resp_type == 'application/json'

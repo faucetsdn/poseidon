@@ -14,16 +14,16 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Test module for PoseidonHistory.py
+Test module for NodeHistory.py
 Created on 28 June 2016
 @author: dgrossman
 """
 import falcon
 import pytest
-from PoseidonHistory import PoseidonHistory
+from NodeHistory import NodeHistory
 
 application = falcon.API()
-application.add_route('/v1/history/{resource}', PoseidonHistory())
+application.add_route('/v1/history/{resource}', NodeHistory())
 
 
 # exposes the application for testing
@@ -34,7 +34,7 @@ def app():
 
 def test_pcap_resource_get(client):
     """
-    Tests the PoseidonHisotry class
+    Tests the Hisotry class
     """
     resp = client.get('/v1/history/someHistoryRequest')
     assert resp.status == falcon.HTTP_OK
