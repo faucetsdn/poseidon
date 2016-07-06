@@ -93,7 +93,7 @@ paths:
       produces:
         - application/json
       tags:
-        - Meta
+        - Data
       responses:
         '200':
           description: Returns a JSON string of the config file
@@ -112,7 +112,7 @@ paths:
       produces:
         - application/json
       tags:
-        - Meta
+        - Data
       responses:
         '200':
           description: Returns a JSON string of a section of the config file
