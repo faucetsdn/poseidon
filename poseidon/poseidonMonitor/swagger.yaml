@@ -103,7 +103,7 @@ paths:
       description: >
         This endpoint talks to the config
       parameters:
-        - in: path
+        - in: section
           name: section
           description: section to retrieve from config file
           required: true
@@ -122,13 +122,13 @@ paths:
       description: >
         This endpoint talks to the config
       parameters:
-        - in: path
+        - in: section
           name: section
           description: section of key to retrieve from config file
           required: true
           type: string
           format: string
-        - in: path
+        - in: field
           name: field
           description: field of desired value from config file
           required: true

@@ -32,7 +32,7 @@ application.add_route('/v1/Config/{section}', SectionConfig())
 application.add_route('/v1/Config/{section}/{field}', FieldConfig())
 
 
-# exposes the application for testingt
+# exposes the application for testing
 @pytest.fixture
 def app():
     return application
