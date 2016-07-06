@@ -32,6 +32,7 @@ import time
 from collections import defaultdict
 
 
+"""
 wait = True
 while wait:
     try:
@@ -58,6 +59,7 @@ for binding_key in binding_keys:
                        routing_key=binding_key)
 
 print ' [*] Waiting for logs. To exit press CTRL+C'
+"""
 
 
 class MachineNode:
@@ -195,5 +197,7 @@ def analyze_pcap(ch, method, properties, body, flow):
         pass
 
 
+"""
 channel.basic_consume(analyzePcap, queue=queue_name, no_ack=True)
 channel.start_consuming()
+"""
