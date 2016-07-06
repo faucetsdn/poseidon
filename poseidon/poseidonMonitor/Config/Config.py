@@ -30,6 +30,10 @@ config_template_path = '/tmp/poseidon/templates/config.template'
 
 
 class FullConfig:
+    """
+    Provides the full configuration file in json dict string
+    with sections as keys and their key-value pairs as values.
+    """
     def __init__(self):
         self.modName = 'FullConfig'
         self.config = ConfigParser.ConfigParser()
@@ -37,13 +41,20 @@ class FullConfig:
 
     def on_get(self, req, resp):
         try:
-            file = open(config_template_path, 'r')
-            resp.body = json.dumps(file.read())
+            ret = {}
+            for sec in self.config.sections():
+                ret[sec] = self.config.items(sec)
+            resp.body = json.dumps(ret)
         except:
             resp.body = json.dumps("Failed to open config file.")
 
 
 class SectionConfig:
+    """
+    Given a section name in the config file,
+    returns a json list string of all the key-value
+    pairs under that section.
+    """
     def __init__(self):
         self.modName = 'SectionConfig'
         self.config = ConfigParser.ConfigParser()
@@ -58,7 +69,10 @@ class SectionConfig:
 
 
 class FieldConfig:
-    """Poseidon Config Rest Interface"""
+    """
+    Given a section and corresponding key in the config
+    file, returns the value as a string.
+    """
     def __init__(self):
         self.modName = 'FieldConfig'
         self.config = ConfigParser.ConfigParser()

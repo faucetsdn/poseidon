@@ -50,7 +50,7 @@ def test_config_full_get(client):
         if r_type.strip() == 'application/json':
             resp_type = r_type
     assert resp_type == 'application/json'
-    assert resp.body == '"[database]\\nuser = user\\npassword = pass\\n\\n[vcontrol]\\napi_url = http://google.com\\n\\n[rest config test]\\nkey1 = trident\\nkey2 = theseus\\ndouble key = atlas horses\\n"'
+    assert resp.body == '{"rest config test": [["key1", "trident"], ["key2", "theseus"], ["double key", "atlas horses"]], "vcontrol": [["api_url", "http://www.lab41.org"]], "database": [["user", "user"], ["password", "pass"]]}'
 
 
 def test_config_section_get(client):

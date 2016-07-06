@@ -3,7 +3,7 @@ user = user
 password = pass
 
 [vcontrol]
-api_url = http://google.com
+api_url = http://www.lab41.org
 
 [rest config test]
 key1 = trident
