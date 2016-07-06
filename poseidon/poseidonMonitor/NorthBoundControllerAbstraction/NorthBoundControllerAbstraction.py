@@ -14,34 +14,20 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-poseidonMain
-
-Created on 29 May 2016
-@author: dgrossman, lanhamt
+Created on 17 May 2016
+@author: dgrossman
 """
-import json
-from os import environ
-from subprocess import call
-from subprocess import check_output
-
-from PoseidonPlanner.PoseidonPlanner import PoseidonPlanner
-from PoseidonSurvey.PoseidonSurvey import PoseidonSurvey
 
 
-class PoseidonMain:
+class NorthBoundControllerAbstraction:
+    """NorthBoundControllerAbstraction """
 
     def __init__(self):
-        self.modName = 'PoseidonMain'
+        self.modName = 'NorthBoundControllerAbstraction'
 
-    def goTime(self):
-        return True
-
-
-def main():
-    pMain = PoseidonMain()
-    pPlanner = PoseidonPlanner()
-    pSurvey = PoseidonSurvey()
-    pass
-
-if __name__ == "main":
-    main()
+    def on_get(self, req, resp, resource):
+        resp.content_type = 'text/text'
+        try:
+            resp.body = self.modName + ' found: %s' % (resource)
+        except:  # pragma: no cover
+            pass

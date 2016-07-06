@@ -19,15 +19,15 @@ Created on 17 May 2016
 """
 
 
-class PoseidonNbca:
-    """PoseidonNbca """
+class Action:
+    """Poseidon Action Rest Interface"""
 
     def __init__(self):
-        self.modName = 'PoseidonNbca'
+        self.modName = 'Action'
 
     def on_get(self, req, resp, resource):
         resp.content_type = 'text/text'
         try:
             resp.body = self.modName + ' found: %s' % (resource)
         except:  # pragma: no cover
-            pass
+            resp.body = "failed"
