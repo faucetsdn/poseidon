@@ -139,9 +139,9 @@ api.add_route('/v1/pcap/{pcap_file}/{output_type}', PCAPResource())
 api.add_route('/v1/nbca/{resource}', NorthBoundControllerAbstraction())
 
 # config routes
-api.add_route('/v1/Config', FullConfig())
-api.add_route('/v1/Config/{section}', SectionConfig())
-api.add_route('/v1/Config/{section}/{field}', FieldConfig())
+api.add_route('/v1/config', FullConfig())
+api.add_route('/v1/config/{section}', SectionConfig())
+api.add_route('/v1/config/{section}/{field}', FieldConfig())
 
 api.add_route('/v1/history{resource}', NodeHistory())
 api.add_route('/v1/action/{resource}', Action())

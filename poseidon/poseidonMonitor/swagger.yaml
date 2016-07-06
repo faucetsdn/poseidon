@@ -89,7 +89,7 @@ paths:
     get:
       summary: Config
       description: >
-        This endpoint talks to the config.
+        This endpoint returns the configuration file.
       produces:
         - application/json
       tags:
