@@ -40,7 +40,7 @@ class FullConfig:
             file = open(config_template_path, 'r')
             resp.body = json.dumps(file.read())
         except:
-            resp.body = "Failed to open config file."
+            resp.body = json.dumps("Failed to open config file.")
 
 
 class SectionConfig:
