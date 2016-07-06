@@ -4,7 +4,10 @@
     -   id: trailing-whitespace
     -   id: end-of-file-fixer
     -   id: autopep8-wrapper
+    -   id: check-case-conflict
     -   id: check-json
+    -   id: pretty-format-json
+    -   id: double-quote-string-fixer
     -   id: check-yaml
 -   repo: git@github.com:asottile/reorder_python_imports
     sha: 3d86483455ab5bd06cc1069fdd5ac57be5463f10
