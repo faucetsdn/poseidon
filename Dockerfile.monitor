@@ -27,10 +27,6 @@ RUN for file in $(find plugins/* -name "requirements.txt"); \
         pip install -r $file; \
     done
 
-# copy templates to tmp
-RUN mkdir -p /tmp/poseidon/templates
-RUN cp -r /poseidonWork/templates /tmp/poseidon/
-
 # build documentation
 RUN ln -s /poseidonWork/plugins /poseidonWork/poseidon/poseidonMonitor/plugins
 RUN sphinx-apidoc -o docs poseidon -F --follow-links && cd docs && make html && make man

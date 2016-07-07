@@ -1,9 +1,15 @@
 [database]
 user = user
-password = pass
+password = SECRET
 
 [vcontrol]
 api_url = http://www.lab41.org
+
+[main]
+name = resource
+
+[monitor]
+scan_frequency = 5
 
 [rest config test]
 key1 = trident

@@ -58,6 +58,7 @@ docs: clean-docs build
 	echo "The docs can be accessed here: $$doc_url"
 
 build: depends
+	# docker-compose build 
 	cd api && docker build -t poseidon-api .
 	docker build -t poseidon-notebooks -f Dockerfile.notebooks .
 	docker build -t poseidon-monitor  -f Dockerfile.monitor .

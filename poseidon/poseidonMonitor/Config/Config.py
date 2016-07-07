@@ -26,7 +26,8 @@ import os
 import json
 
 
-config_template_path = '/tmp/poseidon/templates/config.template'
+# poseidonWork created in docker containers
+config_template_path = '/poseidonWork/templates/config.template'
 
 
 class FullConfig:
