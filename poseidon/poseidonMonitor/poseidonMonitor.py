@@ -27,9 +27,9 @@ from subprocess import check_output
 
 import falcon
 from Action.Action import Action
+from Config.Config import FieldConfig
 from Config.Config import FullConfig
 from Config.Config import SectionConfig
-from Config.Config import FieldConfig
 from ControllerPolling.ControllerPolling import ControllerPolling
 from falcon_cors import CORS
 from NodeHistory.NodeHistory import NodeHistory
@@ -37,15 +37,15 @@ from NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import Nort
 
 
 def get_allowed():
-    rest_url = ""
-    if "ALLOW_ORIGIN" in environ:
-        allow_origin = environ["ALLOW_ORIGIN"]
-        host_port = allow_origin.split("//")[1]
-        host = host_port.split(":")[0]
-        port = str(int(host_port.split(":")[1]) + 1)
-        rest_url = host + ":" + port
+    rest_url = ''
+    if 'ALLOW_ORIGIN' in environ:
+        allow_origin = environ['ALLOW_ORIGIN']
+        host_port = allow_origin.split('//')[1]
+        host = host_port.split(':')[0]
+        port = str(int(host_port.split(':')[1]) + 1)
+        rest_url = host + ':' + port
     else:
-        allow_origin = ""
+        allow_origin = ''
     return allow_origin, rest_url
 
 allow_origin, rest_url = get_allowed()
@@ -64,14 +64,14 @@ class SwaggerAPI:
             # update mydomain with current running host and port
             with open(self.swagger_file, 'r') as f:
                 filedata = f.read()
-            newdata = filedata.replace("mydomain", rest_url)
+            newdata = filedata.replace('mydomain', rest_url)
             with open(self.swagger_file, 'w') as f:
                 f.write(newdata)
 
             with open(self.swagger_file, 'r') as f:
                 resp.body = f.read()
         except:  # pragma: no cover
-            resp.body = ""
+            resp.body = ''
 
 
 class VersionResource:
@@ -89,19 +89,19 @@ class VersionResource:
             pass
         # get commit id (git commit ID)
         try:
-            cmd = "git -C poseidon rev-parse HEAD"
+            cmd = 'git -C poseidon rev-parse HEAD'
             commit_id = check_output(cmd, shell=True)
-            cmd = "git -C poseidon diff-index --quiet HEAD --"
+            cmd = 'git -C poseidon diff-index --quiet HEAD --'
             dirty = call(cmd, shell=True)
             if dirty != 0:
-                version['commit'] = commit_id.strip() + "-dirty"
+                version['commit'] = commit_id.strip() + '-dirty'
             else:
                 version['commit'] = commit_id.strip()
         except:  # pragma: no cover
             pass
         # get runtime id (docker container ID)
         try:
-            if "HOSTNAME" in environ:
+            if 'HOSTNAME' in environ:
                 version['runtime'] = environ['HOSTNAME']
         except:  # pragma: no cover
             pass
@@ -114,17 +114,17 @@ class PCAPResource:
     def on_get(self, req, resp, pcap_file, output_type):
         resp.content_type = 'text/text'
         try:
-            if output_type == "pcap" and pcap_file.split(".")[1] == "pcap":
+            if output_type == 'pcap' and pcap_file.split('.')[1] == 'pcap':
                 resp.body = check_output(
-                    ["/usr/sbin/tcpdump",
-                     "-r",
-                     "/tmp/" + pcap_file,
-                     "-ne",
-                     "-tttt"])
+                    ['/usr/sbin/tcpdump',
+                     '-r',
+                     '/tmp/' + pcap_file,
+                     '-ne',
+                     '-tttt'])
             else:
-                resp.body = "not a pcap"
+                resp.body = 'not a pcap'
         except:  # pragma: no cover
-            resp.body = "failed"
+            resp.body = 'failed'
 
 
 # create callable WSGI app instance for gunicorn
@@ -152,4 +152,4 @@ api.add_route('/v1/polling', ControllerPolling())
 
 api.add_route('/swagger.yaml', SwaggerAPI())
 
-print "done"
+print 'done'
