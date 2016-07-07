@@ -20,8 +20,8 @@ Created on 28 June 2016
 @author: dgrossman
 """
 import pytest
-from PoseidonPlanner import PoseidonPlanner
+from Scheduler import Scheduler
 
 
-def test_PoseidonPlanner():
-    PoseidonPlanner()
+def test_Scheduler():
+    Scheduler()

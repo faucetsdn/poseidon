@@ -14,14 +14,14 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Created on 17 May 2016
+Test module for Onos.py
+
+Created on 28 June 2016
 @author: dgrossman
 """
+import pytest
+from Investigator import Investigator
 
 
-class PoseidonPlanner:
-
-    def __init__(self):
-        self.modName = 'PoseidonPlanner'
-
-    pass
+def test_Investigator():
+    Investigator()

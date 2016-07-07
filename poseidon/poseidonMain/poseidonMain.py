@@ -24,8 +24,8 @@ from os import environ
 from subprocess import call
 from subprocess import check_output
 
-from PoseidonPlanner.PoseidonPlanner import PoseidonPlanner
-from PoseidonSurvey.PoseidonSurvey import PoseidonSurvey
+from Investigator.Investigator import Investigator
+from Scheduler.Scheduler import Scheduler
 
 
 class PoseidonMain:
@@ -34,14 +34,15 @@ class PoseidonMain:
         self.modName = 'PoseidonMain'
 
     def goTime(self):
+        main()
         return True
 
 
 def main():
     pMain = PoseidonMain()
-    pPlanner = PoseidonPlanner()
-    pSurvey = PoseidonSurvey()
-    pass
+    pPlanner = Scheduler()
+    pSurvey = Investigator()
+    return True
 
-if __name__ == "main":
+if __name__ == 'main':  # pragma: no cover
     main()

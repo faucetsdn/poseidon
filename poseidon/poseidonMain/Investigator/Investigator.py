@@ -19,9 +19,9 @@ Created on 17 May 2016
 """
 
 
-class PoseidonSurvey:
+class Investigator:
 
     def __init__(self):
-        self.modName = 'PoseidonSurvey'
+        self.modName = 'Investigator'
 
     pass
