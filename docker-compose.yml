@@ -1,0 +1,29 @@
+version: '2'
+
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - 8080
+  notebooks:
+    build:
+      context: .
+      dockerfile: Dockerfile.notebooks
+  monitor:
+    build:
+      context: .
+      dockerfile: Dockerfile.monitor
+    ports:
+      - 8000
+  main:
+    build:
+      context: .
+      dockerfile: Dockerfile.main
+    ports:
+      - 8000
+  storage:
+    build:
+      context: .
+      dockerfile: Dockerfile.storage

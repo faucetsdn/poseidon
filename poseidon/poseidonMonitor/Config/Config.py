@@ -26,7 +26,8 @@ import os
 import json
 
 
-config_template_path = '/tmp/poseidon/templates/config.template'
+# poseidonWork created in docker containers
+config_template_path = '/poseidonWork/templates/config.template'
 
 
 class FullConfig:
@@ -41,7 +42,7 @@ class FullConfig:
 
     def on_get(self, req, resp):
         try:
-            ret = {}
+            ret = {} 
             for sec in self.config.sections():
                 ret[sec] = self.config.items(sec)
             resp.body = json.dumps(ret)
