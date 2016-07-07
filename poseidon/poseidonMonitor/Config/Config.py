@@ -42,7 +42,7 @@ class FullConfig:
 
     def on_get(self, req, resp):
         try:
-            ret = {} 
+            ret = {}
             for sec in self.config.sections():
                 ret[sec] = self.config.items(sec)
             resp.body = json.dumps(ret)
