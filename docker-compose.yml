@@ -1,0 +1,35 @@
+version: '2'
+
+services:
+  api:
+    image: poseidon-api
+    container_name: poseidon-api
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - 8080
+  monitor:
+    environment:
+      - ALLOW_ORIGIN="$api_url"
+    image: poseidon-monitor
+    container_name: poseidon-monitor
+    build:
+      context: .
+      dockerfile: Dockerfile.monitor
+    ports:
+      - 8000
+  main:
+    image: poseidon
+    container_name: poseidon
+    build:
+      context: .
+      dockerfile: Dockerfile.main
+    ports:
+      - 8000
+  storage:
+    image: poseidon-storage
+    container_name: poseidon-storage
+    build:
+      context: .
+      dockerfile: Dockerfile.storage
