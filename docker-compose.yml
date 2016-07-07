@@ -9,12 +9,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - 8080
-#  notebooks:
-#    image: poseidon-notebooks
-#    container_name: poseidon-notebooks
-#    build:
-#      context: .
-#      dockerfile: Dockerfile.notebooks
   monitor:
     environment:
       - ALLOW_ORIGIN="$api_url"
