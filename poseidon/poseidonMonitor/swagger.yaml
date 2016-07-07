@@ -85,6 +85,37 @@ paths:
       responses:
         '200':
           description: Returns something
+  /config:
+    get:
+      summary: Config
+      description: >
+        This endpoint returns the configuration file.
+      produces:
+        - application/json
+      tags:
+        - Data
+      responses:
+        '200':
+          description: Returns a JSON string of the config file
+  /config/{section}:
+    get:
+      summary: Config
+      description: >
+        This endpoint talks to the config
+      parameters:
+        - in: path
+          name: section
+          description: section to retrieve from config file
+          required: true
+          type: string
+          format: string
+      produces:
+        - application/json
+      tags:
+        - Data
+      responses:
+        '200':
+          description: Returns a JSON string of a section of the config file
   /config/{section}/{field}:
     get:
       summary: config
@@ -93,13 +124,13 @@ paths:
       parameters:
         - in: path
           name: section
-          description: section asked about
+          description: section of key to retrieve from config file
           required: true
           type: string
           format: string
         - in: path
           name: field
-          description: field
+          description: field of desired value from config file
           required: true
           type: string
           format: string
@@ -109,7 +140,7 @@ paths:
         - Data
       responses:
         '200':
-          description: Returns something
+          description: Returns value of field from config file
   /history/{resource}:
     get:
       summary: history

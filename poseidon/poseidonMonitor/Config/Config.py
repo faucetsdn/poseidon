@@ -23,18 +23,60 @@ Created on 17 May 2016
 """
 import ConfigParser
 import os
+import json
 
 
-template_path = '/tmp/poseidon/templates'
+config_template_path = '/tmp/poseidon/templates/config.template'
 
 
-class Config:
-    """Poseidon Config Rest Interface"""
-
+class FullConfig:
+    """
+    Provides the full configuration file in json dict string
+    with sections as keys and their key-value pairs as values.
+    """
     def __init__(self):
-        self.modName = 'Config'
+        self.modName = 'FullConfig'
         self.config = ConfigParser.ConfigParser()
-        self.config.readfp(open(template_path + '/config.template'))
+        self.config.readfp(open(config_template_path))
+
+    def on_get(self, req, resp):
+        try:
+            ret = {}
+            for sec in self.config.sections():
+                ret[sec] = self.config.items(sec)
+            resp.body = json.dumps(ret)
+        except:
+            resp.body = json.dumps("Failed to open config file.")
+
+
+class SectionConfig:
+    """
+    Given a section name in the config file,
+    returns a json list string of all the key-value
+    pairs under that section.
+    """
+    def __init__(self):
+        self.modName = 'SectionConfig'
+        self.config = ConfigParser.ConfigParser()
+        self.config.readfp(open(config_template_path))
+
+    def on_get(self, req, resp, section):
+        try:
+            ret_sec = self.config.items(section)
+        except:
+            ret_sec = "Failed to find section: " + section + " in config file."
+        resp.body = json.dumps(ret_sec)
+
+
+class FieldConfig:
+    """
+    Given a section and corresponding key in the config
+    file, returns the value as a string.
+    """
+    def __init__(self):
+        self.modName = 'FieldConfig'
+        self.config = ConfigParser.ConfigParser()
+        self.config.readfp(open(config_template_path))
 
     def on_get(self, req, resp, section, field):
         """
@@ -44,7 +86,6 @@ class Config:
         """
         resp.content_type = 'text/text'
         try:
-            # self.modName + ' found: %s' % (resource)
             resp.body = self.config.get(section, field)
-        except:  # pragma: no cover
-            pass
+        except:
+            resp.body = "Failed to find field: " + field + " in section: " + section + "."

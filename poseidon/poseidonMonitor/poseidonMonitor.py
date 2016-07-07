@@ -27,7 +27,9 @@ from subprocess import check_output
 
 import falcon
 from Action.Action import Action
-from Config.Config import Config
+from Config.Config import FieldConfig
+from Config.Config import FullConfig
+from Config.Config import SectionConfig
 from ControllerPolling.ControllerPolling import ControllerPolling
 from falcon_cors import CORS
 from NodeHistory.NodeHistory import NodeHistory
@@ -135,7 +137,12 @@ api.add_route('/v1/pcap/{pcap_file}/{output_type}', PCAPResource())
 
 # access to the other components of PoseidonRest
 api.add_route('/v1/nbca/{resource}', NorthBoundControllerAbstraction())
-api.add_route('/v1/config/{section}/{field}', Config())
+
+# config routes
+api.add_route('/v1/config', FullConfig())
+api.add_route('/v1/config/{section}', SectionConfig())
+api.add_route('/v1/config/{section}/{field}', FieldConfig())
+
 api.add_route('/v1/history{resource}', NodeHistory())
 api.add_route('/v1/action/{resource}', Action())
 
