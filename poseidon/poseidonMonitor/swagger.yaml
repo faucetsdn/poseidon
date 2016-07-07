@@ -85,15 +85,21 @@ paths:
       responses:
         '200':
           description: Returns something
-  /config/{resource}:
+  /config/{section}/{field}:
     get:
       summary: config
       description: >
         This endpoint talks to the config
       parameters:
         - in: path
-          name: resource
-          description: information to pass to the config
+          name: section
+          description: section asked about
+          required: true
+          type: string
+          format: string
+        - in: path
+          name: field
+          description: field
           required: true
           type: string
           format: string
