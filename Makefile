@@ -62,10 +62,18 @@ build: depends
 	cd api && docker build -t poseidon-api .
 	docker build -t poseidon-notebooks -f Dockerfile.notebooks .
 	docker build -t poseidon-monitor  -f Dockerfile.monitor .
+	docker build -t poseidon-main  -f Dockerfile.main .
+	docker build -t poseidon-storage  -f Dockerfile.storage .
 
 clean-all: clean depends
 	@docker rmi poseidon-monitor
 	@docker rmi poseidon-api
+
+clean-main: depends
+	@docker ps -aqf "name=poseidon-main" | xargs docker rm -f
+
+clean-main: depends
+	@docker ps -aqf "name=poseidon-main" | xargs docker rm -f
 
 clean-docs: depends
 	@docker ps -aqf "name=poseidon-docs" | xargs docker rm -f
