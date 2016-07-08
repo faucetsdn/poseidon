@@ -22,6 +22,7 @@ Created on 29 May 2016
 from os import environ
 
 import pytest
+from poseidonMain import main
 from poseidonMain import PoseidonMain
 
 
@@ -33,3 +34,8 @@ def test_poseidonMain_goTime():
     a = PoseidonMain()
     b = a.goTime()
     assert b
+
+
+def test_poseidonMain_main():
+    a = main()
+    assert a

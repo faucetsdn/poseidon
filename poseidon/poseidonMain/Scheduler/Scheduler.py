@@ -14,14 +14,14 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Test module for Onos.py
-
-Created on 28 June 2016
+Created on 17 May 2016
 @author: dgrossman
 """
-import pytest
-from PoseidonSurvey import PoseidonSurvey
 
 
-def test_PoseidonSurvey():
-    PoseidonSurvey()
+class Scheduler:
+
+    def __init__(self):
+        self.modName = 'Scheduler'
+
+    pass
