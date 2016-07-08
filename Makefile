@@ -24,7 +24,7 @@ test: build
 
 main: 
 	docker build -t poseidon-main -f Dockerfile.main .
-	docker run --name poseidon-main -it posidon-main 
+	docker run --name poseidon-main -it poseidon-main 
 
 notebooks: clean-notebooks build
 	@ if [ ! -z "${DOCKER_HOST}" ]; then \

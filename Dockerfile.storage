@@ -27,6 +27,17 @@ RUN for file in $(find plugins/* -name "requirements.txt"); \
         pip install -r $file; \
     done
 
+# get mongodb public key for download
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+RUN echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-3.0.list
+
+# install mongodb
+RUN apt-get update && apt-get install -y mongodb-org
+
+RUN mkdir -p /data/db
+VOLUME /data:/data/
+EXPOSE 27017
+
 # build documentation
 RUN ln -s /poseidonWork/plugins /poseidonWork/poseidon/poseidonStorage/plugins
 RUN sphinx-apidoc -o docs poseidon -F --follow-links && cd docs && make html && make man
@@ -34,8 +45,7 @@ RUN sphinx-apidoc -o docs poseidon -F --follow-links && cd docs && make html && 
 ENV PYTHONUNBUFFERED 0
 EXPOSE 8000
 
-ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:8000"]
-CMD ["poseidon.poseidonStorage.poseidonStorage:api"]
+CMD ["mongod"]
 
 # run linter
 #RUN pylint --disable=all --enable=classes --disable=W poseidonStorage
