@@ -14,14 +14,16 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Test module for Onos.py
+Test module for poseidonStorage
 
 Created on 28 June 2016
-@author: dgrossman
+@author: dgrossman, lanhamt
 """
 import pytest
 from poseidonStorage import poseidonStorage
 
 
 def test_poseidonStorage():
-    poseidonStorage()
+    ps = poseidonStorage()
+    assert ps.client.address == ('localhost', 27017)
+    
