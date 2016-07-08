@@ -37,12 +37,12 @@ from NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import Nort
 
 
 def get_allowed():
-    rest_url = ''
+    rest_url = 'localhost:8555'
     if 'ALLOW_ORIGIN' in environ:
         allow_origin = environ['ALLOW_ORIGIN']
         host_port = allow_origin.split('//')[1]
         host = host_port.split(':')[0]
-        port = str(int(host_port.split(':')[1]) + 1)
+        port = str(int(host_port.split(':')[1]))
         rest_url = host + ':' + port
     else:
         allow_origin = ''

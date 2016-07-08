@@ -1,25 +1,21 @@
-run: clean depends build docs notebooks main monitor
+run: clean depends build docs notebooks main api monitor storage
 
-run2: clean depends build docs notebooks
+api: clean-api build-api
 	@ if [ ! -z "${DOCKER_HOST}" ]; then \
 		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
 		docker_url=http://$$docker_host; \
 	else \
 		if [ ! -z "${DOCKERFORMAC}" ]; then \
-			docker_url=http://localhost; \
+			docker_url=http://127.0.0.1; \
 		else \
 			echo "No DOCKER_HOST environment variable set."; \
 			exit 1; \
 		fi; \
 	fi; \
-	docker run --name poseidon-api -dP poseidon-api >/dev/null; \
-	port=$$(docker port poseidon-api 8080/tcp | sed 's/^.*://'); \
-	api_url=$$docker_url:$$port; \
-	docker run --name poseidon-monitor -dP -e ALLOW_ORIGIN=$$api_url poseidon-monitor >/dev/null; \
-	port=$$(docker port poseidon-monitor 8000/tcp | sed 's/^.*://'); \
-	poseidon_url=$$docker_url:$$port; \
+	docker run --name poseidon-api -dP poseidon-api ; \
+	portApi=$$(docker port poseidon-api 8080/tcp | sed 's/^.*://'); \
+	api_url=$$docker_url:$$portApi; \
 	echo "The API can be accessed here: $$api_url"; \
-	echo "poseidon-monitor can be accessed here: $$poseidon_url"; \
 	echo
 
 test: build
@@ -44,7 +40,7 @@ storage: clean-storage
 	echo "poseidon-storage can be accessed here: $$docker_url:$$port"; \
 	echo
 
-monitor: clean-monitor build-monitor
+monitor: api clean-monitor build-monitor
 	@ if [ ! -z "${DOCKER_HOST}" ]; then \
 		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
 		docker_url=http://$$docker_host; \
@@ -56,7 +52,8 @@ monitor: clean-monitor build-monitor
 			exit 1; \
 		fi; \
 	fi; \
-	docker run --name poseidon-monitor -dP poseidon-monitor ; \
+	portApi=$$(docker port poseidon-api 8080/tcp | sed 's/^.*://'); \
+	docker run --name poseidon-monitor -dp 8555:8000 -e ALLOW_ORIGIN=$$docker_url:$$portApi poseidon-monitor ; \
 	port=$$(docker port poseidon-monitor 8000/tcp | sed 's/^.*://'); \
 	echo "poseidon-monitor can be accessed here: $$docker_url:$$port"; \
 	echo
@@ -98,10 +95,12 @@ docs: clean-docs build
 
 build: depends
 	# docker-compose build 
-	#cd api && docker build -t poseidon-api .
 	docker build -t poseidon-notebooks -f Dockerfile.notebooks .
 	docker build -t poseidon-monitor  -f Dockerfile.monitor .
 	docker build -t poseidon-main  -f Dockerfile.main .
+
+build-api:
+	cd api && docker build -t poseidon-api .
 
 build-docs:
 	docker build -t poseidon-docs -f Dockerfile.docs .
@@ -132,6 +131,9 @@ clean-main: depends
 
 clean-docs: depends
 	@docker ps -aqf "name=poseidon-docs" | xargs docker rm -f
+
+clean-api: depends
+	@docker ps -aqf "name=poseidon-api" | xargs docker rm -f
 
 clean-notebooks: depends
 	@docker ps -aqf "name=poseidon-notebooks" | xargs docker rm -f
