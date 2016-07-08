@@ -42,7 +42,7 @@ def main():
     pMain = PoseidonMain()
     pPlanner = Scheduler()
     pSurvey = Investigator()
-    print "main"
+    print 'main'
     return True
 
 if __name__ == '__main__':  # pragma: no cover

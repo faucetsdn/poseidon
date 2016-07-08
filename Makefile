@@ -23,8 +23,25 @@ run: clean depends build docs notebooks
 test: build
 
 main: 
-	docker build -t poseidon-main -f Dockerfile.main .
-	docker run --name poseidon-main -it poseidon-main 
+	docker build -t poseidon-main -f Dockerfile.main
+	docker run --name poseidon-main -it poseidon-main
+
+storage: clean-storage
+	@ if [ ! -z "${DOCKER_HOST}" ]; then \
+		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
+		docker_url=$$docker_host; \
+	else \
+		if [ ! -z "${DOCKERFORMAC}" ]; then \
+			docker_url=localhost; \
+		else \
+			echo "No DOCKER_HOST environment variable set."; \
+			exit 1; \
+		fi; \
+	fi; \
+	docker run --name poseidon-storage -dP mongo >/dev/null; \
+	port=$$(docker port poseidon-storage 27017/tcp | sed 's/^.*://'); \
+	echo "poseidon-storage can be accessed here: $$docker_url:$$port"; \
+	echo
 
 notebooks: clean-notebooks build
 	@ if [ ! -z "${DOCKER_HOST}" ]; then \
@@ -66,10 +83,18 @@ build: depends
 	cd api && docker build -t poseidon-api .
 	docker build -t poseidon-notebooks -f Dockerfile.notebooks .
 	docker build -t poseidon-monitor  -f Dockerfile.monitor .
+	docker build -t poseidon-main  -f Dockerfile.main .
 
 clean-all: clean depends
 	@docker rmi poseidon-monitor
+	@docker rmi poseidon-storage
 	@docker rmi poseidon-api
+
+clean-main: depends
+	@docker ps -aqf "name=poseidon-main" | xargs docker rm -f
+
+clean-storage: depends
+	@docker ps -aqf "name=poseidon-storage" | xargs docker rm -f
 
 clean-docs: depends
 	@docker ps -aqf "name=poseidon-docs" | xargs docker rm -f
