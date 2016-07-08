@@ -41,7 +41,8 @@ def main():
     pMain = PoseidonMain()
     pPlanner = PoseidonPlanner()
     pSurvey = PoseidonSurvey()
-    pass
+    print "main"
+    return True
 
 if __name__ == "main":
     main()
