@@ -25,4 +25,5 @@ from poseidonStorage import poseidonStorage
 
 def test_poseidonStorage():
     ps = poseidonStorage()
-    assert ps.client != None
+    assert ps.client.address == ('localhost', 27017)
+    
