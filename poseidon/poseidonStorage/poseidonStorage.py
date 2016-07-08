@@ -15,13 +15,15 @@
 #   limitations under the License.
 """
 Created on 17 May 2016
-@author: dgrossman
+@author: dgrossman, lanhamt
 """
+from pymongo import MongoClient
 
 
 class poseidonStorage:
-
+    """
+    poseidonStorage class for managing mongodb database
+    """
     def __init__(self):
         self.modName = 'poseidonStorage'
-
-    pass
+        self.client = MongoClient()
