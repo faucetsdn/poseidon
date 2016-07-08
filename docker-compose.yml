@@ -1,14 +1,14 @@
 version: '2'
 
 services:
-  api:
-    image: poseidon-api
-    container_name: poseidon-api
-    build:
-      context: ./api
-      dockerfile: Dockerfile
-    ports:
-      - 8080
+    #api:
+    #image: poseidon-api
+    #container_name: poseidon-api
+    #build:
+    #  context: ./api
+    #  dockerfile: Dockerfile
+    #ports:
+    #  - 8080
   monitor:
     environment:
       - ALLOW_ORIGIN="$api_url"
@@ -27,9 +27,17 @@ services:
       dockerfile: Dockerfile.main
     ports:
       - 8000
+  storageWorkaround:
+    # http://www.diogogmt.com/running-mongodb-with-docker-and-compose/
+    container_name: poseidon-storageWorkaround
+    image: mongo
+    volumes:
+      - /data/db
   storage:
-    image: poseidon-storage
     container_name: poseidon-storage
-    build:
-      context: .
-      dockerfile: Dockerfile.storage
+    image: mongo
+    volumes_from:
+      - storageWorkaround
+    ports:
+      - 27017
+    command: --smallfiles --rest --auth
