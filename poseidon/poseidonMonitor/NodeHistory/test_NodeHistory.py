@@ -13,32 +13,28 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
 """
-Test module for dshell_netflow_parser.py
-
-Created on 13 June 2016
-@author: Charlie Lewis, Abhi Ganesh
+Test module for NodeHistory.py
+Created on 28 June 2016
+@author: dgrossman
 """
-
+import falcon
 import pytest
-import sys
+from NodeHistory import NodeHistory
 
-from dshell_netflow_parser import get_path
-from dshell_netflow_parser import run_tool
-
-
-def test_get_path():
-    get_path()
-    sys.argv = []
-    get_path()
+application = falcon.API()
+application.add_route('/v1/history/{resource}', NodeHistory())
 
 
-def test_run_tool():
-    with open('/tmp/test', 'w') as f:
-        f.write("this is a test file")
-    run_tool('/tmp/test')
+# exposes the application for testing
+@pytest.fixture
+def app():
+    return application
 
-    with open('/tmp/results.out', 'w') as f:
-        f.write("2015-05-20 19:41:59.300879      0.0.0.0 ->    0.0.0.0  (US -> US)  TCP    1940   49152     0      0        0        0  0.0000s")
-    run_tool('/tmp/results.out')
+
+def test_pcap_resource_get(client):
+    """
+    Tests the Hisotry class
+    """
+    resp = client.get('/v1/history/someHistoryRequest')
+    assert resp.status == falcon.HTTP_OK

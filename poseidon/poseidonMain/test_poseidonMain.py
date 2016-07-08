@@ -13,32 +13,29 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
 """
-Test module for dshell_netflow_parser.py
+Test module for poseidonMain.py
 
-Created on 13 June 2016
-@author: Charlie Lewis, Abhi Ganesh
+Created on 29 May 2016
+@author: dgrossman, tlanham
 """
+from os import environ
 
 import pytest
-import sys
-
-from dshell_netflow_parser import get_path
-from dshell_netflow_parser import run_tool
+from poseidonMain import main
+from poseidonMain import PoseidonMain
 
 
-def test_get_path():
-    get_path()
-    sys.argv = []
-    get_path()
+def test_poseidonMain_goTime():
+    """
+    Tests goTime
+    """
+
+    a = PoseidonMain()
+    b = a.goTime()
+    assert b
 
 
-def test_run_tool():
-    with open('/tmp/test', 'w') as f:
-        f.write("this is a test file")
-    run_tool('/tmp/test')
-
-    with open('/tmp/results.out', 'w') as f:
-        f.write("2015-05-20 19:41:59.300879      0.0.0.0 ->    0.0.0.0  (US -> US)  TCP    1940   49152     0      0        0        0  0.0000s")
-    run_tool('/tmp/results.out')
+def test_poseidonMain_main():
+    a = main()
+    assert a

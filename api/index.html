@@ -29,7 +29,8 @@
 
   <script type="text/javascript">
     $(function () {
-      var port = parseInt(location.port)+1;
+				<!-- var port = parseInt(location.port)-1; -->
+      var port = 8555
       var url = "http://"+window.location.hostname+":"+port+"/swagger.yaml";
 
       // Pre load translate...
@@ -104,7 +105,7 @@
     <div>
       <a id="logo" href="#">Poseidon API Sandbox</a>
       <form id='api_selector'>
-        <div class='input'><a id="explore" href="/">{ poseidon }</a></div>
+        <div class='input'><a id="explore" href="/">{ poseidonMonitor }</a></div>
       </form>
     </div>
   </div>

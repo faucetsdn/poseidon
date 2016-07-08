@@ -18,7 +18,7 @@
 Tcpdump hex parser plugin
 
 Created on 13 June 2016
-@author: Charlie Lewis, David Grossman
+@author: Charlie Lewis, David Grossman, Travis Lanham
 """
 
 import pika
@@ -51,6 +51,7 @@ def connections():
     return channel, connection
 
 
+
 def parse_header(line):
     """Parse output of tcpdump of pcap file, extract:
         time
@@ -62,6 +63,7 @@ def parse_header(line):
         destination ip
         destination port (if it exists)
         length of the data
+        resolved addresses (if they exist, for dns traffic only)
         """
     ret_dict = {}
     h = line.split()
@@ -70,32 +72,61 @@ def parse_header(line):
     ret_dict['raw_header'] = line
     ret_dict['date'] = date
     ret_dict['time'] = time
-    src_a = h[3].split(".", 3)
-    if "." in src_a[-1]:
-        port_a = src_a[-1].split('.')
-        ret_dict['src_port'] = port_a[-1]
-        ret_dict['src_ip'] = ".".join(h[3].split('.')[:-1])
-    else:
-        ret_dict['src_ip'] = h[3]
-    dest_a = h[5].split(".", 3)
-    if "." in dest_a[-1]:
-        port_a = dest_a[-1].split('.')
-        ret_dict['dest_port'] = port_a[-1].split(":")[0]
-        ret_dict['dest_ip'] = ".".join(h[5].split('.')[:-1])
-    else:
-        ret_dict['dest_ip'] = h[5].split(":")[0]
-    ret_dict['protocol'] = h[6]
     ret_dict['ethernet_type'] = h[2]
-    try:
-        ret_dict['length'] = int(line.split(' length ')[1].split(':')[0])
-    except:
-        ret_dict['length'] = 0
-    if h[2] == 'IP':
-        #do something meaningful
-        pass
+
+    if h[2] == 'IP6':
+        """
+        Conditional formatting based on ethernet type.
+        IPv4 format: 0.0.0.0.port
+        IPv6 format (one of many): 0:0:0:0:0:0.port
+        """
+        ret_dict['src_port'] = h[3].split('.')[-1]
+        ret_dict['src_ip'] = h[3].split('.')[0]
+
+        ret_dict['dest_port'] = h[5].split('.')[-1].split(":")[0]
+        ret_dict['dest_ip'] = h[5].split('.')[0]
     else:
-        pass
-        #do something else
+        if len(h[3].split('.')) > 4:
+            ret_dict['src_port'] = h[3].split('.')[-1]
+            ret_dict['src_ip'] = '.'.join(h[3].split('.')[:-1])
+        else:
+            ret_dict['src_ip'] = h[3]
+
+        if len(h[5].split('.')) > 4:
+            ret_dict['dest_port'] = h[5].split('.')[-1].split(":")[0]
+            ret_dict['dest_ip'] = '.'.join(h[5].split('.')[:-1])
+        else:
+            ret_dict['dest_ip'] = h[5].split(":")[0]
+
+    ret_dict['protocol'] = h[6]
+
+    try:
+        """
+        If the packet is a DNS request or response, parse it
+        correctly for length and if response from DNS server then
+        parse the addresses resolved, add to list, and enter in return
+        directory. 'A' if for resolved IPv4, 'AAAA' for IPv6
+        """
+        if ret_dict['src_port'] == '53' or ret_dict['dst_port'] == '53':
+            ret_dict['length'] = int(h[-1][1:-1])
+            if ret_dict['src_port'] == '53':
+                resolved_addrs = []
+                if ' A ' in line:
+                    for addr in line.split(' A ')[1:]:
+                        clean_addr = addr.replace(',', '').split()[0]
+                        resolved_addrs.append(clean_addr)
+                if ' AAAA ' in line:
+                    for addr in line.split(' AAAA ')[1:]:
+                        clean_addr = addr.replace(',', '').split()[0]
+                        resolved_addrs.append(clean_addr)
+                if resolved_addrs:
+                    ret_dict['dns_resolved'] = resolved_addrs
+    except:
+        try:
+            ret_dict['length'] = int(line.split(' length ')[1].split(':')[0])
+        except:
+            ret_dict['length'] = 0
+
     return ret_dict
 
 
@@ -105,8 +136,9 @@ def parse_data(line, length):
     h, d = line.split(':', 1)
     ret_str = d.strip().replace(' ', '')
     if length != 0:
-        ret_str = ret_str[:-(2*length)]
+        ret_str = ret_str[:-(2 * length)]
     return ret_str
+
 
 def return_packet(line_source):
     """Create a packet dictionary
@@ -128,28 +160,30 @@ def return_packet(line_source):
         line_strip = line.strip()
         is_header = not line_strip.startswith('0x')
         if is_header:
-            #parse header
+            # parse header
             ret_header = parse_header(line_strip)
             if not ret_data:
-                #no data read, just update the header
+                # no data read, just update the header
                 ret_dict.update(ret_header)
             else:
-                #put the data into the structure and yeild
+                # put the data into the structure and yeild
                 ret_dict['data'] = ret_data
-                ret_data=''
+                ret_data = ''
                 yield ret_dict
         else:
-            #concatenate the data
+            # concatenate the data
             data = parse_data(line_strip, ret_header['length'])
             ret_data = ret_data + data
 
-
 def run_tool(path):
     """Tool entry point"""
-    routing_key = "tcpdump_hex_parser"+path.replace("/", ".")
+    routing_key = "tcpdump_hex_parser" + path.replace("/", ".")
     print "processing pcap results..."
     channel, connection = connections()
-    proc = subprocess.Popen('tcpdump -nn -tttt -xx -r '+path, shell=True, stdout=subprocess.PIPE)
+    proc = subprocess.Popen(
+        'tcpdump -nn -tttt -xx -r ' + path,
+        shell=True,
+        stdout=subprocess.PIPE)
     for packet in return_packet(proc.stdout):
         message = str(packet)
         if channel is not None:

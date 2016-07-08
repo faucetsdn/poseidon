@@ -13,32 +13,37 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
 """
-Test module for dshell_netflow_parser.py
+poseidonMain
 
-Created on 13 June 2016
-@author: Charlie Lewis, Abhi Ganesh
+Created on 29 May 2016
+@author: dgrossman, lanhamt
 """
+import json
+from os import environ
+from subprocess import call
+from subprocess import check_output
 
-import pytest
-import sys
-
-from dshell_netflow_parser import get_path
-from dshell_netflow_parser import run_tool
-
-
-def test_get_path():
-    get_path()
-    sys.argv = []
-    get_path()
+from Investigator.Investigator import Investigator
+from Scheduler.Scheduler import Scheduler
 
 
-def test_run_tool():
-    with open('/tmp/test', 'w') as f:
-        f.write("this is a test file")
-    run_tool('/tmp/test')
+class PoseidonMain:
 
-    with open('/tmp/results.out', 'w') as f:
-        f.write("2015-05-20 19:41:59.300879      0.0.0.0 ->    0.0.0.0  (US -> US)  TCP    1940   49152     0      0        0        0  0.0000s")
-    run_tool('/tmp/results.out')
+    def __init__(self):
+        self.modName = 'PoseidonMain'
+
+    def goTime(self):
+        main()
+        return True
+
+
+def main():
+    pMain = PoseidonMain()
+    pPlanner = Scheduler()
+    pSurvey = Investigator()
+    print 'main'
+    return True
+
+if __name__ == '__main__':  # pragma: no cover
+    main()

@@ -13,32 +13,21 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
 """
-Test module for dshell_netflow_parser.py
-
-Created on 13 June 2016
-@author: Charlie Lewis, Abhi Ganesh
+Created on 17 May 2016
+@author: dgrossman
 """
 
-import pytest
-import sys
 
-from dshell_netflow_parser import get_path
-from dshell_netflow_parser import run_tool
+class Action:
+    """Poseidon Action Rest Interface"""
 
+    def __init__(self):
+        self.modName = 'Action'
 
-def test_get_path():
-    get_path()
-    sys.argv = []
-    get_path()
-
-
-def test_run_tool():
-    with open('/tmp/test', 'w') as f:
-        f.write("this is a test file")
-    run_tool('/tmp/test')
-
-    with open('/tmp/results.out', 'w') as f:
-        f.write("2015-05-20 19:41:59.300879      0.0.0.0 ->    0.0.0.0  (US -> US)  TCP    1940   49152     0      0        0        0  0.0000s")
-    run_tool('/tmp/results.out')
+    def on_get(self, req, resp, resource):
+        resp.content_type = 'text/text'
+        try:
+            resp.body = self.modName + ' found: %s' % (resource)
+        except:  # pragma: no cover
+            resp.body = "failed"
