@@ -34,8 +34,8 @@ RUN sphinx-apidoc -o docs poseidon -F --follow-links && cd docs && make html && 
 ENV PYTHONUNBUFFERED 0
 EXPOSE 8000
 
-ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:8000"]
-CMD ["poseidon.poseidonMain.poseidonMain:api"]
+#ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:8000"]
+CMD ["python", "/posedionWork/poseidon/poseidonMain/poseidonMain.py"]
 
 # run linter
 #RUN pylint --disable=all --enable=classes --disable=W poseidonMain

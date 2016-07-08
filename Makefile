@@ -22,6 +22,10 @@ run: clean depends build docs notebooks
 
 test: build
 
+main: 
+	docker build -t poseidon-main -f Dockerfile.main .
+	docker run --name poseidon-main -it poseidon-main 
+
 notebooks: clean-notebooks build
 	@ if [ ! -z "${DOCKER_HOST}" ]; then \
 		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
