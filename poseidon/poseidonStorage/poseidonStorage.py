@@ -18,6 +18,8 @@ Created on 17 May 2016
 @author: dgrossman, lanhamt
 """
 from pymongo import MongoClient
+import os
+import json
 
 
 class poseidonStorage:
@@ -27,3 +29,35 @@ class poseidonStorage:
     def __init__(self):
         self.modName = 'poseidonStorage'
         self.client = MongoClient()
+
+
+class db_collection_test(poseidonStorage):
+    """
+    rest class to test collections
+    """
+    def on_get(self, req, resp):
+        pass
+
+
+class db_document_test(poseidonStorage):
+    """
+    rest class to test collections
+    """
+    def on_get(self, req, resp):
+        pass
+
+
+class db_query_id_test(poseidonStorage):
+    """
+    rest class to test collections
+    """
+    def on_get(self, req, resp):
+        pass
+
+
+def main():
+    pass
+
+
+if __name__ == '__main__':
+    main()

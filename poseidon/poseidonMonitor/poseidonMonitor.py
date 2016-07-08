@@ -143,7 +143,7 @@ api.add_route('/v1/config', FullConfig())
 api.add_route('/v1/config/{section}', SectionConfig())
 api.add_route('/v1/config/{section}/{field}', FieldConfig())
 
-api.add_route('/v1/history{resource}', NodeHistory())
+api.add_route('/v1/history/{resource}', NodeHistory())
 api.add_route('/v1/action/{resource}', Action())
 
 # add the functionality for a remote call to trigger scanning

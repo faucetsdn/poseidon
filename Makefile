@@ -16,6 +16,7 @@ run: clean depends build docs notebooks
 	docker run --name poseidon-monitor -dP -e ALLOW_ORIGIN=$$api_url poseidon-monitor >/dev/null; \
 	port=$$(docker port poseidon-monitor 8000/tcp | sed 's/^.*://'); \
 	poseidon_url=$$docker_url:$$port; \
+	docker run mongo
 	echo "The API can be accessed here: $$api_url"; \
 	echo "poseidon-monitor can be accessed here: $$poseidon_url"; \
 	echo

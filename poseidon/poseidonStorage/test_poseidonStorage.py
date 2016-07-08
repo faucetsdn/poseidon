@@ -20,10 +20,37 @@ Created on 28 June 2016
 @author: dgrossman, lanhamt
 """
 import pytest
+import falcon
 from poseidonStorage import poseidonStorage
+from poseidonStorage import db_collection_test
+from poseidonStorage import db_document_test
+from poseidonStorage import db_query_id_test
+
+
+application = falcon.API()
+application.add_route('/v1/storage/{collection}', db_collection_test)
+application.add_route('/v1/storage/{database}/{collection}', db_document_test)
+application.add_route('/v1/storage/query/{query}', db_query_id_test)
 
 
 def test_poseidonStorage():
     ps = poseidonStorage()
-    assert ps.client.address == ('localhost', 27017)
-    
+    # assert ps.client.address == ('localhost', 27017)
+
+
+# exposes the application for testing
+@pytest.fixture
+def app():
+    return application
+
+
+def test_db_collection_get(client):
+    resp = client.get('/v1/storage/local')
+
+
+def test_db_document_get(client):
+    resp = client.get('/v1/storage/local/startup_log')
+
+
+def test_db_query_id_get(client):
+    resp = client.get('/v1/storage/query/not_a_query')
