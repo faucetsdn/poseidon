@@ -23,7 +23,7 @@ test: build
 main: clean-main build-main
 	docker run --name poseidon-main -it poseidon-main
 
-storage: clean-storage
+storage: clean-storage build-storage
 	@ if [ ! -z "${DOCKER_HOST}" ]; then \
 		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
 		docker_url=$$docker_host; \
@@ -35,12 +35,12 @@ storage: clean-storage
 			exit 1; \
 		fi; \
 	fi; \
-	docker run --name poseidon-storage -dP mongo >/dev/null; \
+	docker run --name poseidon-storage -dp 27017:27017 mongo >/dev/null; \
 	port=$$(docker port poseidon-storage 27017/tcp | sed 's/^.*://'); \
 	echo "poseidon-storage can be accessed here: $$docker_url:$$port"; \
 	echo
 
-monitor: api clean-monitor build-monitor
+monitor: storage api clean-monitor build-monitor
 	@ if [ ! -z "${DOCKER_HOST}" ]; then \
 		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
 		docker_url=http://$$docker_host; \
@@ -113,6 +113,9 @@ build-notebooks:
 
 build-main:
 	docker build -t poseidon-main  -f Dockerfile.main .
+
+build-storage:
+	docker pull mongo
 
 clean-all: clean depends
 	@docker rmi poseidon-monitor
