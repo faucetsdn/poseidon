@@ -41,4 +41,8 @@ CMD ["poseidon.poseidonMonitor.poseidonMonitor:api"]
 #RUN pylint --disable=all --enable=classes --disable=W poseidonMonitor
 
 # run tests
-RUN py.test -v --cov=poseidon/poseidonMonitor --cov=plugins --cov-report term-missing --cov-config .coveragerc
+RUN py.test -v \
+--ignore=poseidon/poseidonMain \
+--ignore=poseidon/poseidonStorage \
+--cov=poseidon/poseidonMonitor \
+--cov=plugins --cov-report term-missing --cov-config .coveragerc
