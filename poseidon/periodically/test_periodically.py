@@ -20,7 +20,16 @@ Created on 28 June 2016
 @author: dgrossman, lanhamt
 """
 import pytest
+from periodically import doSleep
 from periodically import periodically
+
+
+def test_sleepbad():
+    assert not doSleep(-1)
+
+
+def test_sleepgood():
+    assert doSleep(1)
 
 
 def test_periodically():
