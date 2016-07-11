@@ -22,8 +22,8 @@ Created on 28 June 2016
 import pytest
 import falcon
 from poseidonStorage import poseidonStorage
+from poseidonStorage import db_collection_names_test
 from poseidonStorage import db_collection_test
-from poseidonStorage import db_document_test
 from poseidonStorage import db_query_id_test
 
 
@@ -35,7 +35,8 @@ application.add_route('/v1/storage/query/{query}', db_query_id_test)
 
 def test_poseidonStorage():
     ps = poseidonStorage()
-    # assert ps.client.address == ('localhost', 27017)
+    assert ps.client.address
+    assert ps.client.PORT == 27017
 
 
 # exposes the application for testing

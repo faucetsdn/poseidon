@@ -18,38 +18,56 @@ Created on 17 May 2016
 @author: dgrossman, lanhamt
 """
 from pymongo import MongoClient
+import ConfigParser
 import os
 import json
+import socket
 
 
 class poseidonStorage:
     """
     poseidonStorage class for managing mongodb database
+
+    NOTE: currently assumes that poseidonStorage executes
+    on same machine as mongo image is running on.
     """
     def __init__(self):
         self.modName = 'poseidonStorage'
-        self.client = MongoClient()
+
+        self.config = ConfigParser.ConfigParser()
+        self.config.readfp(open('/poseidonWork/templates/config.template'))
+        database_ip = self.config.get('database', 'ip')
+        self.client = MongoClient(database_ip)
+
+
+class db_collection_names_test(poseidonStorage):
+    """
+    rest class to get names of collections in default
+    database
+    """
+    def on_get(self, req, resp):
+        try:
+            ret = self.client.database.collection_names()
+        except:
+            ret = "Error on retrieving colleciton names."
+        resp.body = json.dumps(ret)
 
 
 class db_collection_test(poseidonStorage):
     """
-    rest class to test collections
+    rest class to test document in collection
     """
-    def on_get(self, req, resp):
-        pass
-
-
-class db_document_test(poseidonStorage):
-    """
-    rest class to test collections
-    """
-    def on_get(self, req, resp):
-        pass
+    def on_get(self, req, resp, collection):
+        try:
+            ret = self.client[collection]
+        except:
+            ret = "Could not find collection: " + collection + " in database."
+        resp.body = json.dumps(ret)
 
 
 class db_query_id_test(poseidonStorage):
     """
-    rest class to test collections
+    rest class to test query
     """
     def on_get(self, req, resp):
         pass
