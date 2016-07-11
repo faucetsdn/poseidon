@@ -1,5 +1,5 @@
 FROM alpine:3.3
-MAINTAINER Charlie Lewis <clewis@iqt.org>
+MAINTAINER dgrossman dgrossman@iqt.org
 
 RUN apk add --update \
     git \
@@ -21,14 +21,9 @@ RUN for file in $(find poseidon/* -name "requirements.txt"); \
         pip install -r $file; \
     done
 
-# install dependencies of plugins for tests
-RUN for file in $(find plugins/* -name "requirements.txt"); \
-    do \
-        pip install -r $file; \
-    done
-
 # run tests
-RUN py.test -v --cov=poseidon/poseidonMain --cov-report term-missing --cov-config .coveragerc
+RUN py.test -v --ignore=poseidon/poseidonMain --ignore=poseidon/poseidonStorage --ignore=poseidon/poseidonMonitor --ignore=plugins --cov=poseidon/periodically --cov-report term-missing --cov-config .coveragerc
 
 ENV PYTHONUNBUFFERED 0
-CMD ["python", "poseidon/poseidonMain/poseidonMain.py","1","-1","http://localhost:8555/v1/version"]
+EXPOSE 8000
+CMD ["python", "poseidon/periodically/periodically.py","1","-1","http://localhost:8000/v1/polling"]
