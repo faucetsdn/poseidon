@@ -14,17 +14,15 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Test module for poseidonStorage
+Test module for periodically
 
 Created on 28 June 2016
 @author: dgrossman, lanhamt
 """
 import pytest
-from poseidonStorage import poseidonStorage
+from periodically import periodically
 
 
-def test_poseidonStorage():
-    ps = poseidonStorage()
-    assert ps.client.HOST == 'localhost'
-    assert ps.client.PORT == 27017
-    #assert ps.client.address == ('localhost', 27017)
+def test_periodically():
+    a = periodically(1, 3, None)
+    assert a == 3
