@@ -1,4 +1,9 @@
-run: clean depends build docs notebooks main api monitor storage
+run: clean depends build docs notebooks main api monitor storage printPlaces periodically
+printPlaces:
+	@docker ps --format "table {{.Names}}\thttp://{{.Ports}}" |sed 's/0.0.0.0/localhost/' | sed 's/->/ container:/'
+
+periodically: clean-periodically build-periodically
+	docker run --net=container:poseidon-monitor periodically
 
 api: clean-api build-api
 	@ if [ ! -z "${DOCKER_HOST}" ]; then \
@@ -99,6 +104,9 @@ build: depends
 	docker build -t poseidon-monitor  -f Dockerfile.monitor .
 	docker build -t poseidon-main  -f Dockerfile.main .
 
+build-periodically:
+	docker build -t periodically -f Dockerfile.periodically .
+
 build-api:
 	cd api && docker build -t poseidon-api .
 
@@ -122,6 +130,10 @@ clean-all: clean depends
 	@docker rmi poseidon-storagmain
 	@docker rmi poseidon-main
 	@docker rmi poseidon-api
+	@docker rmi periodically
+
+clean-periodically: depends
+	@docker ps -afq "name=periodically" | xargs docker rm -f
 
 clean-storage: depends
 	@docker ps -aqf "name=poseidon-storage" | xargs docker rm -f
