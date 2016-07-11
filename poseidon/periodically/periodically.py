@@ -29,7 +29,7 @@ import urllib2
 
 def makeCall(url):
     print 'makeCall ' + datetime.datetime.now().ctime()
-    if url:
+    if url:  # pragma: no cover
         page = urllib2.urlopen(url)
         print page.readlines()
         print 'wget ' + url
@@ -38,8 +38,10 @@ def makeCall(url):
 def doSleep(t):
     if t <= 0:
         print 'Too fast'
+        return False
     else:
         time.sleep(t)
+        return True
 
 
 def periodically(wait, repeats, url):
