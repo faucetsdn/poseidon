@@ -33,7 +33,7 @@ from Config.Config import SectionConfig
 from ControllerPolling.ControllerPolling import ControllerPolling
 from falcon_cors import CORS
 from NodeHistory.NodeHistory import NodeHistory
-from NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import NorthBoundControllerAbstraction
+from NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import a
 
 
 def get_allowed():
@@ -136,19 +136,21 @@ api.add_route('/v1/version', VersionResource())
 api.add_route('/v1/pcap/{pcap_file}/{output_type}', PCAPResource())
 
 # access to the other components of PoseidonRest
-api.add_route('/v1/nbca/{resource}', NorthBoundControllerAbstraction())
+api.add_route('/v1/nbca/{resource}', a.action1())
+api.add_route('/v1/polling', ControllerPolling())
+api.add_route('/v1/polling', a.action2)
 
 # config routes
 api.add_route('/v1/config', FullConfig())
 api.add_route('/v1/config/{section}', SectionConfig())
 api.add_route('/v1/config/{section}/{field}', FieldConfig())
 
-api.add_route('/v1/history{resource}', NodeHistory())
+#api.add_route('/v1/history{resource}', NodeHistory())
 api.add_route('/v1/action/{resource}', Action())
 
 # add the functionality for a remote call to trigger scanning
 # the internal switch state
-api.add_route('/v1/polling', ControllerPolling())
+#api.add_route('/v1/polling', ControllerPolling())
 
 api.add_route('/swagger.yaml', SwaggerAPI())
 

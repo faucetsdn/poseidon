@@ -21,10 +21,10 @@ Created on 28 June 2016
 """
 import falcon
 import pytest
-from NorthBoundControllerAbstraction import NorthBoundControllerAbstraction
+from NorthBoundControllerAbstraction import a
 
 application = falcon.API()
-application.add_route('/v1/Nbca/{resource}', NorthBoundControllerAbstraction())
+application.add_route('/v1/Nbca/{resource}', a.action1())
 
 
 # exposes the application for testing

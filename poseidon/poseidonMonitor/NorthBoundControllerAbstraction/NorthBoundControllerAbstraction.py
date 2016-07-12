@@ -17,17 +17,71 @@
 Created on 17 May 2016
 @author: dgrossman
 """
+import json
 
 
-class NorthBoundControllerAbstraction:
+class NorthBoundControllerAbstraction(object):
     """NorthBoundControllerAbstraction """
 
     def __init__(self):
         self.modName = 'NorthBoundControllerAbstraction'
+        print 'init()' + self.modName
 
-    def on_get(self, req, resp, resource):
-        resp.content_type = 'text/text'
-        try:
-            resp.body = self.modName + ' found: %s' % (resource)
-        except:  # pragma: no cover
-            pass
+    def printSuper(self):
+        print 'doing Something in the super'
+
+
+class Nbca(NorthBoundControllerAbstraction):
+
+    def __init__(self):
+        self.modName = 'Nbca'
+        print 'init()' + self.modName
+        super(Nbca, self).__init__()
+        self.action2 = None
+
+    class action1(object):
+
+        def __init__(self):
+            self.modName = 'action1'
+            print 'init()' + self.modName
+
+        def something(self):
+            super.printSuper(self)
+
+        def on_get(self, req, resp, resource):
+
+            resp.content_type = 'text/text'
+            try:
+                resp.body = self.modName + ' found: %s' % (resource)
+            except:  # pragma: no cover
+                pass
+
+
+class otherClass(object):
+
+    def __init__(self):
+        self.modName = 'otherClass'
+        print 'init()' + self.modName
+        self.retval = {}
+        self.times = 0
+
+    def on_get(self, req, resp):
+        """Haneles Get requests"""
+        # TODO make calls to get switch state,
+        # TODO compare to previous switch state
+        # TODO schedule something to occur for updated flows
+        self.retval['times'] = self.times
+        # TODO change response to something reflecting success of traversal
+        self.retval['resp'] = 'ok'
+        self.times = self.times + 1
+        resp.body = json.dumps(self.retval)
+
+"""
+    def __call__(self, *args, **kwargs):
+        print "call occured"
+        print args
+        print kwargs
+"""
+
+a = Nbca()
+a.action2 = otherClass()
