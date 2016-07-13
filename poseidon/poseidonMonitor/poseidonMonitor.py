@@ -36,7 +36,7 @@ from NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import cont
 class Register(object):
 
     def __init__(self):
-        self.mod_Name = self.__class__.__name__
+        self.mod_name = self.__class__.__name__
         self.actions = dict()
         self.Config = config_interface
         self.Config.owner = self
@@ -162,13 +162,14 @@ class PCAPResource:
             resp.body = 'failed'
 
 
+# create callable WSGI app instance for gunicorn
+api = falcon.API(middleware=[cors.middleware])
+
+# register the local classes
 register = Register()
 register.add_endpoint('Handle_PCAP', PCAPResource)
 register.add_endpoint('Handle_Yaml', SwaggerAPI)
 register.add_endpoint('Handle_Version', VersionResource)
-
-# create callable WSGI app instance for gunicorn
-api = falcon.API(middleware=[cors.middleware])
 
 # make sure to update the yaml file when you add a new route
 
@@ -182,9 +183,11 @@ api.add_route('/swagger.yaml', register.get_endpoint('Handle_Yaml'))
 
 # nbca routes
 api.add_route('/v1/nbca/{resource}',
-              register.NorthBoundControllerAbstraction.get_endpoint('Handle_Resource'))
+              register.NorthBoundControllerAbstraction
+              .get_endpoint('Handle_Resource'))
 api.add_route('/v1/polling',
-              register.NorthBoundControllerAbstraction.get_endpoint('Handle_Periodic'))
+              register.NorthBoundControllerAbstraction
+              .get_endpoint('Handle_Periodic'))
 
 # config routes
 api.add_route('/v1/config',
@@ -193,11 +196,13 @@ api.add_route('/v1/config/{section}',
               register.Config.get_endpoint('Handle_SectionConfig'))
 api.add_route('/v1/config/{section}/{field}',
               register.Config.get_endpoint('Handle_FieldConfig'))
+
 # nodehistory routes
 api.add_route('/v1/history/{resource}',
               register.NodeHistory.get_endpoint('Handle_Default'))
+
+# action routes
 api.add_route('/v1/action/{resource}',
               register.Action.get_endpoint('Handle_Default'))
 
-
-print 'done'
+# storage routes
