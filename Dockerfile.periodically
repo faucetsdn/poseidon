@@ -26,5 +26,5 @@ RUN py.test -v --ignore=poseidon/poseidonMain --ignore=poseidon/poseidonStorage 
 
 ENV PYTHONUNBUFFERED 0
 EXPOSE 8000
-CMD ["echo", "placeholder"]
-#CMD ["python", "poseidon/periodically/periodically.py","1","-1","http://localhost:8000/v1/polling"]
+
+CMD ["python", "poseidon/periodically/periodically.py","1","-1","http://localhost:8000/v1/polling"]
