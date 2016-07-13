@@ -22,7 +22,13 @@ RUN for file in $(find poseidon/* -name "requirements.txt"); \
     done
 
 # run tests
-RUN py.test -v --ignore=poseidon/poseidonMain --ignore=poseidon/poseidonStorage --ignore=poseidon/poseidonMonitor --ignore=plugins --cov=poseidon/periodically --cov-report term-missing --cov-config .coveragerc
+RUN py.test -v  \
+--ignore=poseidon/poseidonMain \
+--ignore=poseidon/poseidonStorage \
+--ignore=poseidon/poseidonMonitor \
+--ignore=plugins \
+--cov=poseidon/periodically \
+--cov-report term-missing --cov-config .coveragerc
 
 ENV PYTHONUNBUFFERED 0
 EXPOSE 8000

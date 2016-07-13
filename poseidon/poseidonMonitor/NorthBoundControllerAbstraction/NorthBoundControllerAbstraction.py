@@ -17,17 +17,93 @@
 Created on 17 May 2016
 @author: dgrossman
 """
+import json
 
 
-class NorthBoundControllerAbstraction:
+class Helper_Base(object):  # pragma: no cover
+    """base class for the helper objets"""
+
+    def __init__(self):
+        pass
+
+    def on_post(self, req, resp):
+        pass
+
+    def on_put(self, req, resp, name):
+        pass
+
+    def on_get(self, req, resp):
+        pass
+
+    def on_delete(self, req, resp):
+        pass
+
+
+class Nbca_Base(object):
     """NorthBoundControllerAbstraction """
 
     def __init__(self):
-        self.modName = 'NorthBoundControllerAbstraction'
+        self.mod_Name = self.__class__.__name__
+
+
+class NorthBoundControllerAbstraction(Nbca_Base):
+
+    def __init__(self):
+        super(NorthBoundControllerAbstraction, self).__init__()
+        self.mod_Name = self.__class__.__name__
+        self.owner = None
+        self.actions = dict()
+
+    def add_endpoint(self, name, handler):
+        a = handler()
+        a.owner = self
+        self.actions[name] = a
+
+    def del_endpoint(self, name):
+        if name in self.actions:
+            self.actions.pop(name)
+
+    def get_endpoint(self, name):
+        if name in self.actions:
+            return self.actions.get(name)
+        else:
+            return None
+
+
+class Handle_Resource(Helper_Base):
+
+    def __init__(self):
+        self.mod_Name = self.__class__.__name__
 
     def on_get(self, req, resp, resource):
         resp.content_type = 'text/text'
         try:
-            resp.body = self.modName + ' found: %s' % (resource)
+            resp.body = self.mod_Name + ' found: %s' % (resource)
         except:  # pragma: no cover
             pass
+
+
+class Handle_Periodic(Helper_Base):
+
+    def __init__(self):
+        self.mod_Name = self.__class__.__name__
+        self.retval = {}
+        self.times = 0
+        self.owner = None
+
+    def on_get(self, req, resp):
+        """Haneles Get requests"""
+        # TODO MSG NBCA to get switch state
+        # TODO compare to previous switch state
+        # TODO schedule something to occur for updated flows
+        self.retval['service'] = self.owner.mod_Name + ':' + self.mod_Name
+        self.retval['times'] = self.times
+        # TODO change response to something reflecting success of traversal
+        self.retval['resp'] = 'ok'
+        self.times = self.times + 1
+        resp.body = json.dumps(self.retval)
+
+
+controller_interface = NorthBoundControllerAbstraction()
+controller_interface.add_endpoint('Handle_Periodic', Handle_Periodic)
+controller_interface.add_endpoint('Handle_Resource', Handle_Resource)

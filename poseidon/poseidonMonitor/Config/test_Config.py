@@ -21,15 +21,16 @@ Created on 28 June 2016
 """
 import falcon
 import pytest
-from Config import FullConfig
-from Config import SectionConfig
-from Config import FieldConfig
+from Config import config_interface
 
 
 application = falcon.API()
-application.add_route('/v1/config', FullConfig())
-application.add_route('/v1/config/{section}', SectionConfig())
-application.add_route('/v1/config/{section}/{field}', FieldConfig())
+application.add_route('/v1/config',
+                      config_interface.get_endpoint('Handle_FullConfig'))
+application.add_route('/v1/config/{section}',
+                      config_interface.get_endpoint('Handle_SectionConfig'))
+application.add_route('/v1/config/{section}/{field}',
+                      config_interface.get_endpoint('Handle_FieldConfig'))
 
 
 # exposes the application for testing
@@ -71,16 +72,16 @@ def test_config_field_get(client):
     """
     resp = client.get('/v1/config/rest config test/key1')
     assert resp.status == falcon.HTTP_OK
-    assert resp.body == "trident"
+    assert resp.body == 'trident'
 
     resp = client.get('/v1/config/rest config test/key2')
     assert resp.status == falcon.HTTP_OK
-    assert resp.body == "theseus"
+    assert resp.body == 'theseus'
 
     resp = client.get('/v1/config/rest config test/double key')
     assert resp.status == falcon.HTTP_OK
-    assert resp.body == "atlas horses"
+    assert resp.body == 'atlas horses'
 
     resp = client.get('/v1/config/bad_section/not_a_key')
     assert resp.status == falcon.HTTP_OK
-    assert resp.body == "Failed to find field: not_a_key in section: bad_section."
+    assert resp.body == 'Failed to find field: not_a_key in section: bad_section.'
