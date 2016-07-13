@@ -20,68 +20,90 @@ Created on 17 May 2016
 import json
 
 
-class NorthBoundControllerAbstraction(object):
+class Helper_Base(object):  # pragma: no cover
+    """base class for the helper objets"""
+
+    def __init__(self):
+        pass
+
+    def on_post(self, req, resp):
+        pass
+
+    def on_put(self, req, resp, name):
+        pass
+
+    def on_get(self, req, resp):
+        pass
+
+    def on_delete(self, req, resp):
+        pass
+
+
+class Nbca_Base(object):
     """NorthBoundControllerAbstraction """
 
     def __init__(self):
-        self.modName = 'NorthBoundControllerAbstraction'
-        print 'init()' + self.modName
-
-    def printSuper(self):
-        print 'doing Something in the super'
+        self.mod_Name = self.__class__.__name__
 
 
-class Nbca(NorthBoundControllerAbstraction):
+class NorthBoundControllerAbstraction(Nbca_Base):
 
     def __init__(self):
-        self.modName = 'Nbca'
-        print 'init()' + self.modName
-        super(Nbca, self).__init__()
-        self.action2 = None
+        super(NorthBoundControllerAbstraction, self).__init__()
+        self.mod_Name = self.__class__.__name__
+        self.owner = None
+        self.actions = dict()
 
-    class action1(object):
+    def add_endpoint(self, name, handler):
+        a = handler()
+        a.owner = self
+        self.actions[name] = a
 
-        def __init__(self):
-            self.modName = 'action1'
-            print 'init()' + self.modName
+    def del_endpoint(self, name):
+        if name in self.actions:
+            self.actions.pop(name)
 
-        def something(self):
-            super.printSuper(self)
-
-        def on_get(self, req, resp, resource):
-
-            resp.content_type = 'text/text'
-            try:
-                resp.body = self.modName + ' found: %s' % (resource)
-            except:  # pragma: no cover
-                pass
+    def get_endpoint(self, name):
+        if name in self.actions:
+            return self.actions.get(name)
+        else:
+            return None
 
 
-class otherClass(object):
+class Handle_Resource(Helper_Base):
 
     def __init__(self):
-        self.modName = 'otherClass'
-        print 'init()' + self.modName
+        self.mod_Name = self.__class__.__name__
+
+    def on_get(self, req, resp, resource):
+        resp.content_type = 'text/text'
+        try:
+            resp.body = self.mod_Name + ' found: %s' % (resource)
+        except:  # pragma: no cover
+            pass
+
+
+class Handle_Periodic(Helper_Base):
+
+    def __init__(self):
+        self.mod_Name = self.__class__.__name__
         self.retval = {}
         self.times = 0
+        self.owner = None
 
     def on_get(self, req, resp):
         """Haneles Get requests"""
-        # TODO make calls to get switch state,
+        # TODO MSG NBCA to get switch state
         # TODO compare to previous switch state
         # TODO schedule something to occur for updated flows
+        self.retval['service'] = self.owner.mod_Name + ':' + self.mod_Name
         self.retval['times'] = self.times
         # TODO change response to something reflecting success of traversal
         self.retval['resp'] = 'ok'
         self.times = self.times + 1
         resp.body = json.dumps(self.retval)
 
-"""
-    def __call__(self, *args, **kwargs):
-        print "call occured"
-        print args
-        print kwargs
-"""
 
-a = Nbca()
-a.action2 = otherClass()
+controller_interface = NorthBoundControllerAbstraction()
+controller_interface.add_endpoint('Handle_Periodic', Handle_Periodic)
+controller_interface.add_endpoint('Handle_Resource', Handle_Resource)

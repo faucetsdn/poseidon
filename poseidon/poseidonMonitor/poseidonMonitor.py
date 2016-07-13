@@ -26,14 +26,49 @@ from subprocess import call
 from subprocess import check_output
 
 import falcon
-from Action.Action import Action
-from Config.Config import FieldConfig
-from Config.Config import FullConfig
-from Config.Config import SectionConfig
-from ControllerPolling.ControllerPolling import ControllerPolling
+from Action.Action import action_interface
+from Config.Config import config_interface
 from falcon_cors import CORS
-from NodeHistory.NodeHistory import NodeHistory
-from NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import a
+from NodeHistory.NodeHistory import nodehistory_interface
+from NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import controller_interface
+
+
+class Register(object):
+
+    def __init__(self):
+        self.mod_Name = self.__class__.__name__
+        self.actions = dict()
+        self.Config = config_interface
+        self.Config.owner = self
+        self.NodeHistory = nodehistory_interface
+        self.NodeHistory.owner = self
+        self.NorthBoundControllerAbstraction = controller_interface
+        self.NorthBoundControllerAbstraction.owner = self
+        self.Action = action_interface
+        self.Action.owner = self
+
+        # wire up handlers for Config
+
+        # wire up handlers for NodeHistory
+
+        # wire up handlers for NorthBoundControllerAbstraction
+
+        # wire up handlers for Action
+
+    def add_endpoint(self, name, handler):
+        a = handler()
+        a.owner = self
+        self.actions[name] = a
+
+    def del_endpoint(self, name):
+        if name in self.actions:
+            self.actions.pop(name)
+
+    def get_endpoint(self, name):
+        if name in self.actions:
+            return self.actions.get(name)
+        else:
+            return None
 
 
 def get_allowed():
@@ -127,31 +162,42 @@ class PCAPResource:
             resp.body = 'failed'
 
 
+register = Register()
+register.add_endpoint('Handle_PCAP', PCAPResource)
+register.add_endpoint('Handle_Yaml', SwaggerAPI)
+register.add_endpoint('Handle_Version', VersionResource)
+
 # create callable WSGI app instance for gunicorn
 api = falcon.API(middleware=[cors.middleware])
 
 # make sure to update the yaml file when you add a new route
-# routes
-api.add_route('/v1/version', VersionResource())
-api.add_route('/v1/pcap/{pcap_file}/{output_type}', PCAPResource())
+
+# 'local' routes
+api.add_route('/v1/version', register.get_endpoint('Handle_Version'))
+api.add_route('/v1/pcap/{pcap_file}/{output_type}',
+              register.get_endpoint('Handle_PCAP'))
+api.add_route('/swagger.yaml', register.get_endpoint('Handle_Yaml'))
 
 # access to the other components of PoseidonRest
-api.add_route('/v1/nbca/{resource}', a.action1())
-api.add_route('/v1/polling', ControllerPolling())
-api.add_route('/v1/polling', a.action2)
+
+# nbca routes
+api.add_route('/v1/nbca/{resource}',
+              register.NorthBoundControllerAbstraction.get_endpoint('Handle_Resource'))
+api.add_route('/v1/polling',
+              register.NorthBoundControllerAbstraction.get_endpoint('Handle_Periodic'))
 
 # config routes
-api.add_route('/v1/config', FullConfig())
-api.add_route('/v1/config/{section}', SectionConfig())
-api.add_route('/v1/config/{section}/{field}', FieldConfig())
+api.add_route('/v1/config',
+              register.Config.get_endpoint('Handle_FullConfig'))
+api.add_route('/v1/config/{section}',
+              register.Config.get_endpoint('Handle_SectionConfig'))
+api.add_route('/v1/config/{section}/{field}',
+              register.Config.get_endpoint('Handle_FieldConfig'))
+# nodehistory routes
+api.add_route('/v1/history/{resource}',
+              register.NodeHistory.get_endpoint('Handle_Default'))
+api.add_route('/v1/action/{resource}',
+              register.Action.get_endpoint('Handle_Default'))
 
-#api.add_route('/v1/history{resource}', NodeHistory())
-api.add_route('/v1/action/{resource}', Action())
-
-# add the functionality for a remote call to trigger scanning
-# the internal switch state
-#api.add_route('/v1/polling', ControllerPolling())
-
-api.add_route('/swagger.yaml', SwaggerAPI())
 
 print 'done'

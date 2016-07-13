@@ -21,10 +21,11 @@ Created on 28 Jun 2016
 """
 import falcon
 import pytest
-from Action import Action
+from Action import action_interface
 
 application = falcon.API()
-application.add_route('/v1/Action/{resource}', Action())
+application.add_route('/v1/Action/{resource}',
+                      action_interface.get_endpoint('Handle_Default'))
 
 
 # exposes the application for testing

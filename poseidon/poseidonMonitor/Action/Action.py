@@ -19,15 +19,69 @@ Created on 17 May 2016
 """
 
 
-class Action:
+class Helper_Base(object):  # pragma: no cover
+    """base class for the helper objets"""
+
+    def __init__(self):
+        pass
+
+    def on_post(self, req, resp):
+        pass
+
+    def on_put(self, req, resp, name):
+        pass
+
+    def on_get(self, req, resp):
+        pass
+
+    def on_delete(self, req, resp):
+        pass
+
+
+class Action_Base(object):
+
+    def __init__(self):
+        self.mod_name = self.__class__.__name__
+
+
+class Action(Action_Base):
     """Poseidon Action Rest Interface"""
 
     def __init__(self):
-        self.modName = 'Action'
+        super(Action, self).__init__()
+        self.mod_name = self.__class__.__name__
+        self.owner = None
+        self.actions = dict()
+
+    def add_endpoint(self, name, handler):
+        a = handler()
+        a.owner = self
+        self.actions[name] = a
+
+    def del_endpoint(self, name):
+        if name in self.actions:
+            self.actions.pop(name)
+
+    def get_endpoint(self, name):
+        if name in self.actions:
+            return self.actions.get(name)
+        else:
+            return None
+
+
+class Handle_Default(Helper_Base):
+
+    def __init__(self):
+        self.mod_name = self.__class__.__name__
+        self.owner = None
 
     def on_get(self, req, resp, resource):
         resp.content_type = 'text/text'
         try:
-            resp.body = self.modName + ' found: %s' % (resource)
+            resp.body = self.mod_name + ' found: %s' % (resource)
         except:  # pragma: no cover
-            resp.body = "failed"
+            resp.body = 'failed'
+
+
+action_interface = Action()
+action_interface.add_endpoint('Handle_Default', Handle_Default)

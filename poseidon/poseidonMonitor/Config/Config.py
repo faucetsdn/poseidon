@@ -22,62 +22,122 @@ Created on 17 May 2016
 @author: dgrossman, lanhamt
 """
 import ConfigParser
-import os
 import json
+import os
 
 
 # poseidonWork created in docker containers
 config_template_path = '/poseidonWork/templates/config.template'
 
 
-class FullConfig:
+class Helper_Base(object):  # pragma: no cover
+
+    def __init__(self):
+        pass
+
+    def on_post(self, req, resp):
+        pass
+
+    def on_put(self, req, resp, name):
+        pass
+
+    def on_get(self, req, resp):
+        pass
+
+    def on_delete(self, req, resp):
+        pass
+
+
+class Config_Base(object):
+
+    def __init__(self):
+        self.mod_name = self.__class__.__name__
+        self.config = ConfigParser.ConfigParser()
+        if os.environ.get('POSEIDON_CONFIG') is not None:
+            print 'From the Environment'
+            self.config_path = os.environ.get('POSEIDON_CONFIG')
+        else:
+            print 'From the hardcoded value'
+            self.config_path = config_template_path
+        self.config.readfp(open(self.config_path))
+
+
+class Config(Config_Base):
+    """Poseidon Action Rest Interface"""
+
+    def __init__(self):
+        super(Config, self).__init__()
+        self.mod_name = self.__class__.__name__
+        self.owner = None
+        self.actions = dict()
+
+    def add_endpoint(self, name, handler):
+        a = handler()
+        a.owner = self
+        self.actions[name] = a
+
+    def del_endpoint(self, name):
+        if name in self.actions:
+            self.actions.pop(name)
+
+    def get_endpoint(self, name):
+        if name in self.actions:
+            return self.actions.get(name)
+        else:
+            return None
+
+
+class Handle_FullConfig(Helper_Base):
     """
     Provides the full configuration file in json dict string
     with sections as keys and their key-value pairs as values.
     """
+
     def __init__(self):
-        self.modName = 'FullConfig'
-        self.config = ConfigParser.ConfigParser()
-        self.config.readfp(open(config_template_path))
+        self.mod_name = self.__class__.__name__
+        self.owner = None
+        # self.config = ConfigParser.ConfigParser()
+        # self.config_path = config_template_path
+        # self.config.readfp(open(self.config_path))
 
     def on_get(self, req, resp):
         try:
             ret = {}
-            for sec in self.config.sections():
-                ret[sec] = self.config.items(sec)
+            for sec in self.owner.config.sections():
+                ret[sec] = self.owner.config.items(sec)
             resp.body = json.dumps(ret)
         except:
-            resp.body = json.dumps("Failed to open config file.")
+            resp.body = json.dumps('Failed to open config file.')
 
 
-class SectionConfig:
+class Handle_SectionConfig(Helper_Base):
     """
     Given a section name in the config file,
     returns a json list string of all the key-value
     pairs under that section.
     """
+
     def __init__(self):
-        self.modName = 'SectionConfig'
-        self.config = ConfigParser.ConfigParser()
-        self.config.readfp(open(config_template_path))
+        self.mod_name = self.__class__.__name__
+        self.owner = None
 
     def on_get(self, req, resp, section):
         try:
-            ret_sec = self.config.items(section)
+            ret_sec = self.owner.config.items(section)
         except:
-            ret_sec = "Failed to find section: " + section + " in config file."
+            ret_sec = 'Failed to find section: ' + section + ' in config file.'
         resp.body = json.dumps(ret_sec)
 
 
-class FieldConfig:
+class Handle_FieldConfig(Helper_Base):
     """
     Given a section and corresponding key in the config
     file, returns the value as a string.
     """
+
     def __init__(self):
-        self.modName = 'FieldConfig'
-        self.config = ConfigParser.ConfigParser()
-        self.config.readfp(open(config_template_path))
+        self.mod_name = self.__class__.__name__
+        self.owner = None
 
     def on_get(self, req, resp, section, field):
         """
@@ -87,6 +147,12 @@ class FieldConfig:
         """
         resp.content_type = 'text/text'
         try:
-            resp.body = self.config.get(section, field)
+            resp.body = self.owner.config.get(section, field)
         except:
-            resp.body = "Failed to find field: " + field + " in section: " + section + "."
+            resp.body = 'Failed to find field: ' + field + ' in section: ' + section + '.'
+
+
+config_interface = Config()
+config_interface.add_endpoint('Handle_FieldConfig', Handle_FieldConfig)
+config_interface.add_endpoint('Handle_SectionConfig', Handle_SectionConfig)
+config_interface.add_endpoint('Handle_FullConfig', Handle_FullConfig)

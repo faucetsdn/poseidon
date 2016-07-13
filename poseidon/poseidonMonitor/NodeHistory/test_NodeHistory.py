@@ -20,10 +20,11 @@ Created on 28 June 2016
 """
 import falcon
 import pytest
-from NodeHistory import NodeHistory
+from NodeHistory import nodehistory_interface
 
 application = falcon.API()
-application.add_route('/v1/history/{resource}', NodeHistory())
+application.add_route('/v1/history/{resource}',
+                      nodehistory_interface.get_endpoint('Handle_Default'))
 
 
 # exposes the application for testing
