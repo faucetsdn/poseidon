@@ -1,4 +1,5 @@
 [database]
+ip = 0.0.0.0
 user = user
 password = SECRET
 

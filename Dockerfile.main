@@ -28,7 +28,7 @@ RUN for file in $(find plugins/* -name "requirements.txt"); \
     done
 
 # run tests
-RUN py.test -v --cov=poseidon/poseidonMain --cov-report term-missing --cov-config .coveragerc
+RUN py.test -v --ignore=poseidon/poseidonStorage --cov=poseidon/poseidonMain --cov-report term-missing --cov-config .coveragerc
 
 ENV PYTHONUNBUFFERED 0
 CMD ["python", "poseidon/poseidonMain/poseidonMain.py","1","-1","http://localhost:8555/v1/version"]
