@@ -34,34 +34,26 @@ config_template_path = '/poseidonWork/templates/config.template'
 
 
 class Config(Monitor_Action_Base):
-    """Poseidon Action Rest Interface"""
 
     def __init__(self):
         super(Config, self).__init__()
         self.mod_name = self.__class__.__name__
+        self.config_section_name = self.mod_name
+
         self.config = ConfigParser.ConfigParser()
         if os.environ.get('POSEIDON_CONFIG') is not None:
             print 'From the Environment'
             self.config_path = os.environ.get('POSEIDON_CONFIG')
         else:
-            print 'From the hardcoded value'
+            print 'From the Docker hardcode'
             self.config_path = config_template_path
-        self.config.readfp(open(self.config_path))
+        self.config.readfp(open(self.config_path, 'r'))
 
-    def add_endpoint(self, name, handler):
-        a = handler()
-        a.owner = self
-        self.actions[name] = a
-
-    def del_endpoint(self, name):
-        if name in self.actions:
-            self.actions.pop(name)
-
-    def get_endpoint(self, name):
-        if name in self.actions:
-            return self.actions.get(name)
-        else:
-            return None
+    def configure(self):
+        if 'Handle_SectionConfig' in self.actions:
+            self.CONFIG = self.actions['Handle_SectionConfig']
+            self.mod_config = self.CONFIG.direct_get(self.mod_name)
+            self.configured = True
 
 
 class Handle_FullConfig(Monitor_Helper_Base):
@@ -71,8 +63,8 @@ class Handle_FullConfig(Monitor_Helper_Base):
     """
 
     def __init__(self):
+        super(Handle_FullConfig, self).__init__()
         self.mod_name = self.__class__.__name__
-        self.owner = None
 
     def direct_get(self):
         retval = None
@@ -97,12 +89,11 @@ class Handle_SectionConfig(Monitor_Helper_Base):
     """
 
     def __init__(self):
+        super(Handle_SectionConfig, self).__init__()
         self.mod_name = self.__class__.__name__
-        self.owner = None
 
     # direct way
     def direct_get(self, section):
-        # print '*************** %s getting %s' % (self.mod_name,section)
         retval = None
         try:
             retval = self.owner.config.items(section)
@@ -123,8 +114,8 @@ class Handle_FieldConfig(Monitor_Helper_Base):
     """
 
     def __init__(self):
+        super(Handle_FieldConfig, self).__init__()
         self.mod_name = self.__class__.__name__
-        self.owner = None
 
     def direct_get(self, field, section):
         retval = ''
@@ -145,6 +136,6 @@ class Handle_FieldConfig(Monitor_Helper_Base):
 
 
 config_interface = Config()
-config_interface.add_endpoint('Handle_FieldConfig', Handle_FieldConfig)
 config_interface.add_endpoint('Handle_SectionConfig', Handle_SectionConfig)
+config_interface.add_endpoint('Handle_FieldConfig', Handle_FieldConfig)
 config_interface.add_endpoint('Handle_FullConfig', Handle_FullConfig)
