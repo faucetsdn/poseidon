@@ -63,7 +63,7 @@ def test_config_section_get(client):
 
     resp = client.get('/v1/config/not_a_section')
     assert resp.status == falcon.HTTP_OK
-    assert resp.body == '"Failed to find section: not_a_section in config file."'
+    assert resp.body == '"Failed to find section: not_a_section"'
 
 
 def test_config_field_get(client):
@@ -84,4 +84,4 @@ def test_config_field_get(client):
 
     resp = client.get('/v1/config/bad_section/not_a_key')
     assert resp.status == falcon.HTTP_OK
-    assert resp.body == 'Failed to find field: not_a_key in section: bad_section.'
+    assert resp.body == 'Can\'t find field: not_a_key in section: bad_section'

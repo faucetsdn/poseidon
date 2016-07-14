@@ -65,6 +65,9 @@ class Config_Base(object):
 class Config(Config_Base):
     """Poseidon Action Rest Interface"""
 
+    def p_name(self):
+        print self.mod_name
+
     def __init__(self):
         super(Config, self).__init__()
         self.mod_name = self.__class__.__name__
@@ -96,18 +99,20 @@ class Handle_FullConfig(Helper_Base):
     def __init__(self):
         self.mod_name = self.__class__.__name__
         self.owner = None
-        # self.config = ConfigParser.ConfigParser()
-        # self.config_path = config_template_path
-        # self.config.readfp(open(self.config_path))
 
-    def on_get(self, req, resp):
+    def direct_get(self):
+        retval = None
         try:
             ret = {}
             for sec in self.owner.config.sections():
                 ret[sec] = self.owner.config.items(sec)
-            resp.body = json.dumps(ret)
+            retval = json.dumps(ret)
         except:
-            resp.body = json.dumps('Failed to open config file.')
+            retval = json.dumps('Failed to open config file.')
+        return retval
+
+    def on_get(self, req, resp):
+        resp.body = self.direct_get()
 
 
 class Handle_SectionConfig(Helper_Base):
@@ -121,11 +126,19 @@ class Handle_SectionConfig(Helper_Base):
         self.mod_name = self.__class__.__name__
         self.owner = None
 
-    def on_get(self, req, resp, section):
+    # direct way
+    def direct_get(self, section):
+        # print '*************** %s getting %s' % (self.mod_name,section)
+        retval = None
         try:
-            ret_sec = self.owner.config.items(section)
+            retval = self.owner.config.items(section)
         except:
-            ret_sec = 'Failed to find section: ' + section + ' in config file.'
+            retval = 'Failed to find section: %s' % (section)
+        return retval
+
+    # rest way
+    def on_get(self, req, resp, section):
+        ret_sec = self.direct_get(section)
         resp.body = json.dumps(ret_sec)
 
 
@@ -139,6 +152,14 @@ class Handle_FieldConfig(Helper_Base):
         self.mod_name = self.__class__.__name__
         self.owner = None
 
+    def direct_get(self, field, section):
+        retval = ''
+        try:
+            retval = self.owner.config.get(section, field)
+        except:
+            retval = 'Can\'t find field: %s in section: %s' % (field, section)
+        return retval
+
     def on_get(self, req, resp, section, field):
         """
         Requests should have a section of the config
@@ -146,10 +167,7 @@ class Handle_FieldConfig(Helper_Base):
         returned in the response body.
         """
         resp.content_type = 'text/text'
-        try:
-            resp.body = self.owner.config.get(section, field)
-        except:
-            resp.body = 'Failed to find field: ' + field + ' in section: ' + section + '.'
+        resp.body = self.direct_get(field, section)
 
 
 config_interface = Config()
