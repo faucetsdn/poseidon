@@ -17,23 +17,21 @@
 Created on 17 May 2016
 @author: dgrossman
 """
+<<<<<<< HEAD
 import sys
 sys.path.append('/poseidonWork/poseidon/poseidon/poseidonMonitor')
 from poseidonMonitor.base import *
+=======
+from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
+from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
+>>>>>>> dd04de9e5e56f68229219a976c1e0d178beadb2c
 
 """
 class Helper_Base(object):  # pragma: no cover
     base class for the helper objets
 
-    def __init__(self):
-        pass
 
-    def on_post(self, req, resp):
-        pass
-
-    def on_put(self, req, resp, name):
-        pass
-
+<<<<<<< HEAD
     def on_get(self, req, resp):
         pass
 """
@@ -52,6 +50,12 @@ class NodeHistory(NodeHistory_Base):
 
     def __init__(self):
         super(NodeHistory_Base, self).__init__()
+=======
+class NodeHistory(Monitor_Action_Base):
+
+    def __init__(self):
+        super(NodeHistory, self).__init__()
+>>>>>>> dd04de9e5e56f68229219a976c1e0d178beadb2c
         self.mod_name = self.__class__.__name__
         self.owner = None
         self.configured = False
@@ -87,7 +91,7 @@ class NodeHistory(NodeHistory_Base):
                 v.configure()
 
 
-class Handle_Default(Helper_Base):
+class Handle_Default(Monitor_Helper_Base):
 
     def __init__(self):
         self.mod_name = self.__class__.__name__
@@ -114,6 +118,7 @@ class Handle_Default(Helper_Base):
 
         self.config = conf.direct_get(name)
         self.configured = True
+
 
 nodehistory_interface = NodeHistory()
 nodehistory_interface.add_endpoint('Handle_Default', Handle_Default)

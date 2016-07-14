@@ -17,41 +17,17 @@
 Created on 17 May 2016
 @author: dgrossman
 """
+from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
+from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 
 
-class Helper_Base(object):  # pragma: no cover
-    """base class for the helper objets"""
-
-    def __init__(self):
-        pass
-
-    def on_post(self, req, resp):
-        pass
-
-    def on_put(self, req, resp, name):
-        pass
-
-    def on_get(self, req, resp):
-        pass
-
-    def on_delete(self, req, resp):
-        pass
-
-
-class Action_Base(object):
-
-    def __init__(self):
-        self.mod_name = self.__class__.__name__
-
-
-class Action(Action_Base):
+class Action(Monitor_Action_Base):
     """Poseidon Action Rest Interface"""
 
     def __init__(self):
         super(Action, self).__init__()
         self.mod_name = self.__class__.__name__
-        self.owner = None
-        self.actions = dict()
+        self.config_section_name = self.mod_name
 
     def add_endpoint(self, name, handler):
         a = handler()
@@ -69,11 +45,11 @@ class Action(Action_Base):
             return None
 
 
-class Handle_Default(Helper_Base):
+class Handle_Default(Monitor_Helper_Base):
 
     def __init__(self):
+        super(Handle_Default, self).__init__()
         self.mod_name = self.__class__.__name__
-        self.owner = None
 
     def on_get(self, req, resp, resource):
         resp.content_type = 'text/text'

@@ -54,6 +54,8 @@ class Register(object):
         # wire up handlers for NorthBoundControllerAbstraction
 
         # wire up handlers for Action
+        self.Action.configure()
+        self.Action.configure_endpoints()
 
     def add_endpoint(self, name, handler):
         a = handler()
