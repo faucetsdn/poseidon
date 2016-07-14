@@ -16,7 +16,7 @@
 """
 Test module for NodeHistory.py
 Created on 28 June 2016
-@author: dgrossman
+@author: dgrossman, lanhamt
 """
 import falcon
 import pytest
