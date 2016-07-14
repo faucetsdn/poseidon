@@ -22,9 +22,6 @@ from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 
 
-class Helper_Base(object):  # pragma: no cover
-    """base class for the helper objets"""
-
 class NodeHistory_Base(object):
 
     def __init__(self):
