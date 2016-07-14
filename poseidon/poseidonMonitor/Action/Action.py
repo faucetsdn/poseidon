@@ -17,42 +17,17 @@
 Created on 17 May 2016
 @author: dgrossman
 """
+from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
+from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 
 
-class Helper_Base(object):  # pragma: no cover
-    """base class for the helper objets"""
-
-    def __init__(self):
-        pass
-
-    def on_post(self, req, resp):
-        pass
-
-    def on_put(self, req, resp, name):
-        pass
-
-    def on_get(self, req, resp):
-        pass
-
-    def on_delete(self, req, resp):
-        pass
-
-
-class Action_Base(object):
-
-    def __init__(self):
-        self.mod_name = self.__class__.__name__
-
-
-class Action(Action_Base):
+class Action(Monitor_Action_Base):
     """Poseidon Action Rest Interface"""
 
     def __init__(self):
         super(Action, self).__init__()
         self.mod_name = self.__class__.__name__
-        self.owner = None
-        self.configured = False
-        self.actions = dict()
+        self.config_section_name = self.mod_name
 
     def add_endpoint(self, name, handler):
         a = handler()
@@ -69,28 +44,12 @@ class Action(Action_Base):
         else:
             return None
 
-    def configure(self):
-        self.mod_name, 'configure'
-        if self.owner:
-            conf = self.owner.Config.get_endpoint('Handle_SectionConfig')
-            self.config = conf.direct_get(self.mod_name)
-            self.configured = True
 
-    def configure_endpoints(self):
-        # print self.mod_name,'configure_endpoints'
-        if self.owner and self.configured:
-            for k, v in self.actions.iteritems():
-                # print 'about to configure %s\n' % (k)
-                v.configure()
-
-
-class Handle_Default(Helper_Base):
+class Handle_Default(Monitor_Helper_Base):
 
     def __init__(self):
+        super(Handle_Default, self).__init__()
         self.mod_name = self.__class__.__name__
-        self.owner = None
-        self.config = None
-        self.configured = False
 
     def on_get(self, req, resp, resource):
         resp.content_type = 'text/text'
@@ -99,21 +58,6 @@ class Handle_Default(Helper_Base):
         except:  # pragma: no cover
             resp.body = 'failed'
 
-    def configure(self):
-        # local valid
-        # print self.mod_name
-        if not self.owner:
-            return
-        # print self.mod_name,self.owner.mod_name
-        # monitor valid
-        if not self.owner.owner:
-            return
-        # print self.mod_name,self.owner.mod_name,self.owner.owner.mod_name
-        conf = self.owner.owner.Config.get_endpoint('Handle_SectionConfig')
-        name = self.owner.mod_name + ':' + self.mod_name
-        # print 'about to configure %s\n' % (name)
-        self.config = conf.direct_get(name)
-        self.configured = True
 
 action_interface = Action()
 action_interface.add_endpoint('Handle_Default', Handle_Default)

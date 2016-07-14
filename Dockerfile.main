@@ -13,6 +13,7 @@ RUN apk add --update \
 
 ADD . /poseidonWork
 WORKDIR /poseidonWork
+ENV PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
 RUN pip install pip --upgrade
 
 # install dependencies of plugins for poseidon

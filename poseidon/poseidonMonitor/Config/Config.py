@@ -25,32 +25,19 @@ import ConfigParser
 import json
 import os
 
+from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
+from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
+
 
 # poseidonWork created in docker containers
 config_template_path = '/poseidonWork/templates/config.template'
 
 
-class Helper_Base(object):  # pragma: no cover
+class Config(Monitor_Action_Base):
+    """Poseidon Action Rest Interface"""
 
     def __init__(self):
-        pass
-
-    def on_post(self, req, resp):
-        pass
-
-    def on_put(self, req, resp, name):
-        pass
-
-    def on_get(self, req, resp):
-        pass
-
-    def on_delete(self, req, resp):
-        pass
-
-
-class Config_Base(object):
-
-    def __init__(self):
+        super(Config, self).__init__()
         self.mod_name = self.__class__.__name__
         self.config = ConfigParser.ConfigParser()
         if os.environ.get('POSEIDON_CONFIG') is not None:
@@ -60,19 +47,6 @@ class Config_Base(object):
             print 'From the hardcoded value'
             self.config_path = config_template_path
         self.config.readfp(open(self.config_path))
-
-
-class Config(Config_Base):
-    """Poseidon Action Rest Interface"""
-
-    def p_name(self):
-        print self.mod_name
-
-    def __init__(self):
-        super(Config, self).__init__()
-        self.mod_name = self.__class__.__name__
-        self.owner = None
-        self.actions = dict()
 
     def add_endpoint(self, name, handler):
         a = handler()
@@ -90,7 +64,7 @@ class Config(Config_Base):
             return None
 
 
-class Handle_FullConfig(Helper_Base):
+class Handle_FullConfig(Monitor_Helper_Base):
     """
     Provides the full configuration file in json dict string
     with sections as keys and their key-value pairs as values.
@@ -115,7 +89,7 @@ class Handle_FullConfig(Helper_Base):
         resp.body = self.direct_get()
 
 
-class Handle_SectionConfig(Helper_Base):
+class Handle_SectionConfig(Monitor_Helper_Base):
     """
     Given a section name in the config file,
     returns a json list string of all the key-value
@@ -142,7 +116,7 @@ class Handle_SectionConfig(Helper_Base):
         resp.body = json.dumps(ret_sec)
 
 
-class Handle_FieldConfig(Helper_Base):
+class Handle_FieldConfig(Monitor_Helper_Base):
     """
     Given a section and corresponding key in the config
     file, returns the value as a string.
