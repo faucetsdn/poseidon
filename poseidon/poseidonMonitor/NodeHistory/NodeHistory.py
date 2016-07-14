@@ -15,8 +15,9 @@
 #   limitations under the License.
 """
 Created on 17 May 2016
-@author: dgrossman
+@author: dgrossman, lanhamt
 """
+
 from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 
@@ -26,7 +27,39 @@ class NodeHistory(Monitor_Action_Base):
     def __init__(self):
         super(NodeHistory, self).__init__()
         self.mod_name = self.__class__.__name__
+        self.owner = None
+        self.configured = False
+        self.actions = dict()
+
+    def add_endpoint(self, name, handler):
+        a = handler()
+        a.owner = self
+        self.actions[name] = a
+
+    def del_endpoint(self, name):
+        if name in self.actions:
+            self.actions.pop(name)
+
+    def get_endpoint(self, name):
+        if name in self.actions:
+            return self.actions.get(name)
+        else:
+            return None
         self.config_section_name = self.mod_name
+
+    def configure(self):
+        self.mod_name, 'configure'
+        if self.owner:
+            conf = self.owner.Config.get_endpoint('Handle_SectionConfig')
+            self.config = conf.direct_get(self.mod_name)
+            self.configured = True
+
+    def configure_endpoints(self):
+        # print self.mod_name, 'configure_endpoints'
+        if self.owner and self.configured:
+            for k, v in self.actions.iteritems():
+                # print 'about to configure %s\n' % (k)
+                v.configure()
 
 
 class Handle_Default(Monitor_Helper_Base):
@@ -34,13 +67,29 @@ class Handle_Default(Monitor_Helper_Base):
     def __init__(self):
         super(Handle_Default, self).__init__()
         self.mod_name = self.__class__.__name__
+        self.owner = None
+        self.config = None
+        self.configured = False
 
     def on_get(self, req, resp, resource):
         resp.content_type = 'text/text'
         try:
             resp.body = self.mod_name + ' found: %s' % (resource)
         except:  # pragma: no cover
-            pass
+            resp.body = 'failed'
+
+    def configure(self):
+        if not self.owner:
+            return
+
+        if not self.owner.owner:
+            return
+
+        conf = self.owner.owner.Config.get_endpoint('Handle_SectionConfig')
+        name = self.owner.mod_name + ':' + self.mod_name
+
+        self.config = conf.direct_get(name)
+        self.configured = True
 
 
 nodehistory_interface = NodeHistory()
