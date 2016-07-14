@@ -24,6 +24,8 @@ class Monitor_Action_Base(object):  # pragma: no cover
     def __init__(self):
         self.mod_name = self.__class__.__name__
         self.owner = None
+        self.mod_configuraiton = None
+        self.CONFIG = None
         self.configured = False
         self.config_section_name = None
         self.actions = dict()
@@ -38,7 +40,7 @@ class Monitor_Action_Base(object):  # pragma: no cover
     def configure(self):
         if self.owner:
             conf = self.owner.Config.get_endpoint('Handle_SectionConfig')
-            self.config = conf.direct_get(self.mod_name)
+            self.mod_configuration = conf.direct_get(self.mod_name)
             self.configured = True
 
     def configure_endpoints(self):

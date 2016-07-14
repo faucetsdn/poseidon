@@ -25,7 +25,7 @@ class Monitor_Helper_Base(object):  # pragma: no cover
     def __init__(self):
         self.mod_name = None
         self.owner = None
-        self.config = None
+        self.mod_config = None
         self.configured = False
         self.config_section_name = None
 
@@ -44,7 +44,7 @@ class Monitor_Helper_Base(object):  # pragma: no cover
         if not self.owner.owner:
             return
         conf = self.owner.owner.Config.get_endpoint('Handle_SectionConfig')
-        self.config = conf.direct_get(self.config_section_name)
+        self.mod_config = conf.direct_get(self.config_section_name)
         self.configured = True
 
     def on_post(self, req, resp):

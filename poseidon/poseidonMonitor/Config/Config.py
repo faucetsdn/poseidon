@@ -45,9 +45,15 @@ class Config(Monitor_Action_Base):
             print 'From the Environment'
             self.config_path = os.environ.get('POSEIDON_CONFIG')
         else:
-            print 'From the hardcoded value'
+            print 'From the Docker hardcode'
             self.config_path = config_template_path
         self.config.readfp(open(self.config_path, 'r'))
+
+    def configure(self):
+        if 'Handle_SectionConfig' in self.actions:
+            self.CONFIG = self.actions['Handle_SectionConfig']
+            self.mod_config = self.CONFIG.direct_get(self.mod_name)
+            self.configured = True
 
 
 class Handle_FullConfig(Monitor_Helper_Base):
@@ -93,7 +99,6 @@ class Handle_SectionConfig(Monitor_Helper_Base):
             retval = self.owner.config.items(section)
         except:
             retval = 'Failed to find section: %s' % (section)
-
         return retval
 
     # rest way
@@ -131,6 +136,6 @@ class Handle_FieldConfig(Monitor_Helper_Base):
 
 
 config_interface = Config()
-config_interface.add_endpoint('Handle_FieldConfig', Handle_FieldConfig)
 config_interface.add_endpoint('Handle_SectionConfig', Handle_SectionConfig)
+config_interface.add_endpoint('Handle_FieldConfig', Handle_FieldConfig)
 config_interface.add_endpoint('Handle_FullConfig', Handle_FullConfig)
