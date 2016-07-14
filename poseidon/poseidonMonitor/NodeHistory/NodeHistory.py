@@ -17,10 +17,13 @@
 Created on 17 May 2016
 @author: dgrossman
 """
+import sys
+sys.path.append('/poseidonWork/poseidon/poseidon/poseidonMonitor')
+from poseidonMonitor.base import *
 
-
+"""
 class Helper_Base(object):  # pragma: no cover
-    """base class for the helper objets"""
+    base class for the helper objets
 
     def __init__(self):
         pass
@@ -33,6 +36,7 @@ class Helper_Base(object):  # pragma: no cover
 
     def on_get(self, req, resp):
         pass
+"""
 
 
 class NodeHistory_Base(object):
@@ -42,11 +46,15 @@ class NodeHistory_Base(object):
 
 
 class NodeHistory(NodeHistory_Base):
+    """
+    Poseidon Node History Rest Interface
+    """
 
     def __init__(self):
         super(NodeHistory_Base, self).__init__()
         self.mod_name = self.__class__.__name__
         self.owner = None
+        self.configured = False
         self.actions = dict()
 
     def add_endpoint(self, name, handler):
@@ -64,19 +72,48 @@ class NodeHistory(NodeHistory_Base):
         else:
             return None
 
+    def configure(self):
+        self.mod_name, 'configure'
+        if self.owner:
+            conf = self.owner.Config.get_endpoint('Handle_SectionConfig')
+            self.config = conf.direct_get(self.mod_name)
+            self.configured = True
+
+    def configure_endpoints(self):
+        # print self.mod_name, 'configure_endpoints'
+        if self.owner and self.configured:
+            for k, v in self.actions.iteritems():
+                # print 'about to configure %s\n' % (k)
+                v.configure()
+
 
 class Handle_Default(Helper_Base):
 
     def __init__(self):
         self.mod_name = self.__class__.__name__
         self.owner = None
+        self.config = None
+        self.configured = False
 
     def on_get(self, req, resp, resource):
         resp.content_type = 'text/text'
         try:
             resp.body = self.mod_name + ' found: %s' % (resource)
         except:  # pragma: no cover
-            pass
+            resp.body = 'failed'
+
+    def configre(self):
+        if not self.owner:
+            return
+
+        if not self.owener.owner:
+            return
+
+        conf = self.owner.owner.Config.get_endpoint('Handle_SectionConfig')
+        name = self.owner.mod_name + ':' + self.mod_name
+
+        self.config = conf.direct_get(name)
+        self.configured = True
 
 nodehistory_interface = NodeHistory()
 nodehistory_interface.add_endpoint('Handle_Default', Handle_Default)

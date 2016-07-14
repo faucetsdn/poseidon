@@ -63,7 +63,7 @@ class Config_Base(object):
 
 
 class Config(Config_Base):
-    """Poseidon Action Rest Interface"""
+    """Poseidon Config Rest Interface"""
 
     def __init__(self):
         super(Config, self).__init__()
