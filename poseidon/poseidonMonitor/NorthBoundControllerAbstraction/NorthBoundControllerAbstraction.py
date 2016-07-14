@@ -19,34 +19,11 @@ Created on 17 May 2016
 """
 import json
 
-
-class Helper_Base(object):  # pragma: no cover
-    """base class for the helper objets"""
-
-    def __init__(self):
-        pass
-
-    def on_post(self, req, resp):
-        pass
-
-    def on_put(self, req, resp, name):
-        pass
-
-    def on_get(self, req, resp):
-        pass
-
-    def on_delete(self, req, resp):
-        pass
+from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
+from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 
 
-class Nbca_Base(object):
-    """NorthBoundControllerAbstraction """
-
-    def __init__(self):
-        self.mod_Name = self.__class__.__name__
-
-
-class NorthBoundControllerAbstraction(Nbca_Base):
+class NorthBoundControllerAbstraction(Monitor_Action_Base):
 
     def __init__(self):
         super(NorthBoundControllerAbstraction, self).__init__()
@@ -70,7 +47,7 @@ class NorthBoundControllerAbstraction(Nbca_Base):
             return None
 
 
-class Handle_Resource(Helper_Base):
+class Handle_Resource(Monitor_Helper_Base):
 
     def __init__(self):
         self.mod_Name = self.__class__.__name__
@@ -83,7 +60,7 @@ class Handle_Resource(Helper_Base):
             pass
 
 
-class Handle_Periodic(Helper_Base):
+class Handle_Periodic(Monitor_Helper_Base):
 
     def __init__(self):
         self.mod_Name = self.__class__.__name__

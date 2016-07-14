@@ -17,34 +17,18 @@
 Created on 17 May 2016
 @author: dgrossman
 """
+from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
+from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 
 
 class Helper_Base(object):  # pragma: no cover
     """base class for the helper objets"""
 
-    def __init__(self):
-        pass
 
-    def on_post(self, req, resp):
-        pass
-
-    def on_put(self, req, resp, name):
-        pass
-
-    def on_get(self, req, resp):
-        pass
-
-
-class NodeHistory_Base(object):
+class NodeHistory(Monitor_Action_Base):
 
     def __init__(self):
-        self.mod_name = self.__class__.__name__
-
-
-class NodeHistory(NodeHistory_Base):
-
-    def __init__(self):
-        super(NodeHistory_Base, self).__init__()
+        super(NodeHistory, self).__init__()
         self.mod_name = self.__class__.__name__
         self.owner = None
         self.actions = dict()
@@ -65,7 +49,7 @@ class NodeHistory(NodeHistory_Base):
             return None
 
 
-class Handle_Default(Helper_Base):
+class Handle_Default(Monitor_Helper_Base):
 
     def __init__(self):
         self.mod_name = self.__class__.__name__
@@ -77,6 +61,7 @@ class Handle_Default(Helper_Base):
             resp.body = self.mod_name + ' found: %s' % (resource)
         except:  # pragma: no cover
             pass
+
 
 nodehistory_interface = NodeHistory()
 nodehistory_interface.add_endpoint('Handle_Default', Handle_Default)
