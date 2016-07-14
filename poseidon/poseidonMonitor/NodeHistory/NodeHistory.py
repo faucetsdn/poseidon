@@ -76,7 +76,7 @@ class Handle_Default(Monitor_Helper_Base):
         except:  # pragma: no cover
             resp.body = 'failed'
 
-    def configre(self):
+    def configure(self):
         if not self.owner:
             return
 
