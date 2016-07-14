@@ -80,7 +80,7 @@ class Handle_Default(Monitor_Helper_Base):
         if not self.owner:
             return
 
-        if not self.owener.owner:
+        if not self.owner.owner:
             return
 
         conf = self.owner.owner.Config.get_endpoint('Handle_SectionConfig')
