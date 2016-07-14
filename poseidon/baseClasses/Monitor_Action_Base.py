@@ -19,7 +19,7 @@ Created on 14 Jul 2016
 """
 
 
-class Monitor_Action_Base(object):
+class Monitor_Action_Base(object):  # pragma: no cover
 
     def __init__(self):
         self.mod_name = self.__class__.__name__
@@ -30,7 +30,10 @@ class Monitor_Action_Base(object):
 
     def set_owner(self, owner):
         self.owner = owner
-        self.config_section_name = self.owner.mod_name + ':' + self.mod_name
+        if self.owner.mod_name is not None:
+            self.config_section_name = self.owner.mod_name + ':' + self.mod_name
+        else:
+            self.config_section_name = 'None:' + self.mod_name
 
     def configure(self):
         if self.owner:
@@ -44,3 +47,19 @@ class Monitor_Action_Base(object):
             for k, v in self.actions.iteritems():
                 # print 'about to configure %s\n' % (k)
                 v.configure()
+
+    def add_endpoint(self, name, handler):
+        a = handler()
+        # print name,handler
+        a.set_owner(self)
+        self.actions[name] = a
+
+    def del_endpoint(self, name):
+        if name in self.actions:
+            self.actions.pop(name)
+
+    def get_endpoint(self, name):
+        if name in self.actions:
+            return self.actions.get(name)
+        else:
+            return None

@@ -29,21 +29,6 @@ class Action(Monitor_Action_Base):
         self.mod_name = self.__class__.__name__
         self.config_section_name = self.mod_name
 
-    def add_endpoint(self, name, handler):
-        a = handler()
-        a.owner = self
-        self.actions[name] = a
-
-    def del_endpoint(self, name):
-        if name in self.actions:
-            self.actions.pop(name)
-
-    def get_endpoint(self, name):
-        if name in self.actions:
-            return self.actions.get(name)
-        else:
-            return None
-
 
 class Handle_Default(Monitor_Helper_Base):
 

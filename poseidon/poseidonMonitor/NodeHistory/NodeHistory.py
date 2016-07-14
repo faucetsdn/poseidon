@@ -21,39 +21,19 @@ from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 
 
-class Helper_Base(object):  # pragma: no cover
-    """base class for the helper objets"""
-
-
 class NodeHistory(Monitor_Action_Base):
 
     def __init__(self):
         super(NodeHistory, self).__init__()
         self.mod_name = self.__class__.__name__
-        self.owner = None
-        self.actions = dict()
-
-    def add_endpoint(self, name, handler):
-        a = handler()
-        a.owner = self
-        self.actions[name] = a
-
-    def del_endpoint(self, name):
-        if name in self.actions:
-            self.actions.pop(name)
-
-    def get_endpoint(self, name):
-        if name in self.actions:
-            return self.actions.get(name)
-        else:
-            return None
+        self.config_section_name = self.mod_name
 
 
 class Handle_Default(Monitor_Helper_Base):
 
     def __init__(self):
+        super(Handle_Default, self).__init__()
         self.mod_name = self.__class__.__name__
-        self.owner = None
 
     def on_get(self, req, resp, resource):
         resp.content_type = 'text/text'

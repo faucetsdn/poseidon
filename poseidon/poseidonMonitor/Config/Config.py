@@ -34,11 +34,12 @@ config_template_path = '/poseidonWork/templates/config.template'
 
 
 class Config(Monitor_Action_Base):
-    """Poseidon Action Rest Interface"""
 
     def __init__(self):
         super(Config, self).__init__()
         self.mod_name = self.__class__.__name__
+        self.config_section_name = self.mod_name
+
         self.config = ConfigParser.ConfigParser()
         if os.environ.get('POSEIDON_CONFIG') is not None:
             print 'From the Environment'
@@ -46,22 +47,7 @@ class Config(Monitor_Action_Base):
         else:
             print 'From the hardcoded value'
             self.config_path = config_template_path
-        self.config.readfp(open(self.config_path))
-
-    def add_endpoint(self, name, handler):
-        a = handler()
-        a.owner = self
-        self.actions[name] = a
-
-    def del_endpoint(self, name):
-        if name in self.actions:
-            self.actions.pop(name)
-
-    def get_endpoint(self, name):
-        if name in self.actions:
-            return self.actions.get(name)
-        else:
-            return None
+        self.config.readfp(open(self.config_path, 'r'))
 
 
 class Handle_FullConfig(Monitor_Helper_Base):
@@ -71,8 +57,8 @@ class Handle_FullConfig(Monitor_Helper_Base):
     """
 
     def __init__(self):
+        super(Handle_FullConfig, self).__init__()
         self.mod_name = self.__class__.__name__
-        self.owner = None
 
     def direct_get(self):
         retval = None
@@ -97,17 +83,17 @@ class Handle_SectionConfig(Monitor_Helper_Base):
     """
 
     def __init__(self):
+        super(Handle_SectionConfig, self).__init__()
         self.mod_name = self.__class__.__name__
-        self.owner = None
 
     # direct way
     def direct_get(self, section):
-        # print '*************** %s getting %s' % (self.mod_name,section)
         retval = None
         try:
             retval = self.owner.config.items(section)
         except:
             retval = 'Failed to find section: %s' % (section)
+
         return retval
 
     # rest way
@@ -123,8 +109,8 @@ class Handle_FieldConfig(Monitor_Helper_Base):
     """
 
     def __init__(self):
+        super(Handle_FieldConfig, self).__init__()
         self.mod_name = self.__class__.__name__
-        self.owner = None
 
     def direct_get(self, field, section):
         retval = ''

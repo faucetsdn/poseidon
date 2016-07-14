@@ -31,7 +31,10 @@ class Monitor_Helper_Base(object):  # pragma: no cover
 
     def set_owner(self, owner):
         self.owner = owner
-        self.config_section_name = self.owner.mod_name + ':' + self.mod_name
+        if self.owner.mod_name is not None:
+            self.config_section_name = self.owner.mod_name + ':' + self.mod_name
+        else:
+            self.config_section_name = 'None:' + self.mod_name
 
     def configure(self):
         # local valid
