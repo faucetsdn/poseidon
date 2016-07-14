@@ -16,3 +16,6 @@ scan_frequency = 5
 key1 = trident
 key2 = theseus
 double key = atlas horses
+
+[Config]
+k = v

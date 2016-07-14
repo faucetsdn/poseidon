@@ -27,35 +27,20 @@ class NorthBoundControllerAbstraction(Monitor_Action_Base):
 
     def __init__(self):
         super(NorthBoundControllerAbstraction, self).__init__()
-        self.mod_Name = self.__class__.__name__
-        self.owner = None
-        self.actions = dict()
-
-    def add_endpoint(self, name, handler):
-        a = handler()
-        a.owner = self
-        self.actions[name] = a
-
-    def del_endpoint(self, name):
-        if name in self.actions:
-            self.actions.pop(name)
-
-    def get_endpoint(self, name):
-        if name in self.actions:
-            return self.actions.get(name)
-        else:
-            return None
+        self.mod_name = self.__class__.__name__
+        self.config_section_name = self.mod_name
 
 
 class Handle_Resource(Monitor_Helper_Base):
 
     def __init__(self):
-        self.mod_Name = self.__class__.__name__
+        super(Handle_Resource, self).__init__()
+        self.mod_name = self.__class__.__name__
 
     def on_get(self, req, resp, resource):
         resp.content_type = 'text/text'
         try:
-            resp.body = self.mod_Name + ' found: %s' % (resource)
+            resp.body = self.mod_name + ' found: %s' % (resource)
         except:  # pragma: no cover
             pass
 
@@ -63,7 +48,8 @@ class Handle_Resource(Monitor_Helper_Base):
 class Handle_Periodic(Monitor_Helper_Base):
 
     def __init__(self):
-        self.mod_Name = self.__class__.__name__
+        super(Handle_Periodic, self).__init__()
+        self.mod_name = self.__class__.__name__
         self.retval = {}
         self.times = 0
         self.owner = None
@@ -73,7 +59,7 @@ class Handle_Periodic(Monitor_Helper_Base):
         # TODO MSG NBCA to get switch state
         # TODO compare to previous switch state
         # TODO schedule something to occur for updated flows
-        self.retval['service'] = self.owner.mod_Name + ':' + self.mod_Name
+        self.retval['service'] = self.owner.mod_name + ':' + self.mod_name
         self.retval['times'] = self.times
         # TODO change response to something reflecting success of traversal
         self.retval['resp'] = 'ok'

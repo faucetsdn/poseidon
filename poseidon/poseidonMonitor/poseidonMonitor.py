@@ -39,19 +39,25 @@ class Register(object):
         self.mod_name = self.__class__.__name__
         self.actions = dict()
         self.Config = config_interface
-        self.Config.owner = self
+        self.Config.set_owner(self)
         self.NodeHistory = nodehistory_interface
-        self.NodeHistory.owner = self
+        self.NodeHistory.set_owner(self)
         self.NorthBoundControllerAbstraction = controller_interface
-        self.NorthBoundControllerAbstraction.owner = self
+        self.NorthBoundControllerAbstraction.set_owner(self)
         self.Action = action_interface
-        self.Action.owner = self
+        self.Action.set_owner(self)
 
         # wire up handlers for Config
+        self.Config.configure()
+        self.Config.configure_endpoints()
 
         # wire up handlers for NodeHistory
+        self.NodeHistory.configure()
+        self.NodeHistory.configure_endpoints()
 
         # wire up handlers for NorthBoundControllerAbstraction
+        self.NorthBoundControllerAbstraction.configure()
+        self.NorthBoundControllerAbstraction.configure_endpoints()
 
         # wire up handlers for Action
         self.Action.configure()
