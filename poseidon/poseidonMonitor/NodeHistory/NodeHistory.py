@@ -22,12 +22,6 @@ from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 
 
-class NodeHistory_Base(object):
-
-    def __init__(self):
-        self.mod_name = self.__class__.__name__
-
-
 class NodeHistory(Monitor_Action_Base):
 
     def __init__(self):
