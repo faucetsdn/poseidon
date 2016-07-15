@@ -248,7 +248,7 @@ paths:
           format: string
         - in: path
           name: doc_id
-          description: id of document to search for 
+          description: id of document to search for
           required: true
           type: string
           format: string
@@ -283,10 +283,10 @@ paths:
           required: true
           type: string
           format: string
-        produces:
-          - application/json
-        tags:
-          - Data
-        responses:
-          '200':
-            description: Returns JSON of query response
+      produces:
+        - application/json
+      tags:
+        - Data
+      responses:
+        '200':
+          description: Returns JSON of query response
