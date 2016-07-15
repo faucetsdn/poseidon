@@ -19,10 +19,30 @@ mock controller for testing
 Created on 14 July 2016
 @author: lanhamt
 """
-import json
-import random
 
 import falcon
+from falcon_cors import CORS
+from os import environ
+import json
+import random
+import falcon
+
+
+def get_allowed():
+    rest_url = 'localhost:8555'
+    if 'ALLOW_ORIGIN' in environ:
+        allow_origin = environ['ALLOW_ORIGIN']
+        host_port = allow_origin.split('//')[1]
+        host = host_port.split(':')[0]
+        port = str(int(host_port.split(':')[1]))
+        rest_url = host + ':' + port
+    else:
+        allow_origin = ''
+    return allow_origin, rest_url
+
+allow_origin, rest_url = get_allowed()
+cors = CORS(allow_origins_list=[allow_origin])
+public_cors = CORS(allow_all_origins=True)
 
 
 class MockController:
@@ -33,3 +53,7 @@ class MockController:
 
     def on_get(self, req, resp):
         resp.body = json.dumps(random.randint(1, 10))
+
+
+api = falcon.API(middleware=[cors.middleware])
+api.add_route('/v1/mock_controller/poll', MockController())

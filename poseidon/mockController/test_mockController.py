@@ -26,7 +26,7 @@ from mockController import MockController
 
 
 application = falcon.API()
-application.add_route('/v1/mock_controller', MockController())
+application.add_route('/v1/mock_controller/poll', MockController())
 
 
 # exposes the application for testing
@@ -36,7 +36,11 @@ def app():
 
 
 def test_controller(client):
-    resp = client.get('/v1/mock_controller')
+    """
+    Tests mock controller get response, response
+    should be json of rand int from 1 to 10.
+    """
+    resp = client.get('/v1/mock_controller/poll')
     assert resp.status == falcon.HTTP_OK
     num = int(resp.body)
     assert num >= 1 and num <= 10
