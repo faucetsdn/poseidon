@@ -14,18 +14,39 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Created on 17 May 2016
+Created on 15 July 2016
 @author: dgrossman
 """
+import os
+import urllib2
+
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
 
 
-class Investigator(Main_Action_Base):
+class Config(Main_Action_Base):
 
     def __init__(self):
-        super(Investigator, self).__init__()
+        super(Config, self).__init__()
         self.mod_name = self.__class__.__name__
+        self.URL = None
+        try:
+            self.URL = os.environ['POSEIDON_CONFIG_URL']
+        except KeyError:
+            print 'cant find POSEIDON_CONFIG_URL'
+            # TODO flag error
+            pass
 
-    pass
+    def get_section(self, section_name):
+        if self.URL is not None:
+            if self.URL[-1] != '/':
+                ask = self.URL + '/' + section_name
+            else:
+                ask = self.URL + section_name
+            retval = urllib2.urlopen(ask).readlines()
+            print ask, retval
+            return retval
+        # TODO flag error?
+        return None
 
-investigator_interface = Investigator()
+
+config_interface = Config()

@@ -17,11 +17,15 @@
 Created on 17 May 2016
 @author: dgrossman
 """
+from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
 
 
-class Scheduler:
+class Scheduler(Main_Action_Base):
 
     def __init__(self):
-        self.modName = 'Scheduler'
+        super(Scheduler, self).__init__()
+        self.mod_name = self.__class__.__name__
 
     pass
+
+scheduler_interface = Scheduler()

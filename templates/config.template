@@ -55,3 +55,15 @@ Config=True
 controller_ip = 0.0.0.0
 controller_port = 8000
 
+[PoseidonMain]
+Config=True
+
+[PoseidonMain:Config]
+Config=True
+
+[PoseidonMain:Investigator]
+Config=True
+
+[PoseidonMain:Scheduler]
+Config=True
+

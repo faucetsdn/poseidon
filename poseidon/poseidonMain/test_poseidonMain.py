@@ -32,8 +32,6 @@ def test_poseidonMain_goTime():
     """
 
     a = PoseidonMain()
-    b = a.goTime()
-    assert b
 
 
 def test_poseidonMain_main():
