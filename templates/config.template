@@ -52,7 +52,6 @@ Config=True
 
 [NorthBoundControllerAbstraction:Handle_Periodic]
 Config=True
+controller_ip = 192.168.99.100
+controller_port = 8000
 
-[mock_controller]
-ip = 192.168.99.100
-port = 8000

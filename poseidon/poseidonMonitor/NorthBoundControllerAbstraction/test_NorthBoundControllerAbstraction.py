@@ -21,12 +21,18 @@ Created on 28 June 2016
 """
 import falcon
 import pytest
+import ast
+
 from NorthBoundControllerAbstraction import controller_interface
+
 
 application = falcon.API()
 application.add_route(
-    '/v1/Nbca/{resource}',
+    '/v1/Nbca/resource/{resource}',
     controller_interface.get_endpoint('Handle_Resource'))
+application.add_route(
+    '/v1/Nbca/periodic',
+    controller_interface.get_endpoint('Handle_Periodic'))
 
 
 # exposes the application for testing
@@ -37,7 +43,20 @@ def app():
 
 def test_NorthBoundControllerAbstraction(client):
     """
-    Tests the PoseidonHisotry class
+    Tests the NorthBoundControllerAbstraction
+    Handle_Resource class
     """
-    resp = client.get('/v1/Nbca/someNbcaRequest')
+    resp = client.get('/v1/Nbca/resource/someNbcaRequest')
     assert resp.status == falcon.HTTP_OK
+
+
+def test_NorthBoundControllerAbstraction_periodic(client):
+    """
+    Tests NorthBoundControllerAbstraction Handle_Periodic
+    class.
+    """
+    resp = client.get('/v1/Nbca/periodic')
+    assert resp.status == falcon.HTTP_OK
+    package = ast.literal_eval(resp.body)
+    assert isinstance(package['times'], int)
+    assert int(package['controller']) <= 10 and int(package['controller']) >= 1

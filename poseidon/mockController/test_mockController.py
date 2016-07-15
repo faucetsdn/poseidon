@@ -36,6 +36,10 @@ def app():
 
 
 def test_controller(client):
+    """
+    Tests mock controller get response, response
+    should be json of rand int from 1 to 10.
+    """
     resp = client.get('/v1/mock_controller/poll')
     assert resp.status == falcon.HTTP_OK
     num = int(resp.body)
