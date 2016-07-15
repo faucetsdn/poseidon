@@ -19,11 +19,13 @@ mock controller for testing
 Created on 14 July 2016
 @author: lanhamt
 """
+
 import falcon
 from falcon_cors import CORS
 from os import environ
-import random
 import json
+import random
+import falcon
 
 
 def get_allowed():
@@ -48,6 +50,7 @@ class MockController:
     On get, returns random integer from
     1 to 10.
     """
+
     def on_get(self, req, resp):
         resp.body = json.dumps(random.randint(1, 10))
 

@@ -37,14 +37,18 @@ class Monitor_Helper_Base(object):  # pragma: no cover
             self.config_section_name = 'None:' + self.mod_name
 
     def configure(self):
+        print self.mod_name, 'configure()'
         # local valid
         if not self.owner:
+            print self.mod_name, 'ownerNull'
             return
         # monitor valid
         if not self.owner.owner:
+            print self.mod_name, 'monitorNull'
             return
         conf = self.owner.owner.Config.get_endpoint('Handle_SectionConfig')
         self.mod_config = conf.direct_get(self.config_section_name)
+        print 'config:', self.config_section_name, ':', self.mod_config
         self.configured = True
 
     def on_post(self, req, resp):

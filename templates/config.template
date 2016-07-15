@@ -1,3 +1,6 @@
+[Monitor]
+Config=True
+
 [database]
 ip = 0.0.0.0
 user = user
@@ -17,8 +20,38 @@ key1 = trident
 key2 = theseus
 double key = atlas horses
 
+[Action]
+Config=True
+
+[Action:Handle_Default]
+Config=True
+
 [Config]
-k = v
+Config=True
+
+[Config:Handle_FullConfig]
+Config=True
+
+[Config:Handle_SectionConfig]
+Config=True
+
+[Config:Handle_FieldConfig]
+Config=True
+
+[NodeHistory]
+Config=True
+
+[NodeHistory:Handle_Default]
+Config=True
+
+[NorthBoundControllerAbstraction]
+Config=True
+
+[NorthBoundControllerAbstraction:Handle_Resource]
+Config=True
+
+[NorthBoundControllerAbstraction:Handle_Periodic]
+Config=True
 
 [mock_controller]
 ip = 192.168.99.100

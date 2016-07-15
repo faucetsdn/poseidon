@@ -182,7 +182,7 @@ paths:
       tags:
         - Data
       responses:
-        ‘200’:
+        '200':
           description: Returns a JSON of names of running databases
   /storage/{database}:
     get:

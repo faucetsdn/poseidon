@@ -50,9 +50,13 @@ class Config(Monitor_Action_Base):
         self.config.readfp(open(self.config_path, 'r'))
 
     def configure(self):
+        print self.mod_name, 'configure'
         if 'Handle_SectionConfig' in self.actions:
+            print self.mod_name, 'configure found'
             self.CONFIG = self.actions['Handle_SectionConfig']
-            self.mod_config = self.CONFIG.direct_get(self.mod_name)
+            self.config_section_name = self.mod_name
+            self.mod_config = self.CONFIG.direct_get(self.config_section_name)
+            print self.mod_name, self.mod_config
             self.configured = True
 
 
@@ -118,6 +122,7 @@ class Handle_FieldConfig(Monitor_Helper_Base):
         self.mod_name = self.__class__.__name__
 
     def direct_get(self, field, section):
+        print 'Handle_SectionConfig:', section
         retval = ''
         try:
             retval = self.owner.config.get(section, field)

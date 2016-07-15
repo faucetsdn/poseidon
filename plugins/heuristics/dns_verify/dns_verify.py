@@ -13,8 +13,6 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
-
 """
 Take parsed pcaps and add all resolved addresses from dns
 to reference new traffic against to determine
@@ -25,12 +23,11 @@ where the DNSRecord is a time store for resolved addresses.
 Created on 22 June 2016
 @author: Travis Lanham, Charlie Lewis
 """
-
-
-import pika
+import ast
 import copy
 import time
-import ast
+
+import pika
 
 """
 wait = True
@@ -70,6 +67,7 @@ class DNSRecord:
     a time-to-live so they will be removed from
     the dict after that time expires.
     """
+
     def __init__(self, addr):
         self.name = addr
         self.resolved = {}
@@ -137,7 +135,7 @@ def verify_dns_record(ch, method, properties, body):
         else:
             # if outbound traffic to non-resolved ip, flag
             if packet['dest_ip'] not in dns_records[src_addr]:
-                return "TODO: signaling packet of interest"
+                return 'TODO: signaling packet of interest'
 
 """
 channel.basic_consume(verify_dns_record, queue=queue_name, no_ack=True)
