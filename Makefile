@@ -128,7 +128,7 @@ build-storage:
 clean-all: clean depends
 	@docker rm -v $(docker ps -a -q -f status=exited) ; docker rmi $(docker images -f "dangling=true" -q)
 	@docker rmi poseidon-monitor
-	@docker rmi poseidon-storagmain
+	@docker rmi poseidon-storage
 	@docker rmi poseidon-main
 	@docker rmi poseidon-api
 	@docker rmi periodically
