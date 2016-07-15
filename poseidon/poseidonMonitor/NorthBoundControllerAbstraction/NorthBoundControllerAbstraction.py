@@ -18,6 +18,7 @@ Created on 17 May 2016
 @author: dgrossman
 """
 import json
+import requests
 
 from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
@@ -63,6 +64,13 @@ class Handle_Periodic(Monitor_Helper_Base):
         self.retval['times'] = self.times
         # TODO change response to something reflecting success of traversal
         self.retval['resp'] = 'ok'
+
+        ip = self.owner.config.get('mock_controller', 'ip')
+        port = self.owner.config.get('mock_controller', 'port')
+
+        resp = requests.get('http://' + ip + ':' + port + '/v1/mock_controller/poll')
+        self.retval['controller'] = resp.body
+
         self.times = self.times + 1
         resp.body = json.dumps(self.retval)
 
