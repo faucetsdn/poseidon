@@ -59,4 +59,9 @@ def test_NorthBoundControllerAbstraction_periodic(client):
     assert resp.status == falcon.HTTP_OK
     package = ast.literal_eval(resp.body)
     assert isinstance(package['times'], int)
-    assert int(package['controller']) <= 10 and int(package['controller']) >= 1
+    assert 'controller' in package
+    assert 'service' in package
+    if 'establish' in package['controller']:
+        assert 'Could not' in package['controller']
+    else:
+        assert int(package['controller']) <= 10 and int(package['controller']) >= 1
