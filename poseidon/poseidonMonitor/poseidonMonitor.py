@@ -33,7 +33,7 @@ from NodeHistory.NodeHistory import nodehistory_interface
 from NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import controller_interface
 
 
-class Register(object):
+class Monitor(object):
 
     def __init__(self):
         self.mod_name = self.__class__.__name__
@@ -48,20 +48,35 @@ class Register(object):
         self.Action.set_owner(self)
 
         # wire up handlers for Config
+        print 'handler Config'
+        # check
         self.Config.configure()
         self.Config.configure_endpoints()
 
         # wire up handlers for NodeHistory
+        print 'handler NodeHistory'
+        # fail
         self.NodeHistory.configure()
         self.NodeHistory.configure_endpoints()
 
         # wire up handlers for NorthBoundControllerAbstraction
+        print 'handler NorthBoundControllerAbstraction'
+        # check
         self.NorthBoundControllerAbstraction.configure()
         self.NorthBoundControllerAbstraction.configure_endpoints()
 
         # wire up handlers for Action
+        print 'handler Action'
+        # check
         self.Action.configure()
         self.Action.configure_endpoints()
+        print '----------------------'
+        self.configSelf()
+
+    def configSelf(self):
+        conf = self.Config.get_endpoint('Handle_SectionConfig')
+        self.mod_configuration = conf.direct_get(self.mod_name)
+        print self.mod_name, ':config:', self.mod_configuration
 
     def add_endpoint(self, name, handler):
         a = handler()
@@ -174,43 +189,43 @@ class PCAPResource:
 api = falcon.API(middleware=[cors.middleware])
 
 # register the local classes
-register = Register()
-register.add_endpoint('Handle_PCAP', PCAPResource)
-register.add_endpoint('Handle_Yaml', SwaggerAPI)
-register.add_endpoint('Handle_Version', VersionResource)
+poseidon_monitor = Monitor()
+poseidon_monitor.add_endpoint('Handle_PCAP', PCAPResource)
+poseidon_monitor.add_endpoint('Handle_Yaml', SwaggerAPI)
+poseidon_monitor.add_endpoint('Handle_Version', VersionResource)
 
 # make sure to update the yaml file when you add a new route
 
 # 'local' routes
-api.add_route('/v1/version', register.get_endpoint('Handle_Version'))
+api.add_route('/v1/version', poseidon_monitor.get_endpoint('Handle_Version'))
 api.add_route('/v1/pcap/{pcap_file}/{output_type}',
-              register.get_endpoint('Handle_PCAP'))
-api.add_route('/swagger.yaml', register.get_endpoint('Handle_Yaml'))
+              poseidon_monitor.get_endpoint('Handle_PCAP'))
+api.add_route('/swagger.yaml', poseidon_monitor.get_endpoint('Handle_Yaml'))
 
 # access to the other components of PoseidonRest
 
 # nbca routes
 api.add_route('/v1/nbca/{resource}',
-              register.NorthBoundControllerAbstraction
+              poseidon_monitor.NorthBoundControllerAbstraction
               .get_endpoint('Handle_Resource'))
 api.add_route('/v1/polling',
-              register.NorthBoundControllerAbstraction
+              poseidon_monitor.NorthBoundControllerAbstraction
               .get_endpoint('Handle_Periodic'))
 
 # config routes
 api.add_route('/v1/config',
-              register.Config.get_endpoint('Handle_FullConfig'))
+              poseidon_monitor.Config.get_endpoint('Handle_FullConfig'))
 api.add_route('/v1/config/{section}',
-              register.Config.get_endpoint('Handle_SectionConfig'))
+              poseidon_monitor.Config.get_endpoint('Handle_SectionConfig'))
 api.add_route('/v1/config/{section}/{field}',
-              register.Config.get_endpoint('Handle_FieldConfig'))
+              poseidon_monitor.Config.get_endpoint('Handle_FieldConfig'))
 
 # nodehistory routes
 api.add_route('/v1/history/{resource}',
-              register.NodeHistory.get_endpoint('Handle_Default'))
+              poseidon_monitor.NodeHistory.get_endpoint('Handle_Default'))
 
 # action routes
 api.add_route('/v1/action/{resource}',
-              register.Action.get_endpoint('Handle_Default'))
+              poseidon_monitor.Action.get_endpoint('Handle_Default'))
 
 # storage routes
