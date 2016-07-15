@@ -30,9 +30,9 @@ class Config(Main_Action_Base):
         self.mod_name = self.__class__.__name__
         self.URL = None
         try:
-            self.URL = os.environ['POSEIDON_CONFIG']
+            self.URL = os.environ['POSEIDON_CONFIG_URL']
         except KeyError:
-            print 'cant find POSEIDON_CONFIG'
+            print 'cant find POSEIDON_CONFIG_URL'
             # TODO flag error
             pass
 
