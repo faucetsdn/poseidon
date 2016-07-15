@@ -25,7 +25,8 @@ from NorthBoundControllerAbstraction import controller_interface
 
 application = falcon.API()
 application.add_route(
-    '/v1/Nbca/{resource}', controller_interface.get_endpoint('Handle_Resource'))
+    '/v1/Nbca/{resource}',
+    controller_interface.get_endpoint('Handle_Resource'))
 
 
 # exposes the application for testing

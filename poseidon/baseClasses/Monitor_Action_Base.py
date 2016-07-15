@@ -38,16 +38,21 @@ class Monitor_Action_Base(object):  # pragma: no cover
             self.config_section_name = 'None:' + self.mod_name
 
     def configure(self):
+        print self.__class__.__name__, 'Base:configure'
         if self.owner:
+            print self.__class__.__name__, 'configure:owner'
             conf = self.owner.Config.get_endpoint('Handle_SectionConfig')
             self.mod_configuration = conf.direct_get(self.mod_name)
+            print '%s,%s:%s' % (self.__class__.__name__,
+                                self.mod_name,
+                                self.mod_configuration)
             self.configured = True
 
     def configure_endpoints(self):
         # print self.mod_name,'configure_endpoints'
         if self.owner and self.configured:
             for k, v in self.actions.iteritems():
-                # print 'about to configure %s\n' % (k)
+                print 'about to configure %s\n' % (k)
                 v.configure()
 
     def add_endpoint(self, name, handler):
