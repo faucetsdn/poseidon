@@ -13,7 +13,6 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
 """
 Given parsed hex pcaps, pull
 from rabbitmq and generate statistics
@@ -24,12 +23,11 @@ NOTE: need to add a periodic database update
 Created on 22 June 2016
 @author: Travis Lanham
 """
-
-
-import pika
 import ast
 import time
 from collections import defaultdict
+
+import pika
 
 
 """
@@ -70,6 +68,7 @@ class MachineNode:
     as packet statistics (length, frequency of
     communication).
     """
+
     def __init__(self, addr):
         self.machine_addr = addr
         self.num_packets = 0
@@ -96,7 +95,7 @@ class MachineNode:
     def get_avg_packet_len(self):
         """
         Returns the average length of packets this Machine
-        has send and recevied. 
+        has send and recevied.
         """
         return sum(self.packet_lengths) / self.num_packets
 
@@ -126,6 +125,7 @@ class FlowRecord:
     and received from and the frequency as well as
     packet length.
     """
+
     def __init__(self):
         """
         Creates dict of addr->MachineNode to store machine records
@@ -148,14 +148,16 @@ class FlowRecord:
                 node.add_pcap_record(length, dest_addr, False)
                 self.machines[src_addr] = node
             else:
-                self.machines[src_addr].add_pcap_record(length, dest_addr, False)
+                self.machines[src_addr].add_pcap_record(
+                    length, dest_addr, False)
         if d_in_net:
             if dest_addr not in self.machines:
                 node = MachineNode(dest_addr)
                 node.add_pcap_record(length, src_addr, True)
                 self.machines[dest_addr] = node
             else:
-                self.machines[dest_addr].add_pcap_record(length, src_addr, True)
+                self.machines[dest_addr].add_pcap_record(
+                    length, src_addr, True)
 
     def get_machine_node(self, addr):
         """
@@ -183,15 +185,31 @@ def analyze_pcap(ch, method, properties, body, flow):
     global network_machines
 
     pcap = ast.literal_eval(body)
-    if pcap['src_ip'] in network_machines and pcap['dest_ip'] in network_machines:
+    if pcap['src_ip'] in network_machines and pcap[
+            'dest_ip'] in network_machines:
         # both machines in network
-        flow.update(pcap['src_ip'], True, pcap['dest_ip'], True, pcap['length'])
+        flow.update(
+            pcap['src_ip'],
+            True,
+            pcap['dest_ip'],
+            True,
+            pcap['length'])
     elif pcap['src_ip'] in network_machines:
         # machine in network talking to outside
-        flow.update(pcap['src_ip'], True, pcap['dest_ip'], False, pcap['length'])
+        flow.update(
+            pcap['src_ip'],
+            True,
+            pcap['dest_ip'],
+            False,
+            pcap['length'])
     elif pcap['dest_ip'] in network_machines:
         # outside talking to network machine
-        flow.update(pcap['src_ip'], False, pcap['dest_ip'], True, pcap['length'])
+        flow.update(
+            pcap['src_ip'],
+            False,
+            pcap['dest_ip'],
+            True,
+            pcap['length'])
     else:
         # neither machine in network (list needs to be updated)
         pass

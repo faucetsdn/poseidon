@@ -20,24 +20,31 @@ NOTE: responses are returned as json
 Created on 28 June 2016
 @author: dgrossman, lanhamt
 """
-import pytest
-import falcon
 import urllib
-from poseidonStorage import poseidonStorage
-from poseidonStorage import main
-from poseidonStorage import db_database_names
-from poseidonStorage import db_collection_names
+
+import falcon
+import pytest
 from poseidonStorage import db_collection_count
-from poseidonStorage import db_retrieve_doc
+from poseidonStorage import db_collection_names
 from poseidonStorage import db_collection_query
+from poseidonStorage import db_database_names
+from poseidonStorage import db_retrieve_doc
+from poseidonStorage import main
+from poseidonStorage import poseidonStorage
 
 
 application = falcon.API()
 application.add_route('/v1/storage', db_database_names())
 application.add_route('/v1/storage/{database}', db_collection_names())
-application.add_route('/v1/storage/{database}/{collection}', db_collection_count())
-application.add_route('/v1/storage/doc/{database}/{collection}/{doc_id}', db_retrieve_doc())
-application.add_route('/v1/storage/query/{database}/{collection}/{query_str}', db_collection_query())
+application.add_route(
+    '/v1/storage/{database}/{collection}',
+    db_collection_count())
+application.add_route(
+    '/v1/storage/doc/{database}/{collection}/{doc_id}',
+    db_retrieve_doc())
+application.add_route(
+    '/v1/storage/query/{database}/{collection}/{query_str}',
+    db_collection_query())
 
 
 def test_poseidonStorage():
@@ -107,7 +114,8 @@ def test_db_retrieve_doc(client):
     If no document is found then error message
     is returned.
     """
-    resp = client.get('/v1/storage/doc/local/startup_log/ffffffffffffffffffffffff')
+    resp = client.get(
+        '/v1/storage/doc/local/startup_log/ffffffffffffffffffffffff')
     assert resp.status == falcon.HTTP_OK
 
     resp = client.get('/v1/storage/doc/local/startup_log/bad_id')
@@ -121,11 +129,11 @@ def test_db_collection_query(client):
     """
     query = "{u'hostname': u'bad'}"
     query = urllib.unquote(query).encode('utf8')
-    resp = client.get("/v1/storage/query/local/startup_log/" + query)
+    resp = client.get('/v1/storage/query/local/startup_log/' + query)
     assert resp.status == falcon.HTTP_OK
     assert resp.body == '"Valid query performed: no documents found."'
 
     query = 'bad'
-    resp = client.get("/v1/storage/query/local/startup_log/" + query)
+    resp = client.get('/v1/storage/query/local/startup_log/' + query)
     assert resp.status == falcon.HTTP_OK
     assert resp.body == '"Error on query."'
