@@ -19,29 +19,42 @@ poseidonMain
 Created on 29 May 2016
 @author: dgrossman, lanhamt
 """
-import json
-from os import environ
-from subprocess import call
-from subprocess import check_output
-
-from Investigator.Investigator import Investigator
-from Scheduler.Scheduler import Scheduler
+from Config.Config import config_interface
+from Investigator.Investigator import investigator_interface
+from Scheduler.Scheduler import scheduler_interface
 
 
-class PoseidonMain:
+class PoseidonMain(object):
 
     def __init__(self):
-        self.modName = 'PoseidonMain'
+        self.mod_name = self.__class__.__name__
+        self.mod_configuration = None
+        self.config_section_name = self.mod_name
 
-    def goTime(self):
-        main()
-        return True
+        self.Investigator = investigator_interface
+        self.Investigator.set_owner(self)
+
+        self.Scheduler = scheduler_interface
+        self.Scheduler.set_owner(self)
+
+        self.Config = config_interface
+        self.Config.set_owner(self)
+
+        self.Config.configure()
+        self.Config.configure_endpoints()
+
+        self.Investigator.configure()
+        self.Investigator.configure_endpoints()
+
+        self.Scheduler.configure()
+        self.Scheduler.configure_endpoints()
+
+        self.mod_configuration = self.Config.get_section(
+            self.config_section_name)
 
 
 def main():
-    pMain = PoseidonMain()
-    pPlanner = Scheduler()
-    pSurvey = Investigator()
+    pmain = PoseidonMain()
     print 'main'
     return True
 
