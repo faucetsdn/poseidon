@@ -29,9 +29,9 @@ RUN for file in $(find plugins/* -name "requirements.txt"); \
     done
 
 ENV PYTHONUNBUFFERED 0
-EXPOSE 8000
+EXPOSE 8111
 
-ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:8000"]
+ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:8111"]
 CMD ["poseidon.mockController.mockController:api"]
 
 # install pytest
