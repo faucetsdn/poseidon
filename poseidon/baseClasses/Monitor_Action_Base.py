@@ -17,20 +17,30 @@
 Created on 14 Jul 2016
 @author: dgrossman
 """
+from poseidon.baseClasses.Rock_Bottom import Rock_Bottom
+""" Base call stubs
+
+Args:
+
+Attributes:
+actions (dict) : dictionary of (string,instantiated class)
+                 access fo rthte related classes
+"""
 
 
-class Monitor_Action_Base(object):  # pragma: no cover
+class Monitor_Action_Base(Rock_Bottom):  # pragma: no cover
 
     def __init__(self):
-        self.mod_name = self.__class__.__name__
-        self.owner = None
-        self.mod_configuraiton = None
-        self.CONFIG = None
-        self.configured = False
-        self.config_section_name = None
+        super(Monitor_Action_Base, self).__init__()
         self.actions = dict()
 
     def set_owner(self, owner):
+        """set parent class
+
+        Args:
+            owner: class to be contacted when attemptinto use other methods
+        """
+
         self.owner = owner
         if self.owner.mod_name is not None:
             self.config_section_name = self.owner.mod_name + ':' + self.mod_name
@@ -38,34 +48,61 @@ class Monitor_Action_Base(object):  # pragma: no cover
             self.config_section_name = 'None:' + self.mod_name
 
     def configure(self):
+        """get, parse, store configuration internally as dict """
         print self.__class__.__name__, 'Base:configure'
         if self.owner:
             print self.__class__.__name__, 'configure:owner'
+            self.mod_configuration = dict()
             conf = self.owner.Config.get_endpoint('Handle_SectionConfig')
-            self.mod_configuration = conf.direct_get(self.mod_name)
-            print '%s,%s:%s' % (self.__class__.__name__,
-                                self.mod_name,
-                                self.mod_configuration)
-            self.configured = True
+            if conf is not None:
+                for item in conf.direct_get(self.mod_name):
+                    k, v = item
+                    self.mod_configuration[k] = v
+                print '%s,%s:%s' % (self.__class__.__name__,
+                                    self.mod_name,
+                                    self.mod_configuration)
+                self.configured = True
+
+    def first_run(self):
+        """do any special setup after the configure"""
+        pass
 
     def configure_endpoints(self):
+        """call stored classes setups and first runs"""
         # print self.mod_name,'configure_endpoints'
         if self.owner and self.configured:
             for k, v in self.actions.iteritems():
                 print 'about to configure %s\n' % (k)
                 v.configure()
+                v.first_run()
 
     def add_endpoint(self, name, handler):
+        """hosd a class in a dict
+
+        Args:
+            name:str    name of the class to hold
+            handler:    instantiated class to hold
+        """
         a = handler()
         # print name,handler
         a.set_owner(self)
         self.actions[name] = a
 
     def del_endpoint(self, name):
+        """remove a managed class
+
+        Args:
+            name: name of the class to remove
+        """
         if name in self.actions:
             self.actions.pop(name)
 
     def get_endpoint(self, name):
+        """get a managed class
+
+        Args:
+            name: name of the class to get
+        """
         if name in self.actions:
             return self.actions.get(name)
         else:

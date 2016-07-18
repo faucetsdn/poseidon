@@ -21,6 +21,7 @@ import os
 import urllib2
 
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
+DOCKER_URL = 'file:///poseidonWork/templates/config.template'
 
 
 class Config(Main_Action_Base):
@@ -32,9 +33,9 @@ class Config(Main_Action_Base):
         try:
             self.URL = os.environ['POSEIDON_CONFIG_URL']
         except KeyError:
-            print 'cant find POSEIDON_CONFIG_URL'
             # TODO flag error
             pass
+        print 'poseidonMain:Config using', self.URL
 
     def get_section(self, section_name):
         if self.URL is not None:
