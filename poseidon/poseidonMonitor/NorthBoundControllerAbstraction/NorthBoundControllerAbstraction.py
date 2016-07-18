@@ -18,6 +18,7 @@ Created on 17 May 2016
 @author: dgrossman
 """
 import json
+
 import requests
 
 from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
@@ -54,6 +55,21 @@ class Handle_Periodic(Monitor_Helper_Base):
         self.retval = {}
         self.times = 0
         self.owner = None
+        self.controller = {}
+        self.controller['ip'] = None
+        self.controller['port'] = None
+        self.controller['url'] = None
+
+    def first_run(self):
+        if self.configured:
+            self.controller['ip'] = str(
+                self.mod_configuration['controller_ip'])
+            self.controller['port'] = str(
+                self.mod_configuration['controller_port'])
+            self.controller['url'] = 'http://' + self.controller['ip'] + \
+                ':' + self.controller['port'] + '/v1/mock_controller/poll'
+        else:
+            pass
 
     def on_get(self, req, resp):
         """Haneles Get requests"""
@@ -66,13 +82,11 @@ class Handle_Periodic(Monitor_Helper_Base):
         self.retval['resp'] = 'ok'
 
         try:
-            ip = self.owner.owner.Config.get_endpoint('Handle_FieldConfig').direct_get('controller_ip', 'NorthBoundControllerAbstraction:Handle_Periodic')
-            port = self.owner.owner.Config.get_endpoint('Handle_FieldConfig').direct_get('controller_port', 'NorthBoundControllerAbstraction:Handle_Periodic')
-            url = 'http://' + ip + ':' + port + '/v1/mock_controller/poll'
-            controller_resp = requests.get(url)
+            controller_resp = requests.get(self.controller['url'])
             self.retval['controller'] = controller_resp.text
         except:
-            self.retval['controller'] = 'Could not establish connection to controller.'
+            self.retval['controller'] = 'Could not establish connection to %s.' % (
+                self.controller['url'])
 
         self.times = self.times + 1
         resp.body = json.dumps(self.retval)

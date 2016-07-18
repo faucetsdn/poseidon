@@ -37,6 +37,7 @@ class Config(Monitor_Action_Base):
 
     def __init__(self):
         super(Config, self).__init__()
+        self.CONFIG = None
         self.mod_name = self.__class__.__name__
         self.config_section_name = self.mod_name
 

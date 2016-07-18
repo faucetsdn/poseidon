@@ -23,6 +23,17 @@ import os
 
 import pytest
 from Config import config_interface
+from Config import DOCKER_URL
+
+
+def getURL():
+    expected = None
+    try:
+        expected = os.environ['POSEIDON_CONFIG_URL']
+    except KeyError:
+        if os.path.isfile(DOCKER_URL):
+            expected = DOCKER_URL
+    return expected
 
 
 def test_env():
@@ -41,12 +52,9 @@ def test_env():
 
 
 def test_get_BADsection():
-    expected = None
-    try:
-        expected = os.environ['POSEIDON_CONFIG_URL']
-    except KeyError:
-        pass
+    expected = getURL()
 
+    config_interface.URL = expected
     a = config_interface.get_section('DOESNOTEXIST')
 
     if expected is not None:
@@ -56,12 +64,9 @@ def test_get_BADsection():
 
 
 def test_get_GOODsection():
-    expected = None
-    try:
-        expected = os.environ['POSEIDON_CONFIG_URL']
-    except KeyError:
-        pass
+    expected = getURL()
 
+    config_interface.URL = expected
     a = config_interface.get_section('PoseidonMain:Config')
 
     if expected is not None:
