@@ -18,6 +18,7 @@ Created on 17 May 2016
 @author: dgrossman
 """
 import json
+import requests
 
 from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
@@ -63,6 +64,16 @@ class Handle_Periodic(Monitor_Helper_Base):
         self.retval['times'] = self.times
         # TODO change response to something reflecting success of traversal
         self.retval['resp'] = 'ok'
+
+        try:
+            ip = self.owner.owner.Config.get_endpoint('Handle_FieldConfig').direct_get('controller_ip', 'NorthBoundControllerAbstraction:Handle_Periodic')
+            port = self.owner.owner.Config.get_endpoint('Handle_FieldConfig').direct_get('controller_port', 'NorthBoundControllerAbstraction:Handle_Periodic')
+            url = 'http://' + ip + ':' + port + '/v1/mock_controller/poll'
+            controller_resp = requests.get(url)
+            self.retval['controller'] = controller_resp.text
+        except:
+            self.retval['controller'] = 'Could not establish connection to controller.'
+
         self.times = self.times + 1
         resp.body = json.dumps(self.retval)
 

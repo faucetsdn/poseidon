@@ -64,6 +64,7 @@ monitor: storage api clean-monitor build-monitor
 	portApi=$$(docker port poseidon-api 8080/tcp | sed 's/^.*://'); \
 	docker run --name poseidon-monitor -dp 8555:8000 -e ALLOW_ORIGIN=$$docker_url:$$portApi poseidon-monitor ; \
 	port=$$(docker port poseidon-monitor 8000/tcp | sed 's/^.*://'); \
+	docker run --name mock-controller -d -e ALLOW_ORIGIN=$$docker_url:8000 mock-controller; \
 	echo "poseidon-monitor can be accessed here: $$docker_url:$$port"; \
 	echo
 
@@ -107,6 +108,7 @@ build: depends
 	docker build -t poseidon-notebooks -f Dockerfile.notebooks .
 	docker build -t poseidon-monitor  -f Dockerfile.monitor .
 	docker build -t poseidon-main  -f Dockerfile.main .
+	docker build -t mock-controller -f Dockerfile.mock .
 
 build-periodically:
 	docker build -t periodically -f Dockerfile.periodically .
@@ -126,6 +128,9 @@ build-notebooks:
 build-main:
 	docker build -t poseidon-main  -f Dockerfile.main .
 
+build-mock-controller:
+	docker build -t mock-controller -f Dockerfile.mock .
+
 build-storage:
 	docker pull mongo
 
@@ -135,6 +140,9 @@ clean-all: clean depends
 	@docker rmi poseidon-main
 	@docker rmi poseidon-api
 	@docker rmi periodically
+
+clean-mock-controller:
+	@docker ps -aqf "name=mock-controller" | xargs docker rm -f
 
 clean-periodically: depends
 	@docker ps -afq "name=periodically" | xargs docker rm -f
