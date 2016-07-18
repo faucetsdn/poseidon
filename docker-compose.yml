@@ -1,14 +1,14 @@
 version: '2'
 
 services:
-    #api:
-    #image: poseidon-api
-    #container_name: poseidon-api
-    #build:
-    #  context: ./api
-    #  dockerfile: Dockerfile
-    #ports:
-    #  - 8080
+  api:
+    image: poseidon-api
+    container_name: poseidon-api
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - 8080
   periodically:
     image: poseidon-periodically
     container_name: poseidon-periodically
