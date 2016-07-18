@@ -43,6 +43,8 @@ services:
       - PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
       - PYTHONUNBUFFERED 0
   monitor:
+    depends_on:
+      - api
     environment:
       - ALLOW_ORIGIN="$api_url"
     image: poseidon-monitor
