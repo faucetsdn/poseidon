@@ -64,7 +64,7 @@ monitor: storage api clean-monitor build-monitor
 	portApi=$$(docker port poseidon-api 8080/tcp | sed 's/^.*://'); \
 	docker run --name poseidon-monitor -dp 8555:8000 -e ALLOW_ORIGIN=$$docker_url:$$portApi poseidon-monitor ; \
 	port=$$(docker port poseidon-monitor 8000/tcp | sed 's/^.*://'); \
-	docker run --name mock-controller -d -e ALLOW_ORIGIN=$$docker_url:8000 mock-controller; \
+	docker run --name mock-controller -dp 8111:8111 -e ALLOW_ORIGIN=$$docker_url:8111 mock-controller; \
 	echo "poseidon-monitor can be accessed here: $$docker_url:$$port"; \
 	echo
 
