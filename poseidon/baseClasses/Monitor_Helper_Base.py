@@ -17,26 +17,29 @@
 Created on 14 July 2016
 @author: dgrossman
 """
+from poseidon.baseClasses.Rock_Bottom import Rock_Bottom
 
 
-class Monitor_Helper_Base(object):  # pragma: no cover
+class Monitor_Helper_Base(Rock_Bottom):  # pragma: no cover
     """base class for the helper objets"""
 
     def __init__(self):
-        self.mod_name = None
-        self.owner = None
-        self.mod_config = None
-        self.configured = False
-        self.config_section_name = None
+        super(Monitor_Helper_Base, self).__init__()
 
     def set_owner(self, owner):
+        """set the parent class
+
+        Args:
+            owner: class to be contacted to use other methods
+        """
         self.owner = owner
         if self.owner.mod_name is not None:
-            self.config_section_name = self.owner.mod_name + ':' + self.mod_name
+            self.config_section_name = self.owner .mod_name + ':' + self.mod_name
         else:
             self.config_section_name = 'None:' + self.mod_name
 
     def configure(self):
+        """get, parse, store configuration internally as dict"""
         print self.mod_name, 'configure()'
         # local valid
         if not self.owner:
@@ -47,18 +50,29 @@ class Monitor_Helper_Base(object):  # pragma: no cover
             print self.mod_name, 'monitorNull'
             return
         conf = self.owner.owner.Config.get_endpoint('Handle_SectionConfig')
-        self.mod_config = conf.direct_get(self.config_section_name)
-        print 'config:', self.config_section_name, ':', self.mod_config
+        self.mod_configuration = dict()
+        for item in conf.direct_get(self.config_section_name):
+            k, v = item
+            self.mod_configuration[k] = v
+        print 'config:', self.config_section_name, ':', self.mod_configuration
         self.configured = True
 
+    def first_run(self):
+        """do special setup after configure"""
+        pass
+
     def on_post(self, req, resp):
+        """handle jrandom rest case"""
         pass
 
     def on_put(self, req, resp, name):
+        """handle jrandom rest case"""
         pass
 
     def on_get(self, req, resp):
+        """handle jrandom rest case"""
         pass
 
     def on_delete(self, req, resp):
+        """handle jrandom rest case"""
         pass

@@ -51,24 +51,28 @@ class Monitor(object):
         print 'handler Config'
         # check
         self.Config.configure()
+        self.Config.first_run()
         self.Config.configure_endpoints()
 
         # wire up handlers for NodeHistory
         print 'handler NodeHistory'
         # fail
         self.NodeHistory.configure()
+        self.NodeHistory.first_run()
         self.NodeHistory.configure_endpoints()
 
         # wire up handlers for NorthBoundControllerAbstraction
         print 'handler NorthBoundControllerAbstraction'
         # check
         self.NorthBoundControllerAbstraction.configure()
+        self.NorthBoundControllerAbstraction.first_run()
         self.NorthBoundControllerAbstraction.configure_endpoints()
 
         # wire up handlers for Action
         print 'handler Action'
         # check
         self.Action.configure()
+        self.Action.first_run()
         self.Action.configure_endpoints()
         print '----------------------'
         self.configSelf()

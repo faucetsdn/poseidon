@@ -17,19 +17,30 @@
 Created on  15 July 2016
 @author: dgrossman
 """
+from poseidon.baseClasses.Rock_Bottom import Rock_Bottom
 
 
-class Main_Action_Base(object):  # pragma: no cover
+class Main_Action_Base(Rock_Bottom):  # pragma: no cover
+    """ Basic call stubs
+
+    Args:
+
+    Attributes:
+        actions (dict): dictionary of (string,instantiated class)
+                        access for related classes
+    """
 
     def __init__(self):
-        self.mod_name = self.__class__.__name__
-        self.owner = None
-        self.mod_configuraiton = None
-        self.configured = False
-        self.config_section_name = None
+        super(Main_Action_Base, self).__init__()
         self.actions = dict()
 
     def set_owner(self, owner):
+        """set parent class
+
+        Args:
+            owner: class be contacted when attempting to use other methods
+
+        """
         self.owner = owner
         if self.owner.mod_name is not None:
             self.config_section_name = self.owner.mod_name + ':' + self.mod_name
@@ -37,26 +48,51 @@ class Main_Action_Base(object):  # pragma: no cover
             self.config_section_name = 'None:' + self.mod_name
 
     def configure(self):
+        """get, parse, store configuration internally as dict """
         if self.owner:
-            self.mod_configuration = self.owner.Config.get_section(
-                self.config_section_name)
+            self.mod_configuration = dict()
+            for item in self.owner.Config.get_section(self.config_section_name):
+                k, v = item
+                self.mod_configuration[k] = v
             self.configured = True
 
+    def first_run(self):
+        """do any special setup after configure"""
+        pass
+
     def configure_endpoints(self):
+        """call stored classes setups and first_runs"""
         if self.owner and self.configured:
             for k, v in self.actions.iteritems():
                 v.configure()
+                v.first_run()
 
     def add_endpoint(self, name, handler):
+        """hold a class in a dict
+
+        Args:
+            name:str    name of the class to hold
+            handler:    instantiated class to hold
+        """
         a = handler()
         a.set_owner(self)
         self.actions[name] = a
 
     def del_endpoint(self, name):
+        """remove a managed class
+
+        Args:
+            name: name of the class to remove
+        """
         if name in self.actions:
             self.actions.pop(name)
 
     def get_endpoint(self, name):
+        """search and return managed class
+
+        Args:
+            name: name of class to mangage
+        """
         if name in self.actions:
             return self.actions.get(name)
         else:
