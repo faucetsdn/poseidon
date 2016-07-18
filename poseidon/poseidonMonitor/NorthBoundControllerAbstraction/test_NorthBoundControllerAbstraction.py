@@ -19,10 +19,10 @@ Test module for NorthBoundControllerAbstraction.py
 Created on 28 June 2016
 @author: dgrossman
 """
-import falcon
-import pytest
 import ast
 
+import falcon
+import pytest
 from NorthBoundControllerAbstraction import controller_interface
 
 
@@ -64,4 +64,6 @@ def test_NorthBoundControllerAbstraction_periodic(client):
     if 'establish' in package['controller']:
         assert 'Could not' in package['controller']
     else:
-        assert int(package['controller']) <= 10 and int(package['controller']) >= 1
+        assert int(
+            package['controller']) <= 10 and int(
+            package['controller']) >= 1
