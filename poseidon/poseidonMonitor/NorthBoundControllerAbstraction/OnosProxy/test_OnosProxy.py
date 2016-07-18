@@ -22,8 +22,11 @@ Test module for OnosProxy.
 import pytest
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.OnosProxy.OnosProxy import OnosProxy
 
+import os
 import json
 from httmock import urlmatch, response, HTTMock
+
+cur_dir = os.path.dirname(os.path.realpath(__file__))
 
 def mock_factory(regex, file):
     @urlmatch(netloc=regex)
@@ -43,16 +46,16 @@ def test_OnosProxy():
     assert proxy
 
 def test_OnosProxy_get_devices():
-    with HTTMock(mock_factory(r'.*', "devices.sample")):
+    with HTTMock(mock_factory(r'.*', os.path.join(cur_dir, "devices.sample"))):
         proxy = OnosProxy("http://localhost/onos/v1/", auth=("user", "pass"))
         r = proxy.get_devices()
 
 def test_OnosProxy_get_hosts():
-    with HTTMock(mock_factory(r'.*', "hosts.sample")):
+    with HTTMock(mock_factory(r'.*', os.path.join(cur_dir, "hosts.sample"))):
         proxy = OnosProxy("http://localhost/onos/v1/", auth=("user", "pass"))
         r = proxy.get_hosts()
 
 def test_OnosProxy_get_flows():
-    with HTTMock(mock_factory(r'.*', "flows.sample")):
+    with HTTMock(mock_factory(r'.*', os.path.join(cur_dir, "flows.sample"))):
         proxy = OnosProxy("http://localhost/onos/v1/", auth=("user", "pass"))
         r = proxy.get_flows()
