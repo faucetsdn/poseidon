@@ -103,7 +103,7 @@ docs: clean-docs build
 	echo; \
 	echo "The docs can be accessed here: $$doc_url"
 
-compose: build
+compose:
 	docker-compose up -d
 
 build: depends

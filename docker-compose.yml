@@ -9,6 +9,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - 8080
+    environment:
+      - ALLOW_ORIGIN=$$docker_url:$$portApi
   periodically:
     image: poseidon-periodically
     container_name: poseidon-periodically
@@ -42,11 +44,12 @@ services:
     environment:
       - PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
       - PYTHONUNBUFFERED 0
+      - ALLOW_ORIGIN=$$docker_url:$$portApi
   monitor:
     depends_on:
       - api
     environment:
-      - ALLOW_ORIGIN="$api_url"
+      - ALLOW_ORIGIN=$$docker_url:$$portApi
     image: poseidon-monitor
     container_name: poseidon-monitor
     build:
