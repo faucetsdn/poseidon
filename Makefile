@@ -5,6 +5,10 @@ printPlaces:
 periodically: clean-periodically build-periodically
 	docker run --net=container:poseidon-monitor periodically
 
+killcrap:
+	find . -name \*.pyc -exec rm -rf {} \;
+	find . -name __pycache__ -type d -exec rm -rf {} \;
+
 api: clean-api build-api
 	@ if [ ! -z "${DOCKER_HOST}" ]; then \
 		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
