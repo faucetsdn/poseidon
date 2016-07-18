@@ -103,6 +103,9 @@ docs: clean-docs build
 	echo; \
 	echo "The docs can be accessed here: $$doc_url"
 
+compose: build
+	docker-compose up -d
+
 build: depends
 	# docker-compose build 
 	docker build -t poseidon-notebooks -f Dockerfile.notebooks .
