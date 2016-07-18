@@ -82,16 +82,11 @@ class Handle_Periodic(Monitor_Helper_Base):
         self.retval['resp'] = 'ok'
 
         try:
-            ip = self.owner.owner.Config.get_endpoint('Handle_FieldConfig').direct_get(
-                'controller_ip', 'NorthBoundControllerAbstraction:Handle_Periodic')
-            port = self.owner.owner.Config.get_endpoint('Handle_FieldConfig').direct_get(
-                'controller_port', 'NorthBoundControllerAbstraction:Handle_Periodic')
-            url = 'http://' + ip + ':' + port + '/v1/mock_controller/poll'
-            controller_resp = requests.get(url)
+            controller_resp = requests.get(self.controller['url'])
             self.retval['controller'] = controller_resp.text
         except:
-            self.retval[
-                'controller'] = 'Could not establish connection to controller.'
+            self.retval['controller'] = 'Could not establish connection to %s.' % (
+                self.controller['url'])
 
         self.times = self.times + 1
         resp.body = json.dumps(self.retval)

@@ -49,13 +49,14 @@ class Monitor_Helper_Base(Rock_Bottom):  # pragma: no cover
         if not self.owner.owner:
             print self.mod_name, 'monitorNull'
             return
-        conf = self.owner.owner.Config.get_endpoint('Handle_SectionConfig')
         self.mod_configuration = dict()
-        for item in conf.direct_get(self.config_section_name):
-            k, v = item
-            self.mod_configuration[k] = v
-        print 'config:', self.config_section_name, ':', self.mod_configuration
-        self.configured = True
+        conf = self.owner.owner.Config.get_endpoint('Handle_SectionConfig')
+        if conf is not None:
+            for item in conf.direct_get(self.config_section_name):
+                k, v = item
+                self.mod_configuration[k] = v
+            print 'config:', self.config_section_name, ':', self.mod_configuration
+            self.configured = True
 
     def first_run(self):
         """do special setup after configure"""

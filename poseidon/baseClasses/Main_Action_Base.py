@@ -51,10 +51,12 @@ class Main_Action_Base(Rock_Bottom):  # pragma: no cover
         """get, parse, store configuration internally as dict """
         if self.owner:
             self.mod_configuration = dict()
-            for item in self.owner.Config.get_section(self.config_section_name):
-                k, v = item
-                self.mod_configuration[k] = v
-            self.configured = True
+            conf = self.owner.Config.get_section(self.config_section_name)
+            if conf is not None:
+                for item in conf:
+                    k, v = item
+                    self.mod_configuration[k] = v
+                self.configured = True
 
     def first_run(self):
         """do any special setup after configure"""

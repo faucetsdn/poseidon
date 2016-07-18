@@ -24,11 +24,12 @@ class Rock_Bottom(object):
     Attributes:
         configured (boolean): True when class configuration is valid
         config_section_name (str): section key for this class
-                                   upper level names are concatenated before
-                                   lower level names
+        upper level names are concatenated before lower level names
+
         mod_name (str): name of this module
         mod_configuration (dict): key value store of config items
         owner (class) : instantiated class holding this class
+
     """
 
     def __init__(self):
