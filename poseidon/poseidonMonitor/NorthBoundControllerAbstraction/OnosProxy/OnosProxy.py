@@ -22,7 +22,7 @@ Created on 11 July 2016
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.ControllerProxy.ControllerProxy import ControllerProxy
 
 class OnosProxy(ControllerProxy):
-    def __init__(self, base_uri, auth):
+    def __init__(self, base_uri, auth=None):
         super(OnosProxy, self).__init__(base_uri)
         self.auth = auth
 
