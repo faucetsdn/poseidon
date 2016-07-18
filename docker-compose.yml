@@ -53,8 +53,8 @@ services:
     ports:
       - 8000
   main:
-    image: poseidon
-    container_name: poseidon
+    image: poseidon-main
+    container_name: poseidon-main
     build:
       context: .
       dockerfile: Dockerfile.main
