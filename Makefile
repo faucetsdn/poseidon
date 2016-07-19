@@ -104,6 +104,17 @@ docs: clean-docs build
 	echo "The docs can be accessed here: $$doc_url"
 
 compose:
+	@ if [ ! -z "${DOCKER_HOST}" ]; then \
+		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
+		docker_url=$$docker_host; \
+	else \
+		if [ ! -z "${DOCKERFORMAC}" ]; then \
+			docker_url=localhost; \
+		else \
+			echo "No DOCKER_HOST environment variable set."; \
+			exit 1; \
+		fi; \
+	fi; \
 	docker-compose up -d
 
 build: depends
