@@ -115,6 +115,7 @@ compose:
 			exit 1; \
 		fi; \
 	fi; \
+	export DOCKER_URL=$$docker_url; \
 	docker-compose up -d
 
 build: depends
