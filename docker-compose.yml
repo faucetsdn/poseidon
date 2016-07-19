@@ -27,6 +27,7 @@ services:
       - 8111
     environment:
       - ALLOW_ORIGIN = http://$DOCKER_URL:8111
+    network_mode: "container:poseidon-monitor"
   monitor:
     depends_on:
       - api
@@ -69,3 +70,4 @@ services:
       dockerfile: Dockerfile.periodically
     ports:
       - 8000
+    network_mode: "container:poseidon-monitor"
