@@ -9,8 +9,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - 8080
-    environment:
-      - ALLOW_ORIGIN=(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-)
+    env_file: poseidon.env
   periodically:
     image: poseidon-periodically
     container_name: poseidon-periodically
@@ -19,6 +18,7 @@ services:
       dockerfile: Dockerfile.periodically
     ports:
       - 8000
+    env_file: poseidon.env
   docs:
     image: poseidon-docs
     container_name: poseidon-docs
@@ -27,6 +27,7 @@ services:
       dockerfile: Dockerfile.docs
     ports:
       - 8000
+    env_file: poseidon.env
   mock:
     image: mock-controller
     container_name: mock-controller
@@ -35,12 +36,10 @@ services:
       dockerfile: Dockerfile.mock
     ports:
       - 8111
-    command: docker run --name mock-controller -dp 8111:8111 -e ALLOW_ORIGIN=$$docker_url:8111 mock-controller
+    env_file: poseidon.env
   monitor:
     depends_on:
       - api
-    environment:
-      - ALLOW_ORIGIN=(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-)
     image: poseidon-monitor
     container_name: poseidon-monitor
     build:
@@ -48,7 +47,7 @@ services:
       dockerfile: Dockerfile.monitor
     ports:
       - 8000
-    command: docker run --name poseidon-monitor -dp 8555:8000 -e ALLOW_ORIGIN=$$docker_url:$$portApi poseidon-monitor
+    env_file: poseidon.env
   main:
     image: poseidon-main
     container_name: poseidon-main
@@ -57,12 +56,14 @@ services:
       dockerfile: Dockerfile.main
     ports:
       - 8000
+    env_file: poseidon.env
   storageWorkaround:
     # http://www.diogogmt.com/running-mongodb-with-docker-and-compose/
     container_name: poseidon-storageWorkaround
     image: mongo
     volumes:
       - /data/db
+    env_file: poseidon.env
   storage:
     container_name: poseidon-storage
     image: mongo
@@ -71,3 +72,4 @@ services:
     ports:
       - 27017
     command: --smallfiles --rest --auth
+    env_file: poseidon.env
