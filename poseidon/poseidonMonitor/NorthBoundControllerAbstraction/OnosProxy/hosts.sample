@@ -1,0 +1,1 @@
+{"hosts":[{"id":"6A:5C:62:D3:13:1A/None","mac":"6A:5C:62:D3:13:1A","vlan":"None","ipAddresses":["10.0.0.1"],"location":{"elementId":"of:0000000000000001","port":"1"}},{"id":"0A:37:9B:44:59:59/None","mac":"0A:37:9B:44:59:59","vlan":"None","ipAddresses":["10.0.0.2"],"location":{"elementId":"of:0000000000000001","port":"2"}}]}
