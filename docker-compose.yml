@@ -9,14 +9,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - 12345:8080
-  periodically:
-    image: poseidon-periodically
-    container_name: poseidon-periodically
-    build:
-      context: .
-      dockerfile: Dockerfile.periodically
-    ports:
-      - 8000
   docs:
     image: poseidon-docs
     container_name: poseidon-docs
@@ -34,7 +26,7 @@ services:
     ports:
       - 8111
     environment:
-      - ALLOW_ORIGIN = http://$$docker_url:8111
+      - ALLOW_ORIGIN = http://$DOCKER_URL:8111
   monitor:
     depends_on:
       - api
@@ -46,7 +38,7 @@ services:
     ports:
       - 8000
     environment:
-      - ALLOW_ORIGIN = http://$$docker_url:12345
+      - ALLOW_ORIGIN = http://$DOCKER_URL:12345
   main:
     image: poseidon-main
     container_name: poseidon-main
@@ -69,3 +61,11 @@ services:
     ports:
       - 27017
     command: --smallfiles --rest --auth
+  periodically:
+    image: poseidon-periodically
+    container_name: poseidon-periodically
+    build:
+      context: .
+      dockerfile: Dockerfile.periodically
+    ports:
+      - 8000
