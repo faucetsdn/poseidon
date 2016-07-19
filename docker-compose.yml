@@ -10,7 +10,7 @@ services:
     ports:
       - 8080
     environment:
-      - ALLOW_ORIGIN=$$docker_url:$$portApi
+      - ALLOW_ORIGIN=(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-)
   periodically:
     image: poseidon-periodically
     container_name: poseidon-periodically
@@ -19,9 +19,6 @@ services:
       dockerfile: Dockerfile.periodically
     ports:
       - 8000
-    environment:
-      - PYTHONUNBUFFERED 0
-      - PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
   docs:
     image: poseidon-docs
     container_name: poseidon-docs
@@ -30,9 +27,6 @@ services:
       dockerfile: Dockerfile.docs
     ports:
       - 8000
-    environment:
-      - PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
-      - PYTHONUNBUFFERED 0
   mock:
     image: mock-controller
     container_name: mock-controller
@@ -41,15 +35,12 @@ services:
       dockerfile: Dockerfile.mock
     ports:
       - 8111
-    environment:
-      - PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
-      - PYTHONUNBUFFERED 0
-      - ALLOW_ORIGIN=$$docker_url:$$portApi
+    command: docker run --name mock-controller -dp 8111:8111 -e ALLOW_ORIGIN=$$docker_url:8111 mock-controller
   monitor:
     depends_on:
       - api
     environment:
-      - ALLOW_ORIGIN=$$docker_url:$$portApi
+      - ALLOW_ORIGIN=(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-)
     image: poseidon-monitor
     container_name: poseidon-monitor
     build:
@@ -57,6 +48,7 @@ services:
       dockerfile: Dockerfile.monitor
     ports:
       - 8000
+    command: docker run --name poseidon-monitor -dp 8555:8000 -e ALLOW_ORIGIN=$$docker_url:$$portApi poseidon-monitor
   main:
     image: poseidon-main
     container_name: poseidon-main
