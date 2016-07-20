@@ -32,6 +32,6 @@ RUN py.test -v  \
 --cov-report term-missing --cov-config .coveragerc
 
 ENV PYTHONUNBUFFERED 0
-EXPOSE 6666:8005
+EXPOSE 6666:8006
 
 CMD ["python", "poseidon/periodically/periodically.py","1","-1","http://localhost:6666/v1/polling"]
