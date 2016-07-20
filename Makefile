@@ -116,7 +116,7 @@ compose: #build
 		fi; \
 	fi; \
 	export DOCKER_URL=$$docker_url; \
-	docker-compose up -d
+	docker-compose up -d --force-recreate
 
 build: depends
 	# docker-compose build 
