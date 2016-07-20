@@ -1,13 +1,13 @@
 version: '2'
 
-# PORTS
+#  PORTS
 #     api:     1111:8001
 #     docs:    2222:8002
 #     mock:    3333:8003
 #     monitor: 4444:8004
-#              6666:8006 for periodically
 #     main:    5555:8005
 #     storage: 27017:27017
+#     periodically: 9999:8009
 
 services:
   api:
@@ -27,6 +27,8 @@ services:
     ports:
       - 2222:8002
   mock:
+    depends_on:
+      - monitor
     image: mock-controller
     container_name: mock-controller
     build:
@@ -34,8 +36,6 @@ services:
       dockerfile: Dockerfile.mock
     environment:
       - ALLOW_ORIGIN = http://$DOCKER_URL:8003
-    depends_on:
-      - monitor
     ports:
       - 3333:8003
   monitor:
@@ -48,7 +48,6 @@ services:
       dockerfile: Dockerfile.monitor
     ports:
       - 4444:8004
-      - 6666:8006
     environment:
       - ALLOW_ORIGIN = http://$DOCKER_URL:1111
   main:
@@ -74,11 +73,14 @@ services:
       - 27017:27017
     command: --smallfiles --rest --auth
   periodically:
+    depends_on:
+      - monitor
     image: poseidon-periodically
     container_name: poseidon-periodically
     build:
       context: .
       dockerfile: Dockerfile.periodically
-    network_mode: "container:poseidon-monitor"
-    depends_on:
+    links:
       - monitor
+    ports:
+      - 9999:8009
