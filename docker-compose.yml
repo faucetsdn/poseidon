@@ -1,5 +1,14 @@
 version: '2'
 
+# PORTS
+#     api:     1111:8001
+#     docs:    2222:8002
+#     mock:    3333:8003
+#     monitor: 4444:8004
+#              6666:8006 for periodically
+#     main:    5555:8005
+#     storage: 27017:27017
+
 services:
   api:
     image: poseidon-api
@@ -8,7 +17,7 @@ services:
       context: ./api
       dockerfile: Dockerfile
     ports:
-      - 12345:8080
+      - 1111:8001
   docs:
     image: poseidon-docs
     container_name: poseidon-docs
@@ -16,7 +25,7 @@ services:
       context: .
       dockerfile: Dockerfile.docs
     ports:
-      - 8000
+      - 2222:8002
   mock:
     image: mock-controller
     container_name: mock-controller
@@ -24,8 +33,11 @@ services:
       context: .
       dockerfile: Dockerfile.mock
     environment:
-      - ALLOW_ORIGIN = http://$DOCKER_URL:8111
-    network_mode: "container:poseidon-monitor"
+      - ALLOW_ORIGIN = http://$DOCKER_URL:8003
+    depends_on:
+      - monitor
+    ports:
+      - 3333:8003
   monitor:
     depends_on:
       - api
@@ -35,9 +47,10 @@ services:
       context: .
       dockerfile: Dockerfile.monitor
     ports:
-      - 8000
+      - 4444:8004
+      - 6666:8006
     environment:
-      - ALLOW_ORIGIN = http://$DOCKER_URL:12345
+      - ALLOW_ORIGIN = http://$DOCKER_URL:1111
   main:
     image: poseidon-main
     container_name: poseidon-main
@@ -45,7 +58,7 @@ services:
       context: .
       dockerfile: Dockerfile.main
     ports:
-      - 8000
+      - 5555:8005
   storageWorkaround:
     # http://www.diogogmt.com/running-mongodb-with-docker-and-compose/
     container_name: poseidon-storageWorkaround
@@ -58,7 +71,7 @@ services:
     volumes_from:
       - storageWorkaround
     ports:
-      - 27017
+      - 27017:27017
     command: --smallfiles --rest --auth
   periodically:
     image: poseidon-periodically
@@ -67,3 +80,5 @@ services:
       context: .
       dockerfile: Dockerfile.periodically
     network_mode: "container:poseidon-monitor"
+    depends_on:
+      - monitor

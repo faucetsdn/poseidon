@@ -38,4 +38,4 @@ RUN py.test -v \
 --cov-report term-missing --cov-config .coveragerc
 
 ENV PYTHONUNBUFFERED 0
-CMD ["python", "poseidon/poseidonMain/poseidonMain.py","1","-1","http://localhost:8555/v1/version"]
+CMD ["python", "poseidon/poseidonMain/poseidonMain.py","1","-1","http://localhost:5555/v1/version"]
