@@ -26,7 +26,8 @@ Created on 22 June 2016
 import ast
 import time
 from collections import defaultdict
-
+import statistics
+from datetime import datetime
 import pika
 
 
@@ -60,6 +61,64 @@ print ' [*] Waiting for logs. To exit press CTRL+C'
 """
 
 
+class TimeRecord:
+    """
+    Time record class to manage. Takes in time records of
+    time concatenated to date for parse format:
+    datetime.strptime(time, '%Y-%m-%d %H:%M:%S.%f')
+    """
+    def __init__(self):
+        self.first_sent = None
+        self.first_received = None
+        self.last_sent = None
+        self.last_received = None
+
+    def update_sent(self, time):
+        """
+        Updates sent fields, if first update then
+        records the first sent time. Updates the
+        latest sent time (both stored as strings).
+        """
+        if not self.first_sent:
+            self.first_sent = time
+        self.last_sent = time
+
+    def update_received(self, time):
+        """
+        Updates received fields, if first update
+        then records the first reception time. Always
+        updates latest received time (both stored as
+        strings).
+        """
+        if not self.first_received:
+            self.first_received = time
+        self.last_received = time
+
+    def get_elapsed_time_sent(self):
+        """
+        Returns elapsed time from first sent to last
+        sent, returns datetime string in format:
+        '0 day, 0:00:00.0' [num day,  hours:mins:sec:frac_sec]
+        NOTE: if less than 1 day elapsed, then only returns
+        '0:00:00.0' format
+        """
+        first = datetime.strptime(self.first_sent, '%Y-%m-%d %H:%M:%S.%f')
+        latest = datetime.strptime(self.last_sent, '%Y-%m-%d %H:%M:%S.%f')
+        return str(latest - first)
+
+    def get_elapsed_time_received(self):
+        """
+        Returns elapsed time from first sent to last
+        received, returns datetime string in format:
+        '0 day, 0:00:00.0' [num day,  hours:mins:sec:frac_sec]
+        NOTE: if less than 1 day elapsed, then only returns
+        '0:00:00.0' format
+        """
+        first = datetime.strptime(self.first_received, '%Y-%m-%d %H:%M:%S.%f')
+        latest = datetime.strptime(self.last_received, '%Y-%m-%d %H:%M:%S.%f')
+        return str(latest - first)
+
+
 class MachineNode:
     """
     Record for machine on network,
@@ -68,36 +127,65 @@ class MachineNode:
     as packet statistics (length, frequency of
     communication).
     """
-
     def __init__(self, addr):
         self.machine_addr = addr
         self.num_packets = 0
         self.packet_lengths = []
         self.machines_sent_to = defaultdict(int)
         self.machines_received_from = defaultdict(int)
+        self.time_record = TimeRecord()
 
-    def add_pcap_record(self, length, addr, receiving):
+    def add_pcap_record(self, length, addr, receiving, pcap=None):
         """
         Adds data for a packet to the MachineNode record.
         Increments the number of packets, then if it is
         receving then updates the addresses and frequency of machines
         this Machine has received from; if sending then updates
         the dict with addresses and frequency of machines it
-        has sent to.
+        has sent to. Updates time record.
         """
         self.num_packets += 1
         self.packet_lengths.append(length)
         if receiving:
             self.machines_received_from[addr] += 1
+            if pcap:
+                self.time_record.update_received('%s %s' % (pcap['date'], pcap['time']))
         else:
             self.machines_sent_to[addr] += 1
+            if pcap:
+                self.time_record.update_sent('%s %s' % (pcap['date'], pcap['time']))
 
-    def get_avg_packet_len(self):
+    def get_flow_duration(self, direction='sent'):
+        """
+        Returns flow duration in string format. Takes a
+        direction parameter ('sent' or 'received') to
+        determine which time delta is returned. 'sent' is
+        default.
+        """
+        if direction == 'sent':
+            return self.time_record.get_elapsed_time_sent()
+        else:
+            return self.time_record.get_elapsed_time_received()
+
+    def get_mean_packet_len(self):
         """
         Returns the average length of packets this Machine
-        has send and recevied.
+        has send and received. Float division is used for
+        precision.
+        NOTE: average length corresponds to mean length for packets
+        sent and received.
         """
-        return sum(self.packet_lengths) / self.num_packets
+        return statistics.mean(self.packet_lengths)
+
+    def get_packet_len_std_dev(self):
+        """
+        Calculates the standard deviation of packet length for
+        all conversations to and from this machine.
+        """
+        try:
+            return statistics.stdev(self.packet_lengths)
+        except:
+            return 'Error retrieving standard deviation.'
 
     def get_machines_sent_to(self):
         """
@@ -125,14 +213,13 @@ class FlowRecord:
     and received from and the frequency as well as
     packet length.
     """
-
     def __init__(self):
         """
         Creates dict of addr->MachineNode to store machine records
         """
         self.machines = {}
 
-    def update(self, src_addr, s_in_net, dest_addr, d_in_net, length):
+    def update(self, src_addr, s_in_net, dest_addr, d_in_net, length, pcap):
         """
         Updates the flow for machines if they are in the
         network. For a packet with a networked source machine,
@@ -145,19 +232,19 @@ class FlowRecord:
         if s_in_net:
             if src_addr not in self.machines:
                 node = MachineNode(src_addr)
-                node.add_pcap_record(length, dest_addr, False)
+                node.add_pcap_record(length, dest_addr, False, pcap)
                 self.machines[src_addr] = node
             else:
                 self.machines[src_addr].add_pcap_record(
-                    length, dest_addr, False)
+                    length, dest_addr, False, pcap)
         if d_in_net:
             if dest_addr not in self.machines:
                 node = MachineNode(dest_addr)
-                node.add_pcap_record(length, src_addr, True)
+                node.add_pcap_record(length, src_addr, True, pcap)
                 self.machines[dest_addr] = node
             else:
                 self.machines[dest_addr].add_pcap_record(
-                    length, src_addr, True)
+                    length, src_addr, True, pcap)
 
     def get_machine_node(self, addr):
         """
@@ -185,15 +272,16 @@ def analyze_pcap(ch, method, properties, body, flow):
     global network_machines
 
     pcap = ast.literal_eval(body)
-    if pcap['src_ip'] in network_machines and pcap[
-            'dest_ip'] in network_machines:
+    if pcap['src_ip'] in network_machines and \
+            pcap['dest_ip'] in network_machines:
         # both machines in network
         flow.update(
             pcap['src_ip'],
             True,
             pcap['dest_ip'],
             True,
-            pcap['length'])
+            pcap['length'],
+            pcap)
     elif pcap['src_ip'] in network_machines:
         # machine in network talking to outside
         flow.update(
@@ -201,7 +289,8 @@ def analyze_pcap(ch, method, properties, body, flow):
             True,
             pcap['dest_ip'],
             False,
-            pcap['length'])
+            pcap['length'],
+            pcap)
     elif pcap['dest_ip'] in network_machines:
         # outside talking to network machine
         flow.update(
@@ -209,7 +298,8 @@ def analyze_pcap(ch, method, properties, body, flow):
             False,
             pcap['dest_ip'],
             True,
-            pcap['length'])
+            pcap['length'],
+            pcap)
     else:
         # neither machine in network (list needs to be updated)
         pass
