@@ -17,7 +17,7 @@
 Test module for pcap_stats.py
 
 Created on 23 June 2016
-@author: Travis Lanham
+@author: lanhamt
 """
 import pytest
 from pcap_stats import analyze_pcap

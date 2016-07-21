@@ -21,7 +21,7 @@ for them, periodically update database with new stats.
 NOTE: need to add a periodic database update
 
 Created on 22 June 2016
-@author: Travis Lanham
+@author: lanhamt
 """
 import ast
 import time
@@ -97,26 +97,20 @@ class TimeRecord:
     def get_elapsed_time_sent(self):
         """
         Returns elapsed time from first sent to last
-        sent, returns datetime string in format:
-        '0 day, 0:00:00.0' [num day,  hours:mins:sec:frac_sec]
-        NOTE: if less than 1 day elapsed, then only returns
-        '0:00:00.0' format
+        sent, returns delta in microseconds as a float.
         """
         first = datetime.strptime(self.first_sent, '%Y-%m-%d %H:%M:%S.%f')
         latest = datetime.strptime(self.last_sent, '%Y-%m-%d %H:%M:%S.%f')
-        return str(latest - first)
+        return (latest - first).total_seconds() * 1000
 
     def get_elapsed_time_received(self):
         """
         Returns elapsed time from first sent to last
-        received, returns datetime string in format:
-        '0 day, 0:00:00.0' [num day,  hours:mins:sec:frac_sec]
-        NOTE: if less than 1 day elapsed, then only returns
-        '0:00:00.0' format
+        received, returns delta in microseconds as a float.
         """
         first = datetime.strptime(self.first_received, '%Y-%m-%d %H:%M:%S.%f')
         latest = datetime.strptime(self.last_received, '%Y-%m-%d %H:%M:%S.%f')
-        return str(latest - first)
+        return (latest - first).total_seconds() * 1000
 
 
 class MachineNode:
