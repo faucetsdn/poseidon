@@ -123,8 +123,10 @@ class MachineNode:
     """
     def __init__(self, addr):
         self.machine_addr = addr
-        self.num_packets = 0
-        self.packet_lengths = []
+        self.num_packets_sent = 0
+        self.num_packets_rec = 0
+        self.packet_lens_sent = []
+        self.packet_lens_rec = []
         self.machines_sent_to = defaultdict(int)
         self.machines_received_from = defaultdict(int)
         self.time_record = TimeRecord()
@@ -138,13 +140,15 @@ class MachineNode:
         the dict with addresses and frequency of machines it
         has sent to. Updates time record.
         """
-        self.num_packets += 1
-        self.packet_lengths.append(length)
         if receiving:
+            self.num_packets_rec += 1
+            self.packet_lens_rec.append(length)
             self.machines_received_from[addr] += 1
             if pcap:
                 self.time_record.update_received('%s %s' % (pcap['date'], pcap['time']))
         else:
+            self.num_packets_sent += 1
+            self.packet_lens_sent.append(length)
             self.machines_sent_to[addr] += 1
             if pcap:
                 self.time_record.update_sent('%s %s' % (pcap['date'], pcap['time']))
@@ -161,23 +165,29 @@ class MachineNode:
         else:
             return self.time_record.get_elapsed_time_received()
 
-    def get_mean_packet_len(self):
+    def get_mean_packet_len(self, direction='sent'):
         """
         Returns the average length of packets this Machine
-        has sent and received. Float division is used for
-        precision.
-        NOTE: average length corresponds to mean length for packets
-        sent and received.
+        has sent and received as a float. Takes a
+        direction parameter ('sent' or 'received') to
+        determine which mean is returned. 'sent' is
+        default.
         """
-        return statistics.mean(self.packet_lengths)
+        if direction == 'sent':
+            return statistics.mean(self.packet_lens_sent)
+        else:
+            return statistics.mean(self.packet_lens_rec)
 
-    def get_packet_len_std_dev(self):
+    def get_packet_len_std_dev(self, direction='sent'):
         """
         Calculates the standard deviation of packet length for
         all conversations to and from this machine.
         """
         try:
-            return statistics.stdev(self.packet_lengths)
+            if direction == 'sent':
+                return statistics.stdev(self.packet_lens_sent)
+            else:
+                return statistics.stdev(self.packet_lens_rec)
         except:
             return 'Error retrieving standard deviation.'
 
