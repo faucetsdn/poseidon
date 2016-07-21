@@ -32,10 +32,10 @@ def test_time_record_class():
     t = TimeRecord()
     t.update_sent('2005-02-02 08:00:00.000000')
     t.update_sent('2005-02-02 08:00:01.000000')
-    assert t.get_elapsed_time_sent() == '0:00:01'
+    assert t.get_elapsed_time_sent() == 1000.0
     t.update_received('2006-03-01 02:00:00.000000')
     t.update_received('2006-03-01 02:00:02.000000')
-    assert t.get_elapsed_time_received() == '0:00:02'
+    assert t.get_elapsed_time_received() == 2000.0
 
 
 def test_machine_node_class():
