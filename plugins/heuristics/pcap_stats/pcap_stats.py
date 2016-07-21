@@ -170,7 +170,7 @@ class MachineNode:
     def get_mean_packet_len(self):
         """
         Returns the average length of packets this Machine
-        has send and received. Float division is used for
+        has sent and received. Float division is used for
         precision.
         NOTE: average length corresponds to mean length for packets
         sent and received.
