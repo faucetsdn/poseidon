@@ -251,6 +251,34 @@ class FlowRecord:
             return self.machines[addr]
 
 
+def db_update_worker():
+    """
+    Function to be executed by separate worker
+    thread to connect to database and update
+    based on machines in the flow records. Then
+    sleeps for 5 sec before waking up for next
+    update
+
+    NOTE: install with
+    thread.start_new_thread(db_update_worker)
+
+    ISSUE: add bool to flow record for whether it
+    needs to be updated (ie any changes from last
+    update) and at end of update, reset it.
+    """
+    """
+    global flowRecordLock
+    while True:
+        try:
+            client = MongoClient(db_ip)
+            db = client.db_name
+        except:
+            print('Could not connect to database, retrying...')
+        time.sleep(5)
+    """
+    pass
+
+
 network_machines = []
 
 
