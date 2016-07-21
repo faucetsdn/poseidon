@@ -10,7 +10,7 @@ RUN git clone https://github.com/swagger-api/swagger-ui.git
 WORKDIR /swagger-ui
 RUN git checkout tags/v2.1.4
 RUN npm install
-EXPOSE 8080
+EXPOSE 1111:8001
 ADD index.html /swagger-ui/dist/index.html
 ADD swagger-ui.js /swagger-ui/dist/swagger-ui.js
 CMD ./node_modules/gulp/bin/gulp.js serve
