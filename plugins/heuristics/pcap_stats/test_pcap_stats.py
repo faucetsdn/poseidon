@@ -188,7 +188,7 @@ def test_analyze_pcap():
     assert isinstance(f.machines, dict)
     assert f.get_machine_node('136.145.402.267').num_packets_sent == 1
     assert f.get_machine_node('136.145.402.267').get_mean_packet_len('sent') == 43.0
-    assert f.get_machine_node('136.145.402.267').get_packet_len_std_dev() == 'Error retrieving standard deviation.'
+    assert f.get_machine_node('136.145.402.267').get_packet_len_std_dev('rec') == 'Error retrieving standard deviation.'
     assert f.get_machine_node('350.137.451.220').num_packets_rec == 1
     assert f.get_machine_node('350.137.451.220').get_mean_packet_len('rec') == 43.0
 
@@ -196,7 +196,7 @@ def test_analyze_pcap():
     assert f.get_machine_node('h.j.k.l') is None
     assert f.get_machine_node('136.145.402.267').num_packets_sent == 2
     assert f.get_machine_node('136.145.402.267').get_mean_packet_len('sent') == 66.5
-    stdev = f.get_machine_node('136.145.402.267').get_packet_len_std_dev()
+    stdev = f.get_machine_node('136.145.402.267').get_packet_len_std_dev('sent')
     assert math.floor(stdev) == 33
     assert f.get_machine_node('136.145.402.267').get_flow_duration('sent') == 0.0
     assert f.get_machine_node('350.137.451.220').get_flow_duration('received') == 0.0
