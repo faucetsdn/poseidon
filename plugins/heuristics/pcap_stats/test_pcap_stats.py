@@ -197,8 +197,8 @@ def test_analyze_pcap():
     assert f.get_machine_node('136.145.402.267').get_mean_packet_len() == 66.5
     stdev = f.get_machine_node('136.145.402.267').get_packet_len_std_dev()
     assert math.floor(stdev) == 33
-    assert f.get_machine_node('136.145.402.267').get_flow_duration('sent')
-    assert f.get_machine_node('350.137.451.220').get_flow_duration('received')
+    assert f.get_machine_node('136.145.402.267').get_flow_duration('sent') == 0.0
+    assert f.get_machine_node('350.137.451.220').get_flow_duration('received') == 0.0
 
     analyze_pcap(ch, method, properties, out_to_net, f)
     assert f.get_machine_node('q.w.e.r') is None
