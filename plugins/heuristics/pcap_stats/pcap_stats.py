@@ -29,9 +29,14 @@ from collections import defaultdict
 import statistics
 from datetime import datetime
 import pika
-
+import thread
+from pymongo import MongoClient
+import threading
 
 """
+flowRecordLock = threading.Lock()
+
+
 wait = True
 while wait:
     try:
@@ -41,11 +46,25 @@ while wait:
         result = channel.queue_declare(exclusive=True)
         queue_name = result.method.queue
         wait = False
-        print "connected to rabbitmq..."
+        print 'connected to rabbitmq...'
     except:
-        print "waiting for connection to rabbitmq..."
+        print 'waiting for connection to rabbitmq...'
         time.sleep(2)
         wait = True
+
+
+client = None
+wait = True
+while wait:
+    try:
+        client = MongoClient(db_ip)
+        client.address
+        wait = False
+        print 'connected to database...'
+    except:
+        print 'could not connect to database, retrying...'
+        time.sleep(2)
+
 
 binding_keys = sys.argv[1:]
 if not binding_keys:
@@ -277,16 +296,18 @@ def db_update_worker():
     update) and at end of update, reset it.
     """
     """
+    global client
     global flowRecordLock
     while True:
         try:
-            client = MongoClient(db_ip)
-            db = client.db_name
+            client.address  # verify connection
+            # flowRecordLock.acquire()
+            # update
+            # flowRecordLock.release()
         except:
-            print('Could not connect to database, retrying...')
+            print('database update failed...')
         time.sleep(5)
     """
-    pass
 
 
 network_machines = []
