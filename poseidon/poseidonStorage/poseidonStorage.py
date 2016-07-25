@@ -60,7 +60,7 @@ class poseidonStorage:
 
         # create db named 'poseidon_records' (NOTE: db will not actually be
         # created until first doc write).
-        self.db = client.poseidon_records
+        self.db = self.client.poseidon_records
 
 
 
@@ -157,7 +157,7 @@ class db_add_doc(poseidonStorage):
         try:
             doc = urllib.unquote(doc).decode('utf8')
             doc = ast.literal_eval(doc)
-            ret = self.client.database.collection.insert_one(doc)
+            ret = self.client[database][collection]insert_one(doc)
             ret = str(ret.inserted_id)
         except:
             ret = 'Error inserting document into database.'

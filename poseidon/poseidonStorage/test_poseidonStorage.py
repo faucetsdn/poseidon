@@ -130,7 +130,7 @@ def test_db_collection_query(client):
     """
     tests response from query of database.
     """
-    query = "{u'hostname': u'bad'}"
+    query = "{'hostname': 'bad'}"
     query = urllib.unquote(query).encode('utf8')
     resp = client.get('/v1/storage/query/local/startup_log/' + query)
     assert resp.status == falcon.HTTP_OK
@@ -144,7 +144,10 @@ def test_db_collection_query(client):
 
 def test_db_add_doc(client):
     """
-    tests adding document to a database
+    tests adding document to a database, then
+    tests retrieving added document from the database
+    using the returned id, then tests that the collection
+    inserted into is listed under the database collections.
     """
     doc = """{
             node_ip: '0.0.0.0'
@@ -163,5 +166,14 @@ def test_db_add_doc(client):
                        'last_received': '0-0-0 00:00:00.000000'}
             }"""
     doc = urllib.unquote(doc).encode('utf8')
-    resp = client.get('/v1/storage/add_doc/poseidon_records/network_graph/' + doc)
+    resp = client.get(
+        '/v1/storage/add_doc/poseidon_records/network_graph/' + doc)
     assert resp.status == falcon.HTTP_OK
+    doc_id = resp.body
+    resp = client.get(
+        '/v1/storage/doc/poseidon_records/network_graph/' + doc_id)
+    assert resp.status == falcon.HTTP_OK
+    assert 'talked_to' in resp.body
+    resp = client.get('/v1/storage/poseidon_records')
+    assert resp.status == falcon.HTTP_OK
+    assert 'network_graph' in resp.body
