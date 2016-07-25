@@ -1,5 +1,6 @@
 [Monitor]
 Config=True
+loggingFile = /poseidonWork/poseidon/config/logging.json
 
 [database]
 ip = 0.0.0.0

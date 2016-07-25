@@ -17,6 +17,8 @@
 Created on 14 July 2016
 @author: dgrossman
 """
+import logging
+
 from poseidon.baseClasses.Rock_Bottom import Rock_Bottom
 
 
@@ -32,6 +34,13 @@ class Monitor_Helper_Base(Rock_Bottom):  # pragma: no cover
         Args:
             owner: class to be contacted to use other methods
         """
+
+        if owner.logger is not None:
+            self.logger = owner.logger
+        else:
+            self.logger = logging.getLogger(__name__)
+
+        self.logger.debug('set_owner = %s' % (owner.mod_name))
         self.owner = owner
         if self.owner.mod_name is not None:
             self.config_section_name = self.owner .mod_name + ':' + self.mod_name
