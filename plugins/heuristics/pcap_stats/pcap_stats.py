@@ -301,6 +301,7 @@ def db_update_worker():
     while True:
         try:
             client.address  # verify connection
+            # check update conditions
             # flowRecordLock.acquire()
             # update
             # flowRecordLock.release()

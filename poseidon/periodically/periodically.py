@@ -30,9 +30,12 @@ import urllib2
 def makeCall(url):
     print 'makeCall ' + datetime.datetime.now().ctime()
     if url:  # pragma: no cover
-        page = urllib2.urlopen(url)
-        print page.readlines()
-        print 'wget ' + url
+        try:
+            page = urllib2.urlopen(url)
+            print page.readlines()
+            print 'wget ' + url
+        except:
+            print 'Error contacting url:', url, ' retrying...'
 
 
 def doSleep(t):

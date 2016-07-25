@@ -75,6 +75,7 @@ services:
   periodically:
     depends_on:
       - monitor
+      - mock
     image: poseidon-periodically
     container_name: poseidon-periodically
     build:
