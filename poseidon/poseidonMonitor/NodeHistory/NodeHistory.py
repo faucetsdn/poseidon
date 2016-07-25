@@ -20,7 +20,7 @@ Created on 17 May 2016
 from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 import json
-import requests
+from requests import get
 
 
 class NodeHistory(Monitor_Action_Base):
@@ -47,9 +47,12 @@ class Handle_Default(Monitor_Helper_Base):
             urllib.unquote(query).encode('utf8')
 
             """
-            resp.body = json.dumps(resource)
+            query = {'node_ip': resource}
+            query = urllib.unquote(query).encode('utf8')
+            response = get('http://localhost:4444/v1/storage/' + query)
         except:  # pragma: no cover
-            resp.body = 'failed'
+            response = 'failed'
+        resp.body = json.dumps(response)
 
 
 nodehistory_interface = NodeHistory()

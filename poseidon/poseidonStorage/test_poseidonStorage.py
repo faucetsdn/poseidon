@@ -21,7 +21,6 @@ Created on 28 June 2016
 @author: dgrossman, lanhamt
 """
 import urllib
-
 import falcon
 import pytest
 from poseidonStorage import db_collection_count
@@ -29,6 +28,7 @@ from poseidonStorage import db_collection_names
 from poseidonStorage import db_collection_query
 from poseidonStorage import db_database_names
 from poseidonStorage import db_retrieve_doc
+from poseidonStorage import db_add_doc
 from poseidonStorage import main
 from poseidonStorage import poseidonStorage
 
@@ -45,6 +45,9 @@ application.add_route(
 application.add_route(
     '/v1/storage/query/{database}/{collection}/{query_str}',
     db_collection_query())
+application.add_route(
+    '/v1/storage/add_doc/{database}/{collection}/{doc_str}',
+    db_add_doc())
 
 
 def test_poseidonStorage():
@@ -137,3 +140,28 @@ def test_db_collection_query(client):
     resp = client.get('/v1/storage/query/local/startup_log/' + query)
     assert resp.status == falcon.HTTP_OK
     assert resp.body == '"Error on query."'
+
+
+def test_db_add_doc(client):
+    """
+    tests adding document to a database
+    """
+    doc = """{
+            node_ip: '0.0.0.0'
+            talked_to: {'machine_1': 2,
+                        'machine_2': 1,
+                        'machine_3': 1}
+            recieved_from: {'machine_1': 1,
+                            'machine_6': 3,
+                            'machine_2': 2}
+            packet_lengths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+            flow_id: '6a32984d2348e23894f3298'
+            dns_records: ['0.0.0.0', '1.1.1.1']
+            time_rec: {'first_sent': '0-0-0 00:00:00.000000',
+                       'first_received': '0-0-0 00:00:00.000000',
+                       'last_sent': '0-0-0 00:00:00.000000',
+                       'last_received': '0-0-0 00:00:00.000000'}
+            }"""
+    doc = urllib.unquote(doc).encode('utf8')
+    resp = client.get('/v1/storage/add_doc/poseidon_records/network_graph/' + doc)
+    assert resp.status == falcon.HTTP_OK

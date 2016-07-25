@@ -58,6 +58,11 @@ class poseidonStorage:
                     'poseidonStorage: could not find database ip address.')
         self.client = MongoClient(database_container_ip)
 
+        # create db named 'poseidon_records' (NOTE: db will not actually be
+        # created until first doc write).
+        self.db = client.poseidon_records
+
+
 
 class db_database_names(poseidonStorage):
     """
@@ -135,6 +140,28 @@ class db_collection_query(poseidonStorage):
         except:
             ret = json.dumps('Error on query.')
         resp.body = ret
+
+
+class db_add_doc(poseidonStorage):
+    """
+    rest layer subclass of poseidonStorage.
+    adds a document to specified database and
+    collection. returned response includes
+    the id of the newly inserted object.
+
+    NOTE: uses utf8 decoding to serialize document
+    to be inserted into database.
+    """
+
+    def on_get(self, req, resp, database, collection, doc):
+        try:
+            doc = urllib.unquote(doc).decode('utf8')
+            doc = ast.literal_eval(doc)
+            ret = self.client.database.collection.insert_one(doc)
+            ret = str(ret.inserted_id)
+        except:
+            ret = 'Error inserting document into database.'
+        resp.body = json.dumps(ret)
 
 
 def main():
