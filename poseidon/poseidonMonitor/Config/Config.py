@@ -40,6 +40,7 @@ class Config(Monitor_Action_Base):
         self.CONFIG = None
         self.mod_name = self.__class__.__name__
         self.config_section_name = self.mod_name
+        self.mod_configuration = dict()
 
         self.config = ConfigParser.ConfigParser()
         if os.environ.get('POSEIDON_CONFIG') is not None:
@@ -56,8 +57,11 @@ class Config(Monitor_Action_Base):
             print self.mod_name, 'configure found'
             self.CONFIG = self.actions['Handle_SectionConfig']
             self.config_section_name = self.mod_name
-            self.mod_config = self.CONFIG.direct_get(self.config_section_name)
-            print self.mod_name, self.mod_config
+            for item in self.CONFIG.direct_get(self.config_section_name):
+                k, v = item
+                self.mod_configuration[k] = v
+            # self.mod_config = self.CONFIG.direct_get(self.config_section_name)
+            print self.mod_name, self.mod_configuration
             self.configured = True
 
 

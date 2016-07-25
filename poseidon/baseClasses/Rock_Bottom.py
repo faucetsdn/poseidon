@@ -16,6 +16,7 @@
 """ Created on  18 July 2016
 @author: dgrossman
 """
+import logging
 
 
 class Rock_Bottom(object):
@@ -38,3 +39,4 @@ class Rock_Bottom(object):
         self.mod_name = self.__class__.__name__
         self.mod_configuration = None
         self.owner = None
+        self.logger = None

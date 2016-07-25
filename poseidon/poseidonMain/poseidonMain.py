@@ -19,14 +19,21 @@ poseidonMain
 Created on 29 May 2016
 @author: dgrossman, lanhamt
 """
-from Config.Config import config_interface
+import logging
+import logging.config
+
 from Investigator.Investigator import investigator_interface
 from Scheduler.Scheduler import scheduler_interface
+
+from Config.Config import config_interface
 
 
 class PoseidonMain(object):
 
     def __init__(self):
+        self.logger = logging.getLogger(__name__)
+        logging.basicConfig(level=logging.DEBUG)
+
         self.mod_name = self.__class__.__name__
         self.mod_configuration = None
         self.config_section_name = self.mod_name
