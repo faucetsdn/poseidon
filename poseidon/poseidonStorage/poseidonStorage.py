@@ -96,7 +96,6 @@ class db_database_names(poseidonStorage):
     """
 
     def on_get(self, req, resp):
-        resp.type = 'application/json'
         try:
             ret = self.client.database_names()
         except:
@@ -112,7 +111,6 @@ class db_collection_names(poseidonStorage):
     """
 
     def on_get(self, req, resp, database):
-        resp.type = 'application/json'
         ret = self.client[database].collection_names()
         # empty list returned for non-existent database
         if not ret:
@@ -127,7 +125,6 @@ class db_collection_count(poseidonStorage):
     """
 
     def on_get(self, req, resp, database, collection):
-        resp.type = 'application/json'
         ret = self.client[database][collection].count()
         resp.body = json.dumps(ret)
 
@@ -139,7 +136,6 @@ class db_retrieve_doc(poseidonStorage):
     """
 
     def on_get(self, req, resp, database, collection, doc_id):
-        resp.type = 'application/json'
         ret = self.client[database][collection].find_one({'_id': doc_id})
         if not ret:
             ret = 'Error retrieving document with id: ' + doc_id + '.'
@@ -157,7 +153,6 @@ class db_collection_query(poseidonStorage):
     """
 
     def on_get(self, req, resp, database, collection, query_str):
-        resp.type = 'application/json'
         try:
             query = urllib.unquote(query_str).decode('utf8')
             query = ast.literal_eval(query_str)
@@ -184,7 +179,6 @@ class db_add_one_doc(poseidonStorage):
     """
 
     def on_get(self, req, resp, database, collection, doc_str):
-        resp.type = 'application/json'
         try:
             doc = urllib.unquote(doc).decode('utf8')
             doc = ast.literal_eval(doc)
@@ -209,7 +203,6 @@ class db_add_many_docs(poseidonStorage):
     """
 
     def on_get(self, req, resp, database, collection, doc_list):
-        resp.type = 'application/json'
         try:
             doc_list = urllib.unquote(doc_list).decode('utf8')
             doc_list = ast.literal_eval(doc_list)

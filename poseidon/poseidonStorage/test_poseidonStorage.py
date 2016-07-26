@@ -177,10 +177,8 @@ def test_db_add_one_doc(client):
     get_str = '/v1/storage/doc/poseidon_records/network_graph/' + doc_id
     resp = client.get(get_str)
     assert resp.status == falcon.HTTP_OK
-    assert resp.type == 'application/json'
     resp = client.get('/v1/storage/poseidon_records')
     assert resp.status == falcon.HTTP_OK
-    assert resp.type == 'application/json'
 
 
 def test_db_add_many_docs(client):
