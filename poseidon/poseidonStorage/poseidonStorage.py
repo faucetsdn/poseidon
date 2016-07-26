@@ -17,6 +17,12 @@
 poseidonStorage interface for mongodb container
 for persistent storage.
 
+NAMES: current databases and collections (subject to change)
+
+    db                      collection
+    ---                     ---
+    poseidon_records        network_graph
+
 Created on 17 May 2016
 @author: dgrossman, lanhamt
 """
@@ -60,8 +66,8 @@ class poseidonStorage:
 
         # create db named 'poseidon_records' (NOTE: db will not actually be
         # created until first doc write).
+        # db stores reference object for the database
         self.db = self.client.poseidon_records
-
 
 
 class db_database_names(poseidonStorage):
@@ -142,14 +148,14 @@ class db_collection_query(poseidonStorage):
         resp.body = ret
 
 
-class db_add_doc(poseidonStorage):
+class db_add_one_doc(poseidonStorage):
     """
     rest layer subclass of poseidonStorage.
     adds a document to specified database and
     collection. returned response includes
     the id of the newly inserted object.
 
-    NOTE: uses utf8 decoding to serialize document
+    NOTE: uses utf8 decoding for document
     to be inserted into database.
     """
 
@@ -161,6 +167,31 @@ class db_add_doc(poseidonStorage):
             ret = str(ret.inserted_id)
         except:
             ret = 'Error inserting document into database.'
+        resp.body = json.dumps(ret)
+
+
+class db_add_many_docs(poseidonStorage):
+    """
+    rest layer subclass of poseidonStorage.
+    adds a list of documents (encoded with
+    utf8) to specified database and collection.
+    returned response includes the list of ids
+    for the documents that have been inserted on
+    success and error on failure.
+
+    NOTE: uses utf8 decoding for documents to be
+    inserted.
+    """
+
+    def on_get(self, req, resp, database, collection, doc_list):
+        try:
+            doc_list = urllib.unquote(doc_list).decode('utf8')
+            doc_list = ast.literal_eval(doc_list)
+            ret = self.client[database][collection].insert_many(doc_list)
+            for o_id in ret:
+                o_id = str(o_id.inserted_id)
+        except:
+            ret = 'Error inserting documents into database.'
         resp.body = json.dumps(ret)
 
 
