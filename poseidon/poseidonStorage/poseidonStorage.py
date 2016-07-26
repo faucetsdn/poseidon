@@ -178,7 +178,7 @@ class db_add_one_doc(poseidonStorage):
     to be inserted into database.
     """
 
-    def on_get(self, req, resp, database, collection, doc):
+    def on_get(self, req, resp, database, collection, doc_str):
         try:
             doc = urllib.unquote(doc).decode('utf8')
             doc = ast.literal_eval(doc)

@@ -193,6 +193,6 @@ def test_db_add_many_docs(client):
     doc_list = [doc_one, doc_two, doc_thr]
     doc_list = str(doc_list)
     doc_list = urllib.unquote(doc_list).encode('utf8')
-    get_str = '/v1/storage/add_many_docs/poseidon_records/network_graph' + doc_list
+    get_str = '/v1/storage/add_many_docs/poseidon_records/network_graph/' + doc_list
     resp = client.get(get_str)
     assert resp.status == falcon.HTTP_OK
