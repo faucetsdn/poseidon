@@ -71,6 +71,23 @@ class poseidonStorage:
         self.db = self.client.poseidon_records
 
 
+def get_allowed():
+    rest_url = 'localhost:28000'
+    if 'ALLOW_ORIGIN' in environ:
+        allow_origin = environ['ALLOW_ORIGIN']
+        host_port = allow_origin.split('//')[1]
+        host = host_port.split(':')[0]
+        port = str(int(host_port.split(':')[1]))
+        rest_url = host + ':' + port
+    else:
+        allow_origin = ''
+    return allow_origin, rest_url
+
+allow_origin, rest_url = get_allowed()
+cors = CORS(allow_origins_list=[allow_origin])
+public_cors = CORS(allow_all_origins=True)
+
+
 class db_database_names(poseidonStorage):
     """
     rest layer subclass of poseidonStorage.
@@ -199,6 +216,7 @@ class db_add_many_docs(poseidonStorage):
 # create callable WSGI app instance for gunicorn
 api = falcon.API(middleware=[cors.middleware])
 
+# add local routes for db api
 api.add_route('/v1/storage', db_database_names())
 api.add_route('/v1/storage/{database}', db_collection_names())
 api.add_route(
