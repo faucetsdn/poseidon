@@ -30,10 +30,11 @@ import ast
 import ConfigParser
 import json
 import urllib
+import falcon
 from subprocess import check_output
 from pymongo import MongoClient
-import falcon
-import falcon_cors from CORS
+from falcon_cors import CORS
+from os import environ
 
 
 class poseidonStorage:
