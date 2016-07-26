@@ -2,7 +2,7 @@
 Config=True
 
 [database]
-ip = 0.0.0.0
+ip = localhost
 user = user
 password = SECRET
 
