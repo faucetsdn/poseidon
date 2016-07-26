@@ -40,5 +40,4 @@ CMD ["poseidon.poseidonStorage.poseidonStorage:api"]
 # run tests
 RUN py.test -v \
 --ignore=poseidon/poseidonMain \
---ignore=poseidon/poseidonStorage \
 --cov=plugins --cov-report term-missing --cov-config .coveragerc
