@@ -170,12 +170,12 @@ def test_db_add_one_doc(client):
                        'last_received': '0-0-0 00:00:00.000000'}
             }"""
     doc = urllib.unquote(doc).encode('utf8')
-    resp = client.get(
-        '/v1/storage/add_one_doc/poseidon_records/network_graph/' + doc)
+    get_str = '/v1/storage/add_one_doc/poseidon_records/network_graph/' + doc
+    resp = client.get(get_str)
     assert resp.status == falcon.HTTP_OK
     doc_id = resp.body
-    resp = client.get(
-        '/v1/storage/doc/poseidon_records/network_graph/' + doc_id)
+    get_str = '/v1/storage/doc/poseidon_records/network_graph/' + doc_id
+    resp = client.get(get_str)
     assert resp.status == falcon.HTTP_OK
     assert 'talked_to' in resp.body
     resp = client.get('/v1/storage/poseidon_records')
@@ -193,6 +193,6 @@ def test_db_add_many_docs(client):
     doc_list = [doc_one, doc_two, doc_thr]
     doc_list = str(doc_list)
     doc_list = urllib.unquote(doc_list).encode('utf8')
-    resp = client.get(
-        '/v1/storage/add_many_docs/poseidon_records/network_graph' + doc_list)
+    get_str = '/v1/storage/add_many_docs/poseidon_records/network_graph' + doc_list
+    resp = client.get(get_str)
     assert resp.status == falcon.HTTP_OK
