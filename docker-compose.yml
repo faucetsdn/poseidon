@@ -72,12 +72,12 @@ services:
     ports:
       - 27017:27017
     command: --smallfiles --rest --auth
-  storage-api:
-    container_name: poseidon-storage-api
-    image: poseidon-storage-api
+  storage-interface:
+    container_name: poseidon-storage-interface
+    image: poseidon-storage-interface
     build:
       context: .
-      dockerfile: Dockerfile.storage-api
+      dockerfile: Dockerfile.storage-interface
     ports:
       - 28000:27000
     environment:
