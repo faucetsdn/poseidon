@@ -68,6 +68,22 @@ monitor: storage api clean-monitor build-monitor
 	echo "poseidon-monitor can be accessed here: $$docker_url:$$port"; \
 	echo
 
+storage-api: clean-storage-api build-storage-api storage
+	@ if [ ! -z "${DOCKER_HOST}" ]; then \
+		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
+		docker_url=http://$$docker_host; \
+	else \
+		if [ ! -z "${DOCKERFORMAC}" ]; then \
+		docker_url=http://localhost; \
+		else \
+			echo "No DOCKER_HOST environment variable set."; \
+			exit 1; \
+		fi; \
+	fi; \
+	docker run --name poseidon-storage-api -dp 28000:27000 -e ALLOW_ORIGIN=$$docker_url:28000 poseidon-storage-api; \
+	echo "poseidon-storage-api up"; \
+	echo
+
 notebooks: clean-notebooks build-notebooks
 	@ if [ ! -z "${DOCKER_HOST}" ]; then \
 		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
@@ -149,6 +165,9 @@ build-mock-controller:
 build-storage:
 	docker pull mongo
 
+build-storage-api:
+	docker build -t poseidon-storage-api -f Dockerfile.storage-api .
+
 clean-all: clean depends
 	@docker rmi poseidon-monitor
 	@docker rmi poseidon-storage
@@ -179,6 +198,9 @@ clean-api: depends
 
 clean-notebooks: depends
 	@docker ps -aqf "name=poseidon-notebooks" | xargs docker rm -f
+
+clean-storage-api: depends
+	@docker ps -aqf "name=poseidon-storage-api" | xargs docker rm -f
 
 clean: clean-docs clean-notebooks depends
 	#@docker ps -aqf "name=poseidon" | xargs docker rm -f
