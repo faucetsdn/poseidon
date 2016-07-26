@@ -1,0 +1,44 @@
+FROM alpine:3.3
+MAINTAINER dgrossman <dgrossman@iqt.org>
+
+RUN apk add --update \
+    git \
+    make \
+    python \
+    python-dev \
+    py-pip \
+    py-sphinx \
+    tcpdump \
+    && rm -rf /var/cache/apk/*
+
+ADD . /poseidonWork
+WORKDIR /poseidonWork
+ENV PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
+RUN pip install pip --upgrade
+
+# install dependencies of plugins for poseidon
+RUN for file in $(find poseidon/* -name "requirements.txt"); \
+    do \
+        pip install -r $file; \
+    done
+
+# install dependencies of plugins for tests
+RUN for file in $(find plugins/* -name "requirements.txt"); \
+    do \
+        pip install -r $file; \
+    done
+
+ENV PYTHONUNBUFFERED 0
+EXPOSE 28000:27000
+
+ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:27000"]
+CMD ["poseidon.poseidonStorage.poseidonStorage:api"]
+
+# run linter
+#RUN pylint --disable=all --enable=classes --disable=W poseidonStorage
+
+# run tests
+RUN py.test -v \
+--ignore=poseidon/poseidonMain \
+--ignore=poseidon/poseidonStorage \
+--cov=plugins --cov-report term-missing --cov-config .coveragerc

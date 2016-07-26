@@ -31,8 +31,9 @@ import ConfigParser
 import json
 import urllib
 from subprocess import check_output
-
 from pymongo import MongoClient
+import falcon
+import falcon_cors from CORS
 
 
 class poseidonStorage:
@@ -193,6 +194,28 @@ class db_add_many_docs(poseidonStorage):
         except:
             ret = 'Error inserting documents into database.'
         resp.body = json.dumps(ret)
+
+
+# create callable WSGI app instance for gunicorn
+api = falcon.API(middleware=[cors.middleware])
+
+api.add_route('/v1/storage', db_database_names())
+api.add_route('/v1/storage/{database}', db_collection_names())
+api.add_route(
+    '/v1/storage/{database}/{collection}',
+    db_collection_count())
+api.add_route(
+    '/v1/storage/doc/{database}/{collection}/{doc_id}',
+    db_retrieve_doc())
+api.add_route(
+    '/v1/storage/query/{database}/{collection}/{query_str}',
+    db_collection_query())
+api.add_route(
+    '/v1/storage/add_one_doc/{database}/{collection}/{doc_str}',
+    db_add_one_doc())
+api.add_route(
+    '/v1/storage/add_many_docs/{database}/{collection}/{doc_list}',
+    db_add_many_docs())
 
 
 def main():
