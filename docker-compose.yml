@@ -72,6 +72,16 @@ services:
     ports:
       - 27017:27017
     command: --smallfiles --rest --auth
+  storage-api:
+    container_name: poseidon-storage-api
+    image: poseidon-storage-api
+    build:
+      context: .
+      dockerfile: Dockerfile.storage-api
+    ports:
+      - 28000:27000
+    environment:
+      - ALLOW_ORIGIN = http://$DOCKER_URL:28000
   periodically:
     depends_on:
       - monitor
