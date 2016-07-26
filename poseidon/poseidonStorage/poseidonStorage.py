@@ -157,7 +157,7 @@ class db_add_doc(poseidonStorage):
         try:
             doc = urllib.unquote(doc).decode('utf8')
             doc = ast.literal_eval(doc)
-            ret = self.client[database][collection]insert_one(doc)
+            ret = self.client[database][collection].insert_one(doc)
             ret = str(ret.inserted_id)
         except:
             ret = 'Error inserting document into database.'
