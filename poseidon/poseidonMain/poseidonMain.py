@@ -105,11 +105,11 @@ class PoseidonMain(object):
             # type , value
             t, v = self.get_queue_item()
 
-            handle_list = self.Scheduler.actions[t]
+            handle_list = self.Scheduler.get(t, None)
             if handle_list is not None:
                 for handle in handle_list:
                     handle(v)
-            handle_list = self.Investigator.actions[t]
+            handle_list = self.Investigator.get(t, None)
             if handle_list is not None:
                 for handle in handle_list:
                     handle(v)
