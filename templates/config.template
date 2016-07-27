@@ -1,6 +1,9 @@
 [Monitor]
 Config=True
 
+[rabbitmq]
+rabbit_host = localhost
+
 [database]
 ip = localhost
 user = user
