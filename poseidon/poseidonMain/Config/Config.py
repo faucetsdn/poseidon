@@ -21,7 +21,8 @@ import os
 import urllib2
 
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
-CI_TESTING = 'file:///poseidonWork/templates/config.template'
+# CI_TESTING = 'file:///poseidonWork/templates/config.template'
+CI_TESTING = '/poseidonWork / templates / config.template'
 
 
 class Config(Main_Action_Base):
