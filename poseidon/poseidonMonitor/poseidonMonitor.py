@@ -86,6 +86,8 @@ class Monitor(object):
         self.init_logging()
 
     def init_logging(self):
+        config = None
+
         path = getenv('loggingFile', None)
 
         if path is None:
