@@ -1,13 +1,14 @@
 version: '2'
 
 #  PORTS
-#     api:     1111:8001
-#     docs:    2222:8002
-#     mock:    3333:8003
-#     monitor: 4444:8004
-#     main:    5555:8005
-#     storage: 27017:27017
-#     periodically: 9999:8009
+#     api:                1111:8001
+#     docs:               2222:8002
+#     mock:               3333:8003
+#     monitor:            4444:8004
+#     main:               5555:8005
+#     storage:            27017:27017
+#     storage-interface:  28000:27000
+#     periodically:       9999:8009
 
 services:
   api:
