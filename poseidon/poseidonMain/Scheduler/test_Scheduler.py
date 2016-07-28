@@ -105,12 +105,16 @@ def test_schedule_once():
     b = CRONSPEC(EVERY.once, '10:30')
     c = CRONSPEC(EVERY.once, None)
 
-    print 'cronspec:', b
-
     s.add_job(jobId, b, somefunc)
-    s.add_job(jobId2, c, somefunc)
+    assert len(s.schedule.jobs) == 1
 
-    assert len(s.schedule.jobs) == 2
+    print 'run'
+    s.schedule.run_all()
+    assert len(s.schedule.jobs) == 0
+
+    s.add_job(jobId2, c, somefunc)
+    assert len(s.schedule.jobs) == 1
+    print 'run'
     s.schedule.run_all()
     assert len(s.schedule.jobs) == 0
     s.shutdown()

@@ -52,7 +52,6 @@ class Scheduler(Main_Action_Base):
                     kwargs['log'].error(badness)
                 else:
                     args[1].error(badness)
-
         return wrapper
 
     def do_once(self, func):
@@ -71,21 +70,6 @@ class Scheduler(Main_Action_Base):
                     args[1].error(badness)
             return self.schedule.CancelJob
         return wrapper
-
-    '''
-
-    def do_once(self, func):
-        @functools.wraps(self, func)
-        def wrapper(self, *args, **kwargs):
-            try:
-                func(*args, **kwargs)
-            except:
-                import traceback
-                badness = traceback.format_exc()
-                self.logger.error(badness)
-            return self.schedule.CancelJob
-        return wrapper
-    '''
 
     '''
     def bad_job(jobId,log):
