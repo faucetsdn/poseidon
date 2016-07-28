@@ -2,8 +2,11 @@
 Config=True
 loggingFile = /poseidonWork/poseidon/config/logging.json
 
+[rabbitmq]
+rabbit_host = localhost
+
 [database]
-ip = 0.0.0.0
+ip = localhost
 user = user
 password = SECRET
 

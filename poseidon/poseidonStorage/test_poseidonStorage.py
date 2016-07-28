@@ -21,7 +21,6 @@ Created on 28 June 2016
 @author: dgrossman, lanhamt
 """
 import urllib
-
 import falcon
 import pytest
 from poseidonStorage import db_collection_count
@@ -29,6 +28,8 @@ from poseidonStorage import db_collection_names
 from poseidonStorage import db_collection_query
 from poseidonStorage import db_database_names
 from poseidonStorage import db_retrieve_doc
+from poseidonStorage import db_add_one_doc
+from poseidonStorage import db_add_many_docs
 from poseidonStorage import main
 from poseidonStorage import poseidonStorage
 
@@ -45,6 +46,12 @@ application.add_route(
 application.add_route(
     '/v1/storage/query/{database}/{collection}/{query_str}',
     db_collection_query())
+application.add_route(
+    '/v1/storage/add_one_doc/{database}/{collection}/{doc_str}',
+    db_add_one_doc())
+application.add_route(
+    '/v1/storage/add_many_docs/{database}/{collection}/{doc_list}',
+    db_add_many_docs())
 
 
 def test_poseidonStorage():
@@ -127,7 +134,7 @@ def test_db_collection_query(client):
     """
     tests response from query of database.
     """
-    query = "{u'hostname': u'bad'}"
+    query = "{'hostname': 'bad'}"
     query = urllib.unquote(query).encode('utf8')
     resp = client.get('/v1/storage/query/local/startup_log/' + query)
     assert resp.status == falcon.HTTP_OK
@@ -137,3 +144,54 @@ def test_db_collection_query(client):
     resp = client.get('/v1/storage/query/local/startup_log/' + query)
     assert resp.status == falcon.HTTP_OK
     assert resp.body == '"Error on query."'
+
+
+def test_db_add_one_doc(client):
+    """
+    tests adding document to a database, then
+    tests retrieving added document from the database
+    using the returned id, then tests that the collection
+    inserted into is listed under the database collections.
+    """
+    doc = """{
+            node_ip: '0.0.0.0'
+            talked_to: {'machine_1': 2,
+                        'machine_2': 1,
+                        'machine_3': 1}
+            recieved_from: {'machine_1': 1,
+                            'machine_6': 3,
+                            'machine_2': 2}
+            packet_lengths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+            flow_id: '6a32984d2348e23894f3298'
+            dns_records: ['0.0.0.0', '1.1.1.1']
+            time_rec: {'first_sent': '0-0-0 00:00:00.000000',
+                       'first_received': '0-0-0 00:00:00.000000',
+                       'last_sent': '0-0-0 00:00:00.000000',
+                       'last_received': '0-0-0 00:00:00.000000'}
+            }"""
+    doc = urllib.unquote(doc).encode('utf8')
+    get_str = '/v1/storage/add_one_doc/poseidon_records/network_graph/' + doc
+    resp = client.get(get_str)
+    assert resp.status == falcon.HTTP_OK
+    doc_id = resp.body
+    get_str = '/v1/storage/doc/poseidon_records/network_graph/' + doc_id
+    resp = client.get(get_str)
+    assert resp.status == falcon.HTTP_OK
+    resp = client.get('/v1/storage/poseidon_records')
+    assert resp.status == falcon.HTTP_OK
+
+
+def test_db_add_many_docs(client):
+    """
+    tests inserting several docs into database.
+    encodes with utf8 for well-formatted url
+    """
+    doc_one = """{node_ip: '1.1.1.1', packet_lengths: [1, 1, 2]}"""
+    doc_two = """{node_ip: '2.2.2.2', packet_lengths: [3, 5, 8]}"""
+    doc_thr = """{node_ip: '3.3.3.3', packet_lengths: [13, 21, 34]}"""
+    doc_list = [doc_one, doc_two, doc_thr]
+    doc_list = str(doc_list)
+    doc_list = urllib.unquote(doc_list).encode('utf8')
+    get_str = '/v1/storage/add_many_docs/poseidon_records/network_graph/' + doc_list
+    resp = client.get(get_str)
+    assert resp.status == falcon.HTTP_OK

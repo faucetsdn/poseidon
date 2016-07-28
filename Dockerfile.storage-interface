@@ -1,5 +1,5 @@
 FROM alpine:3.3
-MAINTAINER Charlie Lewis <clewis@iqt.org>
+MAINTAINER dgrossman <dgrossman@iqt.org>
 
 RUN apk add --update \
     git \
@@ -28,14 +28,21 @@ RUN for file in $(find plugins/* -name "requirements.txt"); \
         pip install -r $file; \
     done
 
+ENV PYTHONUNBUFFERED 0
+EXPOSE 28000:27000
+
+ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:27000"]
+CMD ["poseidon.poseidonStorage.poseidonStorage:api"]
+
+# run linter
+#RUN pylint --disable=all --enable=classes --disable=W poseidonStorage
+
 # run tests
 RUN py.test -v \
---cov=poseidon/poseidonMain \
+--ignore=poseidon/poseidonMain \
 --ignore=poseidon/poseidonMonitor \
---ignore=poseidon/poseidonStorage \
---ignore=plugins \
 --ignore=poseidon/periodically \
+--ignore=plugins/features \
+--ignore=plugins/heuristics \
+--cov=poseidon/poseidonStorage \
 --cov-report term-missing --cov-config .coveragerc
-
-ENV PYTHONUNBUFFERED 0
-CMD ["python", "poseidon/poseidonMain/poseidonMain.py","1","-1","http://localhost:5555/v1/version"]

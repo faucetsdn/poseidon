@@ -19,6 +19,8 @@ Created on 17 May 2016
 """
 from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
+import json
+from requests import get
 
 
 class NodeHistory(Monitor_Action_Base):
@@ -35,11 +37,22 @@ class Handle_Default(Monitor_Helper_Base):
         self.mod_name = self.__class__.__name__
 
     def on_get(self, req, resp, resource):
-        resp.content_type = 'text/text'
+        resp.content_type = 'application/json'
         try:
-            resp.body = self.mod_name + ' found: %s' % (resource)
+            """
+            connect to poseidon storage to query database
+            dump response from storage
+            db_collection_query
+            query = {'node_ip': resource}
+            urllib.unquote(query).encode('utf8')
+
+            """
+            query = {'node_ip': resource}
+            query = urllib.unquote(query).encode('utf8')
+            response = get('http://localhost:4444/v1/storage/' + query)
         except:  # pragma: no cover
-            resp.body = 'failed'
+            response = 'failed'
+        resp.body = json.dumps(response)
 
 
 nodehistory_interface = NodeHistory()

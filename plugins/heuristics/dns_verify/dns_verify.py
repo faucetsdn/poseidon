@@ -26,7 +26,6 @@ Created on 22 June 2016
 import ast
 import copy
 import time
-
 import pika
 
 """
@@ -35,7 +34,7 @@ while wait:
     try:
         connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq'))
         channel = connection.channel()
-        channel.exchange_declare(exchange='topic_recs', type='topic')
+        channel.exchange_declare(exchange='topic_poseidon_internal', type='topic')
         result = channel.queue_declare(exclusive=True)
         queue_name = result.method.queue
         wait = False
@@ -51,7 +50,7 @@ if not binding_keys:
     sys.exit(1)
 
 for binding_key in binding_keys:
-    channel.queue_bind(exchange='topic_recs',
+    channel.queue_bind(exchange='topic_poseidon_internal',
                        queue=queue_name,
                        routing_key=binding_key)
 
