@@ -21,7 +21,6 @@ Created on 13 June 2016
 """
 import subprocess
 import sys
-
 import pika
 
 
@@ -40,10 +39,10 @@ def connections():
     connection = None
     try:
         connection = pika.BlockingConnection(pika.ConnectionParameters(
-            host='rabbitmq'))
+            host='localhost'))
         channel = connection.channel()
 
-        channel.exchange_declare(exchange='topic_recs',
+        channel.exchange_declare(exchange='topic_poseidon_internal',
                                  type='topic')
     except:
         print 'unable to connect to rabbitmq, quitting.'
@@ -175,8 +174,9 @@ def return_packet(line_source):
 
 
 def run_tool(path):
-    """Tool entry point"""
-    routing_key = 'tcpdump_hex_parser' + path.replace('/', '.')
+    """
+    Tool entry point
+    """
     print 'processing pcap results...'
     channel, connection = connections()
     proc = subprocess.Popen(
@@ -185,8 +185,12 @@ def run_tool(path):
         stdout=subprocess.PIPE)
     for packet in return_packet(proc.stdout):
         message = str(packet)
+        if 'dns_resolved' in packet:
+            routing_key = 'poseidon.tcpdump_parser.dns'
+        else:
+            routing_key = 'poseidon.tcpdump_parser'
         if channel is not None:
-            channel.basic_publish(exchange='topic_recs',
+            channel.basic_publish(exchange='topic_poseidon_internal',
                                   routing_key=routing_key,
                                   body=message)
         print ' [x] Sent %r:%r' % (routing_key, message)
