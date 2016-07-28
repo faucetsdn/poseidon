@@ -23,6 +23,14 @@ NOTE: need to add a periodic database update
 Created on 22 June 2016
 @author: lanhamt
 """
+<<<<<<< HEAD
+=======
+from pymongo import MongoClient
+from pcap_stats_utils import FlowRecord
+from pcap_stats_utils import MachineNode
+from pcap_stats_utils import TimeRecord
+import sys
+>>>>>>> 5b49018... exposed storage api, added db features and coverage (commits need to be squashed on merge) (#93)
 import ast
 import time
 from collections import defaultdict
@@ -36,11 +44,17 @@ import threading
 
 flowRecordLock = threading.Lock()
 
+<<<<<<< HEAD
 
+=======
+"""
+>>>>>>> 5b49018... exposed storage api, added db features and coverage (commits need to be squashed on merge) (#93)
 wait = True
 while wait:
     try:
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+        params = pika.ConnectionParameters(host='')
+        print params
+        connection = pika.BlockingConnection(params)
         channel = connection.channel()
         channel.exchange_declare(exchange='topic_recs', type='topic')
         result = channel.queue_declare(exclusive=True)
@@ -57,7 +71,7 @@ client = None
 wait = True
 while wait:
     try:
-        client = MongoClient(db_ip)
+        client = MongoClient()
         client.address
         wait = False
         print 'connected to database...'
@@ -77,6 +91,7 @@ for binding_key in binding_keys:
                        routing_key=binding_key)
 
 print ' [*] Waiting for logs. To exit press CTRL+C'
+<<<<<<< HEAD
 
 
 channel.basic_consume(analyzePcap, queue=queue_name, no_ack=True)
@@ -281,7 +296,9 @@ class FlowRecord:
             return None
         else:
             return self.machines[addr]
-
+=======
+"""
+>>>>>>> 5b49018... exposed storage api, added db features and coverage (commits need to be squashed on merge) (#93)
 
 def db_update_worker():
     """
@@ -360,3 +377,9 @@ def analyze_pcap(ch, method, properties, body, flow):
     else:
         # neither machine in network (list needs to be updated)
         pass
+
+
+"""
+channel.basic_consume(analyze_pcap, queue=queue_name, no_ack=True)
+channel.start_consuming()
+"""
