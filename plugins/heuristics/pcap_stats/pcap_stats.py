@@ -37,6 +37,7 @@ import threading
 flowRecordLock = threading.Lock()
 
 
+"""
 wait = True
 while wait:
     try:
@@ -81,6 +82,7 @@ print ' [*] Waiting for logs. To exit press CTRL+C'
 
 channel.basic_consume(analyzePcap, queue=queue_name, no_ack=True)
 channel.start_consuming()
+"""
 
 
 def db_update_worker():
