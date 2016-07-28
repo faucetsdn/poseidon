@@ -71,7 +71,8 @@ def test_remove():
     s.logger.setLevel(logging.DEBUG)
 
     b = CRONSPEC(EVERY.minute, None)
-    print 'cronspec:', b
+
+    print 'jobs:', len(s.schedule.jobs)
 
     s.add_job(jobId, b, somefunc)
     s.add_job(jobId2, b, somefunc)
@@ -102,8 +103,10 @@ def test_schedule_once():
     s.logger = logging.getLogger('testing')
     s.logger.setLevel(logging.DEBUG)
 
-    b = CRONSPEC(EVERY.once, '10:30')
+    b = CRONSPEC(EVERY.once, '00:00')
     c = CRONSPEC(EVERY.once, None)
+
+    print 'jobs:', len(s.schedule.jobs)
 
     s.add_job(jobId, b, somefunc)
     assert len(s.schedule.jobs) == 1
@@ -132,13 +135,15 @@ def test_schedule_day():
     s.logger = logging.getLogger('testing')
     s.logger.setLevel(logging.DEBUG)
 
-    b = CRONSPEC(EVERY.day, None)
-    c = CRONSPEC(EVERY.day, '10:30')
+    b = CRONSPEC(EVERY.day, '00:00')
+    c = CRONSPEC(EVERY.day, None)
 
-    print 'cronspec:', b
+    print 'day jobs:', len(s.schedule.jobs)
 
     s.add_job(jobId, b, somefunc)
     s.add_job(jobId2, c, somefunc)
+
+    assert len(s.schedule.jobs) == 2
 
     s.schedule.run_all()
 
@@ -166,13 +171,17 @@ def test_schedule_hour():
     s.logger = logging.getLogger('testing')
     s.logger.setLevel(logging.DEBUG)
 
-    b = CRONSPEC(EVERY.hour, None)
-    c = CRONSPEC(EVERY.hour, ':30')
+    b = CRONSPEC(EVERY.hour, ':00')
+    c = CRONSPEC(EVERY.hour, None)
 
-    print 'cronspec:', b
+    print 'jobs:', len(s.schedule.jobs)
 
     s.add_job(jobId, b, somefunc)
     s.add_job(jobId2, c, somefunc)
+
+    print 'xx' * 20, s.list_jobs()
+    assert len(s.schedule.jobs) == 2
+    assert len(s.list_jobs().values()) == 2
 
     s.schedule.run_all()
 
@@ -185,6 +194,7 @@ def test_schedule_hour():
     s.del_job(jobId2)
 
     assert len(s.schedule.jobs) == 0
+    s.shutdown()
 
 
 def test_schedule_minute():
@@ -218,3 +228,4 @@ def test_schedule_minute():
     s.del_job(jobId2)
 
     assert len(s.schedule.jobs) == 0
+    s.shutdown()

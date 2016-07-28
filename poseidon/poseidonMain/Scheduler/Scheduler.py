@@ -142,7 +142,7 @@ class Scheduler(Main_Action_Base):
                         if jobId == v.args[0]:
                             print 'killing:', job
                             self.schedule.cancel_job(job)
-                        else:
+                        else:  # pragma: no cover
                             print '*' * 10
                             jid = v.keywords.get('jobId', None)
                             if jid == jobId:
@@ -156,7 +156,7 @@ class Scheduler(Main_Action_Base):
         jobfunc = job.__dict__['job_func']
         if len(jobfunc.args) >= 1:
             return jobfunc.args[0]
-        else:
+        else:  # pragma: no cover
             return jobfunc.keyworkds.get('jobId', None)
 
     def list_jobs(self):
@@ -164,6 +164,7 @@ class Scheduler(Main_Action_Base):
         for job in self.schedule.jobs:
             jobid = self.get_jobId(job)
             d[jobid] = job
+        return d
 
     def shutdown(self):
         self.schedule.clear()
