@@ -45,25 +45,29 @@ class Scheduler(Main_Action_Base):
             print 'kwargs', kwargs
             try:
                 func(*args, **kwargs)
-            except:
+            except:  # pragma: no cover
                 import traceback
                 badness = traceback.format_exc()
                 if 'log' in kwargs:
                     kwargs['log'].error(badness)
                 else:
                     args[1].error(badness)
-
         return wrapper
 
     def do_once(self, func):
-        @functools.wraps(self, func)
-        def wrapper(self, *args, **kwargs):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            print '  args', args
+            print 'kwargs', kwargs
             try:
                 func(*args, **kwargs)
-            except:
+            except:  # pragma: no cover
                 import traceback
                 badness = traceback.format_exc()
-                self.logger.error(badness)
+                if 'log' in kwargs:
+                    kwargs['log'].error(badness)
+                else:
+                    args[1].error(badness)
             return self.schedule.CancelJob
         return wrapper
 
@@ -82,29 +86,35 @@ class Scheduler(Main_Action_Base):
         start = cronspec.starts
 
         if occurs == EVERY.once:
-            self.schedule.every().day.at(start).do(self.do_once(func),
-                                                   jobId,
-                                                   self.logger,
-                                                   **kwargs)
+            if start is not None:
+                self.schedule.every().day.at(start).do(self.do_once(func),
+                                                       jobId,
+                                                       self.logger,
+                                                       **kwargs)
+            else:
+                self.schedule.every().day.do(self.do_once(func),
+                                             jobId,
+                                             self.logger,
+                                             **kwargs)
 
         if occurs == EVERY.day:
             if start is not None:
-                self.schedule.every(start).day.at(start).do(self.safe(func),
-                                                            jobId,
-                                                            self.logger,
-                                                            **kwargs)
-            else:
                 self.schedule.every().day.at(start).do(self.safe(func),
                                                        jobId,
-                                                       self.actions,
+                                                       self.logger,
                                                        **kwargs)
+            else:
+                self.schedule.every().day.do(self.safe(func),
+                                             jobId,
+                                             self.actions,
+                                             **kwargs)
 
         if occurs == EVERY.hour:
             if start is not None:
-                self.schedule.every(start).hour.do(self.safe(func),
-                                                   jobId,
-                                                   self.logger,
-                                                   **kwargs)
+                self.schedule.every().hour.at(start).do(self.safe(func),
+                                                        jobId,
+                                                        self.logger,
+                                                        **kwargs)
             else:
                 self.schedule.every().hour.do(self.safe(func),
                                               jobId,
@@ -113,10 +123,10 @@ class Scheduler(Main_Action_Base):
 
         if occurs == EVERY.minute:
             if start is not None:
-                self.schedule.every(start).minute.do(self.safe(func),
-                                                     jobId,
-                                                     self.logger,
-                                                     **kwargs)
+                self.schedule.every(start).minutes.do(self.safe(func),
+                                                      jobId,
+                                                      self.logger,
+                                                      **kwargs)
             else:
                 self.schedule.every().minute.do(self.safe(func),
                                                 jobId,
@@ -132,7 +142,7 @@ class Scheduler(Main_Action_Base):
                         if jobId == v.args[0]:
                             print 'killing:', job
                             self.schedule.cancel_job(job)
-                        else:
+                        else:  # pragma: no cover
                             print '*' * 10
                             jid = v.keywords.get('jobId', None)
                             if jid == jobId:
@@ -146,7 +156,7 @@ class Scheduler(Main_Action_Base):
         jobfunc = job.__dict__['job_func']
         if len(jobfunc.args) >= 1:
             return jobfunc.args[0]
-        else:
+        else:  # pragma: no cover
             return jobfunc.keyworkds.get('jobId', None)
 
     def list_jobs(self):
@@ -154,6 +164,7 @@ class Scheduler(Main_Action_Base):
         for job in self.schedule.jobs:
             jobid = self.get_jobId(job)
             d[jobid] = job
+        return d
 
     def shutdown(self):
         self.schedule.clear()
