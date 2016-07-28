@@ -45,7 +45,7 @@ class Scheduler(Main_Action_Base):
             print 'kwargs', kwargs
             try:
                 func(*args, **kwargs)
-            except:
+            except:  # pragma: no cover
                 import traceback
                 badness = traceback.format_exc()
                 if 'log' in kwargs:
@@ -62,7 +62,7 @@ class Scheduler(Main_Action_Base):
             print 'kwargs', kwargs
             try:
                 func(*args, **kwargs)
-            except:
+            except:  # pragma: no cover
                 import traceback
                 badness = traceback.format_exc()
                 if 'log' in kwargs:
