@@ -19,8 +19,11 @@ poseidonMain
 Created on 29 May 2016
 @author: dgrossman, lanhamt
 """
+import json
 import logging
 import logging.config
+import time
+from os import getenv
 
 from Investigator.Investigator import investigator_interface
 from Scheduler.Scheduler import scheduler_interface
@@ -33,9 +36,11 @@ class PoseidonMain(object):
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         logging.basicConfig(level=logging.DEBUG)
+        self.shutdown = False
+
+        self.mod_configuration = dict()
 
         self.mod_name = self.__class__.__name__
-        self.mod_configuration = None
         self.config_section_name = self.mod_name
 
         self.Investigator = investigator_interface
@@ -56,13 +61,68 @@ class PoseidonMain(object):
         self.Scheduler.configure()
         self.Scheduler.configure_endpoints()
 
-        self.mod_configuration = self.Config.get_section(
-            self.config_section_name)
+        for item in self.Config.get_section(self.config_section_name):
+            k, v = item
+            self.mod_configuration[k] = v
+
+        self.init_logging()
+
+    def init_logging(self):
+        config = None
+
+        path = getenv('loggingFile', None)
+
+        if path is None:
+            path = self.mod_configuration.get('loggingFile', None)
+
+        if path is not None:
+            with open(path, 'rt') as f:
+                config = json.load(f)
+            logging.config.dictConfig(config)
+        else:
+            logging.basicConfig(level=logging.DEBUG)
+
+    def handle(self, tv):
+        t, v = tv
+        if t == 'Main':
+            if v == 'shutdown':
+                self.shutdown = True
+
+    def get_queue_item(self):
+        return('t', 'v')
+
+    def init_rabbit(self):
+        pass
+
+    def processQ(self):
+        x = 10
+        while not self.shutdown and x > 0:
+            start = time.clock()
+            time.sleep(1)
+
+            x = x - 1
+
+            # type , value
+            t, v = self.get_queue_item()
+
+            # handle_list = self.Scheduler.get(t, None)
+            # if handle_list is not None:
+            #     for handle in handle_list:
+            #         handle(v)
+            # handle_list = self.Investigator.get(t, None)
+            # if handle_list is not None:
+            #     for handle in handle_list:
+            #         handle(v)
+
+            elapsed = time.clock()
+            elapsed = elapsed - start
+            print 'time to run eventloop is %0.3f ms' % (elapsed * 1000)
 
 
 def main():
     pmain = PoseidonMain()
-    print 'main'
+    pmain.init_rabbit()
+    pmain.processQ()
     return True
 
 if __name__ == '__main__':  # pragma: no cover

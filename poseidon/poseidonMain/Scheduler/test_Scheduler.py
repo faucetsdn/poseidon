@@ -19,9 +19,71 @@ Test module for Onos.py
 Created on 28 June 2016
 @author: dgrossman
 """
+import logging
+
 import pytest
 from Scheduler import Scheduler
+from Scheduler import scheduler_interface
+
+from poseidon.baseClasses.enums_tuples import CRONSPEC
+from poseidon.baseClasses.enums_tuples import EVERY
 
 
-def test_Scheduler():
+def test_instantiation():
     Scheduler()
+
+
+def test_add():
+
+    def somefunc(jobId, logger):
+        print 'someFunc:', jobId, logger
+        return True
+
+    jobId = 'JOBID'
+    jobId2 = 'JOBID'
+
+    s = scheduler_interface
+    s.logger = logging.getLogger('testing')
+    s.logger.setLevel(logging.DEBUG)
+
+    b = CRONSPEC(EVERY.minute, None)
+    print 'cronspec:', b
+
+    s.add_job(jobId, b, somefunc)
+    s.add_job(jobId2, b, somefunc)
+
+    s.schedule.run_all()
+
+    assert len(s.schedule.jobs) == 2
+    s.shutdown()
+
+
+def test_remove():
+    jobId = 'JOBID'
+    jobId2 = 'JOBID'
+
+    def somefunc(jobId, logger):
+        print 'someFunc:', jobId, logger
+        return True
+
+    s = scheduler_interface
+    s.logger = logging.getLogger('testing')
+    s.logger.setLevel(logging.DEBUG)
+
+    b = CRONSPEC(EVERY.minute, None)
+    print 'cronspec:', b
+
+    s.add_job(jobId, b, somefunc)
+    s.add_job(jobId2, b, somefunc)
+
+    s.schedule.run_all()
+
+    assert len(s.schedule.jobs) == 2
+
+    s.del_job(jobId)
+
+    assert len(s.schedule.jobs) == 1
+
+    s.del_job(jobId2)
+
+    assert len(s.schedule.jobs) == 0
