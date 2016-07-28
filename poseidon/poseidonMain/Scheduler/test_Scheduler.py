@@ -55,7 +55,7 @@ def test_add():
     s.schedule.run_all()
 
     assert len(s.schedule.jobs) == 2
-    s.schedule.clear()
+    s.shutdown()
 
 
 def test_remove():
