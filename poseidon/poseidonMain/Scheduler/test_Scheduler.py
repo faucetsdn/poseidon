@@ -40,7 +40,7 @@ def test_add():
         return True
 
     jobId = 'JOBID'
-    jobId2 = 'JOBID'
+    jobId2 = 'JOBID2'
 
     s = scheduler_interface
     s.logger = logging.getLogger('testing')
@@ -60,7 +60,7 @@ def test_add():
 
 def test_remove():
     jobId = 'JOBID'
-    jobId2 = 'JOBID'
+    jobId2 = 'JOBID2'
 
     def somefunc(jobId, logger):
         print 'someFunc:', jobId, logger
@@ -75,6 +75,129 @@ def test_remove():
 
     s.add_job(jobId, b, somefunc)
     s.add_job(jobId2, b, somefunc)
+
+    s.schedule.run_all()
+
+    assert len(s.schedule.jobs) == 2
+
+    s.del_job(jobId)
+
+    assert len(s.schedule.jobs) == 1
+
+    s.del_job(jobId2)
+
+    assert len(s.schedule.jobs) == 0
+    s.shutdown()
+
+
+def test_schedule_once():
+    jobId = 'JOBID'
+
+    def somefunc(jobId, logger):
+        print 'someFunc:', jobId, logger
+        return True
+
+    s = scheduler_interface
+    s.logger = logging.getLogger('testing')
+    s.logger.setLevel(logging.DEBUG)
+
+    b = CRONSPEC(EVERY.once, '10:30')
+    print 'cronspec:', b
+
+    s.add_job(jobId, b, somefunc)
+
+    assert len(s.schedule.jobs) == 1
+    s.schedule.run_all()
+    assert len(s.schedule.jobs) == 0
+    s.shutdown()
+
+
+def test_schedule_day():
+    jobId = 'JOBID'
+    jobId2 = 'JOBID2'
+
+    def somefunc(jobId, logger):
+        print 'someFunc:', jobId, logger
+        return True
+
+    s = scheduler_interface
+    s.logger = logging.getLogger('testing')
+    s.logger.setLevel(logging.DEBUG)
+
+    b = CRONSPEC(EVERY.day, None)
+    c = CRONSPEC(EVERY.day, '10:30')
+
+    print 'cronspec:', b
+
+    s.add_job(jobId, b, somefunc)
+    s.add_job(jobId2, c, somefunc)
+
+    s.schedule.run_all()
+
+    assert len(s.schedule.jobs) == 2
+
+    s.del_job(jobId)
+
+    assert len(s.schedule.jobs) == 1
+
+    s.del_job(jobId2)
+
+    assert len(s.schedule.jobs) == 0
+    s.shutdown()
+
+
+def test_schedule_hour():
+    jobId = 'JOBID'
+    jobId2 = 'JOBID2'
+
+    def somefunc(jobId, logger):
+        print 'someFunc:', jobId, logger
+        return True
+
+    s = scheduler_interface
+    s.logger = logging.getLogger('testing')
+    s.logger.setLevel(logging.DEBUG)
+
+    b = CRONSPEC(EVERY.hour, None)
+    c = CRONSPEC(EVERY.hour, ':30')
+
+    print 'cronspec:', b
+
+    s.add_job(jobId, b, somefunc)
+    s.add_job(jobId2, c, somefunc)
+
+    s.schedule.run_all()
+
+    assert len(s.schedule.jobs) == 2
+
+    s.del_job(jobId)
+
+    assert len(s.schedule.jobs) == 1
+
+    s.del_job(jobId2)
+
+    assert len(s.schedule.jobs) == 0
+
+
+def test_schedule_minute():
+    jobId = 'JOBID'
+    jobId2 = 'JOBID2'
+
+    def somefunc(jobId, logger):
+        print 'someFunc:', jobId, logger
+        return True
+
+    s = scheduler_interface
+    s.logger = logging.getLogger('testing')
+    s.logger.setLevel(logging.DEBUG)
+
+    b = CRONSPEC(EVERY.minute, None)
+    c = CRONSPEC(EVERY.minute, 5)
+
+    print 'cronspec:', b
+
+    s.add_job(jobId, b, somefunc)
+    s.add_job(jobId2, c, somefunc)
 
     s.schedule.run_all()
 
