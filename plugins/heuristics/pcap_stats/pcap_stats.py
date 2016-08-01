@@ -45,14 +45,18 @@ import threading
 flowRecordLock = threading.Lock()
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
+=======
+
+>>>>>>> 748e1da... rabbit integration config
 """
 >>>>>>> 5b49018... exposed storage api, added db features and coverage (commits need to be squashed on merge) (#93)
 wait = True
 while wait:
     try:
-        params = pika.ConnectionParameters(host='')
+        params = pika.ConnectionParameters(host=DOCKER_IP)
         print params
         connection = pika.BlockingConnection(params)
         channel = connection.channel()
@@ -299,6 +303,7 @@ class FlowRecord:
 =======
 """
 >>>>>>> 5b49018... exposed storage api, added db features and coverage (commits need to be squashed on merge) (#93)
+
 
 def db_update_worker():
     """
