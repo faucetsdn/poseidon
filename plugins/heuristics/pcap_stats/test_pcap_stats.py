@@ -20,10 +20,10 @@ Created on 23 June 2016
 @author: lanhamt
 """
 import pytest
+from pcap_stats_utils import FlowRecord
+from pcap_stats_utils import MachineNode
+from pcap_stats_utils import TimeRecord
 from pcap_stats import analyze_pcap
-from pcap_stats import FlowRecord
-from pcap_stats import MachineNode
-from pcap_stats import TimeRecord
 from pcap_stats import network_machines
 import math
 

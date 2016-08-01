@@ -22,6 +22,8 @@ Created on 15 July 2016
 import os
 
 import pytest
+
+from Config import CI_TESTING
 from Config import config_interface
 from Config import DOCKER_URL
 
@@ -48,7 +50,7 @@ def test_env():
 
     a = config_interface
 
-    assert a.URL == expected
+    assert (a.URL == expected or a.URL == CI_TESTING)
 
 
 def test_get_BADsection():

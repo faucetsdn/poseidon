@@ -17,6 +17,8 @@
 Created on  15 July 2016
 @author: dgrossman
 """
+import logging
+
 from poseidon.baseClasses.Rock_Bottom import Rock_Bottom
 
 
@@ -42,6 +44,11 @@ class Main_Action_Base(Rock_Bottom):  # pragma: no cover
 
         """
         self.owner = owner
+        if owner.logger is not None:
+            self.logger = owner.logger
+        else:
+            self.logger = logging.getLogger(__name__)
+
         if self.owner.mod_name is not None:
             self.config_section_name = self.owner.mod_name + ':' + self.mod_name
         else:

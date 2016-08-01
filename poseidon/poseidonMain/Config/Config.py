@@ -22,6 +22,7 @@ import urllib2
 
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
 DOCKER_URL = 'file:///poseidonWork/templates/config.template'
+CI_TESTING = '/poseidonWork/templates/config.template'
 
 
 class Config(Main_Action_Base):
@@ -34,10 +35,15 @@ class Config(Main_Action_Base):
             self.URL = os.environ['POSEIDON_CONFIG_URL']
         except KeyError:
             # TODO flag error
-            pass
+            self.URL = CI_TESTING
         print 'poseidonMain:Config using', self.URL
 
     def get_section(self, section_name):
+        if self.URL == CI_TESTING:
+            import ConfigParser
+            config = ConfigParser.ConfigParser()
+            config.readfp(open(self.URL), 'r')
+            return config.items(section_name)
         if self.URL is not None:
             if self.URL[-1] != '/':
                 ask = self.URL + '/' + section_name
