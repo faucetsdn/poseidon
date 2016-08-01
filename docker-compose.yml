@@ -96,3 +96,9 @@ services:
       - monitor
     ports:
       - "9999:8009"
+  rabbit:
+    image: rabbitmq:management
+    container_name: poseidon-rabbit
+    ports:
+      - '15672:15672'
+      - '5672:5672'

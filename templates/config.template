@@ -5,6 +5,9 @@ loggingFile = /poseidonWork/poseidon/config/logging.json
 [rabbitmq]
 rabbit_host = localhost
 
+[rabbitmq]
+rabbit_host = localhost
+
 [database]
 ip = localhost
 user = user

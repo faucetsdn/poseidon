@@ -27,6 +27,7 @@ from pymongo import MongoClient
 from pcap_stats_utils import FlowRecord
 from pcap_stats_utils import MachineNode
 from pcap_stats_utils import TimeRecord
+import sys
 import ast
 import time
 import pika
@@ -41,7 +42,9 @@ flowRecordLock = threading.Lock()
 wait = True
 while wait:
     try:
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+        params = pika.ConnectionParameters(host=DOCKER_IP)
+        print params
+        connection = pika.BlockingConnection(params)
         channel = connection.channel()
         channel.exchange_declare(exchange='topic_poseidon_internal', type='topic')
         queue_name = 'process_heuristic_stats'
@@ -58,7 +61,7 @@ client = None
 wait = True
 while wait:
     try:
-        client = MongoClient(db_ip)
+        client = MongoClient()
         client.address
         wait = False
         print 'connected to database...'
@@ -162,3 +165,9 @@ def analyze_pcap(ch, method, properties, body, flow):
     else:
         # neither machine in network (list needs to be updated)
         pass
+
+
+"""
+channel.basic_consume(analyze_pcap, queue=queue_name, no_ack=True)
+channel.start_consuming()
+"""

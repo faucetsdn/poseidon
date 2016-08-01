@@ -134,8 +134,15 @@ compose: #build
 	export DOCKER_URL=$$docker_url; \
 	docker-compose up -d --force-recreate
 
+rabbit: clean-rabbit depends
+	docker run -d -h rabbitmq --name rabbitmq -p 15672:15672 -p 5672:5672 rabbitmq:management
+
+pcap-stats:
+	# NOTE: this is a plugin module that can be stood up for testing rabbitmq and mongo
+	@docker ps -aqf "name=pcap-stats" | xargs docker rm -f
+	@docker build -t pcap-stats -f plugins/heuristics/pcap_stats/Dockerfile plugins/heuristics/pcap_stats/
+
 build: depends
-	# docker-compose build 
 	docker build -t poseidon-notebooks -f Dockerfile.notebooks .
 	docker build -t poseidon-monitor  -f Dockerfile.monitor .
 	docker build -t poseidon-main  -f Dockerfile.main .
@@ -174,6 +181,7 @@ clean-all: clean depends
 	@docker rmi poseidon-main
 	@docker rmi poseidon-api
 	@docker rmi periodically
+	@docker rmi poseidon-storage-interface
 
 clean-mock-controller:
 	@docker ps -aqf "name=mock-controller" | xargs docker rm -f
@@ -201,6 +209,9 @@ clean-notebooks: depends
 
 clean-storage-interface: depends
 	@docker ps -aqf "name=poseidon-storage-interface" | xargs docker rm -f
+
+clean-rabbit:
+	@docker ps -aqf "name=poseidon-rabbit" | xargs docker rm -f
 
 clean: clean-docs clean-notebooks depends
 	#@docker ps -aqf "name=poseidon" | xargs docker rm -f
