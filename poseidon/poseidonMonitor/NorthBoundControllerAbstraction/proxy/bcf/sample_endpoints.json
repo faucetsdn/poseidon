@@ -1,0 +1,57 @@
+[ {
+  "attachment-point" : {
+    "switch-interface" : {
+      "interface" : "ethernet01",
+      "switch" : "Leaf2"
+    },
+    "type" : "switch-interface"
+  },
+  "attachment-point-state" : "learned",
+  "created-since" : "2016-07-27T14:34:39.393Z",
+  "detail" : "true",
+  "interface" : "ethernet01",
+  "ip-address" : [ {
+    "ip-address" : "10.0.0.1",
+    "ip-state" : "learned",
+    "mac" : "00:00:00:00:00:00",
+    "segment" : "poseidon",
+    "tenant" : "poseidon"
+  } ],
+  "leaf-group" : "00:00:00:00:00:00:00:00"
+  "mac" : "00:00:00:00:00:00",
+  "nat-endpoint" : false,
+  "remote" : false,
+  "segment" : "poseidon",
+  "state" : "Active",
+  "switch" : "Leaf2",
+  "tenant" : "poseidon",
+  "vlan" : -1
+}, {
+  "attachment-point" : {
+    "switch-interface" : {
+      "interface" : "ethernet01",
+      "switch" : "Leaf2"
+    },
+    "type" : "switch-interface"
+  },
+  "attachment-point-state" : "learned",
+  "created-since" : "2016-07-27T14:34:39.393Z",
+  "detail" : "true",
+  "interface" : "ethernet01",
+  "ip-address" : [ {
+    "ip-address" : "10.0.0.1",
+    "ip-state" : "learned",
+    "mac" : "00:00:00:00:00:00",
+    "segment" : "poseidon",
+    "tenant" : "poseidon"
+  } ],
+  "leaf-group" : "00:00:00:00:00:00:00:00"
+  "mac" : "00:00:00:00:00:00",
+  "nat-endpoint" : false,
+  "remote" : false,
+  "segment" : "poseidon",
+  "state" : "Active",
+  "switch" : "Leaf2",
+  "tenant" : "poseidon",
+  "vlan" : -1
+} ]
