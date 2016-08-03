@@ -19,7 +19,7 @@
   "fabric-role" : "leaf",
   "handshake-state" : "master-state",
   "inet-address" : {
-    "inet-port" : 00000,
+    "inet-port" : 11111,
     "ip" : "fe00:0:0:0:0000:0000:0000:0000%2"
   },
   "lacp-interface-offset" : 0,
@@ -40,7 +40,7 @@
   "fabric-role" : "spine",
   "handshake-state" : "master-state",
   "inet-address" : {
-    "inet-port" : 11111,
+    "inet-port" : 22222,
     "ip" : "fe00:0:0:0:0000:0000:0000:0000%2"
   },
   "leaf-group" : "00:00:00:00:00:00:00:00",
