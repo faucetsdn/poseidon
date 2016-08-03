@@ -1,6 +1,7 @@
 falcon
 falcon-cors
 gunicorn
+httmock
 pylint
 pytest
 pytest-cov

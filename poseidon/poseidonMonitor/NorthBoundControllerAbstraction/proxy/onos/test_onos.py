@@ -14,48 +14,51 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Test module for OnosProxy.
+Test module for onos.
 
 @author: kylez
 """
 
 import pytest
-from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.OnosProxy.OnosProxy import OnosProxy
+from onos import OnosProxy
 
 import os
 import json
 from httmock import urlmatch, response, HTTMock
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
+username = "user"
+password = "pass"
 
-def mock_factory(regex, file):
+
+def mock_factory(regex, filemap):
     @urlmatch(netloc=regex)
     def mock_fn(url, request):
-        with open(file) as f:
-            data = f.read().replace('\n', '')
+        if url.path not in filemap: #pragma: no cover
+            raise Exception("Invalid URL: %s" % url)
+        with open(os.path.join(cur_dir, filemap[url.path])) as f:
+            data = f.read().replace("\n", "")
         content = json.dumps(json.loads(data))
         r = response(content=content)
         return r
     return mock_fn
 
+
 def test_OnosProxy():
     """
-    Tests OnosProxy
+    Tests onos
     """
-    proxy = OnosProxy("base_uri", ("user", "pass"))
-    assert proxy
-
-def test_OnosProxy_get_devices():
-    with HTTMock(mock_factory(r'.*', os.path.join(cur_dir, "devices.sample"))):
-        proxy = OnosProxy("http://localhost/onos/v1/", auth=("user", "pass"))
-        r = proxy.get_devices()
-
-def test_OnosProxy_get_hosts():
-    with HTTMock(mock_factory(r'.*', os.path.join(cur_dir, "hosts.sample"))):
-        proxy = OnosProxy("http://localhost/onos/v1/", auth=("user", "pass"))
-        r = proxy.get_hosts()
-
-def test_OnosProxy_get_flows():
-    with HTTMock(mock_factory(r'.*', os.path.join(cur_dir, "flows.sample"))):
-        proxy = OnosProxy("http://localhost/onos/v1/", auth=("user", "pass"))
-        r = proxy.get_flows()
+    filemap = {
+        "/devices" : "sample_devices.json",
+        "/hosts" : "hosts.sample",
+        "/flows" : "flows.sample"
+    }
+    with HTTMock(mock_factory(r'.*', filemap)):
+        proxy = OnosProxy("http://localhost", ("user", "pass"))
+        assert proxy
+        devices = proxy.get_devices()
+        assert devices
+        hosts = proxy.get_hosts()
+        assert hosts
+        flows = proxy.get_flows()
+        assert flows

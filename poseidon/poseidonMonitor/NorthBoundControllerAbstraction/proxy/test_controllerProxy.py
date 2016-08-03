@@ -14,40 +14,20 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Test module for ControllerProxy.
+Test module for controllerproxy.
 
 @author: kylez
 """
 
 import pytest
-from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.ControllerProxy.ControllerProxy import ControllerProxy
+from controllerproxy import ControllerProxy
 
-"""
-http://jsonplaceholder.typicode.com: Fake online REST API for testing.
-"""
 
 def test_ControllerProxy():
     """
     Tests ControllerProxy
+    # http://jsonplaceholder.typicode.com: Fake online REST API for testing.
     """
-    proxy = ControllerProxy("base_uri")
-    assert proxy
-
-
-def test_ControllerProxy_get_resource():
-    """
-    Tests ControllerProxy get_resource()
-    """
-    base_uri = "http://jsonplaceholder.typicode.com"
-    proxy = ControllerProxy(base_uri)
+    proxy = ControllerProxy("http://jsonplaceholder.typicode.com")
     r = proxy.get_resource("posts")
     r.raise_for_status()
-
-def test_ControllerProxy_get_json_resource():
-    """
-    Test ControllerProxy get_json_resource()
-    """
-    base_uri = "http://jsonplaceholder.typicode.com"
-    proxy = ControllerProxy(base_uri)
-    j = proxy.get_json_resource("posts")
-
