@@ -43,7 +43,7 @@
     "inet-port" : 11111,
     "ip" : "fe00:0:0:0:0000:0000:0000:0000%2"
   },
-  "leaf-group" : "",
+  "leaf-group" : "00:00:00:00:00:00:00:00",
   "model-number-description" : "model2",
   "name" : "Spine1",
   "serial-number-description" : "ABCDEFGH",
