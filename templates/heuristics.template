@@ -1,0 +1,5 @@
+[info]
+name = statistics and insights from parsed pcap files
+
+[service]
+schedule = {"all":"hourly"}

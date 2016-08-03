@@ -14,14 +14,19 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Test module for Onos.py
+Test module for Investigator.py
 
 Created on 28 June 2016
-@author: dgrossman
+@author: dgrossman, tlanham
 """
-import pytest
 from Investigator import Investigator
+import pytest
 
 
 def test_Investigator():
     Investigator()
+
+
+def test_register_algo():
+    investigator = Investigator()
+    investigator.register_algorithm('cubed', lambda x: x**3)

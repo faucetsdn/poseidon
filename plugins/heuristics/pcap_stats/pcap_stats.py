@@ -38,11 +38,10 @@ import threading
 flowRecordLock = threading.Lock()
 
 
-"""
 wait = True
 while wait:
     try:
-        params = pika.ConnectionParameters(host=DOCKER_IP)
+        params = pika.ConnectionParameters(host='rabbitmq')
         print params
         connection = pika.BlockingConnection(params)
         channel = connection.channel()
@@ -61,7 +60,7 @@ client = None
 wait = True
 while wait:
     try:
-        client = MongoClient()
+        client = MongoClient(host='poseidon-storageWorkaround')
         client.address
         wait = False
         print 'connected to database...'
@@ -81,11 +80,6 @@ for binding_key in binding_keys:
                        routing_key=binding_key)
 
 print ' [*] Waiting for logs. To exit press CTRL+C'
-
-
-channel.basic_consume(analyzePcap, queue=queue_name, no_ack=True)
-channel.start_consuming()
-"""
 
 
 def db_update_worker():

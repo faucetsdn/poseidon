@@ -139,6 +139,8 @@ rabbit: clean-rabbit depends
 
 pcap-stats:
 	# NOTE: this is a plugin module that can be stood up for testing rabbitmq and mongo
+	# docker run --name pcap-stats --link rabbitmq:rabbit pcap-stats
+	# use link to alias containers, 'rabbitmq' for name of rabbit-host container
 	@docker ps -aqf "name=pcap-stats" | xargs docker rm -f
 	@docker build -t pcap-stats -f plugins/heuristics/pcap_stats/Dockerfile plugins/heuristics/pcap_stats/
 
@@ -216,6 +218,10 @@ clean-rabbit:
 clean: clean-docs clean-notebooks depends
 	#@docker ps -aqf "name=poseidon" | xargs docker rm -f
 	#@docker ps -aqf "name=poseidon-api" | xargs docker rm -f
+
+nuke-containers:
+	# WARNING: this deletes all containers, not just poseidon ones
+	@docker rm -f $$(docker ps -a -q)
 
 depends:
 	@echo
