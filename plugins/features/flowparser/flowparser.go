@@ -30,11 +30,17 @@ import (
     "os/exec"
     "strings"
     "bufio"
+    "time"
 
     "github.com/streadway/amqp"
     "github.com/DanielArndt/flowtbag"
 )
 
+/*
+ * Given an error and message to display on error, 
+ * checks that an error has occurred; if so, logs a
+ * fatal error, panics, and exits. 
+ */
 func failOnError(err error, msg string) {
     if err != nil {
         log.Fatalf("%s: %s", msg, err)
@@ -42,6 +48,11 @@ func failOnError(err error, msg string) {
     }
 }
 
+/*
+ * Checks if error has occured from err, prints error message if so
+ * and returns false, otherwise prints success message and returns 
+ * true.
+ */
 func CheckError(err error, success_msg string, error_msg string) bool {
     if err != nil {
         fmt.Println(error_msg)
@@ -52,13 +63,22 @@ func CheckError(err error, success_msg string, error_msg string) bool {
     }
 }
 
-func Connect() {
+/*
+ * Handles connection to rabbitmq broker. Connects to rabbitmq, 
+ * establishes channel, declares exchange and then declares queues 
+ * from the program arguments. Retries on connection and channel 
+ * attempts after sleeping for 2 sec if failure. Returns the 
+ * connection and channel. 
+ */
+func RabbitConnect() {
     for {
         conn, err := amqp.Dial("amqp://guest:guest@rabbitmq:5672/")
         if CheckError(err, 
                     "connected to rabbitmq", 
                     "could not connect to rabbitmq, retrying...") {
             break
+        } else {
+            time.Sleep(time.Second * 2)
         }
     }
 
@@ -68,6 +88,8 @@ func Connect() {
                     "channel connected", 
                     "could not establish rabbitmq channel, retrying...") {
             break
+        } else {
+            time.Sleep(time.Second * 2)
         }
     }
 
@@ -102,6 +124,9 @@ func Connect() {
     return conn, ch
 }
 
+/*
+ * Sends given line to given rabbitmq channel.
+ */
 func sendLine(line string, ch Channel) {
     err = ch.Publish(
             "topic_poseidon_internal",
@@ -117,11 +142,16 @@ func sendLine(line string, ch Channel) {
     } else {
         fmt.Println(" [*] Sent %s", line)
     }
-
 }
 
+/*
+ * Connects to rabbitmq, then uses flowtbag to parse pcap
+ * file and sends parsed csv to rabbit. 
+ */
 func main() {
-    conn, ch := Connect()
+    conn, ch := RabbitConnect()
+    defer ch.Close()
+    defer conn.Close()
 
     file_name := os.Args[1]
     output_file := file_name + ".out"
@@ -137,7 +167,4 @@ func main() {
         sendLine(scanner.Text(), ch)
     }
     failOnError(scanner.Err(), "failed to read file")
-
-    ch.Close()
-    conn.Close()
 }
