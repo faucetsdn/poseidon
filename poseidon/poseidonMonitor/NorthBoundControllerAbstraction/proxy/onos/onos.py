@@ -15,36 +15,33 @@
 #   limitations under the License.
 
 """
-Created on 11 July 2016
+Created on 25 July 2016
 @author: kylez
 """
 
-from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.ControllerProxy.ControllerProxy import ControllerProxy
 
-class OnosProxy(ControllerProxy):
-    def __init__(self, base_uri, auth=None):
-        super(OnosProxy, self).__init__(base_uri)
-        self.auth = auth
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.auth.basic.basicauth import BasicAuthControllerProxy
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.mixins.jsonmixin import JsonMixin
 
+
+class OnosProxy(JsonMixin, BasicAuthControllerProxy):
     def get_devices(self, devices_resource="devices"):
         """
         GET list of devices from the controller.
         """
-        j = self.get_json_resource(devices_resource, auth=self.auth)
-        return j
+        r = self.get_resource(devices_resource)
+        return self.parse_json(r)
 
     def get_hosts(self, hosts_resource="hosts"):
         """
-        GET list of hosts from the controller
+        GET list of hosts from the controller.
         """
-        j = self.get_json_resource(hosts_resource, auth=self.auth)
-        return j
+        r = self.get_resource(hosts_resource)
+        return self.parse_json(r)
 
     def get_flows(self, flows_resource="flows"):
         """
-        GET list of flows from the controller
+        GET list of flows from the controller.
         """
-        j = self.get_json_resource(flows_resource, auth=self.auth)
-        return j
-
-
+        r = self.get_resource(flows_resource)
+        return self.parse_json(r)
