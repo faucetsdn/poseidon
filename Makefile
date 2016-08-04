@@ -139,7 +139,7 @@ rabbit: clean-rabbit depends
 
 pcap-stats:
 	# NOTE: this is a plugin module that can be stood up for testing rabbitmq and mongo
-	# docker run --name pcap-stats --link rabbitmq:rabbit pcap-stats
+	# docker run --name pcap-stats --link rabbitmq:rabbitmq pcap-stats
 	# use link to alias containers, 'rabbitmq' for name of rabbit-host container
 	@docker ps -aqf "name=pcap-stats" | xargs docker rm -f
 	@docker build -t pcap-stats -f plugins/heuristics/pcap_stats/Dockerfile plugins/heuristics/pcap_stats/
