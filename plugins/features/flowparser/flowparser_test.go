@@ -24,3 +24,15 @@ package flowparser
 import (
     "testing"
 )
+
+func TestCheckError(t *testing.T) {
+    //
+}
+
+func TestConnect(t *testing.T) {
+    //
+}
+
+func TestMain(t *testing.T) {
+    //
+}

@@ -27,13 +27,22 @@ import (
     "fmt"
     "log"
     "os"
+    "os/exec"
     "strings"
+    "bufio"
 
     "github.com/streadway/amqp"
     "github.com/DanielArndt/flowtbag"
 )
 
-func checkConnection(err error, success_msg string, error_msg string) bool {
+func failOnError(err error, msg string) {
+    if err != nil {
+        log.Fatalf("%s: %s", msg, err)
+        panic(fmt.Sprintf("%s: %s", msg, err))
+    }
+}
+
+func CheckError(err error, success_msg string, error_msg string) bool {
     if err != nil {
         fmt.Println(error_msg)
         return false
@@ -43,26 +52,24 @@ func checkConnection(err error, success_msg string, error_msg string) bool {
     }
 }
 
-func connect() {
+func Connect() {
     for {
         conn, err := amqp.Dial("amqp://guest:guest@rabbitmq:5672/")
-        if checkConnection(err, 
-                            "connected to rabbitmq", 
-                            "could not connect to rabbitmq, retrying...") {
+        if CheckError(err, 
+                    "connected to rabbitmq", 
+                    "could not connect to rabbitmq, retrying...") {
             break
         }
     }
-    defer conn.Close()
 
     for {
         ch, err := conn.Channel()
-        if checkConnection(err, 
-                            "channel connected", 
-                            "could not establish rabbitmq channel, retrying...") {
+        if CheckError(err, 
+                    "channel connected", 
+                    "could not establish rabbitmq channel, retrying...") {
             break
         }
     }
-    defer ch.Close()
 
     err = ch.ExchangeDeclare(
             "topic_poseidon_internal",
@@ -73,9 +80,64 @@ func connect() {
             false,
             nil,
     )
-    failOnError(err, "failed to declare exchange, exiting...")
+    failOnError(err, "failed to declare exchange, exiting")
+
+    queue_name := "process_features_flowparser"
+    _, err := ch.QueueDeclare(queue_name, true, true, false, false, nil)
+    failOnError(err, "queue declaration failed, exiting")
+
+    argc := len(os.Args)
+    if argc > 2 {
+        for i := 2; i < argc; i++ {
+            err := ch.QueueBind(queue_name, os.Args[i], "topic_poseidon_internal", false, nil)
+            failOnError(err, "queue bind failed, exiting")
+        }
+    } else {
+        log.Fatalf("Usage: %s [file_name] [binding_key]...", os.Args[0])
+        panic(fmt.Sprintf("Usage: %s [file_name] [binding_key]...", os.Args[0]))
+    }
+
+    fmt.Println(" [*] Waiting for logs. To exit press CTRL+C")
+
+    return conn, ch
+}
+
+func sendLine(line string, ch Channel) {
+    err = ch.Publish(
+            "topic_poseidon_internal",
+            "poseidon.flowparser",
+            false, 
+            false,
+            amqp.Publishing{
+                ContentType: "text/plain",
+                Body:        []byte (line)
+            })
+    if err != nil {
+        log.Println("failed to send message: %s", line)
+    } else {
+        fmt.Println(" [*] Sent %s", line)
+    }
+
 }
 
 func main() {
-    connect()
+    conn, ch := Connect()
+
+    file_name := os.Args[1]
+    output_file := file_name + ".out"
+    ret, err := exec.Command("./flowtbag", file_name, ">", output_file).Run()
+    failOnError(err, "failed to parse pcap")
+
+    file, err := os.Open(output_file)
+    failOnError(err, "failed to open file")
+    defer file.Close()
+
+    scanner := bufio.NewScanner(file)
+    for scanner.Scan() {
+        sendLine(scanner.Text(), ch)
+    }
+    failOnError(scanner.Err(), "failed to read file")
+
+    ch.Close()
+    conn.Close()
 }
