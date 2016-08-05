@@ -167,4 +167,7 @@ func main() {
         sendLine(scanner.Text(), ch)
     }
     failOnError(scanner.Err(), "failed to read file")
+
+    err := exec.Command("rm", "-rf", output_file).Run()
+    failOnError(err, "failed to delete flowtbag output file")
 }
