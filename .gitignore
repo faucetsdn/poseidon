@@ -72,5 +72,5 @@ target/
 checkscript.sh
 
 #flowparser
-flowparser
-*/src
+plugins/features/flowparser/flowparser
+plugins/features/flowparser/src/*
