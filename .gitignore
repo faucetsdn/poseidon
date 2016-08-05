@@ -73,4 +73,4 @@ checkscript.sh
 
 #flowparser
 flowparser
-flowparser/pkg/
+*/flowparser/pkg/
