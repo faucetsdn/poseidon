@@ -70,4 +70,7 @@ target/
 #other crap
 **/.ropeproject
 checkscript.sh
-flowparser #binary
+
+#flowparser
+flowparser
+flowparser/pkg/
