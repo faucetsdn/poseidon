@@ -42,7 +42,6 @@ wait = True
 while wait:
     try:
         params = pika.ConnectionParameters(host='rabbitmq')
-        print params
         connection = pika.BlockingConnection(params)
         channel = connection.channel()
         channel.exchange_declare(exchange='topic_poseidon_internal', type='topic')

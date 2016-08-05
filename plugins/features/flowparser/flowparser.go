@@ -28,12 +28,10 @@ import (
     "log"
     "os"
     "os/exec"
-    "strings"
     "bufio"
     "time"
 
     "github.com/streadway/amqp"
-    "github.com/DanielArndt/flowtbag"
 )
 
 /*
@@ -70,9 +68,11 @@ func CheckError(err error, success_msg string, error_msg string) bool {
  * attempts after sleeping for 2 sec if failure. Returns the 
  * connection and channel. 
  */
-func RabbitConnect() {
+func RabbitConnect() (*amqp.Connection, *amqp.Channel) {
+    var conn * amqp.Connection
+    var err error
     for {
-        conn, err := amqp.Dial("amqp://guest:guest@rabbitmq:5672/")
+        conn, err = amqp.Dial("amqp://guest:guest@rabbitmq:5672/")
         if CheckError(err, 
                     "connected to rabbitmq", 
                     "could not connect to rabbitmq, retrying...") {
@@ -82,8 +82,9 @@ func RabbitConnect() {
         }
     }
 
+    var ch * amqp.Channel
     for {
-        ch, err := conn.Channel()
+        ch, err = conn.Channel()
         if CheckError(err, 
                     "channel connected", 
                     "could not establish rabbitmq channel, retrying...") {
@@ -101,11 +102,11 @@ func RabbitConnect() {
             false,
             false,
             nil,
-    )
+            )
     failOnError(err, "failed to declare exchange, exiting")
 
     queue_name := "process_features_flowparser"
-    _, err := ch.QueueDeclare(queue_name, true, true, false, false, nil)
+    _, err = ch.QueueDeclare(queue_name, true, true, false, false, nil)
     failOnError(err, "queue declaration failed, exiting")
 
     argc := len(os.Args)
@@ -127,16 +128,15 @@ func RabbitConnect() {
 /*
  * Sends given line to given rabbitmq channel.
  */
-func sendLine(line string, ch Channel) {
-    err = ch.Publish(
+func sendLine(line string, ch *amqp.Channel) {
+    err := ch.Publish(
             "topic_poseidon_internal",
             "poseidon.flowparser",
             false, 
             false,
             amqp.Publishing{
                 ContentType: "text/plain",
-                Body:        []byte (line)
-            })
+                Body:        []byte (line)})
     if err != nil {
         log.Println("failed to send message: %s", line)
     } else {
@@ -155,7 +155,7 @@ func main() {
 
     file_name := os.Args[1]
     output_file := file_name + ".out"
-    ret, err := exec.Command("./flowtbag", file_name, ">", output_file).Run()
+    err := exec.Command("./flowtbag", file_name, ">", output_file).Run()
     failOnError(err, "failed to parse pcap")
 
     file, err := os.Open(output_file)

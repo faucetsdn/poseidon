@@ -1,7 +1,10 @@
-FROM golang
+FROM golang:1.7
 MAINTAINER Travis Lanham <tlanham@iqt.org>
 
-ADD . /go/src/flowparser
-RUN go install /go/src/flowparser
+ADD . /flowparser
+WORKDIR /flowparser
 
-ENTRYPOINT /go/bin/flowparser
+# install rabbitmq package
+RUN go get github.com/streadway/amqp
+
+RUN go build
