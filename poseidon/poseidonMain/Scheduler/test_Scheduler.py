@@ -19,14 +19,12 @@ Test module for Onos.py
 Created on 28 June 2016
 @author: dgrossman
 """
-import logging
-
-import pytest
 from Scheduler import Scheduler
 from Scheduler import scheduler_interface
-
 from poseidon.baseClasses.enums_tuples import CRONSPEC
 from poseidon.baseClasses.enums_tuples import EVERY
+import logging
+import pytest
 
 
 def test_instantiation():

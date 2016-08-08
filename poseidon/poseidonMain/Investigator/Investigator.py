@@ -14,8 +14,11 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
+Module for applying user-defined rules to
+network flows.
+
 Created on 17 May 2016
-@author: dgrossman
+@author: dgrossman, tlanham
 """
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
 
@@ -25,7 +28,10 @@ class Investigator(Main_Action_Base):
     def __init__(self):
         super(Investigator, self).__init__()
         self.mod_name = self.__class__.__name__
+        self.algos = {}
 
-    pass
+    def register_algorithm(self, name, algorithm):
+        self.algos[name] = algorithm
+
 
 investigator_interface = Investigator()
