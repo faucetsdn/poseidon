@@ -20,9 +20,6 @@ NOTE: responses are returned as json
 Created on 28 June 2016
 @author: dgrossman, lanhamt
 """
-import urllib
-import falcon
-import pytest
 from poseidonStorage import db_collection_count
 from poseidonStorage import db_collection_names
 from poseidonStorage import db_collection_query
@@ -32,6 +29,10 @@ from poseidonStorage import db_add_one_doc
 from poseidonStorage import db_add_many_docs
 from poseidonStorage import main
 from poseidonStorage import poseidonStorage
+import ast
+import urllib
+import falcon
+import pytest
 
 
 application = falcon.API()
@@ -138,12 +139,16 @@ def test_db_collection_query(client):
     query = urllib.unquote(query).encode('utf8')
     resp = client.get('/v1/storage/query/local/startup_log/' + query)
     assert resp.status == falcon.HTTP_OK
-    assert resp.body == '"Valid query performed: no documents found."'
+    resp = ast.literal_eval(resp.body)
+    assert resp['count'] == 0
+    assert resp['docs'] == 'Valid query performed, no docs found.'
 
     query = 'bad'
     resp = client.get('/v1/storage/query/local/startup_log/' + query)
     assert resp.status == falcon.HTTP_OK
-    assert resp.body == '"Error on query."'
+    resp = ast.literal_eval(resp.body)
+    assert resp['count'] == -1
+    assert resp['docs'] == 'Error on query.'
 
 
 def test_db_add_one_doc(client):

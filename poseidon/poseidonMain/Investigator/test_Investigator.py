@@ -29,4 +29,10 @@ def test_Investigator():
 
 def test_register_algo():
     investigator = Investigator()
-    investigator.register_algorithm('cubed', lambda x: x**3)
+    investigator.register_algorithm('cube_fn', lambda x: x**3)
+
+
+def test_process_new_machine():
+    investigator = Investigator()
+    ip = '0.0.0.0'
+    investigator.process_new_machine(ip)

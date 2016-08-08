@@ -146,24 +146,34 @@ class db_collection_query(poseidonStorage):
     """
     rest layer subclass of poseidonStorage.
     queries given database and collection,
-    returns documents found in query.
+    returns dict with the count of docs matching
+    the query - if docs were found matching the query
+    then includes a dict of ip->doc for each document.
 
     NOTE: supports utf8 url encoding for well-formed
-    queries (ie "{u'author': u'some author'}")
+    queries (ie "{'node_ip': 'some ip'}")
     """
 
     def on_get(self, req, resp, database, collection, query_str):
+        ret = {}
         try:
             query = urllib.unquote(query_str).decode('utf8')
             query = ast.literal_eval(query_str)
             cursor = self.client[database][collection].find(query)
-            ret = ''
-            for doc in cursor:
-                ret += json.dumps(doc)
-            if not ret:
-                ret = json.dumps('Valid query performed: no documents found.')
+            doc_dict = {}
+            if cursor.count() == 0:
+                ret['count'] = cursor.count()
+                ret['docs'] = 'Valid query performed, no docs found.'
+            else:
+                for doc in cursor:
+                    doc_dict[doc['node_ip']] = doc
+                ret['docs'] = doc_dict
+                ret['count'] = cursor.count()
+            ret = json.dumps(ret)
         except:
-            ret = json.dumps('Error on query.')
+            ret['count'] = -1
+            ret['docs'] = 'Error on query.'
+            ret = json.dumps(ret)
         resp.body = ret
 
 

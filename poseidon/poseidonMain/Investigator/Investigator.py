@@ -21,6 +21,9 @@ Created on 17 May 2016
 @author: dgrossman, tlanham
 """
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
+import requests
+import urllib
+import ast
 
 
 class Investigator(Main_Action_Base):
@@ -31,7 +34,38 @@ class Investigator(Main_Action_Base):
         self.algos = {}
 
     def register_algorithm(self, name, algorithm):
+        """
+        Register investigation algorithm.
+        """
         self.algos[name] = algorithm
+
+    def process_new_machine(self, ip_addr):
+        """
+        Given the ip of a machine added to the network,
+        requests information from the database about the
+        ip, then processes accordingly.
+        """
+        query = {'node_ip': ip_addr}
+        uri = 'http://poseidon-storage-interface/v1/poseidon_records/network_graph/' + str(query)
+        uri = urllib.unquote(str(query)).encode('utf8')
+        try:
+            resp = requests.get(uri)
+        except:
+            # error connecting to storage interface
+            # log error
+            return
+
+        resp = ast.literal_eval(resp.body)
+        if resp['count'] <= 0:
+            # machine has no info in db or error on query
+            pass
+        elif resp['count'] == 1:
+            # there is a record for machine
+            info = resp['body']
+        else:
+            # bad - should only be one record for each ip
+            # log error for investigation
+            pass
 
 
 investigator_interface = Investigator()
