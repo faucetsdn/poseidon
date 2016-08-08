@@ -19,10 +19,11 @@
  * Created on August 3, 2016
  * @author: lanhamt
  */
-package flowparser
+package main
 
 import (
     "testing"
+    "errors"
 )
 
 /*
@@ -30,7 +31,7 @@ import (
  * when a valid error is passed to it (ie a non-nil error).
  */
 func TestFailOnError(t *testing.T) {
-    flowparser.failOnError(nil, "test should not fail")
+    failOnError(nil, "test should not fail")
 }
 
 /*
@@ -40,13 +41,13 @@ func TestFailOnError(t *testing.T) {
  */
 func TestCheckError(t *testing.T) {
     // test no error case
-    ret := flowparser.CheckError(nil, "Should return true")
+    ret := CheckError(nil, "Should print this out 1", "BAD")
     if !ret {
         t.Error("Return should have been true due to error.")
     }
 
     // test error case
-    ret = CheckError(1, "Should return false")
+    ret = CheckError(errors.New("test error"), "BAD", "should print this out 2")
     if ret {
         t.Error("Return should have been false.")
     }
@@ -58,7 +59,9 @@ func TestCheckError(t *testing.T) {
  * to rabbitmq.
  */
 func TestRabbitConnect(t *testing.T) {
-    conn, ch := flowparser.RabbitConnect()
+    conn, ch := RabbitConnect()
+    t.Error(conn)
+    t.Error(ch)
 }
 
 /*
@@ -66,9 +69,9 @@ func TestRabbitConnect(t *testing.T) {
  * given rabbitmq channel. 
  */
 func TestSendLine(t *testing.T) {
-    flowparser.sendLine("csv line to send", nil)
+    sendLine("csv line to send", nil)
 }
 
 func TestMain(t *testing.T) {
-    flowparser.func main()
+    main()
 }

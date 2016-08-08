@@ -7,4 +7,6 @@ WORKDIR /flowparser
 # install rabbitmq package
 RUN go get github.com/streadway/amqp
 
-RUN go build
+RUN go build flowparser.go
+
+CMD ["go", "run", "flowparser.go"]
