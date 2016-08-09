@@ -35,6 +35,7 @@ def test_register_algo():
 def test_count():
     investigator = Investigator()
     investigator.register_algorithm('cubed', lambda x: x**3)
+    investigator.register_algorithm('cubed', lambda x: x**3)
     assert 1 == investigator.count_algorithms()
 
 
@@ -43,6 +44,7 @@ def test_remove():
     investigator.register_algorithm('cubed', lambda x: x**3)
     investigator.register_algorithm('squared', lambda x: x**2)
     assert 2 == investigator.count_algorithms()
+    investigator.delete_algorithm('squared')
     investigator.delete_algorithm('squared')
     assert 1 == investigator.count_algorithms()
     investigator.delete_algorithm('cubed')
