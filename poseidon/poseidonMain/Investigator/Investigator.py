@@ -68,6 +68,7 @@ class Investigator(Main_Action_Base):
             logger = self.logging.getLogger(__name__)
             logger.setLevel(logging.DEBUG)
 
-        def update_config(self)
+        def update_config(self):
+            pass
 
 investigator_interface = Investigator()
