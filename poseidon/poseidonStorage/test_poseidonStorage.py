@@ -142,15 +142,15 @@ def test_db_collection_query(client):
     resp = client.get('/v1/storage/query/local/startup_log/' + query)
     assert resp.status == falcon.HTTP_OK
     resp = ast.literal_eval(resp.body)
-    assert resp['count'] == 0
-    assert resp['docs'] == 'Valid query performed, no docs found.'
+    assert isinstance(int, resp['count'])
+    assert isinstance(str, resp['docs'])
 
     query = 'bad'
     resp = client.get('/v1/storage/query/local/startup_log/' + query)
     assert resp.status == falcon.HTTP_OK
     resp = ast.literal_eval(resp.body)
-    assert resp['count'] == -1
-    assert resp['docs'] == 'Error on query.'
+    assert isinstance(int, resp['count'])
+    assert isinstance(str, resp['docs'])
 
 
 def test_db_add_one_doc(client):
