@@ -31,7 +31,22 @@ class Investigator(Main_Action_Base):
         self.algos = {}
 
     def register_algorithm(self, name, algorithm):
-        self.algos[name] = algorithm
+        if name not in self.algos:
+            self.algos[name] = algorithm
+            return True
+        return False
+
+    def delete_algorithm(self, name):
+        if name in self.algos:
+            self.algos.pop(name)
+            return True
+        return False
+
+    def count_algorithms(self):
+        return len(self.algos)
+
+    def clear(self):
+        self.algos.clear()
 
 
 investigator_interface = Investigator()
