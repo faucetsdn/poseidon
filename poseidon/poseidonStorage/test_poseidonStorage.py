@@ -32,6 +32,7 @@ from poseidonStorage import poseidonStorage
 import falcon
 import pytest
 import bson
+import ast
 
 
 application = falcon.API()
@@ -133,19 +134,21 @@ def test_db_retrieve_doc(client):
 def test_db_collection_query(client):
     """
     tests response from query of database.
+    response is a serialized dict with 'count'
+    and 'docs' fields.
     """
     query = {'hostname': 'bad'}
     query = bson.BSON.encode(query)
     resp = client.get('/v1/storage/query/local/startup_log/' + query)
     assert resp.status == falcon.HTTP_OK
-    resp = bson.BSON.decode(resp.body)
+    resp = ast.literal_eval(resp.body)
     assert resp['count'] == 0
     assert resp['docs'] == 'Valid query performed, no docs found.'
 
     query = 'bad'
     resp = client.get('/v1/storage/query/local/startup_log/' + query)
     assert resp.status == falcon.HTTP_OK
-    resp = bson.BSON.decode(resp.body)
+    resp = ast.literal_eval(resp.body)
     assert resp['count'] == -1
     assert resp['docs'] == 'Error on query.'
 
