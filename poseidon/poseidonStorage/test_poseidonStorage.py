@@ -134,7 +134,7 @@ def test_db_collection_query(client):
     """
     tests response from query of database.
     """
-    query = "{'hostname': 'bad'}"
+    query = {'hostname': 'bad'}
     query = bson.BSON.encode(query)
     resp = client.get('/v1/storage/query/local/startup_log/' + query)
     assert resp.status == falcon.HTTP_OK
