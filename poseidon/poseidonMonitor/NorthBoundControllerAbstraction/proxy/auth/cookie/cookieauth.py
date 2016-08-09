@@ -13,15 +13,20 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+
 """
-Test module for Onos.py
-
-Created on 28 June 2016
-@author: dgrossman
+Created on 25 July 2016
+@author: kylez
 """
-import pytest
-from Onos import Onos
+
+from urlparse import urljoin
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.controllerproxy import ControllerProxy
 
 
-def test_Onos():
-    Onos()
+class CookieAuthControllerProxy(ControllerProxy):
+    def __init__(self, base_uri, login_resource, auth, *args, **kwargs):
+        super(CookieAuthControllerProxy, self).__init__(base_uri, *args, **kwargs)
+        self.login_resource = login_resource
+        self.auth = auth
+        r = self.session.post(urljoin(self.base_uri, login_resource), json=auth, verify=False)
+        self.session.cookies = r.cookies

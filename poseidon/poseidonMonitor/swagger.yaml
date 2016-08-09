@@ -172,3 +172,121 @@ paths:
       responses:
         '200':
           description: Returns a JSON string
+  /storage:
+    get:
+      summary: Get running database names
+      description: >
+        Retrieves names of running databases
+      produces:
+       - application/json
+      tags:
+        - Data
+      responses:
+        '200':
+          description: Returns a JSON of names of running databases
+  /storage/{database}:
+    get:
+      summary: Get collection names for given database
+      description: >
+        Retrieves collection names of a database
+      parameters:
+        - in: path
+          name: database
+          description: database to retrieve collection names
+          required: true
+          type: string
+          format: string
+      produces:
+        - application/json
+      tags:
+        - Data
+      responses:
+        '200':
+          description: Returns JSON of names of collections for given database
+  /storage/{database}/{collection}:
+    get:
+      summary: Get count of documents in given collection for given database
+      description: >
+        Retrieves number of documents for a given collection
+      parameters:
+        - in: path
+          name: database
+          description: database for given collection
+          required: true
+          type: string
+          format: string
+        - in: path
+          name: collection
+          description: name of collection to get document count
+          required: true
+          type: string
+          format: string
+      produces:
+        - application/json
+      tags:
+        - Data
+      responses:
+        '200':
+          description: Returns count of documents for given collection in given database
+  /storage/doc/{database}/{collection}/{doc_id}:
+    get:
+      summary: get document from given collection
+      description: >
+        Retrieves document from given collection in given database
+      parameters:
+        - in: path
+          name: database
+          description: name of database
+          required: true
+          type: string
+          format: string
+        - in: path
+          name: collection
+          description: name of collection to search
+          required: true
+          type: string
+          format: string
+        - in: path
+          name: doc_id
+          description: id of document to search for
+          required: true
+          type: string
+          format: string
+      produces:
+        - application/json
+      tags:
+        - Data
+      responses:
+        '200':
+          description: Returns JSON of document
+  /storage/query/{database}/{collection}/{query_str}:
+    get:
+      summary: query database with given query
+      description: >
+        Query given collection in given database with given query string, note queries should be encoded according to utf8
+      parameters:
+        - in: path
+          name: database
+          description: database to query
+          required: true
+          type: string
+          format: string
+        - in: path
+          name: collection
+          description: collection to query
+          required: true
+          type: string
+          format: string
+        - in: path
+          name: query_str
+          description: query in utf8 encoding
+          required: true
+          type: string
+          format: string
+      produces:
+        - application/json
+      tags:
+        - Data
+      responses:
+        '200':
+          description: Returns JSON of query response

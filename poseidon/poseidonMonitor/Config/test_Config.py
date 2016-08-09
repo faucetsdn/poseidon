@@ -21,15 +21,16 @@ Created on 28 June 2016
 """
 import falcon
 import pytest
-from Config import FullConfig
-from Config import SectionConfig
-from Config import FieldConfig
+from Config import config_interface
 
 
 application = falcon.API()
-application.add_route('/v1/config', FullConfig())
-application.add_route('/v1/config/{section}', SectionConfig())
-application.add_route('/v1/config/{section}/{field}', FieldConfig())
+application.add_route('/v1/config',
+                      config_interface.get_endpoint('Handle_FullConfig'))
+application.add_route('/v1/config/{section}',
+                      config_interface.get_endpoint('Handle_SectionConfig'))
+application.add_route('/v1/config/{section}/{field}',
+                      config_interface.get_endpoint('Handle_FieldConfig'))
 
 
 # exposes the application for testing
@@ -52,7 +53,7 @@ def test_config_full_get(client):
     assert resp_type == 'application/json'
 
 
-def test_config_section_get(client):
+def test_config_section_get_OK(client):
     """
     Tests retrieving a section in the config file.
     """
@@ -60,27 +61,35 @@ def test_config_section_get(client):
     assert resp.status == falcon.HTTP_OK
     assert resp.body == '[["key1", "trident"], ["key2", "theseus"], ["double key", "atlas horses"]]'
 
+
+def test_config_section_get_FAIL(client):
     resp = client.get('/v1/config/not_a_section')
     assert resp.status == falcon.HTTP_OK
-    assert resp.body == '"Failed to find section: not_a_section in config file."'
+    assert resp.body == '"Failed to find section: not_a_section"'
 
 
-def test_config_field_get(client):
+def test_config_field_get_1(client):
     """
     Tests retrieving field from a section in the config file.
     """
     resp = client.get('/v1/config/rest config test/key1')
     assert resp.status == falcon.HTTP_OK
-    assert resp.body == "trident"
+    assert resp.body == 'trident'
 
+
+def test_config_field_get_2(client):
     resp = client.get('/v1/config/rest config test/key2')
     assert resp.status == falcon.HTTP_OK
-    assert resp.body == "theseus"
+    assert resp.body == 'theseus'
 
+
+def test_config_field_get_3T(client):
     resp = client.get('/v1/config/rest config test/double key')
     assert resp.status == falcon.HTTP_OK
-    assert resp.body == "atlas horses"
+    assert resp.body == 'atlas horses'
 
+
+def test_config_field_get_4F(client):
     resp = client.get('/v1/config/bad_section/not_a_key')
     assert resp.status == falcon.HTTP_OK
-    assert resp.body == "Failed to find field: not_a_key in section: bad_section."
+    assert resp.body == 'Can\'t find field: not_a_key in section: bad_section'

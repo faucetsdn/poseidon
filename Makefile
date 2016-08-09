@@ -1,4 +1,13 @@
-run: clean depends build docs notebooks main api monitor storage
+run: clean depends build docs notebooks main api monitor storage printPlaces periodically
+printPlaces:
+	@docker ps --format "table {{.Names}}\thttp://{{.Ports}}" |sed 's/0.0.0.0/localhost/' | sed 's/->/ container:/'
+
+periodically: clean-periodically build-periodically
+	docker run --net=container:poseidon-monitor periodically
+
+killcrap:
+	find . -name \*.pyc -exec rm -rf {} \;
+	find . -name __pycache__ -type d -exec rm -rf {} \;
 
 api: clean-api build-api
 	@ if [ ! -z "${DOCKER_HOST}" ]; then \
@@ -13,7 +22,7 @@ api: clean-api build-api
 		fi; \
 	fi; \
 	docker run --name poseidon-api -dP poseidon-api ; \
-	portApi=$$(docker port poseidon-api 8080/tcp | sed 's/^.*://'); \
+	portApi=$$(docker port poseidon-api 8001/tcp | sed 's/^.*://'); \
 	api_url=$$docker_url:$$portApi; \
 	echo "The API can be accessed here: $$api_url"; \
 	echo
@@ -23,7 +32,7 @@ test: build
 main: clean-main build-main
 	docker run --name poseidon-main -it poseidon-main
 
-storage: clean-storage
+storage: clean-storage build-storage
 	@ if [ ! -z "${DOCKER_HOST}" ]; then \
 		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
 		docker_url=$$docker_host; \
@@ -35,12 +44,12 @@ storage: clean-storage
 			exit 1; \
 		fi; \
 	fi; \
-	docker run --name poseidon-storage -dP mongo >/dev/null; \
+	docker run --name poseidon-storage -dp 27017:27017 mongo >/dev/null; \
 	port=$$(docker port poseidon-storage 27017/tcp | sed 's/^.*://'); \
 	echo "poseidon-storage can be accessed here: $$docker_url:$$port"; \
 	echo
 
-monitor: api clean-monitor build-monitor
+monitor: storage api clean-monitor build-monitor
 	@ if [ ! -z "${DOCKER_HOST}" ]; then \
 		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
 		docker_url=http://$$docker_host; \
@@ -52,10 +61,27 @@ monitor: api clean-monitor build-monitor
 			exit 1; \
 		fi; \
 	fi; \
-	portApi=$$(docker port poseidon-api 8080/tcp | sed 's/^.*://'); \
-	docker run --name poseidon-monitor -dp 8555:8000 -e ALLOW_ORIGIN=$$docker_url:$$portApi poseidon-monitor ; \
-	port=$$(docker port poseidon-monitor 8000/tcp | sed 's/^.*://'); \
+	portApi=$$(docker port poseidon-api 8001/tcp | sed 's/^.*://'); \
+	docker run --name poseidon-monitor -dp 4444:8004 -e ALLOW_ORIGIN=$$docker_url:$$portApi poseidon-monitor ; \
+	port=$$(docker port poseidon-monitor 8004/tcp | sed 's/^.*://'); \
+	docker run --name mock-controller -dp 3333:8003 -e ALLOW_ORIGIN=$$docker_url:8003 mock-controller; \
 	echo "poseidon-monitor can be accessed here: $$docker_url:$$port"; \
+	echo
+
+storage-interface: clean-storage-interface build-storage-interface storage
+	@ if [ ! -z "${DOCKER_HOST}" ]; then \
+		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
+		docker_url=http://$$docker_host; \
+	else \
+		if [ ! -z "${DOCKERFORMAC}" ]; then \
+		docker_url=http://localhost; \
+		else \
+			echo "No DOCKER_HOST environment variable set."; \
+			exit 1; \
+		fi; \
+	fi; \
+	docker run --name poseidon-storage-interface -dp 28000:27000 -e ALLOW_ORIGIN=$$docker_url:28000 poseidon-storage-interface; \
+	echo "poseidon-storage-interface up"; \
 	echo
 
 notebooks: clean-notebooks build-notebooks
@@ -88,16 +114,44 @@ docs: clean-docs build
 		fi; \
 	fi; \
 	docker run --name poseidon-docs -dP poseidon-docs; \
-	port=$$(docker port poseidon-docs 8000/tcp | sed 's/^.*://'); \
+	port=$$(docker port poseidon-docs 8002/tcp | sed 's/^.*://'); \
 	doc_url=$$docker_url:$$port; \
 	echo; \
 	echo "The docs can be accessed here: $$doc_url"
 
+compose: #build
+	@ if [ ! -z "${DOCKER_HOST}" ]; then \
+		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
+		docker_url=$$docker_host; \
+	else \
+		if [ ! -z "${DOCKERFORMAC}" ]; then \
+			docker_url=localhost; \
+		else \
+			echo "No DOCKER_HOST environment variable set."; \
+			exit 1; \
+		fi; \
+	fi; \
+	export DOCKER_URL=$$docker_url; \
+	docker-compose up -d --force-recreate
+
+rabbit: clean-rabbit depends
+	docker run -d -h rabbitmq --name rabbitmq -p 15672:15672 -p 5672:5672 rabbitmq:management
+
+pcap-stats:
+	# NOTE: this is a plugin module that can be stood up for testing rabbitmq and mongo
+	# docker run --name pcap-stats --link rabbitmq:rabbitmq pcap-stats
+	# use link to alias containers, 'rabbitmq' for name of rabbit-host container
+	@docker ps -aqf "name=pcap-stats" | xargs docker rm -f
+	@docker build -t pcap-stats -f plugins/heuristics/pcap_stats/Dockerfile plugins/heuristics/pcap_stats/
+
 build: depends
-	# docker-compose build 
 	docker build -t poseidon-notebooks -f Dockerfile.notebooks .
 	docker build -t poseidon-monitor  -f Dockerfile.monitor .
 	docker build -t poseidon-main  -f Dockerfile.main .
+	docker build -t mock-controller -f Dockerfile.mock .
+
+build-periodically:
+	docker build -t periodically -f Dockerfile.periodically .
 
 build-api:
 	cd api && docker build -t poseidon-api .
@@ -114,11 +168,28 @@ build-notebooks:
 build-main:
 	docker build -t poseidon-main  -f Dockerfile.main .
 
+build-mock-controller:
+	docker build -t mock-controller -f Dockerfile.mock .
+
+build-storage:
+	docker pull mongo
+
+build-storage-interface:
+	docker build -t poseidon-storage-interface -f Dockerfile.storage-interface .
+
 clean-all: clean depends
 	@docker rmi poseidon-monitor
-	@docker rmi poseidon-storagmain
+	@docker rmi poseidon-storage
 	@docker rmi poseidon-main
 	@docker rmi poseidon-api
+	@docker rmi periodically
+	@docker rmi poseidon-storage-interface
+
+clean-mock-controller:
+	@docker ps -aqf "name=mock-controller" | xargs docker rm -f
+
+clean-periodically: depends
+	@docker ps -afq "name=periodically" | xargs docker rm -f
 
 clean-storage: depends
 	@docker ps -aqf "name=poseidon-storage" | xargs docker rm -f
@@ -138,9 +209,19 @@ clean-api: depends
 clean-notebooks: depends
 	@docker ps -aqf "name=poseidon-notebooks" | xargs docker rm -f
 
+clean-storage-interface: depends
+	@docker ps -aqf "name=poseidon-storage-interface" | xargs docker rm -f
+
+clean-rabbit:
+	@docker ps -aqf "name=poseidon-rabbit" | xargs docker rm -f
+
 clean: clean-docs clean-notebooks depends
 	#@docker ps -aqf "name=poseidon" | xargs docker rm -f
 	#@docker ps -aqf "name=poseidon-api" | xargs docker rm -f
+
+nuke-containers:
+	# WARNING: this deletes all containers, not just poseidon ones
+	@docker rm -f $$(docker ps -a -q)
 
 depends:
 	@echo

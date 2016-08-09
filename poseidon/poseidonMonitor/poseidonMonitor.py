@@ -5,7 +5,6 @@
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
 #   You may obtain a copy of the License at
-#
 #       http://www.apache.org/licenses/LICENSE-2.0
 #
 #   Unless required by applicable law or agreed to in writing, software
@@ -21,19 +20,107 @@ Created on 17 May 2016
 @author: Charlie Lewis, dgrossman
 """
 import json
+import logging
+import logging.config
 from os import environ
+from os import getenv
 from subprocess import call
 from subprocess import check_output
 
 import falcon
-from Action.Action import Action
-from Config.Config import FieldConfig
-from Config.Config import FullConfig
-from Config.Config import SectionConfig
-from ControllerPolling.ControllerPolling import ControllerPolling
+from Action.Action import action_interface
 from falcon_cors import CORS
-from NodeHistory.NodeHistory import NodeHistory
-from NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import NorthBoundControllerAbstraction
+from NodeHistory.NodeHistory import nodehistory_interface
+from NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import controller_interface
+
+from Config.Config import config_interface
+
+
+class Monitor(object):
+
+    def __init__(self):
+        # get the logger setup
+        self.logger = logging.getLogger(__name__)
+        self.mod_configuration = dict()
+        logging.basicConfig(level=logging.DEBUG)
+
+        self.mod_name = self.__class__.__name__
+        self.actions = dict()
+        self.Config = config_interface
+        self.Config.set_owner(self)
+        self.NodeHistory = nodehistory_interface
+        self.NodeHistory.set_owner(self)
+        self.NorthBoundControllerAbstraction = controller_interface
+        self.NorthBoundControllerAbstraction.set_owner(self)
+        self.Action = action_interface
+        self.Action.set_owner(self)
+
+        # wire up handlers for Config
+        print 'handler Config'
+        # check
+        self.Config.configure()
+        self.Config.first_run()
+        self.Config.configure_endpoints()
+
+        # wire up handlers for NodeHistory
+        print 'handler NodeHistory'
+        self.NodeHistory.configure()
+        self.NodeHistory.first_run()
+        self.NodeHistory.configure_endpoints()
+
+        # wire up handlers for NorthBoundControllerAbstraction
+        print 'handler NorthBoundControllerAbstraction'
+        # check
+        self.NorthBoundControllerAbstraction.configure()
+        self.NorthBoundControllerAbstraction.first_run()
+        self.NorthBoundControllerAbstraction.configure_endpoints()
+
+        # wire up handlers for Action
+        print 'handler Action'
+        # check
+        self.Action.configure()
+        self.Action.first_run()
+        self.Action.configure_endpoints()
+        print '----------------------'
+        self.configSelf()
+        self.init_logging()
+
+    def init_logging(self):
+        config = None
+
+        path = getenv('loggingFile', None)
+
+        if path is None:
+            path = self.mod_configuration.get('loggingFile', None)
+
+        if path is not None:
+            with open(path, 'rt') as f:
+                config = json.load(f)
+            logging.config.dictConfig(config)
+        else:
+            logging.basicConfig(level=logging.DEBUG)
+
+    def configSelf(self):
+        conf = self.Config.get_endpoint('Handle_SectionConfig')
+        for item in conf.direct_get(self.mod_name):
+            k, v = item
+            self.mod_configuration[k] = v
+        print self.mod_name, ':config:', self.mod_configuration
+
+    def add_endpoint(self, name, handler):
+        a = handler()
+        a.owner = self
+        self.actions[name] = a
+
+    def del_endpoint(self, name):
+        if name in self.actions:
+            self.actions.pop(name)
+
+    def get_endpoint(self, name):
+        if name in self.actions:
+            return self.actions.get(name)
+        else:
+            return None
 
 
 def get_allowed():
@@ -130,26 +217,44 @@ class PCAPResource:
 # create callable WSGI app instance for gunicorn
 api = falcon.API(middleware=[cors.middleware])
 
+# register the local classes
+poseidon_monitor = Monitor()
+poseidon_monitor.add_endpoint('Handle_PCAP', PCAPResource)
+poseidon_monitor.add_endpoint('Handle_Yaml', SwaggerAPI)
+poseidon_monitor.add_endpoint('Handle_Version', VersionResource)
+
 # make sure to update the yaml file when you add a new route
-# routes
-api.add_route('/v1/version', VersionResource())
-api.add_route('/v1/pcap/{pcap_file}/{output_type}', PCAPResource())
+
+# 'local' routes
+api.add_route('/v1/version', poseidon_monitor.get_endpoint('Handle_Version'))
+api.add_route('/v1/pcap/{pcap_file}/{output_type}',
+              poseidon_monitor.get_endpoint('Handle_PCAP'))
+api.add_route('/swagger.yaml', poseidon_monitor.get_endpoint('Handle_Yaml'))
 
 # access to the other components of PoseidonRest
-api.add_route('/v1/nbca/{resource}', NorthBoundControllerAbstraction())
+
+# nbca routes
+api.add_route('/v1/nbca/{resource}',
+              poseidon_monitor.NorthBoundControllerAbstraction
+              .get_endpoint('Handle_Resource'))
+api.add_route('/v1/polling',
+              poseidon_monitor.NorthBoundControllerAbstraction
+              .get_endpoint('Handle_Periodic'))
 
 # config routes
-api.add_route('/v1/config', FullConfig())
-api.add_route('/v1/config/{section}', SectionConfig())
-api.add_route('/v1/config/{section}/{field}', FieldConfig())
+api.add_route('/v1/config',
+              poseidon_monitor.Config.get_endpoint('Handle_FullConfig'))
+api.add_route('/v1/config/{section}',
+              poseidon_monitor.Config.get_endpoint('Handle_SectionConfig'))
+api.add_route('/v1/config/{section}/{field}',
+              poseidon_monitor.Config.get_endpoint('Handle_FieldConfig'))
 
-api.add_route('/v1/history{resource}', NodeHistory())
-api.add_route('/v1/action/{resource}', Action())
+# nodehistory routes
+api.add_route('/v1/history/{resource}',
+              poseidon_monitor.NodeHistory.get_endpoint('Handle_Default'))
 
-# add the functionality for a remote call to trigger scanning
-# the internal switch state
-api.add_route('/v1/polling', ControllerPolling())
+# action routes
+api.add_route('/v1/action/{resource}',
+              poseidon_monitor.Action.get_endpoint('Handle_Default'))
 
-api.add_route('/swagger.yaml', SwaggerAPI())
-
-print 'done'
+# storage routes

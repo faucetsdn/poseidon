@@ -13,15 +13,16 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+
 """
-Created on 17 May 2016
-@author: dgrossman
+Created on 25 July 2016
+@author: kylez
 """
 
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.controllerproxy import ControllerProxy
 
-class Onos:
 
-    def __init__(self):
-        self.modName = 'Onos'
-
-    pass
+class BasicAuthControllerProxy(ControllerProxy):
+    def __init__(self, base_uri, auth, *args, **kwargs):
+        super(BasicAuthControllerProxy, self).__init__(base_uri, *args, **kwargs)
+        self.session.auth = auth

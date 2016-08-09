@@ -1,43 +1,117 @@
 version: '2'
 
+#  PORTS
+#     api:                1111:8001
+#     docs:               2222:8002
+#     mock:               3333:8003
+#     monitor:            4444:8004
+#     main:               5555:8005
+#     storage:            27017:27017
+#     storage-interface:  28000:27000
+#     periodically:       9999:8009
+
 services:
-    #api:
-    #image: poseidon-api
-    #container_name: poseidon-api
-    #build:
-    #  context: ./api
-    #  dockerfile: Dockerfile
-    #ports:
-    #  - 8080
-  monitor:
+  api:
+    image: poseidon-api
+    container_name: poseidon-api
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - '1111:8001'
+  docs:
+    image: poseidon-docs
+    container_name: poseidon-docs
+    build:
+      context: .
+      dockerfile: Dockerfile.docs
+    ports:
+      - '2222:8002'
+  mock:
+    image: mock-controller
+    container_name: mock-controller
+    build:
+      context: .
+      dockerfile: Dockerfile.mock
+    ports:
+      - '3333:8003'
     environment:
-      - ALLOW_ORIGIN="$api_url"
+      - ALLOW_ORIGIN = http://$DOCKER_URL:8003
+    links:
+      - monitor:poseidon-monitor
+  monitor:
     image: poseidon-monitor
     container_name: poseidon-monitor
     build:
       context: .
       dockerfile: Dockerfile.monitor
     ports:
-      - 8000
+      - '4444:8004'
+    environment:
+      - ALLOW_ORIGIN = http://$DOCKER_URL:1111
+    links:
+      - api:poseidon-api
   main:
-    image: poseidon
-    container_name: poseidon
+    image: poseidon-main
+    container_name: poseidon-main
     build:
       context: .
       dockerfile: Dockerfile.main
     ports:
-      - 8000
+      - '5555:8005'
+    links:
+      - storage-interface:poseidon-storage-interface
   storageWorkaround:
     # http://www.diogogmt.com/running-mongodb-with-docker-and-compose/
-    container_name: poseidon-storageWorkaround
     image: mongo
+    container_name: poseidon-storageWorkaround
     volumes:
       - /data/db
   storage:
-    container_name: poseidon-storage
     image: mongo
+    container_name: poseidon-storage
+    ports:
+      - '27017:27017'
+    command: --smallfiles --rest --auth
     volumes_from:
       - storageWorkaround
+  storage-interface:
+    image: poseidon-storage-interface
+    container_name: poseidon-storage-interface
+    build:
+      context: .
+      dockerfile: Dockerfile.storage-interface
     ports:
-      - 27017
-    command: --smallfiles --rest --auth
+      - '28000:27000'
+    environment:
+      - ALLOW_ORIGIN = http://$DOCKER_URL:28000
+    links:
+      - storage:poseidon-storage
+  periodically:
+    image: poseidon-periodically
+    container_name: poseidon-periodically
+    build:
+      context: .
+      dockerfile: Dockerfile.periodically
+    ports:
+      - '9999:8009'
+    links:
+      - mock:mock-controller
+      - monitor:poseidon-monitor
+      - rabbit:rabbitmq
+  rabbit:
+    image: rabbitmq:management
+    container_name: poseidon-rabbit
+    ports:
+      - '15672:15672'
+      - '5672:5672'
+  pcap-stats:
+    image: pcap-stats
+    container_name: pcap-stats
+    build:
+      context: ./plugins/heuristics/pcap_stats
+      dockerfile: Dockerfile
+    links:
+      - rabbit:rabbitmq
+      - storage:poseidon-storage
+      - storageWorkaround:poseidon-storageWorkaround

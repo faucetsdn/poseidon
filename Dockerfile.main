@@ -13,6 +13,7 @@ RUN apk add --update \
 
 ADD . /poseidonWork
 WORKDIR /poseidonWork
+ENV PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
 RUN pip install pip --upgrade
 
 # install dependencies of plugins for poseidon
@@ -27,16 +28,14 @@ RUN for file in $(find plugins/* -name "requirements.txt"); \
         pip install -r $file; \
     done
 
-# build documentation
-RUN ln -s /poseidonWork/plugins /poseidonWork/poseidon/poseidonMain/plugins
-RUN sphinx-apidoc -o docs poseidon -F --follow-links && cd docs && make html && make man
+# run tests
+RUN py.test -v \
+--cov=poseidon/poseidonMain \
+--ignore=poseidon/poseidonMonitor \
+--ignore=poseidon/poseidonStorage \
+--ignore=plugins \
+--ignore=poseidon/periodically \
+--cov-report term-missing --cov-config .coveragerc
 
 ENV PYTHONUNBUFFERED 0
-EXPOSE 8000
-CMD ["python", "poseidon/poseidonMain/poseidonMain.py"]
-
-# run linter
-#RUN pylint --disable=all --enable=classes --disable=W poseidonMain
-
-# run tests
-RUN py.test -v --cov=poseidon/poseidonMain --cov=plugins --cov-report term-missing --cov-config .coveragerc
+CMD ["python", "poseidon/poseidonMain/poseidonMain.py","1","-1","http://localhost:5555/v1/version"]

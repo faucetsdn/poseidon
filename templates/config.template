@@ -1,4 +1,15 @@
+[Monitor]
+Config=True
+loggingFile = /poseidonWork/poseidon/config/logging.json
+
+[rabbitmq]
+rabbit_host = localhost
+
+[rabbitmq]
+rabbit_host = localhost
+
 [database]
+ip = localhost
 user = user
 password = SECRET
 
@@ -15,3 +26,51 @@ scan_frequency = 5
 key1 = trident
 key2 = theseus
 double key = atlas horses
+
+[Action]
+Config=True
+
+[Action:Handle_Default]
+Config=True
+
+[Config]
+Config=True
+
+[Config:Handle_FullConfig]
+Config=True
+
+[Config:Handle_SectionConfig]
+Config=True
+
+[Config:Handle_FieldConfig]
+Config=True
+
+[NodeHistory]
+Config=True
+
+[NodeHistory:Handle_Default]
+Config=True
+
+[NorthBoundControllerAbstraction]
+Config=True
+
+[NorthBoundControllerAbstraction:Handle_Resource]
+Config=True
+
+[NorthBoundControllerAbstraction:Handle_Periodic]
+Config=True
+controller_ip = mock-controller
+controller_port = 3333
+
+[PoseidonMain]
+Config=True
+
+[PoseidonMain:Config]
+Config=True
+
+[PoseidonMain:Investigator]
+Config=True
+
+[PoseidonMain:Scheduler]
+Config=True
+

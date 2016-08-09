@@ -13,17 +13,15 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
 """
 Tcpdump hex parser plugin
 
 Created on 13 June 2016
 @author: Charlie Lewis, David Grossman, Travis Lanham
 """
-
-import pika
 import subprocess
 import sys
+import pika
 
 
 def get_path():
@@ -31,7 +29,7 @@ def get_path():
     try:
         path = sys.argv[1]
     except:
-        print "no path provided, quitting."
+        print 'no path provided, quitting.'
     return path
 
 
@@ -41,15 +39,14 @@ def connections():
     connection = None
     try:
         connection = pika.BlockingConnection(pika.ConnectionParameters(
-            host='rabbitmq'))
+            host='localhost'))
         channel = connection.channel()
 
-        channel.exchange_declare(exchange='topic_recs',
+        channel.exchange_declare(exchange='topic_poseidon_internal',
                                  type='topic')
     except:
-        print "unable to connect to rabbitmq, quitting."
+        print 'unable to connect to rabbitmq, quitting.'
     return channel, connection
-
 
 
 def parse_header(line):
@@ -83,7 +80,7 @@ def parse_header(line):
         ret_dict['src_port'] = h[3].split('.')[-1]
         ret_dict['src_ip'] = h[3].split('.')[0]
 
-        ret_dict['dest_port'] = h[5].split('.')[-1].split(":")[0]
+        ret_dict['dest_port'] = h[5].split('.')[-1].split(':')[0]
         ret_dict['dest_ip'] = h[5].split('.')[0]
     else:
         if len(h[3].split('.')) > 4:
@@ -93,10 +90,10 @@ def parse_header(line):
             ret_dict['src_ip'] = h[3]
 
         if len(h[5].split('.')) > 4:
-            ret_dict['dest_port'] = h[5].split('.')[-1].split(":")[0]
+            ret_dict['dest_port'] = h[5].split('.')[-1].split(':')[0]
             ret_dict['dest_ip'] = '.'.join(h[5].split('.')[:-1])
         else:
-            ret_dict['dest_ip'] = h[5].split(":")[0]
+            ret_dict['dest_ip'] = h[5].split(':')[0]
 
     ret_dict['protocol'] = h[6]
 
@@ -175,10 +172,12 @@ def return_packet(line_source):
             data = parse_data(line_strip, ret_header['length'])
             ret_data = ret_data + data
 
+
 def run_tool(path):
-    """Tool entry point"""
-    routing_key = "tcpdump_hex_parser" + path.replace("/", ".")
-    print "processing pcap results..."
+    """
+    Tool entry point
+    """
+    print 'processing pcap results...'
     channel, connection = connections()
     proc = subprocess.Popen(
         'tcpdump -nn -tttt -xx -r ' + path,
@@ -186,11 +185,15 @@ def run_tool(path):
         stdout=subprocess.PIPE)
     for packet in return_packet(proc.stdout):
         message = str(packet)
+        if 'dns_resolved' in packet:
+            routing_key = 'poseidon.tcpdump_parser.dns'
+        else:
+            routing_key = 'poseidon.tcpdump_parser'
         if channel is not None:
-            channel.basic_publish(exchange='topic_recs',
+            channel.basic_publish(exchange='topic_poseidon_internal',
                                   routing_key=routing_key,
                                   body=message)
-        print " [x] Sent %r:%r" % (routing_key, message)
+        print ' [x] Sent %r:%r' % (routing_key, message)
     try:
         connection.close()
     except:

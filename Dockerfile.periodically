@@ -1,0 +1,38 @@
+FROM alpine:3.3
+MAINTAINER dgrossman dgrossman@iqt.org
+
+RUN apk add --update \
+    git \
+    make \
+    python \
+    python-dev \
+    py-pip \
+    py-sphinx \
+    tcpdump \
+    && rm -rf /var/cache/apk/*
+
+ADD . /poseidonWork
+WORKDIR /poseidonWork
+ENV PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
+RUN pip install pip --upgrade
+
+# install dependencies of plugins for poseidon
+RUN for file in $(find poseidon/* -name "requirements.txt"); \
+    do \
+        pip install -r $file; \
+    done
+
+# run tests
+RUN py.test -v  \
+--ignore=poseidon/poseidonMain \
+--ignore=poseidon/poseidonStorage \
+--ignore=poseidon/poseidonMonitor \
+--ignore=plugins \
+--cov=poseidon/periodically \
+--cov-report term-missing --cov-config .coveragerc
+
+ENV PYTHONUNBUFFERED 0
+EXPOSE 9999:8009
+
+CMD ["python", "poseidon/periodically/periodically.py","1","-1","http://poseidon-monitor:4444/v1/polling"]
+

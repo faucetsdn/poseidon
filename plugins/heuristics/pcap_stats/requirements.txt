@@ -1,1 +1,3 @@
 pika
+statistics
+pymongo

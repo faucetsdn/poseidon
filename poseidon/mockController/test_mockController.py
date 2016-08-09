@@ -14,17 +14,19 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Test module for ControllerPolling.py
+test module for mock controller
 
-Created on 5 July 2016
-@author: dgrossman
+Created on 14 July 2016
+@author: lanhamt
 """
-import falcon
+
 import pytest
-from ControllerPolling import ControllerPolling
+import falcon
+from mockController import MockController
+
 
 application = falcon.API()
-application.add_route('/v1/Polling', ControllerPolling())
+application.add_route('/v1/mock_controller/poll', MockController())
 
 
 # exposes the application for testing
@@ -33,15 +35,12 @@ def app():
     return application
 
 
-def test_p2c(client):
+def test_controller(client):
     """
-    Tests ControllerPolling
+    Tests mock controller get response, response
+    should be json of rand int from 1 to 10.
     """
-    resp = client.get('/v1/Polling')
+    resp = client.get('/v1/mock_controller/poll')
     assert resp.status == falcon.HTTP_OK
-    resp_type = None
-    resp_types = resp.headers['Content-Type'].split(';')
-    for r_type in resp_types:
-        if r_type.strip() == 'application/json':
-            resp_type = r_type
-    assert resp_type == 'application/json'
+    num = int(resp.body)
+    assert num >= 1 and num <= 10

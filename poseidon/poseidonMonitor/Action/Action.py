@@ -17,17 +17,32 @@
 Created on 17 May 2016
 @author: dgrossman
 """
+from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
+from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 
 
-class Action:
+class Action(Monitor_Action_Base):
     """Poseidon Action Rest Interface"""
 
     def __init__(self):
-        self.modName = 'Action'
+        super(Action, self).__init__()
+        self.mod_name = self.__class__.__name__
+        self.config_section_name = self.mod_name
+
+
+class Handle_Default(Monitor_Helper_Base):
+
+    def __init__(self):
+        super(Handle_Default, self).__init__()
+        self.mod_name = self.__class__.__name__
 
     def on_get(self, req, resp, resource):
         resp.content_type = 'text/text'
         try:
-            resp.body = self.modName + ' found: %s' % (resource)
+            resp.body = self.mod_name + ' found: %s' % (resource)
         except:  # pragma: no cover
-            resp.body = "failed"
+            resp.body = 'failed'
+
+
+action_interface = Action()
+action_interface.add_endpoint('Handle_Default', Handle_Default)

@@ -17,17 +17,81 @@
 Created on 17 May 2016
 @author: dgrossman
 """
+import json
+
+import requests
+
+from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
+from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 
 
-class NorthBoundControllerAbstraction:
-    """NorthBoundControllerAbstraction """
+class NorthBoundControllerAbstraction(Monitor_Action_Base):
 
     def __init__(self):
-        self.modName = 'NorthBoundControllerAbstraction'
+        super(NorthBoundControllerAbstraction, self).__init__()
+        self.mod_name = self.__class__.__name__
+        self.config_section_name = self.mod_name
+
+
+class Handle_Resource(Monitor_Helper_Base):
+
+    def __init__(self):
+        super(Handle_Resource, self).__init__()
+        self.mod_name = self.__class__.__name__
 
     def on_get(self, req, resp, resource):
         resp.content_type = 'text/text'
         try:
-            resp.body = self.modName + ' found: %s' % (resource)
+            resp.body = self.mod_name + ' found: %s' % (resource)
         except:  # pragma: no cover
             pass
+
+
+class Handle_Periodic(Monitor_Helper_Base):
+
+    def __init__(self):
+        super(Handle_Periodic, self).__init__()
+        self.mod_name = self.__class__.__name__
+        self.retval = {}
+        self.times = 0
+        self.owner = None
+        self.controller = {}
+        self.controller['ip'] = None
+        self.controller['port'] = None
+        self.controller['url'] = None
+
+    def first_run(self):
+        if self.configured:
+            self.controller['ip'] = str(
+                self.mod_configuration['controller_ip'])
+            self.controller['port'] = str(
+                self.mod_configuration['controller_port'])
+            self.controller['url'] = 'http://' + self.controller['ip'] + \
+                ':' + self.controller['port'] + '/v1/mock_controller/poll'
+        else:
+            pass
+
+    def on_get(self, req, resp):
+        """Haneles Get requests"""
+        # TODO MSG NBCA to get switch state
+        # TODO compare to previous switch state
+        # TODO schedule something to occur for updated flows
+        self.retval['service'] = self.owner.mod_name + ':' + self.mod_name
+        self.retval['times'] = self.times
+        # TODO change response to something reflecting success of traversal
+        self.retval['resp'] = 'ok'
+
+        try:
+            controller_resp = requests.get(self.controller['url'])
+            self.retval['controller'] = controller_resp.text
+        except:
+            self.retval['controller'] = 'Could not establish connection to %s.' % (
+                self.controller['url'])
+
+        self.times = self.times + 1
+        resp.body = json.dumps(self.retval)
+
+
+controller_interface = NorthBoundControllerAbstraction()
+controller_interface.add_endpoint('Handle_Periodic', Handle_Periodic)
+controller_interface.add_endpoint('Handle_Resource', Handle_Resource)
