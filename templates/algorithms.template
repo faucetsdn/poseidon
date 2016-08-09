@@ -1,0 +1,5 @@
+[info]
+name = machine learning algorithms for device identification and anomaly detection
+
+[service]
+schedule = {"all":"hourly"}

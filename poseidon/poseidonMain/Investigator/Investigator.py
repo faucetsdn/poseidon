@@ -65,7 +65,8 @@ class Investigator(Main_Action_Base):
         else:
             # bad - should only be one record for each ip
             # log error for investigation
-            pass
+            logger = self.logging.getLogger(__name__)
+            logger.setLevel(logging.DEBUG)
 
 
 investigator_interface = Investigator()
