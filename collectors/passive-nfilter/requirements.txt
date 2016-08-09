@@ -1,0 +1,6 @@
+docker-py
+paste
+pytest
+pytest-cov
+redis
+web.py

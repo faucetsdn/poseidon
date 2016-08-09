@@ -24,6 +24,7 @@ from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
 import requests
 import urllib
 import ast
+import bson
 
 
 class Investigator(Main_Action_Base):
@@ -37,7 +38,22 @@ class Investigator(Main_Action_Base):
         """
         Register investigation algorithm.
         """
-        self.algos[name] = algorithm
+        if name not in self.algos:
+            self.algos[name] = algorithm
+            return True
+        return False
+
+    def delete_algorithm(self, name):
+        if name in self.algos:
+            self.algos.pop(name)
+            return True
+        return False
+
+    def count_algorithms(self):
+        return len(self.algos)
+
+    def clear(self):
+        self.algos.clear()
 
     def process_new_machine(self, ip_addr):
         """
@@ -46,8 +62,8 @@ class Investigator(Main_Action_Base):
         ip, then processes accordingly.
         """
         query = {'node_ip': ip_addr}
-        uri = 'http://poseidon-storage-interface/v1/poseidon_records/network_graph/' + str(query)
-        uri = urllib.unquote(str(query)).encode('utf8')
+        query = bson.BSON.encode(query)
+        uri = 'http://poseidon-storage-interface/v1/poseidon_records/network_graph/' + query
         try:
             resp = requests.get(uri)
         except:
@@ -70,5 +86,6 @@ class Investigator(Main_Action_Base):
 
         def update_config(self):
             pass
+
 
 investigator_interface = Investigator()
