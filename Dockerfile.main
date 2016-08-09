@@ -28,6 +28,12 @@ RUN for file in $(find plugins/* -name "requirements.txt"); \
         pip install -r $file; \
     done
 
+# install dependencies of collectors for tests
+RUN for file in $(find collectors/* -name "requirements.txt"); \
+    do \
+        pip install -r $file; \
+    done
+
 # run tests
 RUN py.test -v \
 --cov=poseidon/poseidonMain \
