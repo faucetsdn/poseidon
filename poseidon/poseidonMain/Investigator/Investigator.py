@@ -21,11 +21,13 @@ Created on 17 May 2016
 @author: dgrossman, tlanham
 """
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
+from poseidonMain.Config.Config import config_interface
 import logging
 import requests
 import urllib
-import ast
 import bson
+import ast
+import sys
 
 
 class Investigator(Main_Action_Base):
@@ -33,13 +35,36 @@ class Investigator(Main_Action_Base):
     def __init__(self):
         super(Investigator, self).__init__()
         self.mod_name = self.__class__.__name__
-        self.logger = self.logging.getLogger(__name__)
-        self.logger.setLevel(logging.DEBUG)
+        self.Config = config_interface
+        self.set_owner(self)
         self.algos = {}
+        self.rules = {}
+        self.update_rules()
+
+    def update_config(self):
+        """
+        Updates configuration based on config file
+        (for changing rules).
+        """
+        self.configure()
+
+    def update_rules(self):
+        """
+        Updates rules dict from config 
+        """
+        self.update_config()
+        for key in self.mod_configuration:
+            if 'policy' in key:
+                self.rules[key] = self.mod_configuration[key].split(' ')
+        # parse config
 
     def register_algorithm(self, name, algorithm):
         """
         Register investigation algorithm.
+
+        NOTE: for production, replace registering function
+        pointers with info about the algorithm (path,
+        complexity, etc).
         """
         if name not in self.algos:
             self.algos[name] = algorithm
@@ -54,7 +79,10 @@ class Investigator(Main_Action_Base):
 
     def count_algorithms(self):
         return len(self.algos)
- 
+
+    def get_algorithms(self):
+        return self.algos
+
     def clear(self):
         self.algos.clear()
 
@@ -72,6 +100,7 @@ class Investigator(Main_Action_Base):
         except:
             # error connecting to storage interface
             # log error
+            print >> sys.stderr, 'Main (Investigator): could not connect to storage interface'
             return
 
         resp = ast.literal_eval(resp.body)
@@ -84,10 +113,7 @@ class Investigator(Main_Action_Base):
         else:
             # bad - should only be one record for each ip
             # log error for investigation
-            self.logger.debug('duplicate record for machine: %s', ip_addr)
-
-        def update_config(self):
-            pass
+            print >> sys.stderr, 'duplicate record for machine: %s', ip_addr
 
 
 investigator_interface = Investigator()

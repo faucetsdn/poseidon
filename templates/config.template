@@ -71,6 +71,10 @@ Config=True
 [PoseidonMain:Investigator]
 Config=True
 
+[Investigator:Investigator]
+Config = True
+policy_new_machine = algo1 algo2 algo3
+
 [PoseidonMain:Scheduler]
 Config=True
 

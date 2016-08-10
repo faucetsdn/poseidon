@@ -57,9 +57,20 @@ def test_remove():
     assert 0 == investigator.count_algorithms()
 
 
+def test_get_algorithms():
+    investigator = Investigator()
+    investigator.register_algorithm('cubed', lambda x: x**3)
+    assert 'cubed' in investigator.get_algorithms()
+
+
 def test_clear():
     investigator = Investigator()
     investigator.register_algorithm('cubed', lambda x: x**3)
     investigator.register_algorithm('squared', lambda x: x**2)
     investigator.clear()
     assert 0 == investigator.count_algorithms()
+
+
+def test_update_config():
+    investigator = Investigator()
+    investigator.update_config()
