@@ -56,6 +56,13 @@ class Investigator(Main_Action_Base):
         for key in self.mod_configuration:
             if 'policy' in key:
                 self.rules[key] = self.mod_configuration[key].split(' ')
+
+        # removes algorithms that have not been registered
+        for policy in self.rules:
+            for proposed_algo in self.rules[policy]:
+                if proposed_algo not in self.algos:
+                    print >> sys.stderr, 'algorithm: %s has not been registered, deleting from policy', proposed_algo
+                    del proposed_algo
         # parse config
 
     def register_algorithm(self, name, algorithm):

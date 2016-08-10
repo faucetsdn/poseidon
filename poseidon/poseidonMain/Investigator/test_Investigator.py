@@ -27,25 +27,22 @@ def test_Investigator():
     Investigator()
 
 
+def test_update_config():
+    investigator = Investigator()
+    investigator.update_config()
+
+
+def test_update_rules():
+    investigator = Investigator()
+    investigator.update_rules()
+
+
 def test_register_algo():
     investigator = Investigator()
     investigator.register_algorithm('cubed', lambda x: x**3)
 
 
-def test_process_new_machine():
-    investigator = Investigator()
-    ip = '0.0.0.0'
-    investigator.process_new_machine(ip)
-
-
-def test_count():
-    investigator = Investigator()
-    investigator.register_algorithm('cubed', lambda x: x**3)
-    investigator.register_algorithm('cubed', lambda x: x**3)
-    assert 1 == investigator.count_algorithms()
-
-
-def test_remove():
+def test_delete_algo():
     investigator = Investigator()
     investigator.register_algorithm('cubed', lambda x: x**3)
     investigator.register_algorithm('squared', lambda x: x**2)
@@ -57,7 +54,14 @@ def test_remove():
     assert 0 == investigator.count_algorithms()
 
 
-def test_get_algorithms():
+def test_count_algos():
+    investigator = Investigator()
+    investigator.register_algorithm('cubed', lambda x: x**3)
+    investigator.register_algorithm('cubed', lambda x: x**3)
+    assert 1 == investigator.count_algorithms()
+
+
+def test_get_algos():
     investigator = Investigator()
     investigator.register_algorithm('cubed', lambda x: x**3)
     assert 'cubed' in investigator.get_algorithms()
@@ -71,6 +75,7 @@ def test_clear():
     assert 0 == investigator.count_algorithms()
 
 
-def test_update_config():
+def test_process_new_machine():
     investigator = Investigator()
-    investigator.update_config()
+    ip = '0.0.0.0'
+    investigator.process_new_machine(ip)
