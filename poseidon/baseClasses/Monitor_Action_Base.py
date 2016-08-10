@@ -28,7 +28,7 @@ Args:
 
 Attributes:
 actions (dict) : dictionary of (string,instantiated class)
-                 access fo rthte related classes
+                 access for thte related classes
 """
 
 

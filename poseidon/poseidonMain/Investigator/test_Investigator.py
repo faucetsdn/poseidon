@@ -32,6 +32,12 @@ def test_register_algo():
     investigator.register_algorithm('cubed', lambda x: x**3)
 
 
+def test_process_new_machine():
+    investigator = Investigator()
+    ip = '0.0.0.0'
+    investigator.process_new_machine(ip)
+
+
 def test_count():
     investigator = Investigator()
     investigator.register_algorithm('cubed', lambda x: x**3)

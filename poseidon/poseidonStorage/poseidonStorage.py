@@ -26,15 +26,14 @@ NAMES: current databases and collections (subject to change)
 Created on 17 May 2016
 @author: dgrossman, lanhamt
 """
-import ast
-import ConfigParser
-import json
-import urllib
-import falcon
 from subprocess import check_output
 from pymongo import MongoClient
 from falcon_cors import CORS
 from os import environ
+import ConfigParser
+import json
+import falcon
+import bson
 
 
 class poseidonStorage:
@@ -146,24 +145,33 @@ class db_collection_query(poseidonStorage):
     """
     rest layer subclass of poseidonStorage.
     queries given database and collection,
-    returns documents found in query.
+    returns dict with the count of docs matching
+    the query - if docs were found matching the query
+    then includes a dict of ip->doc for each document.
 
-    NOTE: supports utf8 url encoding for well-formed
-    queries (ie "{u'author': u'some author'}")
+    NOTE: supports bson encoding for well-formed
+    queries (ie "{'node_ip': 'some ip'}")
     """
 
     def on_get(self, req, resp, database, collection, query_str):
+        ret = {}
         try:
-            query = urllib.unquote(query_str).decode('utf8')
-            query = ast.literal_eval(query_str)
+            query = bson.BSON.decode(query_str)
             cursor = self.client[database][collection].find(query)
-            ret = ''
-            for doc in cursor:
-                ret += json.dumps(doc)
-            if not ret:
-                ret = json.dumps('Valid query performed: no documents found.')
+            doc_dict = {}
+            if cursor.count() == 0:
+                ret['count'] = cursor.count()
+                ret['docs'] = 'Valid query performed, no docs found.'
+            else:
+                for doc in cursor:
+                    doc_dict[doc['node_ip']] = doc
+                ret['docs'] = doc_dict
+                ret['count'] = cursor.count()
+            ret = json.dumps(ret)
         except:
-            ret = json.dumps('Error on query.')
+            ret['count'] = -1
+            ret['docs'] = 'Error on query.'
+            ret = json.dumps(ret)
         resp.body = ret
 
 
@@ -174,15 +182,15 @@ class db_add_one_doc(poseidonStorage):
     collection. returned response includes
     the id of the newly inserted object.
 
-    NOTE: uses utf8 decoding for document
+    NOTE: uses bson decoding for document
     to be inserted into database.
     """
 
     def on_get(self, req, resp, database, collection, doc_str):
         try:
-            doc = urllib.unquote(doc).decode('utf8')
-            doc = ast.literal_eval(doc)
-            ret = self.client[database][collection].insert_one(doc)
+            if not bson.is_valid(doc_str):
+                doc_str = bson.BSON.encode(doc_str)
+            ret = self.client[database][collection].insert_one(doc_str)
             ret = str(ret.inserted_id)
         except:
             ret = 'Error inserting document into database.'
@@ -193,19 +201,19 @@ class db_add_many_docs(poseidonStorage):
     """
     rest layer subclass of poseidonStorage.
     adds a list of documents (encoded with
-    utf8) to specified database and collection.
+    bson) to specified database and collection.
     returned response includes the list of ids
     for the documents that have been inserted on
     success and error on failure.
 
-    NOTE: uses utf8 decoding for documents to be
-    inserted.
+    NOTE: uses bson decoding for documents to be
+    inserted. Takes a string (doc_list) of concatenated
+    bson-encoded map-objects (ie dicts).
     """
 
     def on_get(self, req, resp, database, collection, doc_list):
         try:
-            doc_list = urllib.unquote(doc_list).decode('utf8')
-            doc_list = ast.literal_eval(doc_list)
+            doc_list = bson.decode_all(doc_list)
             ret = self.client[database][collection].insert_many(doc_list)
             for o_id in ret:
                 o_id = str(o_id.inserted_id)

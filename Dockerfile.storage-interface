@@ -43,7 +43,7 @@ RUN py.test -v \
 --ignore=poseidon/poseidonMonitor \
 --ignore=poseidon/periodically \
 # comment out below for circle testing coverage 
---ignore=poseidon/poseidonStorage \  
+#--ignore=poseidon/poseidonStorage \  
 --ignore=plugins/features \
 --ignore=plugins/heuristics \
 --cov=poseidon/poseidonStorage \

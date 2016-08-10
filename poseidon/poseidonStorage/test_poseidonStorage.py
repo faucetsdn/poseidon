@@ -20,9 +20,6 @@ NOTE: responses are returned as json
 Created on 28 June 2016
 @author: dgrossman, lanhamt
 """
-import urllib
-import falcon
-import pytest
 from poseidonStorage import db_collection_count
 from poseidonStorage import db_collection_names
 from poseidonStorage import db_collection_query
@@ -32,6 +29,10 @@ from poseidonStorage import db_add_one_doc
 from poseidonStorage import db_add_many_docs
 from poseidonStorage import main
 from poseidonStorage import poseidonStorage
+import falcon
+import pytest
+import bson
+import ast
 
 
 application = falcon.API()
@@ -133,17 +134,23 @@ def test_db_retrieve_doc(client):
 def test_db_collection_query(client):
     """
     tests response from query of database.
+    response is a serialized dict with 'count'
+    and 'docs' fields.
     """
-    query = "{'hostname': 'bad'}"
-    query = urllib.unquote(query).encode('utf8')
+    query = {'hostname': 'bad'}
+    query = bson.BSON.encode(query)
     resp = client.get('/v1/storage/query/local/startup_log/' + query)
     assert resp.status == falcon.HTTP_OK
-    assert resp.body == '"Valid query performed: no documents found."'
+    resp = ast.literal_eval(resp.body)
+    assert isinstance(resp['count'], int)
+    assert isinstance(resp['docs'], str)
 
     query = 'bad'
     resp = client.get('/v1/storage/query/local/startup_log/' + query)
     assert resp.status == falcon.HTTP_OK
-    assert resp.body == '"Error on query."'
+    resp = ast.literal_eval(resp.body)
+    assert isinstance(resp['count'], int)
+    assert isinstance(resp['docs'], str)
 
 
 def test_db_add_one_doc(client):
@@ -153,23 +160,22 @@ def test_db_add_one_doc(client):
     using the returned id, then tests that the collection
     inserted into is listed under the database collections.
     """
-    doc = """{
-            node_ip: '0.0.0.0'
-            talked_to: {'machine_1': 2,
+    doc = {}
+    doc['node_ip'] = '0.0.0.0'
+    doc['talked_to'] = {'machine_1': 2,
                         'machine_2': 1,
                         'machine_3': 1}
-            recieved_from: {'machine_1': 1,
+    doc['recieved_from'] = {'machine_1': 1,
                             'machine_6': 3,
                             'machine_2': 2}
-            packet_lengths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-            flow_id: '6a32984d2348e23894f3298'
-            dns_records: ['0.0.0.0', '1.1.1.1']
-            time_rec: {'first_sent': '0-0-0 00:00:00.000000',
+    doc['packet_lengths'] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    doc['flow_id'] = '6a32984d2348e23894f3298'
+    doc['dns_records'] = ['0.0.0.0', '1.1.1.1']
+    doc['time_rec'] = {'first_sent': '0-0-0 00:00:00.000000',
                        'first_received': '0-0-0 00:00:00.000000',
                        'last_sent': '0-0-0 00:00:00.000000',
                        'last_received': '0-0-0 00:00:00.000000'}
-            }"""
-    doc = urllib.unquote(doc).encode('utf8')
+    doc = bson.BSON.encode(doc)
     get_str = '/v1/storage/add_one_doc/poseidon_records/network_graph/' + doc
     resp = client.get(get_str)
     assert resp.status == falcon.HTTP_OK
@@ -184,14 +190,27 @@ def test_db_add_one_doc(client):
 def test_db_add_many_docs(client):
     """
     tests inserting several docs into database.
-    encodes with utf8 for well-formatted url
+    encodes with bson for well-formatted url.
+
+    NOTE: the url is a string of concatenated
+    bson encoded docs (map objects)
     """
-    doc_one = """{node_ip: '1.1.1.1', packet_lengths: [1, 1, 2]}"""
-    doc_two = """{node_ip: '2.2.2.2', packet_lengths: [3, 5, 8]}"""
-    doc_thr = """{node_ip: '3.3.3.3', packet_lengths: [13, 21, 34]}"""
+    doc_one = {}
+    doc_one['node_ip'] = '1.1.1.1'
+    doc_one['packet_lengths'] = [1, 1, 2]
+
+    doc_two = {}
+    doc_two['node_ip'] = '2.2.2.2'
+    doc_two['packet_lengths'] = [3, 5, 8]
+
+    doc_thr = {}
+    doc_thr['node_ip'] = '3.3.3.3'
+    doc_thr['packet_lengths'] = [13, 21, 34]
+
     doc_list = [doc_one, doc_two, doc_thr]
-    doc_list = str(doc_list)
-    doc_list = urllib.unquote(doc_list).encode('utf8')
-    get_str = '/v1/storage/add_many_docs/poseidon_records/network_graph/' + doc_list
+    doc_str = ''
+    for doc in doc_list:
+        doc_str += bson.BSON.encode(doc)
+    get_str = '/v1/storage/add_many_docs/poseidon_records/network_graph/' + doc_str
     resp = client.get(get_str)
     assert resp.status == falcon.HTTP_OK

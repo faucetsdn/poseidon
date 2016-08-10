@@ -40,6 +40,7 @@ RUN pip install pytest
 RUN py.test -v \
 --ignore=poseidon/poseidonMain \
 --ignore=poseidon/poseidonStorage \
+--ignore=collectors/ \
 --cov=poseidon/poseidonMonitor \
 --cov=plugins --cov-report term-missing --cov-config .coveragerc
 
