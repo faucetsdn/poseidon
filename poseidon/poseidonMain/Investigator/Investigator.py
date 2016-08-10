@@ -21,6 +21,7 @@ Created on 17 May 2016
 @author: dgrossman, tlanham
 """
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
+import logging
 import requests
 import urllib
 import ast
@@ -32,6 +33,8 @@ class Investigator(Main_Action_Base):
     def __init__(self):
         super(Investigator, self).__init__()
         self.mod_name = self.__class__.__name__
+        self.logger = self.logging.getLogger(__name__)
+        self.logger.setLevel(logging.DEBUG)
         self.algos = {}
 
     def register_algorithm(self, name, algorithm):
@@ -51,7 +54,7 @@ class Investigator(Main_Action_Base):
 
     def count_algorithms(self):
         return len(self.algos)
-
+ 
     def clear(self):
         self.algos.clear()
 
@@ -81,8 +84,7 @@ class Investigator(Main_Action_Base):
         else:
             # bad - should only be one record for each ip
             # log error for investigation
-            logger = self.logging.getLogger(__name__)
-            logger.setLevel(logging.DEBUG)
+            self.logger.debug('duplicate record for machine: %s', ip_addr)
 
         def update_config(self):
             pass
