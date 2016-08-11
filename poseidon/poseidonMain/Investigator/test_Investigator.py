@@ -21,6 +21,7 @@ Created on 28 June 2016
 """
 import pytest
 from Investigator import Investigator
+from Investigator import Investigator_Response
 
 
 def test_Investigator():
@@ -79,3 +80,10 @@ def test_process_new_machine():
     investigator = Investigator()
     ip = '0.0.0.0'
     investigator.process_new_machine(ip)
+
+
+def test_Investigator_Response():
+    ir = Investigator_Response('0.0.0.0')
+    ir.vent_preparation()
+    ir.send_vent_jobs()
+    ir.update_record()

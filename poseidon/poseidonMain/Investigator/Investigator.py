@@ -21,7 +21,7 @@ Created on 17 May 2016
 @author: dgrossman, tlanham
 """
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
-from poseidonMain.Config.Config import config_interface
+from poseidon.poseidonMain.Config.Config import config_interface
 import logging
 import requests
 import urllib
@@ -50,20 +50,20 @@ class Investigator(Main_Action_Base):
 
     def update_rules(self):
         """
-        Updates rules dict from config 
+        Updates rules dict from config,
+        removes algorithms that are not
+        registered.
         """
         self.update_config()
         for key in self.mod_configuration:
             if 'policy' in key:
                 self.rules[key] = self.mod_configuration[key].split(' ')
 
-        # removes algorithms that have not been registered
         for policy in self.rules:
             for proposed_algo in self.rules[policy]:
                 if proposed_algo not in self.algos:
                     print >> sys.stderr, 'algorithm: %s has not been registered, deleting from policy', proposed_algo
                     del proposed_algo
-        # parse config
 
     def register_algorithm(self, name, algorithm):
         """
@@ -121,6 +121,42 @@ class Investigator(Main_Action_Base):
             # bad - should only be one record for each ip
             # log error for investigation
             print >> sys.stderr, 'duplicate record for machine: %s', ip_addr
+
+
+class Investigator_Response(Investigator):
+    """
+    Investigator_Response manages and tracks the
+    system response to an event (ie new machine
+    added to network, etc). Maintains a record of
+    jobs scheduled 
+    """
+    def __init__(self, address):
+        super(Investigator_Response, self).__init__()
+        self.address = address
+
+    def vent_preparation(self):
+        """
+        Prepares vent jobs based on algorithms
+        available to be used and investigator
+        rules.
+        """
+        pass
+
+    def send_vent_jobs(self):
+        """
+        Connects to vent and sends prepared
+        jobs for analysis, waits for results
+        and then continues with appropriate
+        response.
+        """
+        pass
+
+    def update_record(self):
+        """
+        Update database based on processing
+        results and update network posture.
+        """
+        pass
 
 
 investigator_interface = Investigator()
