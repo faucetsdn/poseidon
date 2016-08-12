@@ -241,9 +241,9 @@ class db_update_one_doc(poseidonStorage):
         ret = {}
         try:
             ret = self.client[database][collection].updateOne(filt, updated_doc)
-            ret['success'] = True
+            ret['success'] = str(True)
         except:
-            ret['success'] = False
+            ret['success'] = str(False)
         resp.body = json.dumps(ret)
 
 
