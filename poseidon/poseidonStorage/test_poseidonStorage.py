@@ -221,6 +221,11 @@ def test_db_add_many_docs(client):
 
 
 def test_db_update_one_doc(client):
+    """
+    tests updating nonexistent doc,
+    encodes filter and updated doc with
+    bson.
+    """
     filt = {'node_ip': '-1.-1.-1.-1'}
     update = {'node_ip': '-1.-1.-1.-1', 'new_field': 101}
 
@@ -230,4 +235,4 @@ def test_db_update_one_doc(client):
     resp = client.get(get_str)
     assert resp.status == falcon.HTTP_OK
     resp = ast.literal_eval(resp.body)
-    assert resp['success'] == str(True)
+    assert resp['success']
