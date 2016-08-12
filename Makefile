@@ -80,7 +80,7 @@ storage-interface: clean-storage-interface build-storage-interface storage
 			exit 1; \
 		fi; \
 	fi; \
-	docker run --name poseidon-storage-interface -dp 28000:27000 -e ALLOW_ORIGIN=$$docker_url:28000 poseidon-storage-interface; \
+	docker run --name poseidon-storage-interface -dp 28000:27000 -e ALLOW_ORIGIN=$$docker_url:28000 -e DOCKER_HOST=$$docker_host poseidon-storage-interface; \
 	echo "poseidon-storage-interface up"; \
 	echo
 

@@ -230,4 +230,4 @@ def test_db_update_one_doc(client):
     resp = client.get(get_str)
     assert resp.status == falcon.HTTP_OK
     resp = ast.literal_eval(resp.body)
-    assert resp['success']
+    assert resp['success'] == str(True)

@@ -50,9 +50,8 @@ class poseidonStorage:
         self.modName = 'poseidonStorage'
 
         database_container_ip = ''
-        database_container_ip = check_output(
-            "env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-",
-            shell=True).strip()
+        if 'DOCKER_HOST' in environ:
+            database_container_ip = environ['DOCKER_HOST']
         if not database_container_ip:
             # did not find env variable DOCKER_HOST
             try:
