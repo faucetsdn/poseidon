@@ -75,6 +75,8 @@ services:
     command: --smallfiles --rest --auth
     volumes_from:
       - storageWorkaround
+    depends_on:
+      - storageWorkaround
   storage-interface:
     image: poseidon-storage-interface
     container_name: poseidon-storage-interface
