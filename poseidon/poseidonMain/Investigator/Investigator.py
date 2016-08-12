@@ -128,7 +128,7 @@ class Investigator_Response(Investigator):
     Investigator_Response manages and tracks the
     system response to an event (ie new machine
     added to network, etc). Maintains a record of
-    jobs scheduled 
+    jobs scheduled
     """
     def __init__(self, address):
         super(Investigator_Response, self).__init__()
@@ -140,7 +140,10 @@ class Investigator_Response(Investigator):
         available to be used and investigator
         rules.
         """
-        pass
+        try:
+            resp = requests.get('contact vent to get instances running')
+        except:
+            print >> sys.stderr, 'Main: Investigator: vent_preparation, vent request failed'
 
     def send_vent_jobs(self):
         """
@@ -149,14 +152,21 @@ class Investigator_Response(Investigator):
         and then continues with appropriate
         response.
         """
-        pass
+        try:
+            resp = requests.get('vent_url')
+        except:
+            print >> sys.stderr, 'Main: Investigator: send_vent_jobs, vent request failed'
 
     def update_record(self):
         """
         Update database based on processing
         results and update network posture.
         """
-        pass
+        try:
+            url = 'http://poseidon-storage-interface/v1/'
+            resp = requests.get(url)
+        except:
+            pass
 
 
 investigator_interface = Investigator()

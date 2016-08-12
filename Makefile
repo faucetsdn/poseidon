@@ -44,7 +44,7 @@ storage: clean-storage build-storage
 			exit 1; \
 		fi; \
 	fi; \
-	docker run --name poseidon-storage -dp 27017:27017 mongo >/dev/null; \
+	docker run --name poseidon-storage -dp 27017:27017 -e DOCKER_HOST=$$docker_host mongo >/dev/null; \
 	port=$$(docker port poseidon-storage 27017/tcp | sed 's/^.*://'); \
 	echo "poseidon-storage can be accessed here: $$docker_url:$$port"; \
 	echo
@@ -149,6 +149,7 @@ build: depends
 	docker build -t poseidon-monitor  -f Dockerfile.monitor .
 	docker build -t poseidon-main  -f Dockerfile.main .
 	docker build -t mock-controller -f Dockerfile.mock .
+	docker build -t poseidon-storage-interface -f Dockerfile.storage-interface .
 
 build-periodically:
 	docker build -t periodically -f Dockerfile.periodically .
