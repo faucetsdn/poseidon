@@ -229,3 +229,5 @@ def test_db_update_one_doc(client):
     get_str = '/v1/storage/update_one_doc/poseidon_records/network_graph/' + filt + '/' + update
     resp = client.get(get_str)
     assert resp.status == falcon.HTTP_OK
+    resp = ast.literal_eval(resp.body)
+    assert resp['success']
