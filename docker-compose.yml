@@ -86,8 +86,7 @@ services:
     ports:
       - '28000:27000'
     environment:
-      - ALLOW_ORIGIN = http://$DOCKER_URL:28000
-      - DOCKER_HOST = $DOCKER_URL
+      - ALLOW_ORIGIN=http://$DOCKER_URL:28000
     links:
       - storage:poseidon-storage
   periodically:

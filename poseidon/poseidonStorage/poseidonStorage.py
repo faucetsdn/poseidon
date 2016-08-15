@@ -28,12 +28,14 @@ Created on 17 May 2016
 """
 from subprocess import check_output
 from pymongo import MongoClient
+from urlparse import urlparse
 from falcon_cors import CORS
 from os import environ
 import ConfigParser
 import json
 import falcon
 import bson
+import sys
 
 
 class poseidonStorage:
@@ -51,8 +53,11 @@ class poseidonStorage:
 
         database_container_ip = ''
         if 'DOCKER_HOST' in environ:
-            database_container_ip = environ['DOCKER_HOST']
-        if not database_container_ip:
+            if '/' in environ['DOCKER_HOST']:
+                database_container_ip = urlparse(environ['DOCKER_HOST']).hostname
+            else:
+                database_container_ip = environ['DOCKER_HOST']
+        else:
             # did not find env variable DOCKER_HOST
             try:
                 self.config = ConfigParser.ConfigParser()
@@ -62,6 +67,7 @@ class poseidonStorage:
             except:
                 raise ValueError(
                     'poseidonStorage: could not find database ip address.')
+        # self.client = MongoClient(database_container_ip)
         self.client = MongoClient(database_container_ip)
 
         # create db named 'poseidon_records' (NOTE: db will not actually be
@@ -249,9 +255,12 @@ class db_update_one_doc(poseidonStorage):
 # create callable WSGI app instance for gunicorn
 api = falcon.API(middleware=[cors.middleware])
 
+
 # add local routes for db api
 api.add_route('/v1/storage', db_database_names())
-api.add_route('/v1/storage/{database}', db_collection_names())
+api.add_route(
+    '/v1/storage/{database}',
+    db_collection_names())
 api.add_route(
     '/v1/storage/{database}/{collection}',
     db_collection_count())
