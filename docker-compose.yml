@@ -75,6 +75,8 @@ services:
     command: --smallfiles --rest --auth
     volumes_from:
       - storageWorkaround
+    depends_on:
+      - storageWorkaround
   storage-interface:
     image: poseidon-storage-interface
     container_name: poseidon-storage-interface
@@ -85,6 +87,7 @@ services:
       - '28000:27000'
     environment:
       - ALLOW_ORIGIN = http://$DOCKER_URL:28000
+      - DOCKER_HOST = $DOCKER_URL
     links:
       - storage:poseidon-storage
   periodically:

@@ -71,6 +71,11 @@ Config=True
 [PoseidonMain:Investigator]
 Config=True
 
+[Investigator:Investigator]
+Config = True
+policy_new_machine = algo1 algo2 algo3
+repo_url = https://github.com/Lab41/poseidon.git
+
 [PoseidonMain:Scheduler]
 Config=True
 

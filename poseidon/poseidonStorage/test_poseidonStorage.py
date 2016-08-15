@@ -27,6 +27,7 @@ from poseidonStorage import db_database_names
 from poseidonStorage import db_retrieve_doc
 from poseidonStorage import db_add_one_doc
 from poseidonStorage import db_add_many_docs
+from poseidonStorage import db_update_one_doc
 from poseidonStorage import main
 from poseidonStorage import poseidonStorage
 import falcon
@@ -53,6 +54,9 @@ application.add_route(
 application.add_route(
     '/v1/storage/add_many_docs/{database}/{collection}/{doc_list}',
     db_add_many_docs())
+application.add_route(
+    '/v1/storage/update_one_doc/{database}/{collection}/{filt}/{updated_doc}',
+    db_update_one_doc())
 
 
 def test_poseidonStorage():
@@ -214,3 +218,21 @@ def test_db_add_many_docs(client):
     get_str = '/v1/storage/add_many_docs/poseidon_records/network_graph/' + doc_str
     resp = client.get(get_str)
     assert resp.status == falcon.HTTP_OK
+
+
+def test_db_update_one_doc(client):
+    """
+    tests updating nonexistent doc,
+    encodes filter and updated doc with
+    bson.
+    """
+    filt = {'node_ip': '-1.-1.-1.-1'}
+    update = {'node_ip': '-1.-1.-1.-1', 'new_field': 101}
+
+    filt = bson.BSON.encode(filt)
+    update = bson.BSON.encode(update)
+    get_str = '/v1/storage/update_one_doc/poseidon_records/network_graph/' + filt + '/' + update
+    resp = client.get(get_str)
+    assert resp.status == falcon.HTTP_OK
+    resp = ast.literal_eval(resp.body)
+    assert resp['success']

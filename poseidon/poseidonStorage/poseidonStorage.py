@@ -50,9 +50,8 @@ class poseidonStorage:
         self.modName = 'poseidonStorage'
 
         database_container_ip = ''
-        database_container_ip = check_output(
-            "env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-",
-            shell=True).strip()
+        if 'DOCKER_HOST' in environ:
+            database_container_ip = environ['DOCKER_HOST']
         if not database_container_ip:
             # did not find env variable DOCKER_HOST
             try:
@@ -222,6 +221,31 @@ class db_add_many_docs(poseidonStorage):
         resp.body = json.dumps(ret)
 
 
+class db_update_one_doc(poseidonStorage):
+    """
+    rest layer subclass of poseidonStorage.
+    udpates single document in database given
+    a filter to find the document and an updated
+    document.
+    excepts on malformation but not on
+    non-update - if there was no existing document
+    found to update then 'updatedExisting' value of
+    response will be False; if exception thrown then
+    'success' value will be False.
+
+    WARNING: replaces entire document with the
+    updated_doc.
+    """
+    def on_get(self, req, resp, database, collection, filt, updated_doc):
+        ret = {}
+        try:
+            ret = self.client[database][collection].updateOne(filt, updated_doc)
+            ret['success'] = str(True)
+        except:
+            ret['success'] = str(False)
+        resp.body = json.dumps(ret)
+
+
 # create callable WSGI app instance for gunicorn
 api = falcon.API(middleware=[cors.middleware])
 
@@ -243,6 +267,9 @@ api.add_route(
 api.add_route(
     '/v1/storage/add_many_docs/{database}/{collection}/{doc_list}',
     db_add_many_docs())
+api.add_route(
+    '/v1/storage/update_one_doc/{database}/{collection}/{filt}/{updated_doc}',
+    db_update_one_doc())
 
 
 def main():
