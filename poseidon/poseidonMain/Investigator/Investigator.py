@@ -22,6 +22,7 @@ Created on 17 May 2016
 """
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
 from poseidon.poseidonMain.Config.Config import Config
+import logging.config
 import logging
 import requests
 import urllib

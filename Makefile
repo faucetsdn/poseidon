@@ -192,34 +192,34 @@ clean-all: clean depends
 	@docker rmi poseidon-storage-interface
 
 clean-mock-controller:
-	@docker ps -aqf "name=mock-controller" | xargs docker rm -f
+	@docker ps -aqf "name=mock-controller" | xargs docker rm -f ||
 
 clean-periodically: depends
-	@docker ps -afq "name=periodically" | xargs docker rm -f
+	@docker ps -afq "name=periodically" | xargs docker rm -f ||
 
 clean-storage: depends
-	@docker ps -aqf "name=poseidon-storage" | xargs docker rm -f
+	@docker ps -aqf "name=poseidon-storage" | xargs docker rm -f ||
 
 clean-monitor: depends
-	@docker ps -aqf "name=poseidon-monitor" | xargs docker rm -f
+	@docker ps -aqf "name=poseidon-monitor" | xargs docker rm -f ||
 
 clean-main: depends
-	@docker ps -aqf "name=poseidon-main" | xargs docker rm -f
+	@docker ps -aqf "name=poseidon-main" | xargs docker rm -f ||
 
 clean-docs: depends
-	@docker ps -aqf "name=poseidon-docs" | xargs docker rm -f
+	@docker ps -aqf "name=poseidon-docs" | xargs docker rm -f ||
 
 clean-api: depends
-	@docker ps -aqf "name=poseidon-api" | xargs docker rm -f
+	@docker ps -aqf "name=poseidon-api" | xargs docker rm -f ||
 
 clean-notebooks: depends
-	@docker ps -aqf "name=poseidon-notebooks" | xargs docker rm -f
+	@docker ps -aqf "name=poseidon-notebooks" | xargs docker rm -f ||
 
 clean-storage-interface: depends
-	@docker ps -aqf "name=poseidon-storage-interface" | xargs docker rm -f
+	@docker ps -aqf "name=poseidon-storage-interface" | xargs docker rm -f ||
 
 clean-rabbit:
-	@docker ps -aqf "name=poseidon-rabbit" | xargs docker rm -f
+	@docker ps -aqf "name=poseidon-rabbit" | xargs docker rm -f ||
 
 clean: clean-docs clean-notebooks depends
 	#@docker ps -aqf "name=poseidon" | xargs docker rm -f
@@ -227,7 +227,7 @@ clean: clean-docs clean-notebooks depends
 
 nuke-containers:
 	# WARNING: this deletes all containers, not just poseidon ones
-	@docker rm -f $$(docker ps -a -q)
+	@docker rm -f $$(docker ps -a -q) ||
 
 depends:
 	@echo
