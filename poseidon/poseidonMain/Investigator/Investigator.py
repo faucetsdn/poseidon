@@ -21,7 +21,7 @@ Created on 17 May 2016
 @author: dgrossman, tlanham
 """
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
-from poseidon.poseidonMain.Config.Config import config_interface
+from poseidon.poseidonMain.Config.Config import Config
 import logging
 import requests
 import urllib
@@ -35,6 +35,8 @@ class Investigator(Main_Action_Base):
     def __init__(self):
         super(Investigator, self).__init__()
         self.mod_name = self.__class__.__name__
+        self.config = Config()
+        self.config_dict = {}
         self.update_config()
 
         self.algos = {}
@@ -44,7 +46,7 @@ class Investigator(Main_Action_Base):
         self.vent_machines = {}
         self.config_vent_machines()
         self.vent_startup()
-        self.vent_addr = 'http://' + self.investigator_dict['vent_addr']
+        self.vent_addr = 'http://' + self.config_dict['vent_addr']
 
     def config_vent_machines(self):
         """
@@ -52,10 +54,10 @@ class Investigator(Main_Action_Base):
         vent endpoints to be added to vcontrol for
         investigator processing.
         """
-        for key in self.investigator_dict:
+        for key in self.config_dict:
             if 'vent_machine' in key:
                 machine_info = {}
-                fields = self.investigator_dict[key].split(' ')
+                fields = self.config_dict[key].split(' ')
                 for field in fields:
                     param = field.split('=')[0]
                     value = field.split('=')[1]
@@ -98,7 +100,7 @@ class Investigator(Main_Action_Base):
         Updates configuration based on config file
         (for changing rules).
         """
-        self.investigator_dict = dict(config_interface.get_section(self.__class__.__name__))
+        self.config_dict = dict(self.config.get_section('Investigator'))
 
     def update_rules(self):
         """
@@ -107,9 +109,9 @@ class Investigator(Main_Action_Base):
         registered.
         """
         self.update_config()
-        for key in self.investigator_dict:
+        for key in self.config_dict:
             if 'policy' in key:
-                self.rules[key] = self.investigator_dict[key].split(' ')
+                self.rules[key] = self.config_dict[key].split(' ')
 
         for policy in self.rules:
             for proposed_algo in self.rules[policy]:

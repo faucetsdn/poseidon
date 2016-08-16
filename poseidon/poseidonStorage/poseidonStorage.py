@@ -67,8 +67,7 @@ class poseidonStorage:
             except:
                 raise ValueError(
                     'poseidonStorage: could not find database ip address.')
-        # self.client = MongoClient(database_container_ip)
-        self.client = MongoClient(database_container_ip)
+        self.client = MongoClient(host=database_container_ip, port=27017)
 
         # create db named 'poseidon_records' (NOTE: db will not actually be
         # created until first doc write).

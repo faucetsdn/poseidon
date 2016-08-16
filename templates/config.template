@@ -9,7 +9,7 @@ rabbit_host = localhost
 rabbit_host = localhost
 
 [database]
-ip = localhost
+ip = <docker_hostname>
 user = user
 password = SECRET
 

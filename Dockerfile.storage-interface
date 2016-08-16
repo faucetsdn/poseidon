@@ -1,8 +1,6 @@
 FROM alpine:3.3
 MAINTAINER dgrossman <dgrossman@iqt.org>
 
-ENV DOCKER_HOST (env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-)
-
 RUN apk add --update \
     git \
     make \
