@@ -65,7 +65,9 @@ class Investigator(Main_Action_Base):
         for policy in self.rules:
             for proposed_algo in self.rules[policy]:
                 if proposed_algo not in self.algos:
-                    print >> sys.stderr, 'algorithm: %s has not been registered, deleting from policy', proposed_algo
+                    logLine = 'algorithm: %s has not been registered, deleting from policy\n' % (
+                        proposed_algo)
+                    self.logger.error(logLine)
                     del proposed_algo
 
     def register_algorithm(self, name, algorithm):
@@ -110,7 +112,8 @@ class Investigator(Main_Action_Base):
         except:
             # error connecting to storage interface
             # log error
-            print >> sys.stderr, 'Main (Investigator): could not connect to storage interface'
+            logLine = 'Main (Investigator): could not connect to storage interface'
+            self.logger.error(logLine)
             return
 
         resp = ast.literal_eval(resp.body)
@@ -123,7 +126,8 @@ class Investigator(Main_Action_Base):
         else:
             # bad - should only be one record for each ip
             # log error for investigation
-            print >> sys.stderr, 'duplicate record for machine: %s', ip_addr
+            logLine = 'duplicate record for machine: %s' % (ip_addr)
+            self.logger.error(logLine)
 
     def get_handlers(self, t):
         handle_list = []
@@ -157,7 +161,8 @@ class Investigator_Response(Investigator):
         try:
             resp = requests.get('contact vent to get instances running')
         except:
-            print >> sys.stderr, 'Main: Investigator: vent_preparation, vent request failed'
+            logLine = 'Main: Investigator: vent_preparation, vent request failed'
+            self.logger.error(logLine)
 
     def send_vent_jobs(self):
         """
@@ -169,7 +174,8 @@ class Investigator_Response(Investigator):
         try:
             resp = requests.get('vent_url')
         except:
-            print >> sys.stderr, 'Main: Investigator: send_vent_jobs, vent request failed'
+            logLine = 'Main: Investigator: send_vent_jobs, vent request failed'
+            self.logger.error(logLine)
 
     def update_record(self):
         """

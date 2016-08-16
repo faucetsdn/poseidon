@@ -31,23 +31,25 @@ wait = True
 while wait:
     try:
         params = pika.ConnectionParameters(host=DOCKER_IP)
-        print params
+        logLine = 'params = %s' % (params)
+        self.logger.debug(logLine)
         connection = pika.BlockingConnection(params)
         channel = connection.channel()
         channel.exchange_declare(exchange='topic_poseidon_internal', type='topic')
         queue_name = 'process_heuristic_stats'
         result = channel.queue_declare(queue=queue_name, exclusive=True)
         wait = False
-        print 'connected to rabbitmq...'
+        self.logger.debug('connected to rabbitmq...')
     except:
-        print 'waiting for connection to rabbitmq...'
+        self.logger.debug('waiting for connection to rabbitmq...')
         time.sleep(2)
         wait = True
 
 
 binding_keys = sys.argv[1:]
 if not binding_keys:
-    print >> sys.stderr, "Usage: %s [binding_key]..." % (sys.argv[0],)
+    logLine = "Usage: %s [binding_key]..." % (sys.argv[0],)
+    self.logger.error(logLine)
     sys.exit(1)
 
 for binding_key in binding_keys:
@@ -56,7 +58,7 @@ for binding_key in binding_keys:
                        routing_key=binding_key)
 
 
-print ' [*] Waiting for logs. To exit press CTRL+C'
+self.logger.debug(' [*] Waiting for logs. To exit press CTRL+C')
 
 # NOTE: add basic consume to channel
 '''
@@ -75,8 +77,6 @@ class Scheduler(Main_Action_Base):
     def safe(self, func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            print '  args', args
-            print 'kwargs', kwargs
             try:
                 func(*args, **kwargs)
             except:  # pragma: no cover
@@ -91,8 +91,6 @@ class Scheduler(Main_Action_Base):
     def do_once(self, func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            print '  args', args
-            print 'kwargs', kwargs
             try:
                 func(*args, **kwargs)
             except:  # pragma: no cover
@@ -161,21 +159,23 @@ class Scheduler(Main_Action_Base):
     def del_job(self, jobId):
         for job in self.schedule.jobs:
             for k, v in job.__dict__.iteritems():
-                print k, v
                 if k == 'job_func':
                     if len(v.args) >= 1:
                         if jobId == v.args[0]:
-                            print 'killing:', job
+                            logLine = 'killing: %s' % (job)
+                            self.logger.debug(logLine)
                             self.schedule.cancel_job(job)
                         else:  # pragma: no cover
-                            print '*' * 10
+                            logLine = '*' * 10
+                            self.logger.debug(logLine)
                             jid = v.keywords.get('jobId', None)
                             if jid == jobId:
-                                print 'killing:', job
+                                logLine = 'killing: %s' % (job)
+                                self.logger.debug(logLine)
                                 self.schedule.cancel_job(job)
-                                print v.args
-                                print v.keywords
-                                print '-' * 40
+                                logLine = 'vargs = %s\nkeyworks = %s\n%s\n' % (
+                                    v.args, v.keywords, '-' * 40)
+                                self.logger.debug(logLine)
 
     def get_jobId(self, job):
         jobfunc = job.__dict__['job_func']

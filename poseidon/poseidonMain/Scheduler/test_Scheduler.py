@@ -19,12 +19,18 @@ Test module for Onos.py
 Created on 28 June 2016
 @author: dgrossman
 """
+import logging
+import logging.config
+
+import pytest
 from Scheduler import Scheduler
 from Scheduler import scheduler_interface
+
 from poseidon.baseClasses.enums_tuples import CRONSPEC
 from poseidon.baseClasses.enums_tuples import EVERY
-import logging
-import pytest
+
+
+logger = logging.getLogger(__name__)
 
 
 def test_instantiation():
@@ -41,6 +47,7 @@ def test_add():
     jobId2 = 'JOBID2'
 
     s = scheduler_interface
+    s.logger = logger
     s.logger = logging.getLogger('testing')
     s.logger.setLevel(logging.DEBUG)
 

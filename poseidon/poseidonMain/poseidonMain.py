@@ -17,6 +17,7 @@
 poseidonMain
 
 Created on 29 May 2016
+
 @author: dgrossman, lanhamt
 """
 import json
@@ -33,8 +34,13 @@ from Config.Config import config_interface
 
 class PoseidonMain(object):
 
-    def __init__(self):
-        self.logger = logging.getLogger(__name__)
+    def __init__(self, startingLogger=None):
+        if startingLogger is None:
+            self.logger = logging.getLogger(__name__)
+            self.logger.debug('logger started')
+        else:
+            self.logger = startingLogger
+            self.logger.debug('logger passed')
         logging.basicConfig(level=logging.DEBUG)
         self.shutdown = False
 
@@ -82,8 +88,7 @@ class PoseidonMain(object):
         else:
             logging.basicConfig(level=logging.DEBUG)
 
-    def handle(self, tv):
-        t, v = tv
+    def handle(self, t, v):
         if t == 'Main':
             if v == 'shutdown':
                 self.shutdown = True
@@ -105,6 +110,8 @@ class PoseidonMain(object):
             # type , value
             t, v = self.get_queue_item()
 
+            self.handle(t, v)
+
             handle_list = self.Scheduler.get_handlers(t)
             if handle_list is not None:
                 for handle in handle_list:
@@ -119,14 +126,13 @@ class PoseidonMain(object):
 
             logLine = 'time to run eventloop is %0.3f ms' % (elapsed * 1000)
             self.logger.debug(logLine)
-            print logLine
 
 
-def main():
-    pmain = PoseidonMain()
+def main(startingLogger=None):
+    pmain = PoseidonMain(startingLogger)
     pmain.init_rabbit()
     pmain.processQ()
     return True
 
 if __name__ == '__main__':  # pragma: no cover
-    main()
+    main(None)

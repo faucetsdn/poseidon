@@ -19,9 +19,13 @@ Test module for Investigator.py
 Created on 28 June 2016
 @author: dgrossman, tlanham
 """
+import logging
+
 import pytest
 from Investigator import Investigator
 from Investigator import Investigator_Response
+
+log = logging.getLogger(__name__)
 
 
 def test_Investigator():
@@ -30,21 +34,25 @@ def test_Investigator():
 
 def test_update_config():
     investigator = Investigator()
+    investigator.logger = log
     investigator.update_config()
 
 
 def test_update_rules():
     investigator = Investigator()
+    investigator.logger = log
     investigator.update_rules()
 
 
 def test_register_algo():
     investigator = Investigator()
+    investigator.logger = log
     investigator.register_algorithm('cubed', lambda x: x**3)
 
 
 def test_delete_algo():
     investigator = Investigator()
+    investigator.logger = log
     investigator.register_algorithm('cubed', lambda x: x**3)
     investigator.register_algorithm('squared', lambda x: x**2)
     assert 2 == investigator.count_algorithms()
@@ -57,6 +65,7 @@ def test_delete_algo():
 
 def test_count_algos():
     investigator = Investigator()
+    investigator.logger = log
     investigator.register_algorithm('cubed', lambda x: x**3)
     investigator.register_algorithm('cubed', lambda x: x**3)
     assert 1 == investigator.count_algorithms()
@@ -64,12 +73,14 @@ def test_count_algos():
 
 def test_get_algos():
     investigator = Investigator()
+    investigator.logger = log
     investigator.register_algorithm('cubed', lambda x: x**3)
     assert 'cubed' in investigator.get_algorithms()
 
 
 def test_clear():
     investigator = Investigator()
+    investigator.logger = log
     investigator.register_algorithm('cubed', lambda x: x**3)
     investigator.register_algorithm('squared', lambda x: x**2)
     investigator.clear()
@@ -78,6 +89,7 @@ def test_clear():
 
 def test_process_new_machine():
     investigator = Investigator()
+    investigator.logger = log
     ip = '0.0.0.0'
     investigator.process_new_machine(ip)
 

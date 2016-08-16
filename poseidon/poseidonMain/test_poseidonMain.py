@@ -19,11 +19,14 @@ Test module for poseidonMain.py
 Created on 29 May 2016
 @author: dgrossman, tlanham
 """
+import logging
 from os import environ
 
 import pytest
 from poseidonMain import main
 from poseidonMain import PoseidonMain
+
+log = logging.getLogger(__name__)
 
 
 def test_poseidonMain_goTime():
@@ -31,9 +34,9 @@ def test_poseidonMain_goTime():
     Tests goTime
     """
 
-    a = PoseidonMain()
+    a = PoseidonMain(log)
 
 
 def test_poseidonMain_main():
-    a = main()
+    a = main(log)
     assert a

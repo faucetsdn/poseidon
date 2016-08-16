@@ -46,8 +46,10 @@ class Main_Action_Base(Rock_Bottom):  # pragma: no cover
         self.owner = owner
         if owner.logger is not None:
             self.logger = owner.logger
+            self.logger.debug('found owner logger')
         else:
             self.logger = logging.getLogger(__name__)
+            self.logger.debug('new logger')
 
         if self.owner.mod_name is not None:
             self.config_section_name = self.owner.mod_name + ':' + self.mod_name
