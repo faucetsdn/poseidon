@@ -28,12 +28,14 @@ Created on 17 May 2016
 """
 from subprocess import check_output
 from pymongo import MongoClient
+from urlparse import urlparse
 from falcon_cors import CORS
 from os import environ
 import ConfigParser
 import json
 import falcon
 import bson
+import sys
 
 
 class poseidonStorage:
@@ -42,7 +44,7 @@ class poseidonStorage:
     brokers requests to database.
 
     NOTE: currently attempts to retrieve database ip from
-    env variable named DOCKER_HOST, if absent tries to get
+    env variable named DOCKER_IP, if absent tries to get
     from config file, else raises connection error.
     """
 
@@ -50,10 +52,13 @@ class poseidonStorage:
         self.modName = 'poseidonStorage'
 
         database_container_ip = ''
-        if 'DOCKER_HOST' in environ:
-            database_container_ip = environ['DOCKER_HOST']
-        if not database_container_ip:
-            # did not find env variable DOCKER_HOST
+        if 'DOCKER_IP' in environ:
+            if '/' in environ['DOCKER_IP']:
+                database_container_ip = urlparse(environ['DOCKER_IP']).hostname
+            else:
+                database_container_ip = environ['DOCKER_IP']
+        else:
+            # did not find env variable DOCKER_IP
             try:
                 self.config = ConfigParser.ConfigParser()
                 self.config.readfp(
@@ -62,7 +67,7 @@ class poseidonStorage:
             except:
                 raise ValueError(
                     'poseidonStorage: could not find database ip address.')
-        self.client = MongoClient(database_container_ip)
+        self.client = MongoClient(host=database_container_ip, port=27017)
 
         # create db named 'poseidon_records' (NOTE: db will not actually be
         # created until first doc write).
@@ -249,9 +254,12 @@ class db_update_one_doc(poseidonStorage):
 # create callable WSGI app instance for gunicorn
 api = falcon.API(middleware=[cors.middleware])
 
+
 # add local routes for db api
 api.add_route('/v1/storage', db_database_names())
-api.add_route('/v1/storage/{database}', db_collection_names())
+api.add_route(
+    '/v1/storage/{database}',
+    db_collection_names())
 api.add_route(
     '/v1/storage/{database}/{collection}',
     db_collection_count())

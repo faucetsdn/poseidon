@@ -42,6 +42,8 @@ RUN py.test -v \
 --ignore=poseidon/poseidonMain \
 --ignore=poseidon/poseidonMonitor \
 --ignore=poseidon/periodically \
+--ignore=poseidon/mockController \
+--ignore=collectors \
 # comment out below for circle testing coverage 
 #--ignore=poseidon/poseidonStorage \  
 --ignore=plugins/features \
