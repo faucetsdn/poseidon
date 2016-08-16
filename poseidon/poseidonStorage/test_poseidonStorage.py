@@ -20,16 +20,16 @@ NOTE: responses are returned as json
 Created on 28 June 2016
 @author: dgrossman, lanhamt
 """
-from poseidonStorage import db_collection_count
-from poseidonStorage import db_collection_names
-from poseidonStorage import db_collection_query
+from poseidonStorage import poseidonStorage
 from poseidonStorage import db_database_names
+from poseidonStorage import db_collection_names
+from poseidonStorage import db_collection_count
 from poseidonStorage import db_retrieve_doc
+from poseidonStorage import db_collection_query
 from poseidonStorage import db_add_one_doc
 from poseidonStorage import db_add_many_docs
 from poseidonStorage import db_update_one_doc
 from poseidonStorage import main
-from poseidonStorage import poseidonStorage
 import falcon
 import pytest
 import bson
@@ -37,8 +37,12 @@ import ast
 
 
 application = falcon.API()
-application.add_route('/v1/storage', db_database_names())
-application.add_route('/v1/storage/{database}', db_collection_names())
+application.add_route(
+    '/v1/storage',
+    db_database_names())
+application.add_route(
+    '/v1/storage/{database}',
+    db_collection_names())
 application.add_route(
     '/v1/storage/{database}/{collection}',
     db_collection_count())
