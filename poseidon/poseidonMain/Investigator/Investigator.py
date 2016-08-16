@@ -20,14 +20,16 @@ network flows.
 Created on 17 May 2016
 @author: dgrossman, tlanham
 """
+import ast
+import logging
+import sys
+import urllib
+
+import bson
+import requests
+
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
 from poseidon.poseidonMain.Config.Config import config_interface
-import logging
-import requests
-import urllib
-import bson
-import ast
-import sys
 
 
 class Investigator(Main_Action_Base):
@@ -36,6 +38,7 @@ class Investigator(Main_Action_Base):
         super(Investigator, self).__init__()
         self.mod_name = self.__class__.__name__
         self.Config = config_interface
+        self.handles = dict()
         self.set_owner(self)
         self.algos = {}
         self.rules = {}
@@ -122,6 +125,16 @@ class Investigator(Main_Action_Base):
             # log error for investigation
             print >> sys.stderr, 'duplicate record for machine: %s', ip_addr
 
+    def get_handlers(self, t):
+        handle_list = []
+        if t in self.handles:
+            handle_list.append(self.handles[t])
+
+        for helper in self.actions.itervalues():
+            if t in helper.handles:
+                handle_list.append(helper.handles[t])
+        return handle_list
+
 
 class Investigator_Response(Investigator):
     """
@@ -130,6 +143,7 @@ class Investigator_Response(Investigator):
     added to network, etc). Maintains a record of
     jobs scheduled
     """
+
     def __init__(self, address):
         super(Investigator_Response, self).__init__()
         self.address = address

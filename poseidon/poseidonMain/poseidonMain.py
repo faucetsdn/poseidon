@@ -105,18 +105,21 @@ class PoseidonMain(object):
             # type , value
             t, v = self.get_queue_item()
 
-            # handle_list = self.Scheduler.get(t, None)
-            # if handle_list is not None:
-            #     for handle in handle_list:
-            #         handle(v)
-            # handle_list = self.Investigator.get(t, None)
-            # if handle_list is not None:
-            #     for handle in handle_list:
-            #         handle(v)
+            handle_list = self.Scheduler.get_handlers(t)
+            if handle_list is not None:
+                for handle in handle_list:
+                    handle(v)
+            handle_list = self.Investigator.get_handlers(t)
+            if handle_list is not None:
+                for handle in handle_list:
+                    handle(v)
 
             elapsed = time.clock()
             elapsed = elapsed - start
-            print 'time to run eventloop is %0.3f ms' % (elapsed * 1000)
+
+            logLine = 'time to run eventloop is %0.3f ms' % (elapsed * 1000)
+            self.logger.debug(logLine)
+            print logLine
 
 
 def main():

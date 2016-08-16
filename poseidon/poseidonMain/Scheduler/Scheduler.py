@@ -69,9 +69,8 @@ class Scheduler(Main_Action_Base):
         self.mod_name = self.__class__.__name__
         self.schedule = schedule
         self.schedule.clear()
+        self.handles = dict()
         self.currentJobs = dict()
-
-        pass
 
     def safe(self, func):
         @functools.wraps(func)
@@ -194,5 +193,15 @@ class Scheduler(Main_Action_Base):
 
     def shutdown(self):
         self.schedule.clear()
+
+    def get_handlers(self, t):
+        handle_list = []
+        if t in self.handles:
+            handle_list.append(self.handles[t])
+
+        for helper in self.actions.itervalues():
+            if t in helper.handles:
+                handle_list.append(helper.handles[t])
+        return handle_list
 
 scheduler_interface = Scheduler()
