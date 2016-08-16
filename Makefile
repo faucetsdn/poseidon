@@ -10,14 +10,14 @@ killcrap:
 	find . -name __pycache__ -type d -exec rm -rf {} \;
 
 api: clean-api build-api
-	@ if [ ! -z "${DOCKER_HOST}" ]; then \
-		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
-		docker_url=http://$$docker_host; \
+	@ if [ ! -z "${DOCKER_IP}" ]; then \
+		DOCKER_IP=$$(env | grep DOCKER_IP | cut -d':' -f2 | cut -c 3-); \
+		docker_url=http://$$DOCKER_IP; \
 	else \
 		if [ ! -z "${DOCKERFORMAC}" ]; then \
 			docker_url=http://127.0.0.1; \
 		else \
-			echo "No DOCKER_HOST environment variable set."; \
+			echo "No DOCKER_IP environment variable set."; \
 			exit 1; \
 		fi; \
 	fi; \
@@ -33,31 +33,31 @@ main: clean-main build-main
 	docker run --name poseidon-main -it poseidon-main
 
 storage: clean-storage build-storage
-	@ if [ ! -z "${DOCKER_HOST}" ]; then \
-		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
-		docker_url=$$docker_host; \
+	@ if [ ! -z "${DOCKER_IP}" ]; then \
+		DOCKER_IP=$$(env | grep DOCKER_IP | cut -d':' -f2 | cut -c 3-); \
+		docker_url=$$DOCKER_IP; \
 	else \
 		if [ ! -z "${DOCKERFORMAC}" ]; then \
 			docker_url=localhost; \
 		else \
-			echo "No DOCKER_HOST environment variable set."; \
+			echo "No DOCKER_IP environment variable set."; \
 			exit 1; \
 		fi; \
 	fi; \
-	docker run --name poseidon-storage -dp 27017:27017 -e DOCKER_HOST=$$docker_host mongo >/dev/null; \
+	docker run --name poseidon-storage -dp 27017:27017 -e DOCKER_IP=$$DOCKER_IP mongo >/dev/null; \
 	port=$$(docker port poseidon-storage 27017/tcp | sed 's/^.*://'); \
 	echo "poseidon-storage can be accessed here: $$docker_url:$$port"; \
 	echo
 
 monitor: storage api clean-monitor build-monitor
-	@ if [ ! -z "${DOCKER_HOST}" ]; then \
-		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
-		docker_url=http://$$docker_host; \
+	@ if [ ! -z "${DOCKER_IP}" ]; then \
+		DOCKER_IP=$$(env | grep DOCKER_IP | cut -d':' -f2 | cut -c 3-); \
+		docker_url=http://$$DOCKER_IP; \
 	else \
 		if [ ! -z "${DOCKERFORMAC}" ]; then \
 		docker_url=http://localhost; \
 		else \
-			echo "No DOCKER_HOST environment variable set."; \
+			echo "No DOCKER_IP environment variable set."; \
 			exit 1; \
 		fi; \
 	fi; \
@@ -69,30 +69,30 @@ monitor: storage api clean-monitor build-monitor
 	echo
 
 storage-interface: clean-storage-interface build-storage-interface storage
-	@ if [ ! -z "${DOCKER_HOST}" ]; then \
-		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
-		docker_url=http://$$docker_host; \
+	@ if [ ! -z "${DOCKER_IP}" ]; then \
+		DOCKER_IP=$$(env | grep DOCKER_IP | cut -d':' -f2 | cut -c 3-); \
+		docker_url=http://$$DOCKER_IP; \
 	else \
 		if [ ! -z "${DOCKERFORMAC}" ]; then \
 		docker_url=http://localhost; \
 		else \
-			echo "No DOCKER_HOST environment variable set."; \
+			echo "No DOCKER_IP environment variable set."; \
 			exit 1; \
 		fi; \
 	fi; \
-	docker run --name poseidon-storage-interface -dp 28000:27000 -e ALLOW_ORIGIN=$$docker_url:28000 -e DOCKER_HOST=$$docker_host poseidon-storage-interface; \
+	docker run --name poseidon-storage-interface -dp 28000:27000 -e ALLOW_ORIGIN=$$docker_url:28000 -e DOCKER_IP=$$DOCKER_IP poseidon-storage-interface; \
 	echo "poseidon-storage-interface up"; \
 	echo
 
 notebooks: clean-notebooks build-notebooks
-	@ if [ ! -z "${DOCKER_HOST}" ]; then \
-		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
-		docker_url=http://$$docker_host; \
+	@ if [ ! -z "${DOCKER_IP}" ]; then \
+		DOCKER_IP=$$(env | grep DOCKER_IP | cut -d':' -f2 | cut -c 3-); \
+		docker_url=http://$$DOCKER_IP; \
 	else \
 		if [ ! -z "${DOCKERFORMAC}" ]; then \
 			docker_url=http://localhost; \
 		else \
-			echo "No DOCKER_HOST environment variable set."; \
+			echo "No DOCKER_IP environment variable set."; \
 			exit 1; \
 		fi; \
 	fi; \
@@ -102,14 +102,14 @@ notebooks: clean-notebooks build-notebooks
 	echo "The notebooks can be accessed here: $$notebook_url"
 
 docs: clean-docs build
-	@ if [ ! -z "${DOCKER_HOST}" ]; then \
-		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
-		docker_url=http://$$docker_host; \
+	@ if [ ! -z "${DOCKER_IP}" ]; then \
+		DOCKER_IP=$$(env | grep DOCKER_IP | cut -d':' -f2 | cut -c 3-); \
+		docker_url=http://$$DOCKER_IP; \
 	else \
 		if [ ! -z "${DOCKERFORMAC}" ]; then \
 			docker_url=http://localhost; \
 		else \
-			echo "No DOCKER_HOST environment variable set."; \
+			echo "No DOCKER_IP environment variable set."; \
 			exit 1; \
 		fi; \
 	fi; \
@@ -119,15 +119,20 @@ docs: clean-docs build
 	echo; \
 	echo "The docs can be accessed here: $$doc_url"
 
-compose: #build
-	@ if [ ! -z "${DOCKER_HOST}" ]; then \
-		docker_host=$$(env | grep DOCKER_HOST | cut -d':' -f2 | cut -c 3-); \
-		docker_url=$$docker_host; \
+compose-install:
+	curl -L https://github.com/docker/compose/releases/download/1.8.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose; \
+	chmod +x /usr/local/bin/docker-compose; \
+
+
+compose:
+	@ if [ ! -z "${DOCKER_IP}" ]; then \
+		DOCKER_IP=$$(env | grep DOCKER_IP | cut -d':' -f2 | cut -c 3-); \
+		docker_url=$$DOCKER_IP; \
 	else \
 		if [ ! -z "${DOCKERFORMAC}" ]; then \
 			docker_url=localhost; \
 		else \
-			echo "No DOCKER_HOST environment variable set."; \
+			echo "No DOCKER_IP environment variable set."; \
 			exit 1; \
 		fi; \
 	fi; \

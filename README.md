@@ -25,7 +25,7 @@ make
 
 - Docker
 - make
-- Environment variable `DOCKER_HOST` set with the address of the docker host. This can be found using `docker-machine ip` and set with `export DOCKER_HOST=host_address` where host_address is either the full address of the host (i.e. `tcp://0.0.0.0:PORT` or similar).
+- Environment variable `DOCKER_IP` set with the address of the docker host. This can be found using `docker-machine ip` if using boot2docker or `ifconfig` and set with `export DOCKER_IP=<host_address>` where host_address is the full address of the host (i.e. `tcp://0.0.0.0` or similar).
 
 # Usage Examples
 

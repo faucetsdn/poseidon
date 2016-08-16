@@ -184,9 +184,9 @@ class Investigator_Response(Investigator):
     added to network, etc). Maintains a record of
     jobs scheduled
     """
-    def __init__(self, address):
+    def __init__(self):
         super(Investigator_Response, self).__init__()
-        self.address = address
+        self.jobs = {}
 
     def vent_preparation(self):
         """
@@ -194,11 +194,12 @@ class Investigator_Response(Investigator):
         available to be used and investigator
         rules.
         """
-        try:
-            url = 'http://' + self.vent_addr + '/commands/deploy/' + vent_machine
-            resp = requests.post(url)
-        except:
-            print >> sys.stderr, 'Main: Investigator: vent_preparation, vent request failed'
+        for machine in self.vent_machines:
+            try:
+                url = 'http://' + self.vent_addr + '/commands/deploy/' + machine
+                resp = requests.post(url)
+            except:
+                print >> sys.stderr, 'Main: Investigator: vent_preparation, vent request failed'
 
     def send_vent_jobs(self):
         """

@@ -44,7 +44,7 @@ class poseidonStorage:
     brokers requests to database.
 
     NOTE: currently attempts to retrieve database ip from
-    env variable named DOCKER_HOST, if absent tries to get
+    env variable named DOCKER_IP, if absent tries to get
     from config file, else raises connection error.
     """
 
@@ -52,13 +52,13 @@ class poseidonStorage:
         self.modName = 'poseidonStorage'
 
         database_container_ip = ''
-        if 'DOCKER_HOST' in environ:
-            if '/' in environ['DOCKER_HOST']:
-                database_container_ip = urlparse(environ['DOCKER_HOST']).hostname
+        if 'DOCKER_IP' in environ:
+            if '/' in environ['DOCKER_IP']:
+                database_container_ip = urlparse(environ['DOCKER_IP']).hostname
             else:
-                database_container_ip = environ['DOCKER_HOST']
+                database_container_ip = environ['DOCKER_IP']
         else:
-            # did not find env variable DOCKER_HOST
+            # did not find env variable DOCKER_IP
             try:
                 self.config = ConfigParser.ConfigParser()
                 self.config.readfp(

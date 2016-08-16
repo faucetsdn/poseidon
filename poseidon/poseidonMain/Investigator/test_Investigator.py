@@ -92,7 +92,7 @@ def test_process_new_machine():
 
 
 def test_Investigator_Response():
-    ir = Investigator_Response('0.0.0.0')
+    ir = Investigator_Response()
     ir.vent_preparation()
     ir.send_vent_jobs()
     ir.update_record()
