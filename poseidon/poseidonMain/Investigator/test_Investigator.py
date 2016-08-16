@@ -28,6 +28,15 @@ def test_Investigator():
     Investigator()
 
 
+def test_config_vent_machines():
+    investigator = Investigator()
+    investigator.mod_configuration['vent_machine_test'] = 'name=triton provider=amphitrite cpus=500'
+    assert 'triton' not in investigator.vent_machines
+    investigator.config_vent_machines()
+    assert 'triton' in investigator.vent_machines
+    investigator.vent_startup()
+
+
 def test_update_config():
     investigator = Investigator()
     investigator.update_config()

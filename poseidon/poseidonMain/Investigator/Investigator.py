@@ -35,18 +35,70 @@ class Investigator(Main_Action_Base):
     def __init__(self):
         super(Investigator, self).__init__()
         self.mod_name = self.__class__.__name__
-        self.Config = config_interface
-        self.set_owner(self)
+        self.update_config()
+
         self.algos = {}
         self.rules = {}
         self.update_rules()
+
+        self.vent_machines = {}
+        self.config_vent_machines()
+        self.vent_startup()
+        self.vent_addr = 'http://' + self.investigator_dict['vent_addr']
+
+    def config_vent_machines(self):
+        """
+        Checks config items in Investigator config for
+        vent endpoints to be added to vcontrol for
+        investigator processing.
+        """
+        for key in self.investigator_dict:
+            if 'vent_machine' in key:
+                machine_info = {}
+                fields = self.investigator_dict[key].split(' ')
+                for field in fields:
+                    param = field.split('=')[0]
+                    value = field.split('=')[1]
+                    if param == 'memory' or param == 'cpus' or param == 'disk_sz':
+                        value = int(value)
+                    machine_info[param] = value
+                self.vent_machines[machine_info['name']] = machine_info
+
+    def vent_startup(self):
+        """
+        For each vent endpoint machine descriped in the Investigator
+        config section, registers the machine with vcontrol.
+        """
+        for machine, config in self.vent_machines.iteritems():
+            body = self.format_vent_create(machine, config['provider'], config)
+            try:
+                resp = requests.post(self.vent_addr + '/machines/create', data=body)
+            except:
+                print >> sys.stderr, 'Main: Investigator: error on vent create request.'
+
+    def format_vent_create(self, name, provider, body={}, group='poseidon-vent', labels='default', memory=4096, cpus=4, disk_sz=20000):
+        """
+        Formats body dict for vcontrol machine create.
+        Returns dict for vcontrol create request.
+
+        NOTE: name and provider are required parameters,
+        the rest can be covered by defaults.
+        """
+        body['name'] = name
+        body['provider'] = provider
+        if 'group' not in body: body['group'] = group
+        if 'labels' not in body: body['labels'] = labels
+        if 'memory' not in body: body['memory'] = memory
+        if 'cpus' not in body: body['cpus'] = cpus
+        if 'disk_sz' not in body: body['disk_sz'] = disk_sz
+        return body
 
     def update_config(self):
         """
         Updates configuration based on config file
         (for changing rules).
         """
-        self.configure()
+        self.investigator_dict = dict(config_interface.get_section(self.__class__.__name__))
 
     def update_rules(self):
         """
@@ -55,9 +107,9 @@ class Investigator(Main_Action_Base):
         registered.
         """
         self.update_config()
-        for key in self.mod_configuration:
+        for key in self.investigator_dict:
             if 'policy' in key:
-                self.rules[key] = self.mod_configuration[key].split(' ')
+                self.rules[key] = self.investigator_dict[key].split(' ')
 
         for policy in self.rules:
             for proposed_algo in self.rules[policy]:
@@ -141,7 +193,8 @@ class Investigator_Response(Investigator):
         rules.
         """
         try:
-            resp = requests.get('contact vent to get instances running')
+            url = 'http://' + self.vent_addr + '/commands/deploy/' + vent_machine
+            resp = requests.post(url)
         except:
             print >> sys.stderr, 'Main: Investigator: vent_preparation, vent request failed'
 
