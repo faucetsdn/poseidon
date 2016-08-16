@@ -17,11 +17,13 @@
 Created on 17 May 2016
 @author: dgrossman
 """
+import functools
+
+import schedule
+
 from poseidon.baseClasses.enums_tuples import CRONSPEC
 from poseidon.baseClasses.enums_tuples import EVERY
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
-import functools
-import schedule
 
 
 '''
@@ -69,7 +71,6 @@ class Scheduler(Main_Action_Base):
         self.schedule.clear()
         self.currentJobs = dict()
 
-    def configure(self):
         pass
 
     def safe(self, func):
@@ -104,15 +105,6 @@ class Scheduler(Main_Action_Base):
                     args[1].error(badness)
             return self.schedule.CancelJob
         return wrapper
-
-    '''
-    def bad_job(jobId,log):
-        print 'Job:',jobId,log
-        print log.fatal('jobId=%s'%(jobId))
-
-        j = a.add_job(b,bad_job,'idJ',log=a.logger)
-        p = a.add_job(b,bad_job,**{'jobId':'idP','log':a.logger})
-    '''
 
     def add_job(self, jobId, cronspec, func, **kwargs):
 
