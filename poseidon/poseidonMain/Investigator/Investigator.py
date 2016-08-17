@@ -72,23 +72,6 @@ class Investigator(Main_Action_Base):
             except:
                 print >> sys.stderr, 'Main: Investigator: error on vctrl create request.'
 
-    def format_vent_create(self, name, provider, body={}, group='poseidon-vctrl', labels='default', memory=4096, cpus=4, disk_sz=20000):
-        """
-        Formats body dict for vcontrol machine create.
-        Returns dict for vcontrol create request.
-
-        NOTE: name and provider are required parameters,
-        the rest can be covered by defaults.
-        """
-        body['name'] = name
-        body['provider'] = provider
-        if 'group' not in body: body['group'] = group
-        if 'labels' not in body: body['labels'] = labels
-        if 'memory' not in body: body['memory'] = memory
-        if 'cpus' not in body: body['cpus'] = cpus
-        if 'disk_sz' not in body: body['disk_sz'] = disk_sz
-        return body
-
     def update_config(self):
         """
         Updates configuration based on config file
