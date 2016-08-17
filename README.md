@@ -21,16 +21,24 @@ cd poseidon
 make
 ```
 
+If installing from a clean machine, a startup.sh script resides in the repo that can be used to 
+install docker and docker-compose for an Ubunut 16.04 box. Make this script executable and then 
+run with `sudo ./startup.sh`.
+
 # Required Dependencies
 
 - Docker
 - make
-- Environment variable `DOCKER_IP` set with the address of the docker host. This can be found using `docker-machine ip` if using boot2docker or `ifconfig` and set with `export DOCKER_IP=<host_address>` where host_address is the full address of the host (i.e. `tcp://0.0.0.0` or similar).
+- docker-compose
+- The 1.8 release of docker-compose can be installed with `make compose-install`
+- Environment variable `DOCKER_IP` set with the address of the host. This can be found using `docker-machine ip` if using boot2docker or `ifconfig` and set with `export DOCKER_IP=<host_address>` where host_address is the full address of the host (i.e. `tcp://0.0.0.0` or similar).
+- Update the `ip` of the `[database]` section of `templates/config.template` to the ip of the host machine (or
+the `docker-machine ip` if using boot2docker or similar). NOTE: without this configuration, poseidon will fail to build.
 
 # Usage Examples
 
 ```
-make run
+make compose
 ```
 
 # Documentation
