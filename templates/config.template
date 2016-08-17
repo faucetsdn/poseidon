@@ -9,7 +9,7 @@ rabbit_host = localhost
 rabbit_host = localhost
 
 [database]
-ip = 192.168.99.100
+ip = localhost
 user = user
 password = SECRET
 
