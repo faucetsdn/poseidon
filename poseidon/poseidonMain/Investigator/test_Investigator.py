@@ -28,13 +28,12 @@ def test_Investigator():
     Investigator()
 
 
-def test_config_vent_machines():
+def test_config_vctrl_machines():
     investigator = Investigator()
     investigator.config_dict['vent_machine_test'] = 'name=triton provider=amphitrite cpus=500'
     assert 'triton' not in investigator.vent_machines
-    investigator.config_vent_machines()
-    assert 'triton' in investigator.vent_machines
-    investigator.vent_startup()
+    investigator.vent_machines['trident1'] = '0.0.0.0'
+    investigator.vctrl_startup()
 
 
 def test_update_config():

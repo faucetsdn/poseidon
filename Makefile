@@ -27,7 +27,7 @@ api: clean-api build-api
 	echo "The API can be accessed here: $$api_url"; \
 	echo
 
-test: build
+test: storage build
 
 main: clean-main build-main
 	docker run --name poseidon-main -it poseidon-main
