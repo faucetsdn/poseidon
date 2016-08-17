@@ -1,4 +1,3 @@
-#!/usr/bin/bash
 #
 #   Copyright (c) 2016 In-Q-Tel, Inc, All Rights Reserved.
 #
