@@ -31,16 +31,14 @@ from Scheduler.Scheduler import scheduler_interface
 
 from Config.Config import config_interface
 
+module_logger = logging.getLogger('poseidonMain')
+
 
 class PoseidonMain(object):
 
-    def __init__(self, startingLogger=None):
-        if startingLogger is None:
-            self.logger = logging.getLogger(__name__)
-            self.logger.debug('logger started')
-        else:
-            self.logger = startingLogger
-            self.logger.debug('logger passed')
+    def __init__(self):
+        self.logger = module_logger
+        self.logger.debug('logger started')
         logging.basicConfig(level=logging.DEBUG)
         self.shutdown = False
 
@@ -128,11 +126,11 @@ class PoseidonMain(object):
             self.logger.debug(logLine)
 
 
-def main(startingLogger=None):
-    pmain = PoseidonMain(startingLogger)
+def main():
+    pmain = PoseidonMain()
     pmain.init_rabbit()
     pmain.processQ()
     return True
 
 if __name__ == '__main__':  # pragma: no cover
-    main(None)
+    main()

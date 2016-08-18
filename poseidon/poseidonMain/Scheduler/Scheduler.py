@@ -18,6 +18,7 @@ Created on 17 May 2016
 @author: dgrossman
 """
 import functools
+import logging
 
 import schedule
 
@@ -26,22 +27,24 @@ from poseidon.baseClasses.enums_tuples import EVERY
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
 
 
+module_logger = logging.getLogger('poseidonMain.Scheduler')
+
 '''
 wait = True
 while wait:
     try:
         params = pika.ConnectionParameters(host=DOCKER_IP)
         logLine = 'params = %s' % (params)
-        self.logger.debug(logLine)
+        module_logger.debug(logLine)
         connection = pika.BlockingConnection(params)
         channel = connection.channel()
         channel.exchange_declare(exchange='topic_poseidon_internal', type='topic')
         queue_name = 'process_heuristic_stats'
         result = channel.queue_declare(queue=queue_name, exclusive=True)
         wait = False
-        self.logger.debug('connected to rabbitmq...')
+        module_logger.debug('connected to rabbitmq...')
     except:
-        self.logger.debug('waiting for connection to rabbitmq...')
+        module_logger.debug('waiting for connection to rabbitmq...')
         time.sleep(2)
         wait = True
 
@@ -49,7 +52,7 @@ while wait:
 binding_keys = sys.argv[1:]
 if not binding_keys:
     logLine = "Usage: %s [binding_key]..." % (sys.argv[0],)
-    self.logger.error(logLine)
+    module_logger.error(logLine)
     sys.exit(1)
 
 for binding_key in binding_keys:
@@ -58,7 +61,7 @@ for binding_key in binding_keys:
                        routing_key=binding_key)
 
 
-self.logger.debug(' [*] Waiting for logs. To exit press CTRL+C')
+module_logger.debug(' [*] Waiting for logs. To exit press CTRL+C')
 
 # NOTE: add basic consume to channel
 '''
@@ -68,6 +71,7 @@ class Scheduler(Main_Action_Base):
 
     def __init__(self):
         super(Scheduler, self).__init__()
+        self.logger = module_logger
         self.mod_name = self.__class__.__name__
         self.schedule = schedule
         self.schedule.clear()

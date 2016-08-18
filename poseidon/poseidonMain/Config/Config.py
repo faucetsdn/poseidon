@@ -26,6 +26,9 @@ DOCKER_URL = 'file:///poseidonWork/templates/config.template'
 CI_TESTING = '/poseidonWork/templates/config.template'
 
 
+module_logger = logging.getLogger('poseidonMain.Config')
+
+
 class Config(Main_Action_Base):
 
     def __init__(self):
@@ -33,7 +36,7 @@ class Config(Main_Action_Base):
         self.mod_name = self.__class__.__name__
         self.URL = None
         if self.logger is None:
-            self.logger = logging.getLogger(__name__)
+            self.logger = module_logger
         try:
             self.URL = os.environ['POSEIDON_CONFIG_URL']
         except KeyError:

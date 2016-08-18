@@ -30,7 +30,7 @@ from Config import config_interface
 from Config import DOCKER_URL
 
 
-logger = logging.getLogger(__name__)
+module_logger = logging.getLogger('poseidonMain.test_Config')
 
 
 def getURL():
@@ -54,7 +54,7 @@ def test_env():
         pass
 
     a = config_interface
-    a.logger = logger
+    a.logger = module_logger
 
     assert (a.URL == expected or a.URL == CI_TESTING)
 
@@ -64,7 +64,7 @@ def test_get_BADsection():
 
     config_interface.URL = expected
     a = config_interface
-    a.logger = logger
+    a.logger = module_logger
     b = config_interface.get_section('DOESNOTEXIST')
 
     if expected is not None:
@@ -78,7 +78,7 @@ def test_get_GOODsection():
 
     config_interface.URL = expected
     a = config_interface
-    a.logger = logger
+    a.logger = module_logger
     b = config_interface.get_section('PoseidonMain:Config')
 
     if expected is not None:

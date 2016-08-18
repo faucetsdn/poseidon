@@ -33,6 +33,9 @@ from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
 from poseidon.poseidonMain.Config.Config import Config
 
 
+module_logger = logging.getLogger('poseidonMain.Investigator')
+
+
 class Investigator(Main_Action_Base):
 
     def __init__(self):
@@ -50,6 +53,7 @@ class Investigator(Main_Action_Base):
         self.vctrl_list()
         self.vctrl_startup()
         self.vctrl_addr = 'http://' + self.config_dict['vctrl_addr']
+        self.logger = module_logger
 
     def vctrl_list(self):
         """

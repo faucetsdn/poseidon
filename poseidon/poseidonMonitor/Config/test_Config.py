@@ -19,10 +19,14 @@ Test module for Config.py
 Created on 28 June 2016
 @author: dgrossman, lanhamt
 """
+import logging
+
 import falcon
 import pytest
+
 from Config import config_interface
 
+module_logger = logging.getLogger('poseidonMonitor.test_Config')
 
 application = falcon.API()
 application.add_route('/v1/config',

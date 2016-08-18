@@ -26,7 +26,7 @@ import pytest
 from poseidonMain import main
 from poseidonMain import PoseidonMain
 
-log = logging.getLogger(__name__)
+module_logger = logging.getLogger('poseidonMain.test_poseidonMain')
 
 
 def test_poseidonMain_goTime():
@@ -34,9 +34,9 @@ def test_poseidonMain_goTime():
     Tests goTime
     """
 
-    a = PoseidonMain(log)
+    a = PoseidonMain()
 
 
 def test_poseidonMain_main():
-    a = main(log)
+    a = main()
     assert a
