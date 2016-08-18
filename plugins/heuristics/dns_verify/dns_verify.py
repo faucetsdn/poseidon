@@ -22,21 +22,27 @@ where the DNSRecord is a time store for resolved addresses.
 
 Created on 22 June 2016
 @author: Travis Lanham, Charlie Lewis
+
+rabbitmq:
+    host:       poseidon-rabbit
+    exchange:   topic-poseidon-internal
+    queue(in):  features_tcpdump
+        keys:   poseidon.tcpdump_parser.dns.#
 """
 import ast
 import copy
 import time
 import pika
 
-"""
+
 wait = True
 while wait:
     try:
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq'))
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host='poseidon-rabbit'))
         channel = connection.channel()
         channel.exchange_declare(exchange='topic_poseidon_internal', type='topic')
-        result = channel.queue_declare(exclusive=True)
-        queue_name = result.method.queue
+        queue_name = 'features_tcpdump'
+        result = channel.queue_declare(name=queue_name, exclusive=True)
         wait = False
         print "connected to rabbitmq..."
     except:
@@ -55,7 +61,7 @@ for binding_key in binding_keys:
                        routing_key=binding_key)
 
 print ' [*] Waiting for logs. To exit press CTRL+C'
-"""
+
 
 
 class DNSRecord:

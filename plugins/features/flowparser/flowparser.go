@@ -19,9 +19,21 @@
  *
  * Created on August 3, 2016
  * @author: lanhamt
+ *
+ * IMPORTANT NOTE: The first argument when the program is invoked 
+ * should be the name of the pcap file.
+
+ * rabbitmq:
+ *     host:       poseidon-rabbit
+ *     exchange:   topic-poseidon-internal
+ *         keys:   poseidon.flowparser
  */
 
 package main
+
+var RABBIT_HOST = "poseidon-rabbit"
+var RABBIT_EXCH = "topic-poseidon-internal"
+var RABBIT_KEYS = "poseidon.flowparser"
 
 import (
     "fmt"
@@ -72,7 +84,7 @@ func RabbitConnect() (*amqp.Connection, *amqp.Channel) {
     var conn * amqp.Connection
     var err error
     for {
-        conn, err = amqp.Dial("amqp://guest:guest@rabbitmq:5672/")
+        conn, err = amqp.Dial("amqp://guest:guest@" + RABBIT_HOST + ":5672/")
         if CheckError(err, 
                     "connected to rabbitmq", 
                     "could not connect to rabbitmq, retrying...") {
@@ -95,15 +107,19 @@ func RabbitConnect() (*amqp.Connection, *amqp.Channel) {
     }
 
     err = ch.ExchangeDeclare(
-            "topic_poseidon_internal",
-            "topic",
-            true,
-            false,
-            false,
-            false,
-            nil,
+            RABBIT_EXCH,                    // name
+            "topic",                        // type
+            true,                           // durable
+            false,                          // auto-deleted
+            false,                          // internal
+            false,                          // no-wait
+            nil,                            // args
             )
     failOnError(err, "failed to declare exchange, exiting")
+
+/*
+    // ========== BELOW ONLY NEEDED IF MODULE IS RECEIVING FROM A QUEUE ==========
+
 
     queue_name := "process_features_flowparser"
     _, err = ch.QueueDeclare(queue_name, true, true, false, false, nil)
@@ -121,6 +137,7 @@ func RabbitConnect() (*amqp.Connection, *amqp.Channel) {
     }
 
     fmt.Println(" [*] Waiting for logs. To exit press CTRL+C")
+*/
 
     return conn, ch
 }
@@ -130,10 +147,10 @@ func RabbitConnect() (*amqp.Connection, *amqp.Channel) {
  */
 func sendLine(line string, ch *amqp.Channel) {
     err := ch.Publish(
-            "topic_poseidon_internal",
-            "poseidon.flowparser",
-            false, 
-            false,
+            RABBIT_EXCH,                    // exchange
+            RABBIT_KEYS,                    // routing key
+            false,                          // mandatory
+            false,                          // immediate
             amqp.Publishing{
                 ContentType: "text/plain",
                 Body:        []byte (line)})

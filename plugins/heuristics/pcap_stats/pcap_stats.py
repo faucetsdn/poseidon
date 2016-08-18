@@ -22,6 +22,12 @@ NOTE: need to add a periodic database update
 
 Created on 22 June 2016
 @author: lanhamt
+
+rabbitmq:
+    host:       poseidon-rabbit
+    exchange:   topic-poseidon-internal
+    queue(in):  features_tcpdump
+        keys:   poseidon.tcpdump_parser.#
 """
 from pymongo import MongoClient
 from pcap_stats_utils import FlowRecord
@@ -33,20 +39,20 @@ import time
 import pika
 import thread
 import threading
+import requests
 
 
 flowRecordLock = threading.Lock()
 
 
-"""
 wait = True
 while wait:
     try:
-        params = pika.ConnectionParameters(host='rabbitmq')
+        params = pika.ConnectionParameters(host='poseidon-rabbit')
         connection = pika.BlockingConnection(params)
         channel = connection.channel()
         channel.exchange_declare(exchange='topic_poseidon_internal', type='topic')
-        queue_name = 'process_heuristic_stats'
+        queue_name = 'features_tcpdump'
         result = channel.queue_declare(queue=queue_name, exclusive=True)
         wait = False
         print 'connected to rabbitmq...'
@@ -54,19 +60,6 @@ while wait:
         print 'waiting for connection to rabbitmq...'
         time.sleep(2)
         wait = True
-
-
-client = None
-wait = True
-while wait:
-    try:
-        client = MongoClient(host='poseidon-storageWorkaround')
-        client.address
-        wait = False
-        print 'connected to database...'
-    except:
-        print 'could not connect to database, retrying...'
-        time.sleep(2)
 
 
 binding_keys = sys.argv[1:]
@@ -80,15 +73,14 @@ for binding_key in binding_keys:
                        routing_key=binding_key)
 
 print ' [*] Waiting for logs. To exit press CTRL+C'
-"""
 
 
 def db_update_worker():
     """
     Function to be executed by separate worker
-    thread to connect to database and update
-    based on machines in the flow records. Then
-    sleeps for 5 sec before waking up for next
+    thread to connect to poseidon-storage-interface
+    and update based on machines in the flow records.
+    Then sleeps for 10 sec before waking up for next
     update
 
     NOTE: install with
@@ -99,18 +91,19 @@ def db_update_worker():
     update) and at end of update, reset it.
     """
     """
-    global client
     global flowRecordLock
     while True:
         try:
-            client.address  # verify connection
+            TODO: fix url for appropriate rest call
+            url = 'http://poseidon-storage-interface/v1/storage/update'
+            resp = requests.get(url)
             # check update conditions
             # flowRecordLock.acquire()
-            # update
+            # update with rest call for appropriate docs
             # flowRecordLock.release()
         except:
             print('database update failed...')
-        time.sleep(5)
+        time.sleep(10)
     """
 
 

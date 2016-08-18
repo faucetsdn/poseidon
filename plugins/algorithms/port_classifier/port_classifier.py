@@ -19,4 +19,57 @@ Created on 17 August 2016
 
 Machine learning plugin for classifying
 ports from tcp packets.
+
+rabbitmq:
+    host:       poseidon-rabbit
+    exchange:   topic-poseidon-internal
+    queue(in):  features_flowparser
+        keys:   poseidon.flowparser
+
+    keys(out):  poseidon.algos.port_class
 """
+import pika
+import sys
+
+wait = True
+while wait:
+    try:
+        params = pika.ConnectionParameters(host='poseidon-rabbit')
+        connection = pika.BlockingConnection(params)
+        channel = connection.channel()
+        channel.exchange_declare(exchange='topic_poseidon_internal', type='topic')
+
+        in_queue = 'features_flowparser'
+        result = channel.queue_declare(queue=in_queue, exclusive=True)
+
+        wait = False
+        print 'connected to rabbitmq...'
+    except:
+        print 'waiting for connection to rabbitmq...'
+        time.sleep(2)
+        wait = True
+
+binding_keys = sys.argv[1:]
+if not binding_keys:
+    print >> sys.stderr, "Usage: %s [binding_key]..." % (sys.argv[0],)
+    sys.exit(1)
+for binding_key in binding_keys:
+    channel.queue_bind(exchange='topic_poseidon_internal',
+                       queue=in_queue,
+                       routing_key=binding_key)
+print ' [*] Waiting for logs. To exit press CTRL+C'
+
+
+def callback(ch, method, properties, body):
+    """
+    """
+    global channel
+    message = 'ml results'
+    routing_key = 'poseidon.algos.port_class'
+    channel.basic_publish(exchange='topic_poseidon_internal',
+                          routing_key=routing_key,
+                          body=message)
+
+
+channel.basic_consume(callback, queue=in_queue, no_ack=True)
+channel.start_consuming()

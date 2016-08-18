@@ -19,6 +19,11 @@ DShell netflow parser plugin
 
 Created on 13 June 2016
 @author: Charlie Lewis, Abhi Ganesh
+
+rabbitmq:
+    host:       poseidon-rabbit
+    exchange:   topic-poseidon-internal
+        keys:   poseidon.dshell
 """
 
 import pika
@@ -41,10 +46,10 @@ def connections():
     connection = None
     try:
         connection = pika.BlockingConnection(pika.ConnectionParameters(
-            host='rabbitmq'))
+            host='poseidon-rabbit'))
         channel = connection.channel()
 
-        channel.exchange_declare(exchange='topic_recs',
+        channel.exchange_declare(exchange='topic-poseidon-internal',
                                  type='topic')
     except:
         print "unable to connect to rabbitmq, quitting."
@@ -53,7 +58,7 @@ def connections():
 
 def run_tool(path):
     """Tool entry point"""
-    routing_key = "dshell_netflow_parser" + path.replace("/", ".")
+    routing_key = 'poseidon.dshell'
     print "processing pcap results..."
     subprocess.Popen(
         '/Dshell/dshell-decode -o /tmp/results.out -d netflow ' +

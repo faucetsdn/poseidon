@@ -107,7 +107,7 @@ services:
     links:
       - mock:mock-controller
       - monitor:poseidon-monitor
-      - rabbit:rabbitmq
+      - rabbit:poseidon-rabbit
   rabbit:
     image: rabbitmq:management
     container_name: poseidon-rabbit
@@ -123,6 +123,6 @@ services:
     environment:
       - DOCKER_IP
     links:
-      - rabbit:rabbitmq
+      - rabbit:poseidon-rabbit
       - storage:poseidon-storage
-      - storageWorkaround:poseidon-storageWorkaround
+      - storage-interface:poseidon-storage-interface
