@@ -183,6 +183,7 @@ func main() {
     for scanner.Scan() {
         sendLine(scanner.Text(), ch)
     }
+    sendLine('EOF -- FLOWPARSER FINISHED with file ' + file_name, ch)
     failOnError(scanner.Err(), "failed to read file")
 
     err = exec.Command("rm", "-rf", output_file).Run()

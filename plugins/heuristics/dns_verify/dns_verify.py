@@ -35,34 +35,39 @@ import time
 import pika
 
 
-"""
-wait = True
-while wait:
-    try:
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host='poseidon-rabbit'))
-        channel = connection.channel()
-        channel.exchange_declare(exchange='topic_poseidon_internal', type='topic')
-        queue_name = 'features_tcpdump'
-        result = channel.queue_declare(name=queue_name, exclusive=True)
-        wait = False
-        print "connected to rabbitmq..."
-    except:
-        print "waiting for connection to rabbitmq..."
-        time.sleep(2)
-        wait = True
+def rabbit_init(host, exchange, queue_name):
+    """
+    Connects to rabbitmq using the given hostname,
+    exchange, and queue. Retries on failure until success.
+    Binds routing keys appropriate for module, and returns
+    the channel and connection.
+    """
+    wait = True
+    while wait:
+        try:
+            connection = pika.BlockingConnection(pika.ConnectionParameters(host=host))
+            channel = connection.channel()
+            channel.exchange_declare(exchange=exchange, type='topic')
+            result = channel.queue_declare(name=queue_name, exclusive=True)
+            wait = False
+            print "connected to rabbitmq..."
+        except:
+            print "waiting for connection to rabbitmq..."
+            time.sleep(2)
+            wait = True
 
-binding_keys = sys.argv[1:]
-if not binding_keys:
-    print >> sys.stderr, "Usage: %s [binding_key]..." % (sys.argv[0],)
-    sys.exit(1)
+    binding_keys = sys.argv[1:]
+    if not binding_keys:
+        print >> sys.stderr, "Usage: %s [binding_key]..." % (sys.argv[0],)
+        sys.exit(1)
 
-for binding_key in binding_keys:
-    channel.queue_bind(exchange='topic_poseidon_internal',
-                       queue=queue_name,
-                       routing_key=binding_key)
+    for binding_key in binding_keys:
+        channel.queue_bind(exchange=exchange,
+                           queue=queue_name,
+                           routing_key=binding_key)
 
-print ' [*] Waiting for logs. To exit press CTRL+C'
-"""
+    print ' [*] Waiting for logs. To exit press CTRL+C'
+    return channel, connection
 
 
 class DNSRecord:
@@ -143,7 +148,13 @@ def verify_dns_record(ch, method, properties, body):
             if packet['dest_ip'] not in dns_records[src_addr]:
                 return 'TODO: signaling packet of interest'
 
-"""
-channel.basic_consume(verify_dns_record, queue=queue_name, no_ack=True)
-channel.start_consuming()
-"""
+
+if __name__ == '__main__':
+    host = 'poseidon-rabbit'
+    exchange = 'topic-poseidon-internal'
+    queue_name = 'features_tcpdump'
+    channel, connection = rabbit_init(host=host,
+                                      exchange=exchange,
+                                      queue_name=queue_name)
+    channel.basic_consume(verify_dns_record, queue=queue_name, no_ack=True)
+    channel.start_consuming()

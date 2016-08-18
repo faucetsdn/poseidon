@@ -1,2 +1,4 @@
+sklearn
+pandas
 numpy
 pika
