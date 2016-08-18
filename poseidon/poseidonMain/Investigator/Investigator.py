@@ -44,6 +44,7 @@ class Investigator(Main_Action_Base):
         self.config = Config()
         self.config_dict = {}
         self.update_config()
+        self.handles = dict()
 
         self.algos = {}
         self.rules = {}
@@ -231,5 +232,14 @@ class Investigator_Response(Investigator):
         except:
             pass
 
+    def get_handlers(self, t):
+        handle_list = []
+        if t in self.handles:
+            handle_list.append(self.handles[t])
+
+        for helper in self.actions.itervalues():
+            if t in helper.handles:
+                handle_list.append(helper.handles[t])
+        return handle_list
 
 investigator_interface = Investigator()
