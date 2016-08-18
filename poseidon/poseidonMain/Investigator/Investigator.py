@@ -22,6 +22,7 @@ Created on 17 May 2016
 """
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
 from poseidon.poseidonMain.Config.Config import Config
+import logging.config
 import logging
 import requests
 import urllib
@@ -44,56 +45,32 @@ class Investigator(Main_Action_Base):
         self.update_rules()
 
         self.vent_machines = {}
-        self.config_vent_machines()
-        self.vent_startup()
-        self.vent_addr = 'http://' + self.config_dict['vent_addr']
+        self.vctrl_list()
+        self.vctrl_startup()
+        self.vctrl_addr = 'http://' + self.config_dict['vctrl_addr']
 
-    def config_vent_machines(self):
+    def vctrl_list(self):
         """
-        Checks config items in Investigator config for
-        vent endpoints to be added to vcontrol for
-        investigator processing.
+        Retrieves list of vent machines running on vcontrol
+        instance. Gets list of machines as json and evaluates
+        into dict to update dict of available vent machines.
         """
-        for key in self.config_dict:
-            if 'vent_machine' in key:
-                machine_info = {}
-                fields = self.config_dict[key].split(' ')
-                for field in fields:
-                    param = field.split('=')[0]
-                    value = field.split('=')[1]
-                    if param == 'memory' or param == 'cpus' or param == 'disk_sz':
-                        value = int(value)
-                    machine_info[param] = value
-                self.vent_machines[machine_info['name']] = machine_info
+        try:
+            resp = requests.get(self.vctrl_addr + '/machines/list')
+            self.vent_machines = ast.literal_eval(resp.body)
+        except:
+            print >> sys.stderr, 'Main: Investigator: error on vctrl list'
 
-    def vent_startup(self):
+    def vctrl_startup(self):
         """
         For each vent endpoint machine descriped in the Investigator
         config section, registers the machine with vcontrol.
         """
         for machine, config in self.vent_machines.iteritems():
-            body = self.format_vent_create(machine, config['provider'], config)
             try:
-                resp = requests.post(self.vent_addr + '/machines/create', data=body)
+                resp = requests.get(self.vctrl_addr + '/commands/start/' + machine + '/all')
             except:
-                print >> sys.stderr, 'Main: Investigator: error on vent create request.'
-
-    def format_vent_create(self, name, provider, body={}, group='poseidon-vent', labels='default', memory=4096, cpus=4, disk_sz=20000):
-        """
-        Formats body dict for vcontrol machine create.
-        Returns dict for vcontrol create request.
-
-        NOTE: name and provider are required parameters,
-        the rest can be covered by defaults.
-        """
-        body['name'] = name
-        body['provider'] = provider
-        if 'group' not in body: body['group'] = group
-        if 'labels' not in body: body['labels'] = labels
-        if 'memory' not in body: body['memory'] = memory
-        if 'cpus' not in body: body['cpus'] = cpus
-        if 'disk_sz' not in body: body['disk_sz'] = disk_sz
-        return body
+                print >> sys.stderr, 'Main: Investigator: error on vctrl create request.'
 
     def update_config(self):
         """
