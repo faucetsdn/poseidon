@@ -18,16 +18,22 @@ poseidonMain
 
 Created on 29 May 2016
 @author: dgrossman, lanhamt
+
+rabbitmq:
+    host:       poseidon-rabbit
+    exchange:   topic-poseidon-internal
+    queue(in):  algos_classifiers
+        keys:   poseidon.algos.#
 """
 import json
 import logging
 import logging.config
 import time
 from os import getenv
+import pika
 
 from Investigator.Investigator import investigator_interface
 from Scheduler.Scheduler import scheduler_interface
-
 from Config.Config import config_interface
 
 
@@ -92,7 +98,36 @@ class PoseidonMain(object):
         return('t', 'v')
 
     def init_rabbit(self):
-        pass
+        """
+        Continuously loops trying to connect to rabbitmq,
+        once connected declares the exchange and queue for
+        processing algorithm results.
+        """
+        wait = True
+        while wait:
+            try:
+                params = pika.ConnectionParameters(host='poseidon-rabbit')
+                connection = pika.BlockingConnection(params)
+                channel = connection.channel()
+                channel.exchange_declare(exchange='topic_poseidon_internal', type='topic')
+
+                queue_name = 'algos_classifiers'
+                result = channel.queue_declare(queue=queue_name, exclusive=True)
+
+                wait = False
+                print 'connected to rabbitmq...'
+            except:
+                print 'waiting for connection to rabbitmq...'
+                time.sleep(2)
+                wait = True
+
+        binding_key = 'poseidon.algos.#'
+        channel.queue_bind(exchange='topic_poseidon_internal',
+                           queue=queue_name,
+                           routing_key=binding_key)
+
+        self.rabbit_connection = connection
+        self.rabbit_channel = channel
 
     def processQ(self):
         x = 10
