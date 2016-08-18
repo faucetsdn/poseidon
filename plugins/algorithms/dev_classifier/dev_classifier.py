@@ -31,6 +31,8 @@ rabbitmq:
 import pika
 import sys
 
+
+"""
 wait = True
 while wait:
     try:
@@ -73,3 +75,4 @@ def callback(ch, method, properties, body):
 
 channel.basic_consume(callback, queue=in_queue, no_ack=True)
 channel.start_consuming()
+"""

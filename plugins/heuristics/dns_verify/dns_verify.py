@@ -35,6 +35,7 @@ import time
 import pika
 
 
+"""
 wait = True
 while wait:
     try:
@@ -61,7 +62,7 @@ for binding_key in binding_keys:
                        routing_key=binding_key)
 
 print ' [*] Waiting for logs. To exit press CTRL+C'
-
+"""
 
 
 class DNSRecord:
