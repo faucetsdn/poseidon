@@ -19,11 +19,14 @@ Test module for poseidonMain.py
 Created on 29 May 2016
 @author: dgrossman, tlanham
 """
+import logging
 from os import environ
 
 import pytest
 from poseidonMain import main
 from poseidonMain import PoseidonMain
+
+module_logger = logging.getLogger('poseidonMain.test_poseidonMain')
 
 
 def test_poseidonMain_goTime():

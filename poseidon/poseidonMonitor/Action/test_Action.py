@@ -19,9 +19,13 @@ Test module for Action.py
 Created on 28 Jun 2016
 @author: dgrossman
 """
+import logging
+
 import falcon
 import pytest
 from Action import action_interface
+
+module_logger = logging.getLogger('poseidonMonitor.test_Action')
 
 application = falcon.API()
 application.add_route('/v1/Action/{resource}',

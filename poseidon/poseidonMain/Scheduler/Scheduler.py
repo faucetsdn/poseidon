@@ -17,35 +17,42 @@
 Created on 17 May 2016
 @author: dgrossman
 """
+import functools
+import logging
+
+import schedule
+
 from poseidon.baseClasses.enums_tuples import CRONSPEC
 from poseidon.baseClasses.enums_tuples import EVERY
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
-import functools
-import schedule
 
+
+module_logger = logging.getLogger('poseidonMain.Scheduler')
 
 '''
 wait = True
 while wait:
     try:
         params = pika.ConnectionParameters(host=DOCKER_IP)
-        print params
+        logLine = 'params = %s' % (params)
+        module_logger.debug(logLine)
         connection = pika.BlockingConnection(params)
         channel = connection.channel()
         channel.exchange_declare(exchange='topic_poseidon_internal', type='topic')
         queue_name = 'process_heuristic_stats'
         result = channel.queue_declare(queue=queue_name, exclusive=True)
         wait = False
-        print 'connected to rabbitmq...'
+        module_logger.debug('connected to rabbitmq...')
     except:
-        print 'waiting for connection to rabbitmq...'
+        module_logger.debug('waiting for connection to rabbitmq...')
         time.sleep(2)
         wait = True
 
 
 binding_keys = sys.argv[1:]
 if not binding_keys:
-    print >> sys.stderr, "Usage: %s [binding_key]..." % (sys.argv[0],)
+    logLine = "Usage: %s [binding_key]..." % (sys.argv[0],)
+    module_logger.error(logLine)
     sys.exit(1)
 
 for binding_key in binding_keys:
@@ -54,7 +61,7 @@ for binding_key in binding_keys:
                        routing_key=binding_key)
 
 
-print ' [*] Waiting for logs. To exit press CTRL+C'
+module_logger.debug(' [*] Waiting for logs. To exit press CTRL+C')
 
 # NOTE: add basic consume to channel
 '''
@@ -64,19 +71,16 @@ class Scheduler(Main_Action_Base):
 
     def __init__(self):
         super(Scheduler, self).__init__()
+        self.logger = module_logger
         self.mod_name = self.__class__.__name__
         self.schedule = schedule
         self.schedule.clear()
+        self.handles = dict()
         self.currentJobs = dict()
-
-    def configure(self):
-        pass
 
     def safe(self, func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            print '  args', args
-            print 'kwargs', kwargs
             try:
                 func(*args, **kwargs)
             except:  # pragma: no cover
@@ -91,8 +95,6 @@ class Scheduler(Main_Action_Base):
     def do_once(self, func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            print '  args', args
-            print 'kwargs', kwargs
             try:
                 func(*args, **kwargs)
             except:  # pragma: no cover
@@ -104,15 +106,6 @@ class Scheduler(Main_Action_Base):
                     args[1].error(badness)
             return self.schedule.CancelJob
         return wrapper
-
-    '''
-    def bad_job(jobId,log):
-        print 'Job:',jobId,log
-        print log.fatal('jobId=%s'%(jobId))
-
-        j = a.add_job(b,bad_job,'idJ',log=a.logger)
-        p = a.add_job(b,bad_job,**{'jobId':'idP','log':a.logger})
-    '''
 
     def add_job(self, jobId, cronspec, func, **kwargs):
 
@@ -170,21 +163,23 @@ class Scheduler(Main_Action_Base):
     def del_job(self, jobId):
         for job in self.schedule.jobs:
             for k, v in job.__dict__.iteritems():
-                print k, v
                 if k == 'job_func':
                     if len(v.args) >= 1:
                         if jobId == v.args[0]:
-                            print 'killing:', job
+                            logLine = 'killing: %s' % (job)
+                            self.logger.debug(logLine)
                             self.schedule.cancel_job(job)
                         else:  # pragma: no cover
-                            print '*' * 10
+                            logLine = '*' * 10
+                            self.logger.debug(logLine)
                             jid = v.keywords.get('jobId', None)
                             if jid == jobId:
-                                print 'killing:', job
+                                logLine = 'killing: %s' % (job)
+                                self.logger.debug(logLine)
                                 self.schedule.cancel_job(job)
-                                print v.args
-                                print v.keywords
-                                print '-' * 40
+                                logLine = 'vargs = %s\nkeyworks = %s\n%s\n' % (
+                                    v.args, v.keywords, '-' * 40)
+                                self.logger.debug(logLine)
 
     def get_jobId(self, job):
         jobfunc = job.__dict__['job_func']
@@ -202,5 +197,15 @@ class Scheduler(Main_Action_Base):
 
     def shutdown(self):
         self.schedule.clear()
+
+    def get_handlers(self, t):
+        handle_list = []
+        if t in self.handles:
+            handle_list.append(self.handles[t])
+
+        for helper in self.actions.itervalues():
+            if t in helper.handles:
+                handle_list.append(helper.handles[t])
+        return handle_list
 
 scheduler_interface = Scheduler()

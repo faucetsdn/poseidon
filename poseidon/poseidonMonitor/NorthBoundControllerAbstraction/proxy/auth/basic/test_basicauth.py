@@ -18,29 +18,35 @@ Test module for basicauth.
 
 @author: kylez
 """
+import base64
+import logging
+import os
 
 import pytest
 from basicauth import BasicAuthControllerProxy
+from httmock import HTTMock
+from httmock import response
+from httmock import urlmatch
 
-import os
-import base64
-from httmock import urlmatch, response, HTTMock
+module_logger = logging.getLogger(
+    'poseidonMonitor.NBCA.proxy.auth.basic.test_basicauth')
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
-username = "user"
-password = "pass"
+username = 'user'
+password = 'pass'
 
 
 def mock_factory(regex, filemap):
     @urlmatch(netloc=regex)
     def mock_fn(url, request):
-        if url.path not in filemap: #pragma: no cover
-            raise Exception("Invalid URL: %s" % url)
-        user, pass_ = base64.b64decode(request.headers["Authorization"].split()[1]).split(":")
+        if url.path not in filemap:  # pragma: no cover
+            raise Exception('Invalid URL: %s' % url)
+        user, pass_ = base64.b64decode(
+            request.headers['Authorization'].split()[1]).split(':')
         assert user == username
         assert pass_ == password
         with open(os.path.join(cur_dir, filemap[url.path])) as f:
-            data = f.read().replace("\n", "")
+            data = f.read().replace('\n', '')
         r = response(content=data)
         return r
     return mock_fn
@@ -51,9 +57,10 @@ def test_BasicAuthControllerProxy():
     Tests BasicAuthControllerProxy
     """
     filemap = {
-        "/resource" : "sample_content.txt"
+        '/resource': 'sample_content.txt'
     }
     with HTTMock(mock_factory(r'.*', filemap)):
-        proxy = BasicAuthControllerProxy("http://localhost/", auth=("user", "pass"))
-        res = proxy.get_resource("/resource")
+        proxy = BasicAuthControllerProxy(
+            'http://localhost/', auth=('user', 'pass'))
+        res = proxy.get_resource('/resource')
         assert proxy

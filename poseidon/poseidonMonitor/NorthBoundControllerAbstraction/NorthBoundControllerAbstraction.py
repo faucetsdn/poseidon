@@ -18,17 +18,21 @@ Created on 17 May 2016
 @author: dgrossman
 """
 import json
+import logging
 
 import requests
 
 from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 
+module_logger = logging.getLogger('poseidonMonitor.NBCA')
+
 
 class NorthBoundControllerAbstraction(Monitor_Action_Base):
 
     def __init__(self):
         super(NorthBoundControllerAbstraction, self).__init__()
+        self.logger = module_logger
         self.mod_name = self.__class__.__name__
         self.config_section_name = self.mod_name
 

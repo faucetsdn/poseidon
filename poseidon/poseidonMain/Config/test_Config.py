@@ -19,6 +19,8 @@ Test module for poseidonMain.py
 Created on 15 July 2016
 @author: dgrossman
 """
+import logging
+import logging.config
 import os
 
 import pytest
@@ -26,6 +28,9 @@ import pytest
 from Config import CI_TESTING
 from Config import config_interface
 from Config import DOCKER_URL
+
+
+module_logger = logging.getLogger('poseidonMain.test_Config')
 
 
 def getURL():
@@ -49,6 +54,7 @@ def test_env():
         pass
 
     a = config_interface
+    a.logger = module_logger
 
     assert (a.URL == expected or a.URL == CI_TESTING)
 
@@ -57,21 +63,25 @@ def test_get_BADsection():
     expected = getURL()
 
     config_interface.URL = expected
-    a = config_interface.get_section('DOESNOTEXIST')
+    a = config_interface
+    a.logger = module_logger
+    b = config_interface.get_section('DOESNOTEXIST')
 
     if expected is not None:
-        assert a == """['"Failed to find section: DOESNOTEXIST"']"""
+        assert b == """['"Failed to find section: DOESNOTEXIST"']"""
     else:
-        assert a is None
+        assert b is None
 
 
 def test_get_GOODsection():
     expected = getURL()
 
     config_interface.URL = expected
-    a = config_interface.get_section('PoseidonMain:Config')
+    a = config_interface
+    a.logger = module_logger
+    b = config_interface.get_section('PoseidonMain:Config')
 
     if expected is not None:
-        assert a == """['[["config", "True"]]']"""
+        assert b == """['[["config", "True"]]']"""
     else:
-        assert a is None
+        assert b is None

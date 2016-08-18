@@ -20,15 +20,20 @@ network flows.
 Created on 17 May 2016
 @author: dgrossman, tlanham
 """
+import ast
+import logging
+import logging.config
+import sys
+import urllib
+
+import bson
+import requests
+
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
 from poseidon.poseidonMain.Config.Config import Config
-import logging.config
-import logging
-import requests
-import urllib
-import bson
-import ast
-import sys
+
+
+module_logger = logging.getLogger('poseidonMain.Investigator')
 
 
 class Investigator(Main_Action_Base):
@@ -39,6 +44,7 @@ class Investigator(Main_Action_Base):
         self.config = Config()
         self.config_dict = {}
         self.update_config()
+        self.handles = dict()
 
         self.algos = {}
         self.rules = {}
@@ -48,6 +54,7 @@ class Investigator(Main_Action_Base):
         self.vctrl_list()
         self.vctrl_startup()
         self.vctrl_addr = 'http://' + self.config_dict['vctrl_addr']
+        self.logger = module_logger
 
     def vctrl_list(self):
         """
@@ -68,9 +75,32 @@ class Investigator(Main_Action_Base):
         """
         for machine, config in self.vent_machines.iteritems():
             try:
-                resp = requests.get(self.vctrl_addr + '/commands/start/' + machine + '/all')
+                resp = requests.post(
+                    self.vent_addr + '/machines/create', data=body)
             except:
-                print >> sys.stderr, 'Main: Investigator: error on vctrl create request.'
+                print >> sys.stderr, 'Main: Investigator: error on vent create request.'
+
+    def format_vent_create(self, name, provider, body={}, group='poseidon-vent', labels='default', memory=4096, cpus=4, disk_sz=20000):
+        """
+        Formats body dict for vcontrol machine create.
+        Returns dict for vcontrol create request.
+
+        NOTE: name and provider are required parameters,
+        the rest can be covered by defaults.
+        """
+        body['name'] = name
+        body['provider'] = provider
+        if 'group' not in body:
+            body['group'] = group
+        if 'labels' not in body:
+            body['labels'] = labels
+        if 'memory' not in body:
+            body['memory'] = memory
+        if 'cpus' not in body:
+            body['cpus'] = cpus
+        if 'disk_sz' not in body:
+            body['disk_sz'] = disk_sz
+        return body
 
     def update_config(self):
         """
@@ -153,6 +183,16 @@ class Investigator(Main_Action_Base):
             # log error for investigation
             print >> sys.stderr, 'duplicate record for machine: %s', ip_addr
 
+    def get_handlers(self, t):
+        handle_list = []
+        if t in self.handles:
+            handle_list.append(self.handles[t])
+
+        for helper in self.actions.itervalues():
+            if t in helper.handles:
+                handle_list.append(helper.handles[t])
+        return handle_list
+
 
 class Investigator_Response(Investigator):
     """
@@ -161,8 +201,10 @@ class Investigator_Response(Investigator):
     added to network, etc). Maintains a record of
     jobs scheduled
     """
+
     def __init__(self):
         super(Investigator_Response, self).__init__()
+        self.logger = module_logger
         self.jobs = {}
 
     def vent_preparation(self):

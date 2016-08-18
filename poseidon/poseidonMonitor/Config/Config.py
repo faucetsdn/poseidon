@@ -23,11 +23,14 @@ Created on 17 May 2016
 """
 import ConfigParser
 import json
+import logging
 import os
 
 from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 
+
+module_logger = logging.getLogger('poseidonMonitor.Config')
 
 # poseidonWork created in docker containers
 config_template_path = '/poseidonWork/templates/config.template'
@@ -37,6 +40,7 @@ class Config(Monitor_Action_Base):
 
     def __init__(self):
         super(Config, self).__init__()
+        self.logger = module_logger
         self.CONFIG = None
         self.mod_name = self.__class__.__name__
         self.config_section_name = self.mod_name

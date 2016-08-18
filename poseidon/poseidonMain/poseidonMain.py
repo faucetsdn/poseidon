@@ -17,6 +17,7 @@
 poseidonMain
 
 Created on 29 May 2016
+
 @author: dgrossman, lanhamt
 """
 import json
@@ -30,11 +31,14 @@ from Scheduler.Scheduler import scheduler_interface
 
 from Config.Config import config_interface
 
+module_logger = logging.getLogger('poseidonMain')
+
 
 class PoseidonMain(object):
 
     def __init__(self):
-        self.logger = logging.getLogger(__name__)
+        self.logger = module_logger
+        self.logger.debug('logger started')
         logging.basicConfig(level=logging.DEBUG)
         self.shutdown = False
 
@@ -82,8 +86,7 @@ class PoseidonMain(object):
         else:
             logging.basicConfig(level=logging.DEBUG)
 
-    def handle(self, tv):
-        t, v = tv
+    def handle(self, t, v):
         if t == 'Main':
             if v == 'shutdown':
                 self.shutdown = True
@@ -105,18 +108,22 @@ class PoseidonMain(object):
             # type , value
             t, v = self.get_queue_item()
 
-            # handle_list = self.Scheduler.get(t, None)
-            # if handle_list is not None:
-            #     for handle in handle_list:
-            #         handle(v)
-            # handle_list = self.Investigator.get(t, None)
-            # if handle_list is not None:
-            #     for handle in handle_list:
-            #         handle(v)
+            self.handle(t, v)
+
+            handle_list = self.Scheduler.get_handlers(t)
+            if handle_list is not None:
+                for handle in handle_list:
+                    handle(v)
+            handle_list = self.Investigator.get_handlers(t)
+            if handle_list is not None:
+                for handle in handle_list:
+                    handle(v)
 
             elapsed = time.clock()
             elapsed = elapsed - start
-            print 'time to run eventloop is %0.3f ms' % (elapsed * 1000)
+
+            logLine = 'time to run eventloop is %0.3f ms' % (elapsed * 1000)
+            self.logger.debug(logLine)
 
 
 def main():

@@ -19,12 +19,18 @@ Test module for Onos.py
 Created on 28 June 2016
 @author: dgrossman
 """
+import logging
+import logging.config
+
+import pytest
 from Scheduler import Scheduler
 from Scheduler import scheduler_interface
+
 from poseidon.baseClasses.enums_tuples import CRONSPEC
 from poseidon.baseClasses.enums_tuples import EVERY
-import logging
-import pytest
+
+
+module_logger = logging.getLogger('poseidonMain.test_Scheduler')
 
 
 def test_instantiation():
@@ -41,6 +47,7 @@ def test_add():
     jobId2 = 'JOBID2'
 
     s = scheduler_interface
+    s.logger = module_logger
     s.logger = logging.getLogger('testing')
     s.logger.setLevel(logging.DEBUG)
 
@@ -65,7 +72,7 @@ def test_remove():
         return True
 
     s = scheduler_interface
-    s.logger = logging.getLogger('testing')
+    s.logger = module_logger
     s.logger.setLevel(logging.DEBUG)
 
     b = CRONSPEC(EVERY.minute, None)
@@ -98,7 +105,7 @@ def test_schedule_once():
         return True
 
     s = scheduler_interface
-    s.logger = logging.getLogger('testing')
+    s.logger = module_logger
     s.logger.setLevel(logging.DEBUG)
 
     b = CRONSPEC(EVERY.once, '00:00')
@@ -130,7 +137,7 @@ def test_schedule_day():
         return True
 
     s = scheduler_interface
-    s.logger = logging.getLogger('testing')
+    s.logger = module_logger
     s.logger.setLevel(logging.DEBUG)
 
     b = CRONSPEC(EVERY.day, '00:00')
@@ -166,7 +173,7 @@ def test_schedule_hour():
         return True
 
     s = scheduler_interface
-    s.logger = logging.getLogger('testing')
+    s.logger = module_logger
     s.logger.setLevel(logging.DEBUG)
 
     b = CRONSPEC(EVERY.hour, ':00')
@@ -204,7 +211,7 @@ def test_schedule_minute():
         return True
 
     s = scheduler_interface
-    s.logger = logging.getLogger('testing')
+    s.logger = module_logger
     s.logger.setLevel(logging.DEBUG)
 
     b = CRONSPEC(EVERY.minute, None)

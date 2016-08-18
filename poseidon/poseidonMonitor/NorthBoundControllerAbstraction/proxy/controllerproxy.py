@@ -13,23 +13,26 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
 """
 Created on 25 July 2016
 
 @author: kylez
 """
+import logging
+from urlparse import urljoin
 
 import requests
-from urlparse import urljoin
+
+module_logger = logging.getLogger('poseidonMonitor.NBCA.proxy/controllerproxy')
 
 
 class ControllerProxy(object):
+
     def __init__(self, base_uri, *args, **kwargs):
+        self.logger = module_logger
         self.base_uri = base_uri
         self.session = requests.Session()
 
     def get_resource(self, resource, *args, **kwargs):
         uri = urljoin(self.base_uri, resource)
         return self.session.get(uri, *args, **kwargs)
-

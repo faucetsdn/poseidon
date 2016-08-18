@@ -13,16 +13,21 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
 """
 Created on 25 July 2016
 @author: kylez
 """
+import logging
 
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.controllerproxy import ControllerProxy
 
+module_logger = logging.getLogger(
+    'poseidonMonitor.NBCA.proxy.auth.basic.basicauth')
+
 
 class BasicAuthControllerProxy(ControllerProxy):
+
     def __init__(self, base_uri, auth, *args, **kwargs):
-        super(BasicAuthControllerProxy, self).__init__(base_uri, *args, **kwargs)
+        super(BasicAuthControllerProxy, self).__init__(
+            base_uri, *args, **kwargs)
         self.session.auth = auth

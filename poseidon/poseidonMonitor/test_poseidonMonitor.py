@@ -19,6 +19,7 @@ Test module for poseidonMonitor.py
 Created on 17 May 2016
 @author: Charlie Lewis
 """
+import logging
 from os import environ
 
 import falcon
@@ -27,6 +28,8 @@ import pytest
 from poseidonMonitor import PCAPResource
 from poseidonMonitor import SwaggerAPI
 from poseidonMonitor import VersionResource
+
+module_logger = logging.getLogger('poseidonMonitor.test_poseidonMonitor')
 
 application = falcon.API()
 application.add_route('/v1/pcap/{pcap_file}/{output_type}', PCAPResource())
@@ -41,7 +44,7 @@ def app():
 
 
 def test_get_allowed():
-    environ['ALLOW_ORIGIN'] = "http://test:80"
+    environ['ALLOW_ORIGIN'] = 'http://test:80'
     allow_origin, rest_url = poseidonMonitor.get_allowed()
 
 
@@ -58,14 +61,14 @@ def test_swagger_api_get(client):
             resp_type = r_type
     assert resp_type == 'text/yaml'
     body = resp.body
-    lines = body.split("\n")
+    lines = body.split('\n')
     version = 'x'
     with open('VERSION', 'r') as f:
         version = f.read()
     body_version = 'y'
     for line in lines:
-        if line.startswith("  version: "):
-            body_version = line.split("  version: ")[1]
+        if line.startswith('  version: '):
+            body_version = line.split('  version: ')[1]
     assert version.strip() == body_version.strip()
 
 

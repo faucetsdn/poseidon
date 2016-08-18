@@ -21,6 +21,8 @@ import logging
 
 from poseidon.baseClasses.Rock_Bottom import Rock_Bottom
 
+module_logger = logging.getLogger('baseClasses.Monitor_Helper_Base')
+
 
 class Monitor_Helper_Base(Rock_Bottom):  # pragma: no cover
     """base class for the helper objets"""
