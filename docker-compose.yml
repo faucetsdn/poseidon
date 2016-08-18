@@ -37,6 +37,7 @@ services:
       - '3333:8003'
     environment:
       - ALLOW_ORIGIN = http://$DOCKER_URL:8003
+      - DOCKER_IP
     links:
       - monitor:poseidon-monitor
   monitor:
@@ -49,6 +50,7 @@ services:
       - '4444:8004'
     environment:
       - ALLOW_ORIGIN = http://$DOCKER_URL:1111
+      - DOCKER_IP
     links:
       - api:poseidon-api
   main:
@@ -59,6 +61,8 @@ services:
       dockerfile: Dockerfile.main
     ports:
       - '5555:8005'
+    environment:
+      - DOCKER_IP
     links:
       - storage-interface:poseidon-storage-interface
   storageWorkaround:
@@ -87,7 +91,7 @@ services:
       - '28000:27000'
     environment:
       - ALLOW_ORIGIN=http://$DOCKER_URL:28000
-      - DOCKER_IP=$DOCKER_IP
+      - DOCKER_IP
     links:
       - storage:poseidon-storage
   periodically:
@@ -98,10 +102,12 @@ services:
       dockerfile: Dockerfile.periodically
     ports:
       - '9999:8009'
+    environment:
+      - DOCKER_IP
     links:
       - mock:mock-controller
       - monitor:poseidon-monitor
-      - rabbit:rabbitmq
+      - rabbit:poseidon-rabbit
   rabbit:
     image: rabbitmq:management
     container_name: poseidon-rabbit
@@ -114,7 +120,9 @@ services:
     build:
       context: ./plugins/heuristics/pcap_stats
       dockerfile: Dockerfile
+    environment:
+      - DOCKER_IP
     links:
-      - rabbit:rabbitmq
+      - rabbit:poseidon-rabbit
       - storage:poseidon-storage
-      - storageWorkaround:poseidon-storageWorkaround
+      - storage-interface:poseidon-storage-interface

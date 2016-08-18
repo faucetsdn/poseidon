@@ -18,6 +18,12 @@ Tcpdump hex parser plugin
 
 Created on 13 June 2016
 @author: Charlie Lewis, David Grossman, Travis Lanham
+
+rabbitmq:
+    host:       poseidon-rabbit
+    exchange:   topic-poseidon-internal
+        keys:   poseidon.tcpdump_parser
+                poseidon.tcpdump_parser.dns
 """
 import subprocess
 import sys
@@ -39,7 +45,7 @@ def connections():
     connection = None
     try:
         connection = pika.BlockingConnection(pika.ConnectionParameters(
-            host='localhost'))
+            host='poseidon-rabbit'))
         channel = connection.channel()
 
         channel.exchange_declare(exchange='topic_poseidon_internal',

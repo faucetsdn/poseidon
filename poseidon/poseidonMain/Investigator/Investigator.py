@@ -22,6 +22,7 @@ Created on 17 May 2016
 """
 import ast
 import logging
+import logging.config
 import sys
 import urllib
 
@@ -46,35 +47,28 @@ class Investigator(Main_Action_Base):
         self.update_rules()
 
         self.vent_machines = {}
-        self.config_vent_machines()
-        self.vent_startup()
-        self.vent_addr = 'http://' + self.config_dict['vent_addr']
+        self.vctrl_list()
+        self.vctrl_startup()
+        self.vctrl_addr = 'http://' + self.config_dict['vctrl_addr']
 
-    def config_vent_machines(self):
+    def vctrl_list(self):
         """
-        Checks config items in Investigator config for
-        vent endpoints to be added to vcontrol for
-        investigator processing.
+        Retrieves list of vent machines running on vcontrol
+        instance. Gets list of machines as json and evaluates
+        into dict to update dict of available vent machines.
         """
-        for key in self.config_dict:
-            if 'vent_machine' in key:
-                machine_info = {}
-                fields = self.config_dict[key].split(' ')
-                for field in fields:
-                    param = field.split('=')[0]
-                    value = field.split('=')[1]
-                    if param == 'memory' or param == 'cpus' or param == 'disk_sz':
-                        value = int(value)
-                    machine_info[param] = value
-                self.vent_machines[machine_info['name']] = machine_info
+        try:
+            resp = requests.get(self.vctrl_addr + '/machines/list')
+            self.vent_machines = ast.literal_eval(resp.body)
+        except:
+            print >> sys.stderr, 'Main: Investigator: error on vctrl list'
 
-    def vent_startup(self):
+    def vctrl_startup(self):
         """
         For each vent endpoint machine descriped in the Investigator
         config section, registers the machine with vcontrol.
         """
         for machine, config in self.vent_machines.iteritems():
-            body = self.format_vent_create(machine, config['provider'], config)
             try:
                 resp = requests.post(
                     self.vent_addr + '/machines/create', data=body)
