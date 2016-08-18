@@ -183,6 +183,16 @@ class Investigator(Main_Action_Base):
             # log error for investigation
             print >> sys.stderr, 'duplicate record for machine: %s', ip_addr
 
+    def get_handlers(self, t):
+        handle_list = []
+        if t in self.handles:
+            handle_list.append(self.handles[t])
+
+        for helper in self.actions.itervalues():
+            if t in helper.handles:
+                handle_list.append(helper.handles[t])
+        return handle_list
+
 
 class Investigator_Response(Investigator):
     """
@@ -194,6 +204,7 @@ class Investigator_Response(Investigator):
 
     def __init__(self):
         super(Investigator_Response, self).__init__()
+        self.logger = module_logger
         self.jobs = {}
 
     def vent_preparation(self):
@@ -232,14 +243,5 @@ class Investigator_Response(Investigator):
         except:
             pass
 
-    def get_handlers(self, t):
-        handle_list = []
-        if t in self.handles:
-            handle_list.append(self.handles[t])
-
-        for helper in self.actions.itervalues():
-            if t in helper.handles:
-                handle_list.append(helper.handles[t])
-        return handle_list
 
 investigator_interface = Investigator()
