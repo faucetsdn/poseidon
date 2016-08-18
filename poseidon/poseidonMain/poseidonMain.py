@@ -103,6 +103,7 @@ class PoseidonMain(object):
         once connected declares the exchange and queue for
         processing algorithm results.
         """
+        """
         wait = True
         while wait:
             try:
@@ -128,6 +129,7 @@ class PoseidonMain(object):
 
         self.rabbit_connection = connection
         self.rabbit_channel = channel
+        """
 
     def processQ(self):
         x = 10

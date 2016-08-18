@@ -63,8 +63,6 @@ print ' [*] Waiting for logs. To exit press CTRL+C'
 
 
 def callback(ch, method, properties, body):
-    """
-    """
     global channel
     message = 'ml results'
     routing_key = 'poseidon.algos.port_class'
