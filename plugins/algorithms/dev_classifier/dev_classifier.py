@@ -85,5 +85,5 @@ if __name__ == '__main__':
     channel, connection = rabbit_init(host=host,
                                       exchange=exchange,
                                       queue_name=queue_name)
-    channel.basic_consume(analyze_pcap, queue=queue_name, no_ack=True)
+    channel.basic_consume(callback, queue=queue_name, no_ack=True)
     channel.start_consuming()

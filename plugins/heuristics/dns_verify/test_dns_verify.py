@@ -134,17 +134,3 @@ def test_rabbit_init():
     channel, connection = rabbit_init(host='poseidon-rabbit',
                                       exchange='topic-poseidon-internal',
                                       queue_name='features_tcpdump')
-
-
-
-
-
-
-
-
-
-
-
-
-
-

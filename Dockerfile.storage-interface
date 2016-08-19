@@ -22,12 +22,6 @@ RUN for file in $(find poseidon/* -name "requirements.txt"); \
         pip install -r $file; \
     done
 
-# install dependencies of plugins for tests
-RUN for file in $(find plugins/* -name "requirements.txt"); \
-    do \
-        pip install -r $file; \
-    done
-
 ENV PYTHONUNBUFFERED 0
 EXPOSE 28000:27000
 
@@ -46,7 +40,6 @@ RUN py.test -v \
 --ignore=collectors \
 # comment out below for circle testing coverage 
 #--ignore=poseidon/poseidonStorage \
---ignore=plugins/features \
---ignore=plugins/heuristics \
+--ignore=plugins/ \
 --cov=poseidon/poseidonStorage \
 --cov-report term-missing --cov-config .coveragerc

@@ -1,20 +1,22 @@
-FROM alpine:3.3
+FROM ubuntu:16.04
 MAINTAINER Charlie Lewis <clewis@iqt.org>
 
-RUN apk add --update \
+RUN apt-get update && \
+    apt-get install -y \
     git \
     make \
     python \
     python-dev \
-    py-pip \
-    py-sphinx \
-    tcpdump \
-    && rm -rf /var/cache/apk/*
+    build-essential \
+    python-setuptools \
+    tcpdump && \
+    easy_install pip
 
 ADD . /poseidonWork
 WORKDIR /poseidonWork
 ENV PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
 RUN pip install pip --upgrade
+RUN pip install -U numpy scipy scikit-learn
 
 # install dependencies of plugins for poseidon
 RUN for file in $(find poseidon/* -name "requirements.txt"); \
@@ -39,7 +41,6 @@ RUN py.test -v \
 --cov=poseidon/poseidonMain \
 --ignore=poseidon/poseidonMonitor \
 --ignore=poseidon/poseidonStorage \
---ignore=plugins \
 --ignore=poseidon/periodically \
 --cov-report term-missing --cov-config .coveragerc
 
