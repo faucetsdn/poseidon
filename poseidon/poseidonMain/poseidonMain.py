@@ -102,7 +102,7 @@ class PoseidonMain(object):
     def get_queue_item(self):
         return('t', 'v')
 
-    def init_rabbit(self):
+    def init_rabbit(self):  # pragma: no cover
         """
         Continuously loops trying to connect to rabbitmq,
         once connected declares the exchange and queue for
@@ -170,7 +170,7 @@ def main(skipRabbit=False):
     pmain = PoseidonMain()
     pmain.skipRabbit = skipRabbit
     if not skipRabbit:
-        pmain.init_rabbit()
+        pmain.init_rabbit()  # pragma: no cover
     pmain.processQ()
     return True
 
