@@ -31,10 +31,11 @@ import logging
 import logging.config
 import time
 from os import getenv
-import pika
 
+import pika
 from Investigator.Investigator import investigator_interface
 from Scheduler.Scheduler import scheduler_interface
+
 from Config.Config import config_interface
 
 module_logger = logging.getLogger('poseidonMain')
@@ -118,12 +119,13 @@ class PoseidonMain(object):
                 channel = connection.channel()
                 channel.exchange_declare(exchange=exchange, type='topic')
 
-                result = channel.queue_declare(queue=queue_name, exclusive=True)
+                result = channel.queue_declare(
+                    queue=queue_name, exclusive=True)
 
                 wait = False
-                print 'connected to rabbitmq...'
+                self.logger.info('connected to rabbitmq...')
             except:
-                print 'waiting for connection to rabbitmq...'
+                self.logger.info('waiting for connection to rabbitmq...')
                 time.sleep(2)
                 wait = True
 

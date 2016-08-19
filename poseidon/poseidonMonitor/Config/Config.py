@@ -48,24 +48,27 @@ class Config(Monitor_Action_Base):
 
         self.config = ConfigParser.ConfigParser()
         if os.environ.get('POSEIDON_CONFIG') is not None:
-            print 'From the Environment'
+            self.logger.info('From the Environment')
             self.config_path = os.environ.get('POSEIDON_CONFIG')
         else:
-            print 'From the Docker hardcode'
+            self.logger.info('From the Docker hardcode')
             self.config_path = config_template_path
         self.config.readfp(open(self.config_path, 'r'))
 
     def configure(self):
-        print self.mod_name, 'configure'
+        ostr = '%s:configure' % (self.mod_name)
+        self.logger.info(ostr)
         if 'Handle_SectionConfig' in self.actions:
-            print self.mod_name, 'configure found'
+            ostr = '%s:configure found' % (self.mod_name)
             self.CONFIG = self.actions['Handle_SectionConfig']
             self.config_section_name = self.mod_name
             for item in self.CONFIG.direct_get(self.config_section_name):
                 k, v = item
                 self.mod_configuration[k] = v
             # self.mod_config = self.CONFIG.direct_get(self.config_section_name)
-            print self.mod_name, self.mod_configuration
+            ostr = 'mod_name:%s |mod_configuration: %s' % (
+                self.mod_name, self.mod_configuration)
+            self.logger.debug(ostr)
             self.configured = True
 
 
@@ -131,7 +134,8 @@ class Handle_FieldConfig(Monitor_Helper_Base):
         self.mod_name = self.__class__.__name__
 
     def direct_get(self, field, section):
-        print 'Handle_SectionConfig:', section
+        ostr = 'Handle_SectionConfig: %s' % (section)
+        self.logger.debug(ostr)
         retval = ''
         try:
             retval = self.owner.config.get(section, field)
