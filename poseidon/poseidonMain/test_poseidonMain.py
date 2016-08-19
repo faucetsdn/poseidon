@@ -37,7 +37,7 @@ def test_poseidonMain_goTime():
     a = PoseidonMain()
 
 
-@pytest.mark.skip(reason='requires rabbitmq broker, integration test')
-def test_poseidonMain_main():
+# @pytest.mark.skip(reason='requires rabbitmq broker, integration test')
+def test_poseidonMain_main(skipRabbit=True):
     a = main()
     assert a

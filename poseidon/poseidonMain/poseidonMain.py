@@ -44,6 +44,7 @@ module_logger = logging.getLogger('poseidonMain')
 class PoseidonMain(object):
 
     def __init__(self):
+        self.skipRabbit = False
         self.logger = module_logger
         self.logger.debug('logger started')
         logging.basicConfig(level=logging.DEBUG)
@@ -165,11 +166,13 @@ class PoseidonMain(object):
             self.logger.debug(logLine)
 
 
-def main():
+def main(skipRabbit=False):
     pmain = PoseidonMain()
-    pmain.init_rabbit()
+    pmain.skipRabbit = skipRabbit
+    if not skipRabbit:
+        pmain.init_rabbit()
     pmain.processQ()
     return True
 
 if __name__ == '__main__':  # pragma: no cover
-    main()
+    main(skipRabbit=False)
