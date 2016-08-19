@@ -103,16 +103,18 @@ class PoseidonMain(object):
         once connected declares the exchange and queue for
         processing algorithm results.
         """
-        """
+        host = 'poseidon-rabbit'
+        exchange = 'topic_poseidon_internal'
+        queue_name = 'algos_classifiers'
+        binding_key = 'poseidon.algos.#'
         wait = True
         while wait:
             try:
-                params = pika.ConnectionParameters(host='poseidon-rabbit')
+                params = pika.ConnectionParameters(host=host)
                 connection = pika.BlockingConnection(params)
                 channel = connection.channel()
-                channel.exchange_declare(exchange='topic_poseidon_internal', type='topic')
+                channel.exchange_declare(exchange=exchange, type='topic')
 
-                queue_name = 'algos_classifiers'
                 result = channel.queue_declare(queue=queue_name, exclusive=True)
 
                 wait = False
@@ -122,14 +124,12 @@ class PoseidonMain(object):
                 time.sleep(2)
                 wait = True
 
-        binding_key = 'poseidon.algos.#'
-        channel.queue_bind(exchange='topic_poseidon_internal',
+        channel.queue_bind(exchange=exchange,
                            queue=queue_name,
                            routing_key=binding_key)
 
         self.rabbit_connection = connection
         self.rabbit_channel = channel
-        """
 
     def processQ(self):
         x = 10
