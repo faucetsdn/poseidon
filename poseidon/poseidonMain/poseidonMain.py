@@ -31,10 +31,11 @@ import logging
 import logging.config
 import time
 from os import getenv
-import pika
 
+import pika
 from Investigator.Investigator import investigator_interface
 from Scheduler.Scheduler import scheduler_interface
+
 from Config.Config import config_interface
 
 module_logger = logging.getLogger('poseidonMain')
@@ -43,6 +44,7 @@ module_logger = logging.getLogger('poseidonMain')
 class PoseidonMain(object):
 
     def __init__(self):
+        self.skipRabbit = False
         self.logger = module_logger
         self.logger.debug('logger started')
         logging.basicConfig(level=logging.DEBUG)
@@ -100,7 +102,7 @@ class PoseidonMain(object):
     def get_queue_item(self):
         return('t', 'v')
 
-    def init_rabbit(self):
+    def init_rabbit(self):  # pragma: no cover
         """
         Continuously loops trying to connect to rabbitmq,
         once connected declares the exchange and queue for
@@ -118,12 +120,13 @@ class PoseidonMain(object):
                 channel = connection.channel()
                 channel.exchange_declare(exchange=exchange, type='topic')
 
-                result = channel.queue_declare(queue=queue_name, exclusive=True)
+                result = channel.queue_declare(
+                    queue=queue_name, exclusive=True)
 
                 wait = False
-                print 'connected to rabbitmq...'
+                self.logger.info('connected to rabbitmq...')
             except:
-                print 'waiting for connection to rabbitmq...'
+                self.logger.info('waiting for connection to rabbitmq...')
                 time.sleep(2)
                 wait = True
 
@@ -163,11 +166,13 @@ class PoseidonMain(object):
             self.logger.debug(logLine)
 
 
-def main():
+def main(skipRabbit=False):
     pmain = PoseidonMain()
-    pmain.init_rabbit()
+    pmain.skipRabbit = skipRabbit
+    if not skipRabbit:
+        pmain.init_rabbit()  # pragma: no cover
     pmain.processQ()
     return True
 
 if __name__ == '__main__':  # pragma: no cover
-    main()
+    main(skipRabbit=False)

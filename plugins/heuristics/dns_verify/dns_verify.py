@@ -13,7 +13,7 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-"""
+'''
 Take parsed pcaps and add all resolved addresses from dns
 to reference new traffic against to determine
 whether a dns lookup has occured recently for dest address.
@@ -28,37 +28,43 @@ rabbitmq:
     exchange:   topic-poseidon-internal
     queue(in):  features_tcpdump
         keys:   poseidon.tcpdump_parser.dns.#
-"""
+'''
 import ast
 import copy
+import logging
 import time
+
 import pika
+
+module_logger = logging.getLogger('plugins.heuristics.dns_verify.dns_verify')
 
 
 def rabbit_init(host, exchange, queue_name):
-    """
+    '''
     Connects to rabbitmq using the given hostname,
     exchange, and queue. Retries on failure until success.
     Binds routing keys appropriate for module, and returns
     the channel and connection.
-    """
+    '''
     wait = True
     while wait:
         try:
-            connection = pika.BlockingConnection(pika.ConnectionParameters(host=host))
+            connection = pika.BlockingConnection(
+                pika.ConnectionParameters(host=host))
             channel = connection.channel()
             channel.exchange_declare(exchange=exchange, type='topic')
             result = channel.queue_declare(name=queue_name, exclusive=True)
             wait = False
-            print "connected to rabbitmq..."
+            module_logger.info('connected to rabbitmq...')
         except:
-            print "waiting for connection to rabbitmq..."
+            module_logger.info('waiting for connection to rabbitmq...')
             time.sleep(2)
             wait = True
 
     binding_keys = sys.argv[1:]
     if not binding_keys:
-        print >> sys.stderr, "Usage: %s [binding_key]..." % (sys.argv[0],)
+        ostr = 'Usage: %s [binding_key]...' % (sys.argv[0],)
+        module_logger.error(ostr)
         sys.exit(1)
 
     for binding_key in binding_keys:
@@ -66,18 +72,18 @@ def rabbit_init(host, exchange, queue_name):
                            queue=queue_name,
                            routing_key=binding_key)
 
-    print ' [*] Waiting for logs. To exit press CTRL+C'
+    module_logger.info(' [*] Waiting for logs. To exit press CTRL+C')
     return channel, connection
 
 
 class DNSRecord:
-    """
+    '''
     Class to keep track of resolved dns
     requests for a machine with address addr
     - stores resolved addresses with
     a time-to-live so they will be removed from
     the dict after that time expires.
-    """
+    '''
 
     def __init__(self, addr):
         self.name = addr
@@ -89,11 +95,11 @@ class DNSRecord:
         self.resolved[addr] = time.time() + duration
 
     def __contains__(self, addr):
-        """
+        '''
         Checks if address is in the resolved
         dict. If time is expired, deletes
         entry and returns False.
-        """
+        '''
         if addr not in self.resolved:
             return False
         if time.time() < self.resolved[addr]:
@@ -103,11 +109,11 @@ class DNSRecord:
             return False
 
     def __iter__(self):
-        """
+        '''
         Returns valid addresses from resolved
         dict, if time is expired then deletes
         and does not yield.
-        """
+        '''
         for a in copy.deepcopy(self.resolved):
             if time.time() < self.resolved[a]:
                 yield a
@@ -120,13 +126,13 @@ dns_records = {}
 
 
 def verify_dns_record(ch, method, properties, body):
-    """
+    '''
     Takes parsed packet as string, if dns packet then
     adds resolved addresses to record of addresses for that machine,
     otherwise checks that the source address is in-network
     (out of network to in-network traffic isn't applicable to dns validation)
     and flags if it destination address was not resolved by the machine.
-    """
+    '''
     global network_machines
     global dns_records
 

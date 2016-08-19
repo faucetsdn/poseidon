@@ -51,14 +51,17 @@ class Monitor_Helper_Base(Rock_Bottom):  # pragma: no cover
 
     def configure(self):
         """get, parse, store configuration internally as dict"""
-        print self.mod_name, 'configure()'
+        ostr = '%s %s' % (self.mod_name, 'configure()')
+        self.logger.info(ostr)
         # local valid
         if not self.owner:
-            print self.mod_name, 'ownerNull'
+            ostr = '%s %s' % (self.mod_name, 'ownerNull')
+            self.logger.error(ostr)
             return
         # monitor valid
         if not self.owner.owner:
-            print self.mod_name, 'monitorNull'
+            ostr = '%s %s' % (self.mod_name, 'monitorNull')
+            self.logger.error(ostr)
             return
         self.mod_configuration = dict()
         conf = self.owner.owner.Config.get_endpoint('Handle_SectionConfig')
@@ -66,7 +69,8 @@ class Monitor_Helper_Base(Rock_Bottom):  # pragma: no cover
             for item in conf.direct_get(self.config_section_name):
                 k, v = item
                 self.mod_configuration[k] = v
-            print 'config:', self.config_section_name, ':', self.mod_configuration
+                ostr = 'config:%s:%s' % (
+                    self.config_section_name, self.mod_configuration)
             self.configured = True
 
     def first_run(self):

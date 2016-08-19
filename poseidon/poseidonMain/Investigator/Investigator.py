@@ -40,6 +40,7 @@ class Investigator(Main_Action_Base):
 
     def __init__(self):
         super(Investigator, self).__init__()
+        self.logger = module_logger
         self.mod_name = self.__class__.__name__
         self.config = Config()
         self.config_dict = {}
@@ -54,7 +55,6 @@ class Investigator(Main_Action_Base):
         self.vctrl_list()
         self.vctrl_startup()
         self.vctrl_addr = 'http://' + self.config_dict['vctrl_addr']
-        self.logger = module_logger
 
     def vctrl_list(self):
         """
@@ -66,7 +66,7 @@ class Investigator(Main_Action_Base):
             resp = requests.get(self.vctrl_addr + '/machines/list')
             self.vent_machines = ast.literal_eval(resp.body)
         except:
-            print >> sys.stderr, 'Main: Investigator: error on vctrl list'
+            self.logger.error('Main: Investigator: error on vctrl list')
 
     def vctrl_startup(self):
         """
@@ -78,7 +78,8 @@ class Investigator(Main_Action_Base):
                 resp = requests.post(
                     self.vent_addr + '/machines/create', data=body)
             except:
-                print >> sys.stderr, 'Main: Investigator: error on vent create request.'
+                self.logger.error(
+                    'Main: Investigator: error on vent create request.')
 
     def format_vent_create(self, name, provider, body={}, group='poseidon-vent', labels='default', memory=4096, cpus=4, disk_sz=20000):
         """
@@ -123,7 +124,9 @@ class Investigator(Main_Action_Base):
         for policy in self.rules:
             for proposed_algo in self.rules[policy]:
                 if proposed_algo not in self.algos:
-                    print >> sys.stderr, 'algorithm: %s has not been registered, deleting from policy', proposed_algo
+                    ostr = 'algorithm: %s has not been registered, deleting from policy' % (
+                        proposed_algo)
+                    self.logger.error(ostr)
                     del proposed_algo
 
     def register_algorithm(self, name, algorithm):
@@ -168,7 +171,8 @@ class Investigator(Main_Action_Base):
         except:
             # error connecting to storage interface
             # log error
-            print >> sys.stderr, 'Main (Investigator): could not connect to storage interface'
+            self.logger.error(
+                'Main (Investigator): could not connect to storage interface')
             return
 
         resp = ast.literal_eval(resp.body)
@@ -181,7 +185,8 @@ class Investigator(Main_Action_Base):
         else:
             # bad - should only be one record for each ip
             # log error for investigation
-            print >> sys.stderr, 'duplicate record for machine: %s', ip_addr
+            ostr = 'duplicate record for machine: %s' % (ip_addr)
+            self.logger.error(ostr)
 
     def get_handlers(self, t):
         handle_list = []
@@ -218,7 +223,8 @@ class Investigator_Response(Investigator):
                 url = 'http://' + self.vent_addr + '/commands/deploy/' + machine
                 resp = requests.post(url)
             except:
-                print >> sys.stderr, 'Main: Investigator: vent_preparation, vent request failed'
+                self.logger.error(
+                    'Main: Investigator: vent_preparation, vent request failed')
 
     def send_vent_jobs(self):
         """
@@ -230,7 +236,8 @@ class Investigator_Response(Investigator):
         try:
             resp = requests.get('vent_url')
         except:
-            print >> sys.stderr, 'Main: Investigator: send_vent_jobs, vent request failed'
+            self.logger.error(
+                'Main: Investigator: send_vent_jobs, vent request failed')
 
     def update_record(self):
         """

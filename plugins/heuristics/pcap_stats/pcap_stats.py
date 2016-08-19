@@ -29,20 +29,23 @@ rabbitmq:
     queue(in):  features_tcpdump
         keys:   poseidon.tcpdump_parser.#
 """
-from pymongo import MongoClient
+import ast
+import logging
+import sys
+import thread
+import threading
+import time
+
+import pika
+import requests
 from pcap_stats_utils import FlowRecord
 from pcap_stats_utils import MachineNode
 from pcap_stats_utils import TimeRecord
-import sys
-import ast
-import time
-import pika
-import thread
-import threading
-import requests
+from pymongo import MongoClient
 
 
 flowRecordLock = threading.Lock()
+module_logger = logging.getLogger('plugins.heuristics.pcap_stats.pcap_stats')
 
 
 def rabbit_init(host, exchange, queue_name):
@@ -55,20 +58,23 @@ def rabbit_init(host, exchange, queue_name):
     wait = True
     while wait:
         try:
-            connection = pika.BlockingConnection(pika.ConnectionParameters(host=host))
+            connection = pika.BlockingConnection(
+                pika.ConnectionParameters(host=host))
             channel = connection.channel()
             channel.exchange_declare(exchange=exchange, type='topic')
             result = channel.queue_declare(name=queue_name, exclusive=True)
             wait = False
-            print "connected to rabbitmq..."
+            module_logger.info('connected to rabbitmq...')
         except:
-            print "waiting for connection to rabbitmq..."
+            module_logger.info('waiting for connection to rabbitmq...')
             time.sleep(2)
             wait = True
 
     binding_keys = sys.argv[1:]
     if not binding_keys:
-        print >> sys.stderr, "Usage: %s [binding_key]..." % (sys.argv[0],)
+        ostr = 'Usage: %s [binding_key]...' % (sys.argv[0])
+        module_logger.error(ostr)
+
         sys.exit(1)
 
     for binding_key in binding_keys:
@@ -76,7 +82,7 @@ def rabbit_init(host, exchange, queue_name):
                            queue=queue_name,
                            routing_key=binding_key)
 
-    print ' [*] Waiting for logs. To exit press CTRL+C'
+    module_logger.info(' [*] Waiting for logs. To exit press CTRL+C')
     return channel, connection
 
 
@@ -107,7 +113,7 @@ def db_update_worker():
             # update with rest call for appropriate docs
             # flowRecordLock.release()
         except:
-            print('database update failed...')
+            module_logger.error('database update failed...')
         time.sleep(10)
     """
 
