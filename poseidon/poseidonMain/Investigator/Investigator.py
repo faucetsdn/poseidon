@@ -40,6 +40,7 @@ class Investigator(Main_Action_Base):
 
     def __init__(self):
         super(Investigator, self).__init__()
+        self.logger = module_logger
         self.mod_name = self.__class__.__name__
         self.config = Config()
         self.config_dict = {}
@@ -54,7 +55,6 @@ class Investigator(Main_Action_Base):
         self.vctrl_list()
         self.vctrl_startup()
         self.vctrl_addr = 'http://' + self.config_dict['vctrl_addr']
-        self.logger = module_logger
 
     def vctrl_list(self):
         """
