@@ -67,6 +67,9 @@ target/
 # OSX crap
 .DS_Store
 
+# pcap files
+*.cap
+
 #other crap
 **/.ropeproject
 checkscript.sh
