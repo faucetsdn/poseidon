@@ -48,7 +48,7 @@ flowRecordLock = threading.Lock()
 module_logger = logging.getLogger('plugins.heuristics.pcap_stats.pcap_stats')
 
 
-def rabbit_init(host, exchange, queue_name):
+def rabbit_init(host, exchange, queue_name):  # pragma: no cover
     """
     Connects to rabbitmq using the given hostname,
     exchange, and queue. Retries on failure until success.

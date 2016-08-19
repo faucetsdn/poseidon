@@ -39,7 +39,7 @@ import pika
 module_logger = logging.getLogger('plugins.heuristics.dns_verify.dns_verify')
 
 
-def rabbit_init(host, exchange, queue_name):
+def rabbit_init(host, exchange, queue_name):  # pragma: no cover
     '''
     Connects to rabbitmq using the given hostname,
     exchange, and queue. Retries on failure until success.
