@@ -3,6 +3,7 @@ MAINTAINER dgrossman <dgrossman@iqt.org>
 
 RUN apk add --update \
     git \
+    gcc \
     make \
     python \
     python-dev \

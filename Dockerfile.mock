@@ -22,12 +22,6 @@ RUN for file in $(find poseidon/* -name "requirements.txt"); \
         pip install -r $file; \
     done
 
-# install dependencies of plugins for tests
-RUN for file in $(find plugins/* -name "requirements.txt"); \
-    do \
-        pip install -r $file; \
-    done
-
 ENV PYTHONUNBUFFERED 0
 EXPOSE 3333:8003
 
@@ -41,6 +35,7 @@ RUN py.test -v \
 --ignore=poseidon/poseidonMain \
 --ignore=poseidon/poseidonStorage \
 --ignore=collectors/ \
+--ignore=plugins/ \
 --cov=poseidon/poseidonMonitor \
 --cov=plugins --cov-report term-missing --cov-config .coveragerc
 
