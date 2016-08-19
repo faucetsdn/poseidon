@@ -19,11 +19,14 @@ Test module for poseidonMain.py
 Created on 29 May 2016
 @author: dgrossman, tlanham
 """
+import logging
 from os import environ
 
 import pytest
 from poseidonMain import main
 from poseidonMain import PoseidonMain
+
+module_logger = logging.getLogger('poseidonMain.test_poseidonMain')
 
 
 def test_poseidonMain_goTime():
@@ -34,7 +37,7 @@ def test_poseidonMain_goTime():
     a = PoseidonMain()
 
 
-@pytest.mark.skip(reason='requires rabbitmq broker, integration test')
+# @pytest.mark.skip(reason='requires rabbitmq broker, integration test')
 def test_poseidonMain_main():
-    a = main()
+    a = main(skipRabbit=True)
     assert a

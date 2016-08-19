@@ -17,6 +17,7 @@
 Created on 15 July 2016
 @author: dgrossman
 """
+import logging
 import os
 import urllib2
 
@@ -25,18 +26,24 @@ DOCKER_URL = 'file:///poseidonWork/templates/config.template'
 CI_TESTING = '/poseidonWork/templates/config.template'
 
 
+module_logger = logging.getLogger('poseidonMain.Config')
+
+
 class Config(Main_Action_Base):
 
     def __init__(self):
         super(Config, self).__init__()
         self.mod_name = self.__class__.__name__
         self.URL = None
+        if self.logger is None:
+            self.logger = module_logger
         try:
             self.URL = os.environ['POSEIDON_CONFIG_URL']
         except KeyError:
             # TODO flag error
             self.URL = CI_TESTING
-        print 'poseidonMain:Config using', self.URL
+            logLine = 'poseidonMain:Config using %s' % (self.URL)
+            self.logger.debug(logLine)
 
     def get_section(self, section_name):
         if self.URL == CI_TESTING:
@@ -50,7 +57,8 @@ class Config(Main_Action_Base):
             else:
                 ask = self.URL + section_name
             retval = urllib2.urlopen(ask).readlines()
-            print ask, retval
+            logLine = 'ask=%s\n retval=%s\n' % (ask, retval)
+            self.logger.debug(logLine)
             return retval
         # TODO flag error?
         return None

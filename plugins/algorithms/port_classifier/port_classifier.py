@@ -28,21 +28,28 @@ rabbitmq:
 
     keys(out):  poseidon.algos.port_class
 """
-import pandas as pd
+import logging
+import sys
+
 import numpy as np
-from sklearn.cross_validation import train_test_split
+import pandas as pd
+import pika
 from sklearn import linear_model
-from sklearn import preprocessing 
+from sklearn import preprocessing
+from sklearn.cross_validation import train_test_split
 from sklearn.metrics import classification_report
 import time
 import pika
 import sys
 
 
+module_logger = logging.getLogger(
+    'plugins.algorithms.port_classifier.port_classifier')
+
 fd = None
 
 
-def rabbit_init(host, exchange, queue_name):
+def rabbit_init(host, exchange, queue_name):  # pragma: no cover
     """
     Connects to rabbitmq using the given hostname,
     exchange, and queue. Retries on failure until success.
@@ -52,21 +59,27 @@ def rabbit_init(host, exchange, queue_name):
     wait = True
     while wait:
         try:
-            connection = pika.BlockingConnection(pika.ConnectionParameters(host=host))
+            connection = pika.BlockingConnection(
+                pika.ConnectionParameters(host=host))
             channel = connection.channel()
             channel.exchange_declare(exchange=exchange, type='topic')
             result = channel.queue_declare(queue=queue_name, exclusive=True)
             wait = False
+            module_logger.info('connected to rabbitmq...')
             print "connected to rabbitmq..."
         except Exception, e:
             print "waiting for connection to rabbitmq..."
             print str(e)
+            module_logger.info(str(e))
+            module_logger.info('waiting for connection to rabbitmq...')
             time.sleep(2)
             wait = True
 
     binding_keys = sys.argv[1:]
     if not binding_keys:
-        print >> sys.stderr, "Usage: %s [binding_key]..." % (sys.argv[0],)
+        ostr = 'Usage: %s [binding_key]...' % (sys.argv[0])
+        module_logger.error(ostr)
+
         sys.exit(1)
 
     for binding_key in binding_keys:
@@ -74,7 +87,7 @@ def rabbit_init(host, exchange, queue_name):
                            queue=queue_name,
                            routing_key=binding_key)
 
-    print ' [*] Waiting for logs. To exit press CTRL+C'
+    module_logger.info(' [*] Waiting for logs. To exit press CTRL+C')
     return channel, connection
 
 
@@ -101,30 +114,34 @@ def port_classifier(channel, file):
     # Remove uneccesary columns
     flow_df = flow_df.drop('misc', axis=1)
 
-    # Filter initial raw dataset to only have ports classified that are specefied
-    filtered_df = flow_df.loc[flow_df['dstport'].isin([53, 443, 80]) | flow_df['srcport'].isin([53, 443, 80])]
+    # Filter initial raw dataset to only have ports classified that are
+    # specefied
+    filtered_df = flow_df.loc[flow_df['dstport'].isin([53, 443, 80]) | flow_df[
+        'srcport'].isin([53, 443, 80])]
 
     # Create stats only array
     stats = filtered_df.ix[:, 'total_fpackets':]
 
     # Create ports only aray
-    ports = filtered_df.apply(lambda x: min(x['srcport'], x['dstport']), axis=1)
+    ports = filtered_df.apply(lambda x: min(
+        x['srcport'], x['dstport']), axis=1)
 
     # Scale stats info to be fed into classifier
     scaled_stats = preprocessing.scale(stats)
 
     # Create test and training data
-    X_train, X_test, y_train, y_test = train_test_split(scaled_stats, ports.values, test_size=0.2, random_state=41) 
+    X_train, X_test, y_train, y_test = train_test_split(
+        scaled_stats, ports.values, test_size=0.2, random_state=41)
 
     # Create logistic regression model
     lgs = linear_model.LogisticRegression(C=1e5)
     overall_accuracy = lgs.fit(X_train, y_train).score(X_test, y_test)
-    print overall_accuracy
+    module_logger.info(str(overall_accuracy))
 
     # Classification Report for model
     result = lgs.predict(X_test)
     class_report = classification_report(y_test, result)
-    print class_report
+    module_logger.info(str(class_report))
 
     message = class_report
     routing_key = 'poseidon.algos.port_class'
@@ -132,7 +149,8 @@ def port_classifier(channel, file):
                           routing_key=routing_key,
                           body=message)
 
-    print ' [x] Sent %r:%r' % (routing_key, message)
+    ostr = ' [x] Sent %r:%r' % (routing_key, message)
+    module_logger.info(ostr)
 
 
 if __name__ == '__main__':

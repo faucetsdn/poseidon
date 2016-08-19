@@ -18,14 +18,18 @@ Test module for jsonmixin.
 
 @author: kylez
 """
+import json
+import logging
+import os
 
 import pytest
-from jsonmixin import JsonMixin
 from httmock import response
-import os
-import json
+from jsonmixin import JsonMixin
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
+
+module_logger = logging.getLogger(
+    'poseidonMonitor.NBCA.proxy.mixins.test_jsonmixin')
 
 
 def test_JsonMixin():
@@ -33,9 +37,10 @@ def test_JsonMixin():
     Tests JsonMixin
     """
     # Craft a JSON response object
-    with open(os.path.join(cur_dir, "sample_json.json")) as f:
-        j = json.loads(f.read().replace("\n", ""))
-    res = response(content=json.dumps(j), headers={"content-type":"application/json"})
+    with open(os.path.join(cur_dir, 'sample_json.json')) as f:
+        j = json.loads(f.read().replace('\n', ''))
+    res = response(content=json.dumps(j), headers={
+                   'content-type': 'application/json'})
 
     # Parse the JSON response object
     mixin = JsonMixin()

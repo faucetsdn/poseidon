@@ -18,6 +18,8 @@
 """
 import logging
 
+module_logger = logging.getLogger('baseClasses.Rock_Bottom')
+
 
 class Rock_Bottom(object):
     """Bottom most poseidon class

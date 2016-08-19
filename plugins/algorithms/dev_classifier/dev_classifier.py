@@ -28,11 +28,16 @@ rabbitmq:
 
     keys(out):  poseidon.algos.dev_class
 """
-import pika
+import logging
 import sys
 
+import pika
 
-def rabbit_init(host, exchange, queue_name):
+module_logger = logging.getLogger(
+    'plugins.algorithms.dev_classifier.dev_classifier')
+
+
+def rabbit_init(host, exchange, queue_name):  # pragma: no cover
     """
     Connects to rabbitmq using the given hostname,
     exchange, and queue. Retries on failure until success.
@@ -42,20 +47,22 @@ def rabbit_init(host, exchange, queue_name):
     wait = True
     while wait:
         try:
-            connection = pika.BlockingConnection(pika.ConnectionParameters(host=host))
+            connection = pika.BlockingConnection(
+                pika.ConnectionParameters(host=host))
             channel = connection.channel()
             channel.exchange_declare(exchange=exchange, type='topic')
             result = channel.queue_declare(name=queue_name, exclusive=True)
             wait = False
-            print "connected to rabbitmq..."
+            module_logger.info('connected to rabbitmq...')
         except:
-            print "waiting for connection to rabbitmq..."
+            module_logger.info('waiting for connection to rabbitmq...')
             time.sleep(2)
             wait = True
 
     binding_keys = sys.argv[1:]
     if not binding_keys:
-        print >> sys.stderr, "Usage: %s [binding_key]..." % (sys.argv[0],)
+        ostr = 'Usage: %s [binding_key]...' % (sys.argv[0])
+        module_logger.error(ostr)
         sys.exit(1)
 
     for binding_key in binding_keys:
@@ -63,13 +70,12 @@ def rabbit_init(host, exchange, queue_name):
                            queue=queue_name,
                            routing_key=binding_key)
 
-    print ' [*] Waiting for logs. To exit press CTRL+C'
+    module_logger.info(' [*] Waiting for logs. To exit press CTRL+C')
     return channel, connection
 
 
 def callback(ch, method, properties, body):
-    """
-    """
+
     global channel
     message = 'ml results'
     routing_key = 'poseidon.algos.dev_class'
