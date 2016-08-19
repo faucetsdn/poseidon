@@ -31,8 +31,12 @@ rabbitmq:
 """
 import ast
 import copy
+import logging
 import time
+
 import pika
+
+module_logger = logging.getLogger('plugins.heuristics.dns_verify.dns_verify')
 
 
 """
@@ -45,15 +49,16 @@ while wait:
         queue_name = 'features_tcpdump'
         result = channel.queue_declare(name=queue_name, exclusive=True)
         wait = False
-        print "connected to rabbitmq..."
+        module_logger.info( "connected to rabbitmq...")
     except:
-        print "waiting for connection to rabbitmq..."
+        module_logger.info( "waiting for connection to rabbitmq...")
         time.sleep(2)
         wait = True
 
 binding_keys = sys.argv[1:]
 if not binding_keys:
-    print >> sys.stderr, "Usage: %s [binding_key]..." % (sys.argv[0],)
+    ostr = "Usage: %s [binding_key]..." % (sys.argv[0],)
+    module_logger.info(ostr)
     sys.exit(1)
 
 for binding_key in binding_keys:
@@ -61,7 +66,8 @@ for binding_key in binding_keys:
                        queue=queue_name,
                        routing_key=binding_key)
 
-print ' [*] Waiting for logs. To exit press CTRL+C'
+ostr = ' [*] Waiting for logs. To exit press CTRL+C'
+module_logger.info(ostr)
 """
 
 

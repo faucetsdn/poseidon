@@ -28,8 +28,18 @@ rabbitmq:
 
     keys(out):  poseidon.algos.port_class
 """
-import pika
+import logging
 import sys
+
+import pika
+
+module_logger = logging.getLogger(
+    'plugins.algorithms.port_classifier.port_classifier')
+
+import logging
+
+module_logger = logging.getLogger(
+    'plugins.algorithms.port_classifier.port_classifier')
 
 
 """
@@ -45,26 +55,28 @@ while wait:
         result = channel.queue_declare(queue=in_queue, exclusive=True)
 
         wait = False
-        print 'connected to rabbitmq...'
+        module_logger.info('connected to rabbitmq...')
     except:
-        print 'waiting for connection to rabbitmq...'
+        module_logger.info('waiting for connection to rabbitmq...')
         time.sleep(2)
         wait = True
 
 binding_keys = sys.argv[1:]
 if not binding_keys:
-    print >> sys.stderr, "Usage: %s [binding_key]..." % (sys.argv[0],)
+    ostr = sys.stderr, "Usage: %s [binding_key]..." % (sys.argv[0],)
+    module_logger.error(ostr)
     sys.exit(1)
 for binding_key in binding_keys:
     channel.queue_bind(exchange='topic_poseidon_internal',
                        queue=in_queue,
                        routing_key=binding_key)
-print ' [*] Waiting for logs. To exit press CTRL+C'
+ostr = ' [*] Waiting for logs. To exit press CTRL+C'
+module_logger.info(ostr)
 
 
 def callback(ch, method, properties, body):
-    """
-    """
+"""
+"""
     global channel
     message = 'ml results'
     routing_key = 'poseidon.algos.port_class'

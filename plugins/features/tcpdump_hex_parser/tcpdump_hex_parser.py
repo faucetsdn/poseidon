@@ -25,9 +25,14 @@ rabbitmq:
         keys:   poseidon.tcpdump_parser
                 poseidon.tcpdump_parser.dns
 """
+import logging
 import subprocess
 import sys
+
 import pika
+
+module_logger = logging.getLogger(
+    'plugins.features.tcpdump_hex_parser.tcpdump_hex_parser')
 
 
 def get_path():
@@ -35,7 +40,7 @@ def get_path():
     try:
         path = sys.argv[1]
     except:
-        print 'no path provided, quitting.'
+        module_logger.error('no path provided, quitting.')
     return path
 
 
@@ -51,7 +56,7 @@ def connections():
         channel.exchange_declare(exchange='topic_poseidon_internal',
                                  type='topic')
     except:
-        print 'unable to connect to rabbitmq, quitting.'
+        module_logger.error('unable to connect to rabbitmq, quitting.')
     return channel, connection
 
 
@@ -183,7 +188,7 @@ def run_tool(path):
     """
     Tool entry point
     """
-    print 'processing pcap results...'
+    module_logger.info('processing pcap results...')
     channel, connection = connections()
     proc = subprocess.Popen(
         'tcpdump -nn -tttt -xx -r ' + path,
@@ -199,7 +204,8 @@ def run_tool(path):
             channel.basic_publish(exchange='topic_poseidon_internal',
                                   routing_key=routing_key,
                                   body=message)
-        print ' [x] Sent %r:%r' % (routing_key, message)
+        ostr = ' [x] Sent %r:%r' % (routing_key, message)
+        module_logger.info(ostr)
     try:
         connection.close()
     except:

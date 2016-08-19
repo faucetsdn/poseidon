@@ -29,17 +29,19 @@ rabbitmq:
     queue(in):  features_tcpdump
         keys:   poseidon.tcpdump_parser.#
 """
-from pymongo import MongoClient
+import ast
+import logging
+import sys
+import thread
+import threading
+import time
+
+import pika
+import requests
 from pcap_stats_utils import FlowRecord
 from pcap_stats_utils import MachineNode
 from pcap_stats_utils import TimeRecord
-import sys
-import ast
-import time
-import pika
-import thread
-import threading
-import requests
+from pymongo import MongoClient
 
 
 flowRecordLock = threading.Lock()
