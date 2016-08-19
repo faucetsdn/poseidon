@@ -13,7 +13,7 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-"""
+'''
 Take parsed pcaps and add all resolved addresses from dns
 to reference new traffic against to determine
 whether a dns lookup has occured recently for dest address.
@@ -28,7 +28,7 @@ rabbitmq:
     exchange:   topic-poseidon-internal
     queue(in):  features_tcpdump
         keys:   poseidon.tcpdump_parser.dns.#
-"""
+'''
 import ast
 import copy
 import logging
@@ -40,12 +40,12 @@ module_logger = logging.getLogger('plugins.heuristics.dns_verify.dns_verify')
 
 
 def rabbit_init(host, exchange, queue_name):
-    """
+    '''
     Connects to rabbitmq using the given hostname,
     exchange, and queue. Retries on failure until success.
     Binds routing keys appropriate for module, and returns
     the channel and connection.
-    """
+    '''
     wait = True
     while wait:
         try:
@@ -95,11 +95,11 @@ class DNSRecord:
         self.resolved[addr] = time.time() + duration
 
     def __contains__(self, addr):
-        """
+        '''
         Checks if address is in the resolved
         dict. If time is expired, deletes
         entry and returns False.
-        """
+        '''
         if addr not in self.resolved:
             return False
         if time.time() < self.resolved[addr]:
@@ -109,11 +109,11 @@ class DNSRecord:
             return False
 
     def __iter__(self):
-        """
+        '''
         Returns valid addresses from resolved
         dict, if time is expired then deletes
         and does not yield.
-        """
+        '''
         for a in copy.deepcopy(self.resolved):
             if time.time() < self.resolved[a]:
                 yield a
@@ -126,13 +126,13 @@ dns_records = {}
 
 
 def verify_dns_record(ch, method, properties, body):
-    """
+    '''
     Takes parsed packet as string, if dns packet then
     adds resolved addresses to record of addresses for that machine,
     otherwise checks that the source address is in-network
     (out of network to in-network traffic isn't applicable to dns validation)
     and flags if it destination address was not resolved by the machine.
-    """
+    '''
     global network_machines
     global dns_records
 
