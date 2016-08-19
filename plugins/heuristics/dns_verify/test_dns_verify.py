@@ -26,6 +26,7 @@ from dns_verify import dns_records
 from dns_verify import DNSRecord
 from dns_verify import network_machines
 from dns_verify import verify_dns_record
+from dns_verify import rabbit_init
 
 
 def test_dns_record_class():
@@ -126,3 +127,10 @@ def test_dns_packet_validation():
     assert '5.8.13.21' in dns_records['136.145.402.267'].resolved
 
     dns_records.clear()
+
+
+@pytest.mark.skip(reason='requires rabbitmq broker, integration test')
+def test_rabbit_init():
+    channel, connection = rabbit_init(host='poseidon-rabbit',
+                                      exchange='topic-poseidon-internal',
+                                      queue_name='features_tcpdump')

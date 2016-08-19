@@ -3,6 +3,8 @@ MAINTAINER dgrossman dgrossman@iqt.org
 
 RUN apk add --update \
     git \
+    gcc \
+    gfortran \
     make \
     python \
     python-dev \

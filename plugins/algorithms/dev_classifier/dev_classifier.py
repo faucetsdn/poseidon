@@ -32,34 +32,39 @@ import pika
 import sys
 
 
-"""
-wait = True
-while wait:
-    try:
-        params = pika.ConnectionParameters(host='poseidon-rabbit')
-        connection = pika.BlockingConnection(params)
-        channel = connection.channel()
-        channel.exchange_declare(exchange='topic_poseidon_internal', type='topic')
+def rabbit_init(host, exchange, queue_name):
+    """
+    Connects to rabbitmq using the given hostname,
+    exchange, and queue. Retries on failure until success.
+    Binds routing keys appropriate for module, and returns
+    the channel and connection.
+    """
+    wait = True
+    while wait:
+        try:
+            connection = pika.BlockingConnection(pika.ConnectionParameters(host=host))
+            channel = connection.channel()
+            channel.exchange_declare(exchange=exchange, type='topic')
+            result = channel.queue_declare(name=queue_name, exclusive=True)
+            wait = False
+            print "connected to rabbitmq..."
+        except:
+            print "waiting for connection to rabbitmq..."
+            time.sleep(2)
+            wait = True
 
-        in_queue = 'features_flowparser'
-        result = channel.queue_declare(queue=in_queue, exclusive=True)
+    binding_keys = sys.argv[1:]
+    if not binding_keys:
+        print >> sys.stderr, "Usage: %s [binding_key]..." % (sys.argv[0],)
+        sys.exit(1)
 
-        wait = False
-        print 'connected to rabbitmq...'
-    except:
-        print 'waiting for connection to rabbitmq...'
-        time.sleep(2)
-        wait = True
+    for binding_key in binding_keys:
+        channel.queue_bind(exchange=exchange,
+                           queue=queue_name,
+                           routing_key=binding_key)
 
-binding_keys = sys.argv[1:]
-if not binding_keys:
-    print >> sys.stderr, "Usage: %s [binding_key]..." % (sys.argv[0],)
-    sys.exit(1)
-for binding_key in binding_keys:
-    channel.queue_bind(exchange='topic_poseidon_internal',
-                       queue=in_queue,
-                       routing_key=binding_key)
-print ' [*] Waiting for logs. To exit press CTRL+C'
+    print ' [*] Waiting for logs. To exit press CTRL+C'
+    return channel, connection
 
 
 def callback(ch, method, properties, body):
@@ -73,6 +78,12 @@ def callback(ch, method, properties, body):
                           body=message)
 
 
-channel.basic_consume(callback, queue=in_queue, no_ack=True)
-channel.start_consuming()
-"""
+if __name__ == '__main__':
+    host = 'poseidon-rabbit'
+    exchange = 'topic-poseidon-internal'
+    queue_name = 'features_flowparser'
+    channel, connection = rabbit_init(host=host,
+                                      exchange=exchange,
+                                      queue_name=queue_name)
+    channel.basic_consume(callback, queue=queue_name, no_ack=True)
+    channel.start_consuming()

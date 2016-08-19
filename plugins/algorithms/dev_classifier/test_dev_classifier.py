@@ -20,3 +20,12 @@ Created on 17 August 2016
 Test module for machine learning algorithm
 for classifying device type from tcp packets.
 """
+import pytest
+from dev_classifier import rabbit_init
+
+
+@pytest.mark.skip(reason='requires rabbitmq broker, integration test')
+def test_rabbit_init():
+    channel, connection = rabbit_init(host='poseidon-rabbit',
+                                      exchange='topic-poseidon-internal',
+                                      queue_name='features_flowparser')

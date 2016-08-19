@@ -27,7 +27,7 @@ api: clean-api build-api
 	echo "The API can be accessed here: $$api_url"; \
 	echo
 
-test: storage build
+test: build
 
 main: clean-main build-main
 	docker run --name poseidon-main -it poseidon-main
@@ -120,6 +120,7 @@ docs: clean-docs build
 	echo "The docs can be accessed here: $$doc_url"
 
 compose-install:
+	# NOTE: you may need to use `sudo make compose-install` if not running as root
 	curl -L https://github.com/docker/compose/releases/download/1.8.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose; \
 	chmod +x /usr/local/bin/docker-compose; \
 
@@ -188,8 +189,9 @@ clean-all: clean depends
 	@docker rmi poseidon-storage
 	@docker rmi poseidon-main
 	@docker rmi poseidon-api
-	@docker rmi periodically
+	@docker rmi poseidon-periodically
 	@docker rmi poseidon-storage-interface
+	@docker rmi poseidon-rabbit
 
 clean-mock-controller:
 	@docker ps -aqf "name=mock-controller" | xargs docker rm -f || echo
