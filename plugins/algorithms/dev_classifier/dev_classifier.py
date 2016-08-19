@@ -37,7 +37,7 @@ module_logger = logging.getLogger(
     'plugins.algorithms.dev_classifier.dev_classifier')
 
 
-def rabbit_init(host, exchange, queue_name):
+def rabbit_init(host, exchange, queue_name):  # pragma: no cover
     """
     Connects to rabbitmq using the given hostname,
     exchange, and queue. Retries on failure until success.
