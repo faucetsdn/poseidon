@@ -151,8 +151,8 @@ pcap-stats:
 	@docker build -t pcap-stats -f plugins/heuristics/pcap_stats/Dockerfile plugins/heuristics/pcap_stats/
 
 ml-clean:
-	make nuke-containers
-	docker rmi ml-port-class
+	make nuke-containers || echo
+	docker rmi ml-port-class || echo
 	make compose
 	docker logs ml-port-class
 

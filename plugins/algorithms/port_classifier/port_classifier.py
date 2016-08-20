@@ -142,6 +142,7 @@ def port_classifier(channel, file):
     result = lgs.predict(X_test)
     class_report = classification_report(y_test, result)
     module_logger.info(str(class_report))
+    print class_report
 
     message = class_report
     routing_key = 'poseidon.algos.port_class'
@@ -157,7 +158,7 @@ if __name__ == '__main__':
     host = 'poseidon-rabbit'
     exchange = 'topic-poseidon-internal'
     queue_name = 'features_flowparser'
-    binding_key = 'poseidon.algos.port_class'
+    binding_key = 'poseidon.flowparser'
     fd = open('temp_file', 'w+')
 
     channel, connection = rabbit_init(host=host,
