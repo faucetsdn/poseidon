@@ -150,6 +150,12 @@ pcap-stats:
 	@docker ps -aqf "name=pcap-stats" | xargs docker rm -f
 	@docker build -t pcap-stats -f plugins/heuristics/pcap_stats/Dockerfile plugins/heuristics/pcap_stats/
 
+ml-clean:
+	make nuke-containers || echo
+	docker rmi ml-port-class || echo
+	make compose
+	docker logs ml-port-class
+
 build: depends
 	docker build -t poseidon-notebooks -f Dockerfile.notebooks .
 	docker build -t poseidon-monitor  -f Dockerfile.monitor .

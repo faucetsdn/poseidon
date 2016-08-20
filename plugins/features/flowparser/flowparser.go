@@ -13,14 +13,14 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  *
- * 
+ *
  * Uses flowtbag package to parse pcap files for netflow info
  * and sends produced csv to analysis modules with rabbitmq.
  *
  * Created on August 3, 2016
  * @author: lanhamt
  *
- * IMPORTANT NOTE: The first argument when the program is invoked 
+ * IMPORTANT NOTE: The first argument when the program is invoked
  * should be the name of the pcap file.
 
  * rabbitmq:
@@ -31,25 +31,27 @@
 
 package main
 
-var RABBIT_HOST = "poseidon-rabbit"
-var RABBIT_EXCH = "topic-poseidon-internal"
-var RABBIT_KEYS = "poseidon.flowparser"
-
 import (
+    "bufio"
     "fmt"
     "log"
     "os"
     "os/exec"
-    "bufio"
     "time"
 
     "github.com/streadway/amqp"
 )
 
+const (
+    RABBIT_HOST = "poseidon-rabbit"
+    RABBIT_EXCH = "topic-poseidon-internal"
+    RABBIT_KEYS = "poseidon.flowparser"
+)
+
 /*
- * Given an error and message to display on error, 
+ * Given an error and message to display on error,
  * checks that an error has occurred; if so, logs a
- * fatal error, panics, and exits. 
+ * fatal error, panics, and exits.
  */
 func failOnError(err error, msg string) {
     if err != nil {
@@ -60,7 +62,7 @@ func failOnError(err error, msg string) {
 
 /*
  * Checks if error has occured from err, prints error message if so
- * and returns false, otherwise prints success message and returns 
+ * and returns false, otherwise prints success message and returns
  * true.
  */
 func CheckError(err error, success_msg string, error_msg string) bool {
@@ -74,32 +76,32 @@ func CheckError(err error, success_msg string, error_msg string) bool {
 }
 
 /*
- * Handles connection to rabbitmq broker. Connects to rabbitmq, 
- * establishes channel, declares exchange and then declares queues 
- * from the program arguments. Retries on connection and channel 
- * attempts after sleeping for 2 sec if failure. Returns the 
- * connection and channel. 
+ * Handles connection to rabbitmq broker. Connects to rabbitmq,
+ * establishes channel, declares exchange and then declares queues
+ * from the program arguments. Retries on connection and channel
+ * attempts after sleeping for 2 sec if failure. Returns the
+ * connection and channel.
  */
 func RabbitConnect() (*amqp.Connection, *amqp.Channel) {
-    var conn * amqp.Connection
+    var conn *amqp.Connection
     var err error
     for {
         conn, err = amqp.Dial("amqp://guest:guest@" + RABBIT_HOST + ":5672/")
-        if CheckError(err, 
-                    "connected to rabbitmq", 
-                    "could not connect to rabbitmq, retrying...") {
+        if CheckError(err,
+            "connected to rabbitmq",
+            "could not connect to rabbitmq, retrying...") {
             break
         } else {
             time.Sleep(time.Second * 2)
         }
     }
 
-    var ch * amqp.Channel
+    var ch *amqp.Channel
     for {
         ch, err = conn.Channel()
-        if CheckError(err, 
-                    "channel connected", 
-                    "could not establish rabbitmq channel, retrying...") {
+        if CheckError(err,
+            "channel connected",
+            "could not establish rabbitmq channel, retrying...") {
             break
         } else {
             time.Sleep(time.Second * 2)
@@ -107,37 +109,37 @@ func RabbitConnect() (*amqp.Connection, *amqp.Channel) {
     }
 
     err = ch.ExchangeDeclare(
-            RABBIT_EXCH,                    // name
-            "topic",                        // type
-            true,                           // durable
-            false,                          // auto-deleted
-            false,                          // internal
-            false,                          // no-wait
-            nil,                            // args
-            )
+        RABBIT_EXCH, // name
+        "topic",     // type
+        false,        // durable
+        false,       // auto-deleted
+        false,       // internal
+        false,       // no-wait
+        nil,         // args
+    )
     failOnError(err, "failed to declare exchange, exiting")
 
-/*
-    // ========== BELOW ONLY NEEDED IF MODULE IS RECEIVING FROM A QUEUE ==========
+    /*
+       // ========== BELOW ONLY NEEDED IF MODULE IS RECEIVING FROM A QUEUE ==========
 
 
-    queue_name := "process_features_flowparser"
-    _, err = ch.QueueDeclare(queue_name, true, true, false, false, nil)
-    failOnError(err, "queue declaration failed, exiting")
+       queue_name := "process_features_flowparser"
+       _, err = ch.QueueDeclare(queue_name, true, true, false, false, nil)
+       failOnError(err, "queue declaration failed, exiting")
 
-    argc := len(os.Args)
-    if argc > 2 {
-        for i := 2; i < argc; i++ {
-            err := ch.QueueBind(queue_name, os.Args[i], "topic_poseidon_internal", false, nil)
-            failOnError(err, "queue bind failed, exiting")
-        }
-    } else {
-        log.Fatalf("Usage: %s [file_name] [binding_key]...", os.Args[0])
-        panic(fmt.Sprintf("Usage: %s [file_name] [binding_key]...", os.Args[0]))
-    }
+       argc := len(os.Args)
+       if argc > 2 {
+           for i := 2; i < argc; i++ {
+               err := ch.QueueBind(queue_name, os.Args[i], "topic_poseidon_internal", false, nil)
+               failOnError(err, "queue bind failed, exiting")
+           }
+       } else {
+           log.Fatalf("Usage: %s [file_name] [binding_key]...", os.Args[0])
+           panic(fmt.Sprintf("Usage: %s [file_name] [binding_key]...", os.Args[0]))
+       }
 
-    fmt.Println(" [*] Waiting for logs. To exit press CTRL+C")
-*/
+       fmt.Println(" [*] Waiting for logs. To exit press CTRL+C")
+    */
 
     return conn, ch
 }
@@ -147,13 +149,13 @@ func RabbitConnect() (*amqp.Connection, *amqp.Channel) {
  */
 func sendLine(line string, ch *amqp.Channel) {
     err := ch.Publish(
-            RABBIT_EXCH,                    // exchange
-            RABBIT_KEYS,                    // routing key
-            false,                          // mandatory
-            false,                          // immediate
-            amqp.Publishing{
-                ContentType: "text/plain",
-                Body:        []byte (line)})
+        RABBIT_EXCH, // exchange
+        RABBIT_KEYS, // routing key
+        false,       // mandatory
+        false,       // immediate
+        amqp.Publishing{
+            ContentType: "text/plain",
+            Body:        []byte(line)})
     if err != nil {
         log.Println("failed to send message: %s", line)
     } else {
@@ -163,7 +165,7 @@ func sendLine(line string, ch *amqp.Channel) {
 
 /*
  * Connects to rabbitmq, then uses flowtbag to parse pcap
- * file and sends parsed csv to rabbit. 
+ * file and sends parsed csv to rabbit.
  */
 func main() {
     conn, ch := RabbitConnect()
@@ -172,7 +174,10 @@ func main() {
 
     file_name := os.Args[1]
     output_file := file_name + ".out"
-    err := exec.Command("./flowtbag", file_name, ">", output_file).Run()
+    cmd := exec.Command("./flowtbag", file_name)
+    out_fd, err := os.OpenFile(output_file, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, 0777)
+    cmd.Stdout = out_fd
+    cmd.Run()
     failOnError(err, "failed to parse pcap")
 
     file, err := os.Open(output_file)
@@ -183,7 +188,7 @@ func main() {
     for scanner.Scan() {
         sendLine(scanner.Text(), ch)
     }
-    sendLine('EOF -- FLOWPARSER FINISHED with file ' + file_name, ch)
+    sendLine("EOF -- FLOWPARSER FINISHED with file " + file_name, ch)
     failOnError(scanner.Err(), "failed to read file")
 
     err = exec.Command("rm", "-rf", output_file).Run()

@@ -36,7 +36,7 @@ services:
     ports:
       - '3333:8003'
     environment:
-      - ALLOW_ORIGIN = http://$DOCKER_URL:8003
+      - ALLOW_ORIGIN = http://$DOCKER_IP:8003
       - DOCKER_IP
     links:
       - monitor:poseidon-monitor
@@ -49,7 +49,7 @@ services:
     ports:
       - '4444:8004'
     environment:
-      - ALLOW_ORIGIN = http://$DOCKER_URL:1111
+      - ALLOW_ORIGIN = http://$DOCKER_IP:1111
       - DOCKER_IP
     links:
       - api:poseidon-api
@@ -90,7 +90,7 @@ services:
     ports:
       - '28000:27000'
     environment:
-      - ALLOW_ORIGIN=http://$DOCKER_URL:28000
+      - ALLOW_ORIGIN=http://$DOCKER_IP:28000
       - DOCKER_IP
     links:
       - storage:poseidon-storage
@@ -114,15 +114,26 @@ services:
     ports:
       - '15672:15672'
       - '5672:5672'
-  pcap-stats:
-    image: pcap-stats
-    container_name: pcap-stats
+#
+# -------------------- PLUGINS --------------------
+#
+  flowparser:
+    image: flowparser
+    container_name: flowparser
     build:
-      context: ./plugins/heuristics/pcap_stats
+      context: ./plugins/features/flowparser/
       dockerfile: Dockerfile
     environment:
       - DOCKER_IP
     links:
       - rabbit:poseidon-rabbit
-      - storage:poseidon-storage
-      - storage-interface:poseidon-storage-interface
+  ml-port-class:
+    image: ml-port-class
+    container_name: ml-port-class
+    build:
+      context: ./plugins/algorithms/port_classifier/
+      dockerfile: Dockerfile
+    environment:
+      - DOCKER_IP
+    links:
+      - rabbit:poseidon-rabbit

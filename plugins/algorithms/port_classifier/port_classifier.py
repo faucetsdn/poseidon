@@ -38,9 +38,15 @@ from sklearn import linear_model
 from sklearn import preprocessing
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import classification_report
+import time
+import pika
+import sys
+
 
 module_logger = logging.getLogger(
     'plugins.algorithms.port_classifier.port_classifier')
+
+fd = None
 
 
 def rabbit_init(host, exchange, queue_name):  # pragma: no cover
@@ -57,10 +63,14 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
                 pika.ConnectionParameters(host=host))
             channel = connection.channel()
             channel.exchange_declare(exchange=exchange, type='topic')
-            result = channel.queue_declare(name=queue_name, exclusive=True)
+            result = channel.queue_declare(queue=queue_name, exclusive=True)
             wait = False
             module_logger.info('connected to rabbitmq...')
-        except:
+            print "connected to rabbitmq..."
+        except Exception, e:
+            print "waiting for connection to rabbitmq..."
+            print str(e)
+            module_logger.info(str(e))
             module_logger.info('waiting for connection to rabbitmq...')
             time.sleep(2)
             wait = True
@@ -83,12 +93,15 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
 
 def file_receive(ch, method, properties, body):
     if 'EOF -- FLOWPARSER FINISHED' in body:
-        ml('temp_file')
+        ch.stop_consuming()
+        fd.seek(0)  # rewind to beginning of file
+        port_classifier(ch, 'temp_file')
     else:
-        fd.write(body)
+        fd.write(body + '\n')
+        print ' [*] Received %s', body
 
 
-def preprocess_csv(file):
+def port_classifier(channel, file):
     # Read in file
     flow_df = pd.read_csv(file, names=['srcip', 'srcport', 'dstip', 'dstport', 'proto', 'total_fpackets', 'total_fvolume',
                                        'total_bpackets', 'total_bvolume', 'min_fpktl', 'mean_fpktl', 'max_fpktl', 'std_fpktl',
@@ -129,8 +142,8 @@ def preprocess_csv(file):
     result = lgs.predict(X_test)
     class_report = classification_report(y_test, result)
     module_logger.info(str(class_report))
+    print class_report
 
-    global channel
     message = class_report
     routing_key = 'poseidon.algos.port_class'
     channel.basic_publish(exchange='topic_poseidon_internal',
@@ -141,14 +154,17 @@ def preprocess_csv(file):
     module_logger.info(ostr)
 
 
-fd = open('temp_file', 'w')
-
 if __name__ == '__main__':
     host = 'poseidon-rabbit'
     exchange = 'topic-poseidon-internal'
     queue_name = 'features_flowparser'
+    binding_key = 'poseidon.flowparser'
+    fd = open('temp_file', 'w+')
+
     channel, connection = rabbit_init(host=host,
                                       exchange=exchange,
                                       queue_name=queue_name)
-    channel.basic_consume(file_receive, queue=queue_name, no_ack=True)
+    channel.basic_consume(file_receive, queue=queue_name,
+                                        no_ack=True,
+                                        consumer_tag=binding_key)
     channel.start_consuming()
