@@ -94,6 +94,8 @@ services:
       - DOCKER_IP
     links:
       - storage:poseidon-storage
+    depends_on:
+      - storageWorkaround
   periodically:
     image: poseidon-periodically
     container_name: poseidon-periodically
