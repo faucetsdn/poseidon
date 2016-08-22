@@ -16,7 +16,6 @@ ADD . /poseidonWork
 WORKDIR /poseidonWork
 ENV PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
 RUN pip install pip --upgrade
-RUN pip install -U numpy scipy scikit-learn
 
 # install dependencies of plugins for poseidon
 RUN for file in $(find poseidon/* -name "requirements.txt"); \

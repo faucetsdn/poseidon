@@ -19,5 +19,4 @@ RUN pip install pip --upgrade
 RUN pip install -r requirements.txt
 
 ADD port_classifier.py port_classifier.py
-
 CMD ["python", "port_classifier.py", "poseidon.flowparser"]

@@ -94,7 +94,7 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
 def file_receive(ch, method, properties, body):
     if 'EOF -- FLOWPARSER FINISHED' in body:
         ch.stop_consuming()
-        fd.seek(0)  # rewind to beginning of file
+        fd.close()
         port_classifier(ch, 'temp_file')
     else:
         fd.write(body + '\n')

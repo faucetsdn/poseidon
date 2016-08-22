@@ -1,3 +1,5 @@
 scikit-learn
+pandas
+scipy
 numpy
 pika
