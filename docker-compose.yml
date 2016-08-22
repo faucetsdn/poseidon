@@ -76,6 +76,8 @@ services:
     container_name: poseidon-storage
     ports:
       - '27017:27017'
+    environment:
+      - DOCKER_IP
     command: --smallfiles --rest --auth
     volumes_from:
       - storageWorkaround
