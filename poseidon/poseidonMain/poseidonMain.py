@@ -38,12 +38,13 @@ from Scheduler.Scheduler import scheduler_interface
 
 from Config.Config import config_interface
 
-class NullHandler(logging.Handler):
-    def emit(self, record):
-        pass
+# class NullHandler(logging.Handler):
+#     def emit(self, record):
+#         pass
 
-h = NullHandler()
-module_logger = logging.getLogger(__name__).addHandler(h)
+# h = NullHandler()
+#  module_logger = logging.getLogger(__name__).addHandler(h)
+module_logger = logging.getLogger(__name__)
 
 class PoseidonMain(object):
 
