@@ -127,7 +127,7 @@ class Monitor(object):
 
 
 def get_allowed():
-    rest_url = 'localhost:8555'
+    rest_url = 'localhost:4444'
     if 'ALLOW_ORIGIN' in environ:
         allow_origin = environ['ALLOW_ORIGIN']
         host_port = allow_origin.split('//')[1]
