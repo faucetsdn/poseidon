@@ -125,7 +125,7 @@ compose-install:
 	chmod +x /usr/local/bin/docker-compose; \
 
 
-compose:
+compose: storage-interface nuke-containers
 	@ if [ ! -z "${DOCKER_IP}" ]; then \
 		DOCKER_IP=$$(env | grep DOCKER_IP | cut -d':' -f2 | cut -c 3-); \
 		docker_url=$$DOCKER_IP; \
