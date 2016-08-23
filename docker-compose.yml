@@ -1,12 +1,12 @@
 version: '2'
 
 #  PORTS
-#  api:                1111:8080
-#  docs:               2222:8002
-#  mock:               3333:8003
-#  monitor:            4444:8004
-#  storage:            27017:27017
-#  storage-interface:  28000:27000
+#   g api:                1111:8080
+#   g docs:               2222:8002
+#   g mock:               3333:8003
+#   g monitor:            4444:8004
+#     storage:            27017:27017
+#   g storage-interface:  28000:27000
 
 services:
   api:
@@ -17,6 +17,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - '1111:8080'
+    networks:
+     app_net:
+        ipv4_address: 172.16.201.10
   docs:
     image: poseidon-docs
     container_name: poseidon-docs
@@ -25,6 +28,9 @@ services:
       dockerfile: Dockerfile.docs
     ports:
       - '2222:8002'
+    networks:
+      app_net:
+        ipv4_address: 172.16.201.11
   mock:
     image: mock-controller
     container_name: mock-controller
@@ -33,8 +39,12 @@ services:
       dockerfile: Dockerfile.mock
     ports:
       - '3333:8003'
+    networks:
+      app_net:
+        ipv4_address: 172.16.201.12
     environment:
-      - ALLOW_ORIGIN=http://$DOCKER_IP:3333
+      #- ALLOW_ORIGIN = http://$DOCKER_IP:8003
+      - ALLOW_ORIGIN = http://172.16.201.12:8003
       - DOCKER_IP
     links:
       - monitor:poseidon-monitor
@@ -46,8 +56,12 @@ services:
       dockerfile: Dockerfile.monitor
     ports:
       - '4444:8004'
+    networks:
+      app_net:
+        ipv4_address: 172.16.201.13
     environment:
-      - ALLOW_ORIGIN = http://$DOCKER_IP:1111
+      #- ALLOW_ORIGIN = http://$DOCKER_IP:1111
+      - ALLOW_ORIGIN = http://172.16.201.10:1111
       - DOCKER_IP
     links:
       - api:poseidon-api
@@ -57,6 +71,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.main
+    networks:
+      app_net:
+        ipv4_address: 172.16.201.14
     environment:
       - DOCKER_IP
     links:
@@ -72,6 +89,9 @@ services:
     container_name: poseidon-storage
     ports:
       - '27017:27017'
+    networks:
+      app_net:
+        ipv4_address: 172.16.201.15
     environment:
       - DOCKER_IP
     command: --smallfiles --rest --auth
@@ -87,8 +107,12 @@ services:
       dockerfile: Dockerfile.storage-interface
     ports:
       - '28000:27000'
+    networks:
+      app_net:
+        ipv4_address: 172.16.201.16
     environment:
-      - ALLOW_ORIGIN=http://$DOCKER_IP:28000
+      #- ALLOW_ORIGIN=http://$DOCKER_IP:28000
+      - ALLOW_ORIGIN=http://172.16.201.16:28000
       - DOCKER_IP
     links:
       - storage:poseidon-storage
@@ -100,6 +124,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.periodically
+    networks:
+      app_net:
+        ipv4_address: 172.16.201.17
     environment:
       - DOCKER_IP
     links:
@@ -112,6 +139,11 @@ services:
     ports:
       - '15672:15672'
       - '5672:5672'
+    networks:
+      app_net:
+        ipv4_address: 172.16.201.18
+
+
 #
 # -------------------- PLUGINS --------------------
 #
@@ -123,6 +155,9 @@ services:
       dockerfile: Dockerfile
     environment:
       - DOCKER_IP
+    networks:
+      app_net:
+        ipv4_address: 172.16.201.19
   ml-port-class:
     image: ml-port-class
     container_name: ml-port-class
@@ -131,3 +166,21 @@ services:
       dockerfile: Dockerfile
     environment:
       - DOCKER_IP
+    networks:
+      app_net:
+        ipv4_address: 172.16.201.20
+
+#
+# -------------------- NETWORK  --------------------
+#
+
+networks:
+  app_net:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_1pv6: "false"
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.201.0/24
+        gateway: 172.16.201.1
