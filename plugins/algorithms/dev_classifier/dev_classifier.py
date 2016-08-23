@@ -33,8 +33,7 @@ import sys
 
 import pika
 
-module_logger = logging.getLogger(
-    'plugins.algorithms.dev_classifier.dev_classifier')
+module_logger = logging.getLogger(__name__)
 
 
 def rabbit_init(host, exchange, queue_name):  # pragma: no cover

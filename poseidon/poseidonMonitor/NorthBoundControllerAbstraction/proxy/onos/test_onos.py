@@ -29,7 +29,7 @@ from httmock import urlmatch
 from onos import OnosProxy
 
 
-module_logger = logging.getLogger('poseidonMonitor.NBCA.proxy.onos.test_onos')
+module_logger = logging.getLogger(__name__)
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 username = 'user'
 password = 'pass'

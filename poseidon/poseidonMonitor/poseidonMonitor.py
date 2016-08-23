@@ -35,7 +35,7 @@ from NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import cont
 
 from Config.Config import config_interface
 
-module_logger = logging.getLogger('poseidonMonitor.Monitor')
+module_logger = logging.getLogger(__name__)
 
 
 class Monitor(object):

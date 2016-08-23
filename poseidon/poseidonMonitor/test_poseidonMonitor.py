@@ -29,7 +29,7 @@ from poseidonMonitor import PCAPResource
 from poseidonMonitor import SwaggerAPI
 from poseidonMonitor import VersionResource
 
-module_logger = logging.getLogger('poseidonMonitor.test_poseidonMonitor')
+module_logger = logging.getLogger(__name__)
 
 application = falcon.API()
 application.add_route('/v1/pcap/{pcap_file}/{output_type}', PCAPResource())

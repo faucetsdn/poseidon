@@ -22,7 +22,7 @@ import logging
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.auth.basic.basicauth import BasicAuthControllerProxy
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.mixins.jsonmixin import JsonMixin
 
-module_logger = logging.getLogger('poseidonMonitor.NBCA.proxy.onos.onos')
+module_logger = logging.getLogger(__name__)
 
 
 class OnosProxy(JsonMixin, BasicAuthControllerProxy):

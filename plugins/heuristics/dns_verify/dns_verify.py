@@ -36,7 +36,7 @@ import time
 
 import pika
 
-module_logger = logging.getLogger('plugins.heuristics.dns_verify.dns_verify')
+module_logger = logging.getLogger(__name__)
 
 
 def rabbit_init(host, exchange, queue_name):  # pragma: no cover

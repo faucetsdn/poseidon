@@ -30,7 +30,7 @@ from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 
 
-module_logger = logging.getLogger('poseidonMonitor.Config')
+module_logger = logging.getLogger(__name__)
 
 # poseidonWork created in docker containers
 config_template_path = '/poseidonWork/templates/config.template'

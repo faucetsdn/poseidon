@@ -23,8 +23,7 @@ import logging
 import pytest
 from controllerproxy import ControllerProxy
 
-module_logger = logging.getLogger(
-    'poseidonMonitor.NBCA.proxy.test_controllerProxy')
+module_logger = logging.getLogger(__name__)
 
 
 def test_ControllerProxy():

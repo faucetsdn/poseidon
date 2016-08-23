@@ -28,8 +28,8 @@ from jsonmixin import JsonMixin
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 
-module_logger = logging.getLogger(
-    'poseidonMonitor.NBCA.proxy.mixins.test_jsonmixin')
+module_logger = logging.getLogger(__name__)
+    
 
 
 def test_JsonMixin():

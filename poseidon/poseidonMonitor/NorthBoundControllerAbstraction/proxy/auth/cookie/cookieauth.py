@@ -23,8 +23,7 @@ from urlparse import urljoin
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.controllerproxy import ControllerProxy
 
 
-module_logger = logging.getLogger(
-    'poseidonMonitor.NBCA.proxy.auth.cookie,cookieauth')
+module_logger = logging.getLogger(__name__)
 
 
 class CookieAuthControllerProxy(ControllerProxy):

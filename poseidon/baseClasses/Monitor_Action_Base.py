@@ -21,7 +21,7 @@ import logging
 
 from poseidon.baseClasses.Rock_Bottom import Rock_Bottom
 
-module_logger = logging.getLogger('baseClasses.Monitor_Action_base')
+module_logger = logging.getLogger(__name__)
 
 """ Base call stubs
 
