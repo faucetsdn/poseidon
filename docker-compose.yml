@@ -36,7 +36,7 @@ services:
     ports:
       - '3333:8003'
     environment:
-      - ALLOW_ORIGIN = http://localhost:8003
+      - ALLOW_ORIGIN=http://$DOCKER_IP:8003
       - DOCKER_IP
     links:
       - monitor:poseidon-monitor
