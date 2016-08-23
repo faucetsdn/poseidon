@@ -1,14 +1,12 @@
 version: '2'
 
 #  PORTS
-#     api:                1111:8001
-#     docs:               2222:8002
-#     mock:               3333:8003
-#     monitor:            4444:8004
-#     main:               5555:8005
-#     storage:            27017:27017
-#     storage-interface:  28000:27000
-#     periodically:       9999:8009
+#  api:                1111:8080
+#  docs:               2222:8002
+#  mock:               3333:8003
+#  monitor:            4444:8004
+#  storage:            27017:27017
+#  storage-interface:  28000:27000
 
 services:
   api:
@@ -18,7 +16,7 @@ services:
       context: ./api
       dockerfile: Dockerfile
     ports:
-      - '1111:8001'
+      - '1111:8080'
   docs:
     image: poseidon-docs
     container_name: poseidon-docs
@@ -36,7 +34,7 @@ services:
     ports:
       - '3333:8003'
     environment:
-      - ALLOW_ORIGIN=http://$DOCKER_IP:8003
+      - ALLOW_ORIGIN=http://$DOCKER_IP:3333
       - DOCKER_IP
     links:
       - monitor:poseidon-monitor
@@ -114,6 +112,7 @@ services:
     ports:
       - '15672:15672'
       - '5672:5672'
+
 #
 # -------------------- PLUGINS --------------------
 #
@@ -125,8 +124,6 @@ services:
       dockerfile: Dockerfile
     environment:
       - DOCKER_IP
-    links:
-      - rabbit:poseidon-rabbit
   ml-port-class:
     image: ml-port-class
     container_name: ml-port-class
@@ -135,5 +132,3 @@ services:
       dockerfile: Dockerfile
     environment:
       - DOCKER_IP
-    links:
-      - rabbit:poseidon-rabbit
