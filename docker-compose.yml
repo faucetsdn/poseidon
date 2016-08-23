@@ -36,7 +36,7 @@ services:
     ports:
       - '3333:8003'
     environment:
-      - ALLOW_ORIGIN = http://$DOCKER_IP:8003
+      - ALLOW_ORIGIN = http://localhost:8003
       - DOCKER_IP
     links:
       - monitor:poseidon-monitor
@@ -59,8 +59,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.main
-    ports:
-      - '5555:8005'
     environment:
       - DOCKER_IP
     links:
@@ -104,8 +102,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.periodically
-    ports:
-      - '9999:8009'
     environment:
       - DOCKER_IP
     links:
