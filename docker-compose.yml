@@ -2,7 +2,7 @@ version: '2'
 
 #  PORTS
 #   g api:                1111:8080
-#   g docs:               2222:8000
+#   g docs:               2222:8002
 #   g mock:               3333:8003
 #   g monitor:            4444:8004
 #     storage:            27017:27017
@@ -27,7 +27,7 @@ services:
       context: .
       dockerfile: Dockerfile.docs
     ports:
-      - '2222:8000'
+      - '2222:8002'
     networks:
       app_net:
         ipv4_address: 172.16.201.11
@@ -184,4 +184,3 @@ networks:
       config:
       - subnet: 172.16.201.0/24
         gateway: 172.16.201.1
-

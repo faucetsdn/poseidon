@@ -29,11 +29,9 @@ rabbitmq:
     keys(out):  poseidon.algos.port_class
 """
 import logging
-import sys
 
 import numpy as np
 import pandas as pd
-import pika
 from sklearn import linear_model
 from sklearn import preprocessing
 from sklearn.cross_validation import train_test_split
@@ -79,7 +77,6 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
     if not binding_keys:
         ostr = 'Usage: %s [binding_key]...' % (sys.argv[0])
         module_logger.error(ostr)
-
         sys.exit(1)
 
     for binding_key in binding_keys:
