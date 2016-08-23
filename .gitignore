@@ -69,6 +69,7 @@ target/
 
 # pcap files
 *.cap
+*.pcap
 
 #other crap
 **/.ropeproject
