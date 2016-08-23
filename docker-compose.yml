@@ -78,12 +78,7 @@ services:
       - DOCKER_IP
     links:
       - storage-interface:poseidon-storage-interface
-  storageWorkaround:
-    # http://www.diogogmt.com/running-mongodb-with-docker-and-compose/
-    image: mongo
-    container_name: poseidon-storageWorkaround
-    volumes:
-      - /data/db
+# http://www.diogogmt.com/running-mongodb-with-docker-and-compose/
   storage:
     image: mongo
     container_name: poseidon-storage
@@ -95,10 +90,8 @@ services:
     environment:
       - DOCKER_IP
     command: --smallfiles --rest --auth
-    volumes_from:
-      - storageWorkaround
-    depends_on:
-      - storageWorkaround
+    volumes:
+      - /data/db
   storage-interface:
     image: poseidon-storage-interface
     container_name: poseidon-storage-interface
@@ -116,8 +109,6 @@ services:
       - DOCKER_IP
     links:
       - storage:poseidon-storage
-    depends_on:
-      - storageWorkaround
   periodically:
     image: poseidon-periodically
     container_name: poseidon-periodically
