@@ -138,7 +138,6 @@ compose: storage-interface nuke-containers
 		fi; \
 	fi; \
 	export DOCKER_URL=$$docker_url; \
-	mkdir -p /data/db; \
 	docker-compose up -d --force-recreate
 
 rabbit: clean-rabbit depends
