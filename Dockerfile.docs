@@ -1,16 +1,17 @@
-FROM alpine:3.3
+FROM ubuntu:16.04
 MAINTAINER dgrossman <dgrossman@iqt.org>
 
-RUN apk add --update \
+RUN apt-get update && \
+    apt-get install -y \
+    build-essential \
     git \
-    gcc \
     make \
     python \
     python-dev \
-    py-pip \
-    py-sphinx \
-    tcpdump \
-    && rm -rf /var/cache/apk/*
+    python-pip \
+    python-setuptools \
+    python-sphinx \
+    tcpdump
 
 ADD . /poseidonWork
 WORKDIR /poseidonWork

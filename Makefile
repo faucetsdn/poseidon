@@ -68,7 +68,7 @@ monitor: storage api clean-monitor build-monitor
 	echo "poseidon-monitor can be accessed here: $$docker_url:$$port"; \
 	echo
 
-storage-interface: clean-storage-interface build-storage-interface storage
+storage-interface: clean-storage-interface storage build-storage-interface 
 	@ if [ ! -z "${DOCKER_IP}" ]; then \
 		DOCKER_IP=$$(env | grep DOCKER_IP | cut -d':' -f2 | cut -c 3-); \
 		docker_url=http://$$DOCKER_IP; \
@@ -156,7 +156,7 @@ ml-clean:
 	make compose
 	docker logs ml-port-class
 
-build: depends
+build: depends storage
 	docker build -t poseidon-notebooks -f Dockerfile.notebooks .
 	docker build -t poseidon-monitor  -f Dockerfile.monitor .
 	docker build -t poseidon-main  -f Dockerfile.main .
