@@ -22,7 +22,7 @@ import logging
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.auth.cookie.cookieauth import CookieAuthControllerProxy
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.mixins.jsonmixin import JsonMixin
 
-module_logger = logging.getLogger('poseidonMonitor.NBCA.proxy.bfc.bfc')
+module_logger = logging.getLogger(__name__)
 
 
 class BcfProxy(JsonMixin, CookieAuthControllerProxy):

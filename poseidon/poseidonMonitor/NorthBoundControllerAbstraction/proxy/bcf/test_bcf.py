@@ -28,7 +28,7 @@ from httmock import HTTMock
 from httmock import response
 from httmock import urlmatch
 
-module_logger = logging.getLogger('poseidonMonitor.NBCA.proxy.bfc.test_bfc')
+module_logger = logging.getLogger(__name__)
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 username = 'user'

@@ -26,7 +26,7 @@ import falcon
 import pytest
 from NorthBoundControllerAbstraction import controller_interface
 
-module_logger = logging.getLogger('poseidonMonitor.NBCA.test_NBCA')
+module_logger = logging.getLogger(__name__)
 
 
 application = falcon.API()

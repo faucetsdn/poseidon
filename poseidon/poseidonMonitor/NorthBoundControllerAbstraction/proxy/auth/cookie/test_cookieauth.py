@@ -28,8 +28,7 @@ from httmock import HTTMock
 from httmock import response
 from httmock import urlmatch
 
-module_logger = logging.getLogger(
-    'poseidonMonitor.NBCA.proxy.auth.cookie.test_cookieauth')
+module_logger = logging.getLogger(__name__)
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 username = 'user'

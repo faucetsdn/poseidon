@@ -41,8 +41,7 @@ import pika
 import sys
 
 
-module_logger = logging.getLogger(
-    'plugins.algorithms.port_classifier.port_classifier')
+module_logger = logging.getLogger(__name__)
 
 fd = None
 

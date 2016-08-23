@@ -45,7 +45,7 @@ from pymongo import MongoClient
 
 
 flowRecordLock = threading.Lock()
-module_logger = logging.getLogger('plugins.heuristics.pcap_stats.pcap_stats')
+module_logger = logging.getLogger(__name__)
 
 
 def rabbit_init(host, exchange, queue_name):  # pragma: no cover

@@ -26,7 +26,7 @@ DOCKER_URL = 'file:///poseidonWork/templates/config.template'
 CI_TESTING = '/poseidonWork/templates/config.template'
 
 
-module_logger = logging.getLogger('poseidonMain.Config')
+module_logger = logging.getLogger(__name__)
 
 
 class Config(Main_Action_Base):

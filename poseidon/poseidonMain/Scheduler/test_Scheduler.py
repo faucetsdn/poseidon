@@ -30,7 +30,7 @@ from poseidon.baseClasses.enums_tuples import CRONSPEC
 from poseidon.baseClasses.enums_tuples import EVERY
 
 
-module_logger = logging.getLogger('poseidonMain.test_Scheduler')
+module_logger = logging.getLogger(__name__)
 
 
 def test_instantiation():
@@ -49,7 +49,6 @@ def test_add():
 
     s = scheduler_interface
     s.logger = module_logger
-    s.logger = logging.getLogger('testing')
     s.logger.setLevel(logging.DEBUG)
 
     b = CRONSPEC(EVERY.minute, None)
