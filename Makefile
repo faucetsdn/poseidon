@@ -10,17 +10,6 @@ killcrap:
 	find . -name __pycache__ -type d -exec rm -rf {} \;
 
 api: clean-api build-api
-	@ if [ ! -z "${DOCKER_IP}" ]; then \
-		DOCKER_IP=$$(env | grep DOCKER_IP | cut -d':' -f2 | cut -c 3-); \
-		docker_url=http://$$DOCKER_IP; \
-	else \
-		if [ ! -z "${DOCKERFORMAC}" ]; then \
-			docker_url=http://127.0.0.1; \
-		else \
-			echo "No DOCKER_IP environment variable set."; \
-			exit 1; \
-		fi; \
-	fi; \
 	docker run --name poseidon-api -dP poseidon-api ; \
 	portApi=$$(docker port poseidon-api 8001/tcp | sed 's/^.*://'); \
 	api_url=$$docker_url:$$portApi; \
@@ -33,34 +22,12 @@ main: clean-main build-main
 	docker run --name poseidon-main -it poseidon-main
 
 storage: clean-storage build-storage
-	@ if [ ! -z "${DOCKER_IP}" ]; then \
-		DOCKER_IP=$$(env | grep DOCKER_IP | cut -d':' -f2 | cut -c 3-); \
-		docker_url=$$DOCKER_IP; \
-	else \
-		if [ ! -z "${DOCKERFORMAC}" ]; then \
-			docker_url=localhost; \
-		else \
-			echo "No DOCKER_IP environment variable set."; \
-			exit 1; \
-		fi; \
-	fi; \
-	docker run --name poseidon-storage -dp 27017:27017 -e DOCKER_IP=$$DOCKER_IP mongo >/dev/null; \
+	docker run --name poseidon-storage -dp 27017:27017 mongo >/dev/null; \
 	port=$$(docker port poseidon-storage 27017/tcp | sed 's/^.*://'); \
 	echo "poseidon-storage can be accessed here: $$docker_url:$$port"; \
 	echo
 
 monitor: storage api clean-monitor build-monitor
-	@ if [ ! -z "${DOCKER_IP}" ]; then \
-		DOCKER_IP=$$(env | grep DOCKER_IP | cut -d':' -f2 | cut -c 3-); \
-		docker_url=http://$$DOCKER_IP; \
-	else \
-		if [ ! -z "${DOCKERFORMAC}" ]; then \
-		docker_url=http://localhost; \
-		else \
-			echo "No DOCKER_IP environment variable set."; \
-			exit 1; \
-		fi; \
-	fi; \
 	portApi=$$(docker port poseidon-api 8001/tcp | sed 's/^.*://'); \
 	docker run --name poseidon-monitor -dp 4444:8004 -e ALLOW_ORIGIN=$$docker_url:$$portApi poseidon-monitor ; \
 	port=$$(docker port poseidon-monitor 8004/tcp | sed 's/^.*://'); \
@@ -69,50 +36,17 @@ monitor: storage api clean-monitor build-monitor
 	echo
 
 storage-interface: clean-storage-interface storage build-storage-interface 
-	@ if [ ! -z "${DOCKER_IP}" ]; then \
-		DOCKER_IP=$$(env | grep DOCKER_IP | cut -d':' -f2 | cut -c 3-); \
-		docker_url=http://$$DOCKER_IP; \
-	else \
-		if [ ! -z "${DOCKERFORMAC}" ]; then \
-		docker_url=http://localhost; \
-		else \
-			echo "No DOCKER_IP environment variable set."; \
-			exit 1; \
-		fi; \
-	fi; \
-	docker run --name poseidon-storage-interface -dp 28000:27000 -e ALLOW_ORIGIN=$$docker_url:28000 -e DOCKER_IP=$$DOCKER_IP poseidon-storage-interface; \
+	docker run --name poseidon-storage-interface -dp 28000:27000 -e ALLOW_ORIGIN=$$docker_url:28000 poseidon-storage-interface; \
 	echo "poseidon-storage-interface up"; \
 	echo
 
 notebooks: clean-notebooks build-notebooks
-	@ if [ ! -z "${DOCKER_IP}" ]; then \
-		DOCKER_IP=$$(env | grep DOCKER_IP | cut -d':' -f2 | cut -c 3-); \
-		docker_url=http://$$DOCKER_IP; \
-	else \
-		if [ ! -z "${DOCKERFORMAC}" ]; then \
-			docker_url=http://localhost; \
-		else \
-			echo "No DOCKER_IP environment variable set."; \
-			exit 1; \
-		fi; \
-	fi; \
 	docker run --name poseidon-notebooks -w /notebooks -dP -v "$$(pwd):/notebooks" poseidon-notebooks jupyter notebook --ip=0.0.0.0 --no-browser >/dev/null; \
 	port=$$(docker port poseidon-notebooks 8888/tcp | sed 's/^.*://'); \
 	notebook_url=$$docker_url:$$port; \
 	echo "The notebooks can be accessed here: $$notebook_url"
 
 docs: clean-docs build
-	@ if [ ! -z "${DOCKER_IP}" ]; then \
-		DOCKER_IP=$$(env | grep DOCKER_IP | cut -d':' -f2 | cut -c 3-); \
-		docker_url=http://$$DOCKER_IP; \
-	else \
-		if [ ! -z "${DOCKERFORMAC}" ]; then \
-			docker_url=http://localhost; \
-		else \
-			echo "No DOCKER_IP environment variable set."; \
-			exit 1; \
-		fi; \
-	fi; \
 	docker run --name poseidon-docs -dP poseidon-docs; \
 	port=$$(docker port poseidon-docs 8002/tcp | sed 's/^.*://'); \
 	doc_url=$$docker_url:$$port; \
@@ -126,17 +60,6 @@ compose-install:
 
 
 compose: storage-interface nuke-containers
-	@ if [ ! -z "${DOCKER_IP}" ]; then \
-		DOCKER_IP=$$(env | grep DOCKER_IP | cut -d':' -f2 | cut -c 3-); \
-		docker_url=$$DOCKER_IP; \
-	else \
-		if [ ! -z "${DOCKERFORMAC}" ]; then \
-			docker_url=localhost; \
-		else \
-			echo "No DOCKER_IP environment variable set."; \
-			exit 1; \
-		fi; \
-	fi; \
 	export DOCKER_URL=$$docker_url; \
 	docker-compose up -d --force-recreate
 
@@ -191,13 +114,14 @@ build-storage-interface:
 	docker build -t poseidon-storage-interface -f Dockerfile.storage-interface .
 
 clean-all: clean depends
-	@docker rmi poseidon-monitor
-	@docker rmi poseidon-storage
-	@docker rmi poseidon-main
-	@docker rmi poseidon-api
-	@docker rmi poseidon-periodically
-	@docker rmi poseidon-storage-interface
-	@docker rmi poseidon-rabbit
+	@docker rmi -f poseidon-monitor
+	@docker rmi -f poseidon-storage
+	@docker rmi -f poseidon-main
+	@docker rmi -f poseidon-api
+	@docker rmi -f poseidon-periodically
+	@docker rmi -f poseidon-storage-interface
+	@docker rmi -f poseidon-rabbit
+	@docker rmi -f poseidon-docs
 
 clean-mock-controller:
 	@docker ps -aqf "name=mock-controller" | xargs docker rm -f || echo

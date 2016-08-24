@@ -43,31 +43,23 @@ class poseidonStorage:
     poseidonStorage class for managing mongodb database,
     brokers requests to database.
 
-    NOTE: currently attempts to retrieve database ip from
-    env variable named DOCKER_IP, if absent tries to get
-    from config file, else raises connection error.
+    NOTE: retrieves database host from config
+    file in templates/config.template under the
+    [database] section.
     """
 
     def __init__(self):
         self.modName = 'poseidonStorage'
 
-        database_container_ip = ''
-        if 'DOCKER_IP' in environ:
-            if '/' in environ['DOCKER_IP']:
-                database_container_ip = urlparse(environ['DOCKER_IP']).hostname
-            else:
-                database_container_ip = environ['DOCKER_IP']
-        else:
-            # did not find env variable DOCKER_IP
-            try:
-                self.config = ConfigParser.ConfigParser()
-                self.config.readfp(
-                    open('/poseidonWork/templates/config.template'))
-                database_container_ip = self.config.get('database', 'ip')
-            except:
-                raise ValueError(
-                    'poseidonStorage: could not find database ip address.')
-        self.client = MongoClient(host=database_container_ip, port=27017)
+        try:
+            self.config = ConfigParser.ConfigParser()
+            self.config.readfp(
+                open('/poseidonWork/templates/config.template'))
+            database_container_ip = self.config.get('database', 'ip')
+        except:
+            raise ValueError(
+                'poseidonStorage: could not find database ip address.')
+        self.client = MongoClient(host=database_container_ip)
 
         # create db named 'poseidon_records' (NOTE: db will not actually be
         # created until first doc write).

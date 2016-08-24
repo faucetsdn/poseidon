@@ -33,7 +33,7 @@ module_logger = logging.getLogger(__name__)
 wait = True
 while wait:
     try:
-        params = pika.ConnectionParameters(host=DOCKER_IP)
+        params = pika.ConnectionParameters(host='poseidon-rabbit')
         logLine = 'params = %s' % (params)
         module_logger.debug(logLine)
         connection = pika.BlockingConnection(params)
