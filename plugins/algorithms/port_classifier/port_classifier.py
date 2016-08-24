@@ -160,7 +160,8 @@ if __name__ == '__main__':
     channel, connection = rabbit_init(host=host,
                                       exchange=exchange,
                                       queue_name=queue_name)
-    channel.basic_consume(file_receive, queue=queue_name,
-                                        no_ack=True,
-                                        consumer_tag=binding_key)
+    channel.basic_consume(file_receive,
+                          queue=queue_name,
+                          no_ack=True,
+                          consumer_tag=binding_key)
     channel.start_consuming()
