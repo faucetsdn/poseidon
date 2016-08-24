@@ -72,6 +72,8 @@ services:
         ipv4_address: 172.16.201.14
     links:
       - storage-interface:poseidon-storage-interface
+    environment:
+      - PRODUCTION=True
 # http://www.diogogmt.com/running-mongodb-with-docker-and-compose/
   storage:
     image: mongo
