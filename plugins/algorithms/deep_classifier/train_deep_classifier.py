@@ -23,7 +23,7 @@ packets based on hex headers.
 rabbitmq:
     host:       poseidon-rabbit
     exchange:   topic-poseidon-internal
-    queue:      
+    queue:		
 """
 import logging
 import time
@@ -76,7 +76,7 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
 if __name__ == '__main__':
     host = 'poseidon-rabbit'
     exchange = 'topic-poseidon-internal'
-        queue_name = 'NAME'  # fix this
+    queue_name = 'NAME'
     channel, connection = rabbit_init(host=host,
                                       exchange=exchange,
                                       queue_name=queue_name)

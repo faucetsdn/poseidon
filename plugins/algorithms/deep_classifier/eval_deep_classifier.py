@@ -17,17 +17,17 @@
 Created on 24 August 2016
 @author: bradh41, tlanham
 
-Deep learning module to classify
-packets based on hex headers.
+Evaluation module for deep learning
+model to classify packets based on
+hex headers.
 
 rabbitmq:
     host:       poseidon-rabbit
     exchange:   topic-poseidon-internal
     queue:      
 """
+import cPickle
 import logging
-import time
-import sys
 
 
 module_logger = logging.getLogger(__name__)
@@ -73,6 +73,24 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
     module_logger.info(' [*] Waiting for logs. To exit press CTRL+C')
     return channel, connection
 
+
+def load_model(file_name):
+    """
+    Given a file name for a pickel-serialized
+    evaluation function in byte form, loads the
+    function and returns it on success, otherwise
+    returns None.
+    """
+    try:
+        f = open(file_name, 'rb')
+        eval_model = cPickle.load(f)
+        f.close()
+        return eval_model
+    except:
+        module_logger.error('Failed to load model evaluation function from: ' + file_name)
+        return None
+
+
 if __name__ == '__main__':
     host = 'poseidon-rabbit'
     exchange = 'topic-poseidon-internal'
@@ -80,3 +98,4 @@ if __name__ == '__main__':
     channel, connection = rabbit_init(host=host,
                                       exchange=exchange,
                                       queue_name=queue_name)
+    load_model('deep_eval.save')
