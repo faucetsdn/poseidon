@@ -94,7 +94,7 @@ def load_model(file_name):
 if __name__ == '__main__':
     host = 'poseidon-rabbit'
     exchange = 'topic-poseidon-internal'
-        queue_name = 'NAME'  # fix this
+    queue_name = 'NAME'  # fix this
     channel, connection = rabbit_init(host=host,
                                       exchange=exchange,
                                       queue_name=queue_name)
