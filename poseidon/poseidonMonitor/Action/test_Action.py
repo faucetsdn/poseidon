@@ -25,7 +25,7 @@ import falcon
 import pytest
 from Action import action_interface
 
-module_logger = logging.getLogger('poseidonMonitor.test_Action')
+module_logger = logging.getLogger(__name__)
 
 application = falcon.API()
 application.add_route('/v1/Action/{resource}',

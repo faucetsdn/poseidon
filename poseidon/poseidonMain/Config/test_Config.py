@@ -30,7 +30,7 @@ from Config import config_interface
 from Config import DOCKER_URL
 
 
-module_logger = logging.getLogger('poseidonMain.test_Config')
+module_logger = logging.getLogger(__name__)
 
 
 def getURL():

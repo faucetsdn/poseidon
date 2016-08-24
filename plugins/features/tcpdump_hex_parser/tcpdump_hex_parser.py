@@ -31,8 +31,7 @@ import sys
 
 import pika
 
-module_logger = logging.getLogger(
-    'plugins.features.tcpdump_hex_parser.tcpdump_hex_parser')
+module_logger = logging.getLogger(__name__)
 
 
 def get_path():

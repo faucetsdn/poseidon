@@ -21,8 +21,7 @@ import logging
 
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.controllerproxy import ControllerProxy
 
-module_logger = logging.getLogger(
-    'poseidonMonitor.NBCA.proxy.auth.basic.basicauth')
+module_logger = logging.getLogger(__name__)
 
 
 class BasicAuthControllerProxy(ControllerProxy):

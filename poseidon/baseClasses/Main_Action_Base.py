@@ -21,7 +21,7 @@ import logging
 
 from poseidon.baseClasses.Rock_Bottom import Rock_Bottom
 
-module_logger = logging.getLogger('baseClasses.Main_Action_Base')
+module_logger = logging.getLogger(__name__)
 
 
 class Main_Action_Base(Rock_Bottom):  # pragma: no cover

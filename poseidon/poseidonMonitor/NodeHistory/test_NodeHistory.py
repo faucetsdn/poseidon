@@ -26,7 +26,7 @@ from NodeHistory import Handle_Default
 from NodeHistory import NodeHistory
 from NodeHistory import nodehistory_interface
 
-module_logger = logging.getLogger('poseidonMonitor.test_NodeHistory')
+module_logger = logging.getLogger(__name__)
 
 application = falcon.API()
 application.add_route('/v1/history/{resource}',

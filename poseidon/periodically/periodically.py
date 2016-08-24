@@ -27,7 +27,7 @@ import sys
 import time
 import urllib2
 
-module_logger = logging.getLogger('poseidon.periodically.periodically')
+module_logger = logging.getLogger(__name__)
 
 
 def makeCall(url):

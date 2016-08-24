@@ -27,7 +27,7 @@ from poseidon.baseClasses.enums_tuples import EVERY
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
 
 
-module_logger = logging.getLogger('poseidonMain.Scheduler')
+module_logger = logging.getLogger(__name__)
 
 '''
 wait = True

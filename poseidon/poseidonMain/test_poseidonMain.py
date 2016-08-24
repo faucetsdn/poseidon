@@ -26,7 +26,7 @@ import pytest
 from poseidonMain import main
 from poseidonMain import PoseidonMain
 
-module_logger = logging.getLogger('poseidonMain.test_poseidonMain')
+module_logger = logging.getLogger(__name__)
 
 
 def test_poseidonMain_goTime():

@@ -25,7 +25,7 @@ import pytest
 from Investigator import Investigator
 from Investigator import Investigator_Response
 
-module_logger = logging.getLogger('poseidonMain.test_Investigator')
+module_logger = logging.getLogger(__name__)
 
 
 def test_Investigator():

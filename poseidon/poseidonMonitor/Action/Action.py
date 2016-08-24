@@ -23,7 +23,7 @@ from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 
 
-module_logger = logging.getLogger('poseidonMonitor.Action')
+module_logger = logging.getLogger(__name__)
 
 
 class Action(Monitor_Action_Base):
