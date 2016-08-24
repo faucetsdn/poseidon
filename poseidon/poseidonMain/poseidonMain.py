@@ -144,11 +144,19 @@ class PoseidonMain(object):
 
     def processQ(self):
         x = 10
+
+        flag = False 
+        if getenv('PRODUCTION','False')=='True':
+            flag=True
+
+        self.logger.debug('PRODUCTION = %s' %(getenv('PRODDUCTION','False')))
+  
         while not self.shutdown and x > 0:
             start = time.clock()
             time.sleep(1)
 
-            x = x - 1
+	    if not flag:
+            	x = x - 1
 
             # type , value
             t, v = self.get_queue_item()
