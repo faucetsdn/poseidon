@@ -15,7 +15,7 @@
 #   limitations under the License.
 """
 Created on 24 August 2016
-@author: bradh, tlanham
+@author: bradh41, tlanham
 
 Deep learning module to classify
 packets based on hex headers.
