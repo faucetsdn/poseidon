@@ -22,3 +22,10 @@ package to classify pcap hex
 headers.
 """
 import pytest
+
+
+@pytest.mark.skip(reason='requires rabbitmq broker, integration test')
+def test_rabbit_init():
+    channel, connection = rabbit_init(host='poseidon-rabbit',
+                                      exchange='topic-poseidon-internal',
+                                      queue_name='poseidon.tcpdump_parser.#')
