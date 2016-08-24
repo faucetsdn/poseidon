@@ -28,3 +28,55 @@ rabbitmq:
 import logging
 import time
 import sys
+
+
+module_logger = logging.getLogger(__name__)
+
+
+def rabbit_init(host, exchange, queue_name):  # pragma: no cover
+    """
+    Connects to rabbitmq using the given hostname,
+    exchange, and queue. Retries on failure until success.
+    Binds routing keys appropriate for module, and returns
+    the channel and connection.
+    """
+    wait = True
+    while wait:
+        try:
+            connection = pika.BlockingConnection(
+                pika.ConnectionParameters(host=host))
+            channel = connection.channel()
+            channel.exchange_declare(exchange=exchange, type='topic')
+            result = channel.queue_declare(queue=queue_name, exclusive=True)
+            wait = False
+            module_logger.info('connected to rabbitmq...')
+            print "connected to rabbitmq..."
+        except Exception, e:
+            print "waiting for connection to rabbitmq..."
+            print str(e)
+            module_logger.info(str(e))
+            module_logger.info('waiting for connection to rabbitmq...')
+            time.sleep(2)
+            wait = True
+
+    binding_keys = sys.argv[1:]
+    if not binding_keys:
+        ostr = 'Usage: %s [binding_key]...' % (sys.argv[0])
+        module_logger.error(ostr)
+        sys.exit(1)
+
+    for binding_key in binding_keys:
+        channel.queue_bind(exchange=exchange,
+                           queue=queue_name,
+                           routing_key=binding_key)
+
+    module_logger.info(' [*] Waiting for logs. To exit press CTRL+C')
+    return channel, connection
+
+if __name__ == '__main__':
+    host = 'poseidon-rabbit'
+    exchange = 'topic-poseidon-internal'
+    queue_name = 'NAME'
+    channel, connection = rabbit_init(host=host,
+                                      exchange=exchange,
+                                      queue_name=queue_name)
