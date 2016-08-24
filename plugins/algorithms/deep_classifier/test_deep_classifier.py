@@ -23,9 +23,17 @@ headers.
 """
 import pytest
 
+# eval tests
+from eval_deep_classifier import load_model
+from eval_deep_classifier import rabbit_init
+
 
 @pytest.mark.skip(reason='requires rabbitmq broker, integration test')
 def test_rabbit_init():
     channel, connection = rabbit_init(host='poseidon-rabbit',
                                       exchange='topic-poseidon-internal',
                                       queue_name='poseidon.tcpdump_parser.#')
+
+
+def test_load_model():
+    assert load_model('not_a_file.abc') is None
