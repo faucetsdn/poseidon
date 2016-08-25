@@ -157,9 +157,9 @@ func sendLine(line string, ch *amqp.Channel) {
             ContentType: "text/plain",
             Body:        []byte(line)})
     if err != nil {
-        log.Println("failed to send message: %s", line)
+        log.Println("failed to send message: " + line)
     } else {
-        fmt.Println(" [*] Sent %s", line)
+        fmt.Println(" [*] Sent " + line)
     }
 }
 
