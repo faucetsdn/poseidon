@@ -74,10 +74,24 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
     return channel, connection
 
 
+def callback():
+    message = 'MACHINE LEARNING RESULTS'
+    routing_key = 'poseidon.algos.port_class'
+    channel.basic_publish(exchange='topic_poseidon_internal',
+                          routing_key=routing_key,
+                          body=message)
+
+
 if __name__ == '__main__':
     host = 'poseidon-rabbit'
     exchange = 'topic-poseidon-internal'
-    queue_name = 'NAME'  # fix this
+    queue_name = 'NAME'  # TODO!! fix this
     channel, connection = rabbit_init(host=host,
                                       exchange=exchange,
                                       queue_name=queue_name)
+    binding_key = 'KEY'  # TODO!!
+    channel.basic_consume(callback,
+                          queue=queue_name,
+                          no_ack=True,
+                          consumer_tag=binding_key)
+    channel.start_consuming()

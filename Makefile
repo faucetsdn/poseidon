@@ -113,7 +113,7 @@ build-storage:
 build-storage-interface:
 	docker build -t poseidon-storage-interface -f Dockerfile.storage-interface .
 
-clean-all:
+clean-all: nuke-containers
 	@docker rmi -f poseidon-monitor || echo
 	@docker rmi -f poseidon-storage || echo
 	@docker rmi -f poseidon-main || echo
