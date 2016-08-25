@@ -21,26 +21,32 @@ Created on 11 July 2016
 
 """
 import datetime
+import logging
 import os
 import sys
 import time
 import urllib2
 
+module_logger = logging.getLogger(__name__)
+
 
 def makeCall(url):
-    print 'makeCall ' + datetime.datetime.now().ctime()
+    ostr = 'makeCall %s' % (datetime.datetime.now().ctime())
+    module_logger.info(ostr)
     if url:  # pragma: no cover
         try:
             page = urllib2.urlopen(url)
-            print page.readlines()
-            print 'wget ' + url
+            module_logger.info(page.readlines())
+            ostr = 'wget %s' % (url)
+            module_logger.info(ostr)
         except:
-            print 'Error contacting url:', url, ' retrying...'
+            ostr = 'Error contacting url: %s retrying...' % (url)
+            module_logger.error(ostr)
 
 
 def doSleep(t):
     if t <= 0:
-        print 'Too fast'
+        module_logger.error('Too fast')
         return False
     else:
         time.sleep(t)
@@ -84,5 +90,4 @@ def main(argv):  # pragma: no cover
 
 
 if __name__ == '__main__':  # pragma: no cover
-    print sys.argv
     main(sys.argv[1:])

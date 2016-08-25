@@ -18,35 +18,39 @@ Test module for bcf.
 
 @author: kylez
 """
+import json
+import logging
+import os
 
 import pytest
 from bcf import BcfProxy
+from httmock import HTTMock
+from httmock import response
+from httmock import urlmatch
 
-import os
-import json
-from httmock import urlmatch, response, HTTMock
+module_logger = logging.getLogger(__name__)
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
-username = "user"
-password = "pass"
-cookie = "cookie"
+username = 'user'
+password = 'pass'
+cookie = 'cookie'
 
 
 def mock_factory(regex, filemap):
     @urlmatch(netloc=regex)
     def mock_fn(url, request):
-        if url.path == "/login":
+        if url.path == '/login':
             j = json.loads(request.body)
-            assert j["username"] == username
-            assert j["password"] == password
-            headers = {"set-cookie": "session_cookie=%s" % cookie,}
+            assert j['username'] == username
+            assert j['password'] == password
+            headers = {'set-cookie': 'session_cookie=%s' % cookie, }
             r = response(headers=headers, request=request)
         elif url.path in filemap:
             with open(os.path.join(cur_dir, filemap[url.path])) as f:
-                data = f.read().replace("\n", "")
+                data = f.read().replace('\n', '')
             r = response(content=data, request=request)
-        else: # pragma: no cover
-            raise Exception("Invalid URL: %s" % url)
+        else:  # pragma: no cover
+            raise Exception('Invalid URL: %s' % url)
         return r
     return mock_fn
 
@@ -56,11 +60,12 @@ def test_BcfProxy():
     Tests bcf
     """
     filemap = {
-        "/data/controller/applications/bcf/info/endpoint-manager/endpoint" : "sample_endpoints.json",
-        "/data/controller/applications/bcf/info/fabric/switch" : "sample_switches.json",
+        '/data/controller/applications/bcf/info/endpoint-manager/endpoint': 'sample_endpoints.json',
+        '/data/controller/applications/bcf/info/fabric/switch': 'sample_switches.json',
     }
     with HTTMock(mock_factory(r'.*', filemap)):
-        proxy = BcfProxy("http://localhost", "login", {"username": username, "password": password})
+        proxy = BcfProxy('http://localhost', 'login',
+                         {'username': username, 'password': password})
         endpoints = proxy.get_endpoints()
         assert endpoints
         switches = proxy.get_switches()

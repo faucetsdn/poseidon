@@ -35,12 +35,14 @@ from NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import cont
 
 from Config.Config import config_interface
 
+module_logger = logging.getLogger(__name__)
+
 
 class Monitor(object):
 
     def __init__(self):
         # get the logger setup
-        self.logger = logging.getLogger(__name__)
+        self.logger = module_logger
         self.mod_configuration = dict()
         logging.basicConfig(level=logging.DEBUG)
 
@@ -56,32 +58,32 @@ class Monitor(object):
         self.Action.set_owner(self)
 
         # wire up handlers for Config
-        print 'handler Config'
+        self.logger.info('handler Config')
         # check
         self.Config.configure()
         self.Config.first_run()
         self.Config.configure_endpoints()
 
         # wire up handlers for NodeHistory
-        print 'handler NodeHistory'
+        self.logger.info('handler NodeHistory')
         self.NodeHistory.configure()
         self.NodeHistory.first_run()
         self.NodeHistory.configure_endpoints()
 
         # wire up handlers for NorthBoundControllerAbstraction
-        print 'handler NorthBoundControllerAbstraction'
+        self.logger.info('handler NorthBoundControllerAbstraction')
         # check
         self.NorthBoundControllerAbstraction.configure()
         self.NorthBoundControllerAbstraction.first_run()
         self.NorthBoundControllerAbstraction.configure_endpoints()
 
         # wire up handlers for Action
-        print 'handler Action'
+        self.logger.info('handler Action')
         # check
         self.Action.configure()
         self.Action.first_run()
         self.Action.configure_endpoints()
-        print '----------------------'
+        self.logger.info('----------------------')
         self.configSelf()
         self.init_logging()
 
@@ -105,7 +107,8 @@ class Monitor(object):
         for item in conf.direct_get(self.mod_name):
             k, v = item
             self.mod_configuration[k] = v
-        print self.mod_name, ':config:', self.mod_configuration
+        ostr = '%s:config:%s' % (self.mod_name, self.mod_configuration)
+        self.logger.info(ostr)
 
     def add_endpoint(self, name, handler):
         a = handler()
@@ -124,7 +127,7 @@ class Monitor(object):
 
 
 def get_allowed():
-    rest_url = 'localhost:8555'
+    rest_url = 'localhost:4444'
     if 'ALLOW_ORIGIN' in environ:
         allow_origin = environ['ALLOW_ORIGIN']
         host_port = allow_origin.split('//')[1]
@@ -136,7 +139,8 @@ def get_allowed():
     return allow_origin, rest_url
 
 allow_origin, rest_url = get_allowed()
-cors = CORS(allow_origins_list=[allow_origin])
+# cors = CORS(allow_origins_list=[allow_origin])
+cors = CORS(allow_all_origins=True)
 public_cors = CORS(allow_all_origins=True)
 
 

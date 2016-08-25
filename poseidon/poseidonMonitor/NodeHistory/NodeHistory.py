@@ -17,16 +17,22 @@
 Created on 17 May 2016
 @author: dgrossman, lanhamt
 """
+import json
+import logging
+
+from requests import get
+
 from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
-import json
-from requests import get
+
+module_logger = logging.getLogger(__name__)
 
 
 class NodeHistory(Monitor_Action_Base):
 
     def __init__(self):
         super(NodeHistory, self).__init__()
+        self.logger = module_logger
         self.mod_name = self.__class__.__name__
 
 
@@ -34,6 +40,7 @@ class Handle_Default(Monitor_Helper_Base):
 
     def __init__(self):
         super(Handle_Default, self).__init__()
+        self.logger = module_logger
         self.mod_name = self.__class__.__name__
 
     def on_get(self, req, resp, resource):

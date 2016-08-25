@@ -13,7 +13,7 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  *
- * 
+ *
  * Test package for flowparser.
  *
  * Created on August 3, 2016
@@ -22,8 +22,8 @@
 package main
 
 import (
-    "testing"
-    "errors"
+	"errors"
+	"testing"
 )
 
 /*
@@ -31,26 +31,26 @@ import (
  * when a valid error is passed to it (ie a non-nil error).
  */
 func TestFailOnError(t *testing.T) {
-    failOnError(nil, "test should not fail")
+	failOnError(nil, "test should not fail")
 }
 
 /*
- * Tests CheckError function which returns true when there is 
- * no error (ie err = nil), and returns false when there is 
- * an error. 
+ * Tests CheckError function which returns true when there is
+ * no error (ie err = nil), and returns false when there is
+ * an error.
  */
 func TestCheckError(t *testing.T) {
-    // test no error case
-    ret := CheckError(nil, "Should print this out 1", "BAD")
-    if !ret {
-        t.Error("Return should have been true due to error.")
-    }
+	// test no error case
+	ret := CheckError(nil, "Should print this out 1", "BAD")
+	if !ret {
+		t.Error("Return should have been true due to error.")
+	}
 
-    // test error case
-    ret = CheckError(errors.New("test error"), "BAD", "should print this out 2")
-    if ret {
-        t.Error("Return should have been false.")
-    }
+	// test error case
+	ret = CheckError(errors.New("test error"), "BAD", "should print this out 2")
+	if ret {
+		t.Error("Return should have been false.")
+	}
 }
 
 /*
@@ -59,19 +59,22 @@ func TestCheckError(t *testing.T) {
  * to rabbitmq.
  */
 func TestRabbitConnect(t *testing.T) {
-    conn, ch := RabbitConnect()
-    t.Error(conn)
-    t.Error(ch)
+	// INTEGRATION TEST
+	// conn, ch := RabbitConnect()
+	// t.Error(conn)
+	// t.Error(ch)
 }
 
 /*
- * Tests sendLine function which sends given line to 
- * given rabbitmq channel. 
+ * Tests sendLine function which sends given line to
+ * given rabbitmq channel.
  */
 func TestSendLine(t *testing.T) {
-    sendLine("csv line to send", nil)
+	// INTEGRATION TEST
+	// sendLine("csv line to send", nil)
 }
 
 func TestMain(t *testing.T) {
-    main()
+	// INTEGRATION TEST
+	// main()
 }

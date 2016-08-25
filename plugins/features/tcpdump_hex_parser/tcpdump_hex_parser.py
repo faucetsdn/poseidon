@@ -18,10 +18,20 @@ Tcpdump hex parser plugin
 
 Created on 13 June 2016
 @author: Charlie Lewis, David Grossman, Travis Lanham
+
+rabbitmq:
+    host:       poseidon-rabbit
+    exchange:   topic-poseidon-internal
+        keys:   poseidon.tcpdump_parser
+                poseidon.tcpdump_parser.dns
 """
+import logging
 import subprocess
 import sys
+
 import pika
+
+module_logger = logging.getLogger(__name__)
 
 
 def get_path():
@@ -29,7 +39,7 @@ def get_path():
     try:
         path = sys.argv[1]
     except:
-        print 'no path provided, quitting.'
+        module_logger.error('no path provided, quitting.')
     return path
 
 
@@ -39,13 +49,13 @@ def connections():
     connection = None
     try:
         connection = pika.BlockingConnection(pika.ConnectionParameters(
-            host='localhost'))
+            host='poseidon-rabbit'))
         channel = connection.channel()
 
         channel.exchange_declare(exchange='topic_poseidon_internal',
                                  type='topic')
     except:
-        print 'unable to connect to rabbitmq, quitting.'
+        module_logger.error('unable to connect to rabbitmq, quitting.')
     return channel, connection
 
 
@@ -177,7 +187,7 @@ def run_tool(path):
     """
     Tool entry point
     """
-    print 'processing pcap results...'
+    module_logger.info('processing pcap results...')
     channel, connection = connections()
     proc = subprocess.Popen(
         'tcpdump -nn -tttt -xx -r ' + path,
@@ -193,7 +203,8 @@ def run_tool(path):
             channel.basic_publish(exchange='topic_poseidon_internal',
                                   routing_key=routing_key,
                                   body=message)
-        print ' [x] Sent %r:%r' % (routing_key, message)
+        ostr = ' [x] Sent %r:%r' % (routing_key, message)
+        module_logger.info(ostr)
     try:
         connection.close()
     except:

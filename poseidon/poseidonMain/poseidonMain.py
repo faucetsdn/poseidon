@@ -17,7 +17,14 @@
 poseidonMain
 
 Created on 29 May 2016
+
 @author: dgrossman, lanhamt
+
+rabbitmq:
+    host:       poseidon-rabbit
+    exchange:   topic-poseidon-internal
+    queue(in):  algos_classifiers
+        keys:   poseidon.algos.#
 """
 import json
 import logging
@@ -25,16 +32,26 @@ import logging.config
 import time
 from os import getenv
 
+import pika
 from Investigator.Investigator import investigator_interface
 from Scheduler.Scheduler import scheduler_interface
 
 from Config.Config import config_interface
 
+# class NullHandler(logging.Handler):
+#     def emit(self, record):
+#         pass
+
+# h = NullHandler()
+#  module_logger = logging.getLogger(__name__).addHandler(h)
+module_logger = logging.getLogger(__name__)
 
 class PoseidonMain(object):
 
     def __init__(self):
-        self.logger = logging.getLogger(__name__)
+        self.skipRabbit = False
+        self.logger = module_logger
+        self.logger.debug('logger started')
         logging.basicConfig(level=logging.DEBUG)
         self.shutdown = False
 
@@ -82,8 +99,7 @@ class PoseidonMain(object):
         else:
             logging.basicConfig(level=logging.DEBUG)
 
-    def handle(self, tv):
-        t, v = tv
+    def handle(self, t, v):
         if t == 'Main':
             if v == 'shutdown':
                 self.shutdown = True
@@ -91,39 +107,85 @@ class PoseidonMain(object):
     def get_queue_item(self):
         return('t', 'v')
 
-    def init_rabbit(self):
-        pass
+    def init_rabbit(self):  # pragma: no cover
+        """
+        Continuously loops trying to connect to rabbitmq,
+        once connected declares the exchange and queue for
+        processing algorithm results.
+        """
+        host = 'poseidon-rabbit'
+        exchange = 'topic_poseidon_internal'
+        queue_name = 'algos_classifiers'
+        binding_key = 'poseidon.algos.#'
+        wait = True
+        while wait:
+            try:
+                params = pika.ConnectionParameters(host=host)
+                connection = pika.BlockingConnection(params)
+                channel = connection.channel()
+                channel.exchange_declare(exchange=exchange, type='topic')
+
+                result = channel.queue_declare(
+                    queue=queue_name, exclusive=True)
+
+                wait = False
+                self.logger.info('connected to rabbitmq...')
+            except:
+                self.logger.info('waiting for connection to rabbitmq...')
+                time.sleep(2)
+                wait = True
+
+        channel.queue_bind(exchange=exchange,
+                           queue=queue_name,
+                           routing_key=binding_key)
+
+        self.rabbit_connection = connection
+        self.rabbit_channel = channel
 
     def processQ(self):
         x = 10
+
+        flag = False 
+        if getenv('PRODUCTION','False')=='True':
+            flag=True
+
+        self.logger.debug('PRODUCTION = %s' %(getenv('PRODDUCTION','False')))
+  
         while not self.shutdown and x > 0:
             start = time.clock()
             time.sleep(1)
 
-            x = x - 1
+	    if not flag:
+            	x = x - 1
 
             # type , value
             t, v = self.get_queue_item()
 
-            # handle_list = self.Scheduler.get(t, None)
-            # if handle_list is not None:
-            #     for handle in handle_list:
-            #         handle(v)
-            # handle_list = self.Investigator.get(t, None)
-            # if handle_list is not None:
-            #     for handle in handle_list:
-            #         handle(v)
+            self.handle(t, v)
+
+            handle_list = self.Scheduler.get_handlers(t)
+            if handle_list is not None:
+                for handle in handle_list:
+                    handle(v)
+            handle_list = self.Investigator.get_handlers(t)
+            if handle_list is not None:
+                for handle in handle_list:
+                    handle(v)
 
             elapsed = time.clock()
             elapsed = elapsed - start
-            print 'time to run eventloop is %0.3f ms' % (elapsed * 1000)
+
+            logLine = 'time to run eventloop is %0.3f ms' % (elapsed * 1000)
+            self.logger.debug(logLine)
 
 
-def main():
+def main(skipRabbit=False):
     pmain = PoseidonMain()
-    pmain.init_rabbit()
+    pmain.skipRabbit = skipRabbit
+    if not skipRabbit:
+        pmain.init_rabbit()  # pragma: no cover
     pmain.processQ()
     return True
 
 if __name__ == '__main__':  # pragma: no cover
-    main()
+    main(skipRabbit=False)

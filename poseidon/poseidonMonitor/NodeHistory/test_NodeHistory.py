@@ -18,12 +18,15 @@ Test module for NodeHistory.py
 Created on 28 June 2016
 @author: dgrossman, lanhamt
 """
+import logging
+
 import falcon
 import pytest
-from NodeHistory import nodehistory_interface
-from NodeHistory import NodeHistory
 from NodeHistory import Handle_Default
-from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
+from NodeHistory import NodeHistory
+from NodeHistory import nodehistory_interface
+
+module_logger = logging.getLogger(__name__)
 
 application = falcon.API()
 application.add_route('/v1/history/{resource}',

@@ -17,8 +17,13 @@
 Created on 17 May 2016
 @author: dgrossman
 """
+import logging
+
 from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
+
+
+module_logger = logging.getLogger(__name__)
 
 
 class Action(Monitor_Action_Base):
@@ -28,6 +33,7 @@ class Action(Monitor_Action_Base):
         super(Action, self).__init__()
         self.mod_name = self.__class__.__name__
         self.config_section_name = self.mod_name
+        self.logger = module_logger
 
 
 class Handle_Default(Monitor_Helper_Base):

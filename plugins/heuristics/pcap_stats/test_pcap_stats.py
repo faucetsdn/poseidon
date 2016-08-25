@@ -25,6 +25,7 @@ from pcap_stats_utils import MachineNode
 from pcap_stats_utils import TimeRecord
 from pcap_stats import analyze_pcap
 from pcap_stats import network_machines
+from pcap_stats import rabbit_init
 import math
 
 
@@ -226,3 +227,10 @@ def test_analyze_pcap():
     assert three_rec['136.145.402.267'] == 1
 
     analyze_pcap(ch, method, properties, out_to_out, f)
+
+
+@pytest.mark.skip(reason='requires rabbitmq broker, integration test')
+def test_rabbit_init():
+    channel, connection = rabbit_init(host='poseidon-rabbit',
+                                      exchange='topic-poseidon-internal',
+                                      queue_name='features_tcpdump')

@@ -13,17 +13,24 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
 """
 DShell netflow parser plugin
 
 Created on 13 June 2016
 @author: Charlie Lewis, Abhi Ganesh
-"""
 
-import pika
+rabbitmq:
+    host:       poseidon-rabbit
+    exchange:   topic-poseidon-internal
+        keys:   poseidon.dshell
+"""
+import logging
 import subprocess
 import sys
+
+import pika
+
+module_logger = logging.getLogger(__name__)
 
 
 def get_path():
@@ -31,7 +38,7 @@ def get_path():
     try:
         path = sys.argv[1]
     except:
-        print "no path provided, quitting."
+        module_logger.error('no path provided, quitting.')
     return path
 
 
@@ -41,20 +48,20 @@ def connections():
     connection = None
     try:
         connection = pika.BlockingConnection(pika.ConnectionParameters(
-            host='rabbitmq'))
+            host='poseidon-rabbit'))
         channel = connection.channel()
 
-        channel.exchange_declare(exchange='topic_recs',
+        channel.exchange_declare(exchange='topic-poseidon-internal',
                                  type='topic')
     except:
-        print "unable to connect to rabbitmq, quitting."
+        module_logger.error('unable to connect to rabbitmq, quitting.')
     return channel, connection
 
 
 def run_tool(path):
     """Tool entry point"""
-    routing_key = "dshell_netflow_parser" + path.replace("/", ".")
-    print "processing pcap results..."
+    routing_key = 'poseidon.dshell'
+    module_logger.info('processing pcap results...')
     subprocess.Popen(
         '/Dshell/dshell-decode -o /tmp/results.out -d netflow ' +
         path,
@@ -62,7 +69,7 @@ def run_tool(path):
         stdout=subprocess.PIPE).wait()
 
     channel, connection = connections()
-    print "sending pcap results..."
+    module_logger.info('sending pcap results...')
 
     try:
         with open('/tmp/results.out', 'r') as f:
@@ -71,27 +78,28 @@ def run_tool(path):
                 rec = rec.strip()
                 fields = rec.split()
                 try:
-                    data["date"] = fields[0].strip()
-                    data["time"] = fields[1].strip()
-                    data["src_ip"] = fields[2].strip()
-                    data["dst_ip"] = fields[4].strip()
-                    data["src_country_code"] = fields[5].strip()[1:]
-                    data["dst_country_code"] = fields[7].strip()[:-1]
-                    data["protocol"] = fields[8].strip()
-                    data["src_port"] = fields[9].strip()
-                    data["dst_port"] = fields[10].strip()
-                    data["src_packets"] = fields[11].strip()
-                    data["dst_packets"] = fields[12].strip()
-                    data["src_bytes"] = fields[13].strip()
-                    data["dst_bytes"] = fields[14].strip()
-                    data["duration"] = fields[15].strip()
-                    data["tool"] = "dshell_netflow"
+                    data['date'] = fields[0].strip()
+                    data['time'] = fields[1].strip()
+                    data['src_ip'] = fields[2].strip()
+                    data['dst_ip'] = fields[4].strip()
+                    data['src_country_code'] = fields[5].strip()[1:]
+                    data['dst_country_code'] = fields[7].strip()[:-1]
+                    data['protocol'] = fields[8].strip()
+                    data['src_port'] = fields[9].strip()
+                    data['dst_port'] = fields[10].strip()
+                    data['src_packets'] = fields[11].strip()
+                    data['dst_packets'] = fields[12].strip()
+                    data['src_bytes'] = fields[13].strip()
+                    data['dst_bytes'] = fields[14].strip()
+                    data['duration'] = fields[15].strip()
+                    data['tool'] = 'dshell_netflow'
                     message = str(data)
 
                     if channel:
                         channel.basic_publish(
                             exchange='topic_recs', routing_key=routing_key, body=message)
-                        print " [x] Sent %r:%r" % (routing_key, message)
+                        ostr = ' [x] Sent %r:%r' % (routing_key, message)
+                        module_logger.debug(ostr)
                 except:
                     pass
     except:

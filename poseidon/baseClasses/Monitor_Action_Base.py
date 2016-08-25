@@ -21,6 +21,7 @@ import logging
 
 from poseidon.baseClasses.Rock_Bottom import Rock_Bottom
 
+module_logger = logging.getLogger(__name__)
 
 """ Base call stubs
 
@@ -46,11 +47,7 @@ class Monitor_Action_Base(Rock_Bottom):  # pragma: no cover
         """
 
         self.owner = owner
-        if owner.logger is not None:
-            self.logger = owner.logger
-        else:
-            self.logger = logging.getLogger(__name__)
-
+        self.logger = module_logger
         if self.owner.mod_name is not None:
             self.config_section_name = self.owner.mod_name + ':' + self.mod_name
         else:
@@ -58,18 +55,21 @@ class Monitor_Action_Base(Rock_Bottom):  # pragma: no cover
 
     def configure(self):
         """get, parse, store configuration internally as dict """
-        print self.__class__.__name__, 'Base:configure'
+        ostr = '%s %s' % (self.__class__.__name__, 'Base:configure')
+        self.logger.debug(ostr)
         if self.owner:
-            print self.__class__.__name__, 'configure:owner'
+            ostr = '%s %s' % (self.__class__.__name__, 'configure:owner')
+            self.logger.debug(ostr)
             self.mod_configuration = dict()
             conf = self.owner.Config.get_endpoint('Handle_SectionConfig')
             if conf is not None:
                 for item in conf.direct_get(self.mod_name):
                     k, v = item
                     self.mod_configuration[k] = v
-                print '%s,%s:%s' % (self.__class__.__name__,
-                                    self.mod_name,
-                                    self.mod_configuration)
+                ostr = '%s,%s:%s' % (self.__class__.__name__,
+                                     self.mod_name,
+                                     self.mod_configuration)
+                self.logger.debug(ostr)
                 self.configured = True
 
     def first_run(self):
@@ -78,10 +78,10 @@ class Monitor_Action_Base(Rock_Bottom):  # pragma: no cover
 
     def configure_endpoints(self):
         """call stored classes setups and first runs"""
-        # print self.mod_name,'configure_endpoints'
         if self.owner and self.configured:
             for k, v in self.actions.iteritems():
-                print 'about to configure %s\n' % (k)
+                ostr = 'about to configure %s\n' % (k)
+                self.logger.debug(ostr)
                 v.configure()
                 v.first_run()
 
@@ -93,7 +93,6 @@ class Monitor_Action_Base(Rock_Bottom):  # pragma: no cover
             handler:    instantiated class to hold
         """
         a = handler()
-        # print name,handler
         a.set_owner(self)
         self.actions[name] = a
 

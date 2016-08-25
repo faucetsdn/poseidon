@@ -18,9 +18,12 @@ Test module for controllerproxy.
 
 @author: kylez
 """
+import logging
 
 import pytest
 from controllerproxy import ControllerProxy
+
+module_logger = logging.getLogger(__name__)
 
 
 def test_ControllerProxy():
@@ -28,6 +31,6 @@ def test_ControllerProxy():
     Tests ControllerProxy
     # http://jsonplaceholder.typicode.com: Fake online REST API for testing.
     """
-    proxy = ControllerProxy("http://jsonplaceholder.typicode.com")
-    r = proxy.get_resource("posts")
+    proxy = ControllerProxy('http://jsonplaceholder.typicode.com')
+    r = proxy.get_resource('posts')
     r.raise_for_status()

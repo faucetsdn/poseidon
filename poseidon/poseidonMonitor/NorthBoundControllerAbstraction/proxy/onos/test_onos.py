@@ -18,26 +18,30 @@ Test module for onos.
 
 @author: kylez
 """
+import json
+import logging
+import os
 
 import pytest
+from httmock import HTTMock
+from httmock import response
+from httmock import urlmatch
 from onos import OnosProxy
 
-import os
-import json
-from httmock import urlmatch, response, HTTMock
 
+module_logger = logging.getLogger(__name__)
 cur_dir = os.path.dirname(os.path.realpath(__file__))
-username = "user"
-password = "pass"
+username = 'user'
+password = 'pass'
 
 
 def mock_factory(regex, filemap):
     @urlmatch(netloc=regex)
     def mock_fn(url, request):
-        if url.path not in filemap: #pragma: no cover
-            raise Exception("Invalid URL: %s" % url)
+        if url.path not in filemap:  # pragma: no cover
+            raise Exception('Invalid URL: %s' % url)
         with open(os.path.join(cur_dir, filemap[url.path])) as f:
-            data = f.read().replace("\n", "")
+            data = f.read().replace('\n', '')
         content = json.dumps(json.loads(data))
         r = response(content=content)
         return r
@@ -49,12 +53,12 @@ def test_OnosProxy():
     Tests onos
     """
     filemap = {
-        "/devices" : "sample_devices.json",
-        "/hosts" : "hosts.sample",
-        "/flows" : "flows.sample"
+        '/devices': 'sample_devices.json',
+        '/hosts': 'hosts.sample',
+        '/flows': 'flows.sample'
     }
     with HTTMock(mock_factory(r'.*', filemap)):
-        proxy = OnosProxy("http://localhost", ("user", "pass"))
+        proxy = OnosProxy('http://localhost', ('user', 'pass'))
         assert proxy
         devices = proxy.get_devices()
         assert devices

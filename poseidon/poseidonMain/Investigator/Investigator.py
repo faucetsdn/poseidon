@@ -20,63 +20,66 @@ network flows.
 Created on 17 May 2016
 @author: dgrossman, tlanham
 """
+import ast
+import logging
+import logging.config
+import sys
+import urllib
+
+import bson
+import requests
+
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
 from poseidon.poseidonMain.Config.Config import Config
-import logging
-import requests
-import urllib
-import bson
-import ast
-import sys
+
+
+module_logger = logging.getLogger(__name__)
 
 
 class Investigator(Main_Action_Base):
 
     def __init__(self):
         super(Investigator, self).__init__()
+        self.logger = module_logger
         self.mod_name = self.__class__.__name__
         self.config = Config()
         self.config_dict = {}
         self.update_config()
+        self.handles = dict()
 
         self.algos = {}
         self.rules = {}
         self.update_rules()
 
         self.vent_machines = {}
-        self.config_vent_machines()
-        self.vent_startup()
-        self.vent_addr = 'http://' + self.config_dict['vent_addr']
+        self.vctrl_list()
+        self.vctrl_startup()
+        self.vctrl_addr = 'http://' + self.config_dict['vctrl_addr']
 
-    def config_vent_machines(self):
+    def vctrl_list(self):
         """
-        Checks config items in Investigator config for
-        vent endpoints to be added to vcontrol for
-        investigator processing.
+        Retrieves list of vent machines running on vcontrol
+        instance. Gets list of machines as json and evaluates
+        into dict to update dict of available vent machines.
         """
-        for key in self.config_dict:
-            if 'vent_machine' in key:
-                machine_info = {}
-                fields = self.config_dict[key].split(' ')
-                for field in fields:
-                    param = field.split('=')[0]
-                    value = field.split('=')[1]
-                    if param == 'memory' or param == 'cpus' or param == 'disk_sz':
-                        value = int(value)
-                    machine_info[param] = value
-                self.vent_machines[machine_info['name']] = machine_info
+        try:
+            resp = requests.get(self.vctrl_addr + '/machines/list')
+            self.vent_machines = ast.literal_eval(resp.body)
+        except:
+            self.logger.error('Main: Investigator: error on vctrl list')
 
-    def vent_startup(self):
+    def vctrl_startup(self):
         """
         For each vent endpoint machine descriped in the Investigator
         config section, registers the machine with vcontrol.
         """
         for machine, config in self.vent_machines.iteritems():
-            body = self.format_vent_create(machine, config['provider'], config)
             try:
-                resp = requests.post(self.vent_addr + '/machines/create', data=body)
+                resp = requests.post(
+                    self.vent_addr + '/machines/create', data=body)
             except:
-                print >> sys.stderr, 'Main: Investigator: error on vent create request.'
+                self.logger.error(
+                    'Main: Investigator: error on vent create request.')
 
     def format_vent_create(self, name, provider, body={}, group='poseidon-vent', labels='default', memory=4096, cpus=4, disk_sz=20000):
         """
@@ -88,11 +91,16 @@ class Investigator(Main_Action_Base):
         """
         body['name'] = name
         body['provider'] = provider
-        if 'group' not in body: body['group'] = group
-        if 'labels' not in body: body['labels'] = labels
-        if 'memory' not in body: body['memory'] = memory
-        if 'cpus' not in body: body['cpus'] = cpus
-        if 'disk_sz' not in body: body['disk_sz'] = disk_sz
+        if 'group' not in body:
+            body['group'] = group
+        if 'labels' not in body:
+            body['labels'] = labels
+        if 'memory' not in body:
+            body['memory'] = memory
+        if 'cpus' not in body:
+            body['cpus'] = cpus
+        if 'disk_sz' not in body:
+            body['disk_sz'] = disk_sz
         return body
 
     def update_config(self):
@@ -116,7 +124,9 @@ class Investigator(Main_Action_Base):
         for policy in self.rules:
             for proposed_algo in self.rules[policy]:
                 if proposed_algo not in self.algos:
-                    print >> sys.stderr, 'algorithm: %s has not been registered, deleting from policy', proposed_algo
+                    ostr = 'algorithm: %s has not been registered, deleting from policy' % (
+                        proposed_algo)
+                    self.logger.error(ostr)
                     del proposed_algo
 
     def register_algorithm(self, name, algorithm):
@@ -161,7 +171,8 @@ class Investigator(Main_Action_Base):
         except:
             # error connecting to storage interface
             # log error
-            print >> sys.stderr, 'Main (Investigator): could not connect to storage interface'
+            self.logger.error(
+                'Main (Investigator): could not connect to storage interface')
             return
 
         resp = ast.literal_eval(resp.body)
@@ -174,7 +185,18 @@ class Investigator(Main_Action_Base):
         else:
             # bad - should only be one record for each ip
             # log error for investigation
-            print >> sys.stderr, 'duplicate record for machine: %s', ip_addr
+            ostr = 'duplicate record for machine: %s' % (ip_addr)
+            self.logger.error(ostr)
+
+    def get_handlers(self, t):
+        handle_list = []
+        if t in self.handles:
+            handle_list.append(self.handles[t])
+
+        for helper in self.actions.itervalues():
+            if t in helper.handles:
+                handle_list.append(helper.handles[t])
+        return handle_list
 
 
 class Investigator_Response(Investigator):
@@ -184,8 +206,10 @@ class Investigator_Response(Investigator):
     added to network, etc). Maintains a record of
     jobs scheduled
     """
+
     def __init__(self):
         super(Investigator_Response, self).__init__()
+        self.logger = module_logger
         self.jobs = {}
 
     def vent_preparation(self):
@@ -199,7 +223,8 @@ class Investigator_Response(Investigator):
                 url = 'http://' + self.vent_addr + '/commands/deploy/' + machine
                 resp = requests.post(url)
             except:
-                print >> sys.stderr, 'Main: Investigator: vent_preparation, vent request failed'
+                self.logger.error(
+                    'Main: Investigator: vent_preparation, vent request failed')
 
     def send_vent_jobs(self):
         """
@@ -211,7 +236,8 @@ class Investigator_Response(Investigator):
         try:
             resp = requests.get('vent_url')
         except:
-            print >> sys.stderr, 'Main: Investigator: send_vent_jobs, vent request failed'
+            self.logger.error(
+                'Main: Investigator: send_vent_jobs, vent request failed')
 
     def update_record(self):
         """

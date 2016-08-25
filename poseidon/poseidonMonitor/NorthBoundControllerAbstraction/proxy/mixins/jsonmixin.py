@@ -13,19 +13,22 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
 """
 Created on 25 July 2016
 @author: kylez
 """
-
 import json
+import logging
+
+module_logger = logging.getLogger(__name__)
+
 
 class JsonMixin:
+
     def parse_json(self, response):
         """
         Parse JSON from the `text` field of a response.
         """
         return response.json()
         #j = json.loads(response.text)
-        #return j
+        # return j

@@ -1,15 +1,17 @@
-FROM alpine:3.3
+FROM ubuntu:16.04
 MAINTAINER dgrossman dgrossman@iqt.org
 
-RUN apk add --update \
+RUN apt-get update && \
+    apt-get install -y \
+    build-essential \
     git \
     make \
     python \
     python-dev \
-    py-pip \
-    py-sphinx \
-    tcpdump \
-    && rm -rf /var/cache/apk/*
+    python-pip \
+    python-setuptools \
+    python-sphinx \
+    tcpdump
 
 ADD . /poseidonWork
 WORKDIR /poseidonWork
@@ -18,12 +20,6 @@ RUN pip install pip --upgrade
 
 # install dependencies of plugins for poseidon
 RUN for file in $(find poseidon/* -name "requirements.txt"); \
-    do \
-        pip install -r $file; \
-    done
-
-# install dependencies of plugins for tests
-RUN for file in $(find plugins/* -name "requirements.txt"); \
     do \
         pip install -r $file; \
     done
@@ -41,6 +37,7 @@ RUN py.test -v \
 --ignore=poseidon/poseidonMain \
 --ignore=poseidon/poseidonStorage \
 --ignore=collectors/ \
+--ignore=plugins/ \
 --cov=poseidon/poseidonMonitor \
 --cov=plugins --cov-report term-missing --cov-config .coveragerc
 
