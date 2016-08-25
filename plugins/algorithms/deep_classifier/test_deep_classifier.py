@@ -27,6 +27,9 @@ import pytest
 from eval_deep_classifier import load_model
 from eval_deep_classifier import rabbit_init
 
+# train tests
+import train_deep_classifier
+
 
 @pytest.mark.skip(reason='requires rabbitmq broker, integration test')
 def test_rabbit_init():
