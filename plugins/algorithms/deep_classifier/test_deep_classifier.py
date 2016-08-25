@@ -22,10 +22,9 @@ package to classify pcap hex
 headers.
 """
 import pytest
-
-# eval tests
 from eval_deep_classifier import load_model
 from eval_deep_classifier import rabbit_init
+# eval tests
 
 
 @pytest.mark.skip(reason='requires rabbitmq broker, integration test')

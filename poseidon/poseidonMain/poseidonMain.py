@@ -23,8 +23,8 @@ Created on 29 May 2016
 rabbitmq:
     host:       poseidon-rabbit
     exchange:   topic-poseidon-internal
-    queue(in):  algos_classifiers
-        keys:   poseidon.algos.#
+    queue(in):  poseidon_internals
+        keys:   poseidon.algos.#,poseidon.action.#
 '''
 import json
 import logging
@@ -145,13 +145,14 @@ class PoseidonMain(object):
 
         if isinstance(keys, types.ListType):
             for key in keys:
-                self.logger.debug('adding key:%s to rabbitmq channel', key)
+                self.logger.debug(
+                    'array adding key:%s to rabbitmq channel', key)
                 channel.queue_bind(exchange=exchange,
                                    queue=queue_name,
                                    routing_key=key)
 
         if isinstance(keys, types.StringType):
-            self.logger.debug('adding key:%s to rabbitmq channel', keys)
+            self.logger.debug('string adding key:%s to rabbitmq channel', keys)
             channel.queue_bind(exchange=exchange,
                                queue=queue_name, routing_key=keys)
 
@@ -161,8 +162,8 @@ class PoseidonMain(object):
         ''' init_rabbit '''
         host = 'poseidon-rabbit'
         exchange = 'topic_poseidon_internal'
-        queue_name = 'algos_classifiers'
-        binding_key = 'poseidon.algos.#'
+        queue_name = 'poseidon_internals'
+        binding_key = ['poseidon.algos.#', 'poseidon.action.#']
         retval = self.make_rabbit_connection(
             host, exchange, queue_name, binding_key)
         self.rabbit_channel_local = retval[0]
@@ -198,6 +199,7 @@ class PoseidonMain(object):
             self.logger.debug('about to look for work')
             try:
                 item = self.m_qeueue.get(False)
+                self.logger.debug('item:%r', item)
             except Queue.Empty:
                 pass
 
@@ -229,7 +231,7 @@ def main(skip_rabbit=False):
     if not skip_rabbit:
         pmain.init_rabbit()  # pragma: no cover
         pmain.start_channel(pmain.rabbit_channel_local,
-                            callback, 'algos_classifiers')
+                            callback, 'poseidon_internals')
         # def start_channel(self, channel, callback, queue):
     pmain.process()
     return True

@@ -26,16 +26,17 @@ NAMES: current databases and collections (subject to change)
 Created on 17 May 2016
 @author: dgrossman, lanhamt
 """
-from subprocess import check_output
-from pymongo import MongoClient
-from urlparse import urlparse
-from falcon_cors import CORS
-from os import environ
 import ConfigParser
 import json
-import falcon
-import bson
 import sys
+from os import environ
+from subprocess import check_output
+from urlparse import urlparse
+
+import bson
+import falcon
+from falcon_cors import CORS
+from pymongo import MongoClient
 
 
 class poseidonStorage:
@@ -233,10 +234,12 @@ class db_update_one_doc(poseidonStorage):
     WARNING: replaces entire document with the
     updated_doc.
     """
+
     def on_get(self, req, resp, database, collection, filt, updated_doc):
         ret = {}
         try:
-            ret = self.client[database][collection].updateOne(filt, updated_doc)
+            ret = self.client[database][
+                collection].updateOne(filt, updated_doc)
             ret['success'] = str(True)
         except:
             ret['success'] = str(False)

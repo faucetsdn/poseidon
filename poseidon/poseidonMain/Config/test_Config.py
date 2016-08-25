@@ -24,7 +24,6 @@ import logging.config
 import os
 
 import pytest
-
 from Config import CI_TESTING
 from Config import config_interface
 from Config import DOCKER_URL
