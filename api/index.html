@@ -30,8 +30,11 @@
   <script type="text/javascript">
     $(function () {
 				<!-- var port = parseInt(location.port)-1; -->
-      var port = 4444
-      var url = "http://"+window.location.hostname+":"+port+"/swagger.yaml";
+      <!-- var port = 4444 -->
+      <!-- var url = "http://"+window.location.hostname+":"+port+"/swagger.yaml"; -->
+      var port = 8004 
+      var url = "http://172.16.201.13:8004"+"/swagger.yaml";
+
 
       // Pre load translate...
       if(window.SwaggerTranslator) {
