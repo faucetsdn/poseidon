@@ -127,8 +127,19 @@ class PoseidonMain(object):
             if v == 'shutdown':
                 self.shutdown = True
 
-    def make_rabbit_connection(self, host, exchange, queue_name, keys):  # pragma: no cover
-        '''   '''
+    def get_queue_item(self):
+        return('t', 'v')
+
+    def init_rabbit(self):  # pragma: no cover
+        """
+        Continuously loops trying to connect to rabbitmq,
+        once connected declares the exchange and queue for
+        processing algorithm results.
+        """
+        host = 'poseidon-rabbit'
+        exchange = 'topic-poseidon-internal'
+        queue_name = 'algos_classifiers'
+        binding_key = 'poseidon.algos.#'
         wait = True
         while wait:
             try:

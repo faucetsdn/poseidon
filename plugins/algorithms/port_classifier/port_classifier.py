@@ -91,7 +91,10 @@ def file_receive(ch, method, properties, body):
     if 'EOF -- FLOWPARSER FINISHED' in body:
         ch.stop_consuming()
         fd.close()
-        port_classifier(ch, 'temp_file')
+        try:
+            port_classifier(ch, 'temp_file')
+        except Exception, e:
+            module_logger.debug(str(e))
     else:
         fd.write(body + '\n')
         print ' [*] Received %s', body

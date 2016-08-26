@@ -67,10 +67,10 @@ func failOnError(err error, msg string) {
  */
 func CheckError(err error, success_msg string, error_msg string) bool {
     if err != nil {
-        fmt.Println(error_msg)
+        log.Println(error_msg)
         return false
     } else {
-        fmt.Println(success_msg)
+        log.Println(success_msg)
         return true
     }
 }
@@ -119,28 +119,6 @@ func RabbitConnect() (*amqp.Connection, *amqp.Channel) {
     )
     failOnError(err, "failed to declare exchange, exiting")
 
-    /*
-       // ========== BELOW ONLY NEEDED IF MODULE IS RECEIVING FROM A QUEUE ==========
-
-
-       queue_name := "process_features_flowparser"
-       _, err = ch.QueueDeclare(queue_name, true, true, false, false, nil)
-       failOnError(err, "queue declaration failed, exiting")
-
-       argc := len(os.Args)
-       if argc > 2 {
-           for i := 2; i < argc; i++ {
-               err := ch.QueueBind(queue_name, os.Args[i], "topic_poseidon_internal", false, nil)
-               failOnError(err, "queue bind failed, exiting")
-           }
-       } else {
-           log.Fatalf("Usage: %s [file_name] [binding_key]...", os.Args[0])
-           panic(fmt.Sprintf("Usage: %s [file_name] [binding_key]...", os.Args[0]))
-       }
-
-       fmt.Println(" [*] Waiting for logs. To exit press CTRL+C")
-    */
-
     return conn, ch
 }
 
@@ -159,7 +137,7 @@ func sendLine(line string, ch *amqp.Channel) {
     if err != nil {
         log.Println("failed to send message: " + line)
     } else {
-        fmt.Println(" [*] Sent " + line)
+        log.Println(" [*] Sent " + line)
     }
 }
 

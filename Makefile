@@ -1,4 +1,4 @@
-run: clean depends build docs notebooks main api monitor storage printPlaces periodically
+run: clean-all depends build docs notebooks main api monitor storage printPlaces periodically
 printPlaces:
 	@docker ps --format "table {{.Names}}\thttp://{{.Ports}}" |sed 's/0.0.0.0/localhost/' | sed 's/->/ container:/'
 
@@ -113,15 +113,15 @@ build-storage:
 build-storage-interface:
 	docker build -t poseidon-storage-interface -f Dockerfile.storage-interface .
 
-clean-all: clean depends
-	@docker rmi -f poseidon-monitor
-	@docker rmi -f poseidon-storage
-	@docker rmi -f poseidon-main
-	@docker rmi -f poseidon-api
-	@docker rmi -f poseidon-periodically
-	@docker rmi -f poseidon-storage-interface
-	@docker rmi -f poseidon-rabbit
-	@docker rmi -f poseidon-docs
+clean-all: nuke-containers
+	@docker rmi -f poseidon-monitor || echo
+	@docker rmi -f poseidon-storage || echo
+	@docker rmi -f poseidon-main || echo
+	@docker rmi -f poseidon-api || echo
+	@docker rmi -f poseidon-periodically || echo
+	@docker rmi -f poseidon-storage-interface || echo
+	@docker rmi -f poseidon-rabbit || echo
+	@docker rmi -f poseidon-docs || echo
 
 clean-mock-controller:
 	@docker ps -aqf "name=mock-controller" | xargs docker rm -f || echo
@@ -153,10 +153,6 @@ clean-storage-interface: depends
 clean-rabbit:
 	@docker ps -aqf "name=poseidon-rabbit" | xargs docker rm -f || echo
 
-clean: clean-docs clean-notebooks depends
-	#@docker ps -aqf "name=poseidon" | xargs docker rm -f
-	#@docker ps -aqf "name=poseidon-api" | xargs docker rm -f
-
 nuke-containers:
 	# WARNING: this deletes all containers, not just poseidon ones
 	@docker rm -f $$(docker ps -a -q) || echo
@@ -167,4 +163,4 @@ depends:
 	@echo
 	docker -v
 
-.PHONY: run test docs build notebooks clean clean-all clean-notebooks clean-docs depends
+.PHONY: run test docs build notebooks clean-all clean-notebooks clean-docs depends

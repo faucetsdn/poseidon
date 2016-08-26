@@ -82,7 +82,7 @@ def callback(ch, method, properties, body):
     global channel
     message = 'ml results'
     routing_key = 'poseidon.algos.dev_class'
-    channel.basic_publish(exchange='topic_poseidon_internal',
+    channel.basic_publish(exchange='topic-poseidon-internal',
                           routing_key=routing_key,
                           body=message)
 
