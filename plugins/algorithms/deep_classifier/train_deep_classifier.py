@@ -216,11 +216,8 @@ def is_clean_packet(packet):  # pragma: no cover
     if not packet['src_port'].isdigit(): return False
     if not packet['dest_port'].isdigit(): return False
 
-    try:
-        ipaddress.ip_address(packet['src_ip'])
-        ipaddress.ip_address(packet['dest_ip'])
-    except:
-        return False
+    if packet['src_ip'].isalpha(): return False
+    if packet['dest_ip'].isalpha(): return False
 
     if 'data' in packet:
         try:
@@ -261,8 +258,8 @@ def read_pcap(path):  # pragma: no cover
                 hex_sessions[key] = ([packet['data']], insert_num)
                 insert_num += 1
 
-    return hex_sessions
     print 'finished reading pcap file'
+    return hex_sessions
 
 
 def pickleFile(thing2save, file2save2=None, filePath='/work/notebooks/drawModels/', fileName='myModels'):  # pragma: no cover
@@ -729,6 +726,7 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
         hexSessions = removeBadSessionizer(hexSessions)
 
     numSessions = len(hexSessions)
+    print str(numSessions) + ' sessions found'
     hexSessionsKeys = order_keys(hexSessions)
     hexDict = hexTokenizer()
     
