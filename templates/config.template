@@ -3,7 +3,7 @@ Config=True
 loggingFile = /poseidonWork/poseidon/config/logging.json
 
 [database]
-ip = localhost
+ip = 10.176.142.96
 
 [vcontrol]
 api_url = http://www.lab41.org

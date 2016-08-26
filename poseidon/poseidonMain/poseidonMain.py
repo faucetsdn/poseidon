@@ -51,7 +51,9 @@ module_logger = logging.getLogger(__name__)
 
 
 def callback(ch, method, properties, body, q=None):
+    module_logger.debug('got a message: %r', body)
     # TODO more
+    print body
     q.put(body)
 
 
@@ -161,7 +163,7 @@ class PoseidonMain(object):
     def init_rabbit(self):
         ''' init_rabbit '''
         host = 'poseidon-rabbit'
-        exchange = 'topic_poseidon_internal'
+        exchange = 'topic-poseidon-internal'
         queue_name = 'poseidon_internals'
         binding_key = ['poseidon.algos.#', 'poseidon.action.#']
         retval = self.make_rabbit_connection(
