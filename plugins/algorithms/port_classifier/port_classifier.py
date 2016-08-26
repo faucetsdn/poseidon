@@ -63,7 +63,7 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
             result = channel.queue_declare(queue=queue_name, exclusive=True)
             wait = False
             module_logger.info('connected to rabbitmq...')
-            print "connected to rabbitmq..."
+            #print "connected to rabbitmq..."
         except Exception, e:
             print "waiting for connection to rabbitmq..."
             print str(e)
@@ -91,7 +91,10 @@ def file_receive(ch, method, properties, body):
     if 'EOF -- FLOWPARSER FINISHED' in body:
         ch.stop_consuming()
         fd.close()
-        port_classifier(ch, 'temp_file')
+        try:
+            port_classifier(ch, 'temp_file')
+        except Exception e:
+            module_logger.debug(str(e))
     else:
         fd.write(body + '\n')
         print ' [*] Received %s', body
@@ -142,7 +145,7 @@ def port_classifier(channel, file):
 
     message = class_report
     routing_key = 'poseidon.algos.port_class'
-    channel.basic_publish(exchange='topic_poseidon_internal',
+    channel.basic_publish(exchange='topic-poseidon-internal',
                           routing_key=routing_key,
                           body=message)
 

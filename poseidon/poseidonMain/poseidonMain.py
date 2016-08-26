@@ -114,7 +114,7 @@ class PoseidonMain(object):
         processing algorithm results.
         """
         host = 'poseidon-rabbit'
-        exchange = 'topic_poseidon_internal'
+        exchange = 'topic-poseidon-internal'
         queue_name = 'algos_classifiers'
         binding_key = 'poseidon.algos.#'
         wait = True
@@ -155,8 +155,8 @@ class PoseidonMain(object):
             start = time.clock()
             time.sleep(1)
 
-	    if not flag:
-            	x = x - 1
+        if not flag:
+                x = x - 1
 
             # type , value
             t, v = self.get_queue_item()

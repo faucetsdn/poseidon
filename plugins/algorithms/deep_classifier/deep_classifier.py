@@ -77,7 +77,7 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
 def callback():
     message = 'MACHINE LEARNING RESULTS'
     routing_key = 'poseidon.algos.port_class'
-    channel.basic_publish(exchange='topic_poseidon_internal',
+    channel.basic_publish(exchange='topic-poseidon-internal',
                           routing_key=routing_key,
                           body=message)
 
