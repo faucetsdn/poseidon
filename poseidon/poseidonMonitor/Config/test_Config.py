@@ -23,7 +23,6 @@ import logging
 
 import falcon
 import pytest
-
 from Config import config_interface
 
 module_logger = logging.getLogger(__name__)

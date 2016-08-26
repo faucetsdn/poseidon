@@ -24,7 +24,7 @@ hex headers.
 rabbitmq:
     host:       poseidon-rabbit
     exchange:   topic-poseidon-internal
-    queue:      
+    queue:
 """
 import cPickle
 import logging
@@ -50,9 +50,9 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
             result = channel.queue_declare(queue=queue_name, exclusive=True)
             wait = False
             module_logger.info('connected to rabbitmq...')
-            print "connected to rabbitmq..."
+            print 'connected to rabbitmq...'
         except Exception, e:
-            print "waiting for connection to rabbitmq..."
+            print 'waiting for connection to rabbitmq...'
             print str(e)
             module_logger.info(str(e))
             module_logger.info('waiting for connection to rabbitmq...')
@@ -87,7 +87,8 @@ def load_model(file_name):
         f.close()
         return eval_model
     except:
-        module_logger.error('Failed to load model evaluation function from: ' + file_name)
+        module_logger.error(
+            'Failed to load model evaluation function from: ' + file_name)
         return None
 
 

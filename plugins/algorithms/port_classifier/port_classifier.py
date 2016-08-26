@@ -29,16 +29,16 @@ rabbitmq:
     keys(out):  poseidon.algos.port_class
 """
 import logging
+import sys
+import time
 
 import numpy as np
 import pandas as pd
+import pika
 from sklearn import linear_model
 from sklearn import preprocessing
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import classification_report
-import time
-import pika
-import sys
 
 
 module_logger = logging.getLogger(__name__)
@@ -63,9 +63,9 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
             result = channel.queue_declare(queue=queue_name, exclusive=True)
             wait = False
             module_logger.info('connected to rabbitmq...')
-            print "connected to rabbitmq..."
+            print 'connected to rabbitmq...'
         except Exception, e:
-            print "waiting for connection to rabbitmq..."
+            print 'waiting for connection to rabbitmq...'
             print str(e)
             module_logger.info(str(e))
             module_logger.info('waiting for connection to rabbitmq...')

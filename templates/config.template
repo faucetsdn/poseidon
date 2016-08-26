@@ -51,8 +51,8 @@ Config=True
 
 [NorthBoundControllerAbstraction:Handle_Periodic]
 Config=True
-controller_ip = mock-controller
-controller_port = 3333
+controller_ip = 172.16.201.12
+controller_port = 8003
 
 [PoseidonMain]
 Config=True
