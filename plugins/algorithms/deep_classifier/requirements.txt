@@ -1,7 +1,5 @@
-cPickle
-binascii
 numpy
-json
 ipaddress
-blocks
 theano
+picklable_itertools
+h5py
