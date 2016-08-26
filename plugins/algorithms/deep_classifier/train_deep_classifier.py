@@ -469,7 +469,7 @@ def oneHot(index, granular = 'hex'):  # pragma: no cover
 
 def oneSessionEncoder(sessionPackets, hexDict, maxPackets=2, packetTimeSteps=100,
                       packetReverse=False, charLevel=False, padOldTimeSteps=True):  # pragma: no cover
-
+    
     sessionCollect = []
     packetCollect = []
     
@@ -483,8 +483,8 @@ def oneSessionEncoder(sessionPackets, hexDict, maxPackets=2, packetTimeSteps=100
     else:
         sessionList = copy(sessionPackets)
 
-    for rawpacket in sessionList:
-        packet = copy(rawpacket)
+    for packet in sessionList:
+        packet = [hexDict[packet[i:i+2]] for i in xrange(0,len(packet)-2+1,2)]
             
         if len(packet) >= packetTimeSteps: #crop packet to length packetTimeSteps
             packet = packet[:packetTimeSteps]
@@ -873,7 +873,7 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
 
             costfun = classifierTrain(sessionsMinibatch, targetsMinibatch)
 
-            if iteration % (numSessions / 10) == 0:
+            if iteration % (numSessions / (10 * batch_size)) == 0:
                 costCollect.append(costfun[0])
                 trainCollect.append(np.mean(np.argmax(costfun[-1],axis=1) == np.argmax(targetsMinibatch, axis=1)))
                 module_logger.info('   Iteration: ', iteration)
@@ -886,7 +886,7 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
             iteration+=1
 
             #testing accuracy
-            if iteration % (numSessions / 2) == 0:
+            if iteration % (numSessions / (2 * batch_size)) == 0:
                 predtar, acttar, testCollect = predictClass(classifierPredict, hexSessions, comsDict, uniqIPs, hexDict,
                                                             hexSessionsKeys,
                                                             numClasses, trainPercent, dimIn, maxPackets, packetTimeSteps,
@@ -895,7 +895,7 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
                 module_logger.info(str(testCollect))
 
             #save the models
-            if iteration % (numSessions / 5) == 0:
+            if iteration % (numSessions / (5 * batch_size)) == 0:
                 pickleFile(classifierTrain, filePath='',
                             fileName=runname+'TRAIN'+str(iteration))
                 pickleFile(classifierPredict, filePath='',
