@@ -19,9 +19,8 @@ test module for mock controller
 Created on 14 July 2016
 @author: lanhamt
 """
-
-import pytest
 import falcon
+import pytest
 from mockController import MockController
 
 

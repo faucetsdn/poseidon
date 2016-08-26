@@ -21,10 +21,11 @@ and FlowRecord classes
 Created on 28 July 2016
 @author: lanhamt
 """
+import time
 from collections import defaultdict
 from datetime import datetime
+
 import statistics
-import time
 
 
 class TimeRecord:
@@ -33,6 +34,7 @@ class TimeRecord:
     time concatenated to date for parse format:
     datetime.strptime(time, '%Y-%m-%d %H:%M:%S.%f')
     """
+
     def __init__(self):
         self.first_sent = None
         self.first_received = None
@@ -87,6 +89,7 @@ class MachineNode:
     as packet statistics (length, frequency of
     communication).
     """
+
     def __init__(self, addr):
         self.machine_addr = addr
         self.num_packets_sent = 0
@@ -111,13 +114,15 @@ class MachineNode:
             self.packet_lens_rec.append(length)
             self.machines_received_from[addr] += 1
             if pcap:
-                self.time_record.update_received('%s %s' % (pcap['date'], pcap['time']))
+                self.time_record.update_received(
+                    '%s %s' % (pcap['date'], pcap['time']))
         else:
             self.num_packets_sent += 1
             self.packet_lens_sent.append(length)
             self.machines_sent_to[addr] += 1
             if pcap:
-                self.time_record.update_sent('%s %s' % (pcap['date'], pcap['time']))
+                self.time_record.update_sent(
+                    '%s %s' % (pcap['date'], pcap['time']))
 
     def get_flow_duration(self, direction='sent'):
         """
@@ -183,6 +188,7 @@ class FlowRecord:
     and received from and the frequency as well as
     packet length.
     """
+
     def __init__(self):
         """
         Creates dict of addr->MachineNode to store machine records
