@@ -93,7 +93,7 @@ def file_receive(ch, method, properties, body):
         fd.close()
         try:
             port_classifier(ch, 'temp_file')
-        except Exception e:
+        except Exception, e:
             module_logger.debug(str(e))
     else:
         fd.write(body + '\n')

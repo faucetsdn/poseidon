@@ -156,7 +156,7 @@ class PoseidonMain(object):
             time.sleep(1)
 
         if not flag:
-                x = x - 1
+            x = x - 1
 
             # type , value
             t, v = self.get_queue_item()
