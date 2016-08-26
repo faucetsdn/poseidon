@@ -626,7 +626,6 @@ def predictClass(predictFun, hexSessionsDict, comsDict, uniqIPs, hexDict, hexSes
     testCollect = []
     predtargets = []
     actualtargets = []
-    trainPercent = 0.9
     trainIndex = int(len(hexSessionsKeys)*trainPercent)
         
     start = trainIndex
@@ -882,6 +881,9 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
                 module_logger.info('   Iteration: ', iteration)
                 module_logger.info('   Cost: ', np.mean(costCollect))
                 module_logger.info('   TRAIN accuracy: ', np.mean(trainCollect))
+                print '   Iteration: ', iteration
+                print '   Cost: ', np.mean(costCollect)
+                print '   TRAIN accuracy: ', np.mean(trainCollect)
 
             iteration+=1
 
