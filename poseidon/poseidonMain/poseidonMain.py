@@ -54,7 +54,8 @@ def callback(ch, method, properties, body, q=None):
     module_logger.debug('got a message: %r', body)
     # TODO more
     print body
-    q.put(body)
+    if q is not None:
+        q.put(body)
 
 
 class PoseidonMain(object):
