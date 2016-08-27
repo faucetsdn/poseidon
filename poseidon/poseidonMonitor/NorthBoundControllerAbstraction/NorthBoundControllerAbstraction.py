@@ -41,9 +41,11 @@ class Handle_Resource(Monitor_Helper_Base):
 
     def __init__(self):
         super(Handle_Resource, self).__init__()
+        self.logger = module_logger
         self.mod_name = self.__class__.__name__
 
     def on_get(self, req, resp, resource):
+        ''' handle reading endpoint '''
         resp.content_type = 'text/text'
         try:
             resp.body = self.mod_name + ' found: %s' % (resource)
@@ -52,9 +54,11 @@ class Handle_Resource(Monitor_Helper_Base):
 
 
 class Handle_Periodic(Monitor_Helper_Base):
+    ''' handle periodic process, determine if switch state updated '''
 
     def __init__(self):
         super(Handle_Periodic, self).__init__()
+        self.logger = module_logger
         self.mod_name = self.__class__.__name__
         self.retval = {}
         self.times = 0
@@ -89,6 +93,9 @@ class Handle_Periodic(Monitor_Helper_Base):
             controller_resp = requests.get(self.controller['url'])
             self.retval['controller'] = controller_resp.text
         except:
+            self.logger.error('Could not establish connection to %s.',
+                              self.controller['url'])
+
             self.retval['controller'] = 'Could not establish connection to %s.' % (
                 self.controller['url'])
 

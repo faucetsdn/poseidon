@@ -87,6 +87,7 @@ class Monitor(object):
         self.init_logging()
 
     def init_logging(self):
+        ''' setup logging  '''
         config = None
 
         path = getenv('loggingFile', None)
@@ -102,6 +103,7 @@ class Monitor(object):
             logging.basicConfig(level=logging.DEBUG)
 
     def configSelf(self):
+        ''' get configuraiton for this module '''
         conf = self.Config.get_endpoint('Handle_SectionConfig')
         for item in conf.direct_get(self.mod_name):
             k, v = item
@@ -110,15 +112,18 @@ class Monitor(object):
         self.logger.info(ostr)
 
     def add_endpoint(self, name, handler):
+        ''' add a function by name  '''
         a = handler()
         a.owner = self
         self.actions[name] = a
 
     def del_endpoint(self, name):
+        ''' remove a function by name or None  '''
         if name in self.actions:
             self.actions.pop(name)
 
     def get_endpoint(self, name):
+        ''' get a function by name or None  '''
         if name in self.actions:
             return self.actions.get(name)
         else:
@@ -126,6 +131,7 @@ class Monitor(object):
 
 
 def get_allowed():
+    ''' setup who is allowed to view rest page '''
     rest_url = 'localhost:4444'
     if 'ALLOW_ORIGIN' in environ:
         allow_origin = environ['ALLOW_ORIGIN']
