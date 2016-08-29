@@ -81,8 +81,10 @@ class Handle_FullConfig(Monitor_Helper_Base):
     def __init__(self):
         super(Handle_FullConfig, self).__init__()
         self.mod_name = self.__class__.__name__
+        self.logger = module_logger
 
     def direct_get(self):
+        ''' get the config from the owner '''
         retval = None
         try:
             ret = {}
@@ -90,6 +92,7 @@ class Handle_FullConfig(Monitor_Helper_Base):
                 ret[sec] = self.owner.config.items(sec)
             retval = json.dumps(ret)
         except:
+            self.logger.error('Failed to open config file.')
             retval = json.dumps('Failed to open config file.')
         return retval
 
@@ -110,6 +113,7 @@ class Handle_SectionConfig(Monitor_Helper_Base):
 
     # direct way
     def direct_get(self, section):
+        ''' return the section via the owner '''
         retval = None
         try:
             retval = self.owner.config.items(section)
@@ -119,6 +123,7 @@ class Handle_SectionConfig(Monitor_Helper_Base):
 
     # rest way
     def on_get(self, req, resp, section):
+        ''' use the rest interface to return  '''
         ret_sec = self.direct_get(section)
         resp.body = json.dumps(ret_sec)
 
@@ -131,9 +136,11 @@ class Handle_FieldConfig(Monitor_Helper_Base):
 
     def __init__(self):
         super(Handle_FieldConfig, self).__init__()
+        self.logger = module_logger
         self.mod_name = self.__class__.__name__
 
     def direct_get(self, field, section):
+        ''' get the field from the section via owner '''
         ostr = 'Handle_SectionConfig: %s' % (section)
         self.logger.debug(ostr)
         retval = ''

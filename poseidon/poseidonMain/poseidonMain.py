@@ -53,8 +53,8 @@ module_logger = logging.getLogger(__name__)
 def callback(ch, method, properties, body, q=None):
     module_logger.debug('got a message: %r', body)
     # TODO more
-    print body
-    q.put(body)
+    if q is not None:
+        q.put(body)
 
 
 class PoseidonMain(object):
@@ -130,16 +130,12 @@ class PoseidonMain(object):
     def get_queue_item(self):
         return('t', 'v')
 
-    def init_rabbit(self):  # pragma: no cover
+    def make_rabbit_connection(self, host, exchange, queue_name, keys):  # pragma: no cover
         """
         Continuously loops trying to connect to rabbitmq,
         once connected declares the exchange and queue for
         processing algorithm results.
         """
-        host = 'poseidon-rabbit'
-        exchange = 'topic-poseidon-internal'
-        queue_name = 'algos_classifiers'
-        binding_key = 'poseidon.algos.#'
         wait = True
         while wait:
             try:
@@ -182,11 +178,23 @@ class PoseidonMain(object):
         self.rabbit_channel_local = retval[0]
         self.rabbit_connection_local = retval[1]
 
-    def start_channel(self, channel, callback, queue):
+        host = 'poseidon-vent'
+        exchange = 'topic-vent-poseidon'
+        queue_name = 'vent_poseidon'
+        binding_key = ['vent.#']
+
+        '''
+        retval = self.make_rabbit_connection(
+            host, exchange, queue_name, binding_key)
+        self.rabbit_channel_vent = retval[0]
+        self.rabbit_connection_vent = retval[1]
+        '''
+
+    def start_channel(self, channel, mycallback, queue):
         ''' handle threading for a messagetype '''
         self.logger.debug('about to start channel %s', channel)
         channel.basic_consume(
-            partial(callback, q=self.m_qeueue), queue=queue, no_ack=True)
+            partial(mycallback, q=self.m_qeueue), queue=queue, no_ack=True)
         mq_recv_thread = threading.Thread(target=channel.start_consuming)
         mq_recv_thread.start()
 
@@ -242,7 +250,7 @@ def main(skip_rabbit=False):
     pmain = PoseidonMain()
     pmain.skip_rabbit = skip_rabbit
     if not skip_rabbit:
-        pmain.init_rabbit()  # pragma: no cover
+        pmain.init_rabbit()  # pragme no cover
         pmain.start_channel(pmain.rabbit_channel_local,
                             callback, 'poseidon_internals')
         # def start_channel(self, channel, callback, queue):
