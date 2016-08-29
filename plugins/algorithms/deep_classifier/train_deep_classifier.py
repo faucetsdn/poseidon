@@ -100,31 +100,31 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
     return channel, connection
 
 
-os.environ['THEANO_FLAGS'] = 'floatX=float32,device=cpu'
+os.environ['THEANO_FLAGS'] = 'floatX=float32,device=cpu' 
 sys.setrecursionlimit(100000)
 
-maxPackets = 2
-packetTimeSteps = 80
-loadPrepedData = False
+maxPackets = 2  # number of packets per session to use
+packetTimeSteps = 80  # number of hex characters in heading to use
+loadPrepedData = False  # if preprocessed data is already stored
 dataPath = '/data/fs4/home/bradh/bigFlows.pickle'
 
-packetReverse = False
-padOldTimeSteps = True
+packetReverse = False  # reverse packet contents before encoding
+padOldTimeSteps = True  # for packets with len < packetTimeSteps
 
 runname = 'hredClassify2smallpackets'
 rnnType = 'gru'  # gru or lstm
 
-wtstd = 0.2
+wtstd = 0.2  # weight initialization
 dimIn = 257  # hex has 256 characters + the <EOP> character
 dim = 100  # dimension reduction size
-batch_size = 20
+batch_size = 20 
 numClasses = 4
-clippings = 1
+clippings = 1  # norm cuttoff for gradient clipping
 
 epochs = 1
 lr = 0.0001
 decay = 0.9
-trainPercent = 0.9
+trainPercent = 0.9  # percent of data in training set
 
 module_logger = logging.getLogger(__name__)
 
@@ -228,7 +228,10 @@ def is_clean_packet(packet):  # pragma: no cover
     return True
 
 
-def order_keys(hexSessionDict):  # pragma: no cover
+def order_keys(hexSessionDict):
+    """
+    Returns list of the hex sessions in (rough) time order.
+    """
     orderedKeys = []
 
     for key in sorted(hexSessionDict.keys(), key=lambda key: hexSessionDict[key][1]):
