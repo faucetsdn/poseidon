@@ -30,6 +30,7 @@ rabbitmq:
 """
 import logging
 import sys
+import time
 
 import numpy as np
 import pandas as pd
@@ -38,13 +39,9 @@ from sklearn import linear_model
 from sklearn import preprocessing
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import classification_report
-import time
-import pika
-import sys
 
 
-module_logger = logging.getLogger(
-    'plugins.algorithms.port_classifier.port_classifier')
+module_logger = logging.getLogger(__name__)
 
 fd = None
 
@@ -66,9 +63,9 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
             result = channel.queue_declare(queue=queue_name, exclusive=True)
             wait = False
             module_logger.info('connected to rabbitmq...')
-            print "connected to rabbitmq..."
+            print 'connected to rabbitmq...'
         except Exception, e:
-            print "waiting for connection to rabbitmq..."
+            print 'waiting for connection to rabbitmq...'
             print str(e)
             module_logger.info(str(e))
             module_logger.info('waiting for connection to rabbitmq...')
@@ -79,7 +76,6 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
     if not binding_keys:
         ostr = 'Usage: %s [binding_key]...' % (sys.argv[0])
         module_logger.error(ostr)
-
         sys.exit(1)
 
     for binding_key in binding_keys:
@@ -94,8 +90,11 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
 def file_receive(ch, method, properties, body):
     if 'EOF -- FLOWPARSER FINISHED' in body:
         ch.stop_consuming()
-        fd.seek(0)  # rewind to beginning of file
-        port_classifier(ch, 'temp_file')
+        fd.close()
+        try:
+            port_classifier(ch, 'temp_file')
+        except Exception, e:
+            module_logger.debug(str(e))
     else:
         fd.write(body + '\n')
         print ' [*] Received %s', body
@@ -146,7 +145,7 @@ def port_classifier(channel, file):
 
     message = class_report
     routing_key = 'poseidon.algos.port_class'
-    channel.basic_publish(exchange='topic_poseidon_internal',
+    channel.basic_publish(exchange='topic-poseidon-internal',
                           routing_key=routing_key,
                           body=message)
 
@@ -164,7 +163,8 @@ if __name__ == '__main__':
     channel, connection = rabbit_init(host=host,
                                       exchange=exchange,
                                       queue_name=queue_name)
-    channel.basic_consume(file_receive, queue=queue_name,
-                                        no_ack=True,
-                                        consumer_tag=binding_key)
+    channel.basic_consume(file_receive,
+                          queue=queue_name,
+                          no_ack=True,
+                          consumer_tag=binding_key)
     channel.start_consuming()

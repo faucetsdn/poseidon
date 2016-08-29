@@ -23,7 +23,7 @@ from urlparse import urljoin
 
 import requests
 
-module_logger = logging.getLogger('poseidonMonitor.NBCA.proxy/controllerproxy')
+module_logger = logging.getLogger(__name__)
 
 
 class ControllerProxy(object):

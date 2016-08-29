@@ -36,16 +36,16 @@ import time
 
 import pika
 
-module_logger = logging.getLogger('plugins.heuristics.dns_verify.dns_verify')
+module_logger = logging.getLogger(__name__)
 
 
 def rabbit_init(host, exchange, queue_name):  # pragma: no cover
-    '''
+    """
     Connects to rabbitmq using the given hostname,
     exchange, and queue. Retries on failure until success.
     Binds routing keys appropriate for module, and returns
     the channel and connection.
-    '''
+    """
     wait = True
     while wait:
         try:
@@ -53,17 +53,21 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
                 pika.ConnectionParameters(host=host))
             channel = connection.channel()
             channel.exchange_declare(exchange=exchange, type='topic')
-            result = channel.queue_declare(name=queue_name, exclusive=True)
+            result = channel.queue_declare(queue=queue_name, exclusive=True)
             wait = False
             module_logger.info('connected to rabbitmq...')
-        except:
+            print 'connected to rabbitmq...'
+        except Exception, e:
+            print 'waiting for connection to rabbitmq...'
+            print str(e)
+            module_logger.info(str(e))
             module_logger.info('waiting for connection to rabbitmq...')
             time.sleep(2)
             wait = True
 
     binding_keys = sys.argv[1:]
     if not binding_keys:
-        ostr = 'Usage: %s [binding_key]...' % (sys.argv[0],)
+        ostr = 'Usage: %s [binding_key]...' % (sys.argv[0])
         module_logger.error(ostr)
         sys.exit(1)
 
@@ -162,5 +166,8 @@ if __name__ == '__main__':
     channel, connection = rabbit_init(host=host,
                                       exchange=exchange,
                                       queue_name=queue_name)
-    channel.basic_consume(verify_dns_record, queue=queue_name, no_ack=True)
+    channel.basic_consume(verify_dns_record,
+                          queue=queue_name,
+                          no_ack=True,
+                          consumer_tag='poseidon.tcpdump_parser.dns.#')
     channel.start_consuming()

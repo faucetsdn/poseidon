@@ -30,8 +30,7 @@ import sys
 
 import pika
 
-module_logger = logging.getLogger(
-    'plugins.features.dshell_netflow_parser.dshell_netflow_parser')
+module_logger = logging.getLogger(__name__)
 
 
 def get_path():

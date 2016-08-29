@@ -26,7 +26,7 @@ import pytest
 from poseidonMain import main
 from poseidonMain import PoseidonMain
 
-module_logger = logging.getLogger('poseidonMain.test_poseidonMain')
+module_logger = logging.getLogger(__name__)
 
 
 def test_poseidonMain_goTime():
@@ -37,7 +37,8 @@ def test_poseidonMain_goTime():
     a = PoseidonMain()
 
 
-# @pytest.mark.skip(reason='requires rabbitmq broker, integration test')
+@pytest.mark.skip(reason='requires rabbitmq broker, integration test')
 def test_poseidonMain_main():
     a = main(skipRabbit=True)
+    a.shutdown = True
     assert a

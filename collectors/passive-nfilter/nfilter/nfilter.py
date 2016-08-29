@@ -9,7 +9,7 @@ from rest.start import StartR
 from rest.stop import StopR
 
 
-module_logger = logging.getLogger('collectors.passive-nfilter.nfilter.nfilter')
+module_logger = logging.getLogger(__name__)
 
 
 class NFilterServer(object):

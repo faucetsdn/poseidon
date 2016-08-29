@@ -16,6 +16,7 @@ Nothing to see here yet, move along...
 # Install Instructions
 
 ```
+sudo mkdir -p /data/db
 git clone https://github.com/Lab41/poseidon.git
 cd poseidon
 make
@@ -30,8 +31,8 @@ run with `sudo ./startup.sh`.
 - Docker
 - make
 - docker-compose
+- /data/db directory for mongodb database
 - The 1.8 release of docker-compose can be installed with `make compose-install`
-- Environment variable `DOCKER_IP` set with the address of the host. This can be found using `docker-machine ip` if using boot2docker or `ifconfig` and set with `export DOCKER_IP=<host_address>` where host_address is the full address of the host (i.e. `tcp://0.0.0.0` or similar).
 - Update the `ip` of the `[database]` section of `templates/config.template` to the ip of the host machine (or
 the `docker-machine ip` if using boot2docker or similar). NOTE: without this configuration, poseidon will fail to build.
 

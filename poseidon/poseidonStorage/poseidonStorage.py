@@ -26,16 +26,17 @@ NAMES: current databases and collections (subject to change)
 Created on 17 May 2016
 @author: dgrossman, lanhamt
 """
-from subprocess import check_output
-from pymongo import MongoClient
-from urlparse import urlparse
-from falcon_cors import CORS
-from os import environ
 import ConfigParser
 import json
-import falcon
-import bson
 import sys
+from os import environ
+from subprocess import check_output
+from urlparse import urlparse
+
+import bson
+import falcon
+from falcon_cors import CORS
+from pymongo import MongoClient
 
 
 class poseidonStorage:
@@ -43,31 +44,23 @@ class poseidonStorage:
     poseidonStorage class for managing mongodb database,
     brokers requests to database.
 
-    NOTE: currently attempts to retrieve database ip from
-    env variable named DOCKER_IP, if absent tries to get
-    from config file, else raises connection error.
+    NOTE: retrieves database host from config
+    file in templates/config.template under the
+    [database] section.
     """
 
     def __init__(self):
         self.modName = 'poseidonStorage'
 
-        database_container_ip = ''
-        if 'DOCKER_IP' in environ:
-            if '/' in environ['DOCKER_IP']:
-                database_container_ip = urlparse(environ['DOCKER_IP']).hostname
-            else:
-                database_container_ip = environ['DOCKER_IP']
-        else:
-            # did not find env variable DOCKER_IP
-            try:
-                self.config = ConfigParser.ConfigParser()
-                self.config.readfp(
-                    open('/poseidonWork/templates/config.template'))
-                database_container_ip = self.config.get('database', 'ip')
-            except:
-                raise ValueError(
-                    'poseidonStorage: could not find database ip address.')
-        self.client = MongoClient(host=database_container_ip, port=27017)
+        try:
+            self.config = ConfigParser.ConfigParser()
+            self.config.readfp(
+                open('/poseidonWork/templates/config.template'))
+            database_container_ip = self.config.get('database', 'ip')
+        except:
+            raise ValueError(
+                'poseidonStorage: could not find database ip address.')
+        self.client = MongoClient(host=database_container_ip)
 
         # create db named 'poseidon_records' (NOTE: db will not actually be
         # created until first doc write).
@@ -241,10 +234,12 @@ class db_update_one_doc(poseidonStorage):
     WARNING: replaces entire document with the
     updated_doc.
     """
+
     def on_get(self, req, resp, database, collection, filt, updated_doc):
         ret = {}
         try:
-            ret = self.client[database][collection].updateOne(filt, updated_doc)
+            ret = self.client[database][
+                collection].updateOne(filt, updated_doc)
             ret['success'] = str(True)
         except:
             ret['success'] = str(False)

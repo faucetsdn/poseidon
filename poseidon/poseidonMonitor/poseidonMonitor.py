@@ -29,13 +29,12 @@ from subprocess import check_output
 
 import falcon
 from Action.Action import action_interface
+from Config.Config import config_interface
 from falcon_cors import CORS
 from NodeHistory.NodeHistory import nodehistory_interface
 from NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import controller_interface
 
-from Config.Config import config_interface
-
-module_logger = logging.getLogger('poseidonMonitor.Monitor')
+module_logger = logging.getLogger(__name__)
 
 
 class Monitor(object):
@@ -88,6 +87,7 @@ class Monitor(object):
         self.init_logging()
 
     def init_logging(self):
+        ''' setup logging  '''
         config = None
 
         path = getenv('loggingFile', None)
@@ -103,6 +103,7 @@ class Monitor(object):
             logging.basicConfig(level=logging.DEBUG)
 
     def configSelf(self):
+        ''' get configuraiton for this module '''
         conf = self.Config.get_endpoint('Handle_SectionConfig')
         for item in conf.direct_get(self.mod_name):
             k, v = item
@@ -111,15 +112,18 @@ class Monitor(object):
         self.logger.info(ostr)
 
     def add_endpoint(self, name, handler):
+        ''' add a function by name  '''
         a = handler()
         a.owner = self
         self.actions[name] = a
 
     def del_endpoint(self, name):
+        ''' remove a function by name or None  '''
         if name in self.actions:
             self.actions.pop(name)
 
     def get_endpoint(self, name):
+        ''' get a function by name or None  '''
         if name in self.actions:
             return self.actions.get(name)
         else:
@@ -127,7 +131,8 @@ class Monitor(object):
 
 
 def get_allowed():
-    rest_url = 'localhost:8555'
+    ''' setup who is allowed to view rest page '''
+    rest_url = 'localhost:4444'
     if 'ALLOW_ORIGIN' in environ:
         allow_origin = environ['ALLOW_ORIGIN']
         host_port = allow_origin.split('//')[1]
@@ -139,7 +144,8 @@ def get_allowed():
     return allow_origin, rest_url
 
 allow_origin, rest_url = get_allowed()
-cors = CORS(allow_origins_list=[allow_origin])
+# cors = CORS(allow_origins_list=[allow_origin])
+cors = CORS(allow_all_origins=True)
 public_cors = CORS(allow_all_origins=True)
 
 

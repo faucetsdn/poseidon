@@ -27,41 +27,48 @@ from poseidon.baseClasses.enums_tuples import EVERY
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
 
 
-module_logger = logging.getLogger('poseidonMain.Scheduler')
+module_logger = logging.getLogger(__name__)
 
 '''
-wait = True
-while wait:
-    try:
-        params = pika.ConnectionParameters(host=DOCKER_IP)
-        logLine = 'params = %s' % (params)
-        module_logger.debug(logLine)
-        connection = pika.BlockingConnection(params)
-        channel = connection.channel()
-        channel.exchange_declare(exchange='topic_poseidon_internal', type='topic')
-        queue_name = 'process_heuristic_stats'
-        result = channel.queue_declare(queue=queue_name, exclusive=True)
-        wait = False
-        module_logger.debug('connected to rabbitmq...')
-    except:
-        module_logger.debug('waiting for connection to rabbitmq...')
-        time.sleep(2)
-        wait = True
+def rabbit_init(host, exchange, queue_name):  # pragma: no cover
+    """
+    Connects to rabbitmq using the given hostname,
+    exchange, and queue. Retries on failure until success.
+    Binds routing keys appropriate for module, and returns
+    the channel and connection.
+    """
+    wait = True
+    while wait:
+        try:
+            connection = pika.BlockingConnection(
+                pika.ConnectionParameters(host=host))
+            channel = connection.channel()
+            channel.exchange_declare(exchange=exchange, type='topic')
+            result = channel.queue_declare(queue=queue_name, exclusive=True)
+            wait = False
+            module_logger.info('connected to rabbitmq...')
+            print "connected to rabbitmq..."
+        except Exception, e:
+            print "waiting for connection to rabbitmq..."
+            print str(e)
+            module_logger.info(str(e))
+            module_logger.info('waiting for connection to rabbitmq...')
+            time.sleep(2)
+            wait = True
 
+    binding_keys = sys.argv[1:]
+    if not binding_keys:
+        ostr = 'Usage: %s [binding_key]...' % (sys.argv[0])
+        module_logger.error(ostr)
+        sys.exit(1)
 
-binding_keys = sys.argv[1:]
-if not binding_keys:
-    logLine = "Usage: %s [binding_key]..." % (sys.argv[0],)
-    module_logger.error(logLine)
-    sys.exit(1)
+    for binding_key in binding_keys:
+        channel.queue_bind(exchange=exchange,
+                           queue=queue_name,
+                           routing_key=binding_key)
 
-for binding_key in binding_keys:
-    channel.queue_bind(exchange='topic_poseidon_internal',
-                       queue=queue_name,
-                       routing_key=binding_key)
-
-
-module_logger.debug(' [*] Waiting for logs. To exit press CTRL+C')
+    module_logger.info(' [*] Waiting for logs. To exit press CTRL+C')
+    return channel, connection
 
 # NOTE: add basic consume to channel
 '''

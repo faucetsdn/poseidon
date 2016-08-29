@@ -24,13 +24,12 @@ import logging.config
 import os
 
 import pytest
-
 from Config import CI_TESTING
 from Config import config_interface
 from Config import DOCKER_URL
 
 
-module_logger = logging.getLogger('poseidonMain.test_Config')
+module_logger = logging.getLogger(__name__)
 
 
 def getURL():

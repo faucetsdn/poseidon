@@ -14,24 +14,21 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Created on 17 August 2016
-@author: aganeshLab41, tlanham
+Created on 24 August 2016
+@author: bradh41, tlanham
 
-Machine learning module for classifying
-device type from tcp packets.
+Deep learning module to classify
+packets based on hex headers.
 
 rabbitmq:
     host:       poseidon-rabbit
     exchange:   topic-poseidon-internal
-    queue(in):  features_flowparser
-        keys:   poseidon.flowparser
-
-    keys(out):  poseidon.algos.dev_class
+    queue:
 """
 import logging
 import sys
+import time
 
-import pika
 
 module_logger = logging.getLogger(__name__)
 
@@ -77,11 +74,9 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
     return channel, connection
 
 
-def callback(ch, method, properties, body):
-
-    global channel
-    message = 'ml results'
-    routing_key = 'poseidon.algos.dev_class'
+def callback():
+    message = 'MACHINE LEARNING RESULTS'
+    routing_key = 'poseidon.algos.port_class'
     channel.basic_publish(exchange='topic-poseidon-internal',
                           routing_key=routing_key,
                           body=message)
@@ -90,12 +85,13 @@ def callback(ch, method, properties, body):
 if __name__ == '__main__':
     host = 'poseidon-rabbit'
     exchange = 'topic-poseidon-internal'
-    queue_name = 'features_flowparser'
+    queue_name = 'NAME'  # TODO!! fix this
     channel, connection = rabbit_init(host=host,
                                       exchange=exchange,
                                       queue_name=queue_name)
+    binding_key = 'KEY'  # TODO!!
     channel.basic_consume(callback,
                           queue=queue_name,
                           no_ack=True,
-                          consumer_tag='poseidon.flowparser')
+                          consumer_tag=binding_key)
     channel.start_consuming()

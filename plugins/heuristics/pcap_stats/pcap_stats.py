@@ -45,7 +45,7 @@ from pymongo import MongoClient
 
 
 flowRecordLock = threading.Lock()
-module_logger = logging.getLogger('plugins.heuristics.pcap_stats.pcap_stats')
+module_logger = logging.getLogger(__name__)
 
 
 def rabbit_init(host, exchange, queue_name):  # pragma: no cover
@@ -62,10 +62,14 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
                 pika.ConnectionParameters(host=host))
             channel = connection.channel()
             channel.exchange_declare(exchange=exchange, type='topic')
-            result = channel.queue_declare(name=queue_name, exclusive=True)
+            result = channel.queue_declare(queue=queue_name, exclusive=True)
             wait = False
             module_logger.info('connected to rabbitmq...')
-        except:
+            print 'connected to rabbitmq...'
+        except Exception, e:
+            print 'waiting for connection to rabbitmq...'
+            print str(e)
+            module_logger.info(str(e))
             module_logger.info('waiting for connection to rabbitmq...')
             time.sleep(2)
             wait = True
@@ -74,7 +78,6 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
     if not binding_keys:
         ostr = 'Usage: %s [binding_key]...' % (sys.argv[0])
         module_logger.error(ostr)
-
         sys.exit(1)
 
     for binding_key in binding_keys:
@@ -173,5 +176,8 @@ if __name__ == '__main__':
     channel, connection = rabbit_init(host=host,
                                       exchange=exchange,
                                       queue_name=queue_name)
-    channel.basic_consume(analyze_pcap, queue=queue_name, no_ack=True)
+    channel.basic_consume(analyze_pcap,
+                          queue=queue_name,
+                          no_ack=True,
+                          consumer_tag='poseidon.tcpdump_parser.#')
     channel.start_consuming()

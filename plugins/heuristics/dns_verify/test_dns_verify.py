@@ -25,8 +25,8 @@ import pytest
 from dns_verify import dns_records
 from dns_verify import DNSRecord
 from dns_verify import network_machines
-from dns_verify import verify_dns_record
 from dns_verify import rabbit_init
+from dns_verify import verify_dns_record
 
 
 def test_dns_record_class():

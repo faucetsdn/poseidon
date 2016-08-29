@@ -20,8 +20,7 @@ Created on 25 July 2016
 import json
 import logging
 
-module_logger = logging.getLogger(
-    'poseidonMonitor.NBCA.proxy.mixins.jsonmixin')
+module_logger = logging.getLogger(__name__)
 
 
 class JsonMixin:
