@@ -74,7 +74,6 @@ services:
       - storage-interface:poseidon-storage-interface
     environment:
       - PRODUCTION=True
-# http://www.diogogmt.com/running-mongodb-with-docker-and-compose/
   storage:
     image: mongo
     container_name: poseidon-storage

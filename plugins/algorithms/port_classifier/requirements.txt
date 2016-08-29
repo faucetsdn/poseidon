@@ -3,3 +3,5 @@ pandas
 scipy
 numpy
 pika
+requests
+bson

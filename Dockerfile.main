@@ -11,6 +11,7 @@ RUN apt-get update && \
     python-pip \
     python-setuptools \
     python-sphinx \
+    python-pymongo \
     tcpdump 
 
 ADD . /poseidonWork
