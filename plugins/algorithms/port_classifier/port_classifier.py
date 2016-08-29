@@ -47,6 +47,15 @@ from sklearn.metrics import classification_report
 module_logger = logging.getLogger(__name__)
 
 fd = None
+path_name = None
+
+
+def get_path():
+    try:
+        path_name = sys.argv[1]
+    except:
+        module_logger.debug('no argv[1] for pathname')
+    return None
 
 
 def get_host():
@@ -135,10 +144,10 @@ def save_model(model):
     try:
         model_pickel = cPickle.dumps(model, cPickle.HIGHEST_PROTOCOL)
         model_str = bson.BSON.encode(model_pickel)
-        get_str = 'http://poseidon-storage-interface/v1/storage/add_one_doc/poseidon_records/models/' + model_str
+        get_str = 'http://' + os.environ['POSEIDON_HOST'] + '/v1/storage/add_one_doc/poseidon_records/models/' + model_str
         resp = requests.get(get_str)
     except:
-        module_logger.debug('connection to storage interface failed')
+        module_logger.debug('connection to storage-interface failed')
 
 
 def port_classifier(channel, file):
@@ -196,9 +205,9 @@ def port_classifier(channel, file):
     module_logger.info(ostr)
 
 
-if __name__ == '__main__':
+def run_plugin():
     host = get_host()
-    host = 'poseidon-rabbit'
+    host = 'poseidon-rabbit'  # TODO!! remove for production
     exchange = 'topic-poseidon-internal'
     queue_name = 'features_flowparser'
     binding_key = 'poseidon.flowparser'
@@ -212,3 +221,9 @@ if __name__ == '__main__':
                           no_ack=True,
                           consumer_tag=binding_key)
     channel.start_consuming()
+
+
+if __name__ == '__main__':
+    path_name = get_path()
+    if path_name:
+        run_plugin()
