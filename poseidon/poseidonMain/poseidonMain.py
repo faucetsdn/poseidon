@@ -37,9 +37,10 @@ from functools import partial
 from os import getenv
 
 import pika
-from Config.Config import config_interface
-from Investigator.Investigator import investigator_interface
-from Scheduler.Scheduler import scheduler_interface
+
+from poseidon.poseidonMain.Config.Config import config_interface
+from poseidon.poseidonMain.Investigator.Investigator import investigator_interface
+from poseidon.poseidonMain.Scheduler.Scheduler import scheduler_interface
 
 # class NullHandler(logging.Handler):
 #     def emit(self, record):
@@ -55,9 +56,12 @@ def callback(ch, method, properties, body, q=None):
     # TODO more
     if q is not None:
         q.put(body)
+    else:
+        module_logger.error('posedionMain workQueu is None')
 
 
 class PoseidonMain(object):
+    ''' poseidonmain '''
 
     def __init__(self):
         ''' poseidonMain initialization '''
@@ -121,21 +125,21 @@ class PoseidonMain(object):
         else:
             logging.basicConfig(level=logging.DEBUG)
 
-    def handle(self, t, v):
+    def make_type_val(self, item):
         ''' search messages and act  '''
-        if t == 'Main':
-            if v == 'shutdown':
+        endpoint = item.get('endpoint', None)
+        value = item.get('value', None)
+        if endpoint == 'Main':
+            if value == 'shutdown':
                 self.shutdown = True
-
-    def get_queue_item(self):
-        return('t', 'v')
+        return endpoint, value
 
     def make_rabbit_connection(self, host, exchange, queue_name, keys):  # pragma: no cover
-        """
+        '''
         Continuously loops trying to connect to rabbitmq,
         once connected declares the exchange and queue for
         processing algorithm results.
-        """
+        '''
         wait = True
         while wait:
             try:
@@ -167,7 +171,7 @@ class PoseidonMain(object):
 
         return channel, connection
 
-    def init_rabbit(self):
+    def init_rabbit(self):  # pragma: no cover
         ''' init_rabbit '''
         host = 'poseidon-rabbit'
         exchange = 'topic-poseidon-internal'
@@ -210,6 +214,7 @@ class PoseidonMain(object):
 
         while not self.shutdown and testing_loop > 0:
             item = None
+            workfound = False
             start = time.clock()
             time.sleep(1)
 
@@ -221,32 +226,35 @@ class PoseidonMain(object):
             try:
                 item = self.m_qeueue.get(False)
                 self.logger.debug('item:%r', item)
+                workfound = True
             except Queue.Empty:
                 pass
 
-            t = 't'
-            v = 'v'
             self.logger.debug('done looking for work!')
 
-            self.handle(t, v)
+            if workfound:
 
-            handle_list = self.Scheduler.get_handlers(t)
-            if handle_list is not None:
-                for handle in handle_list:
-                    handle(v)
-            handle_list = self.Investigator.get_handlers(t)
-            if handle_list is not None:
-                for handle in handle_list:
-                    handle(v)
+                itype, ivalue = self.make_type_val(item)
+
+                handle_list = self.Scheduler.get_handlers(itype)
+                if handle_list is not None:
+                    for handle in handle_list:
+                        handle(ivalue)
+                handle_list = self.Investigator.get_handlers(itype)
+                if handle_list is not None:
+                    for handle in handle_list:
+                        handle(ivalue)
 
             elapsed = time.clock()
             elapsed = elapsed - start
 
             log_line = 'time to run eventloop is %0.3f ms' % (elapsed * 1000)
             self.logger.debug(log_line)
+        self.logger.debug('Shutting Down')
 
 
 def main(skip_rabbit=False):
+    ''' main function '''
     pmain = PoseidonMain()
     pmain.skip_rabbit = skip_rabbit
     if not skip_rabbit:
