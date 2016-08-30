@@ -21,6 +21,7 @@ Test module for machine learning plugin
 for classifying ports from tcp packets.
 """
 import pytest
+import sys
 import os
 from port_classifier import rabbit_init
 from port_classifier import get_path
@@ -41,7 +42,12 @@ def test_get_host():
 
 
 def test_save_model():
-    save_model(lambda x: x + 1)
+    class Test:
+        def __init__(self):
+            self.s = 'hello world'
+
+    model = Test()
+    save_model(model)
     assert os.path.isfile('port_class_log_reg_model.pickle')
 
 
