@@ -148,14 +148,14 @@ def test_db_collection_query(client):
     """
     query = {'hostname': 'bad'}
     query = bson.BSON.encode(query)
-    resp = client.get('/v1/storage/query/local/startup_log/' + query)
+    resp = client.get('/v1/storage/query/'+'local/'+'startup_log', data=query)
     assert resp.status == falcon.HTTP_OK
     resp = ast.literal_eval(resp.body)
     assert isinstance(resp['count'], int)
     assert isinstance(resp['docs'], str)
 
     query = 'bad'
-    resp = client.get('/v1/storage/query/local/startup_log/' + query)
+    resp = client.get('/v1/storage/query/'+'local/'+'startup_log', data=query)
     assert resp.status == falcon.HTTP_OK
     resp = ast.literal_eval(resp.body)
     assert isinstance(resp['count'], int)
@@ -185,14 +185,14 @@ def test_db_add_one_doc(client):
                        'last_sent': '0-0-0 00:00:00.000000',
                        'last_received': '0-0-0 00:00:00.000000'}
     doc = bson.BSON.encode(doc)
-    get_str = '/v1/storage/add_one_doc/poseidon_records/network_graph/' + doc
-    resp = client.get(get_str)
+    uri = '/v1/storage/add_one_doc/'+'poseidon_records/'+'network_graph'
+    resp = client.post(uri, data=doc)
     assert resp.status == falcon.HTTP_OK
     doc_id = resp.body
-    get_str = '/v1/storage/doc/poseidon_records/network_graph/' + doc_id
-    resp = client.get(get_str)
+    uri = '/v1/storage/doc/'+'poseidon_records/'+'network_graph/'+doc_id
+    resp = client.get(uri)
     assert resp.status == falcon.HTTP_OK
-    resp = client.get('/v1/storage/poseidon_records')
+    resp = client.get('/v1/storage/'+'poseidon_records')
     assert resp.status == falcon.HTTP_OK
 
 
@@ -220,8 +220,8 @@ def test_db_add_many_docs(client):
     doc_str = ''
     for doc in doc_list:
         doc_str += bson.BSON.encode(doc)
-    get_str = '/v1/storage/add_many_docs/poseidon_records/network_graph/' + doc_str
-    resp = client.get(get_str)
+    uri = '/v1/storage/add_many_docs/'+'poseidon_records/'+'network_graph/'
+    resp = client.post(uri, data=doc_str)
     assert resp.status == falcon.HTTP_OK
 
 
@@ -236,8 +236,8 @@ def test_db_update_one_doc(client):
 
     filt = bson.BSON.encode(filt)
     update = bson.BSON.encode(update)
-    get_str = '/v1/storage/update_one_doc/poseidon_records/network_graph/' + filt + '/' + update
-    resp = client.get(get_str)
+    uri = '/v1/storage/update_one_doc/'+'poseidon_records/'+'network_graph/'+filt
+    resp = client.post(uri, data=update)
     assert resp.status == falcon.HTTP_OK
     resp = ast.literal_eval(resp.body)
     assert resp['success']

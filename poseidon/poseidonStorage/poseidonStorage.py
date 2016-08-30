@@ -151,7 +151,7 @@ class db_collection_query(poseidonStorage):
     queries (ie "{'node_ip': 'some ip'}")
     """
 
-    def on_post(self, req, resp, database, collection, query_str):
+    def on_get(self, req, resp, database, collection, query_str):
         ret = {}
         try:
             query = bson.BSON.decode(query_str)
@@ -184,8 +184,9 @@ class db_add_one_doc(poseidonStorage):
     to be inserted into database.
     """
 
-    def on_post(self, req, resp, database, collection, doc_str):
+    def on_post(self, req, resp, database, collection):
         try:
+            doc_str = req.stream.read()
             if not bson.is_valid(doc_str):
                 doc_str = bson.BSON.encode(doc_str)
             ret = self.client[database][collection].insert_one(doc_str)
@@ -209,8 +210,9 @@ class db_add_many_docs(poseidonStorage):
     bson-encoded map-objects (ie dicts).
     """
 
-    def on_post(self, req, resp, database, collection, doc_list):
+    def on_post(self, req, resp, database, collection):
         try:
+            doc_list = req.stream.read()
             doc_list = bson.decode_all(doc_list)
             ret = self.client[database][collection].insert_many(doc_list)
             for o_id in ret:
@@ -236,11 +238,11 @@ class db_update_one_doc(poseidonStorage):
     updated_doc.
     """
 
-    def on_post(self, req, resp, database, collection, filt, updated_doc):
+    def on_post(self, req, resp, database, collection, filt):
         ret = {}
         try:
-            ret = self.client[database][
-                collection].updateOne(filt, updated_doc)
+            updated_doc = req.stream.read()
+            ret = self.client[database][collection].updateOne(filt, updated_doc)
             ret['success'] = str(True)
         except:
             ret['success'] = str(False)
