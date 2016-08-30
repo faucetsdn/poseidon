@@ -68,6 +68,7 @@ def get_host():
         return os.environ['POSEIDON_HOST']
     else:
         module_logger.debug('POSEIDON_HOST environment variable not found')
+        return None
 
 
 def rabbit_init(host, exchange, queue_name):  # pragma: no cover
@@ -205,8 +206,7 @@ def port_classifier(channel, file):
     module_logger.info(ostr)
 
 
-def run_plugin():  # pragma: no cover
-    host = get_host()
+def run_plugin(path, host):  # pragma: no cover
     host = 'poseidon-rabbit'  # TODO!! remove for production
     exchange = 'topic-poseidon-internal'
     queue_name = 'features_flowparser'
@@ -225,5 +225,6 @@ def run_plugin():  # pragma: no cover
 
 if __name__ == '__main__':
     path_name = get_path()
-    if path_name:
-        run_plugin()
+    host = get_host()
+    if path_name and host:
+        run_plugin(path, host)

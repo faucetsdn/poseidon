@@ -41,11 +41,12 @@ def test_get_host():
     assert get_host() == '1.1.1.1'
 
 
-def test_save_model():
-    class Test:
-        def __init__(self):
-            self.s = 'hello world'
+class Test:
+    def __init__(self):
+        self.s = 'hello world'
 
+
+def test_save_model():
     model = Test()
     save_model(model)
     assert os.path.isfile('port_class_log_reg_model.pickle')
