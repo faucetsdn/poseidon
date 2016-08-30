@@ -151,7 +151,7 @@ class db_collection_query(poseidonStorage):
     queries (ie "{'node_ip': 'some ip'}")
     """
 
-    def on_get(self, req, resp, database, collection, query_str):
+    def on_post(self, req, resp, database, collection, query_str):
         ret = {}
         try:
             query = bson.BSON.decode(query_str)
@@ -184,7 +184,7 @@ class db_add_one_doc(poseidonStorage):
     to be inserted into database.
     """
 
-    def on_get(self, req, resp, database, collection, doc_str):
+    def on_post(self, req, resp, database, collection, doc_str):
         try:
             if not bson.is_valid(doc_str):
                 doc_str = bson.BSON.encode(doc_str)
@@ -209,7 +209,7 @@ class db_add_many_docs(poseidonStorage):
     bson-encoded map-objects (ie dicts).
     """
 
-    def on_get(self, req, resp, database, collection, doc_list):
+    def on_post(self, req, resp, database, collection, doc_list):
         try:
             doc_list = bson.decode_all(doc_list)
             ret = self.client[database][collection].insert_many(doc_list)
@@ -236,7 +236,7 @@ class db_update_one_doc(poseidonStorage):
     updated_doc.
     """
 
-    def on_get(self, req, resp, database, collection, filt, updated_doc):
+    def on_post(self, req, resp, database, collection, filt, updated_doc):
         ret = {}
         try:
             ret = self.client[database][
@@ -266,13 +266,13 @@ api.add_route(
     '/v1/storage/query/{database}/{collection}/{query_str}',
     db_collection_query())
 api.add_route(
-    '/v1/storage/add_one_doc/{database}/{collection}/{doc_str}',
+    '/v1/storage/add_one_doc/{database}/{collection}',
     db_add_one_doc())
 api.add_route(
-    '/v1/storage/add_many_docs/{database}/{collection}/{doc_list}',
+    '/v1/storage/add_many_docs/{database}/{collection}',
     db_add_many_docs())
 api.add_route(
-    '/v1/storage/update_one_doc/{database}/{collection}/{filt}/{updated_doc}',
+    '/v1/storage/update_one_doc/{database}/{collection}/{filt}',
     db_update_one_doc())
 
 

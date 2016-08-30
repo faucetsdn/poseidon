@@ -71,6 +71,9 @@ target/
 **/*.cap
 **/*.pcap
 
+# pickled models
+**/*.pickle
+
 #other crap
 **/.ropeproject
 checkscript.sh

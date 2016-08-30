@@ -205,7 +205,7 @@ def port_classifier(channel, file):
     module_logger.info(ostr)
 
 
-def run_plugin():
+def run_plugin():  # pragma: no cover
     host = get_host()
     host = 'poseidon-rabbit'  # TODO!! remove for production
     exchange = 'topic-poseidon-internal'
