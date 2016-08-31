@@ -179,7 +179,7 @@ class Scheduler(Main_Action_Base):
                         else:  # pragma: no cover
                             logLine = '*' * 10
                             self.logger.debug(logLine)
-                            jid = v.keywords.get('jobId', None)
+                            jid = v.keywords.get('jobId')
                             if jid == jobId:
                                 logLine = 'killing: %s' % (job)
                                 self.logger.debug(logLine)
@@ -193,7 +193,7 @@ class Scheduler(Main_Action_Base):
         if len(jobfunc.args) >= 1:
             return jobfunc.args[0]
         else:  # pragma: no cover
-            return jobfunc.keyworkds.get('jobId', None)
+            return jobfunc.keyworkds.get('jobId')
 
     def list_jobs(self):
         d = dict()

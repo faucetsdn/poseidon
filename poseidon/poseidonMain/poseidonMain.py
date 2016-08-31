@@ -113,10 +113,10 @@ class PoseidonMain(object):
         ''' setup the logging parameters for poseidon '''
         config = None
 
-        path = getenv('loggingFile', None)
+        path = getenv('loggingFile')
 
         if path is None:
-            path = self.mod_configuration.get('loggingFile', None)
+            path = self.mod_configuration.get('loggingFile')
 
         if path is not None:
             with open(path, 'rt') as some_file:
@@ -127,8 +127,8 @@ class PoseidonMain(object):
 
     def make_type_val(self, item):
         ''' search messages and act  '''
-        endpoint = item.get('endpoint', None)
-        value = item.get('value', None)
+        endpoint = item.get('endpoint')
+        value = item.get('value')
         if endpoint == 'Main':
             if value == 'shutdown':
                 self.shutdown = True
