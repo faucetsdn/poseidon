@@ -81,7 +81,8 @@ class Investigator(Main_Action_Base):
                 self.logger.error(
                     'Main: Investigator: error on vent create request.')
 
-    def format_vent_create(self, name, provider, body=None, group='poseidon-vent', labels='default', memory=4096, cpus=4, disk_sz=20000):
+    @staticmethod
+    def format_vent_create(name, provider, body=None, group='poseidon-vent', labels='default', memory=4096, cpus=4, disk_sz=20000):
         '''
         Formats body dict for vcontrol machine create.
         Returns dict for vcontrol create request.
@@ -240,7 +241,8 @@ class Investigator_Response(Investigator):
             self.logger.error(
                 'Main: Investigator: send_vent_jobs, vent request failed')
 
-    def update_record(self):
+    @staticmethod
+    def update_record():
         '''
         Update database based on processing
         results and update network posture.
