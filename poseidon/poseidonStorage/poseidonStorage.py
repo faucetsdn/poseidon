@@ -22,6 +22,7 @@ NAMES: current databases and collections (subject to change)
     db                      collection
     ---                     ---
     poseidon_records        network_graph
+    poseidon_records        models
 
 Created on 17 May 2016
 @author: dgrossman, lanhamt
@@ -81,7 +82,7 @@ def get_allowed():
     return allow_origin, rest_url
 
 allow_origin, rest_url = get_allowed()
-cors = CORS(allow_origins_list=[allow_origin])
+cors = CORS(allow_all_origins=True)
 public_cors = CORS(allow_all_origins=True)
 
 
@@ -153,7 +154,6 @@ class db_collection_query(poseidonStorage):
     def on_get(self, req, resp, database, collection, query_str):
         ret = {}
         try:
-            query = bson.BSON.decode(query_str)
             cursor = self.client[database][collection].find(query)
             doc_dict = {}
             if cursor.count() == 0:
@@ -179,14 +179,17 @@ class db_add_one_doc(poseidonStorage):
     collection. returned response includes
     the id of the newly inserted object.
 
+    body: serialized string of mapping object
+
     NOTE: uses bson decoding for document
     to be inserted into database.
     """
 
-    def on_get(self, req, resp, database, collection, doc_str):
+    def on_post(self, req, resp, database, collection):
         try:
-            if not bson.is_valid(doc_str):
-                doc_str = bson.BSON.encode(doc_str)
+            data = req.context['data']
+            doc_str = ast.literal_eval(data)
+            doc_str = bson.BSON.encode(doc_str)
             ret = self.client[database][collection].insert_one(doc_str)
             ret = str(ret.inserted_id)
         except:
@@ -208,8 +211,9 @@ class db_add_many_docs(poseidonStorage):
     bson-encoded map-objects (ie dicts).
     """
 
-    def on_get(self, req, resp, database, collection, doc_list):
+    def on_post(self, req, resp, database, collection):
         try:
+            doc_list = req.stream.read()
             doc_list = bson.decode_all(doc_list)
             ret = self.client[database][collection].insert_many(doc_list)
             for o_id in ret:
@@ -235,11 +239,11 @@ class db_update_one_doc(poseidonStorage):
     updated_doc.
     """
 
-    def on_get(self, req, resp, database, collection, filt, updated_doc):
+    def on_post(self, req, resp, database, collection, filt):
         ret = {}
         try:
-            ret = self.client[database][
-                collection].updateOne(filt, updated_doc)
+            updated_doc = req.stream.read()
+            ret = self.client[database][collection].updateOne(filt, updated_doc)
             ret['success'] = str(True)
         except:
             ret['success'] = str(False)
@@ -265,13 +269,13 @@ api.add_route(
     '/v1/storage/query/{database}/{collection}/{query_str}',
     db_collection_query())
 api.add_route(
-    '/v1/storage/add_one_doc/{database}/{collection}/{doc_str}',
+    '/v1/storage/add_one_doc/{database}/{collection}',
     db_add_one_doc())
 api.add_route(
-    '/v1/storage/add_many_docs/{database}/{collection}/{doc_list}',
+    '/v1/storage/add_many_docs/{database}/{collection}',
     db_add_many_docs())
 api.add_route(
-    '/v1/storage/update_one_doc/{database}/{collection}/{filt}/{updated_doc}',
+    '/v1/storage/update_one_doc/{database}/{collection}/{filt}',
     db_update_one_doc())
 
 

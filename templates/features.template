@@ -3,3 +3,12 @@ name = Feature generation from PCAPs
 
 [service]
 schedule = {"all":"hourly"}
+
+[flowparser]
+Env = ["POSEIDON_HOST=0.0.0.0"]
+
+[tcpdump_hex_parser]
+Env = ["POSEIDON_HOST=0.0.0.0"]
+
+[dshell_netflow_parser]
+Env = ["POSEIDON_HOST=0.0.0.0"]
