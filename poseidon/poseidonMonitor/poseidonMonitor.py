@@ -154,7 +154,6 @@ class SwaggerAPI:
     """Serve up swagger API"""
     swagger_file = 'poseidon/poseidonMonitor/swagger.yaml'
 
-    @staticmethod
     def on_get(self, req, resp):
         """Handles GET requests"""
         resp.content_type = 'text/yaml'

@@ -25,7 +25,6 @@ module_logger = logging.getLogger(__name__)
 
 class JsonMixin:
 
-    @staticmethod
     def parse_json(self, response):
         """
         Parse JSON from the `text` field of a response.
