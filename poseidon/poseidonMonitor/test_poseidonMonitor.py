@@ -25,9 +25,10 @@ from os import environ
 import falcon
 import poseidonMonitor
 import pytest
-from poseidonMonitor import PCAPResource
-from poseidonMonitor import SwaggerAPI
-from poseidonMonitor import VersionResource
+
+from poseidon.poseidonMonitor.poseidonMonitor import PCAPResource
+from poseidon.poseidonMonitor.poseidonMonitor import SwaggerAPI
+from poseidon.poseidonMonitor.poseidonMonitor import VersionResource
 
 module_logger = logging.getLogger(__name__)
 

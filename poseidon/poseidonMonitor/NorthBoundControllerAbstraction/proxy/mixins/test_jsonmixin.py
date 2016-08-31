@@ -24,7 +24,7 @@ import os
 
 import pytest
 from httmock import response
-from jsonmixin import JsonMixin
+from jlsonmixin import JsonMixin
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 

@@ -29,6 +29,7 @@ module_logger = logging.getLogger(__name__)
 
 
 class NorthBoundControllerAbstraction(Monitor_Action_Base):
+    ''' handle abstracting poseidon from the controllers '''
 
     def __init__(self):
         super(NorthBoundControllerAbstraction, self).__init__()

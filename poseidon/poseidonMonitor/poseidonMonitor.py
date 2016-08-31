@@ -28,11 +28,12 @@ from subprocess import call
 from subprocess import check_output
 
 import falcon
-from Action.Action import action_interface
-from Config.Config import config_interface
 from falcon_cors import CORS
-from NodeHistory.NodeHistory import nodehistory_interface
-from NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import controller_interface
+
+from poseidon.poseidonMonitor.Action.Action import action_interface
+from poseidon.poseidonMonitor.Config.Config import config_interface
+from poseidon.poseidonMonitor.NodeHistory.NodeHistory import nodehistory_interface
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import controller_interface
 
 module_logger = logging.getLogger(__name__)
 

@@ -21,8 +21,8 @@ Created on 14 July 2016
 """
 import falcon
 import pytest
-from mockController import MockController
 
+from poseidon.mockController.mockController import MockController
 
 application = falcon.API()
 application.add_route('/v1/mock_controller/poll', MockController())

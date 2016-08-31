@@ -266,4 +266,4 @@ def main(skip_rabbit=False):
     return True
 
 if __name__ == '__main__':  # pragma: no cover
-    return main(skip_rabbit=False)
+    main(skip_rabbit=False)

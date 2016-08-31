@@ -26,7 +26,8 @@ import pytest
 from httmock import HTTMock
 from httmock import response
 from httmock import urlmatch
-from onos import OnosProxy
+
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.onos.onos import OnosProxy
 
 
 module_logger = logging.getLogger(__name__)
