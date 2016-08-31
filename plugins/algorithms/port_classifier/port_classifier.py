@@ -130,7 +130,7 @@ def file_receive(ch, method, properties, body):
             module_logger.debug(str(e))
     else:
         fd.write(body + '\n')
-        print ' [*] Received %s', body
+        print ' [*] Received {0}'.format(body)
 
 
 def save_model(model):
@@ -204,7 +204,7 @@ def port_classifier(channel, file):
                           routing_key=routing_key,
                           body=message)
 
-    ostr = ' [x] Sent %r:%r' % (routing_key, message)
+    ostr = ' [x] Sent {0}:{1}'.format(routing_key, message)
     module_logger.info(ostr)
 
 
@@ -229,4 +229,4 @@ if __name__ == '__main__':
     path_name = get_path()
     host = get_host()
     if path_name and host:
-        run_plugin(path, host)
+        run_plugin(path_name, host)
