@@ -12,7 +12,6 @@ class CreateR:
     This endpoint is for creating a new filter
     """
 
-    @staticmethod
     def POST(self):
         web.header('Content-Type', 'application/json')
 
