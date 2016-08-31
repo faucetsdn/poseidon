@@ -233,7 +233,7 @@ class PoseidonMain(object):
 
             self.logger.debug('done looking for work!')
 
-            if workfound:
+            if workfound:  # pragma no cover
 
                 itype, ivalue = self.make_type_val(item)
 
@@ -260,7 +260,7 @@ def main(skip_rabbit=False):
     pmain = PoseidonMain()
     pmain.skip_rabbit = skip_rabbit
     if not skip_rabbit:
-        pmain.init_rabbit()  # pragme no cover
+        pmain.init_rabbit()
         pmain.start_channel(pmain.rabbit_channel_local,
                             callback, 'poseidon_internals')
         # def start_channel(self, channel, callback, queue):
