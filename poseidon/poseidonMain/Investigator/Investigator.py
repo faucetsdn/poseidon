@@ -13,13 +13,13 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-"""
+'''
 Module for applying user-defined rules to
 network flows.
 
 Created on 17 May 2016
 @author: dgrossman, tlanham
-"""
+'''
 import ast
 import logging
 import logging.config
@@ -57,11 +57,11 @@ class Investigator(Main_Action_Base):
         self.vctrl_addr = 'http://' + self.config_dict['vctrl_addr']
 
     def vctrl_list(self):
-        """
+        '''
         Retrieves list of vent machines running on vcontrol
         instance. Gets list of machines as json and evaluates
         into dict to update dict of available vent machines.
-        """
+        '''
         try:
             resp = requests.get(self.vctrl_addr + '/machines/list')
             self.vent_machines = ast.literal_eval(resp.body)
@@ -69,10 +69,10 @@ class Investigator(Main_Action_Base):
             self.logger.error('Main: Investigator: error on vctrl list')
 
     def vctrl_startup(self):
-        """
+        '''
         For each vent endpoint machine descriped in the Investigator
         config section, registers the machine with vcontrol.
-        """
+        '''
         for machine, config in self.vent_machines.iteritems():
             try:
                 resp = requests.post(
@@ -82,13 +82,13 @@ class Investigator(Main_Action_Base):
                     'Main: Investigator: error on vent create request.')
 
     def format_vent_create(self, name, provider, body={}, group='poseidon-vent', labels='default', memory=4096, cpus=4, disk_sz=20000):
-        """
+        '''
         Formats body dict for vcontrol machine create.
         Returns dict for vcontrol create request.
 
         NOTE: name and provider are required parameters,
         the rest can be covered by defaults.
-        """
+        '''
         body['name'] = name
         body['provider'] = provider
         if 'group' not in body:
@@ -104,18 +104,18 @@ class Investigator(Main_Action_Base):
         return body
 
     def update_config(self):
-        """
+        '''
         Updates configuration based on config file
         (for changing rules).
-        """
+        '''
         self.config_dict = dict(self.config.get_section('Investigator'))
 
     def update_rules(self):
-        """
+        '''
         Updates rules dict from config,
         removes algorithms that are not
         registered.
-        """
+        '''
         self.update_config()
         for key in self.config_dict:
             if 'policy' in key:
@@ -130,13 +130,13 @@ class Investigator(Main_Action_Base):
                     del proposed_algo
 
     def register_algorithm(self, name, algorithm):
-        """
+        '''
         Register investigation algorithm.
 
         NOTE: for production, replace registering function
         pointers with info about the algorithm (path,
         complexity, etc).
-        """
+        '''
         if name not in self.algos:
             self.algos[name] = algorithm
             return True
@@ -158,11 +158,11 @@ class Investigator(Main_Action_Base):
         self.algos.clear()
 
     def process_new_machine(self, ip_addr):
-        """
+        '''
         Given the ip of a machine added to the network,
         requests information from the database about the
         ip, then processes accordingly.
-        """
+        '''
         query = {'node_ip': ip_addr}
         query = bson.BSON.encode(query)
         uri = 'http://poseidon-storage-interface/v1/poseidon_records/network_graph/' + query
@@ -200,12 +200,12 @@ class Investigator(Main_Action_Base):
 
 
 class Investigator_Response(Investigator):
-    """
+    '''
     Investigator_Response manages and tracks the
     system response to an event (ie new machine
     added to network, etc). Maintains a record of
     jobs scheduled
-    """
+    '''
 
     def __init__(self):
         super(Investigator_Response, self).__init__()
@@ -213,11 +213,11 @@ class Investigator_Response(Investigator):
         self.jobs = {}
 
     def vent_preparation(self):
-        """
+        '''
         Prepares vent jobs based on algorithms
         available to be used and investigator
         rules.
-        """
+        '''
         for machine in self.vent_machines:
             try:
                 url = 'http://' + self.vent_addr + '/commands/deploy/' + machine
@@ -227,12 +227,12 @@ class Investigator_Response(Investigator):
                     'Main: Investigator: vent_preparation, vent request failed')
 
     def send_vent_jobs(self):
-        """
+        '''
         Connects to vent and sends prepared
         jobs for analysis, waits for results
         and then continues with appropriate
         response.
-        """
+        '''
         try:
             resp = requests.get('vent_url')
         except:
@@ -240,10 +240,10 @@ class Investigator_Response(Investigator):
                 'Main: Investigator: send_vent_jobs, vent request failed')
 
     def update_record(self):
-        """
+        '''
         Update database based on processing
         results and update network posture.
-        """
+        '''
         try:
             url = 'http://poseidon-storage-interface/v1/'
             resp = requests.get(url)
