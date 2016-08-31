@@ -91,10 +91,10 @@ class Monitor(object):
         ''' setup logging  '''
         config = None
 
-        path = getenv('loggingFile', None)
+        path = getenv('loggingFile')
 
         if path is None:
-            path = self.mod_configuration.get('loggingFile', None)
+            path = self.mod_configuration.get('loggingFile')
 
         if path is not None:
             with open(path, 'rt') as f:
