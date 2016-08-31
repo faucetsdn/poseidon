@@ -154,8 +154,7 @@ class SwaggerAPI:
     """Serve up swagger API"""
     swagger_file = 'poseidon/poseidonMonitor/swagger.yaml'
 
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         """Handles GET requests"""
         resp.content_type = 'text/yaml'
         try:
@@ -208,8 +207,8 @@ class VersionResource:
 
 class PCAPResource:
     """Serve up parsed PCAP files"""
-
-    def on_get(self, req, resp, pcap_file, output_type):
+    @staticmethod
+    def on_get(req, resp, pcap_file, output_type):
         resp.content_type = 'text/text'
         try:
             if output_type == 'pcap' and pcap_file.split('.')[1] == 'pcap':
