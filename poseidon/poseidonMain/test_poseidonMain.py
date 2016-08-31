@@ -30,6 +30,5 @@ module_logger = logging.getLogger(__name__)
 
 
 def test_poseidonMain_main():
-    a = main(skipRabbit=True)
+    a = main(skip_rabbit=True)
     a.shutdown = True
-    assert a
