@@ -52,7 +52,7 @@ module_logger = logging.getLogger(__name__)
 
 
 def callback(ch, method, properties, body, q=None):
-    module_logger.debug('got a message: %r', body)
+    module_logger.debug('got a message: {0}'.format(body))
     # TODO more
     if q is not None:
         q.put(body)
@@ -148,10 +148,10 @@ class PoseidonMain(object):
                 channel = connection.channel()
                 channel.exchange_declare(exchange=exchange, type='topic')
                 channel.queue_declare(queue=queue_name, exclusive=True)
-                self.logger.debug('connected to %s rabbitMQ', host)
+                self.logger.debug('connected to {0} rabbitMQ'.format(host))
                 wait = False
             except Exception as e:
-                self.logger.debug('waiting for %s rabbitQM', host)
+                self.logger.debug('waiting for {0} rabbitQM'.format(host))
                 self.logger.debug(str(e))
                 time.sleep(2)
                 wait = True
@@ -159,13 +159,14 @@ class PoseidonMain(object):
         if isinstance(keys, types.ListType):
             for key in keys:
                 self.logger.debug(
-                    'array adding key:%s to rabbitmq channel', key)
+                    'array adding key:{0} to rabbitmq channel'.format(key))
                 channel.queue_bind(exchange=exchange,
                                    queue=queue_name,
                                    routing_key=key)
 
         if isinstance(keys, types.StringType):
-            self.logger.debug('string adding key:%s to rabbitmq channel', keys)
+            self.logger.debug(
+                'string adding key:{0} to rabbitmq channel'.format(keys))
             channel.queue_bind(exchange=exchange,
                                queue=queue_name, routing_key=keys)
 
@@ -196,7 +197,7 @@ class PoseidonMain(object):
 
     def start_channel(self, channel, mycallback, queue):
         ''' handle threading for a messagetype '''
-        self.logger.debug('about to start channel %s', channel)
+        self.logger.debug('about to start channel {0}'.format(channel))
         channel.basic_consume(
             partial(mycallback, q=self.m_qeueue), queue=queue, no_ack=True)
         mq_recv_thread = threading.Thread(target=channel.start_consuming)
@@ -210,8 +211,8 @@ class PoseidonMain(object):
         if getenv('PRODUCTION', 'False') == 'True':
             flag = True
 
-        self.logger.debug('PRODUCTION = %s', getenv('PRODDUCTION', 'False'))
-
+        self.logger.debug('PRODUCTION = {0}'.format(
+            getenv('PRODDUCTION', 'False')))
         while not self.shutdown and testing_loop > 0:
             item = None
             workfound = False
@@ -225,7 +226,7 @@ class PoseidonMain(object):
             self.logger.debug('about to look for work')
             try:
                 item = self.m_qeueue.get(False)
-                self.logger.debug('item:%r', item)
+                self.logger.debug('item:{0}'.format(item))
                 workfound = True
             except Queue.Empty:
                 pass
@@ -248,7 +249,8 @@ class PoseidonMain(object):
             elapsed = time.clock()
             elapsed = elapsed - start
 
-            log_line = 'time to run eventloop is %0.3f ms' % (elapsed * 1000)
+            log_line = 'time to run eventloop is {0} ms' .format(
+                elapsed * 1000)
             self.logger.debug(log_line)
         self.logger.debug('Shutting Down')
 

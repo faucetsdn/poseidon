@@ -109,7 +109,7 @@ class Monitor(object):
         for item in conf.direct_get(self.mod_name):
             k, v = item
             self.mod_configuration[k] = v
-        ostr = '%s:config:%s' % (self.mod_name, self.mod_configuration)
+        ostr = '{0}:config:{1}'.format(self.mod_name, self.mod_configuration)
         self.logger.info(ostr)
 
     def add_endpoint(self, name, handler):

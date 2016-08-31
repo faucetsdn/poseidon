@@ -40,7 +40,7 @@ def mock_factory(regex, filemap):
     @urlmatch(netloc=regex)
     def mock_fn(url, request):
         if url.path not in filemap:  # pragma: no cover
-            raise Exception('Invalid URL: %s' % url)
+            raise Exception('Invalid URL: {0}'.format(url))
         with open(os.path.join(cur_dir, filemap[url.path])) as f:
             data = f.read().replace('\n', '')
         content = json.dumps(json.loads(data))

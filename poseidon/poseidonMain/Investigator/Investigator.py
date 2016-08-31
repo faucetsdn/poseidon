@@ -126,7 +126,7 @@ class Investigator(Main_Action_Base):
         for policy in self.rules:
             for proposed_algo in self.rules[policy]:
                 if proposed_algo not in self.algos:
-                    ostr = 'algorithm: %s has not been registered, deleting from policy' % (
+                    ostr = 'algorithm: {0} has not been registered, deleting from policy'.format(
                         proposed_algo)
                     self.logger.error(ostr)
                     del proposed_algo
@@ -187,7 +187,7 @@ class Investigator(Main_Action_Base):
         else:
             # bad - should only be one record for each ip
             # log error for investigation
-            ostr = 'duplicate record for machine: %s' % (ip_addr)
+            ostr = 'duplicate record for machine: {0}'.format(ip_addr)
             self.logger.error(ostr)
 
     def get_handlers(self, t):

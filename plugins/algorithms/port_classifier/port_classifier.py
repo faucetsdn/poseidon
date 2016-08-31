@@ -28,16 +28,17 @@ rabbitmq:
 
     keys(out):  poseidon.algos.port_class
 """
-import logging
-import sys
-import os
-import time
 import cPickle
+import logging
+import os
+import sys
+import time
+
 import bson
-import requests
 import numpy as np
 import pandas as pd
 import pika
+import requests
 from sklearn import linear_model
 from sklearn import preprocessing
 from sklearn.cross_validation import train_test_split
@@ -99,7 +100,7 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
 
     binding_keys = sys.argv[1:]
     if not binding_keys:
-        ostr = 'Usage: %s [binding_key]...' % (sys.argv[0])
+        ostr = 'Usage: {0} [binding_key]...'.format(sys.argv[0])
         module_logger.error(ostr)
         sys.exit(1)
 
@@ -145,7 +146,8 @@ def save_model(model):
     try:
         model_pickel = cPickle.dumps(model, cPickle.HIGHEST_PROTOCOL)
         model_str = bson.BSON.encode(model_pickel)
-        get_str = 'http://' + os.environ['POSEIDON_HOST'] + '/v1/storage/add_one_doc/poseidon_records/models/' + model_str
+        get_str = 'http://' + os.environ['POSEIDON_HOST'] + \
+            '/v1/storage/add_one_doc/poseidon_records/models/' + model_str
         resp = requests.get(get_str)
     except:
         module_logger.debug('connection to storage-interface failed')

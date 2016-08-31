@@ -203,7 +203,7 @@ def run_tool(path):
             channel.basic_publish(exchange='topic-poseidon-internal',
                                   routing_key=routing_key,
                                   body=message)
-        ostr = ' [x] Sent %r:%r' % (routing_key, message)
+        ostr = ' [x] Sent {0}:{1}'.format(routing_key, message)
         module_logger.info(ostr)
     try:
         connection.close()

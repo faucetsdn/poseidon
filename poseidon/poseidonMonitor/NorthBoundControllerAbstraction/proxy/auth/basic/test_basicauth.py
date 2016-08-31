@@ -40,7 +40,7 @@ def mock_factory(regex, filemap):
     @urlmatch(netloc=regex)
     def mock_fn(url, request):
         if url.path not in filemap:  # pragma: no cover
-            raise Exception('Invalid URL: %s' % url)
+            raise Exception('Invalid URL: {0}'.format(url))
         user, pass_ = base64.b64decode(
             request.headers['Authorization'].split()[1]).split(':')
         assert user == username

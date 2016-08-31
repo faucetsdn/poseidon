@@ -31,16 +31,16 @@ module_logger = logging.getLogger(__name__)
 
 
 def makeCall(url):
-    ostr = 'makeCall %s' % (datetime.datetime.now().ctime())
+    ostr = 'makeCall {0}'.format(datetime.datetime.now().ctime())
     module_logger.info(ostr)
     if url:  # pragma: no cover
         try:
             page = urllib2.urlopen(url)
             module_logger.info(page.readlines())
-            ostr = 'wget %s' % (url)
+            ostr = 'wget {0}'.format(url)
             module_logger.info(ostr)
         except:
-            ostr = 'Error contacting url: %s retrying...' % (url)
+            ostr = 'Error contacting url: {0} retrying...'.format(url)
             module_logger.error(ostr)
 
 
