@@ -227,4 +227,4 @@ if __name__ == '__main__':
     path_name = get_path()
     host = get_host()
     if path_name and host:
-        run_plugin(path, host)
+        run_plugin(path_name, host)
