@@ -55,10 +55,10 @@ class Monitor_Action_Base(Rock_Bottom):  # pragma: no cover
 
     def configure(self):
         """get, parse, store configuration internally as dict """
-        ostr = '%s %s' % (self.__class__.__name__, 'Base:configure')
+        ostr = '{0} {1}'.format(self.__class__.__name__, 'Base:configure')
         self.logger.debug(ostr)
         if self.owner:
-            ostr = '%s %s' % (self.__class__.__name__, 'configure:owner')
+            ostr = '{0} {1}'.format(self.__class__.__name__, 'configure:owner')
             self.logger.debug(ostr)
             self.mod_configuration = dict()
             conf = self.owner.Config.get_endpoint('Handle_SectionConfig')
@@ -66,9 +66,9 @@ class Monitor_Action_Base(Rock_Bottom):  # pragma: no cover
                 for item in conf.direct_get(self.mod_name):
                     k, v = item
                     self.mod_configuration[k] = v
-                ostr = '%s,%s:%s' % (self.__class__.__name__,
-                                     self.mod_name,
-                                     self.mod_configuration)
+                ostr = '{0},{1}:{2}' .format(self.__class__.__name__,
+                                             self.mod_name,
+                                             self.mod_configuration)
                 self.logger.debug(ostr)
                 self.configured = True
 
@@ -80,7 +80,7 @@ class Monitor_Action_Base(Rock_Bottom):  # pragma: no cover
         """call stored classes setups and first runs"""
         if self.owner and self.configured:
             for k, v in self.actions.iteritems():
-                ostr = 'about to configure %s\n' % (k)
+                ostr = 'about to configure {0}'.format(k)
                 self.logger.debug(ostr)
                 v.configure()
                 v.first_run()

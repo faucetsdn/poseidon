@@ -23,10 +23,11 @@ import logging
 import os
 
 import pytest
-from bcf import BcfProxy
 from httmock import HTTMock
 from httmock import response
 from httmock import urlmatch
+
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.bcf import BcfProxy
 
 module_logger = logging.getLogger(__name__)
 
@@ -43,14 +44,14 @@ def mock_factory(regex, filemap):
             j = json.loads(request.body)
             assert j['username'] == username
             assert j['password'] == password
-            headers = {'set-cookie': 'session_cookie=%s' % cookie, }
+            headers = {'set-cookie': 'session_cookie={0}'.format(cookie)}
             r = response(headers=headers, request=request)
         elif url.path in filemap:
             with open(os.path.join(cur_dir, filemap[url.path])) as f:
                 data = f.read().replace('\n', '')
             r = response(content=data, request=request)
         else:  # pragma: no cover
-            raise Exception('Invalid URL: %s' % url)
+            raise Exception('Invalid URL: {0}' .format(url))
         return r
     return mock_fn
 

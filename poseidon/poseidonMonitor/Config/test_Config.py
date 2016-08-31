@@ -23,7 +23,8 @@ import logging
 
 import falcon
 import pytest
-from Config import config_interface
+
+from poseidon.poseidonMonitor.Config.Config import config_interface
 
 module_logger = logging.getLogger(__name__)
 

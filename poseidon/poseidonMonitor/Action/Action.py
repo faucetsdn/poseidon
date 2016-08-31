@@ -46,7 +46,7 @@ class Handle_Default(Monitor_Helper_Base):
     def on_get(self, req, resp, resource):
         resp.content_type = 'text/text'
         try:
-            resp.body = self.mod_name + ' found: %s' % (resource)
+            resp.body = self.mod_name + ' found: {0}'.format(resource)
         except:  # pragma: no cover
             self.logger.error('failed')
             resp.body = 'failed'

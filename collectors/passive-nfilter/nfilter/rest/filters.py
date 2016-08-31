@@ -6,6 +6,7 @@ class FiltersR:
     This endpoint is for getting filters
     """
 
-    def GET(self):
+    @staticmethod
+    def GET():
         web.header('Content-Type', 'text/html')
         return ''

@@ -64,7 +64,7 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
 
     binding_keys = sys.argv[1:]
     if not binding_keys:
-        ostr = 'Usage: %s [binding_key]...' % (sys.argv[0])
+        ostr = 'Usage: {0} [binding_key]...'.format(sys.argv[0])
         module_logger.error(ostr)
         sys.exit(1)
 

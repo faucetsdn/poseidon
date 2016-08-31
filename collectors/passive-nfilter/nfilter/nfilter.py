@@ -35,7 +35,8 @@ class NFilter:
     This class is for defining things needed to start up.
     """
 
-    def urls(self):
+    @staticmethod
+    def urls():
         urls = (
             '/create', CreateR,
             '/filters', FiltersR,

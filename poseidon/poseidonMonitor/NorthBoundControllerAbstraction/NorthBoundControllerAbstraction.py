@@ -29,6 +29,7 @@ module_logger = logging.getLogger(__name__)
 
 
 class NorthBoundControllerAbstraction(Monitor_Action_Base):
+    ''' handle abstracting poseidon from the controllers '''
 
     def __init__(self):
         super(NorthBoundControllerAbstraction, self).__init__()
@@ -48,7 +49,7 @@ class Handle_Resource(Monitor_Helper_Base):
         ''' handle reading endpoint '''
         resp.content_type = 'text/text'
         try:
-            resp.body = self.mod_name + ' found: %s' % (resource)
+            resp.body = self.mod_name + ' found: {0}'.format(resource)
         except:  # pragma: no cover
             pass
 
@@ -93,10 +94,9 @@ class Handle_Periodic(Monitor_Helper_Base):
             controller_resp = requests.get(self.controller['url'])
             self.retval['controller'] = controller_resp.text
         except:
-            self.logger.error('Could not establish connection to %s.',
-                              self.controller['url'])
-
-            self.retval['controller'] = 'Could not establish connection to %s.' % (
+            self.logger.error(
+                'Could not establish connection to {0}.'.format(self.controller['url']))
+            self.retval['controller'] = 'Could not establish connection to {0}.'.format(
                 self.controller['url'])
 
         self.times = self.times + 1

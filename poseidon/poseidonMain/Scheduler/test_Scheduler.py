@@ -23,11 +23,11 @@ import logging
 import logging.config
 
 import pytest
-from Scheduler import Scheduler
-from Scheduler import scheduler_interface
 
 from poseidon.baseClasses.enums_tuples import CRONSPEC
 from poseidon.baseClasses.enums_tuples import EVERY
+from poseidon.poseidonMain.Scheduler.Scheduler import Scheduler
+from poseidon.poseidonMain.Scheduler.Scheduler import scheduler_interface
 
 
 module_logger = logging.getLogger(__name__)
@@ -38,7 +38,7 @@ def test_instantiation():
 
 
 def somefunc(jobId, logger):
-    module_logger.info('someFunc: %s %s' % (jobId, str(logger)))
+    module_logger.info('someFunc: {0} {1}'.format(jobId, str(logger)))
     return True
 
 
@@ -52,7 +52,7 @@ def test_add():
     s.logger.setLevel(logging.DEBUG)
 
     b = CRONSPEC(EVERY.minute, None)
-    ostr = 'cronspec: %s' % (str(b))
+    ostr = 'cronspec: {0}'.format(str(b))
     module_logger.debug(ostr)
 
     s.add_job(jobId, b, somefunc)
@@ -74,7 +74,7 @@ def test_remove():
 
     b = CRONSPEC(EVERY.minute, None)
 
-    ostr = 'jobs:%i' % (len(s.schedule.jobs))
+    ostr = 'jobs:{0}'.format(len(s.schedule.jobs))
     module_logger.info(ostr)
 
     s.add_job(jobId, b, somefunc)
@@ -105,7 +105,7 @@ def test_schedule_once():
     b = CRONSPEC(EVERY.once, '00:00')
     c = CRONSPEC(EVERY.once, None)
 
-    module_logger.info('jobs:%i' % (len(s.schedule.jobs)))
+    module_logger.info('jobs:{0}'.format(len(s.schedule.jobs)))
 
     s.add_job(jobId, b, somefunc)
     assert len(s.schedule.jobs) == 1
@@ -133,7 +133,7 @@ def test_schedule_day():
     b = CRONSPEC(EVERY.day, '00:00')
     c = CRONSPEC(EVERY.day, None)
 
-    module_logger.info('day jobs:%i' % (len(s.schedule.jobs)))
+    module_logger.info('day jobs:{0}'.format(len(s.schedule.jobs)))
 
     s.add_job(jobId, b, somefunc)
     s.add_job(jobId2, c, somefunc)
@@ -165,12 +165,12 @@ def test_schedule_hour():
     b = CRONSPEC(EVERY.hour, ':00')
     c = CRONSPEC(EVERY.hour, None)
 
-    module_logger.info('jobs:%i' % (len(s.schedule.jobs)))
+    module_logger.info('jobs:{0}'.format(len(s.schedule.jobs)))
 
     s.add_job(jobId, b, somefunc)
     s.add_job(jobId2, c, somefunc)
 
-    ostr = 'xx' * 20 + '%s' % (s.list_jobs())
+    ostr = 'xx' * 20 + '{0}'.format(s.list_jobs())
     module_logger.info(ostr)
     assert len(s.schedule.jobs) == 2
     assert len(s.list_jobs().values()) == 2
@@ -200,7 +200,7 @@ def test_schedule_minute():
     b = CRONSPEC(EVERY.minute, None)
     c = CRONSPEC(EVERY.minute, 5)
 
-    module_logger.info('cronspec:%s' % (str(b)))
+    module_logger.info('cronspec:{0}'.format(str(b)))
 
     s.add_job(jobId, b, somefunc)
     s.add_job(jobId2, c, somefunc)
