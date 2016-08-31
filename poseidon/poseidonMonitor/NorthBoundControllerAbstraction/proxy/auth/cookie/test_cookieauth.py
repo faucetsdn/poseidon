@@ -23,10 +23,11 @@ import logging
 import os
 
 import pytest
-from cookieauth import CookieAuthControllerProxy
 from httmock import HTTMock
 from httmock import response
 from httmock import urlmatch
+
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.auth.cookie.cookieauth import CookieAuthControllerProxy
 
 module_logger = logging.getLogger(__name__)
 

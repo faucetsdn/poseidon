@@ -23,22 +23,11 @@ import logging
 from os import environ
 
 import pytest
-from poseidonMain import main
-from poseidonMain import PoseidonMain
+
+from poseidon.poseidonMain.poseidonMain import main
 
 module_logger = logging.getLogger(__name__)
 
 
-def test_poseidonMain_goTime():
-    """
-    Tests goTime
-    """
-
-    a = PoseidonMain()
-
-
-@pytest.mark.skip(reason='requires rabbitmq broker, integration test')
 def test_poseidonMain_main():
-    a = main(skipRabbit=True)
-    a.shutdown = True
-    assert a
+    a = main(skip_rabbit=True)

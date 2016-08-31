@@ -23,10 +23,11 @@ import logging
 import os
 
 import pytest
-from basicauth import BasicAuthControllerProxy
 from httmock import HTTMock
 from httmock import response
 from httmock import urlmatch
+
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.auth.basic.basicauth import BasicAuthControllerProxy
 
 module_logger = logging.getLogger(__name__)
 

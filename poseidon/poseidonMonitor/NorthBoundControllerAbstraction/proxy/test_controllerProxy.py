@@ -21,7 +21,8 @@ Test module for controllerproxy.
 import logging
 
 import pytest
-from controllerproxy import ControllerProxy
+
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.controllerproxy import ControllerProxy
 
 module_logger = logging.getLogger(__name__)
 

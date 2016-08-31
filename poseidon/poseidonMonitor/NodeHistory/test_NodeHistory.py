@@ -22,9 +22,10 @@ import logging
 
 import falcon
 import pytest
-from NodeHistory import Handle_Default
-from NodeHistory import NodeHistory
-from NodeHistory import nodehistory_interface
+
+from poseidon.poseidonMonitor.NodeHistory.NodeHistory import Handle_Default
+from poseidon.poseidonMonitor.NodeHistory.NodeHistory import NodeHistory
+from poseidon.poseidonMonitor.NodeHistory.NodeHistory import nodehistory_interface
 
 module_logger = logging.getLogger(__name__)
 
@@ -34,6 +35,7 @@ application.add_route('/v1/history/{resource}',
 
 
 def test_node_hist_class():
+    ''' test instantiate of NodeHistory '''
     nh = NodeHistory()
     nh.add_endpoint('Handle_Default', Handle_Default)
     nh.configure()
@@ -41,6 +43,7 @@ def test_node_hist_class():
 
 
 def test_handle_default_class():
+    ''' test handle_Default '''
     hd = Handle_Default()
     hd.owner = Handle_Default()
     hd.configure()

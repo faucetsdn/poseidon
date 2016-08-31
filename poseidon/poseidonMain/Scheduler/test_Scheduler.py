@@ -23,11 +23,11 @@ import logging
 import logging.config
 
 import pytest
-from Scheduler import Scheduler
-from Scheduler import scheduler_interface
 
 from poseidon.baseClasses.enums_tuples import CRONSPEC
 from poseidon.baseClasses.enums_tuples import EVERY
+from poseidon.poseidonMain.Scheduler.Scheduler import Scheduler
+from poseidon.poseidonMain.Scheduler.Scheduler import scheduler_interface
 
 
 module_logger = logging.getLogger(__name__)

@@ -23,10 +23,11 @@ import logging
 import os
 
 import pytest
-from bcf import BcfProxy
 from httmock import HTTMock
 from httmock import response
 from httmock import urlmatch
+
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.bcf import BcfProxy
 
 module_logger = logging.getLogger(__name__)
 
