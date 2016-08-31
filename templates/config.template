@@ -6,7 +6,7 @@ loggingFile = /poseidonWork/poseidon/config/logging.json
 ip = localhost
 
 [vcontrol]
-api_url = http://www.lab41.org
+VCONTROL_HOST = 0.0.0.0
 
 [main]
 name = resource

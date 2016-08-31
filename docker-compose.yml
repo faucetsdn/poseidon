@@ -74,16 +74,16 @@ services:
       - storage-interface:poseidon-storage-interface
     environment:
       - PRODUCTION=True
-# http://www.diogogmt.com/running-mongodb-with-docker-and-compose/
   storage:
     image: mongo
     container_name: poseidon-storage
     ports:
       - '27017:27017'
+      - '28017:28017'
     networks:
       app_net:
         ipv4_address: 172.16.201.15
-    command: --smallfiles --rest --auth
+    command: --smallfiles --rest --httpinterface
     volumes:
       - /data/db
   storage-interface:

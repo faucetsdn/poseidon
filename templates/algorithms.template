@@ -3,3 +3,12 @@ name = machine learning algorithms for device identification and anomaly detecti
 
 [service]
 schedule = {"all":"hourly"}
+
+[deep_classifier]
+Env = ["POSEIDON_HOST=0.0.0.0"]
+
+[dev_classifier]
+Env = ["POSEIDON_HOST=0.0.0.0"]
+
+[port_classifier]
+Env = ["POSEIDON_HOST=0.0.0.0"]
