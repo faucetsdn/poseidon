@@ -76,12 +76,12 @@ class Investigator(Main_Action_Base):
         for machine, config in self.vent_machines.iteritems():
             try:
                 resp = requests.post(
-                    self.vent_addr + '/machines/create', data=body)
+                    self.vctrl_addr + '/machines/create', data=body)
             except:
                 self.logger.error(
                     'Main: Investigator: error on vent create request.')
 
-    def format_vent_create(self, name, provider, body={}, group='poseidon-vent', labels='default', memory=4096, cpus=4, disk_sz=20000):
+    def format_vent_create(self, name, provider, body=None, group='poseidon-vent', labels='default', memory=4096, cpus=4, disk_sz=20000):
         '''
         Formats body dict for vcontrol machine create.
         Returns dict for vcontrol create request.
@@ -89,6 +89,7 @@ class Investigator(Main_Action_Base):
         NOTE: name and provider are required parameters,
         the rest can be covered by defaults.
         '''
+        body = body or {}
         body['name'] = name
         body['provider'] = provider
         if 'group' not in body:
