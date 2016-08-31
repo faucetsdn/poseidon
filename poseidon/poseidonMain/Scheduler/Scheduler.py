@@ -85,7 +85,8 @@ class Scheduler(Main_Action_Base):
         self.handles = dict()
         self.currentJobs = dict()
 
-    def safe(self, func):
+    @staticmethod
+    def safe(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             try:
@@ -188,7 +189,8 @@ class Scheduler(Main_Action_Base):
                                     v.args, v.keywords, '-' * 40)
                                 self.logger.debug(logLine)
 
-    def get_jobId(self, job):
+    @staticmethod
+    def get_jobId(job):
         jobfunc = job.__dict__['job_func']
         if len(jobfunc.args) >= 1:
             return jobfunc.args[0]

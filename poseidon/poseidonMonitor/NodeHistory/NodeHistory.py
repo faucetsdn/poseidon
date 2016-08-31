@@ -43,7 +43,8 @@ class Handle_Default(Monitor_Helper_Base):
         self.logger = module_logger
         self.mod_name = self.__class__.__name__
 
-    def on_get(self, req, resp, resource):
+    @staticmethod
+    def on_get(req, resp, resource):
         resp.content_type = 'application/json'
         try:
             """
