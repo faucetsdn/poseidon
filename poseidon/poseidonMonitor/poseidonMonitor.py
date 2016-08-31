@@ -109,7 +109,7 @@ class Monitor(object):
         for item in conf.direct_get(self.mod_name):
             k, v = item
             self.mod_configuration[k] = v
-        ostr = '%s:config:%s' % (self.mod_name, self.mod_configuration)
+        ostr = '{0}:config:{1}'.format(self.mod_name, self.mod_configuration)
         self.logger.info(ostr)
 
     def add_endpoint(self, name, handler):
@@ -207,8 +207,8 @@ class VersionResource:
 
 class PCAPResource:
     """Serve up parsed PCAP files"""
-
-    def on_get(self, req, resp, pcap_file, output_type):
+    @staticmethod
+    def on_get(req, resp, pcap_file, output_type):
         resp.content_type = 'text/text'
         try:
             if output_type == 'pcap' and pcap_file.split('.')[1] == 'pcap':

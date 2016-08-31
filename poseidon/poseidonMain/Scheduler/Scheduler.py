@@ -58,7 +58,7 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
 
     binding_keys = sys.argv[1:]
     if not binding_keys:
-        ostr = 'Usage: %s [binding_key]...' % (sys.argv[0])
+        ostr = 'Usage: {0} [binding_key]...'.format(sys.argv[0])
         module_logger.error(ostr)
         sys.exit(1)
 
@@ -85,7 +85,8 @@ class Scheduler(Main_Action_Base):
         self.handles = dict()
         self.currentJobs = dict()
 
-    def safe(self, func):
+    @staticmethod
+    def safe(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             try:
@@ -173,7 +174,7 @@ class Scheduler(Main_Action_Base):
                 if k == 'job_func':
                     if len(v.args) >= 1:
                         if jobId == v.args[0]:
-                            logLine = 'killing: %s' % (job)
+                            logLine = 'killing: {0}'.format(job)
                             self.logger.debug(logLine)
                             self.schedule.cancel_job(job)
                         else:  # pragma: no cover
@@ -181,14 +182,15 @@ class Scheduler(Main_Action_Base):
                             self.logger.debug(logLine)
                             jid = v.keywords.get('jobId')
                             if jid == jobId:
-                                logLine = 'killing: %s' % (job)
+                                logLine = 'killing:{0}'.format(job)
                                 self.logger.debug(logLine)
                                 self.schedule.cancel_job(job)
-                                logLine = 'vargs = %s\nkeyworks = %s\n%s\n' % (
+                                logLine = 'vargs = {0}\nkeyworks = {1}\n{2}\n'.format(
                                     v.args, v.keywords, '-' * 40)
                                 self.logger.debug(logLine)
 
-    def get_jobId(self, job):
+    @staticmethod
+    def get_jobId(job):
         jobfunc = job.__dict__['job_func']
         if len(jobfunc.args) >= 1:
             return jobfunc.args[0]
