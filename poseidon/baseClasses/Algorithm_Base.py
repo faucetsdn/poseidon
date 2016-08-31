@@ -53,24 +53,25 @@ class Algorithm_Base(object):
                 rabbit_channel.exchange_declare(
                     queue=queue_name, exclusive=True)
                 wait = False
-                self.logger.debug('connected to %s rabbitmq...', host)
+                self.logger.debug('connected to {0} rabbitmq...'.format(host))
             except Exception as e:
                 self.logger.debug(str(e))
                 self.logger.debug(
-                    'waiting for connection to %s rabbitmq...', host)
+                    'waiting for connection to {0} rabbitmq...'.format(host))
                 time.sleep(2)
                 wait = True
 
         if isinstance(keys, types.ListType):
             for key in keys:
                 self.logger.debug(
-                    'array adding key:%s to rabbitmq channel', key)
+                    'array adding key:{0} to rabbitmq channel'.format(key))
                 rabbit_channel.queue_bind(exchange=exchange,
                                           queue=queue_name,
                                           routing_key=key)
 
         if isinstance(keys, type.StringType):
-            self.logger.debug('string adding key:%s to rabbitmq channel', keys)
+            self.logger.debug(
+                'string adding key:{0} to rabbitmq channel'.format(keys))
             rabbit_channel.queue_bind(exchange=exchange,
                                       queue=queue_name,
                                       routing_key=keys)

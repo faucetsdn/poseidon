@@ -56,17 +56,17 @@ class Config(Monitor_Action_Base):
         self.config.readfp(open(self.config_path, 'r'))
 
     def configure(self):
-        ostr = '%s:configure' % (self.mod_name)
+        ostr = '{0}:configure'.format(self.mod_name)
         self.logger.info(ostr)
         if 'Handle_SectionConfig' in self.actions:
-            ostr = '%s:configure found' % (self.mod_name)
+            ostr = '{0}:configure found'.format(self.mod_name)
             self.CONFIG = self.actions['Handle_SectionConfig']
             self.config_section_name = self.mod_name
             for item in self.CONFIG.direct_get(self.config_section_name):
                 k, v = item
                 self.mod_configuration[k] = v
             # self.mod_config = self.CONFIG.direct_get(self.config_section_name)
-            ostr = 'mod_name:%s |mod_configuration: %s' % (
+            ostr = 'mod_name:{0} |mod_configuration: {1}'.format(
                 self.mod_name, self.mod_configuration)
             self.logger.debug(ostr)
             self.configured = True
@@ -118,7 +118,7 @@ class Handle_SectionConfig(Monitor_Helper_Base):
         try:
             retval = self.owner.config.items(section)
         except:
-            retval = 'Failed to find section: %s' % (section)
+            retval = 'Failed to find section: {0}'.format(section)
         return retval
 
     # rest way
@@ -141,13 +141,14 @@ class Handle_FieldConfig(Monitor_Helper_Base):
 
     def direct_get(self, field, section):
         ''' get the field from the section via owner '''
-        ostr = 'Handle_SectionConfig: %s' % (section)
+        ostr = 'Handle_SectionConfig: {0}'.format(section)
         self.logger.debug(ostr)
         retval = ''
         try:
             retval = self.owner.config.get(section, field)
         except:
-            retval = 'Can\'t find field: %s in section: %s' % (field, section)
+            retval = 'Can\'t find field: {0} in section: {1}'.format(
+                field, section)
         return retval
 
     def on_get(self, req, resp, section, field):

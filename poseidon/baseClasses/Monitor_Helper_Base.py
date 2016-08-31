@@ -42,7 +42,7 @@ class Monitor_Helper_Base(Rock_Bottom):  # pragma: no cover
         else:
             self.logger = logging.getLogger(__name__)
 
-        self.logger.debug('set_owner = %s' % (owner.mod_name))
+        self.logger.debug('set_owner = {0}'.format(owner.mod_name))
         self.owner = owner
         if self.owner.mod_name is not None:
             self.config_section_name = self.owner .mod_name + ':' + self.mod_name
@@ -51,16 +51,16 @@ class Monitor_Helper_Base(Rock_Bottom):  # pragma: no cover
 
     def configure(self):
         """get, parse, store configuration internally as dict"""
-        ostr = '%s %s' % (self.mod_name, 'configure()')
+        ostr = '{0} {1}'.format(self.mod_name, 'configure()')
         self.logger.info(ostr)
         # local valid
         if not self.owner:
-            ostr = '%s %s' % (self.mod_name, 'ownerNull')
+            ostr = '{0} {1}'.format(self.mod_name, 'ownerNull')
             self.logger.error(ostr)
             return
         # monitor valid
         if not self.owner.owner:
-            ostr = '%s %s' % (self.mod_name, 'monitorNull')
+            ostr = '{0} {1}'.format(self.mod_name, 'monitorNull')
             self.logger.error(ostr)
             return
         self.mod_configuration = dict()
@@ -69,7 +69,7 @@ class Monitor_Helper_Base(Rock_Bottom):  # pragma: no cover
             for item in conf.direct_get(self.config_section_name):
                 k, v = item
                 self.mod_configuration[k] = v
-                ostr = 'config:%s:%s' % (
+                ostr = 'config:{0}:{1}'.format(
                     self.config_section_name, self.mod_configuration)
             self.configured = True
 
