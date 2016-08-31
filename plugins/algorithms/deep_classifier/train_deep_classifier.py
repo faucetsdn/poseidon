@@ -25,34 +25,46 @@ rabbitmq:
     exchange:   topic-poseidon-internal
     queue:
 """
-import time
-import os
 import ast
-import json
-import subprocess
-import cPickle
-import sys
 import binascii
-import multiprocessing as mp
-from itertools import chain
-from collections import OrderedDict
+import cPickle
+import json
 import logging
-import ipaddress
-
-import numpy as np
+import multiprocessing as mp
+import os
 import random
+import subprocess
+import sys
+import time
+from collections import OrderedDict
 from copy import copy
+from itertools import chain
 
 import blocks
-from blocks.bricks import Linear, Softmax, Softplus, NDimensionalSoftmax, BatchNormalizedMLP, Rectifier, Logistic, Tanh, MLP
-from blocks.bricks.recurrent import GatedRecurrent, Fork, LSTM
-from blocks.initialization import Constant, IsotropicGaussian, Identity, Uniform
-from blocks.bricks.cost import BinaryCrossEntropy, CategoricalCrossEntropy
-from blocks.filter import VariableFilter
-from blocks.roles import PARAMETER
-from blocks.graph import ComputationGraph
-
+import ipaddress
+import numpy as np
 import theano
+from blocks.bricks import BatchNormalizedMLP
+from blocks.bricks import Linear
+from blocks.bricks import Logistic
+from blocks.bricks import MLP
+from blocks.bricks import NDimensionalSoftmax
+from blocks.bricks import Rectifier
+from blocks.bricks import Softmax
+from blocks.bricks import Softplus
+from blocks.bricks import Tanh
+from blocks.bricks.cost import BinaryCrossEntropy
+from blocks.bricks.cost import CategoricalCrossEntropy
+from blocks.bricks.recurrent import Fork
+from blocks.bricks.recurrent import GatedRecurrent
+from blocks.bricks.recurrent import LSTM
+from blocks.filter import VariableFilter
+from blocks.graph import ComputationGraph
+from blocks.initialization import Constant
+from blocks.initialization import Identity
+from blocks.initialization import IsotropicGaussian
+from blocks.initialization import Uniform
+from blocks.roles import PARAMETER
 from theano import tensor as T
 
 
@@ -213,11 +225,15 @@ def is_clean_packet(packet):  # pragma: no cover
     are valid address formats. Checks that packet data
     is hex. Returns True if all tests pass, False otherwise.
     """
-    if not packet['src_port'].isdigit(): return False
-    if not packet['dest_port'].isdigit(): return False
+    if not packet['src_port'].isdigit():
+        return False
+    if not packet['dest_port'].isdigit():
+        return False
 
-    if packet['src_ip'].isalpha(): return False
-    if packet['dest_ip'].isalpha(): return False
+    if packet['src_ip'].isalpha():
+        return False
+    if packet['dest_ip'].isalpha():
+        return False
 
     if 'data' in packet:
         try:
@@ -239,8 +255,8 @@ def order_keys(hexSessionDict):  # pragma: no cover
 
 def read_pcap(path):  # pragma: no cover
     print 'starting reading pcap file'
-    hex_sessions = {} 
-    proc = subprocess.Popen('tcpdump -nn -tttt -xx -r '+path,
+    hex_sessions = {}
+    proc = subprocess.Popen('tcpdump -nn -tttt -xx -r ' + path,
                             shell=True,
                             stdout=subprocess.PIPE)
     insert_num = 0  # keeps track of insertion order into dict
@@ -248,7 +264,8 @@ def read_pcap(path):  # pragma: no cover
         if not is_clean_packet(packet):
             continue
         if 'data' in packet:
-            key = (packet['src_ip']+":"+packet['src_port'], packet['dest_ip']+":"+packet['dest_port'])
+            key = (packet['src_ip'] + ':' + packet['src_port'],
+                   packet['dest_ip'] + ':' + packet['dest_port'])
             rev_key = (key[1], key[0])
             if key in hex_sessions:
                 hex_sessions[key][0].append(packet['data'])
@@ -265,9 +282,9 @@ def read_pcap(path):  # pragma: no cover
 def pickleFile(thing2save, file2save2=None, filePath='/work/notebooks/drawModels/', fileName='myModels'):  # pragma: no cover
 
     if file2save2 is None:
-        f = file(filePath+fileName+'.pickle', 'wb')
+        f = file(filePath + fileName + '.pickle', 'wb')
     else:
-        f = file(filePath+file2save2, 'wb')
+        f = file(filePath + file2save2, 'wb')
 
     cPickle.dump(thing2save, f, protocol=cPickle.HIGHEST_PROTOCOL)
     f.close()
@@ -285,7 +302,7 @@ def removeBadSessionizer(hexSessionDict, saveFile=False, dataPath=None, fileName
         paclens = []
         for pac in hexSessionDict[ses][0]:
             paclens.append(len(pac))
-        if np.min(paclens)<80:
+        if np.min(paclens) < 80:
             del hexSessionDict[ses]
 
     if saveFile:
@@ -325,29 +342,29 @@ def hexTokenizer():  # pragma: no cover
 
     for key, val in enumerate(hexList):
         if len(val) == 1:
-            val = '0'+val
-        hexDict[val] = key  #dictionary k=hex, v=int  
+            val = '0' + val
+        hexDict[val] = key  # dictionary k=hex, v=int
 
     return hexDict
 
 
 def srcIpDict(hexSessionDict):  # pragma: no cover
-    ''' 
-    input: dictionary of key = sessions, value = list of HEX HEADERS of packets in session
-    output: dictionary of key = source IP, value/subkey = dictionary of destination IPs, 
-                                           subvalue = [[sport], [dport], [plen], [protocol]]
-    
     '''
-    srcIpDict = OrderedDict()   
-    uniqIPs = [] #some ips are dest only. this will collect all ips, not just srcIpDict.keys()
-    
+    input: dictionary of key = sessions, value = list of HEX HEADERS of packets in session
+    output: dictionary of key = source IP, value/subkey = dictionary of destination IPs,
+                                           subvalue = [[sport], [dport], [plen], [protocol]]
+
+    '''
+    srcIpDict = OrderedDict()
+    uniqIPs = []  # some ips are dest only. this will collect all ips, not just srcIpDict.keys()
+
     for session in hexSessionDict.keys():
-        
+
         for rawpacket in hexSessionDict[session][0]:
             packet = copy(rawpacket)
-            
+
             dstIpSubDict = {}
-            
+
             sourceMAC = packet[:12]
             destMAC = packet[12:24]
             srcip = packet[52:60]
@@ -356,15 +373,17 @@ def srcIpDict(hexSessionDict):  # pragma: no cover
             dport = packet[72:76]
             plen = packet[32:36]
             protocol = packet[46:48]
-            
+
             uniqIPs = list(set(uniqIPs) | set([dstip, srcip]))
 
             if srcip not in srcIpDict:
-                dstIpSubDict[dstip] = [[sport], [dport], [plen], [protocol], [sourceMAC], [destMAC]]
+                dstIpSubDict[dstip] = [[sport], [dport], [
+                    plen], [protocol], [sourceMAC], [destMAC]]
                 srcIpDict[srcip] = dstIpSubDict
 
-            if dstip not in srcIpDict[srcip]:    
-                srcIpDict[srcip][dstip] = [[sport], [dport], [plen], [protocol], [sourceMAC], [destMAC]]
+            if dstip not in srcIpDict[srcip]:
+                srcIpDict[srcip][dstip] = [[sport], [dport], [
+                    plen], [protocol], [sourceMAC], [destMAC]]
             else:
                 srcIpDict[srcip][dstip][0].append(sport)
                 srcIpDict[srcip][dstip][1].append(dport)
@@ -372,24 +391,25 @@ def srcIpDict(hexSessionDict):  # pragma: no cover
                 srcIpDict[srcip][dstip][3].append(protocol)
                 srcIpDict[srcip][dstip][4].append(sourceMAC)
                 srcIpDict[srcip][dstip][5].append(destMAC)
-                
+
     return srcIpDict, uniqIPs
 
 
 def dictUniquerizer(dictOdictsOlistOlists):  # pragma: no cover
     '''
-    input: dictionary of dictionaries that have a list of lists 
+    input: dictionary of dictionaries that have a list of lists
            ex. srcIpDict[srcip][dstip] = [[sport], [dport], [plen], [protocol]]
     output: dictionary of dictionaries with list of lists with unique items in the final sublist
-    
+
     WARNING: will overwrite your input dictionary. Make a copy if you want to preserve dictOdictsOlistOlists.
     '''
-    #dictCopy
+    # dictCopy
     for key in dictOdictsOlistOlists.keys():
         for subkey in dictOdictsOlistOlists[key].keys():
             for sublist in xrange(len(dictOdictsOlistOlists[key][subkey])):
-                dictOdictsOlistOlists[key][subkey][sublist] = list(set(dictOdictsOlistOlists[key][subkey][sublist]))
-    
+                dictOdictsOlistOlists[key][subkey][sublist] = list(
+                    set(dictOdictsOlistOlists[key][subkey][sublist]))
+
     return dictOdictsOlistOlists
 
 
@@ -398,16 +418,17 @@ def ipDirSwitcher(hexSessionList):  # pragma: no cover
     switches both ip and mac addresses
     input is a list of packets from ONE session
     '''
-    
+
     ipdirsession = []
-        
+
     for p in hexSessionList:
         sourceMAC = p[:12]
         destMAC = p[12:24]
         sourceIP = p[52:60]
         destIP = p[60:68]
 
-        ipdirsession.append(destMAC + sourceMAC + p[24:52] + destIP + sourceIP + p[68:])
+        ipdirsession.append(destMAC + sourceMAC +
+                            p[24:52] + destIP + sourceIP + p[68:])
 
     return ipdirsession
 
@@ -416,112 +437,121 @@ def portDirSwitcher(hexSessionList):  # pragma: no cover
     '''
     input is a list of packets from ONE session
     '''
-    
+
     portdirsession = []
-    
+
     for p in hexSessionList:
         sport = p[68:72]
         dport = p[72:76]
 
-        portdirsession.append(p[:68]+dport+sport+p[76:])
+        portdirsession.append(p[:68] + dport + sport + p[76:])
 
     return portdirsession
 
 
-def dstIpSwapOut(hexSessionList, dictOcoms, listOuniqIPs):  # pragma: no cover    
+def dstIpSwapOut(hexSessionList, dictOcoms, listOuniqIPs):  # pragma: no cover
     swapSession = []
-    sourceMAC = hexSessionList[0][:12]#[0] assumes first packet contains true initial direction
+    # [0] assumes first packet contains true initial direction
+    sourceMAC = hexSessionList[0][:12]
     destMAC = hexSessionList[0][12:24]
-    srcip = hexSessionList[0][52:60] 
+    srcip = hexSessionList[0][52:60]
     dstip = hexSessionList[0][60:68]
-    normDstIps = dictOcoms[srcip].keys()+[srcip] #get list of dstIPs that srcIP talks to
+    # get list of dstIPs that srcIP talks to
+    normDstIps = dictOcoms[srcip].keys() + [srcip]
     abbynormIps = copy(listOuniqIPs)
-    
+
     for normIp in normDstIps:
-        abbynormIps.remove(normIp) #remove itself and know dstIPs from list of consideration.
-    
-    abbynormDestIp = random.sample(abbynormIps, 1)[0] #get random ip that srcip doesn't talk to
+        # remove itself and know dstIPs from list of consideration.
+        abbynormIps.remove(normIp)
+
+    # get random ip that srcip doesn't talk to
+    abbynormDestIp = random.sample(abbynormIps, 1)[0]
 
     for rawpacket in hexSessionList:
         packet = copy(rawpacket)
-        
+
         if packet[60:68] == dstip:
-            packet = packet[:60] + abbynormDestIp + packet[68:] #
+            packet = packet[:60] + abbynormDestIp + packet[68:]
         elif packet[60:68] == srcip:
-            packet = packet[:52] + abbynormDestIp + packet[60:] #in case direction switches for packet in session
-            
+            # in case direction switches for packet in session
+            packet = packet[:52] + abbynormDestIp + packet[60:]
+
         swapSession.append(packet)
 
     return swapSession
 
 
-def oneHot(index, granular = 'hex'):  # pragma: no cover
+def oneHot(index, granular='hex'):  # pragma: no cover
     if granular == 'hex':
         vecLen = 257
     else:
         vecLen = 17
-    
+
     zeroVec = np.zeros(vecLen)
     zeroVec[index] = 1.0
-    
+
     return zeroVec
 
 
 def oneSessionEncoder(sessionPackets, hexDict, maxPackets=2, packetTimeSteps=100,
                       packetReverse=False, charLevel=False, padOldTimeSteps=True):  # pragma: no cover
-    
+
     sessionCollect = []
     packetCollect = []
-    
+
     if charLevel:
         vecLen = 17
     else:
         vecLen = 257
-    
-    if len(sessionPackets) > maxPackets: #crop the number of sessions to maxPackets
+
+    if len(sessionPackets) > maxPackets:  # crop the number of sessions to maxPackets
         sessionList = copy(sessionPackets[:maxPackets])
     else:
         sessionList = copy(sessionPackets)
 
     for packet in sessionList:
-        packet = [hexDict[packet[i:i+2]] for i in xrange(0,len(packet)-2+1,2)]
-            
-        if len(packet) >= packetTimeSteps: #crop packet to length packetTimeSteps
+        packet = [hexDict[packet[i:i + 2]]
+                  for i in xrange(0, len(packet) - 2 + 1, 2)]
+
+        if len(packet) >= packetTimeSteps:  # crop packet to length packetTimeSteps
             packet = packet[:packetTimeSteps]
-            packet = packet+[256] #add <EOP> end of packet token
-        else:
-            packet = packet+[256] #add <EOP> end of packet token
-        
+
+        packet += [256]  # add <EOP> end of packet token
+
         packetCollect.append(packet)
-        
-        pacMat = np.array([oneHot(x) for x in packet]) #one hot encoding of packet into a matrix
+
+        # one hot encoding of packet into a matrix
+        pacMat = np.array([oneHot(x) for x in packet])
         pacMatLen = len(pacMat)
-        
-        #padding packet
+
+        # padding packet
         if packetReverse:
             pacMat = pacMat[::-1]
 
         if pacMatLen < packetTimeSteps:
-            #pad by stacking zeros on top of data so that earlier timesteps do not have information
-            #padding the packet such that zeros are after the actual info for better translation
+            # pad by stacking zeros on top of data so that earlier timesteps do not have information
+            # padding the packet such that zeros are after the actual info for
+            # better translation
             if padOldTimeSteps:
-                pacMat = np.vstack( ( np.zeros((packetTimeSteps-pacMatLen,vecLen)), pacMat) ) 
+                pacMat = np.vstack(
+                    (np.zeros((packetTimeSteps - pacMatLen, vecLen)), pacMat))
             else:
-                pacMat = np.vstack( (pacMat, np.zeros((packetTimeSteps-pacMatLen,vecLen))) ) 
+                pacMat = np.vstack(
+                    (pacMat, np.zeros((packetTimeSteps - pacMatLen, vecLen))))
 
         if pacMatLen > packetTimeSteps:
             pacMat = pacMat[:packetTimeSteps, :]
 
         sessionCollect.append(pacMat)
 
-    #padding session
+    # padding session
     sessionCollect = np.asarray(sessionCollect, dtype=theano.config.floatX)
     numPacketsInSession = sessionCollect.shape[0]
     if numPacketsInSession < maxPackets:
-        #pad sessions to fit the
-        sessionCollect = np.vstack( (sessionCollect,np.zeros((maxPackets-numPacketsInSession,
-                                                             packetTimeSteps, vecLen))) )
-    
+        # pad sessions to fit the
+        sessionCollect = np.vstack((sessionCollect, np.zeros((maxPackets - numPacketsInSession,
+                                                              packetTimeSteps, vecLen))))
+
     return sessionCollect, packetCollect
 
 
@@ -532,14 +562,15 @@ def floatX(X):  # pragma: no cover
 def dropout(X, p=0.):  # pragma: no cover
     if p != 0:
         retain_prob = 1 - p
-        X = X / retain_prob * srng.binomial(X.shape, p=retain_prob, dtype=theano.config.floatX)
+        X = X / retain_prob * \
+            srng.binomial(X.shape, p=retain_prob, dtype=theano.config.floatX)
     return X
 
 
 def clip_norm(g, c, n):  # pragma: no cover
     '''n is the norm, c is the threashold, and g is the gradient'''
-    if c > 0: 
-        g = T.switch(T.ge(n, c), g*c/n, g) 
+    if c > 0:
+        g = T.switch(T.ge(n, c), g * c / n, g)
     return g
 
 
@@ -552,7 +583,7 @@ def max_norm(p, maxnorm=0.):  # pragma: no cover
     if maxnorm > 0:
         norms = T.sqrt(T.sum(T.sqr(p), axis=0))
         desired = T.clip(norms, 0, maxnorm)
-        p = p * (desired/ (1e-7 + norms))
+        p = p * (desired / (1e-7 + norms))
     return p
 
 
@@ -609,7 +640,7 @@ def RMSprop(cost, params, lr=0.001, l1=0., l2=0., maxnorm=0., rho=0.9, epsilon=1
         acc = theano.shared(p.get_value() * 0.)
         acc_new = rho * acc + (1 - rho) * g ** 2
         updates.append((acc, acc_new))
- 
+
         updated_p = p - lr * (g / T.sqrt(acc_new + epsilon))
         updated_p = weight_regularize(updated_p, maxnorm=maxnorm)
         updates.append((p, updated_p))
@@ -619,57 +650,60 @@ def RMSprop(cost, params, lr=0.001, l1=0., l2=0., maxnorm=0., rho=0.9, epsilon=1
 def predictClass(predictFun, hexSessionsDict, comsDict, uniqIPs, hexDict, hexSessionsKeys,
                  numClasses=4, trainPercent=0.9, dimIn=257, maxPackets=2,
                  packetTimeSteps=16, padOldTimeSteps=True):  # pragma: no cover
-    
+
     testCollect = []
     predtargets = []
     actualtargets = []
-    trainIndex = int(len(hexSessionsKeys)*trainPercent)
-        
+    trainIndex = int(len(hexSessionsKeys) * trainPercent)
+
     start = trainIndex
     end = len(hexSessionsKeys)
-        
+
     trainingSessions = []
     trainingTargets = []
 
     for trainKey in range(start, end):
-        sessionForEncoding = list(hexSessionsDict[hexSessionsKeys[trainKey]][0])
+        sessionForEncoding = list(
+            hexSessionsDict[hexSessionsKeys[trainKey]][0])
 
-        adversaryList = [sessionForEncoding, 
-                         dstIpSwapOut(sessionForEncoding, comsDict, uniqIPs), 
-                         portDirSwitcher(sessionForEncoding), 
+        adversaryList = [sessionForEncoding,
+                         dstIpSwapOut(sessionForEncoding, comsDict, uniqIPs),
+                         portDirSwitcher(sessionForEncoding),
                          ipDirSwitcher(sessionForEncoding)]
         abbyIndex = random.sample(range(len(adversaryList)), 1)[0]
         abbyOneHotSes = oneSessionEncoder(adversaryList[abbyIndex],
                                           hexDict=hexDict,
-                                          packetReverse=packetReverse, 
-                                          padOldTimeSteps=padOldTimeSteps, 
-                                          maxPackets=maxPackets, 
+                                          packetReverse=packetReverse,
+                                          padOldTimeSteps=padOldTimeSteps,
+                                          maxPackets=maxPackets,
                                           packetTimeSteps=packetTimeSteps)
 
-        targetClasses = [0]*numClasses
+        targetClasses = [0] * numClasses
         targetClasses[abbyIndex] = 1
         abbyTarget = np.array(targetClasses, dtype=theano.config.floatX)
         trainingSessions.append(abbyOneHotSes[0])
         trainingTargets.append(abbyTarget)
 
-    sessionsMinibatch = np.asarray(trainingSessions, dtype=theano.config.floatX).reshape((-1, packetTimeSteps, 1, dimIn))
+    sessionsMinibatch = np.asarray(trainingSessions, dtype=theano.config.floatX).reshape(
+        (-1, packetTimeSteps, 1, dimIn))
     targetsMinibatch = np.asarray(trainingTargets, dtype=theano.config.floatX)
 
     predcostfun = predictFun(sessionsMinibatch)
-    testCollect.append(np.mean(np.argmax(predcostfun,axis=1) == np.argmax(targetsMinibatch, axis=1)))
+    testCollect.append(np.mean(np.argmax(predcostfun, axis=1)
+                               == np.argmax(targetsMinibatch, axis=1)))
 
-    predtargets = np.argmax(predcostfun,axis=1)
+    predtargets = np.argmax(predcostfun, axis=1)
     actualtargets = np.argmax(targetsMinibatch, axis=1)
 
-    print "TEST accuracy:         ", np.mean(testCollect)
+    print 'TEST accuracy:         ', np.mean(testCollect)
     print
 
     return predtargets, actualtargets, np.mean(testCollect)
 
 
-def binaryPrecisionRecall(predictions, targets, numClasses = 4):  # pragma: no cover
+def binaryPrecisionRecall(predictions, targets, numClasses=4):  # pragma: no cover
     for cla in range(numClasses):
-        
+
         confustop = np.array([])
         confusbottom = np.array([])
 
@@ -689,22 +723,24 @@ def binaryPrecisionRecall(predictions, targets, numClasses = 4):  # pragma: no c
         top = np.append(confustop, (truePos, falsePos))
         bottom = np.append(confusbottom, (falseNeg, trueNeg))
         confusionMatrix = np.vstack((top, bottom))
-        
-        precision = float(truePos)/(truePos + falsePos + 0.00001)  # 1 - (how much junk did we give user)
-        recall = float(truePos)/(truePos + falseNeg + 0.00001)  # 1 - (how much good stuff did we miss)
-        f1 = 2*((precision*recall)/(precision+recall+0.00001))
 
-        module_logger.info('class '+str(cla)+' precision: ', precision)
-        module_logger.info('class '+str(cla)+' recall:    ', recall)
-        module_logger.info('class '+str(cla)+' f1:        ', f1)
+        # 1 - (how much junk did we give user)
+        precision = float(truePos) / (truePos + falsePos + 0.00001)
+        # 1 - (how much good stuff did we miss)
+        recall = float(truePos) / (truePos + falseNeg + 0.00001)
+        f1 = 2 * ((precision * recall) / (precision + recall + 0.00001))
+
+        module_logger.info('class ' + str(cla) + ' precision: ', precision)
+        module_logger.info('class ' + str(cla) + ' recall:    ', recall)
+        module_logger.info('class ' + str(cla) + ' f1:        ', f1)
 
 
-def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOldTimeSteps, wtstd, 
-             lr, decay, clippings, dimIn, dim, numClasses, batch_size, epochs, 
+def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOldTimeSteps, wtstd,
+             lr, decay, clippings, dimIn, dim, numClasses, batch_size, epochs,
              trainPercent, dataPath, loadPrepedData=False):  # pragma: no cover
     print locals()
     print
-    
+
     X = T.tensor4('inputs')
     Y = T.matrix('targets')
     linewt_init = IsotropicGaussian(wtstd)
@@ -713,10 +749,11 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
     rnnbias_init = Constant(0.0)
     classifierWts = IsotropicGaussian(wtstd)
 
-    learning_rateClass = theano.shared(np.array(lr, dtype=theano.config.floatX))
+    learning_rateClass = theano.shared(
+        np.array(lr, dtype=theano.config.floatX))
     learning_decay = np.array(decay, dtype=theano.config.floatX)
-    
-    ###DATA PREP
+
+    # DATA PREP
     print 'loading data'
     if loadPrepedData:
         hexSessions = loadFile(dataPath)
@@ -729,47 +766,49 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
     print str(numSessions) + ' sessions found'
     hexSessionsKeys = order_keys(hexSessions)
     hexDict = hexTokenizer()
-    
+
     print 'creating dictionary of ip communications'
     comsDict, uniqIPs = srcIpDict(hexSessions)
     comsDict = dictUniquerizer(comsDict)
-     
+
     print 'initializing network graph'
-    ###ENCODER
+    # ENCODER
     if rnnType == 'gru':
-        rnn = GatedRecurrent(dim=dim, weights_init = rnnwt_init, biases_init = rnnbias_init, name = 'gru')
+        rnn = GatedRecurrent(dim=dim, weights_init=rnnwt_init,
+                             biases_init=rnnbias_init, name='gru')
         dimMultiplier = 2
     else:
-        rnn = LSTM(dim=dim, weights_init = rnnwt_init, biases_init = rnnbias_init, name = 'lstm')
+        rnn = LSTM(dim=dim, weights_init=rnnwt_init,
+                   biases_init=rnnbias_init, name='lstm')
         dimMultiplier = 4
 
     fork = Fork(output_names=['linear', 'gates'],
-                name='fork', input_dim=dimIn, output_dims=[dim, dim * dimMultiplier], 
-                weights_init = linewt_init, biases_init = line_bias)
+                name='fork', input_dim=dimIn, output_dims=[dim, dim * dimMultiplier],
+                weights_init=linewt_init, biases_init=line_bias)
 
-    ###CONTEXT
+    # CONTEXT
     if rnnType == 'gru':
-        rnnContext = GatedRecurrent(dim=dim, weights_init = rnnwt_init, 
-                                    biases_init = rnnbias_init, name = 'gruContext')
+        rnnContext = GatedRecurrent(dim=dim, weights_init=rnnwt_init,
+                                    biases_init=rnnbias_init, name='gruContext')
     else:
-        rnnContext = LSTM(dim=dim, weights_init = rnnwt_init, biases_init = rnnbias_init, 
-                          name = 'lstmContext')
+        rnnContext = LSTM(dim=dim, weights_init=rnnwt_init, biases_init=rnnbias_init,
+                          name='lstmContext')
 
     forkContext = Fork(output_names=['linearContext', 'gatesContext'],
-                name='forkContext', input_dim=dim, output_dims=[dim, dim * dimMultiplier], 
-                weights_init = linewt_init, biases_init = line_bias)
+                       name='forkContext', input_dim=dim, output_dims=[dim, dim * dimMultiplier],
+                       weights_init=linewt_init, biases_init=line_bias)
 
     forkDec = Fork(output_names=['linear', 'gates'],
-                name='forkDec', input_dim=dim, output_dims=[dim, dim*dimMultiplier], 
-                weights_init = linewt_init, biases_init = line_bias)
+                   name='forkDec', input_dim=dim, output_dims=[dim, dim * dimMultiplier],
+                   weights_init=linewt_init, biases_init=line_bias)
 
-    #CLASSIFIER
-    bmlp = BatchNormalizedMLP( activations=[Logistic(),Logistic()], 
-               dims=[dim, dim, numClasses],
-               weights_init=classifierWts,
-               biases_init=Constant(0.0001) )
+    # CLASSIFIER
+    bmlp = BatchNormalizedMLP(activations=[Logistic(), Logistic()],
+                              dims=[dim, dim, numClasses],
+                              weights_init=classifierWts,
+                              biases_init=Constant(0.0001))
 
-    #initialize the weights in all the functions
+    # initialize the weights in all the functions
     fork.initialize()
     rnn.initialize()
     forkContext.initialize()
@@ -778,18 +817,21 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
     bmlp.initialize()
 
     def onestepEnc(X):
-        data1, data2 = fork.apply(X) 
+        data1, data2 = fork.apply(X)
 
         if rnnType == 'gru':
-            hEnc = rnn.apply(data1, data2) 
+            hEnc = rnn.apply(data1, data2)
         else:
             hEnc, _ = rnn.apply(data2)
 
         return hEnc
 
-    hEnc, _ = theano.scan(onestepEnc, X) #(mini*numPackets, packetLen, 1, hexdictLen)
-    hEncReshape = T.reshape(hEnc[:,-1], (-1, maxPackets, 1, dim)) #[:,-1] takes the last rep for each packet
-                                                                 #(mini, numPackets, 1, dimReduced)
+    # (mini*numPackets, packetLen, 1, hexdictLen)
+    hEnc, _ = theano.scan(onestepEnc, X)
+    # [:,-1] takes the last rep for each packet
+    hEncReshape = T.reshape(hEnc[:, -1], (-1, maxPackets, 1, dim))
+    #(mini, numPackets, 1, dimReduced)
+
     def onestepContext(hEncReshape):
 
         data3, data4 = forkContext.apply(hEncReshape)
@@ -802,7 +844,7 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
         return hContext
 
     hContext, _ = theano.scan(onestepContext, hEncReshape)
-    hContextReshape = T.reshape(hContext[:,-1], (-1,dim))
+    hContextReshape = T.reshape(hContext[:, -1], (-1, dim))
 
     data5, _ = forkDec.apply(hContextReshape)
 
@@ -811,19 +853,21 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
     softoutClass = softmax.apply(pyx)
     costClass = T.mean(CategoricalCrossEntropy().apply(Y, softoutClass))
 
-    #CREATE GRAPH
+    # CREATE GRAPH
     cgClass = ComputationGraph([costClass])
-    paramsClass = VariableFilter(roles = [PARAMETER])(cgClass.variables)
-    updatesClass = Adam(paramsClass, costClass, learning_rateClass, c=clippings) 
+    paramsClass = VariableFilter(roles=[PARAMETER])(cgClass.variables)
+    updatesClass = Adam(paramsClass, costClass,
+                        learning_rateClass, c=clippings)
 
     module_logger.info('starting graph compilation')
-    classifierTrain = theano.function([X,Y], [costClass, hEnc, hContext, pyx, softoutClass], 
+    classifierTrain = theano.function([X, Y], [costClass, hEnc, hContext, pyx, softoutClass],
                                       updates=updatesClass, allow_input_downcast=True)
-    classifierPredict = theano.function([X], softoutClass, allow_input_downcast=True)
+    classifierPredict = theano.function(
+        [X], softoutClass, allow_input_downcast=True)
     module_logger.info('graph compilation finished')
     print 'finished graph compilation'
 
-    trainIndex = int(len(hexSessionsKeys)*trainPercent)
+    trainIndex = int(len(hexSessionsKeys) * trainPercent)
 
     epochCost = []
     gradNorms = []
@@ -835,57 +879,63 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
 
     module_logger.info('beginning training')
     iteration = 0
-    #epoch
+    # epoch
     for epoch in xrange(epochs):
 
-        #iteration/minibatch
-        for start, end in zip(range(0, trainIndex,batch_size),
+        # iteration/minibatch
+        for start, end in zip(range(0, trainIndex, batch_size),
                               range(batch_size, trainIndex, batch_size)):
 
             trainingTargets = []
             trainingSessions = []
 
-            #create one minibatch with 0.5 normal and 0.5 abby normal traffic
+            # create one minibatch with 0.5 normal and 0.5 abby normal traffic
             for trainKey in range(start, end):
-                sessionForEncoding = list(hexSessions[hexSessions.keys()[trainKey]][0])
+                sessionForEncoding = list(
+                    hexSessions[hexSessions.keys()[trainKey]][0])
 
-                adversaryList = [sessionForEncoding, 
-                                 dstIpSwapOut(sessionForEncoding, comsDict, uniqIPs), 
-                                 portDirSwitcher(sessionForEncoding), 
+                adversaryList = [sessionForEncoding,
+                                 dstIpSwapOut(sessionForEncoding,
+                                              comsDict, uniqIPs),
+                                 portDirSwitcher(sessionForEncoding),
                                  ipDirSwitcher(sessionForEncoding)]
                 abbyIndex = random.sample(range(len(adversaryList)), 1)[0]
-                
-                abbyOneHotSes = oneSessionEncoder(adversaryList[abbyIndex],
-                                                  hexDict = hexDict,
-                                                  packetReverse=packetReverse, 
-                                                  padOldTimeSteps = padOldTimeSteps, 
-                                                  maxPackets = maxPackets, 
-                                                  packetTimeSteps = packetTimeSteps)
 
-                targetClasses = [0]*numClasses
+                abbyOneHotSes = oneSessionEncoder(adversaryList[abbyIndex],
+                                                  hexDict=hexDict,
+                                                  packetReverse=packetReverse,
+                                                  padOldTimeSteps=padOldTimeSteps,
+                                                  maxPackets=maxPackets,
+                                                  packetTimeSteps=packetTimeSteps)
+
+                targetClasses = [0] * numClasses
                 targetClasses[abbyIndex] = 1
-                abbyTarget = np.array(targetClasses, dtype=theano.config.floatX)
+                abbyTarget = np.array(
+                    targetClasses, dtype=theano.config.floatX)
                 trainingSessions.append(abbyOneHotSes[0])
                 trainingTargets.append(abbyTarget)
 
-            sessionsMinibatch = np.asarray(trainingSessions).reshape((-1, packetTimeSteps, 1, dimIn))
+            sessionsMinibatch = np.asarray(trainingSessions).reshape(
+                (-1, packetTimeSteps, 1, dimIn))
             targetsMinibatch = np.asarray(trainingTargets)
 
             costfun = classifierTrain(sessionsMinibatch, targetsMinibatch)
 
             if iteration % (numSessions / (10 * batch_size)) == 0:
                 costCollect.append(costfun[0])
-                trainCollect.append(np.mean(np.argmax(costfun[-1],axis=1) == np.argmax(targetsMinibatch, axis=1)))
+                trainCollect.append(
+                    np.mean(np.argmax(costfun[-1], axis=1) == np.argmax(targetsMinibatch, axis=1)))
                 module_logger.info('   Iteration: ', iteration)
                 module_logger.info('   Cost: ', np.mean(costCollect))
-                module_logger.info('   TRAIN accuracy: ', np.mean(trainCollect))
+                module_logger.info('   TRAIN accuracy: ',
+                                   np.mean(trainCollect))
                 print '   Iteration: ', iteration
                 print '   Cost: ', np.mean(costCollect)
                 print '   TRAIN accuracy: ', np.mean(trainCollect)
 
-            iteration+=1
+            iteration += 1
 
-            #testing accuracy
+            # testing accuracy
             if iteration % (numSessions / (2 * batch_size)) == 0:
                 predtar, acttar, testCollect = predictClass(classifierPredict, hexSessions, comsDict, uniqIPs, hexDict,
                                                             hexSessionsKeys,
@@ -894,16 +944,16 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
                 binaryPrecisionRecall(predtar, acttar)
                 module_logger.info(str(testCollect))
 
-            #save the models
+            # save the models
             if iteration % (numSessions / (5 * batch_size)) == 0:
                 pickleFile(classifierTrain, filePath='',
-                            fileName=runname+'TRAIN'+str(iteration))
+                           fileName=runname + 'TRAIN' + str(iteration))
                 pickleFile(classifierPredict, filePath='',
-                            fileName=runname+'PREDICT'+str(iteration))
+                           fileName=runname + 'PREDICT' + str(iteration))
 
         epochCost.append(np.mean(costCollect))
         trainAcc.append(np.mean(trainCollect))
-        
+
         module_logger.info('Epoch: ', epoch)
         module_logger.info('Epoch cost average: ', epochCost[-1])
         module_logger.info('Epoch TRAIN accuracy: ', trainAcc[-1])
@@ -918,11 +968,11 @@ if __name__ == '__main__':
     host = 'poseidon-rabbit'
     exchange = 'topic-poseidon-internal'
     queue_name = 'NAME'
-    #channel, connection = rabbit_init(host=host,
+    # channel, connection = rabbit_init(host=host,
     #                                  exchange=exchange,
     #                                  queue_name=queue_name)
     print 'starting program'
     dataPath = 'testpcap.cap'
-    train, predict = training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOldTimeSteps, wtstd, 
-             lr, decay, clippings, dimIn, dim, numClasses, batch_size, epochs, 
-             trainPercent, dataPath, loadPrepedData)
+    train, predict = training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOldTimeSteps, wtstd,
+                              lr, decay, clippings, dimIn, dim, numClasses, batch_size, epochs,
+                              trainPercent, dataPath, loadPrepedData)
