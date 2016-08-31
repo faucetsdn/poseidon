@@ -63,7 +63,7 @@ def callback(ch, method, properties, body, q=None):
 class PoseidonMain(object):
     ''' poseidonmain '''
 
-    def __init__(self):
+    def __init__(self, skip_rabbit=False):
         ''' poseidonMain initialization '''
         self.skip_rabbit = False
 
@@ -233,7 +233,7 @@ class PoseidonMain(object):
 
             self.logger.debug('done looking for work!')
 
-            if workfound:
+            if workfound:  # pragma no cover
 
                 itype, ivalue = self.make_type_val(item)
 
@@ -257,10 +257,9 @@ class PoseidonMain(object):
 
 def main(skip_rabbit=False):
     ''' main function '''
-    pmain = PoseidonMain()
-    pmain.skip_rabbit = skip_rabbit
+    pmain = PoseidonMain(skip_rabbit=skip_rabbit)
     if not skip_rabbit:
-        pmain.init_rabbit()  # pragme no cover
+        pmain.init_rabbit()
         pmain.start_channel(pmain.rabbit_channel_local,
                             callback, 'poseidon_internals')
         # def start_channel(self, channel, callback, queue):
