@@ -154,7 +154,6 @@ class db_collection_query(poseidonStorage):
     def on_get(self, req, resp, database, collection, query_str):
         ret = {}
         try:
-            query = bson.BSON.decode(query_str)
             cursor = self.client[database][collection].find(query)
             doc_dict = {}
             if cursor.count() == 0:
@@ -180,15 +179,17 @@ class db_add_one_doc(poseidonStorage):
     collection. returned response includes
     the id of the newly inserted object.
 
+    body: serialized string of mapping object
+
     NOTE: uses bson decoding for document
     to be inserted into database.
     """
 
     def on_post(self, req, resp, database, collection):
         try:
-            doc_str = req.stream.read()
-            if not bson.is_valid(doc_str):
-                doc_str = bson.BSON.encode(doc_str)
+            data = req.context['data']
+            doc_str = ast.literal_eval(data)
+            doc_str = bson.BSON.encode(doc_str)
             ret = self.client[database][collection].insert_one(doc_str)
             ret = str(ret.inserted_id)
         except:
