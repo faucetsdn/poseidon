@@ -25,8 +25,21 @@ from os import environ
 import pytest
 
 from poseidon.poseidonMain.poseidonMain import main
+from poseidon.poseidonMain.poseidonMain import PoseidonMain
 
 module_logger = logging.getLogger(__name__)
+
+
+def test_make_type_val():
+    d = dict()
+    d['endpoint'] = 'Main'
+    d['value'] = 'shutdown'
+
+    a = PoseidonMain(skip_rabbit=True)
+    t, v = a.make_type_val(d)
+    assert t == 'Main'
+    assert v == 'shutdown'
+    assert a.shutdown
 
 
 def test_poseidonMain_main():
