@@ -50,6 +50,7 @@ class MockController:
     1 to 10.
     """
 
+    @staticmethod
     def on_get(self, req, resp):
         resp.body = json.dumps(random.randint(1, 10))
 
