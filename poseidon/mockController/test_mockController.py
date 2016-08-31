@@ -42,4 +42,5 @@ def test_controller(client):
     resp = client.get('/v1/mock_controller/poll')
     assert resp.status == falcon.HTTP_OK
     num = int(resp.body)
-    assert num >= 1 and num <= 10
+    assert num >= 1
+    assert num <= 10

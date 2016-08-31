@@ -68,6 +68,5 @@ def test_NorthBoundControllerAbstraction_periodic(client):
     if 'establish' in package['controller']:
         assert 'Could not' in package['controller']
     else:
-        assert int(
-            package['controller']) <= 10 and int(
-            package['controller']) >= 1
+        assert int(package['controller']) <= 10
+        assert int(package['controller']) >= 1
