@@ -33,7 +33,7 @@ run with `sudo ./startup.sh`.
 - docker-compose
 - /data/db directory for mongodb database
 - The 1.8 release of docker-compose can be installed with `make compose-install`
-- Update the `ip` of the `[database]` section of `templates/config.template` to the ip of the host machine (or
+- Update the `ip` of the `[database]` section of `config/poseidon.config` to the ip of the host machine (or
 the `docker-machine ip` if using boot2docker or similar). NOTE: without this configuration, poseidon will fail to build.
 
 # Usage Examples

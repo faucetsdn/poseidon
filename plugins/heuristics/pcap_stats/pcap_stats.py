@@ -41,7 +41,6 @@ import requests
 from pcap_stats_utils import FlowRecord
 from pcap_stats_utils import MachineNode
 from pcap_stats_utils import TimeRecord
-from pymongo import MongoClient
 
 
 flowRecordLock = threading.Lock()

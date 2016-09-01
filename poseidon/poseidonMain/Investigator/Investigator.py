@@ -25,9 +25,8 @@ import logging
 import logging.config
 import sys
 import urllib
-
-import bson
 import requests
+import json
 
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
 from poseidon.poseidonMain.Config.Config import Config
@@ -166,8 +165,7 @@ class Investigator(Main_Action_Base):
         ip, then processes accordingly.
         '''
         query = {'node_ip': ip_addr}
-        query = bson.BSON.encode(query)
-        uri = 'http://poseidon-storage-interface/v1/poseidon_records/network_graph/' + query
+        uri = 'http://poseidon-storage-interface/v1/poseidon_records/network_graph/' + json.dumps(query)
         try:
             resp = requests.get(uri)
         except:

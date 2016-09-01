@@ -68,7 +68,7 @@ class poseidonStorage:
     brokers requests to database.
 
     NOTE: retrieves database host from config
-    file in templates/config.template under the
+    file in config/poseidon.config under the
     [database] section.
     """
 
@@ -78,7 +78,7 @@ class poseidonStorage:
         try:
             self.config = ConfigParser.ConfigParser()
             self.config.readfp(
-                open('/poseidonWork/templates/config.template'))
+                open('/poseidonWork/config/poseidon.config'))
             database_container_ip = self.config.get('database', 'ip')
         except: # pragma: no cover
             raise ValueError(
