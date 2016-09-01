@@ -220,10 +220,10 @@ class db_collection_query(poseidonStorage):
                     doc_list.append(doc)
                 ret['docs'] = doc_list
                 ret['count'] = cursor.count()
-        except bsonInputExceptions:
+        except bsonInputExceptions:  # pragma: no cover
             ret['count'] = -1
             resp.status = falcon.HTTP_BAD_REQUEST
-        except TypeError, e:
+        except TypeError, e:  # pragma: no cover
             # bad query string
             ret['count'] = -1
             resp.status = falcon.HTTP_BAD_REQUEST
@@ -311,7 +311,7 @@ class db_update_one_doc(poseidonStorage):
                 ret['raw_result'] = result.raw_result
             else:
                 ret['success'] = 0
-        except bsonInputExceptions:
+        except bsonInputExceptions:  # pragma: no cover
             ret['success'] = 0
             resp.status = falcon.HTTP_BAD_REQUEST
         except ValueError, TypeError:
