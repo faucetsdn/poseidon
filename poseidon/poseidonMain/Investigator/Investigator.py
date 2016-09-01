@@ -76,7 +76,7 @@ class Investigator(Main_Action_Base):
         for machine, config in self.vent_machines.iteritems():
             try:
                 resp = requests.post(
-                    self.vctrl_addr + '/machines/create', data=body)
+                    self.vctrl_addr + '/machines/create', data={'machine':'vent1'})
             except:
                 self.logger.error(
                     'Main: Investigator: error on vent create request.')
@@ -222,7 +222,7 @@ class Investigator_Response(Investigator):
         '''
         for machine in self.vent_machines:
             try:
-                url = 'http://' + self.vent_addr + '/commands/deploy/' + machine
+                url = 'http://' + self.vctrl_addr + '/commands/deploy/' + machine
                 resp = requests.post(url)
             except:
                 self.logger.error(
