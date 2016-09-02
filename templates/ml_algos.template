@@ -3,6 +3,7 @@ name = machine learning algorithms for device and port identification
 
 [service]
 schedule = {"all":"hourly"}
+mime_types = text/csv
 ext_types = csv
 
 [dev_classifier]
