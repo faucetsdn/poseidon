@@ -3,6 +3,8 @@ name = Feature generation from PCAPs
 
 [service]
 schedule = {"all":"hourly"}
+mime_types = application/vnd.tcpdump.pcap
+ext_types = pcap
 
 [flowparser]
 Env = ["POSEIDON_HOST=0.0.0.0"]
