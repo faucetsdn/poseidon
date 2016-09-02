@@ -3,6 +3,8 @@ name = machine learning algorithms for device identification and anomaly detecti
 
 [service]
 schedule = {"all":"hourly"}
+mime_types = application/vnd.tcpdump.pcap
+ext_types = pcap
 
 [deep_classifier]
 Env = ["POSEIDON_HOST=0.0.0.0"]
