@@ -151,7 +151,7 @@ func main() {
     defer conn.Close()
 
     file_name := os.Args[1]
-    output_file := file_name + ".out"
+    output_file := file_name + ".csv"
     cmd := exec.Command("./flowtbag", file_name)
     out_fd, err := os.OpenFile(output_file, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, 0777)
     cmd.Stdout = out_fd
