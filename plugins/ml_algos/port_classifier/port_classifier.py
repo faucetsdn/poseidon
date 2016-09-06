@@ -49,6 +49,7 @@ module_logger = logging.getLogger(__name__)
 
 fd = None
 path_name = None
+MONGO_PORT = '27017'
 
 
 def get_path():
@@ -144,11 +145,10 @@ def save_model(model):
                  cPickle.HIGHEST_PROTOCOL)
 
     try:
-        model_pickel = cPickle.dumps(model, cPickle.HIGHEST_PROTOCOL)
-        model_str = bson.BSON.encode(model_pickel)
-        get_str = 'http://' + os.environ['POSEIDON_HOST'] + \
-            '/v1/storage/add_one_doc/poseidon_records/models/' + model_str
-        resp = requests.get(get_str)
+        model_str = cPickle.dumps(model, cPickle.HIGHEST_PROTOCOL)
+        uri = 'http://' + os.environ['POSEIDON_HOST'] + MONGO_PORT + \
+            '/v1/storage/add_one_doc/poseidon_records/models/'
+        resp = requests.post(uri, data=json.dumps(model_str))
     except:
         module_logger.debug('connection to storage-interface failed')
 
@@ -209,7 +209,6 @@ def port_classifier(channel, file):
 
 
 def run_plugin(path, host):  # pragma: no cover
-    host = 'poseidon-rabbit'  # TODO!! remove for production
     exchange = 'topic-poseidon-internal'
     queue_name = 'features_flowparser'
     binding_key = 'poseidon.flowparser'
@@ -218,11 +217,7 @@ def run_plugin(path, host):  # pragma: no cover
     channel, connection = rabbit_init(host=host,
                                       exchange=exchange,
                                       queue_name=queue_name)
-    channel.basic_consume(file_receive,
-                          queue=queue_name,
-                          no_ack=True,
-                          consumer_tag=binding_key)
-    channel.start_consuming()
+    port_classifier(channel, path)
 
 
 if __name__ == '__main__':
