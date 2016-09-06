@@ -7,9 +7,9 @@ RUN apk add --update \
     && rm -rf /var/cache/apk/*
 
 ADD . /nfilter
-RUN pip install -r requirements.txt
 RUN pip install -r /nfilter/requirements.txt
 WORKDIR /nfilter/nfilter
+RUN pip install -r requirements.txt
 
 EXPOSE 8080
 
