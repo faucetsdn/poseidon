@@ -43,6 +43,11 @@ def test_JsonMixin():
                    'content-type': 'application/json'})
 
     # Parse the JSON response object
-    mixin = JsonMixin()
-    parsed = mixin.parse_json(res)
+    parsed = JsonMixin.parse_json(res)
     assert parsed
+
+    # Verify that blank text fields are parsed properly.
+    obj = lambda : None # Just a proxy object for attaching text field.
+    obj.text = ""
+    parsed = JsonMixin.parse_json(obj)
+    assert parsed == {}
