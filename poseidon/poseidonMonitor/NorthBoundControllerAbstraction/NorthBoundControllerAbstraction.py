@@ -20,6 +20,7 @@ Created on 17 May 2016
 import json
 import logging
 
+import proxy
 import requests
 
 from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
