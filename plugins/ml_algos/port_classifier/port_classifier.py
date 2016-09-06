@@ -50,6 +50,8 @@ module_logger = logging.getLogger(__name__)
 fd = None
 path_name = None
 MONGO_PORT = '27017'
+DATABASE = 'poseidon_records'
+COLLECTION = 'models'
 
 
 def get_path():
@@ -84,7 +86,7 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
     while wait:
         try:
             connection = pika.BlockingConnection(
-                pika.ConnectionParameters(host=host))
+                              pika.ConnectionParameters(host=host))
             channel = connection.channel()
             channel.exchange_declare(exchange=exchange, type='topic')
             result = channel.queue_declare(queue=queue_name, exclusive=True)
@@ -146,9 +148,13 @@ def save_model(model):
 
     try:
         model_str = cPickle.dumps(model, cPickle.HIGHEST_PROTOCOL)
+        database = 'poseidon_records'
+        collection = 'models'
         uri = 'http://' + os.environ['POSEIDON_HOST'] + MONGO_PORT + \
-            '/v1/storage/add_one_doc/poseidon_records/models/'
+            '/v1/storage/add_one_doc/{database}/{collection}'.format(database=DATABASE, collection=COLLECTION)
         resp = requests.post(uri, data=json.dumps(model_str))
+        if resp.status != falcon.HTTP_OK:
+            module_logger.debug(str(resp.status))
     except:
         module_logger.debug('connection to storage-interface failed')
 

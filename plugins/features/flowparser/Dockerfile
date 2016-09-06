@@ -25,4 +25,4 @@ RUN cp flowtbag /go/src/flowparser/
 # set workdir to flowparser
 WORKDIR /go/src/flowparser
 
-CMD ["go", "run", "flowparser.go", "testpcap.cap"]
+ENTRYPOINT ["go", "run", "flowparser.go"]
