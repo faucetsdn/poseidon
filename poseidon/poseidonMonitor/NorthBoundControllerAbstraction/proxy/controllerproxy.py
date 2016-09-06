@@ -36,3 +36,10 @@ class ControllerProxy(object):
     def get_resource(self, resource, *args, **kwargs):
         uri = urljoin(self.base_uri, resource)
         return self.session.get(uri, *args, **kwargs)
+
+    def post_resource(self, resource, *args, **kwargs):
+        uri = urljoin(self.base_uri, resource)
+        return self.session.post(uri, *args, **kwargs)
+
+    def request_resource(self, *args, **kwargs):
+        return self.session.request(*args, **kwargs)
