@@ -22,8 +22,8 @@ import os
 import urllib2
 
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
-DOCKER_URL = 'file:///poseidonWork/templates/config.template'
-CI_TESTING = '/poseidonWork/templates/config.template'
+DOCKER_URL = 'file:///poseidonWork/config/poseidon.config'
+CI_TESTING = '/poseidonWork/config/poseidon.config'
 
 
 module_logger = logging.getLogger(__name__)

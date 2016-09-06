@@ -20,7 +20,6 @@ Created on 23 June 2016
 @author: lanhamt
 """
 import math
-
 import pytest
 from pcap_stats import analyze_pcap
 from pcap_stats import network_machines
