@@ -141,7 +141,7 @@ services:
     image: ml-port-class
     container_name: ml-port-class
     build:
-      context: ./plugins/algorithms/port_classifier/
+      context: ./plugins/ml_algos/port_classifier/
       dockerfile: Dockerfile
     networks:
       app_net:
