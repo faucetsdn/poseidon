@@ -49,6 +49,9 @@ module_logger = logging.getLogger(__name__)
 
 fd = None
 path_name = None
+MONGO_PORT = '27017'
+DATABASE = 'poseidon_records'
+COLLECTION = 'models'
 
 
 def get_path():
@@ -83,7 +86,7 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
     while wait:
         try:
             connection = pika.BlockingConnection(
-                pika.ConnectionParameters(host=host))
+                              pika.ConnectionParameters(host=host))
             channel = connection.channel()
             channel.exchange_declare(exchange=exchange, type='topic')
             result = channel.queue_declare(queue=queue_name, exclusive=True)
@@ -144,11 +147,15 @@ def save_model(model):
                  cPickle.HIGHEST_PROTOCOL)
 
     try:
-        model_pickel = cPickle.dumps(model, cPickle.HIGHEST_PROTOCOL)
-        model_str = bson.BSON.encode(model_pickel)
-        get_str = 'http://' + os.environ['POSEIDON_HOST'] + \
-            '/v1/storage/add_one_doc/poseidon_records/models/' + model_str
-        resp = requests.get(get_str)
+        model_str = cPickle.dumps(model, cPickle.HIGHEST_PROTOCOL)
+        database = 'poseidon_records'
+        collection = 'models'
+        uri = 'http://' + os.environ['POSEIDON_HOST'] + ':' + MONGO_PORT + \
+            '/v1/storage/add_one_doc/{database}/{collection}'.format(database=DATABASE,
+                                                                     collection=COLLECTION)
+        resp = requests.post(uri, data=json.dumps(model_str))
+        if resp.status != falcon.HTTP_OK:
+            module_logger.debug(str(resp.status))
     except:
         module_logger.debug('connection to storage-interface failed')
 
@@ -209,7 +216,6 @@ def port_classifier(channel, file):
 
 
 def run_plugin(path, host):  # pragma: no cover
-    host = 'poseidon-rabbit'  # TODO!! remove for production
     exchange = 'topic-poseidon-internal'
     queue_name = 'features_flowparser'
     binding_key = 'poseidon.flowparser'
@@ -218,11 +224,7 @@ def run_plugin(path, host):  # pragma: no cover
     channel, connection = rabbit_init(host=host,
                                       exchange=exchange,
                                       queue_name=queue_name)
-    channel.basic_consume(file_receive,
-                          queue=queue_name,
-                          no_ack=True,
-                          consumer_tag=binding_key)
-    channel.start_consuming()
+    port_classifier(channel, path)
 
 
 if __name__ == '__main__':
