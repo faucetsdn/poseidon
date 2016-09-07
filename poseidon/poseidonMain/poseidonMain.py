@@ -142,7 +142,7 @@ class PoseidonMain(object):
             value = item
             return endpoint, value
 
-        endpoing, value = 'Error', 'Error'
+        endpoint, value = 'Error', 'Error'
         return endpoint, value
 
     def make_rabbit_connection(self, host, exchange, queue_name, keys):  # pragma: no cover
