@@ -39,12 +39,23 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         super(BcfProxy, self).__init__(
             base_uri, login_resource, auth, *args, **kwargs)
 
+    @staticmethod
+    def reduce_endpoints(data):
+        ret_list = list()
+        for d in data:
+            ipa = d.get('ip-address')
+            if ipa is not None and ipa[0] is not None:
+                ipa[0]['name'] = d.get('name')
+                ipa[0].pop('ip-state', None)
+                ret_list.append(ipa[0])
+        return ret_list
+
     def get_endpoints(self, endpoints_resource='data/controller/applications/bcf/info/endpoint-manager/endpoint'):
         """
         GET list of endpoints from the controller.
         """
         r = self.get_resource(endpoints_resource)
-        retval = JsonMixin.parse_json(r)
+        retval = self.reduce_endpoints(JsonMixin.parse_json(r))
         sout = 'get_endpoints return:{0}'.format(retval)
         module_logger.debug(sout)
         return retval
@@ -81,6 +92,8 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
     def get_span_fabric(self, span_name=None, span_fabric_resource='data/controller/applications/bcf/span-fabric'):
         """
         GET list of span fabric configuration.
+
+        use this to task mirror_traffic
         """
         if span_name:
             span_fabric_resource = ''.join(
@@ -96,6 +109,12 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         PUT to jail (i.e. isolate) an endpoint from the network.
 
         Jail with shutdown=True, unjail by shutdown=False.
+
+        if the endpoint_name is not currently named, you must supply the mac addr
+        and make up an endpoint name
+
+        if there is an endpoint name, only need endpoint_name
+
         """
         subs = (tenant, segment)
         resource = shutdown_resource % subs
@@ -111,6 +130,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
 
     def mirror_traffic(self, seq, mirror=True, span_name='vent', fabric_span_endpoint="data/controller/applications/bcf/span-fabric[name=\"%s\"]", **target_kwargs):
         """
+
         If mirror=True, PUT to apply the filter rules specified by target_kwargs to a specified span fabric (vent by default). For example, bcf.mirror_traffic(seq=1, tenant="TENANT", segment="SEGMENT") will apply a rule with seq=1 filtering all traffic matching tenant TENANT and segment SEGMENT. If a rule with seq=1 already exists, it will be overwritten.
 
         If mirror=False, PUT to delete the rule with specified seq. If no such rule exists, this call does nothing.
