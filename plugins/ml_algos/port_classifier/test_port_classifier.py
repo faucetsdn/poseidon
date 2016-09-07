@@ -50,6 +50,8 @@ def test_save_model():
     model = Test()
     save_model(model)
     assert os.path.isfile('port_class_log_reg_model.pickle')
+    os.environ['POSEIDON_HOST'] = 'httpbin.org/post'
+    save_model(model)
 
 
 @pytest.mark.skip(reason='requires rabbitmq broker, integration test')

@@ -150,8 +150,9 @@ def save_model(model):
         model_str = cPickle.dumps(model, cPickle.HIGHEST_PROTOCOL)
         database = 'poseidon_records'
         collection = 'models'
-        uri = 'http://' + os.environ['POSEIDON_HOST'] + MONGO_PORT + \
-            '/v1/storage/add_one_doc/{database}/{collection}'.format(database=DATABASE, collection=COLLECTION)
+        uri = 'http://' + os.environ['POSEIDON_HOST'] + ':' + MONGO_PORT + \
+            '/v1/storage/add_one_doc/{database}/{collection}'.format(database=DATABASE,
+                                                                     collection=COLLECTION)
         resp = requests.post(uri, data=json.dumps(model_str))
         if resp.status != falcon.HTTP_OK:
             module_logger.debug(str(resp.status))
