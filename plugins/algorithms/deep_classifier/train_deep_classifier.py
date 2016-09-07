@@ -27,7 +27,6 @@ rabbitmq:
 """
 import time
 import os
-import ast
 import json
 import subprocess
 import cPickle
