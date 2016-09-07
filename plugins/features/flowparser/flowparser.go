@@ -168,7 +168,4 @@ func main() {
     }
     sendLine("EOF -- FLOWPARSER FINISHED with file " + file_name, ch)
     failOnError(scanner.Err(), "failed to read file")
-
-    err = exec.Command("rm", "-rf", output_file).Run()
-    failOnError(err, "failed to delete flowtbag output file")
 }
