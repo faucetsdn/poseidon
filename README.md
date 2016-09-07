@@ -31,9 +31,9 @@ run with `sudo ./startup.sh`.
 - Docker
 - make
 - docker-compose
-- /data/db directory for mongodb database
+- `/data/db` directory for mongodb database; you can use a different directory by updating the docker-compose.yaml - under the `storage` section, update `volumes` to `/path/to/your/dir:/data/db` with the path to the directory to store mongodb records.
 - The 1.8 release of docker-compose can be installed with `make compose-install`
-- Update the `ip` of the `[database]` section of `config/poseidon.config` to the ip of the host machine (or
+- Update the `ip` of the `[database]` section of `config/poseidon.config` to the external ip of the host machine running mongodb (or
 the `docker-machine ip` if using boot2docker or similar). NOTE: without this configuration, poseidon will fail to build.
 
 # Usage Examples
