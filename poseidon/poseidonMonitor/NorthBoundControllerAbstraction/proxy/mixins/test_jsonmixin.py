@@ -24,12 +24,12 @@ import os
 
 import pytest
 from httmock import response
-from jsonmixin import JsonMixin
+
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.mixins.jsonmixin import JsonMixin
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 
 module_logger = logging.getLogger(__name__)
-    
 
 
 def test_JsonMixin():
@@ -43,6 +43,11 @@ def test_JsonMixin():
                    'content-type': 'application/json'})
 
     # Parse the JSON response object
-    mixin = JsonMixin()
-    parsed = mixin.parse_json(res)
+    parsed = JsonMixin.parse_json(res)
     assert parsed
+
+    # Verify that blank text fields are parsed properly.
+    obj = lambda : None # Just a proxy object for attaching text field.
+    obj.text = ""
+    parsed = JsonMixin.parse_json(obj)
+    assert parsed == {}

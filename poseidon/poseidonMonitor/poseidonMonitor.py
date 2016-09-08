@@ -28,12 +28,12 @@ from subprocess import call
 from subprocess import check_output
 
 import falcon
-from Action.Action import action_interface
 from falcon_cors import CORS
-from NodeHistory.NodeHistory import nodehistory_interface
-from NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import controller_interface
 
-from Config.Config import config_interface
+from poseidon.poseidonMonitor.Action.Action import action_interface
+from poseidon.poseidonMonitor.Config.Config import config_interface
+from poseidon.poseidonMonitor.NodeHistory.NodeHistory import nodehistory_interface
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import controller_interface
 
 module_logger = logging.getLogger(__name__)
 
@@ -88,12 +88,13 @@ class Monitor(object):
         self.init_logging()
 
     def init_logging(self):
+        ''' setup logging  '''
         config = None
 
-        path = getenv('loggingFile', None)
+        path = getenv('loggingFile')
 
         if path is None:
-            path = self.mod_configuration.get('loggingFile', None)
+            path = self.mod_configuration.get('loggingFile')
 
         if path is not None:
             with open(path, 'rt') as f:
@@ -103,23 +104,27 @@ class Monitor(object):
             logging.basicConfig(level=logging.DEBUG)
 
     def configSelf(self):
+        ''' get configuraiton for this module '''
         conf = self.Config.get_endpoint('Handle_SectionConfig')
         for item in conf.direct_get(self.mod_name):
             k, v = item
             self.mod_configuration[k] = v
-        ostr = '%s:config:%s' % (self.mod_name, self.mod_configuration)
+        ostr = '{0}:config:{1}'.format(self.mod_name, self.mod_configuration)
         self.logger.info(ostr)
 
     def add_endpoint(self, name, handler):
+        ''' add a function by name  '''
         a = handler()
         a.owner = self
         self.actions[name] = a
 
     def del_endpoint(self, name):
+        ''' remove a function by name or None  '''
         if name in self.actions:
             self.actions.pop(name)
 
     def get_endpoint(self, name):
+        ''' get a function by name or None  '''
         if name in self.actions:
             return self.actions.get(name)
         else:
@@ -127,6 +132,7 @@ class Monitor(object):
 
 
 def get_allowed():
+    ''' setup who is allowed to view rest page '''
     rest_url = 'localhost:4444'
     if 'ALLOW_ORIGIN' in environ:
         allow_origin = environ['ALLOW_ORIGIN']
@@ -201,8 +207,8 @@ class VersionResource:
 
 class PCAPResource:
     """Serve up parsed PCAP files"""
-
-    def on_get(self, req, resp, pcap_file, output_type):
+    @staticmethod
+    def on_get(req, resp, pcap_file, output_type):
         resp.content_type = 'text/text'
         try:
             if output_type == 'pcap' and pcap_file.split('.')[1] == 'pcap':

@@ -20,8 +20,9 @@ Created on 28 June 2016
 @author: dgrossman, lanhamt
 """
 import pytest
-from periodically import doSleep
-from periodically import periodically
+
+from poseidon.periodically.periodically import doSleep
+from poseidon.periodically.periodically import periodically
 
 
 def test_sleepbad():

@@ -53,9 +53,9 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
             result = channel.queue_declare(queue=queue_name, exclusive=True)
             wait = False
             module_logger.info('connected to rabbitmq...')
-            print "connected to rabbitmq..."
+            print 'connected to rabbitmq...'
         except Exception, e:
-            print "waiting for connection to rabbitmq..."
+            print 'waiting for connection to rabbitmq...'
             print str(e)
             module_logger.info(str(e))
             module_logger.info('waiting for connection to rabbitmq...')
@@ -64,7 +64,7 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
 
     binding_keys = sys.argv[1:]
     if not binding_keys:
-        ostr = 'Usage: %s [binding_key]...' % (sys.argv[0])
+        ostr = 'Usage: {0} [binding_key]...'.format(sys.argv[0])
         module_logger.error(ostr)
         sys.exit(1)
 
@@ -82,7 +82,7 @@ def callback(ch, method, properties, body):
     global channel
     message = 'ml results'
     routing_key = 'poseidon.algos.dev_class'
-    channel.basic_publish(exchange='topic_poseidon_internal',
+    channel.basic_publish(exchange='topic-poseidon-internal',
                           routing_key=routing_key,
                           body=message)
 

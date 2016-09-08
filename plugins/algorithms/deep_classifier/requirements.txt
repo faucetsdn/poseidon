@@ -1,7 +1,0 @@
-cPickle
-binascii
-numpy
-json
-ipaddress
-blocks
-theano

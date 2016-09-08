@@ -68,8 +68,11 @@ target/
 .DS_Store
 
 # pcap files
-*.cap
-*.pcap
+**/*.cap
+**/*.pcap
+
+# pickled models
+**/*.pickle
 
 #other crap
 **/.ropeproject
@@ -78,3 +81,4 @@ checkscript.sh
 #flowparser
 plugins/features/flowparser/flowparser
 plugins/features/flowparser/src/*
+

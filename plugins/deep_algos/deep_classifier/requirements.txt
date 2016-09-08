@@ -1,0 +1,5 @@
+numpy
+ipaddress
+theano
+picklable_itertools
+h5py

@@ -1,17 +1,20 @@
-from docker import Client
-
 import ast
 import json
-import redis
 import uuid
+
+import redis
 import web
+from docker import Client
+
 
 class CreateR:
     """
     This endpoint is for creating a new filter
     """
-    def POST(self):
-        web.header("Content-Type","application/json")
+
+    @staticmethod
+    def POST():
+        web.header('Content-Type', 'application/json')
 
         # verify payload is in the correct format
         data = web.data()
@@ -22,7 +25,7 @@ class CreateR:
                 payload = ast.literal_eval(json.loads(data))
         except:
             # !! TODO parse out url parms...
-            return "malformed json body"
+            return 'malformed json body'
 
         # payload should have the following fields:
         # - id
@@ -31,31 +34,32 @@ class CreateR:
         # - filter
         # should spin up a tcpdump container that writes out pcap files based on the filter
         # needs to be attached to the nic specified
-        # should keep track of container id, container name, and id of filter and filter + whatever else is in payload in redis
+        # should keep track of container id, container name, and id of filter
+        # and filter + whatever else is in payload in redis
 
         # verify payload has necessary information
-        if "nic" not in payload:
-            return "payload missing nic"
-        if "id" not in payload:
-            return "payload missing id"
-        if "interval" not in payload:
-            return "payload missing interval"
-        if "filter" not in payload:
-            return "payload missing filter"
+        if 'nic' not in payload:
+            return 'payload missing nic'
+        if 'id' not in payload:
+            return 'payload missing id'
+        if 'interval' not in payload:
+            return 'payload missing interval'
+        if 'filter' not in payload:
+            return 'payload missing filter'
 
         # connect to redis
         r = None
         try:
             r = redis.StrictRedis(host='redis', port=6379, db=0)
         except:
-            return "unable to connect to redis"
+            return 'unable to connect to redis'
 
         # connect to docker
         c = None
         try:
             c = Client(base_url='unix://var/run/docker.sock')
         except:
-            return "unable to connect to docker"
+            return 'unable to connect to docker'
 
         # store payload in redis
         if r:
@@ -64,10 +68,12 @@ class CreateR:
 
         # spin up container with payload specifications
         if c:
-            network_config = c.create_host_config(network_mode='host', binds=['/files:/files:rw'])
+            network_config = c.create_host_config(
+                network_mode='host', binds=['/files:/files:rw'])
             container = c.create_container(image='collectors/passive-nfilter/nprocessor',
-                                           command="/tmp/run.sh "+payload['nic']+" "+payload['interval']+" "+payload['id']+" "+payload['filter'],
+                                           command='/tmp/run.sh ' + payload['nic'] + ' ' + payload[
+                                               'interval'] + ' ' + payload['id'] + ' ' + payload['filter'],
                                            host_config=network_config)
             response = c.start(container=container.get('Id'))
 
-        return "successfully created and started filter "+str(payload['id'])
+        return 'successfully created and started filter ' + str(payload['id'])

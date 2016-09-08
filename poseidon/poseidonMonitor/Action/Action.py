@@ -13,10 +13,10 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-"""
+'''
 Created on 17 May 2016
 @author: dgrossman
-"""
+'''
 import logging
 
 from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
@@ -27,26 +27,28 @@ module_logger = logging.getLogger(__name__)
 
 
 class Action(Monitor_Action_Base):
-    """Poseidon Action Rest Interface"""
+    '''Poseidon Action Rest Interface'''
 
     def __init__(self):
         super(Action, self).__init__()
+        self.logger = module_logger
         self.mod_name = self.__class__.__name__
         self.config_section_name = self.mod_name
-        self.logger = module_logger
 
 
 class Handle_Default(Monitor_Helper_Base):
 
     def __init__(self):
         super(Handle_Default, self).__init__()
+        self.logger = module_logger
         self.mod_name = self.__class__.__name__
 
     def on_get(self, req, resp, resource):
         resp.content_type = 'text/text'
         try:
-            resp.body = self.mod_name + ' found: %s' % (resource)
+            resp.body = self.mod_name + ' found: {0}'.format(resource)
         except:  # pragma: no cover
+            self.logger.error('failed')
             resp.body = 'failed'
 
 

@@ -25,9 +25,9 @@ import os
 
 import pytest
 
-from Config import CI_TESTING
-from Config import config_interface
-from Config import DOCKER_URL
+from poseidon.poseidonMain.Config.Config import CI_TESTING
+from poseidon.poseidonMain.Config.Config import config_interface
+from poseidon.poseidonMain.Config.Config import DOCKER_URL
 
 
 module_logger = logging.getLogger(__name__)

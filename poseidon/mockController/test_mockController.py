@@ -19,11 +19,10 @@ test module for mock controller
 Created on 14 July 2016
 @author: lanhamt
 """
-
-import pytest
 import falcon
-from mockController import MockController
+import pytest
 
+from poseidon.mockController.mockController import MockController
 
 application = falcon.API()
 application.add_route('/v1/mock_controller/poll', MockController())
@@ -43,4 +42,5 @@ def test_controller(client):
     resp = client.get('/v1/mock_controller/poll')
     assert resp.status == falcon.HTTP_OK
     num = int(resp.body)
-    assert num >= 1 and num <= 10
+    assert num >= 1
+    assert num <= 10

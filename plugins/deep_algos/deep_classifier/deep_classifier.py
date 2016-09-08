@@ -23,11 +23,11 @@ packets based on hex headers.
 rabbitmq:
     host:       poseidon-rabbit
     exchange:   topic-poseidon-internal
-    queue:      
+    queue:
 """
 import logging
-import time
 import sys
+import time
 
 
 module_logger = logging.getLogger(__name__)
@@ -50,9 +50,9 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
             result = channel.queue_declare(queue=queue_name, exclusive=True)
             wait = False
             module_logger.info('connected to rabbitmq...')
-            print "connected to rabbitmq..."
+            print 'connected to rabbitmq...'
         except Exception, e:
-            print "waiting for connection to rabbitmq..."
+            print 'waiting for connection to rabbitmq...'
             print str(e)
             module_logger.info(str(e))
             module_logger.info('waiting for connection to rabbitmq...')
@@ -61,7 +61,7 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
 
     binding_keys = sys.argv[1:]
     if not binding_keys:
-        ostr = 'Usage: %s [binding_key]...' % (sys.argv[0])
+        ostr = 'Usage: {0} [binding_key]...'.format(sys.argv[0])
         module_logger.error(ostr)
         sys.exit(1)
 
@@ -74,10 +74,24 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
     return channel, connection
 
 
+def callback():
+    message = 'MACHINE LEARNING RESULTS'
+    routing_key = 'poseidon.algos.port_class'
+    channel.basic_publish(exchange='topic-poseidon-internal',
+                          routing_key=routing_key,
+                          body=message)
+
+
 if __name__ == '__main__':
     host = 'poseidon-rabbit'
     exchange = 'topic-poseidon-internal'
-    queue_name = 'NAME'  # fix this
+    queue_name = 'NAME'  # TODO!! fix this
     channel, connection = rabbit_init(host=host,
                                       exchange=exchange,
                                       queue_name=queue_name)
+    binding_key = 'KEY'  # TODO!!
+    channel.basic_consume(callback,
+                          queue=queue_name,
+                          no_ack=True,
+                          consumer_tag=binding_key)
+    channel.start_consuming()

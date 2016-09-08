@@ -52,7 +52,7 @@ def connections():
             host='poseidon-rabbit'))
         channel = connection.channel()
 
-        channel.exchange_declare(exchange='topic_poseidon_internal',
+        channel.exchange_declare(exchange='topic-poseidon-internal',
                                  type='topic')
     except:
         module_logger.error('unable to connect to rabbitmq, quitting.')
@@ -200,10 +200,10 @@ def run_tool(path):
         else:
             routing_key = 'poseidon.tcpdump_parser'
         if channel is not None:
-            channel.basic_publish(exchange='topic_poseidon_internal',
+            channel.basic_publish(exchange='topic-poseidon-internal',
                                   routing_key=routing_key,
                                   body=message)
-        ostr = ' [x] Sent %r:%r' % (routing_key, message)
+        ostr = ' [x] Sent {0}:{1}'.format(routing_key, message)
         module_logger.info(ostr)
     try:
         connection.close()

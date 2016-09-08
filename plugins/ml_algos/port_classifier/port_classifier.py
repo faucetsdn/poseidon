@@ -28,22 +28,51 @@ rabbitmq:
 
     keys(out):  poseidon.algos.port_class
 """
+import cPickle
 import logging
+import os
+import sys
+import time
 
+import bson
 import numpy as np
 import pandas as pd
+import pika
+import requests
 from sklearn import linear_model
 from sklearn import preprocessing
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import classification_report
-import time
-import pika
-import sys
 
 
 module_logger = logging.getLogger(__name__)
 
 fd = None
+path_name = None
+MONGO_PORT = '27017'
+DATABASE = 'poseidon_records'
+COLLECTION = 'models'
+
+
+def get_path():
+    try:
+        path_name = sys.argv[1]
+    except:
+        module_logger.debug('no argv[1] for pathname')
+    return None
+
+
+def get_host():
+    """
+    Checks for poseidon host env
+    variable and returns it if found,
+    otherwise logs error.
+    """
+    if 'POSEIDON_HOST' in os.environ:
+        return os.environ['POSEIDON_HOST']
+    else:
+        module_logger.debug('POSEIDON_HOST environment variable not found')
+        return None
 
 
 def rabbit_init(host, exchange, queue_name):  # pragma: no cover
@@ -57,15 +86,15 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
     while wait:
         try:
             connection = pika.BlockingConnection(
-                pika.ConnectionParameters(host=host))
+                              pika.ConnectionParameters(host=host))
             channel = connection.channel()
             channel.exchange_declare(exchange=exchange, type='topic')
             result = channel.queue_declare(queue=queue_name, exclusive=True)
             wait = False
             module_logger.info('connected to rabbitmq...')
-            print "connected to rabbitmq..."
+            print 'connected to rabbitmq...'
         except Exception, e:
-            print "waiting for connection to rabbitmq..."
+            print 'waiting for connection to rabbitmq...'
             print str(e)
             module_logger.info(str(e))
             module_logger.info('waiting for connection to rabbitmq...')
@@ -74,7 +103,7 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
 
     binding_keys = sys.argv[1:]
     if not binding_keys:
-        ostr = 'Usage: %s [binding_key]...' % (sys.argv[0])
+        ostr = 'Usage: {0} [binding_key]...'.format(sys.argv[0])
         module_logger.error(ostr)
         sys.exit(1)
 
@@ -88,13 +117,47 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
 
 
 def file_receive(ch, method, properties, body):
+    """
+    Callback function for rabbitmq. Takes csv
+    strings as messages to be appended to file
+    for use in logistic regression model generation.
+    If last line is read then closes file and starts
+    model generation.
+    """
     if 'EOF -- FLOWPARSER FINISHED' in body:
         ch.stop_consuming()
         fd.close()
-        port_classifier(ch, 'temp_file')
+        try:
+            port_classifier(ch, 'temp_file')
+        except Exception, e:
+            module_logger.debug(str(e))
     else:
         fd.write(body + '\n')
-        print ' [*] Received %s', body
+        print ' [*] Received {0}'.format(body)
+
+
+def save_model(model):
+    """
+    Takes a model class to be saved and
+    serializes it, saves to a file, and
+    then adds to db.
+    """
+    cPickle.dump(model,
+                 open('port_class_log_reg_model.pickle', 'wb'),
+                 cPickle.HIGHEST_PROTOCOL)
+
+    try:
+        model_str = cPickle.dumps(model, cPickle.HIGHEST_PROTOCOL)
+        database = 'poseidon_records'
+        collection = 'models'
+        uri = 'http://' + os.environ['POSEIDON_HOST'] + ':' + MONGO_PORT + \
+            '/v1/storage/add_one_doc/{database}/{collection}'.format(database=DATABASE,
+                                                                     collection=COLLECTION)
+        resp = requests.post(uri, data=json.dumps(model_str))
+        if resp.status != falcon.HTTP_OK:
+            module_logger.debug(str(resp.status))
+    except:
+        module_logger.debug('connection to storage-interface failed')
 
 
 def port_classifier(channel, file):
@@ -134,6 +197,8 @@ def port_classifier(channel, file):
     overall_accuracy = lgs.fit(X_train, y_train).score(X_test, y_test)
     module_logger.info(str(overall_accuracy))
 
+    save_model(lgs)
+
     # Classification Report for model
     result = lgs.predict(X_test)
     class_report = classification_report(y_test, result)
@@ -142,16 +207,15 @@ def port_classifier(channel, file):
 
     message = class_report
     routing_key = 'poseidon.algos.port_class'
-    channel.basic_publish(exchange='topic_poseidon_internal',
+    channel.basic_publish(exchange='topic-poseidon-internal',
                           routing_key=routing_key,
                           body=message)
 
-    ostr = ' [x] Sent %r:%r' % (routing_key, message)
+    ostr = ' [x] Sent {0}:{1}'.format(routing_key, message)
     module_logger.info(ostr)
 
 
-if __name__ == '__main__':
-    host = 'poseidon-rabbit'
+def run_plugin(path, host):  # pragma: no cover
     exchange = 'topic-poseidon-internal'
     queue_name = 'features_flowparser'
     binding_key = 'poseidon.flowparser'
@@ -160,8 +224,11 @@ if __name__ == '__main__':
     channel, connection = rabbit_init(host=host,
                                       exchange=exchange,
                                       queue_name=queue_name)
-    channel.basic_consume(file_receive,
-                          queue=queue_name,
-                          no_ack=True,
-                          consumer_tag=binding_key)
-    channel.start_consuming()
+    port_classifier(channel, path)
+
+
+if __name__ == '__main__':
+    path_name = get_path()
+    host = get_host()
+    if path_name and host:
+        run_plugin(path_name, host)
