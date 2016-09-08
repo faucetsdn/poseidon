@@ -57,7 +57,7 @@ def callback(ch, method, properties, body, q=None):
     if q is not None:
         q.put(body)
     else:
-        module_logger.error('posedionMain workQueu is None')
+        module_logger.error('posedionMain workQueue is None')
 
 
 class PoseidonMain(object):
@@ -126,12 +126,23 @@ class PoseidonMain(object):
             logging.basicConfig(level=logging.DEBUG)
 
     def make_type_val(self, item):
-        ''' search messages and act  '''
-        endpoint = item.get('endpoint')
-        value = item.get('value')
-        if endpoint == 'Main':
-            if value == 'shutdown':
-                self.shutdown = True
+        endpoint = None
+        value = None
+
+        if isinstance(item, types.DictionaryType):
+            ''' search messages and act  '''
+            endpoint = item.get('endpoint')
+            value = item.get('value')
+            if endpoint == 'Main':
+                if value == 'shutdown':
+                    self.shutdown = True
+            return endpoint, value
+        if isinstance(item, types.StringType):
+            endpoint = 'None'
+            value = item
+            return endpoint, value
+
+        endpoint, value = 'Error', 'Error'
         return endpoint, value
 
     def make_rabbit_connection(self, host, exchange, queue_name, keys):  # pragma: no cover
