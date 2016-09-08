@@ -58,7 +58,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         GET list of endpoints from the controller.
         '''
         r = self.get_resource(endpoints_resource)
-        retval = self.format_endpoints(JsonMixin.parse_json(r))
+        retval = JsonMixin.parse_json(r)
         sout = 'get_endpoints return:{0}'.format(retval)
         module_logger.debug(sout)
         return retval
@@ -114,7 +114,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             span_fabric_resource = ''.join(
                 [span_fabric_resource, '[name="%s"]' % span_name])
         r = self.get_resource(span_fabric_resource)
-        retval = self.format_span_fabric(BcfProxy.parse_json(r))
+        retval = BcfProxy.parse_json(r)
         sout = 'get_span_fabric return:{0}'.format(retval)
         module_logger.debug(sout)
         return retval

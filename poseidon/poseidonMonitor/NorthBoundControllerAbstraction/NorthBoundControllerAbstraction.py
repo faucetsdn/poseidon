@@ -100,7 +100,8 @@ class Handle_Periodic(Monitor_Helper_Base):
 
         try:
             current = self.bcf.get_endpoints()
-            self.retval['machines'] = current
+            parsed = self.bcf.format_endpoints(current)
+            self.retval['machines'] = parsed
             self.retval['resp'] = 'ok'
         except:
             self.logger.error(
