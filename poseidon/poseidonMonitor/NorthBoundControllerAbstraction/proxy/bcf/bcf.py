@@ -158,7 +158,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
 
         If mirror=False, PUT to delete the rule with specified seq.
         If no such rule exists, this call does nothing.
-         "src-ip-cidr": “X.A.0.33/32"
+        "src-ip-cidr": "X.A.0.33/32:"
 
         {
             "name": "vent",
