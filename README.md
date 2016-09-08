@@ -34,7 +34,7 @@ run with `sudo ./startup.sh`.
 - The 1.8 release of docker-compose can be installed with `make compose-install`
 - Update the `ip` of the `[database]` section of `config/poseidon.config` to the external ip of the host machine running mongodb (or
 the `docker-machine ip` if using boot2docker or similar). NOTE: without this configuration, poseidon will fail to build.
-- Update the `controller_uri` ip address, `contrller_user`, `controller_password` of the `[NorthBoundControllerAbstraction:Handle_Periodic` NOTE: without this configuration, poseidon will not be able to talk to the controller
+- Update the `controller_uri` ip address, `contrller_user`, `controller_password` of the `[NorthBoundControllerAbstraction:Handle_Periodic]` NOTE: without this configuration, poseidon will not be able to talk to the controller
 
 # Usage Examples
 
