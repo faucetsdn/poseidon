@@ -83,7 +83,11 @@ class Handle_Periodic(Monitor_Helper_Base):
             myauth = {}
             myauth['password'] = self.controller['PASS']
             myauth['user'] = self.controller['USER']
-            self.bcf = BcfProxy(self.controller['URI'], auth=myauth)
+            try:
+                self.bcf = BcfProxy(self.controller['URI'], auth=myauth)
+            except:
+                self.logger.error(
+                    'BcfProxy coult not connect to {0}'.format(self.controller['URI']))
         else:
             pass
 
