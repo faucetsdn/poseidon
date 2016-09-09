@@ -148,15 +148,14 @@ def save_model(model):
                  cPickle.HIGHEST_PROTOCOL)
 
     try:
-        model_str = cPickle.dumps(model, cPickle.HIGHEST_PROTOCOL)
-        database = 'poseidon_records'
-        collection = 'models'
+        model_str = cPickle.dumps(model, 0)  # uses lowest protocol for utf8 compliance when request is serialized
         uri = 'http://' + os.environ['POSEIDON_HOST'] + ':' + STORAGE_PORT + \
             '/v1/storage/add_one_doc/{database}/{collection}'.format(database=DATABASE,
                                                                      collection=COLLECTION)
-        resp = requests.post(uri, data=json.dumps(model_str))
-        if resp.status != falcon.HTTP_OK:
-            module_logger.debug(str(resp.status))
+        payload = {'model': model_str}
+        resp = requests.post(uri, data=json.dumps(payload))
+        if resp.status_code != 200:
+            module_logger.debug(str(resp.status_code))
     except:
         module_logger.debug('connection to storage-interface failed')
 
