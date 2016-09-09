@@ -75,6 +75,7 @@ class Handle_Periodic(Monitor_Helper_Base):
         self.first_time = True
         self.prev_endpoints = {}
         self.new_endpoints = {}
+        # @TODO init the rabbitmq
 
     def first_run(self):
         if self.configured:
@@ -109,7 +110,6 @@ class Handle_Periodic(Monitor_Helper_Base):
 
     def on_get(self, req, resp):
         """Handles Get requests"""
-        # TODO compare to previous switch state
         # TODO schedule something to occur for updated flows
 
         self.retval['service'] = self.owner.mod_name + ':' + self.mod_name
@@ -129,6 +129,9 @@ class Handle_Periodic(Monitor_Helper_Base):
             self.retval['controller'] = 'Could not establish connection to {0}.'.format(
                 self.controller['URI'])
 
+        # @TODO read item from queue (NONBLOCKING...)
+        # probably start another thread and read from a Queue
+
         machines = parsed
 
         if self.first_time:
@@ -146,6 +149,10 @@ class Handle_Periodic(Monitor_Helper_Base):
                     module_logger.critical(
                         '***** detected new address {0}'.format(machine))
                     self.new_endpoints[h] = machine
+
+        for hashed, machine in self.new_endpoints.iteritems():
+            # @TODO write findings to main
+            pass
 
         self.retval['machines'] = parsed
         self.retval['resp'] = 'ok'
