@@ -33,8 +33,8 @@ import logging
 import os
 import sys
 import time
+import json
 
-import bson
 import numpy as np
 import pandas as pd
 import pika
@@ -49,7 +49,7 @@ module_logger = logging.getLogger(__name__)
 
 fd = None
 path_name = None
-MONGO_PORT = '27017'
+STORAGE_PORT = '28000'
 DATABASE = 'poseidon_records'
 COLLECTION = 'models'
 
@@ -59,7 +59,7 @@ def get_path():
         path_name = sys.argv[1]
     except:
         module_logger.debug('no argv[1] for pathname')
-    return None
+    return path_name
 
 
 def get_host():
@@ -151,7 +151,7 @@ def save_model(model):
         model_str = cPickle.dumps(model, cPickle.HIGHEST_PROTOCOL)
         database = 'poseidon_records'
         collection = 'models'
-        uri = 'http://' + os.environ['POSEIDON_HOST'] + ':' + MONGO_PORT + \
+        uri = 'http://' + os.environ['POSEIDON_HOST'] + ':' + STORAGE_PORT + \
             '/v1/storage/add_one_doc/{database}/{collection}'.format(database=DATABASE,
                                                                      collection=COLLECTION)
         resp = requests.post(uri, data=json.dumps(model_str))
@@ -210,8 +210,7 @@ def port_classifier(channel, file):
     routing_key = 'poseidon.algos.port_class'
     channel.basic_publish(exchange='topic-poseidon-internal',
                           routing_key=routing_key,
-                          body=message,
-                          rabbit_rec=False)
+                          body=message)
 
     ostr = ' [x] Sent {0}:{1}'.format(routing_key, message)
     module_logger.info(ostr)
@@ -225,7 +224,8 @@ def run_plugin(path, host):  # pragma: no cover
 
     channel, connection = rabbit_init(host=host,
                                       exchange=exchange,
-                                      queue_name=queue_name)
+                                      queue_name=queue_name,
+                                      rabbit_rec=False)
     port_classifier(channel, path)
 
 
