@@ -24,6 +24,7 @@ from urlparse import urljoin
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.auth.cookie.cookieauth import CookieAuthControllerProxy
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.mixins.jsonmixin import JsonMixin
 
+logging.basicConfig(level=logging.DEBUG)
 module_logger = logging.getLogger(__name__)
 
 
@@ -100,8 +101,8 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
 
         if span is not None and span[0] is not None:
             s = span[0]
-            d['ports'] = d.get('filter')
-            d['name'] = d.get('name')
+            d['ports'] = s.get('filter')
+            d['name'] = s.get('name')
         return d
 
     def get_span_fabric(self, span_name=None, span_fabric_resource='data/controller/applications/bcf/span-fabric'):
@@ -143,8 +144,63 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         module_logger.debug(sout)
         return retval
 
-    def mirror_traffic(self, seq, mirror=True, span_name='vent', fabric_span_endpoint="data/controller/applications/bcf/span-fabric[name=\"%s\"]", **target_kwargs):
+    @staticmethod
+    def get_highest(span_fabric):
         '''
+        get the max number, should be all clear after it
+        '''
+        my_filter = span_fabric[0].get('filter')
+        if my_filter is not None:
+            my_max = -1
+            for f in my_filter:
+                seq = int(f.get('seq', -2))
+                if int(seq) > my_max:
+                    my_max = seq
+            return (my_max + 1)
+        else:
+            module_logger.error('get_highest could not find filter')
+            return None
+
+    def get_seq_by_ip(self, ip):
+        my_filter = self.get_span_fabric()[0].get('filter')
+        retval = []
+        if my_filter is not None:
+            for f in my_filter:
+                if 'match-specification' in f:
+                    dst = f[
+                        'match-specification'].get('dst-ip-cidr', 'broke')[:-3]
+                    src = f[
+                        'match-specification'].get('src-ip-cidr', 'broke')[:-3]
+                    if src == ip or dst == ip:
+                        retval.append(f.get('seq'))
+        return retval
+
+    def mirror_ip(self, ip):
+        my_start = self.get_highest(self.get_span_fabric())
+        if my_start is not None:
+            module_logger.debug('mirroring {0}'.format(my_start))
+            src = {'match-specification': {'src-ip-cidr': '{0}/32'.format(ip)}}
+            dst = {'match-specification': {'dst-ip-cidr': '{0}/32'.format(ip)}}
+            self.mirror_traffic(my_start, mirror=True, s_dict=src)
+            self.mirror_traffic(my_start + 1, mirror=True, s_dict=dst)
+        else:
+            module_logger.error('mirror_ip:None')
+
+    def unmirror_ip(self, ip):
+        kill_list = self.get_seq_by_ip(ip)
+        for kill in kill_list:
+            self.mirror_traffic(kill, mirror=False)
+
+    def mirror_traffic(self,
+                       seq,
+                       mirror=True,
+                       span_name='vent',
+                       s_dict=None,
+                       fabric_span_endpoint="data/controller/applications/bcf/span-fabric[name=\"%s\"]", **target_kwargs):
+        '''
+        mirror_traffic(q,mirror=True,s_dict = {'match-specificaiton' : {'dst-ip-cidr':'10.179.0.33/32'} ...
+        NOTE: s_dict or kwargs, not both..
+
 
         If mirror=True, PUT to apply the filter rules specified by target_kwargs
         to a specified span fabric (vent by default).  For example,
@@ -155,14 +211,60 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
 
         If mirror=False, PUT to delete the rule with specified seq.
         If no such rule exists, this call does nothing.
+        "src-ip-cidr": "X.A.0.33/32:"
+
+        {
+            "name": "vent",
+            "active": true,
+            "priority": 1,
+            "dest-interface-group": "ig1",
+            "filter": [
+                  {#sDict
+                            "match-specification": {
+                                        "dst-ip-cidr": "X.A.0.33/32"
+                                      },
+                            "seq": 7
+                          },
+                  {
+                            "match-specification": {
+                                        "src-ip-cidr": "X.A.0.33/32"
+                                      },
+                            "seq": 8
+                          },
+                  {
+                            "match-specification": {
+                                        "src-mac": "AA:AA:AA:AA:AA:AA"
+                                      },
+                            "seq": 9
+                          },
+                  {#kwargs way
+                            "seq": 10,
+                            "tenant": "port2",
+                            "segment": "prod"
+                          }
+                ]
+          }
+
         '''
         resource = fabric_span_endpoint % span_name
         uri = urljoin(self.base_uri, resource)
         data = self.get_span_fabric()[0]  # first element is vent span rule
+        module_logger.debug('{0}'.format(data))
+
         if mirror:
-            new_filter = target_kwargs
+            module_logger.error('mirrortrue')
+            new_filter = {}
+            if s_dict is not None:
+                module_logger.error('sdict')
+                # cant go having things with hyphens as variable names.. sooo..
+                new_filter.update(s_dict)
+            else:
+                module_logger.error('kwargs')
+                new_filter.update(target_kwargs)
             new_filter['seq'] = seq
-            data['filter'].append(target_kwargs)
+            # update?
+            print(type(data))
+            data['filter'].append(new_filter)
         else:  # mirror=False
             data['filter'] = [filter for filter in data[
                 'filter'] if filter['seq'] != seq]

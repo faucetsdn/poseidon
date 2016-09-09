@@ -48,6 +48,7 @@ from poseidon.poseidonMain.Scheduler.Scheduler import scheduler_interface
 
 # h = NullHandler()
 #  module_logger = logging.getLogger(__name__).addHandler(h)
+logging.basicConfig(level=logging.DEBUG)
 module_logger = logging.getLogger(__name__)
 
 
@@ -75,7 +76,6 @@ class PoseidonMain(object):
 
         self.logger = module_logger
         self.logger.debug('logger started')
-        logging.basicConfig(level=logging.DEBUG)
 
         self.m_qeueue = Queue.Queue()
         self.shutdown = False

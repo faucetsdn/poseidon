@@ -27,6 +27,7 @@ import sys
 import time
 import urllib2
 
+logging.basicConfig(level=logging.DEBUG)
 module_logger = logging.getLogger(__name__)
 
 
@@ -69,10 +70,12 @@ def periodically(wait, repeats, url):
             makeCall(url)
             next_call = next_call + wait
             doSleep(next_call - time.time())
+            module_logger.debug('Kick')
     return loops
 
 
 def main(argv):  # pragma: no cover
+    module_logger.debug('argv:{0}'.format(argv))
     try:
         url = os.environ['KICKURL']
     except KeyError:
