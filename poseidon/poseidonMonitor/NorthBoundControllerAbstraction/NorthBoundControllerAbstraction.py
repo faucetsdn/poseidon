@@ -17,6 +17,7 @@
 Created on 17 May 2016
 @author: dgrossman
 """
+import hashlib
 import json
 import logging
 
@@ -26,6 +27,7 @@ from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.bcf import BcfProxy
 
+logging.basicConfig()
 module_logger = logging.getLogger(__name__)
 
 
@@ -70,6 +72,9 @@ class Handle_Periodic(Monitor_Helper_Base):
         self.controller['USER'] = None
         self.controller['PASS'] = None
         self.bcf = None
+        self.first_time = True
+        self.prev_endpoints = {}
+        self.new_endpoints = {}
 
     def first_run(self):
         if self.configured:
@@ -91,9 +96,19 @@ class Handle_Periodic(Monitor_Helper_Base):
         else:
             pass
 
+    @staticmethod
+    def make_hash(item):
+        h = hashlib.new('ripemd160')
+        pre_h = str()
+        post_h = None
+        for word in ['tenant', 'mac', 'segment', 'name', 'ip-address']:
+            pre_h = pre_h + str(item.get(str(word), 'missing'))
+        h.update(pre_h)
+        post_h = h.hexdigest()
+        return post_h
+
     def on_get(self, req, resp):
-        """Haneles Get requests"""
-        # TODO MSG NBCA to get switch state
+        """Handles Get requests"""
         # TODO compare to previous switch state
         # TODO schedule something to occur for updated flows
 
@@ -102,16 +117,38 @@ class Handle_Periodic(Monitor_Helper_Base):
         self.retval['machines'] = None
         self.retval['resp'] = 'bad'
 
+        current = None
+        parsed = None
+
         try:
             current = self.bcf.get_endpoints()
             parsed = self.bcf.format_endpoints(current)
-            self.retval['machines'] = parsed
-            self.retval['resp'] = 'ok'
         except:
             self.logger.error(
                 'Could not establish connection to {0}.'.format(self.controller['URI']))
             self.retval['controller'] = 'Could not establish connection to {0}.'.format(
                 self.controller['URI'])
+
+        machines = parsed
+
+        if self.first_time:
+            self.first_time = False
+            # @TODO db call to see if really need to run things
+            for machine in machines:
+                h = self.make_hash(machine)
+                module_logger.critical(
+                    'adding  address to known systems {0}'.format(machine))
+                self.prev_endpoints[h] = machine
+        else:
+            for machine in machines:
+                h = self.make_hash(machine)
+                if h not in self.prev_endpoints:
+                    module_logger.critical(
+                        '***** detected new address {0}'.format(machine))
+                    self.new_endpoints[h] = machine
+
+        self.retval['machines'] = parsed
+        self.retval['resp'] = 'ok'
 
         # TODO change response to something reflecting success of traversal
 
