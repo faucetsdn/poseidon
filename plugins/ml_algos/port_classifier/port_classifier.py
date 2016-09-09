@@ -48,7 +48,6 @@ from sklearn.metrics import classification_report
 module_logger = logging.getLogger(__name__)
 
 fd = None
-path_name = None
 STORAGE_PORT = '28000'
 DATABASE = 'poseidon_records'
 COLLECTION = 'models'
@@ -59,6 +58,7 @@ def get_path():
         path_name = sys.argv[1]
     except:
         module_logger.debug('no argv[1] for pathname')
+        path_name = None
     return path_name
 
 
