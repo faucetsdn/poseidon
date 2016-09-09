@@ -120,6 +120,56 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         module_logger.debug(sout)
         return retval
 
+    def get_byip(self, ip_addr):
+        '''
+        return records about ip addresses from get_endpoints
+        to be used by shutdown_ip
+        '''
+        endpoints = self.get_endpoints()
+        match_list = []
+        for endpoint in endpoints:
+            record = None
+            name = endpoint.get('name')
+            if 'ip-address' in endpoint:
+                record = endpoint['ip-address']
+                for rec in record:
+                    if rec.get('ip-address') == ip_addr:
+                        rec['name'] = name
+                        match_list.append(rec)
+        return match_list
+
+    def get_bymac(self, mac_addr):
+        '''
+        return recrods about mac address from get_endpoints
+        '''
+        endpoints = self.get_endpoints()
+        match_list = []
+        for endpoint in endpoints:
+            if mac_addr == endpoint.get('mac'):
+                record = {}
+                for value in ['mac', 'name', 'tenant', 'segment']:
+                    record[value] = endpoint.get(value)
+                match_list.append(record)
+        return match_list
+
+    def shutdown_ip(self, ip_addr, shutdown=True, mac_addr=None):
+        if mac_addr is None:
+            records = self.get_byip(ip_addr)
+        else:
+            records = self.get_bymac(mac_addr)
+        shutdowns = []
+        for record in records:
+            tenant = record.get('tenant')
+            segment = record.get('segment')
+            mac = record.get('mac')
+            name = '{0}{1}{2}'.format(tenant, segment, mac)
+            if record.get('name') is not None:
+                name = record['name']
+            module_logger.debug('found: {0}'.format(record))
+            self.shutdown_endpoint(tenant, segment, name, mac, shutdown)
+            shutdowns.append(record)
+        return shutdowns
+
     def shutdown_endpoint(self, tenant, segment, endpoint_name, mac=None, shutdown=True, shutdown_resource="data/controller/applications/bcf/tenant[name=\"%s\"]/segment[name=\"%s\"]/endpoint"):
         '''
         PUT to jail (i.e. isolate) an endpoint from the network.
@@ -252,14 +302,11 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         module_logger.debug('{0}'.format(data))
 
         if mirror:
-            module_logger.error('mirrortrue')
             new_filter = {}
             if s_dict is not None:
-                module_logger.error('sdict')
                 # cant go having things with hyphens as variable names.. sooo..
                 new_filter.update(s_dict)
             else:
-                module_logger.error('kwargs')
                 new_filter.update(target_kwargs)
             new_filter['seq'] = seq
             # update?
