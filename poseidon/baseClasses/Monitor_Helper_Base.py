@@ -13,10 +13,10 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-"""
+'''
 Created on 14 July 2016
 @author: dgrossman
-"""
+'''
 import logging
 
 from poseidon.baseClasses.Rock_Bottom import Rock_Bottom
@@ -25,17 +25,17 @@ module_logger = logging.getLogger(__name__)
 
 
 class Monitor_Helper_Base(Rock_Bottom):  # pragma: no cover
-    """base class for the helper objets"""
+    '''base class for the helper objets'''
 
     def __init__(self):
         super(Monitor_Helper_Base, self).__init__()
 
     def set_owner(self, owner):
-        """set the parent class
+        '''set the parent class
 
         Args:
             owner: class to be contacted to use other methods
-        """
+        '''
 
         if owner.logger is not None:
             self.logger = owner.logger
@@ -50,7 +50,7 @@ class Monitor_Helper_Base(Rock_Bottom):  # pragma: no cover
             self.config_section_name = 'None:' + self.mod_name
 
     def configure(self):
-        """get, parse, store configuration internally as dict"""
+        '''get, parse, store configuration internally as dict'''
         ostr = '{0} {1}'.format(self.mod_name, 'configure()')
         self.logger.info(ostr)
         # local valid
@@ -71,24 +71,25 @@ class Monitor_Helper_Base(Rock_Bottom):  # pragma: no cover
                 self.mod_configuration[k] = v
                 ostr = 'config:{0}:{1}'.format(
                     self.config_section_name, self.mod_configuration)
+                self.logger.debug(ostr)
             self.configured = True
 
     def first_run(self):
-        """do special setup after configure"""
+        '''do special setup after configure'''
         pass
 
     def on_post(self, req, resp):
-        """handle jrandom rest case"""
+        '''handle jrandom rest case'''
         pass
 
     def on_put(self, req, resp, name):
-        """handle jrandom rest case"""
+        '''handle jrandom rest case'''
         pass
 
     def on_get(self, req, resp):
-        """handle jrandom rest case"""
+        '''handle jrandom rest case'''
         pass
 
     def on_delete(self, req, resp):
-        """handle jrandom rest case"""
+        '''handle jrandom rest case'''
         pass

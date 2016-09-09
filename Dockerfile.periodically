@@ -38,5 +38,5 @@ RUN py.test -v  \
 ENV PYTHONUNBUFFERED 0
 EXPOSE 9999:8009
 
-CMD ["python", "poseidon/periodically/periodically.py","1","-1","http://poseidon-monitor:4444/v1/polling"]
+CMD ["python", "poseidon/periodically/periodically.py","10","-1","http://poseidon-monitor:8004/v1/polling"]
 

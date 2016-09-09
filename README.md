@@ -11,8 +11,6 @@ Can SDN and machine learning answer:
 
 # Getting Started
 
-Nothing to see here yet, move along...
-
 # Install Instructions
 
 ```
@@ -31,10 +29,12 @@ run with `sudo ./startup.sh`.
 - Docker
 - make
 - docker-compose
-- `/data/db` directory for mongodb database; you can use a different directory by updating the docker-compose.yaml - under the `storage` section, update `volumes` to `/path/to/your/dir:/data/db` with the path to the directory to store mongodb records.
+- `/data/db` directory for mongodb database; you can use a different directory by updating the `docker-compose.yaml` 
+- under the `storage` section, update `volumes` to `/path/to/your/dir:/data/db` with the path to the directory to store mongodb records.
 - The 1.8 release of docker-compose can be installed with `make compose-install`
 - Update the `ip` of the `[database]` section of `config/poseidon.config` to the external ip of the host machine running mongodb (or
 the `docker-machine ip` if using boot2docker or similar). NOTE: without this configuration, poseidon will fail to build.
+- Update the `controller_uri` ip address, `contrller_user`, `controller_pass` of the `[NorthBoundControllerAbstraction:Handle_Periodic]` section. NOTE: without this configuration, poseidon will not be able to talk to the controller
 
 # Usage Examples
 
