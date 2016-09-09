@@ -43,7 +43,7 @@ services:
       app_net:
         ipv4_address: 172.16.201.12
     environment:
-      - ALLOW_ORIGIN = http://172.16.201.12:8003
+      - ALLOW_ORIGIN=http://172.16.201.12:8003
     links:
       - monitor:poseidon-monitor
   monitor:
@@ -58,9 +58,11 @@ services:
       app_net:
         ipv4_address: 172.16.201.13
     environment:
-      - ALLOW_ORIGIN = http://172.16.201.10:1111
+      - ALLOW_ORIGIN=http://172.16.201.10:1111
+      - SKIPRABBIT=False
     links:
       - api:poseidon-api
+      - rabbit:poseidon-rabbit
   main:
     image: poseidon-main
     container_name: poseidon-main

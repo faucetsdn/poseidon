@@ -92,14 +92,14 @@ class Handle_Periodic(Monitor_Helper_Base):
         self.first_time = True
         self.prev_endpoints = {}
         self.new_endpoints = {}
-        self.skip_rabbit = False
+        self.do_rabbit = True
         self.m_queue = Queue.Queue()
         self.rabbit_connection_local = None
         self.rabbit_channel_local = None
 
         if getenv('SKIPRABBIT') is None:
             module_logger.critical('handle_periodic skipping rabbit')
-            self.skip_rabbit = True
+            self.do_rabbit = False
         else:
             module_logger.critical('handle_periodic starting rabbit')
             self.start_rabbit()
@@ -109,8 +109,9 @@ class Handle_Periodic(Monitor_Helper_Base):
     # rabbit
     def start_rabbit(self):
         self.init_rabbit()
-        self.start_channel(self.rabbit_channel_local,
-                           callback, 'poseidon_internals2')
+        if self.do_rabbit:
+            self.start_channel(self.rabbit_channel_local,
+                               callback, 'poseidon_internals2')
 
     def make_type_val(self, item):
         ''' search messages and act  '''
@@ -141,8 +142,9 @@ class Handle_Periodic(Monitor_Helper_Base):
         wait = True
         channel = None
         connection = None
+        total_sleep = 30
 
-        while wait:
+        while wait and total_sleep > 0:
             try:
                 connection = pika.BlockingConnection(
                     pika.ConnectionParameters(host=host))
@@ -157,9 +159,13 @@ class Handle_Periodic(Monitor_Helper_Base):
                     '************* waiting for {0} rabbitQM'.format(host))
                 self.logger.debug(str(e))
                 time.sleep(2)
+                total_sleep -= 2
                 wait = True
 
-        if isinstance(keys, types.ListType):
+        if wait:
+            self.do_rabbit = False
+
+        if isinstance(keys, types.ListType) and not wait:
             for key in keys:
                 self.logger.debug(
                     'array adding key:{0} to rabbitmq channel'.format(key))
@@ -167,7 +173,7 @@ class Handle_Periodic(Monitor_Helper_Base):
                                    queue=queue_name,
                                    routing_key=key)
 
-        if isinstance(keys, types.StringType):
+        if isinstance(keys, types.StringType) and not wait:
             self.logger.debug(
                 'string adding key:{0} to rabbitmq channel'.format(keys))
             channel.queue_bind(exchange=exchange,
