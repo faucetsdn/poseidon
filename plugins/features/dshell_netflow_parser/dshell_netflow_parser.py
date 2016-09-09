@@ -98,7 +98,7 @@ def run_tool(path):
                     if channel:
                         channel.basic_publish(
                             exchange='topic_recs', routing_key=routing_key, body=message)
-                        ostr = ' [x] Sent %r:%r' % (routing_key, message)
+                        ostr = ' [x] Sent {0}:{1}'.format(routing_key, message)
                         module_logger.debug(ostr)
                 except:
                     pass

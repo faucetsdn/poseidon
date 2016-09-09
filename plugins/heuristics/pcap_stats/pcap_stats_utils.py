@@ -115,14 +115,14 @@ class MachineNode:
             self.machines_received_from[addr] += 1
             if pcap:
                 self.time_record.update_received(
-                    '%s %s' % (pcap['date'], pcap['time']))
+                    '{0} {1}' .format(pcap['date'], pcap['time']))
         else:
             self.num_packets_sent += 1
             self.packet_lens_sent.append(length)
             self.machines_sent_to[addr] += 1
             if pcap:
                 self.time_record.update_sent(
-                    '%s %s' % (pcap['date'], pcap['time']))
+                    '{0} {1}'.format(pcap['date'], pcap['time']))
 
     def get_flow_duration(self, direction='sent'):
         """

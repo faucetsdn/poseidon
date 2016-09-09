@@ -20,11 +20,12 @@ NOTE: responses are returned as json
 Created on 28 June 2016
 @author: dgrossman, lanhamt
 """
-import ast
-
+import os
 import bson
 import falcon
 import pytest
+import json
+from poseidonStorage import get_allowed
 from poseidonStorage import db_add_many_docs
 from poseidonStorage import db_add_one_doc
 from poseidonStorage import db_collection_count
@@ -54,13 +55,13 @@ application.add_route(
     '/v1/storage/query/{database}/{collection}/{query_str}',
     db_collection_query())
 application.add_route(
-    '/v1/storage/add_one_doc/{database}/{collection}/{doc_str}',
+    '/v1/storage/add_one_doc/{database}/{collection}',
     db_add_one_doc())
 application.add_route(
-    '/v1/storage/add_many_docs/{database}/{collection}/{doc_list}',
+    '/v1/storage/add_many_docs/{database}/{collection}',
     db_add_many_docs())
 application.add_route(
-    '/v1/storage/update_one_doc/{database}/{collection}/{filt}/{updated_doc}',
+    '/v1/storage/update_one_doc/{database}/{collection}/{filt}',
     db_update_one_doc())
 
 
@@ -82,6 +83,12 @@ def test_main():
     tests main for poseidonStorage.
     """
     main()
+
+
+def test_get_allowed():
+    get_allowed()
+    os.environ['ALLOW_ORIGIN'] = 'tcp://1.1.1.1:1234'
+    get_allowed()
 
 
 # exposes the application for testing
@@ -111,7 +118,8 @@ def test_db_collection_names(client):
 
     resp = client.get('/v1/storage/not_a_db')
     assert resp.status == falcon.HTTP_OK
-    assert resp.body == '"Error on retrieving colleciton names."'
+    names = json.loads(resp.body)
+    assert names == []
 
 
 def test_db_collection_count(client):
@@ -121,7 +129,7 @@ def test_db_collection_count(client):
     """
     resp = client.get('/v1/storage/local/startup_log')
     assert resp.status == falcon.HTTP_OK
-    assert '1' in resp.body
+    assert int(resp.body) == 1
 
 
 def test_db_retrieve_doc(client):
@@ -136,8 +144,8 @@ def test_db_retrieve_doc(client):
     assert resp.status == falcon.HTTP_OK
 
     resp = client.get('/v1/storage/doc/local/startup_log/bad_id')
-    assert resp.status == falcon.HTTP_OK
-    assert resp.body == '"Error retrieving document with id: bad_id."'
+    assert resp.status == falcon.HTTP_BAD_REQUEST
+    assert resp.body == '"Bad document id."'
 
 
 def test_db_collection_query(client):
@@ -146,20 +154,18 @@ def test_db_collection_query(client):
     response is a serialized dict with 'count'
     and 'docs' fields.
     """
-    query = {'hostname': 'bad'}
+    query = {}
     query = bson.BSON.encode(query)
-    resp = client.get('/v1/storage/query/local/startup_log/' + query)
+    resp = client.get('/v1/storage/query/' + 'local/' + 'startup_log/' + query)
     assert resp.status == falcon.HTTP_OK
-    resp = ast.literal_eval(resp.body)
-    assert isinstance(resp['count'], int)
-    assert isinstance(resp['docs'], str)
+    resp = json.loads(resp.body)
+    assert resp['count'] >= 0
 
     query = 'bad'
-    resp = client.get('/v1/storage/query/local/startup_log/' + query)
-    assert resp.status == falcon.HTTP_OK
-    resp = ast.literal_eval(resp.body)
-    assert isinstance(resp['count'], int)
-    assert isinstance(resp['docs'], str)
+    resp = client.get('/v1/storage/query/' + 'local/' + 'startup_log/' + query)
+    assert resp.status == falcon.HTTP_BAD_REQUEST
+    resp = json.loads(resp.body)
+    assert resp['count'] == -1
 
 
 def test_db_add_one_doc(client):
@@ -170,7 +176,7 @@ def test_db_add_one_doc(client):
     inserted into is listed under the database collections.
     """
     doc = {}
-    doc['node_ip'] = '0.0.0.0'
+    doc['node_ip'] = 'TEST'
     doc['talked_to'] = {'machine_1': 2,
                         'machine_2': 1,
                         'machine_3': 1}
@@ -184,25 +190,59 @@ def test_db_add_one_doc(client):
                        'first_received': '0-0-0 00:00:00.000000',
                        'last_sent': '0-0-0 00:00:00.000000',
                        'last_received': '0-0-0 00:00:00.000000'}
-    doc = bson.BSON.encode(doc)
-    get_str = '/v1/storage/add_one_doc/poseidon_records/network_graph/' + doc
-    resp = client.get(get_str)
+    # adds doc to db
+    uri = '/v1/storage/add_one_doc/' + 'poseidon_records/' + 'network_graph'
+    resp = client.post(uri, data=json.dumps(doc))
     assert resp.status == falcon.HTTP_OK
-    doc_id = resp.body
-    get_str = '/v1/storage/doc/poseidon_records/network_graph/' + doc_id
-    resp = client.get(get_str)
+    doc_id = json.loads(resp.body)
+
+    # retrieves doc from db
+    uri = '/v1/storage/doc/' + 'poseidon_records/' + 'network_graph/' + doc_id
+    resp = client.get(uri)
     assert resp.status == falcon.HTTP_OK
-    resp = client.get('/v1/storage/poseidon_records')
+    doc = json.loads(resp.body)
+    assert doc['node_ip'] == 'TEST'
+    assert doc['packet_lengths'] == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+    # checks that collection is persistent
+    resp = client.get('/v1/storage/' + 'poseidon_records')
     assert resp.status == falcon.HTTP_OK
+    assert 'network_graph' in json.loads(resp.body)
+
+    # checks that number of documents in collection at least one now
+    resp = client.get('/v1/storage/' + 'poseidon_records/' + 'network_graph')
+    assert int(resp.body) >= 1
+
+    # test a query of the inserted collection with a bad object id
+    query = {'_id': 'xyz'}
+    query = bson.BSON.encode(query)
+    resp = client.get('/v1/storage/query/' + 'poseidon_records/' + 'network_graph/' + query)
+    assert resp.status == falcon.HTTP_BAD_REQUEST
+
+    # test a proper query of the collection for the inserted doc by id
+    query = {'_id': doc_id}
+    query = bson.BSON.encode(query)
+    resp = client.get('/v1/storage/query/' + 'poseidon_records/' + 'network_graph/' + query)
+    assert resp.status == falcon.HTTP_OK
+    resp = json.loads(resp.body)
+    assert resp['count'] == 1
+
+    # test a collection query using the node_ip
+    query = {'node_ip': 'TEST'}
+    query = bson.BSON.encode(query)
+    resp = client.get('/v1/storage/query/' + 'poseidon_records/' + 'network_graph/' + query)
+    assert resp.status == falcon.HTTP_OK
+    resp = json.loads(resp.body)
+    assert resp['count'] == 1
+    doc = resp['docs'][0]  # should only have 1 doc in list
+    assert doc['node_ip'] == 'TEST'
+    assert doc['flow_id'] == '6a32984d2348e23894f3298'
 
 
 def test_db_add_many_docs(client):
     """
     tests inserting several docs into database.
     encodes with bson for well-formatted url.
-
-    NOTE: the url is a string of concatenated
-    bson encoded docs (map objects)
     """
     doc_one = {}
     doc_one['node_ip'] = '1.1.1.1'
@@ -216,13 +256,21 @@ def test_db_add_many_docs(client):
     doc_thr['node_ip'] = '3.3.3.3'
     doc_thr['packet_lengths'] = [13, 21, 34]
 
-    doc_list = [doc_one, doc_two, doc_thr]
-    doc_str = ''
-    for doc in doc_list:
-        doc_str += bson.BSON.encode(doc)
-    get_str = '/v1/storage/add_many_docs/poseidon_records/network_graph/' + doc_str
-    resp = client.get(get_str)
+    # insert 3 docs
+    docs = [doc_one, doc_two, doc_thr]
+    uri = '/v1/storage/add_many_docs/'+'poseidon_records/'+'network_graph/'
+    resp = client.post(uri, data=json.dumps(docs))
     assert resp.status == falcon.HTTP_OK
+    resp = json.loads(resp.body)
+    assert len(resp) == 3
+
+    # check that inserted docs are in collection
+    query = {}
+    query = bson.BSON.encode(query)
+    resp = client.get('/v1/storage/query/' + 'poseidon_records/' + 'network_graph/' + query)
+    assert resp.status == falcon.HTTP_OK
+    resp = json.loads(resp.body)
+    assert resp['count'] >= 3
 
 
 def test_db_update_one_doc(client):
@@ -234,10 +282,33 @@ def test_db_update_one_doc(client):
     filt = {'node_ip': '-1.-1.-1.-1'}
     update = {'node_ip': '-1.-1.-1.-1', 'new_field': 101}
 
-    filt = bson.BSON.encode(filt)
-    update = bson.BSON.encode(update)
-    get_str = '/v1/storage/update_one_doc/poseidon_records/network_graph/' + filt + '/' + update
-    resp = client.get(get_str)
+    # non-existent document
+    filt = json.dumps(filt)
+    uri = '/v1/storage/update_one_doc/'+'poseidon_records/'+'network_graph/'+filt
+    resp = client.post(uri, data=json.dumps(update))
+    assert resp.status == falcon.HTTP_BAD_REQUEST
+    resp = json.loads(resp.body)
+    assert not resp['success']
+
+    # insert doc
+    doc = {'node_ip': 'GIRAFFE'}
+    uri = '/v1/storage/add_one_doc/' + 'poseidon_records/' + 'network_graph'
+    resp = client.post(uri, data=json.dumps(doc))
     assert resp.status == falcon.HTTP_OK
-    resp = ast.literal_eval(resp.body)
-    assert resp['success']
+
+    # update doc node_ip
+    doc_id = json.loads(resp.body)
+    filt = {'_id': doc_id}
+    filt = json.dumps(filt)
+    update = {'$set': {'node_ip': 'HIPPO'}}
+    uri = '/v1/storage/update_one_doc/'+'poseidon_records/'+'network_graph/'+filt
+    resp = client.post(uri, data=json.dumps(update))
+    assert resp.status == falcon.HTTP_OK
+    assert json.loads(resp.body)['raw_result']['updatedExisting']
+
+    # verify update to node_ip
+    uri = '/v1/storage/doc/' + 'poseidon_records/' + 'network_graph/' + doc_id
+    resp = client.get(uri)
+    assert resp.status == falcon.HTTP_OK
+    doc = json.loads(resp.body)
+    assert doc['node_ip'] == 'HIPPO'

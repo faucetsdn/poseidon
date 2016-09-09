@@ -22,6 +22,7 @@ NAMES: current databases and collections (subject to change)
     db                      collection
     ---                     ---
     poseidon_records        network_graph
+                            models
 
 Created on 17 May 2016
 @author: dgrossman, lanhamt
@@ -29,14 +30,36 @@ Created on 17 May 2016
 import ConfigParser
 import json
 import sys
-from os import environ
-from subprocess import check_output
-from urlparse import urlparse
-
 import bson
 import falcon
 from falcon_cors import CORS
 from pymongo import MongoClient
+from bson import ObjectId
+from os import environ
+from subprocess import check_output
+from urlparse import urlparse
+
+
+class MongoJSONEncoder(json.JSONEncoder):
+    """
+    JSON encoder to handle special case
+    ObjectId objects and datetime objects
+    for serialization.
+    """
+    def default(self, o):
+        if isinstance(o, ObjectId):
+            return str(o)
+        if hasattr(o, 'isoformat'):
+            return o.isoformat()
+        return json.JSONEncoder.default(self, o)
+
+
+# exceptions for malformed bson
+bsonInputExceptions = (bson.errors.BSONError,
+                       bson.errors.InvalidId,
+                       bson.errors.InvalidStringData,
+                       bson.errors.InvalidDocument,
+                       bson.errors.InvalidBSON)
 
 
 class poseidonStorage:
@@ -45,7 +68,7 @@ class poseidonStorage:
     brokers requests to database.
 
     NOTE: retrieves database host from config
-    file in templates/config.template under the
+    file in config/poseidon.config under the
     [database] section.
     """
 
@@ -55,9 +78,9 @@ class poseidonStorage:
         try:
             self.config = ConfigParser.ConfigParser()
             self.config.readfp(
-                open('/poseidonWork/templates/config.template'))
+                open('/poseidonWork/config/poseidon.config'))
             database_container_ip = self.config.get('database', 'ip')
-        except:
+        except: # pragma: no cover
             raise ValueError(
                 'poseidonStorage: could not find database ip address.')
         self.client = MongoClient(host=database_container_ip)
@@ -81,169 +104,223 @@ def get_allowed():
     return allow_origin, rest_url
 
 allow_origin, rest_url = get_allowed()
-cors = CORS(allow_origins_list=[allow_origin])
+cors = CORS(allow_all_origins=True)
 public_cors = CORS(allow_all_origins=True)
 
 
 class db_database_names(poseidonStorage):
     """
-    rest layer subclass of poseidonStorage.
-    gets names of databases.
+    Request:
+        URL:        /v1/storage/
+        Method:     GET
+    Response:
+        Body:       json encoded list of db names
     """
 
     def on_get(self, req, resp):
         try:
             ret = self.client.database_names()
-        except:
+        except:  # pragma: no cover
             ret = 'Error in connecting to mongo container'
-        resp.body = json.dumps(ret)
+            resp.status = falcon.HTTP_INTERNAL_SERVER_ERROR
+        resp.body = MongoJSONEncoder().encode(ret)
 
 
 class db_collection_names(poseidonStorage):
     """
-    rest layer subclass of poseidonStorage.
-    get names of collections in given
-    database.
+    Request:
+        URL:        /v1/storage/{database}
+        Method:     GET
+    Response:
+        Body:       json encoded list of collection
+                    names for given db
     """
 
     def on_get(self, req, resp, database):
-        ret = self.client[database].collection_names()
-        # empty list returned for non-existent database
-        if not ret:
+        try:
+            ret = self.client[database].collection_names()
+        except:  # pragma: no cover
             ret = 'Error on retrieving colleciton names.'
-        resp.body = json.dumps(ret)
+            resp.status = falcon.HTTP_INTERNAL_SERVER_ERROR
+        resp.body = MongoJSONEncoder().encode(ret)
 
 
 class db_collection_count(poseidonStorage):
     """
-    rest layer subclass of poseidonStorage.
-    gets information for given collection.
+    Request:
+        URL:        /v1/storage/{database}/{collection}
+        Method:     GET
+    Response:
+        Body:       json encoded (string) number of
+                    documents in given collection
     """
 
     def on_get(self, req, resp, database, collection):
-        ret = self.client[database][collection].count()
-        resp.body = json.dumps(ret)
+        try:     
+            ret = self.client[database][collection].count()
+        except:  # pragma: no cover
+            ret = 'Error retrieving collection doc count.'
+            resp.status = falcon.HTTP_INTERNAL_SERVER_ERROR
+        resp.body = MongoJSONEncoder().encode(ret)
 
 
 class db_retrieve_doc(poseidonStorage):
     """
-    rest layer subclass of poseidonStorage.
-    gets document in given database with given id.
+    Request:
+        URL:        /v1/storage/doc/{database}/{collection}/{doc_id}
+        Method:     GET
+        Attributes: doc_id is the string of the document's _id which
+                    will be used to create an ObjectId to search the db.
+    Response:
+        Body:       json encoded document (mapping object), ObjectId
+                    returned in doc in string form
     """
 
     def on_get(self, req, resp, database, collection, doc_id):
-        ret = self.client[database][collection].find_one({'_id': doc_id})
-        if not ret:
+        try:
+            obj = ObjectId(doc_id)
+            ret = self.client[database][collection].find_one({'_id': obj})
+        except bsonInputExceptions:
+            ret = 'Bad document id.'
+            resp.status = falcon.HTTP_BAD_REQUEST
+        except:  # pragma: no cover
             ret = 'Error retrieving document with id: ' + doc_id + '.'
-        resp.body = json.dumps(ret)
+            resp.status = falcon.HTTP_INTERNAL_SERVER_ERROR
+        resp.body = MongoJSONEncoder().encode(ret)
 
 
 class db_collection_query(poseidonStorage):
     """
-    rest layer subclass of poseidonStorage.
-    queries given database and collection,
-    returns dict with the count of docs matching
-    the query - if docs were found matching the query
-    then includes a dict of ip->doc for each document.
-
-    NOTE: supports bson encoding for well-formed
-    queries (ie "{'node_ip': 'some ip'}")
+    Request:
+        URL:        /v1/storage/query/{database}/{collection}/{query_str}
+        Method:     GET
+        Attributes: query_str should be a serialized string of a
+                    mapping object - bson encoded
+    Response:
+        Body:       json encoded dict with 'count' of docs
+                    matching the query and 'docs' list of
+                    documents matching the query; 'count' is
+                    set to -1 on error
     """
 
     def on_get(self, req, resp, database, collection, query_str):
         ret = {}
         try:
-            query = bson.BSON.decode(query_str)
+            query = bson.BSON(query_str)
+            query = query.decode()
+            if '_id' in query:
+                query['_id'] = ObjectId(query['_id'])
+
             cursor = self.client[database][collection].find(query)
-            doc_dict = {}
             if cursor.count() == 0:
                 ret['count'] = cursor.count()
-                ret['docs'] = 'Valid query performed, no docs found.'
             else:
+                doc_list = []
                 for doc in cursor:
-                    doc_dict[doc['node_ip']] = doc
-                ret['docs'] = doc_dict
+                    doc_list.append(doc)
+                ret['docs'] = doc_list
                 ret['count'] = cursor.count()
-            ret = json.dumps(ret)
-        except:
+        except bsonInputExceptions:  # pragma: no cover
             ret['count'] = -1
-            ret['docs'] = 'Error on query.'
-            ret = json.dumps(ret)
-        resp.body = ret
+            resp.status = falcon.HTTP_BAD_REQUEST
+        except TypeError, e:  # pragma: no cover
+            # bad query string
+            ret['count'] = -1
+            resp.status = falcon.HTTP_BAD_REQUEST
+        except Exception, e:  # pragma: no cover
+            ret['count'] = -1
+            resp.status = falcon.HTTP_INTERNAL_SERVER_ERROR
+        resp.body = MongoJSONEncoder().encode(ret)
 
 
 class db_add_one_doc(poseidonStorage):
     """
-    rest layer subclass of poseidonStorage.
-    adds a document to specified database and
-    collection. returned response includes
-    the id of the newly inserted object.
-
-    NOTE: uses bson decoding for document
-    to be inserted into database.
+    Request:
+        URL:        /v1/storage/add_one_doc/{database}/{collection}
+        Method:     POST
+        Attributes: request body is json serialized string of mapping
+                    object
+    Response:
+        Body:       string id of inserted document
     """
 
-    def on_get(self, req, resp, database, collection, doc_str):
+    def on_post(self, req, resp, database, collection):
         try:
-            if not bson.is_valid(doc_str):
-                doc_str = bson.BSON.encode(doc_str)
-            ret = self.client[database][collection].insert_one(doc_str)
-            ret = str(ret.inserted_id)
-        except:
-            ret = 'Error inserting document into database.'
-        resp.body = json.dumps(ret)
+            data = req.stream.read()
+            data_dict = json.loads(data)
+            ret = self.client[database][collection].insert_one(data_dict)
+            ret = ret.inserted_id
+        except Exception, e:  # pragma: no cover
+            ret = str(e)
+            resp.status = falcon.HTTP_INTERNAL_SERVER_ERROR
+        resp.body = MongoJSONEncoder().encode(ret)
 
 
 class db_add_many_docs(poseidonStorage):
     """
-    rest layer subclass of poseidonStorage.
-    adds a list of documents (encoded with
-    bson) to specified database and collection.
-    returned response includes the list of ids
-    for the documents that have been inserted on
-    success and error on failure.
-
-    NOTE: uses bson decoding for documents to be
-    inserted. Takes a string (doc_list) of concatenated
-    bson-encoded map-objects (ie dicts).
+    Request:
+        URL:        /v1/storage/add_many_docs/{database}/{collection}
+        Method:     POST
+        Attributes: json encoded list of documents to be inserted
+    Response:
+        Body:       json encoded list of object ids (string form)
+                    of inserted docs
     """
 
-    def on_get(self, req, resp, database, collection, doc_list):
+    def on_post(self, req, resp, database, collection):
         try:
-            doc_list = bson.decode_all(doc_list)
-            ret = self.client[database][collection].insert_many(doc_list)
-            for o_id in ret:
-                o_id = str(o_id.inserted_id)
-        except:
-            ret = 'Error inserting documents into database.'
-        resp.body = json.dumps(ret)
+            doc_list = req.stream.read()
+            doc_list = json.loads(doc_list)
+            result = self.client[database][collection].insert_many(doc_list)
+            ret = []
+            for obj_id in result.inserted_ids:
+                ret.append(obj_id)
+        except Exception, e:  # pragma: no cover
+            ret = str(e)
+            resp.status = falcon.HTTP_INTERNAL_SERVER_ERROR
+        resp.body = MongoJSONEncoder().encode(ret)
 
 
 class db_update_one_doc(poseidonStorage):
     """
-    rest layer subclass of poseidonStorage.
-    udpates single document in database given
-    a filter to find the document and an updated
-    document.
-    excepts on malformation but not on
-    non-update - if there was no existing document
-    found to update then 'updatedExisting' value of
-    response will be False; if exception thrown then
-    'success' value will be False.
-
-    WARNING: replaces entire document with the
-    updated_doc.
+    Request:
+        URL:        /v1/storage/update_one_doc/{database}/{collection}/{filt}
+        Method:     POST
+        Attributes: json encoded document to replace existing, json encoded
+                    filter
+                    more info from mongodb:
+                        https://docs.mongodb.com/getting-started/python/update/
+                        https://docs.mongodb.com/manual/reference/operator/update/
+    Response:
+        Body:       dict with 'success' key indicating success or failure on
+                    updating doc, and if successful the raw_result document
+                    returned by the server
     """
 
-    def on_get(self, req, resp, database, collection, filt, updated_doc):
+    def on_post(self, req, resp, database, collection, filt):
         ret = {}
         try:
-            ret = self.client[database][
-                collection].updateOne(filt, updated_doc)
-            ret['success'] = str(True)
-        except:
-            ret['success'] = str(False)
-        resp.body = json.dumps(ret)
+            doc_update = req.stream.read()
+            doc_update = json.loads(doc_update)
+            filt = json.loads(filt)
+            if '_id' in filt:
+                filt['_id'] = ObjectId(filt['_id'])
+            result = self.client[database][collection].update_one(filt, doc_update)
+            if result.modified_count == 1:
+                ret['success'] = 1
+                ret['raw_result'] = result.raw_result
+            else:
+                ret['success'] = 0
+        except bsonInputExceptions:  # pragma: no cover
+            ret['success'] = 0
+            resp.status = falcon.HTTP_BAD_REQUEST
+        except ValueError, TypeError:
+            ret['success'] = 0
+            resp.status = falcon.HTTP_BAD_REQUEST
+        except Exception, e:  # pragma: no cover
+            ret['success'] = 0
+            resp.status = falcon.HTTP_INTERNAL_SERVER_ERROR
+        resp.body = MongoJSONEncoder().encode(ret)
 
 
 # create callable WSGI app instance for gunicorn
@@ -251,7 +328,9 @@ api = falcon.API(middleware=[cors.middleware])
 
 
 # add local routes for db api
-api.add_route('/v1/storage', db_database_names())
+api.add_route(
+    '/v1/storage',
+    db_database_names())
 api.add_route(
     '/v1/storage/{database}',
     db_collection_names())
@@ -265,13 +344,13 @@ api.add_route(
     '/v1/storage/query/{database}/{collection}/{query_str}',
     db_collection_query())
 api.add_route(
-    '/v1/storage/add_one_doc/{database}/{collection}/{doc_str}',
+    '/v1/storage/add_one_doc/{database}/{collection}',
     db_add_one_doc())
 api.add_route(
-    '/v1/storage/add_many_docs/{database}/{collection}/{doc_list}',
+    '/v1/storage/add_many_docs/{database}/{collection}',
     db_add_many_docs())
 api.add_route(
-    '/v1/storage/update_one_doc/{database}/{collection}/{filt}/{updated_doc}',
+    '/v1/storage/update_one_doc/{database}/{collection}/{filt}',
     db_update_one_doc())
 
 

@@ -23,7 +23,8 @@ import logging
 
 import falcon
 import pytest
-from Action import action_interface
+
+from poseidon.poseidonMonitor.Action.Action import action_interface
 
 module_logger = logging.getLogger(__name__)
 

@@ -32,7 +32,7 @@
 package main
 
 import (
-    "bufio"
+//    "bufio"
     "fmt"
     "log"
     "os"
@@ -146,29 +146,27 @@ func sendLine(line string, ch *amqp.Channel) {
  * file and sends parsed csv to rabbit.
  */
 func main() {
-    conn, ch := RabbitConnect()
-    defer ch.Close()
-    defer conn.Close()
+    //conn, ch := RabbitConnect()
+    //defer ch.Close()
+    //defer conn.Close()
 
     file_name := os.Args[1]
-    output_file := file_name + ".out"
+    output_file := file_name + ".csv"
     cmd := exec.Command("./flowtbag", file_name)
-    out_fd, err := os.OpenFile(output_file, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, 0777)
+    out_fd, err := os.OpenFile(output_file, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, 0666)
+    failOnError(err, "failed to open output file")
     cmd.Stdout = out_fd
     cmd.Run()
     failOnError(err, "failed to parse pcap")
 
-    file, err := os.Open(output_file)
-    failOnError(err, "failed to open file")
-    defer file.Close()
+    //file, err := os.Open(output_file)
+    //failOnError(err, "failed to open file")
+    //defer file.Close()
 
-    scanner := bufio.NewScanner(file)
-    for scanner.Scan() {
-        sendLine(scanner.Text(), ch)
-    }
-    sendLine("EOF -- FLOWPARSER FINISHED with file " + file_name, ch)
-    failOnError(scanner.Err(), "failed to read file")
-
-    err = exec.Command("rm", "-rf", output_file).Run()
-    failOnError(err, "failed to delete flowtbag output file")
+    //scanner := bufio.NewScanner(file)
+    //for scanner.Scan() {
+    //    sendLine(scanner.Text(), ch)
+    //}
+    //sendLine("EOF -- FLOWPARSER FINISHED with file " + file_name, ch)
+    //failOnError(scanner.Err(), "failed to read file")
 }

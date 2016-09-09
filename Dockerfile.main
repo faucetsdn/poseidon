@@ -42,6 +42,7 @@ RUN py.test -v \
 --ignore=poseidon/poseidonMonitor \
 --ignore=poseidon/poseidonStorage \
 --ignore=poseidon/periodically \
+--ignore=poseidon/collectors \
 --cov-report term-missing --cov-config .coveragerc
 
 ENV PYTHONUNBUFFERED 0

@@ -22,8 +22,8 @@ import os
 import urllib2
 
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
-DOCKER_URL = 'file:///poseidonWork/templates/config.template'
-CI_TESTING = '/poseidonWork/templates/config.template'
+DOCKER_URL = 'file:///poseidonWork/config/poseidon.config'
+CI_TESTING = '/poseidonWork/config/poseidon.config'
 
 
 module_logger = logging.getLogger(__name__)
@@ -42,7 +42,7 @@ class Config(Main_Action_Base):
         except KeyError:
             # TODO flag error
             self.URL = CI_TESTING
-            logLine = 'poseidonMain:Config using %s' % (self.URL)
+            logLine = 'poseidonMain:Config using {0}'.format(self.URL)
             self.logger.debug(logLine)
 
     def get_section(self, section_name):
@@ -57,7 +57,7 @@ class Config(Main_Action_Base):
             else:
                 ask = self.URL + section_name
             retval = urllib2.urlopen(ask).readlines()
-            logLine = 'ask=%s\n retval=%s\n' % (ask, retval)
+            logLine = 'ask={0}\n retval={1}\n'.format(ask, retval)
             self.logger.debug(logLine)
             return retval
         # TODO flag error?

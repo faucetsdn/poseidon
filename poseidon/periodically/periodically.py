@@ -27,20 +27,21 @@ import sys
 import time
 import urllib2
 
+logging.basicConfig(level=logging.DEBUG)
 module_logger = logging.getLogger(__name__)
 
 
 def makeCall(url):
-    ostr = 'makeCall %s' % (datetime.datetime.now().ctime())
+    ostr = 'makeCall {0}'.format(datetime.datetime.now().ctime())
     module_logger.info(ostr)
     if url:  # pragma: no cover
         try:
             page = urllib2.urlopen(url)
             module_logger.info(page.readlines())
-            ostr = 'wget %s' % (url)
+            ostr = 'wget {0}'.format(url)
             module_logger.info(ostr)
         except:
-            ostr = 'Error contacting url: %s retrying...' % (url)
+            ostr = 'Error contacting url: {0} retrying...'.format(url)
             module_logger.error(ostr)
 
 
@@ -69,10 +70,12 @@ def periodically(wait, repeats, url):
             makeCall(url)
             next_call = next_call + wait
             doSleep(next_call - time.time())
+            module_logger.debug('Kick')
     return loops
 
 
 def main(argv):  # pragma: no cover
+    module_logger.debug('argv:{0}'.format(argv))
     try:
         url = os.environ['KICKURL']
     except KeyError:

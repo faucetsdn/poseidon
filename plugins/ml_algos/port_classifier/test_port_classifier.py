@@ -14,28 +14,49 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Created on 24 August 2016
-@author: bradh41, tlanham
+Created on 17 August 2016
+@author: aganeshLab41, tlanham
 
-Test module for deep learning
-package to classify pcap hex
-headers.
+Test module for machine learning plugin
+for classifying ports from tcp packets.
 """
 import pytest
-from eval_deep_classifier import load_model
-from eval_deep_classifier import rabbit_init
-# eval tests
+import sys
+import os
+from port_classifier import rabbit_init
+from port_classifier import get_path
+from port_classifier import get_host
+from port_classifier import save_model
 
-# train tests
-# import train_deep_classifier  # NEED TO FIX blocks IMPORT
+
+def test_get_path():
+    get_path()
+    sys.argv = []
+    get_path()
+
+
+def test_get_host():
+    get_host()
+    os.environ['POSEIDON_HOST'] = '1.1.1.1'
+    assert get_host() == '1.1.1.1'
+
+
+class Test:
+    def __init__(self):
+        self.s = 'hello world'
+
+
+def test_save_model():
+    model = Test()
+    save_model(model)
+    assert os.path.isfile('port_class_log_reg_model.pickle')
+    os.environ['POSEIDON_HOST'] = 'httpbin.org/post'
+    save_model(model)
 
 
 @pytest.mark.skip(reason='requires rabbitmq broker, integration test')
 def test_rabbit_init():
     channel, connection = rabbit_init(host='poseidon-rabbit',
                                       exchange='topic-poseidon-internal',
-                                      queue_name='poseidon.tcpdump_parser.#')
-
-
-def test_load_model():
-    assert load_model('not_a_file.abc') is None
+                                      queue_name='features_flowparser',
+                                      rabbit_rec=False)

@@ -37,9 +37,10 @@ from functools import partial
 from os import getenv
 
 import pika
-from Config.Config import config_interface
-from Investigator.Investigator import investigator_interface
-from Scheduler.Scheduler import scheduler_interface
+
+from poseidon.poseidonMain.Config.Config import config_interface
+from poseidon.poseidonMain.Investigator.Investigator import investigator_interface
+from poseidon.poseidonMain.Scheduler.Scheduler import scheduler_interface
 
 # class NullHandler(logging.Handler):
 #     def emit(self, record):
@@ -47,19 +48,24 @@ from Scheduler.Scheduler import scheduler_interface
 
 # h = NullHandler()
 #  module_logger = logging.getLogger(__name__).addHandler(h)
+logging.basicConfig(level=logging.DEBUG)
 module_logger = logging.getLogger(__name__)
 
 
 def callback(ch, method, properties, body, q=None):
-    module_logger.debug('got a message: %r', body)
+    module_logger.debug('got a message: {0}'.format(body))
+    print body
     # TODO more
     if q is not None:
         q.put(body)
+    else:
+        module_logger.error('posedionMain workQueue is None')
 
 
 class PoseidonMain(object):
+    ''' poseidonmain '''
 
-    def __init__(self):
+    def __init__(self, skip_rabbit=False):
         ''' poseidonMain initialization '''
         self.skip_rabbit = False
 
@@ -71,7 +77,6 @@ class PoseidonMain(object):
 
         self.logger = module_logger
         self.logger.debug('logger started')
-        logging.basicConfig(level=logging.DEBUG)
 
         self.m_qeueue = Queue.Queue()
         self.shutdown = False
@@ -109,10 +114,10 @@ class PoseidonMain(object):
         ''' setup the logging parameters for poseidon '''
         config = None
 
-        path = getenv('loggingFile', None)
+        path = getenv('loggingFile')
 
         if path is None:
-            path = self.mod_configuration.get('loggingFile', None)
+            path = self.mod_configuration.get('loggingFile')
 
         if path is not None:
             with open(path, 'rt') as some_file:
@@ -121,21 +126,32 @@ class PoseidonMain(object):
         else:
             logging.basicConfig(level=logging.DEBUG)
 
-    def handle(self, t, v):
-        ''' search messages and act  '''
-        if t == 'Main':
-            if v == 'shutdown':
-                self.shutdown = True
+    def make_type_val(self, item):
+        endpoint = None
+        value = None
 
-    def get_queue_item(self):
-        return('t', 'v')
+        if isinstance(item, types.DictionaryType):
+            ''' search messages and act  '''
+            endpoint = item.get('endpoint')
+            value = item.get('value')
+            if endpoint == 'Main':
+                if value == 'shutdown':
+                    self.shutdown = True
+            return endpoint, value
+        if isinstance(item, types.StringType):
+            endpoint = 'None'
+            value = item
+            return endpoint, value
+
+        endpoint, value = 'Error', 'Error'
+        return endpoint, value
 
     def make_rabbit_connection(self, host, exchange, queue_name, keys):  # pragma: no cover
-        """
+        '''
         Continuously loops trying to connect to rabbitmq,
         once connected declares the exchange and queue for
         processing algorithm results.
-        """
+        '''
         wait = True
         while wait:
             try:
@@ -144,10 +160,10 @@ class PoseidonMain(object):
                 channel = connection.channel()
                 channel.exchange_declare(exchange=exchange, type='topic')
                 channel.queue_declare(queue=queue_name, exclusive=True)
-                self.logger.debug('connected to %s rabbitMQ', host)
+                self.logger.debug('connected to {0} rabbitMQ'.format(host))
                 wait = False
             except Exception as e:
-                self.logger.debug('waiting for %s rabbitQM', host)
+                self.logger.debug('waiting for {0} rabbitQM'.format(host))
                 self.logger.debug(str(e))
                 time.sleep(2)
                 wait = True
@@ -155,19 +171,20 @@ class PoseidonMain(object):
         if isinstance(keys, types.ListType):
             for key in keys:
                 self.logger.debug(
-                    'array adding key:%s to rabbitmq channel', key)
+                    'array adding key:{0} to rabbitmq channel'.format(key))
                 channel.queue_bind(exchange=exchange,
                                    queue=queue_name,
                                    routing_key=key)
 
         if isinstance(keys, types.StringType):
-            self.logger.debug('string adding key:%s to rabbitmq channel', keys)
+            self.logger.debug(
+                'string adding key:{0} to rabbitmq channel'.format(keys))
             channel.queue_bind(exchange=exchange,
                                queue=queue_name, routing_key=keys)
 
         return channel, connection
 
-    def init_rabbit(self):
+    def init_rabbit(self):  # pragma: no cover
         ''' init_rabbit '''
         host = 'poseidon-rabbit'
         exchange = 'topic-poseidon-internal'
@@ -192,7 +209,7 @@ class PoseidonMain(object):
 
     def start_channel(self, channel, mycallback, queue):
         ''' handle threading for a messagetype '''
-        self.logger.debug('about to start channel %s', channel)
+        self.logger.debug('about to start channel {0}'.format(channel))
         channel.basic_consume(
             partial(mycallback, q=self.m_qeueue), queue=queue, no_ack=True)
         mq_recv_thread = threading.Thread(target=channel.start_consuming)
@@ -206,10 +223,11 @@ class PoseidonMain(object):
         if getenv('PRODUCTION', 'False') == 'True':
             flag = True
 
-        self.logger.debug('PRODUCTION = %s', getenv('PRODDUCTION', 'False'))
-
+        self.logger.debug('PRODUCTION = {0}'.format(
+            getenv('PRODDUCTION', 'False')))
         while not self.shutdown and testing_loop > 0:
             item = None
+            workfound = False
             start = time.clock()
             time.sleep(1)
 
@@ -220,37 +238,40 @@ class PoseidonMain(object):
             self.logger.debug('about to look for work')
             try:
                 item = self.m_qeueue.get(False)
-                self.logger.debug('item:%r', item)
+                self.logger.debug('item:{0}'.format(item))
+                workfound = True
             except Queue.Empty:
                 pass
 
-            t = 't'
-            v = 'v'
             self.logger.debug('done looking for work!')
 
-            self.handle(t, v)
+            if workfound:  # pragma no cover
 
-            handle_list = self.Scheduler.get_handlers(t)
-            if handle_list is not None:
-                for handle in handle_list:
-                    handle(v)
-            handle_list = self.Investigator.get_handlers(t)
-            if handle_list is not None:
-                for handle in handle_list:
-                    handle(v)
+                itype, ivalue = self.make_type_val(item)
+
+                handle_list = self.Scheduler.get_handlers(itype)
+                if handle_list is not None:
+                    for handle in handle_list:
+                        handle(ivalue)
+                handle_list = self.Investigator.get_handlers(itype)
+                if handle_list is not None:
+                    for handle in handle_list:
+                        handle(ivalue)
 
             elapsed = time.clock()
             elapsed = elapsed - start
 
-            log_line = 'time to run eventloop is %0.3f ms' % (elapsed * 1000)
+            log_line = 'time to run eventloop is {0} ms' .format(
+                elapsed * 1000)
             self.logger.debug(log_line)
+        self.logger.debug('Shutting Down')
 
 
 def main(skip_rabbit=False):
-    pmain = PoseidonMain()
-    pmain.skip_rabbit = skip_rabbit
+    ''' main function '''
+    pmain = PoseidonMain(skip_rabbit=skip_rabbit)
     if not skip_rabbit:
-        pmain.init_rabbit()  # pragme no cover
+        pmain.init_rabbit()
         pmain.start_channel(pmain.rabbit_channel_local,
                             callback, 'poseidon_internals')
         # def start_channel(self, channel, callback, queue):
