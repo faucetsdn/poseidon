@@ -10,8 +10,12 @@ RUN apt-get update && \
     python-dev \
     build-essential \
     python-setuptools \
-    tcpdump && \
-    easy_install pip
+    tcpdump \
+    python-pip \
+    python-numpy
+
+RUN easy_install pip
+RUN pip install --upgrade pip 
 
 # install module dependencies
 ADD requirements.txt requirements.txt
@@ -19,4 +23,5 @@ RUN pip install pip --upgrade
 RUN pip install -r requirements.txt
 
 ADD port_classifier.py port_classifier.py
-CMD ["python", "port_classifier.py", "poseidon.flowparser"]
+ENTRYPOINT ["python", "port_classifier.py", "poseidon.flowparser"]
+CMD [""]

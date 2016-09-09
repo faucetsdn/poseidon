@@ -54,6 +54,7 @@ module_logger = logging.getLogger(__name__)
 
 def callback(ch, method, properties, body, q=None):
     module_logger.debug('got a message: {0}'.format(body))
+    print body
     # TODO more
     if q is not None:
         q.put(body)

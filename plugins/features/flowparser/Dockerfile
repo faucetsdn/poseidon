@@ -15,8 +15,8 @@ ADD . src/flowparser
 RUN go get github.com/streadway/amqp
 
 # install and build flowtbag
-RUN go get github.com/DanielArndt/flowtbag
-WORKDIR /go/src/github.com/DanielArndt/flowtbag/
+RUN go get github.com/danielarndt/flowtbag
+WORKDIR /go/src/github.com/danielarndt/flowtbag/
 RUN go build
 
 # copy flowtbag binary to flowparser
