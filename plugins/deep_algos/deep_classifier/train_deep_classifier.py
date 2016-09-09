@@ -25,9 +25,17 @@ rabbitmq:
     exchange:   topic-poseidon-internal
     queue:
 """
+<<<<<<< HEAD:plugins/algorithms/deep_classifier/train_deep_classifier.py
+import sessionizer
+import learningfunctions
+import adversarialfunctions
+import time
+import os
+=======
 import ast
 import binascii
 import cPickle
+>>>>>>> f587c3de9ea9126fd51da374b6f2fa05742d58f4:plugins/deep_algos/deep_classifier/train_deep_classifier.py
 import json
 import logging
 import multiprocessing as mp
@@ -141,6 +149,8 @@ trainPercent = 0.9  # percent of data in training set
 module_logger = logging.getLogger(__name__)
 
 
+<<<<<<< HEAD:plugins/algorithms/deep_classifier/train_deep_classifier.py
+=======
 def parse_header(line):  # pragma: no cover
     ret_dict = {}
     h = line.split()
@@ -282,6 +292,7 @@ def read_pcap(path):  # pragma: no cover
     return hex_sessions
 
 
+>>>>>>> f587c3de9ea9126fd51da374b6f2fa05742d58f4:plugins/deep_algos/deep_classifier/train_deep_classifier.py
 def pickleFile(thing2save, file2save2=None, filePath='/work/notebooks/drawModels/', fileName='myModels'):  # pragma: no cover
 
     if file2save2 is None:
@@ -416,6 +427,9 @@ def dictUniquerizer(dictOdictsOlistOlists):  # pragma: no cover
     return dictOdictsOlistOlists
 
 
+<<<<<<< HEAD:plugins/algorithms/deep_classifier/train_deep_classifier.py
+def oneHot(index, granular = 'hex'):  # pragma: no cover
+=======
 def ipDirSwitcher(hexSessionList):  # pragma: no cover
     '''
     switches both ip and mac addresses
@@ -485,6 +499,7 @@ def dstIpSwapOut(hexSessionList, dictOcoms, listOuniqIPs):  # pragma: no cover
 
 
 def oneHot(index, granular='hex'):  # pragma: no cover
+>>>>>>> f587c3de9ea9126fd51da374b6f2fa05742d58f4:plugins/deep_algos/deep_classifier/train_deep_classifier.py
     if granular == 'hex':
         vecLen = 257
     else:
@@ -496,9 +511,17 @@ def oneHot(index, granular='hex'):  # pragma: no cover
     return zeroVec
 
 
+<<<<<<< HEAD:plugins/algorithms/deep_classifier/train_deep_classifier.py
+#TODO: add character level encoding
+def oneSessionEncoder(sessionPackets, hexDict, maxPackets = 2, packetTimeSteps = 100,
+                      packetReverse = False, charLevel = False, padOldTimeSteps = True, 
+                      onlyEssentials = False):    
+            
+=======
 def oneSessionEncoder(sessionPackets, hexDict, maxPackets=2, packetTimeSteps=100,
                       packetReverse=False, charLevel=False, padOldTimeSteps=True):  # pragma: no cover
 
+>>>>>>> f587c3de9ea9126fd51da374b6f2fa05742d58f4:plugins/deep_algos/deep_classifier/train_deep_classifier.py
     sessionCollect = []
     packetCollect = []
 
@@ -512,6 +535,22 @@ def oneSessionEncoder(sessionPackets, hexDict, maxPackets=2, packetTimeSteps=100
     else:
         sessionList = copy(sessionPackets)
 
+<<<<<<< HEAD:plugins/algorithms/deep_classifier/train_deep_classifier.py
+    for rawpacket in sessionList:
+        packet = copy(rawpacket)
+        
+        if onlyEssentials: #cat of length,protocol,frag,srcIP,dstIP,srcport,dstport
+            packet = packet[32:36]+packet[44:46]+packet[46:48]+packet[52:60]+packet[60:68]+\
+                     packet[68:72]+packet[72:76]
+        
+        packet = [hexDict[packet[i:i+2]] for i in xrange(0,len(packet)-2+1,2)] #get hex pairs
+            
+        if len(packet) >= packetTimeSteps: #crop packet to length packetTimeSteps rel to hex pairs
+            packet = packet[:packetTimeSteps]
+        
+        packet = packet+[256] #add <EOP> end of packet token
+        
+=======
     for packet in sessionList:
         packet = [hexDict[packet[i:i + 2]]
                   for i in xrange(0, len(packet) - 2 + 1, 2)]
@@ -521,6 +560,7 @@ def oneSessionEncoder(sessionPackets, hexDict, maxPackets=2, packetTimeSteps=100
 
         packet += [256]  # add <EOP> end of packet token
 
+>>>>>>> f587c3de9ea9126fd51da374b6f2fa05742d58f4:plugins/deep_algos/deep_classifier/train_deep_classifier.py
         packetCollect.append(packet)
 
         # one hot encoding of packet into a matrix
@@ -551,6 +591,25 @@ def oneSessionEncoder(sessionPackets, hexDict, maxPackets=2, packetTimeSteps=100
     sessionCollect = np.asarray(sessionCollect, dtype=theano.config.floatX)
     numPacketsInSession = sessionCollect.shape[0]
     if numPacketsInSession < maxPackets:
+<<<<<<< HEAD:plugins/algorithms/deep_classifier/train_deep_classifier.py
+        #pad sessions to fit the 
+        sessionCollect = np.vstack( (sessionCollect,np.zeros((maxPackets-numPacketsInSession, 
+                                                             packetTimeSteps, vecLen))) )
+    
+    return sessionCollect, packetCollect
+
+
+def predictClass(predictFun, hexSessionsDict, comsDict, uniqIPs, hexDict, hexSessionsKeys,
+                 binaryTarget, numClasses, trainPercent = 0.9, dimIn=257, maxPackets=2,
+                 packetTimeSteps = 16, padOldTimeSteps=True):
+    
+    testCollect = []
+    predtargets = []
+    actualtargets = []
+    trainPercent = 0.9
+    trainIndex = int(len(hexSessionsKeys)*trainPercent)
+        
+=======
         # pad sessions to fit the
         sessionCollect = np.vstack((sessionCollect, np.zeros((maxPackets - numPacketsInSession,
                                                               packetTimeSteps, vecLen))))
@@ -659,6 +718,7 @@ def predictClass(predictFun, hexSessionsDict, comsDict, uniqIPs, hexDict, hexSes
     actualtargets = []
     trainIndex = int(len(hexSessionsKeys) * trainPercent)
 
+>>>>>>> f587c3de9ea9126fd51da374b6f2fa05742d58f4:plugins/deep_algos/deep_classifier/train_deep_classifier.py
     start = trainIndex
     end = len(hexSessionsKeys)
 
@@ -669,6 +729,35 @@ def predictClass(predictFun, hexSessionsDict, comsDict, uniqIPs, hexDict, hexSes
         sessionForEncoding = list(
             hexSessionsDict[hexSessionsKeys[trainKey]][0])
 
+<<<<<<< HEAD:plugins/algorithms/deep_classifier/train_deep_classifier.py
+        adfun = adversarialfunctions.Adversary(sessionForEncoding)
+        adversaryList = [sessionForEncoding, 
+                         adfun.dstIpSwapOut(comsDict, uniqIPs),
+                         adfun.portDirSwitcher(),
+                         adfun.ipDirSwitcher(),
+                         adfun.noisyPacketMaker(maxPackets, packetTimeSteps, percentNoisy = 0.2)]
+        if binaryTarget:
+            # choose normal and one of the abnormal types
+            abbyIndex = random.sample([0, random.sample(xrange(1,len(adversaryList)), 1)[0]], 1)[0]
+            if abbyIndex == 0:
+                targetClasses = [1,0]
+            else:
+                targetClasses = [0,1]
+        else:
+            assert len(adversaryList)==numClasses
+            abbyIndex = random.sample(range(len(adversaryList)), 1)[0]
+            targetClasses = [0]*numClasses
+            targetClasses[abbyIndex] = 1
+            
+        abbyIndex = random.sample(range(len(adversaryList)), 1)[0]
+        abbyOneHotSes = oneSessionEncoder(adversaryList[abbyIndex],
+                                          hexDict = hexDict,
+                                          packetReverse=packetReverse, 
+                                          padOldTimeSteps = padOldTimeSteps, 
+                                          maxPackets = maxPackets, 
+                                          packetTimeSteps = packetTimeSteps)
+
+=======
         adversaryList = [sessionForEncoding,
                          dstIpSwapOut(sessionForEncoding, comsDict, uniqIPs),
                          portDirSwitcher(sessionForEncoding),
@@ -684,11 +773,17 @@ def predictClass(predictFun, hexSessionsDict, comsDict, uniqIPs, hexDict, hexSes
         targetClasses = [0] * numClasses
         targetClasses[abbyIndex] = 1
         abbyTarget = np.array(targetClasses, dtype=theano.config.floatX)
+>>>>>>> f587c3de9ea9126fd51da374b6f2fa05742d58f4:plugins/deep_algos/deep_classifier/train_deep_classifier.py
         trainingSessions.append(abbyOneHotSes[0])
-        trainingTargets.append(abbyTarget)
+        trainingTargets.append(np.array(targetClasses, dtype=theano.config.floatX))
 
+<<<<<<< HEAD:plugins/algorithms/deep_classifier/train_deep_classifier.py
+    sessionsMinibatch = np.asarray(trainingSessions, dtype=theano.config.floatX)\
+                                   .reshape((-1, packetTimeSteps, 1, dimIn))
+=======
     sessionsMinibatch = np.asarray(trainingSessions, dtype=theano.config.floatX).reshape(
         (-1, packetTimeSteps, 1, dimIn))
+>>>>>>> f587c3de9ea9126fd51da374b6f2fa05742d58f4:plugins/deep_algos/deep_classifier/train_deep_classifier.py
     targetsMinibatch = np.asarray(trainingTargets, dtype=theano.config.floatX)
 
     predcostfun = predictFun(sessionsMinibatch)
@@ -762,7 +857,8 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
         hexSessions = loadFile(dataPath)
 
     else:
-        hexSessions = read_pcap(dataPath)
+        sessioner = sessionizer.HexSessionizer(dataPath)
+        hexSessions = sessioner.read_pcap()
         hexSessions = removeBadSessionizer(hexSessions)
 
     numSessions = len(hexSessions)
@@ -858,9 +954,15 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
 
     # CREATE GRAPH
     cgClass = ComputationGraph([costClass])
+<<<<<<< HEAD:plugins/algorithms/deep_classifier/train_deep_classifier.py
+    paramsClass = VariableFilter(roles = [PARAMETER])(cgClass.variables)
+    learning = learningfunctions.Learning(costClass,paramsClass,learning_rateClass,l1=0.,l2=0.,maxnorm=0.,c=clippings)
+    updatesClass = learning.Adam() 
+=======
     paramsClass = VariableFilter(roles=[PARAMETER])(cgClass.variables)
     updatesClass = Adam(paramsClass, costClass,
                         learning_rateClass, c=clippings)
+>>>>>>> f587c3de9ea9126fd51da374b6f2fa05742d58f4:plugins/deep_algos/deep_classifier/train_deep_classifier.py
 
     module_logger.info('starting graph compilation')
     classifierTrain = theano.function([X, Y], [costClass, hEnc, hContext, pyx, softoutClass],
@@ -894,6 +996,20 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
 
             # create one minibatch with 0.5 normal and 0.5 abby normal traffic
             for trainKey in range(start, end):
+<<<<<<< HEAD:plugins/algorithms/deep_classifier/train_deep_classifier.py
+                sessionForEncoding = list(hexSessions[hexSessions.keys()[trainKey]][0])
+    
+                adfun = adversarialfunctions.Adversary(sessionForEncoding)
+                adversaryList = [sessionForEncoding, 
+                                 #noisyPacketMaker(sessionForEncoding, maxPackets, packetTimeSteps, percentNoisy = 0.2),
+                                 adfun.dstIpSwapOut(comsDict, uniqIPs),
+                                 adfun.portDirSwitcher(),
+                                 adfun.ipDirSwitcher(),
+                                 #dstIpSwapOut(sessionForEncoding, comsDict, uniqIPs), 
+                                 #portDirSwitcher(sessionForEncoding), 
+                                 #ipDirSwitcher(sessionForEncoding)
+                abbyIndex = random.sample(range(len(adversaryList)), 1)[0]
+=======
                 sessionForEncoding = list(
                     hexSessions[hexSessions.keys()[trainKey]][0])
 
@@ -910,6 +1026,7 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
                                                   padOldTimeSteps=padOldTimeSteps,
                                                   maxPackets=maxPackets,
                                                   packetTimeSteps=packetTimeSteps)
+>>>>>>> f587c3de9ea9126fd51da374b6f2fa05742d58f4:plugins/deep_algos/deep_classifier/train_deep_classifier.py
 
                 targetClasses = [0] * numClasses
                 targetClasses[abbyIndex] = 1
@@ -944,7 +1061,7 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
                                                             hexSessionsKeys,
                                                             numClasses, trainPercent, dimIn, maxPackets, packetTimeSteps,
                                                             padOldTimeSteps)
-                binaryPrecisionRecall(predtar, acttar)
+                binaryPrecisionRecall(predtar, acttar, numClasses)
                 module_logger.info(str(testCollect))
 
             # save the models
