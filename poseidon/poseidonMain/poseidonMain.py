@@ -67,7 +67,7 @@ class PoseidonMain(object):
 
     def __init__(self, skip_rabbit=False):
         ''' poseidonMain initialization '''
-        self.skip_rabbit = False
+        self.skip_rabbit = skip_rabbit
 
         self.rabbit_connection_local = None
         self.rabbit_channel_local = None
@@ -78,7 +78,7 @@ class PoseidonMain(object):
         self.logger = module_logger
         self.logger.debug('logger started')
 
-        self.m_qeueue = Queue.Queue()
+        self.m_queue = Queue.Queue()
         self.shutdown = False
 
         self.mod_configuration = dict()
@@ -127,11 +127,11 @@ class PoseidonMain(object):
             logging.basicConfig(level=logging.DEBUG)
 
     def make_type_val(self, item):
+        ''' search messages and act  '''
         endpoint = None
         value = None
 
         if isinstance(item, types.DictionaryType):
-            ''' search messages and act  '''
             endpoint = item.get('endpoint')
             value = item.get('value')
             if endpoint == 'Main':
@@ -153,6 +153,9 @@ class PoseidonMain(object):
         processing algorithm results.
         '''
         wait = True
+        channel = None
+        connection = None
+
         while wait:
             try:
                 connection = pika.BlockingConnection(
@@ -211,7 +214,7 @@ class PoseidonMain(object):
         ''' handle threading for a messagetype '''
         self.logger.debug('about to start channel {0}'.format(channel))
         channel.basic_consume(
-            partial(mycallback, q=self.m_qeueue), queue=queue, no_ack=True)
+            partial(mycallback, q=self.m_queue), queue=queue, no_ack=True)
         mq_recv_thread = threading.Thread(target=channel.start_consuming)
         mq_recv_thread.start()
 
@@ -237,7 +240,7 @@ class PoseidonMain(object):
             # type , value
             self.logger.debug('about to look for work')
             try:
-                item = self.m_qeueue.get(False)
+                item = self.m_queue.get(False)
                 self.logger.debug('item:{0}'.format(item))
                 workfound = True
             except Queue.Empty:

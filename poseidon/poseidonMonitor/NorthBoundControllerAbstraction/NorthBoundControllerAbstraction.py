@@ -17,16 +17,35 @@
 Created on 17 May 2016
 @author: dgrossman
 """
+import hashlib
 import json
 import logging
+import Queue
+import threading
+import time
+import types
+from functools import partial
+from os import getenv
 
+import pika
 import requests
 
 from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.bcf import BcfProxy
 
+# logging.basicConfig()
 module_logger = logging.getLogger(__name__)
+
+
+def callback(ch, method, properties, body, q=None):
+    module_logger.debug('got a message: {0}'.format(body))
+    # TODO more
+    if q is not None:
+        q.put(body)
+    else:
+        module_logger.error(
+            'NorthBoundControllerAbstraction workQueue is None')
 
 
 class NorthBoundControllerAbstraction(Monitor_Action_Base):
@@ -70,6 +89,116 @@ class Handle_Periodic(Monitor_Helper_Base):
         self.controller['USER'] = None
         self.controller['PASS'] = None
         self.bcf = None
+        self.first_time = True
+        self.prev_endpoints = {}
+        self.new_endpoints = {}
+        self.do_rabbit = True
+        self.m_queue = Queue.Queue()
+        self.rabbit_connection_local = None
+        self.rabbit_channel_local = None
+
+        if getenv('SKIPRABBIT') is None:
+            module_logger.critical('handle_periodic skipping rabbit')
+            self.do_rabbit = False
+        else:
+            module_logger.critical('handle_periodic starting rabbit')
+            self.start_rabbit()
+
+        # @TODO init the rabbitmq
+
+    # rabbit
+    def start_rabbit(self):
+        self.init_rabbit()
+        if self.do_rabbit:
+            self.start_channel(self.rabbit_channel_local,
+                               callback, 'poseidon_internals2')
+
+    def make_type_val(self, item):
+        ''' search messages and act  '''
+        endpoint = None
+        value = None
+
+        if isinstance(item, types.DictionaryType):
+            endpoint = item.get('endpoint')
+            value = item.get('value')
+            if endpoint == 'Main':
+                if value == 'shutdown':
+                    self.shutdown = True
+            return endpoint, value
+        if isinstance(item, types.StringType):
+            endpoint = 'None'
+            value = item
+            return endpoint, value
+
+        endpoint, value = 'Error', 'Error'
+        return endpoint, value
+
+    def make_rabbit_connection(self, host, exchange, queue_name, keys):  # pragma: no cover
+        '''
+        Continuously loops trying to connect to rabbitmq,
+        once connected declares the exchange and queue for
+        processing algorithm results.
+        '''
+        wait = True
+        channel = None
+        connection = None
+        total_sleep = 30
+
+        while wait and total_sleep > 0:
+            try:
+                connection = pika.BlockingConnection(
+                    pika.ConnectionParameters(host=host))
+                channel = connection.channel()
+                channel.exchange_declare(exchange=exchange, type='topic')
+                channel.queue_declare(queue=queue_name, exclusive=True)
+                self.logger.debug(
+                    '************* connected to {0} rabbitMQ'.format(host))
+                wait = False
+            except Exception as e:
+                self.logger.debug(
+                    '************* waiting for {0} rabbitQM'.format(host))
+                self.logger.debug(str(e))
+                time.sleep(2)
+                total_sleep -= 2
+                wait = True
+
+        if wait:
+            self.do_rabbit = False
+
+        if isinstance(keys, types.ListType) and not wait:
+            for key in keys:
+                self.logger.debug(
+                    'array adding key:{0} to rabbitmq channel'.format(key))
+                channel.queue_bind(exchange=exchange,
+                                   queue=queue_name,
+                                   routing_key=key)
+
+        if isinstance(keys, types.StringType) and not wait:
+            self.logger.debug(
+                'string adding key:{0} to rabbitmq channel'.format(keys))
+            channel.queue_bind(exchange=exchange,
+                               queue=queue_name, routing_key=keys)
+
+        return channel, connection
+
+    def init_rabbit(self):  # pragma: no cover
+        ''' init_rabbit '''
+        host = 'poseidon-rabbit'
+        exchange = 'topic-poseidon-internal'
+        queue_name = 'poseidon_internals2'
+        binding_key = ['poseidon.algos.#', 'poseidon.action.#']
+        retval = self.make_rabbit_connection(
+            host, exchange, queue_name, binding_key)
+        self.rabbit_channel_local = retval[0]
+        self.rabbit_connection_local = retval[1]
+
+    def start_channel(self, channel, mycallback, queue):
+        ''' handle threading for a messagetype '''
+        self.logger.debug('about to start channel {0}'.format(channel))
+        channel.basic_consume(
+            partial(mycallback, q=self.m_queue), queue=queue, no_ack=True)
+        mq_recv_thread = threading.Thread(target=channel.start_consuming)
+        mq_recv_thread.start()
 
     def first_run(self):
         if self.configured:
@@ -91,10 +220,19 @@ class Handle_Periodic(Monitor_Helper_Base):
         else:
             pass
 
+    @staticmethod
+    def make_hash(item):
+        h = hashlib.new('ripemd160')
+        pre_h = str()
+        post_h = None
+        for word in ['tenant', 'mac', 'segment', 'name', 'ip-address']:
+            pre_h = pre_h + str(item.get(str(word), 'missing'))
+        h.update(pre_h)
+        post_h = h.hexdigest()
+        return post_h
+
     def on_get(self, req, resp):
-        """Haneles Get requests"""
-        # TODO MSG NBCA to get switch state
-        # TODO compare to previous switch state
+        """Handles Get requests"""
         # TODO schedule something to occur for updated flows
 
         self.retval['service'] = self.owner.mod_name + ':' + self.mod_name
@@ -102,16 +240,57 @@ class Handle_Periodic(Monitor_Helper_Base):
         self.retval['machines'] = None
         self.retval['resp'] = 'bad'
 
+        current = None
+        parsed = None
+        workfound = False
+        item = None
         try:
             current = self.bcf.get_endpoints()
             parsed = self.bcf.format_endpoints(current)
-            self.retval['machines'] = parsed
-            self.retval['resp'] = 'ok'
         except:
             self.logger.error(
                 'Could not establish connection to {0}.'.format(self.controller['URI']))
             self.retval['controller'] = 'Could not establish connection to {0}.'.format(
                 self.controller['URI'])
+
+        # type , value
+        self.logger.debug('about to look for work')
+        try:
+            item = self.m_queue.get(False)
+            self.logger.debug('item:{0}'.format(item))
+            workfound = True
+        except Queue.Empty:
+            pass
+        self.logger.debug('done looking for work!')
+
+        if workfound:
+            self.logger.debug(
+                'should be working on something: {0}'.format(item))
+
+        machines = parsed
+
+        if self.first_time:
+            self.first_time = False
+            # @TODO db call to see if really need to run things
+            for machine in machines:
+                h = self.make_hash(machine)
+                module_logger.critical(
+                    'adding  address to known systems {0}'.format(machine))
+                self.prev_endpoints[h] = machine
+        else:
+            for machine in machines:
+                h = self.make_hash(machine)
+                if h not in self.prev_endpoints:
+                    module_logger.critical(
+                        '***** detected new address {0}'.format(machine))
+                    self.new_endpoints[h] = machine
+
+        for hashed, machine in self.new_endpoints.iteritems():
+            # @TODO write findings to main
+            pass
+
+        self.retval['machines'] = parsed
+        self.retval['resp'] = 'ok'
 
         # TODO change response to something reflecting success of traversal
 
