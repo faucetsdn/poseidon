@@ -20,10 +20,10 @@ Created on 23 June 2016
 @author: Travis Lanham
 """
 import time
-
 import pytest
 import sys
 import os
+
 from dns_verify import get_path
 from dns_verify import get_host
 from dns_verify import dns_records
