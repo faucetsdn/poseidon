@@ -141,7 +141,7 @@ def db_update_worker():
 
 
 network_machines = []
-flow = None
+flow = FlowRecord()
 
 
 def analyze_pcap(ch, method, properties, body):
