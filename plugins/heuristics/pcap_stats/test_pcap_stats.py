@@ -226,9 +226,9 @@ def test_analyze_pcap():
         '136.145.402.267').get_packet_len_std_dev('sent')
     assert math.floor(stdev) == 33
     assert pcap_stats.flow.get_machine_node(
-        '136.145.402.267').get_pcap_stats.flow_duration('sent') == 0.0
+        '136.145.402.267').get_flow_duration('sent') == 0.0
     assert pcap_stats.flow.get_machine_node(
-        '350.137.451.220').get_pcap_stats.flow_duration('received') == 0.0
+        '350.137.451.220').get_flow_duration('received') == 0.0
 
     analyze_pcap(ch, method, properties, out_to_net)
     assert pcap_stats.flow.get_machine_node('q.w.e.r') is None
