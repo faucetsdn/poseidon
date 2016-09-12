@@ -15,5 +15,6 @@ ADD requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 ADD dns_verify.py dns_verify.py
 
-ENTRYPOINT ["python", "dns_verify.py", "poseidon.tcpdump_parser.dns.#"]
+# entrypoint and cmd for vent injection of file name
+ENTRYPOINT ["python", "dns_verify.py"]
 CMD [""]

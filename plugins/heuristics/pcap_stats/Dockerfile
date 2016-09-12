@@ -16,5 +16,6 @@ RUN pip install -r requirements.txt
 ADD pcap_stats.py pcap_stats.py 
 ADD pcap_stats_utils.py pcap_stats_utils.py
 
-ENTRYPOINT ["python", "pcap_stats.py", "poseidon.tcpdump_parser.#"]
-CMD ["python", "pcap_stats.py", "poseidon.tcpdump_parser.#"]
+# entrypoint and cmd for vent injection of file name
+ENTRYPOINT ["python", "pcap_stats.py"]
+CMD [""]

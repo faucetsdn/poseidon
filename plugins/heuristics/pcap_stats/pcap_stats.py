@@ -35,6 +35,7 @@ import sys
 import thread
 import threading
 import time
+import os
 
 import pika
 import requests

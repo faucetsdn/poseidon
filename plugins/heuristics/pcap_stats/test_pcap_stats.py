@@ -26,6 +26,7 @@ from pcap_stats import get_host
 from pcap_stats import analyze_pcap
 from pcap_stats import network_machines
 from pcap_stats import rabbit_init
+from pcap_stats import flow
 from pcap_stats_utils import FlowRecord
 from pcap_stats_utils import MachineNode
 from pcap_stats_utils import TimeRecord
@@ -199,9 +200,9 @@ def test_analyze_pcap():
     network_machines.append('136.145.402.267')
     network_machines.append('24.56.78.90')
     network_machines.append('350.137.451.220')
-    f = FlowRecord()
+    flow = FlowRecord()
 
-    analyze_pcap(ch, method, properties, net_to_net, f)
+    analyze_pcap(ch, method, properties, net_to_net)
     assert isinstance(f.machines, dict)
     assert f.get_machine_node('136.145.402.267').num_packets_sent == 1
     assert f.get_machine_node(
@@ -212,7 +213,7 @@ def test_analyze_pcap():
     assert f.get_machine_node(
         '350.137.451.220').get_mean_packet_len('rec') == 43.0
 
-    analyze_pcap(ch, method, properties, net_to_out, f)
+    analyze_pcap(ch, method, properties, net_to_out)
     assert f.get_machine_node('h.j.k.l') is None
     assert f.get_machine_node('136.145.402.267').num_packets_sent == 2
     assert f.get_machine_node(
@@ -225,7 +226,7 @@ def test_analyze_pcap():
     assert f.get_machine_node(
         '350.137.451.220').get_flow_duration('received') == 0.0
 
-    analyze_pcap(ch, method, properties, out_to_net, f)
+    analyze_pcap(ch, method, properties, out_to_net)
     assert f.get_machine_node('q.w.e.r') is None
     assert f.get_machine_node('24.56.78.90').num_packets_rec == 1
     assert f.get_machine_node(
@@ -250,7 +251,7 @@ def test_analyze_pcap():
         three_rec[mac] = freq
     assert three_rec['136.145.402.267'] == 1
 
-    analyze_pcap(ch, method, properties, out_to_out, f)
+    analyze_pcap(ch, method, properties, out_to_out)
 
 
 @pytest.mark.skip(reason='requires rabbitmq broker, integration test')

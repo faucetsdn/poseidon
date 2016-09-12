@@ -25,4 +25,6 @@ RUN cp flowtbag /go/src/flowparser/
 # set workdir to flowparser
 WORKDIR /go/src/flowparser
 
+# entrypoint and cmd set for vent injection to append file name
 ENTRYPOINT ["go", "run", "flowparser.go"]
+CMD [""]
