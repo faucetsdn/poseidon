@@ -21,7 +21,7 @@ Test module for machine learning algorithm
 for classifying device type from tcp packets.
 """
 import pytest
-from dev_classifier import rabbit_init
+from train_dev_classifier import rabbit_init
 
 
 @pytest.mark.skip(reason='requires rabbitmq broker, integration test')

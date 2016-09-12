@@ -30,7 +30,7 @@ from pcap_stats import get_host
 from pcap_stats import analyze_pcap
 from pcap_stats import network_machines
 from pcap_stats import rabbit_init
-from pcap_stats_utils import pcap_stats.flowRecord
+from pcap_stats_utils import FlowRecord
 from pcap_stats_utils import MachineNode
 from pcap_stats_utils import TimeRecord
 
