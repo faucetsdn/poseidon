@@ -33,6 +33,28 @@ import logging
 module_logger = logging.getLogger(__name__)
 
 
+def get_path():
+    try:
+        path_name = sys.argv[1]
+    except:
+        module_logger.debug('no argv[1] for pathname')
+        path_name = None
+    return path_name
+
+
+def get_host():
+    """
+    Checks for poseidon host env
+    variable and returns it if found,
+    otherwise logs error.
+    """
+    if 'POSEIDON_HOST' in os.environ:
+        return os.environ['POSEIDON_HOST']
+    else:
+        module_logger.debug('POSEIDON_HOST environment variable not found')
+        return None
+
+
 def rabbit_init(host, exchange, queue_name):  # pragma: no cover
     """
     Connects to rabbitmq using the given hostname,
