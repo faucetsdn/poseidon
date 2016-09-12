@@ -21,6 +21,9 @@ Created on 23 June 2016
 """
 import math
 import pytest
+import sys
+import os
+
 from pcap_stats import get_path
 from pcap_stats import get_host
 from pcap_stats import analyze_pcap
