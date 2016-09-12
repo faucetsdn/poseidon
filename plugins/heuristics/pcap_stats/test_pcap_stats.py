@@ -24,13 +24,13 @@ import pytest
 import sys
 import os
 
+import pcap_stats
 from pcap_stats import get_path
 from pcap_stats import get_host
 from pcap_stats import analyze_pcap
 from pcap_stats import network_machines
 from pcap_stats import rabbit_init
-from pcap_stats import flow
-from pcap_stats_utils import FlowRecord
+from pcap_stats_utils import pcap_stats.flowRecord
 from pcap_stats_utils import MachineNode
 from pcap_stats_utils import TimeRecord
 
@@ -78,7 +78,7 @@ def test_machine_node_class():
         assert mac == 'a.b.c.google'
         assert freq == 1
 
-    n.add_pcap_record(10, 'd.e.flow.x', False)
+    n.add_pcap_record(10, 'd.e.pcap_stats.flow.x', False)
     assert n.num_packets_sent == 2
     assert n.get_mean_packet_len('sent') == 30.0
 
@@ -86,7 +86,7 @@ def test_machine_node_class():
     for mac, freq in n.get_machines_sent_to():
         sent[mac] = freq
     assert sent['a.b.c.google'] == 1
-    assert sent['d.e.flow.x'] == 1
+    assert sent['d.e.pcap_stats.flow.x'] == 1
 
     n.add_pcap_record(10, 'a.b.c.google', True)
     assert n.num_packets_rec == 2
@@ -96,54 +96,54 @@ def test_machine_node_class():
         assert freq == 2
 
 
-def test_flow_record_class():
-    flow = FlowRecord()
-    assert isinstance(flow.machines, dict)
-    flow.update('a.b.c.d', True, '99.88.77.66', False, 150, None)
-    assert flow.get_machine_node('a.b.c.d').num_packets_sent == 1
-    assert flow.get_machine_node('a.b.c.d').get_mean_packet_len('sent') == 150.0
-    for mac, freq in flow.machines['a.b.c.d'].get_machines_sent_to():
+def test_pcap_stats.flow_record_class():
+    pcap_stats.flow = FlowRecord()
+    assert isinstance(pcap_stats.flow.machines, dict)
+    pcap_stats.flow.update('a.b.c.d', True, '99.88.77.66', False, 150, None)
+    assert pcap_stats.flow.get_machine_node('a.b.c.d').num_packets_sent == 1
+    assert pcap_stats.flow.get_machine_node('a.b.c.d').get_mean_packet_len('sent') == 150.0
+    for mac, freq in pcap_stats.flow.machines['a.b.c.d'].get_machines_sent_to():
         assert mac == '99.88.77.66'
         assert freq == 1
 
-    assert flow.get_machine_node('99.88.77.66') is None
+    assert pcap_stats.flow.get_machine_node('99.88.77.66') is None
 
-    flow.update('204.63.227.78', True, 'a.b.c.d', True, 50, None)
-    assert flow.get_machine_node('a.b.c.d').num_packets_rec == 1
-    assert flow.get_machine_node('a.b.c.d').get_mean_packet_len('rec') == 50.0
-    assert flow.get_machine_node('204.63.227.78').num_packets_sent == 1
-    assert flow.get_machine_node(
+    pcap_stats.flow.update('204.63.227.78', True, 'a.b.c.d', True, 50, None)
+    assert pcap_stats.flow.get_machine_node('a.b.c.d').num_packets_rec == 1
+    assert pcap_stats.flow.get_machine_node('a.b.c.d').get_mean_packet_len('rec') == 50.0
+    assert pcap_stats.flow.get_machine_node('204.63.227.78').num_packets_sent == 1
+    assert pcap_stats.flow.get_machine_node(
         '204.63.227.78').get_mean_packet_len('sent') == 50.0
-    for mac, freq in flow.get_machine_node(
+    for mac, freq in pcap_stats.flow.get_machine_node(
             'a.b.c.d').get_machines_received_from():
         assert mac == '204.63.227.78'
         assert freq == 1
 
-    flow.update('a.b.c.d', True, '204.63.227.78', True, 30, None)
-    assert flow.get_machine_node('a.b.c.d').num_packets_sent == 2
-    assert flow.get_machine_node('a.b.c.d').get_mean_packet_len('sent') >= 76
-    assert flow.get_machine_node('204.63.227.78').num_packets_rec == 1
-    assert flow.get_machine_node('204.63.227.78').num_packets_sent == 1
-    assert flow.get_machine_node(
+    pcap_stats.flow.update('a.b.c.d', True, '204.63.227.78', True, 30, None)
+    assert pcap_stats.flow.get_machine_node('a.b.c.d').num_packets_sent == 2
+    assert pcap_stats.flow.get_machine_node('a.b.c.d').get_mean_packet_len('sent') >= 76
+    assert pcap_stats.flow.get_machine_node('204.63.227.78').num_packets_rec == 1
+    assert pcap_stats.flow.get_machine_node('204.63.227.78').num_packets_sent == 1
+    assert pcap_stats.flow.get_machine_node(
         '204.63.227.78').get_mean_packet_len('rec') == 30.0
 
     abcd_sent = {}
-    for mac, freq in flow.get_machine_node('a.b.c.d').get_machines_sent_to():
+    for mac, freq in pcap_stats.flow.get_machine_node('a.b.c.d').get_machines_sent_to():
         abcd_sent[mac] = freq
     assert abcd_sent['99.88.77.66'] == 1
     assert abcd_sent['204.63.227.78'] == 1
     abcd_rec = {}
-    for mac, freq in flow.get_machine_node(
+    for mac, freq in pcap_stats.flow.get_machine_node(
             'a.b.c.d').get_machines_received_from():
         abcd_rec[mac] = freq
     assert abcd_rec['204.63.227.78'] == 1
     two_sent = {}
-    for mac, freq in flow.get_machine_node(
+    for mac, freq in pcap_stats.flow.get_machine_node(
             '204.63.227.78').get_machines_sent_to():
         two_sent[mac] = freq
     assert two_sent['a.b.c.d'] == 1
     two_rec = {}
-    for mac, freq in flow.get_machine_node(
+    for mac, freq in pcap_stats.flow.get_machine_node(
             '204.63.227.78').get_machines_received_from():
         two_rec[mac] = freq
     assert two_rec['a.b.c.d'] == 1
@@ -203,53 +203,53 @@ def test_analyze_pcap():
     network_machines.append('136.145.402.267')
     network_machines.append('24.56.78.90')
     network_machines.append('350.137.451.220')
-    flow = FlowRecord()
+    pcap_stats.pcap_stats.flow = FlowRecord()
 
     analyze_pcap(ch, method, properties, net_to_net)
-    assert isinstance(flow.machines, dict)
-    assert flow.get_machine_node('136.145.402.267').num_packets_sent == 1
-    assert flow.get_machine_node(
+    assert isinstance(pcap_stats.flow.machines, dict)
+    assert pcap_stats.flow.get_machine_node('136.145.402.267').num_packets_sent == 1
+    assert pcap_stats.flow.get_machine_node(
         '136.145.402.267').get_mean_packet_len('sent') == 43.0
-    assert flow.get_machine_node('136.145.402.267').get_packet_len_std_dev(
+    assert pcap_stats.flow.get_machine_node('136.145.402.267').get_packet_len_std_dev(
         'rec') == 'Error retrieving standard deviation.'
-    assert flow.get_machine_node('350.137.451.220').num_packets_rec == 1
-    assert flow.get_machine_node(
+    assert pcap_stats.flow.get_machine_node('350.137.451.220').num_packets_rec == 1
+    assert pcap_stats.flow.get_machine_node(
         '350.137.451.220').get_mean_packet_len('rec') == 43.0
 
     analyze_pcap(ch, method, properties, net_to_out)
-    assert flow.get_machine_node('h.j.k.l') is None
-    assert flow.get_machine_node('136.145.402.267').num_packets_sent == 2
-    assert flow.get_machine_node(
+    assert pcap_stats.flow.get_machine_node('h.j.k.l') is None
+    assert pcap_stats.flow.get_machine_node('136.145.402.267').num_packets_sent == 2
+    assert pcap_stats.flow.get_machine_node(
         '136.145.402.267').get_mean_packet_len('sent') == 66.5
-    stdev = flow.get_machine_node(
+    stdev = pcap_stats.flow.get_machine_node(
         '136.145.402.267').get_packet_len_std_dev('sent')
     assert math.floor(stdev) == 33
-    assert flow.get_machine_node(
-        '136.145.402.267').get_flow_duration('sent') == 0.0
-    assert flow.get_machine_node(
-        '350.137.451.220').get_flow_duration('received') == 0.0
+    assert pcap_stats.flow.get_machine_node(
+        '136.145.402.267').get_pcap_stats.flow_duration('sent') == 0.0
+    assert pcap_stats.flow.get_machine_node(
+        '350.137.451.220').get_pcap_stats.flow_duration('received') == 0.0
 
     analyze_pcap(ch, method, properties, out_to_net)
-    assert flow.get_machine_node('q.w.e.r') is None
-    assert flow.get_machine_node('24.56.78.90').num_packets_rec == 1
-    assert flow.get_machine_node(
+    assert pcap_stats.flow.get_machine_node('q.w.e.r') is None
+    assert pcap_stats.flow.get_machine_node('24.56.78.90').num_packets_rec == 1
+    assert pcap_stats.flow.get_machine_node(
         '24.56.78.90').get_mean_packet_len('rec') == 180.0
 
     one_sent = {}
-    for mac, freq in flow.get_machine_node(
+    for mac, freq in pcap_stats.flow.get_machine_node(
             '136.145.402.267').get_machines_sent_to():
         one_sent[mac] = freq
     assert one_sent['350.137.451.220'] == 1
     assert one_sent['h.j.k.l'] == 1
 
     two_rec = {}
-    for mac, freq in flow.get_machine_node(
+    for mac, freq in pcap_stats.flow.get_machine_node(
             '24.56.78.90').get_machines_received_from():
         two_rec[mac] = freq
     assert two_rec['q.w.e.r'] == 1
 
     three_rec = {}
-    for mac, freq in flow.get_machine_node(
+    for mac, freq in pcap_stats.flow.get_machine_node(
             '350.137.451.220').get_machines_received_from():
         three_rec[mac] = freq
     assert three_rec['136.145.402.267'] == 1
