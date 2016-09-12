@@ -23,5 +23,7 @@ RUN pip install pip --upgrade
 RUN pip install -r requirements.txt
 
 ADD port_classifier.py port_classifier.py
-ENTRYPOINT ["python", "port_classifier.py", "poseidon.flowparser"]
+
+# added entrypoint and cmd for vent injection of file name
+ENTRYPOINT ["python", "port_classifier.py"]
 CMD [""]
