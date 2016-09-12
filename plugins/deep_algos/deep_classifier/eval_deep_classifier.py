@@ -28,6 +28,8 @@ rabbitmq:
 """
 import cPickle
 import logging
+import sys
+import os
 
 
 module_logger = logging.getLogger(__name__)
