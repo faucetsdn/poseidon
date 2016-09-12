@@ -13,3 +13,21 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+import pytest
+import sys
+import os
+
+from eval_dev_classifier import get_path
+from eval_dev_classifier import get_host
+
+
+def test_get_path():
+    get_path()
+    sys.argv = []
+    get_path()
+
+
+def test_get_host():
+    get_host()
+    os.environ['POSEIDON_HOST'] = '1.1.1.1'
+    assert get_host() == '1.1.1.1'

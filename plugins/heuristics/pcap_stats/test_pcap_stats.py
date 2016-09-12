@@ -96,7 +96,7 @@ def test_machine_node_class():
         assert freq == 2
 
 
-def test_pcap_stats.flow_record_class():
+def test_flow_record_class():
     pcap_stats.flow = FlowRecord()
     assert isinstance(pcap_stats.flow.machines, dict)
     pcap_stats.flow.update('a.b.c.d', True, '99.88.77.66', False, 150, None)
@@ -147,6 +147,7 @@ def test_pcap_stats.flow_record_class():
             '204.63.227.78').get_machines_received_from():
         two_rec[mac] = freq
     assert two_rec['a.b.c.d'] == 1
+    pcap_stats.flow = None
 
 
 def test_analyze_pcap():
