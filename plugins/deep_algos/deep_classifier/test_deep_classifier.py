@@ -24,8 +24,9 @@ headers.
 import pytest
 import re
 
-from eval_deep_classifier import get_path
-from eval_deep_classifier import get_host
+from train_deep_classifier import get_path
+from train_deep_classifier import get_host
+
 from eval_deep_classifier import load_model
 from eval_deep_classifier import rabbit_init
 
