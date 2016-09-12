@@ -389,15 +389,15 @@ def predictClass(predictFun, hexSessionsDict, comsDict, uniqIPs, hexDict, hexSes
             # choose normal and one of the abnormal types
             abbyIndex = random.sample([0, random.sample(xrange(1,len(adversaryList)), 1)[0]], 1)[0]
             if abbyIndex == 0:
-                targetClasses = [1,0]
+                targetClasses = [1, 0]
             else:
-                targetClasses = [0,1]
+                targetClasses = [0, 1]
         else:
-            assert len(adversaryList)==numClasses
+            assert len(adversaryList) == numClasses
             abbyIndex = random.sample(range(len(adversaryList)), 1)[0]
             targetClasses = [0]*numClasses
             targetClasses[abbyIndex] = 1
-            
+
         abbyIndex = random.sample(range(len(adversaryList)), 1)[0]
         abbyOneHotSes = oneSessionEncoder(adversaryList[abbyIndex],
                                           hexDict = hexDict,

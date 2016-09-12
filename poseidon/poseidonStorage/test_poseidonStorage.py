@@ -155,7 +155,7 @@ def test_db_collection_query(client):
     and 'docs' fields.
     """
     query = {}
-    query = bson.BSON.encode(query)
+    query = json.dumps(query)
     resp = client.get('/v1/storage/query/' + 'local/' + 'startup_log/' + query)
     assert resp.status == falcon.HTTP_OK
     resp = json.loads(resp.body)
