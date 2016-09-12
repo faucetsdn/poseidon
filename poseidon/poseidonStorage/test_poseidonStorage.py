@@ -155,7 +155,7 @@ def test_db_collection_query(client):
     and 'docs' fields.
     """
     query = {}
-    query = bson.BSON.encode(query)
+    query = json.dumps(query)
     resp = client.get('/v1/storage/query/' + 'local/' + 'startup_log/' + query)
     assert resp.status == falcon.HTTP_OK
     resp = json.loads(resp.body)
@@ -215,13 +215,13 @@ def test_db_add_one_doc(client):
 
     # test a query of the inserted collection with a bad object id
     query = {'_id': 'xyz'}
-    query = bson.BSON.encode(query)
+    query = json.dumps(query)
     resp = client.get('/v1/storage/query/' + 'poseidon_records/' + 'network_graph/' + query)
     assert resp.status == falcon.HTTP_BAD_REQUEST
 
     # test a proper query of the collection for the inserted doc by id
     query = {'_id': doc_id}
-    query = bson.BSON.encode(query)
+    query = json.dumps(query)
     resp = client.get('/v1/storage/query/' + 'poseidon_records/' + 'network_graph/' + query)
     assert resp.status == falcon.HTTP_OK
     resp = json.loads(resp.body)
@@ -229,7 +229,7 @@ def test_db_add_one_doc(client):
 
     # test a collection query using the node_ip
     query = {'node_ip': 'TEST'}
-    query = bson.BSON.encode(query)
+    query = json.dumps(query)
     resp = client.get('/v1/storage/query/' + 'poseidon_records/' + 'network_graph/' + query)
     assert resp.status == falcon.HTTP_OK
     resp = json.loads(resp.body)
@@ -266,7 +266,7 @@ def test_db_add_many_docs(client):
 
     # check that inserted docs are in collection
     query = {}
-    query = bson.BSON.encode(query)
+    query = json.dumps(query)
     resp = client.get('/v1/storage/query/' + 'poseidon_records/' + 'network_graph/' + query)
     assert resp.status == falcon.HTTP_OK
     resp = json.loads(resp.body)

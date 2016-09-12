@@ -80,7 +80,7 @@ class poseidonStorage:
             self.config.readfp(
                 open('/poseidonWork/config/poseidon.config'))
             database_container_ip = self.config.get('database', 'ip')
-        except: # pragma: no cover
+        except:  # pragma: no cover
             raise ValueError(
                 'poseidonStorage: could not find database ip address.')
         self.client = MongoClient(host=database_container_ip)
@@ -156,7 +156,7 @@ class db_collection_count(poseidonStorage):
     """
 
     def on_get(self, req, resp, database, collection):
-        try:     
+        try:
             ret = self.client[database][collection].count()
         except:  # pragma: no cover
             ret = 'Error retrieving collection doc count.'
@@ -195,7 +195,7 @@ class db_collection_query(poseidonStorage):
         URL:        /v1/storage/query/{database}/{collection}/{query_str}
         Method:     GET
         Attributes: query_str should be a serialized string of a
-                    mapping object - bson encoded
+                    mapping object - json encoded
     Response:
         Body:       json encoded dict with 'count' of docs
                     matching the query and 'docs' list of
@@ -206,8 +206,7 @@ class db_collection_query(poseidonStorage):
     def on_get(self, req, resp, database, collection, query_str):
         ret = {}
         try:
-            query = bson.BSON(query_str)
-            query = query.decode()
+            query = json.loads(query_str)
             if '_id' in query:
                 query['_id'] = ObjectId(query['_id'])
 
@@ -220,15 +219,18 @@ class db_collection_query(poseidonStorage):
                     doc_list.append(doc)
                 ret['docs'] = doc_list
                 ret['count'] = cursor.count()
-        except bsonInputExceptions:  # pragma: no cover
+        except bsonInputExceptions, e:  # pragma: no cover
             ret['count'] = -1
+            ret['error'] = str(e)
             resp.status = falcon.HTTP_BAD_REQUEST
-        except TypeError, e:  # pragma: no cover
+        except (TypeError, ValueError), e:  # pragma: no cover
             # bad query string
             ret['count'] = -1
+            ret['error'] = str(e)
             resp.status = falcon.HTTP_BAD_REQUEST
         except Exception, e:  # pragma: no cover
             ret['count'] = -1
+            ret['error'] = str(e)
             resp.status = falcon.HTTP_INTERNAL_SERVER_ERROR
         resp.body = MongoJSONEncoder().encode(ret)
 
