@@ -22,11 +22,25 @@ Created on 23 June 2016
 import time
 
 import pytest
+from dns_verify import get_path
+from dns_verify import get_host
 from dns_verify import dns_records
 from dns_verify import DNSRecord
 from dns_verify import network_machines
 from dns_verify import rabbit_init
 from dns_verify import verify_dns_record
+
+
+def test_get_path():
+    get_path()
+    sys.argv = []
+    get_path()
+
+
+def test_get_host():
+    get_host()
+    os.environ['POSEIDON_HOST'] = '1.1.1.1'
+    assert get_host() == '1.1.1.1'
 
 
 def test_dns_record_class():

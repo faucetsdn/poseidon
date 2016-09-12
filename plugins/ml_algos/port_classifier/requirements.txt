@@ -4,4 +4,3 @@ scipy
 numpy
 pika
 requests
-bson

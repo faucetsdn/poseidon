@@ -21,12 +21,26 @@ Created on 23 June 2016
 """
 import math
 import pytest
+from pcap_stats import get_path
+from pcap_stats import get_host
 from pcap_stats import analyze_pcap
 from pcap_stats import network_machines
 from pcap_stats import rabbit_init
 from pcap_stats_utils import FlowRecord
 from pcap_stats_utils import MachineNode
 from pcap_stats_utils import TimeRecord
+
+
+def test_get_path():
+    get_path()
+    sys.argv = []
+    get_path()
+
+
+def test_get_host():
+    get_host()
+    os.environ['POSEIDON_HOST'] = '1.1.1.1'
+    assert get_host() == '1.1.1.1'
 
 
 def test_time_record_class():
