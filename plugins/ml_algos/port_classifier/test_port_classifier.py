@@ -23,6 +23,7 @@ for classifying ports from tcp packets.
 import pytest
 import sys
 import os
+
 from port_classifier import rabbit_init
 from port_classifier import get_path
 from port_classifier import get_host

@@ -16,10 +16,8 @@
 """
 Created on 24 August 2016
 @author: bradh41, tlanham
-
 Deep learning module to classify
 packets based on hex headers.
-
 rabbitmq:
     host:       poseidon-rabbit
     exchange:   topic-poseidon-internal
@@ -61,7 +59,29 @@ from theano import tensor as T
 module_logger = logging.getLogger(__name__)
 
 
-def rabbit_init(host, exchange, queue_name):  # pragma: no cover
+def get_path():
+    try:
+        path_name = sys.argv[1]
+    except:
+        module_logger.debug('no argv[1] for pathname')
+        path_name = None
+    return path_name
+
+
+def get_host():
+    """
+    Checks for poseidon host env
+    variable and returns it if found,
+    otherwise logs error.
+    """
+    if 'POSEIDON_HOST' in os.environ:
+        return os.environ['POSEIDON_HOST']
+    else:
+        module_logger.debug('POSEIDON_HOST environment variable not found')
+        return None
+
+
+def rabbit_init(host, exchange, queue_name, rabbit_rec):  # pragma: no cover
     """
     Connects to rabbitmq using the given hostname,
     exchange, and queue. Retries on failure until success.
@@ -72,7 +92,7 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
     while wait:
         try:
             connection = pika.BlockingConnection(
-                pika.ConnectionParameters(host=host))
+                              pika.ConnectionParameters(host=host))
             channel = connection.channel()
             channel.exchange_declare(exchange=exchange, type='topic')
             result = channel.queue_declare(queue=queue_name, exclusive=True)
@@ -87,16 +107,17 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
             time.sleep(2)
             wait = True
 
-    binding_keys = sys.argv[1:]
-    if not binding_keys:
-        ostr = 'Usage: %s [binding_key]...' % (sys.argv[0])
-        module_logger.error(ostr)
-        sys.exit(1)
+    if rabbit_rec:
+        binding_keys = sys.argv[1:]
+        if not binding_keys:
+            ostr = 'Usage: {0} [binding_key]...'.format(sys.argv[0])
+            module_logger.error(ostr)
+            sys.exit(1)
 
-    for binding_key in binding_keys:
-        channel.queue_bind(exchange=exchange,
-                           queue=queue_name,
-                           routing_key=binding_key)
+        for binding_key in binding_keys:
+            channel.queue_bind(exchange=exchange,
+                               queue=queue_name,
+                               routing_key=binding_key)
 
     module_logger.info(' [*] Waiting for logs. To exit press CTRL+C')
     return channel, connection
@@ -154,7 +175,7 @@ def removeBadSessionizer(hexSessionDict, saveFile=False, dataPath=None, fileName
         paclens = []
         for pac in hexSessionDict[ses][0]:
             paclens.append(len(pac))
-        if np.min(paclens)<80:
+        if np.min(paclens) < 80:
             del hexSessionDict[ses]
 
     if saveFile:
@@ -651,15 +672,24 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
     return classifierTrain, classifierPredict
 
 
-if __name__ == '__main__':
-    host = 'poseidon-rabbit'
+def run_plugin(path, host):  # pragma: no cover
     exchange = 'topic-poseidon-internal'
-    queue_name = 'NAME'
-    #channel, connection = rabbit_init(host=host,
-    #                                  exchange=exchange,
-    #                                  queue_name=queue_name)
-    print 'starting program'
-    dataPath = 'testpcap.cap'
-    train, predict = training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOldTimeSteps, wtstd, 
-             lr, decay, clippings, dimIn, dim, numClasses, batch_size, epochs, 
-             trainPercent, dataPath, loadPrepedData)
+    queue_name = 'poseidon_internals'
+
+    channel, connection = rabbit_init(host=host,
+                                      exchange=exchange,
+                                      queue_name=queue_name,
+                                      rabbit_rec=False)
+
+    train, predict = training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOldTimeSteps, wtstd,
+                              lr, decay, clippings, dimIn, dim, numClasses, batch_size, epochs,
+                              trainPercent, path, loadPrepedData)
+
+
+if __name__ == '__main__':
+    path_name = get_path()
+    host = get_host()
+    if path_name and host:
+        run_plugin(path_name, host)
+
+    print 'program completed'

@@ -14,22 +14,23 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Created on 24 August 2016
-@author: bradh41, tlanham
+Created on 12 September 2016
+@author: tlanham, aganeshLab41
 
-Evaluation module for deep learning
-model to classify packets based on
-hex headers.
+Evaluation module for logistic regression
+device classifier.
 
 rabbitmq:
     host:       poseidon-rabbit
     exchange:   topic-poseidon-internal
-    queue:
+    key (out):	poseidon.algos.eval_dev_class
 """
 import cPickle
 import logging
-import sys
 import os
+import sys
+import time
+import json
 
 
 module_logger = logging.getLogger(__name__)
@@ -57,7 +58,7 @@ def get_host():
         return None
 
 
-def rabbit_init(host, exchange, queue_name):  # pragma: no cover
+def rabbit_init(host, exchange, queue_name, rabbit_rec):  # pragma: no cover
     """
     Connects to rabbitmq using the given hostname,
     exchange, and queue. Retries on failure until success.
@@ -68,7 +69,7 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
     while wait:
         try:
             connection = pika.BlockingConnection(
-                pika.ConnectionParameters(host=host))
+                              pika.ConnectionParameters(host=host))
             channel = connection.channel()
             channel.exchange_declare(exchange=exchange, type='topic')
             result = channel.queue_declare(queue=queue_name, exclusive=True)
@@ -83,44 +84,39 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
             time.sleep(2)
             wait = True
 
-    binding_keys = sys.argv[1:]
-    if not binding_keys:
-        ostr = 'Usage: {0} [binding_key]...'.format(sys.argv[0])
-        module_logger.error(ostr)
-        sys.exit(1)
+    if rabbit_rec:
+        binding_keys = sys.argv[1:]
+        if not binding_keys:
+            ostr = 'Usage: {0} [binding_key]...'.format(sys.argv[0])
+            module_logger.error(ostr)
+            sys.exit(1)
 
-    for binding_key in binding_keys:
-        channel.queue_bind(exchange=exchange,
-                           queue=queue_name,
-                           routing_key=binding_key)
+        for binding_key in binding_keys:
+            channel.queue_bind(exchange=exchange,
+                               queue=queue_name,
+                               routing_key=binding_key)
 
     module_logger.info(' [*] Waiting for logs. To exit press CTRL+C')
     return channel, connection
 
 
-def load_model(file_name):
-    """
-    Given a file name for a pickel-serialized
-    evaluation function in byte form, loads the
-    function and returns it on success, otherwise
-    returns None.
-    """
-    try:
-        f = open(file_name, 'rb')
-        eval_model = cPickle.load(f)
-        f.close()
-        return eval_model
-    except:
-        module_logger.error(
-            'Failed to load model evaluation function from: ' + file_name)
-        return None
+def eval_dev_classifier(channel, path):
+    pass
+
+
+def run_plugin(path, host):  # pragma: no cover
+    exchange = 'topic-poseidon-internal'
+    queue = 'poseidon_internals'
+
+    channel, connection = rabbit_init(host=host,
+                                      exchange=exchange,
+                                      queue_name=queue,
+                                      rabbit_rec=False)
+    eval_dev_classifier(channel, path)
 
 
 if __name__ == '__main__':
-    host = 'poseidon-rabbit'
-    exchange = 'topic-poseidon-internal'
-    queue_name = 'NAME'  # fix this
-    channel, connection = rabbit_init(host=host,
-                                      exchange=exchange,
-                                      queue_name=queue_name)
-    load_model('deep_eval.save')
+    path_name = get_path()
+    host = get_host()
+    if path_name and host:
+        run_plugin(path_name, host)

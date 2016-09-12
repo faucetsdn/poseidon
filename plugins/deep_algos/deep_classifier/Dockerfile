@@ -26,8 +26,8 @@ RUN pip install git+git://github.com/mila-udem/blocks.git@stable \
   -r https://raw.githubusercontent.com/mila-udem/blocks/stable/requirements.txt
 RUN pip install numpy --upgrade
 
-# test capture -- REMOVE FOR PRODUCTION
-ADD testpcap.cap testpcap.cap
-
 ADD train_deep_classifier.py train_deep_classifier.py
-CMD ["python", "train_deep_classifier.py"]
+
+# entrypoint command - file appended
+ENTRYPOINT ["python", "train_deep_classifier.py"]
+CMD [""]

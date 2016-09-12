@@ -3,4 +3,3 @@ pandas
 scipy
 numpy
 pika
-requests

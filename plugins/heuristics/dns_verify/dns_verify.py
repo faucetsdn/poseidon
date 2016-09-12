@@ -33,13 +33,36 @@ import ast
 import copy
 import logging
 import time
-
+import os
+import sys
 import pika
 
 module_logger = logging.getLogger(__name__)
 
 
-def rabbit_init(host, exchange, queue_name):  # pragma: no cover
+def get_path():
+    try:
+        path_name = sys.argv[1]
+    except:
+        module_logger.debug('no argv[1] for pathname')
+        path_name = None
+    return path_name
+
+
+def get_host():
+    """
+    Checks for poseidon host env
+    variable and returns it if found,
+    otherwise logs error.
+    """
+    if 'POSEIDON_HOST' in os.environ:
+        return os.environ['POSEIDON_HOST']
+    else:
+        module_logger.debug('POSEIDON_HOST environment variable not found')
+        return None
+
+
+def rabbit_init(host, exchange, queue_name, rabbit_rec):  # pragma: no cover
     """
     Connects to rabbitmq using the given hostname,
     exchange, and queue. Retries on failure until success.
@@ -50,7 +73,7 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
     while wait:
         try:
             connection = pika.BlockingConnection(
-                pika.ConnectionParameters(host=host))
+                              pika.ConnectionParameters(host=host))
             channel = connection.channel()
             channel.exchange_declare(exchange=exchange, type='topic')
             result = channel.queue_declare(queue=queue_name, exclusive=True)
@@ -65,16 +88,13 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
             time.sleep(2)
             wait = True
 
-    binding_keys = sys.argv[1:]
-    if not binding_keys:
-        ostr = 'Usage: {0} [binding_key]...'.format(sys.argv[0])
-        module_logger.error(ostr)
-        sys.exit(1)
+    if rabbit_rec:
+        binding_keys = ['poseidon.tcpdump_parser.dns.#']
 
-    for binding_key in binding_keys:
-        channel.queue_bind(exchange=exchange,
-                           queue=queue_name,
-                           routing_key=binding_key)
+        for binding_key in binding_keys:
+            channel.queue_bind(exchange=exchange,
+                               queue=queue_name,
+                               routing_key=binding_key)
 
     module_logger.info(' [*] Waiting for logs. To exit press CTRL+C')
     return channel, connection
@@ -159,15 +179,22 @@ def verify_dns_record(ch, method, properties, body):
                 return 'TODO: signaling packet of interest'
 
 
-if __name__ == '__main__':
-    host = 'poseidon-rabbit'
+def run_plugin(path, host):
     exchange = 'topic-poseidon-internal'
     queue_name = 'features_tcpdump'
     channel, connection = rabbit_init(host=host,
                                       exchange=exchange,
-                                      queue_name=queue_name)
+                                      queue_name=queue_name,
+                                      rabbit_rec=True)
     channel.basic_consume(verify_dns_record,
                           queue=queue_name,
                           no_ack=True,
                           consumer_tag='poseidon.tcpdump_parser.dns.#')
     channel.start_consuming()
+
+
+if __name__ == '__main__':
+    path_name = get_path()
+    host = get_host()
+    if path_name and host:
+        run_plugin(path_name, host)

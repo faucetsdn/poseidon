@@ -18,5 +18,8 @@ ADD requirements.txt requirements.txt
 RUN pip install pip --upgrade
 RUN pip install -r requirements.txt
 
-ADD dev_classifier.py dev_classifier.py
-CMD ["python", "dev_classifier.py", "poseidon.flowparser"]
+ADD eval_dev_classifier.py eval_dev_classifier.py
+
+# added entrypoint and cmd for vent integration of file name
+ENTRYPOINT ["python", "eval_dev_classifier.py"]
+CMD [""]
