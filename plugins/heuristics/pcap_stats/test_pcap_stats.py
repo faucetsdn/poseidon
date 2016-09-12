@@ -204,7 +204,7 @@ def test_analyze_pcap():
     network_machines.append('136.145.402.267')
     network_machines.append('24.56.78.90')
     network_machines.append('350.137.451.220')
-    pcap_stats.pcap_stats.flow = FlowRecord()
+    pcap_stats.flow = FlowRecord()
 
     analyze_pcap(ch, method, properties, net_to_net)
     assert isinstance(pcap_stats.flow.machines, dict)

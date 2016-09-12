@@ -33,6 +33,9 @@ import time
 import json
 
 
+module_logger = logging.getLogger(__name__)
+
+
 def get_path():
     try:
         path_name = sys.argv[1]
