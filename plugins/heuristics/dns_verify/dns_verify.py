@@ -49,6 +49,19 @@ def get_path():
     return path_name
 
 
+def get_host():
+    """
+    Checks for poseidon host env
+    variable and returns it if found,
+    otherwise logs error.
+    """
+    if 'POSEIDON_HOST' in os.environ:
+        return os.environ['POSEIDON_HOST']
+    else:
+        module_logger.debug('POSEIDON_HOST environment variable not found')
+        return None
+
+
 def rabbit_init(host, exchange, queue_name, rabbit_rec):  # pragma: no cover
     """
     Connects to rabbitmq using the given hostname,

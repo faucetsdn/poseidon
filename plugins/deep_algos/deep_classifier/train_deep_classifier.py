@@ -672,15 +672,24 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
     return classifierTrain, classifierPredict
 
 
-if __name__ == '__main__':
-    host = 'poseidon-rabbit'
+def run_plugin(path, host):  # pragma: no cover
     exchange = 'topic-poseidon-internal'
-    queue_name = 'NAME'
-    #channel, connection = rabbit_init(host=host,
-    #                                  exchange=exchange,
-    #                                  queue_name=queue_name)
-    print 'starting program'
-    dataPath = 'testpcap.cap'
-    train, predict = training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOldTimeSteps, wtstd, 
-             lr, decay, clippings, dimIn, dim, numClasses, batch_size, epochs, 
-             trainPercent, dataPath, loadPrepedData)
+    queue_name = 'poseidon_internals'
+
+    channel, connection = rabbit_init(host=host,
+                                      exchange=exchange,
+                                      queue_name=queue_name,
+                                      rabbit_rec=False)
+
+    train, predict = training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOldTimeSteps, wtstd,
+                              lr, decay, clippings, dimIn, dim, numClasses, batch_size, epochs,
+                              trainPercent, path, loadPrepedData)
+
+
+if __name__ == '__main__':
+    path_name = get_path()
+    host = get_host()
+    if path_name and host:
+        run_plugin(path_name, host)
+
+    print 'program completed'

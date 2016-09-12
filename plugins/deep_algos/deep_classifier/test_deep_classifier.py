@@ -24,13 +24,22 @@ headers.
 import pytest
 import re
 
-# eval tests
+from eval_deep_classifier import get_path
+from eval_deep_classifier import get_host
 from eval_deep_classifier import load_model
 from eval_deep_classifier import rabbit_init
 
-# train tests
-#from train_deep_classifier import parse_data
-#from train_deep_classifier import parse_header
+
+def test_get_path():
+    get_path()
+    sys.argv = []
+    get_path()
+
+
+def test_get_host():
+    get_host()
+    os.environ['POSEIDON_HOST'] = '1.1.1.1'
+    assert get_host() == '1.1.1.1'
 
 
 @pytest.mark.skip(reason='requires rabbitmq broker, integration test')
