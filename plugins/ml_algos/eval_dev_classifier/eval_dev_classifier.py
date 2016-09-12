@@ -35,6 +35,7 @@ from collections import defaultdict
 import numpy as np
 import pandas as pd
 from sklearn import preprocessing
+import base64
 
 LABEL_DICT = {0:'Nest', 1: 'TiVo', 2: 'FileServer', 3: 'Printer', 4:'Domain Controller', 5:'SonyTV'}
 STORAGE_PORT = '28000'
@@ -120,7 +121,8 @@ def load_model():
         if resp.status_code != requests.codes.ok:
             print 'error retrieving model from database'
         model = json.loads(resp.body)['docs'][0]['model']
-        model = cPickle.loads(model,0)
+        model_str = base64.b64encode(model)
+        model = cPickle.loads(base64.b64decode(model_str))
         return model 
     except:
         print "Failed to load model"
