@@ -23,6 +23,8 @@ headers.
 """
 import pytest
 import re
+import sys
+import os
 
 from eval_deep_classifier import load_model
 from eval_deep_classifier import get_path
