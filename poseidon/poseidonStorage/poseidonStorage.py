@@ -80,7 +80,7 @@ class poseidonStorage:
             self.config.readfp(
                 open('/poseidonWork/config/poseidon.config'))
             database_container_ip = self.config.get('database', 'ip')
-        except: # pragma: no cover
+        except:  # pragma: no cover
             raise ValueError(
                 'poseidonStorage: could not find database ip address.')
         self.client = MongoClient(host=database_container_ip)
@@ -156,7 +156,7 @@ class db_collection_count(poseidonStorage):
     """
 
     def on_get(self, req, resp, database, collection):
-        try:     
+        try:
             ret = self.client[database][collection].count()
         except:  # pragma: no cover
             ret = 'Error retrieving collection doc count.'
@@ -223,7 +223,7 @@ class db_collection_query(poseidonStorage):
             ret['count'] = -1
             ret['error'] = str(e)
             resp.status = falcon.HTTP_BAD_REQUEST
-        except TypeError, e:  # pragma: no cover
+        except (TypeError, ValueError), e:  # pragma: no cover
             # bad query string
             ret['count'] = -1
             ret['error'] = str(e)
