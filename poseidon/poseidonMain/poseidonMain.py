@@ -57,7 +57,7 @@ def callback(ch, method, properties, body, q=None):
     print body
     # TODO more
     if q is not None:
-        q.put(body)
+        q.put((method.routing_key, body))
     else:
         module_logger.error('posedionMain workQueue is None')
 

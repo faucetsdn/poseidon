@@ -28,21 +28,21 @@ from functools import partial
 from os import getenv
 
 import pika
-import requests
 
 from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.bcf import BcfProxy
+# import requests
 
 # logging.basicConfig()
 module_logger = logging.getLogger(__name__)
 
 
 def callback(ch, method, properties, body, q=None):
-    module_logger.debug('got a message: {0}'.format(body))
+    module_logger.debug('gt a message: {0}'.format(body))
     # TODO more
     if q is not None:
-        q.put(body)
+        q.put((method.routing_key, body))
     else:
         module_logger.error(
             'NorthBoundControllerAbstraction workQueue is None')
@@ -111,7 +111,7 @@ class Handle_Periodic(Monitor_Helper_Base):
         self.init_rabbit()
         if self.do_rabbit:
             self.start_channel(self.rabbit_channel_local,
-                               callback, 'poseidon_internals2')
+                               callback, 'poseidon_NBCA')
 
     def make_type_val(self, item):
         ''' search messages and act  '''
@@ -185,7 +185,7 @@ class Handle_Periodic(Monitor_Helper_Base):
         ''' init_rabbit '''
         host = 'poseidon-rabbit'
         exchange = 'topic-poseidon-internal'
-        queue_name = 'poseidon_internals2'
+        queue_name = 'poseidon_NBCA'
         binding_key = ['poseidon.algos.#', 'poseidon.action.#']
         retval = self.make_rabbit_connection(
             host, exchange, queue_name, binding_key)
@@ -231,6 +231,9 @@ class Handle_Periodic(Monitor_Helper_Base):
         post_h = h.hexdigest()
         return post_h
 
+    def do_work(self, item):
+        pass
+
     def on_get(self, req, resp):
         """Handles Get requests"""
         # TODO schedule something to occur for updated flows
@@ -264,18 +267,20 @@ class Handle_Periodic(Monitor_Helper_Base):
         self.logger.debug('done looking for work!')
 
         if workfound:
+            self.do_work(item)
             self.logger.debug(
                 'should be working on something: {0}'.format(item))
 
         machines = parsed
 
+        # @TODO make this into a function
         if self.first_time:
             self.first_time = False
             # @TODO db call to see if really need to run things
             for machine in machines:
                 h = self.make_hash(machine)
                 module_logger.critical(
-                    'adding  address to known systems {0}'.format(machine))
+                    'adding address to known systems {0}'.format(machine))
                 self.prev_endpoints[h] = machine
         else:
             for machine in machines:
@@ -287,13 +292,15 @@ class Handle_Periodic(Monitor_Helper_Base):
 
         for hashed, machine in self.new_endpoints.iteritems():
             # @TODO write findings to main
-            pass
-
+            r_exchange = 'topic-poseidon-internal'
+            r_key = 'poseidon.action.new_machine'
+            r_msg = json.dumps({hashed: machine})
+            self.rabbit_channel_local.basic_publish(exchange=r_exchange,
+                                                    routing_key=r_key,
+                                                    body=r_msg)
         self.retval['machines'] = parsed
         self.retval['resp'] = 'ok'
-
         # TODO change response to something reflecting success of traversal
-
         self.times = self.times + 1
         resp.body = json.dumps(self.retval)
 
