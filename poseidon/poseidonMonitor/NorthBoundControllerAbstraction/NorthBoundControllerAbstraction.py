@@ -32,6 +32,7 @@ import pika
 from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.bcf import BcfProxy
+# import ast
 # import requests
 
 # logging.basicConfig()
@@ -39,7 +40,8 @@ module_logger = logging.getLogger(__name__)
 
 
 def callback(ch, method, properties, body, q=None):
-    module_logger.debug('gt a message: {0}'.format(body))
+    module_logger.debug(
+        'got a message:{0} {1}'.format(method.routing_key, body))
     # TODO more
     if q is not None:
         q.put((method.routing_key, body))
@@ -92,6 +94,7 @@ class Handle_Periodic(Monitor_Helper_Base):
         self.first_time = True
         self.prev_endpoints = {}
         self.new_endpoints = {}
+        self.mirroring = {}
         self.do_rabbit = True
         self.m_queue = Queue.Queue()
         self.rabbit_connection_local = None
@@ -231,8 +234,28 @@ class Handle_Periodic(Monitor_Helper_Base):
         post_h = h.hexdigest()
         return post_h
 
-    def do_work(self, item):
-        pass
+    def handle_item(self, item):
+        self.logger.debug('handle_item: {0}:{1}'.format(item, type(item)))
+        itype = item[0]
+        ivalue = item[1]
+        ivalue = json.loads(ivalue)
+        self.logger.debug(
+            'handle_item: ivalue json: {0}:{1}'.format(ivalue, type(ivalue)))
+
+        if itype == 'poseidon.action.start_monitor':
+            for my_hash, my_dict in ivalue.iteritems():
+                if my_hash in self.new_endpoints:
+                    v = self.new_endpoints.pop(my_hash)
+                    self.logger.debug(
+                        'removed {0} from new_endpoints'.format(v))
+                else:
+                    self.logger.debug('could not find {0} in {1}'.format(
+                        my_hash, self.new_endpoints))
+
+                self.logger.debug(
+                    'mirroring :{0}'.format(my_dict['ip-address']))
+                self.bcf.mirror_ip(my_dict['ip-address'])
+                self.mirroring['my_hash'] = my_dict
 
     def on_get(self, req, resp):
         """Handles Get requests"""
@@ -267,7 +290,7 @@ class Handle_Periodic(Monitor_Helper_Base):
         self.logger.debug('done looking for work!')
 
         if workfound:
-            self.do_work(item)
+            self.handle_item(item)
             self.logger.debug(
                 'should be working on something: {0}'.format(item))
 

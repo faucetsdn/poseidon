@@ -19,6 +19,7 @@ Test module for poseidonMain.py
 Created on 29 May 2016
 @author: dgrossman, tlanham
 """
+import json
 import logging
 from os import environ
 
@@ -31,15 +32,14 @@ module_logger = logging.getLogger(__name__)
 
 
 def test_make_type_val():
-    d = dict()
-    d['endpoint'] = 'Main'
-    d['value'] = 'shutdown'
+    endpoint = 'poseidon.action.shutdown'
+    value = 'shutdown'
+    d = (endpoint, value)
 
     a = PoseidonMain(skip_rabbit=True)
     t, v = a.make_type_val(d)
-    assert t == 'Main'
+    assert t == 'poseidon.action.shutdown'
     assert v == 'shutdown'
-    assert a.shutdown
 
 
 def test_poseidonMain_main():

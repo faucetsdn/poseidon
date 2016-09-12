@@ -53,8 +53,8 @@ module_logger = logging.getLogger(__name__)
 
 
 def callback(ch, method, properties, body, q=None):
-    module_logger.debug('got a message: {0}'.format(body))
-    print body
+    module_logger.debug('got a message: {0}:{1}:{2}'.format(
+        method.routing_key, body, type(body)))
     # TODO more
     if q is not None:
         q.put((method.routing_key, body))
@@ -103,6 +103,8 @@ class PoseidonMain(object):
 
         self.Scheduler.configure()
         self.Scheduler.configure_endpoints()
+        self.monitoring = dict()
+        self.shutdown = dict()
 
         for item in self.Config.get_section(self.config_section_name):
             my_k, my_v = item
@@ -126,25 +128,82 @@ class PoseidonMain(object):
         else:
             logging.basicConfig(level=logging.DEBUG)
 
-    def make_type_val(self, item):
-        ''' search messages and act  '''
+    @staticmethod
+    def make_type_val(item):
+        ''' normalize messages '''
         endpoint = None
         value = None
+        endpoint, value = item[0], item[1]
 
-        if isinstance(item, types.DictionaryType):
-            endpoint = item.get('endpoint')
-            value = item.get('value')
-            if endpoint == 'Main':
-                if value == 'shutdown':
-                    self.shutdown = True
-            return endpoint, value
-        if isinstance(item, types.StringType):
-            endpoint = 'None'
-            value = item
-            return endpoint, value
-
-        endpoint, value = 'Error', 'Error'
         return endpoint, value
+
+    def start_monitor(self, ivalue):
+        ''' start monitoring an address'''
+        self.logger.debug('start_monitor:{0},{1}'.format(ivalue, type(ivalue)))
+        r_exchange = 'topic-poseidon-internal'
+        r_key = 'poseidon.action.start_monitor'
+        r_msg = json.dumps(ivalue)
+
+        for my_hash, my_value in ivalue.iteritems():
+
+            if my_hash not in self.monitoring:
+                self.logger.debug(
+                    'starting monitoring:{0}:{1}'.format(my_hash, my_value))
+                # TODO MSG the collector to begin waiting. contents of my_value
+                #
+                self.rabbit_channel_local.basic_publish(exchange=r_exchange,
+                                                        routing_key=r_key,
+                                                        body=r_msg)
+                self.monitoring[my_hash] = my_value
+            else:
+                self.logger.debug(
+                    'already being monitored:{0}:{1}'.format(my_hash, my_value))
+
+    def stop_monitor(self, ivalue):
+        ''' stop monitoring an address'''
+        r_exchange = 'topic-poseidon-internal'
+        r_key = 'poseidon.action.start_monitor'
+        r_msg = json.dumps(ivalue)
+        self.rabbit_channel_local.basic_publish(exchange=r_exchange,
+                                                routing_key=r_key,
+                                                body=r_msg)
+
+    def endpoint_shutdown(self, ivalue):
+        ''' shutdown an endpoint '''
+        r_exchange = 'topic-poseidon-internal'
+        r_key = 'poseidon.action.endpoint_shutdown'
+        r_msg = json.dumps(ivalue)
+        self.rabbit_channel_local.basic_publish(exchange=r_exchange,
+                                                routing_key=r_key,
+                                                body=r_msg)
+
+    def endpoint_allow(self, ivalue):
+        ''' shutdown an endpoint '''
+        r_exchange = 'topic-poseidon-internal'
+        r_key = 'poseidon.action.endpoint_allow'
+        r_msg = json.dumps(ivalue)
+        self.rabbit_channel_local.basic_publish(exchange=r_exchange,
+                                                routing_key=r_key,
+                                                body=r_msg)
+
+    def handle_item(self, itype, ivalue):
+        ivalue = json.loads(ivalue)
+        if itype == 'poseidon.action.shutdown':
+            self.logger.debug('***** shutting down')
+            self.shutdown = True
+        if itype == 'poseidon.action.new_machine':
+            self.logger.debug('***** new machine {0}'.format(ivalue))
+            # tell monitor to monitor
+            self.start_monitor(ivalue)
+        if itype == 'poseidon.analytics.results.traditional':
+            # TODO make a db call
+            # need to compare results to db
+            if False:
+                # if bad
+                self.endpoint_shutdown(ivalue)
+            else:
+                # if good
+                self.stop_monitor(ivalue)
 
     def make_rabbit_connection(self, host, exchange, queue_name, keys):  # pragma: no cover
         '''
@@ -251,6 +310,8 @@ class PoseidonMain(object):
             if workfound:  # pragma no cover
 
                 itype, ivalue = self.make_type_val(item)
+
+                self.handle_item(itype, ivalue)
 
                 handle_list = self.Scheduler.get_handlers(itype)
                 if handle_list is not None:
