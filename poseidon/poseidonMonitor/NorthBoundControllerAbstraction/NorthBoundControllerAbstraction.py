@@ -239,6 +239,8 @@ class Handle_Periodic(Monitor_Helper_Base):
 
                 self.logger.debug(
                     'mirroring :{0}'.format(my_dict['ip-address']))
+                self.logger.debug(
+                    'mirroring[{0}]={1}'.format(my_hash, my_dict))
                 self.bcf.mirror_ip(my_dict['ip-address'])
                 self.mirroring[my_hash] = my_dict
 
