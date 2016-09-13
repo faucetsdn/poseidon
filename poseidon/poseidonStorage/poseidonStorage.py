@@ -73,13 +73,11 @@ class PoseidonStorage(object):
     """
 
     def __init__(self):
-        self.modName = 'PoseidonStorage'
-
         try:
             self.config = ConfigParser.ConfigParser()
             self.config.readfp(
                 open('/poseidonWork/config/poseidon.config'))
-            section_name = self.__class__.__name__
+            section_name = 'PoseidonStorage'
             field_name = 'database'
             database_container_ip = self.config.get(section_name, field_name)
         except:  # pragma: no cover
