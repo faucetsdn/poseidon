@@ -246,6 +246,7 @@ class Handle_Periodic(Monitor_Helper_Base):
         '''get work item from queue if exists'''
         # type , value
         workfound = False
+        item = None
         self.logger.debug('about to look for work')
         try:
             item = self.m_queue.get(False)
