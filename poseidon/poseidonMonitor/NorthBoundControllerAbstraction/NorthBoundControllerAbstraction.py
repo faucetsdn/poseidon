@@ -240,7 +240,7 @@ class Handle_Periodic(Monitor_Helper_Base):
                 self.logger.debug(
                     'mirroring :{0}'.format(my_dict['ip-address']))
                 self.bcf.mirror_ip(my_dict['ip-address'])
-                self.mirroring['my_hash'] = my_dict
+                self.mirroring[my_hash] = my_dict
 
     def get_rabbit_work(self):
         '''get work item from queue if exists'''
