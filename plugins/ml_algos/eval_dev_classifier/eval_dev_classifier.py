@@ -120,7 +120,7 @@ def load_model():
         resp = requests.get(uri)
         if resp.status_code != requests.codes.ok:
             print 'error retrieving model from database'
-        model = json.loads(resp.body)['docs'][0]['model']
+        model = json.loads(resp.text)['docs'][0]['model']
         model_str = base64.b64encode(model)
         model = cPickle.loads(base64.b64decode(model_str))
         return model 
