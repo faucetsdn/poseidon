@@ -23,7 +23,7 @@ Created on 29 May 2016
 rabbitmq:
     host:       poseidon-rabbit
     exchange:   topic-poseidon-internal
-    queue(in):  poseidon_internals
+    queue(in):  poseidon_main
         keys:   poseidon.algos.#,poseidon.action.#
 '''
 import json
@@ -53,6 +53,7 @@ module_logger = logging.getLogger(__name__)
 
 
 def callback(ch, method, properties, body, q=None):
+    ''' callback, places rabbit data into internal queue'''
     module_logger.debug('got a message: {0}:{1}:{2}'.format(
         method.routing_key, body, type(body)))
     # TODO more
@@ -187,6 +188,7 @@ class PoseidonMain(object):
                                                 body=r_msg)
 
     def handle_item(self, itype, ivalue):
+        self.logger.debug('handle_item:{0}:{1}'.format(itype, ivalue))
         ivalue = json.loads(ivalue)
         if itype == 'poseidon.action.shutdown':
             self.logger.debug('***** shutting down')
@@ -200,9 +202,13 @@ class PoseidonMain(object):
             # need to compare results to db
             if False:
                 # if bad
+                self.logger.debug(
+                    '***** shutting down endpoint:{0}:{1}'.format(itype, ivalue))
                 self.endpoint_shutdown(ivalue)
             else:
                 # if good
+                self.logger.debug(
+                    '***** allowing endpoint {0}:{1}'.format(itype,  ivalue))
                 self.stop_monitor(ivalue)
 
     def make_rabbit_connection(self, host, exchange, queue_name, keys):  # pragma: no cover
@@ -250,7 +256,7 @@ class PoseidonMain(object):
         ''' init_rabbit '''
         host = 'poseidon-rabbit'
         exchange = 'topic-poseidon-internal'
-        queue_name = 'poseidon_internals'
+        queue_name = 'poseidon_main'
         binding_key = ['poseidon.algos.#', 'poseidon.action.#']
         retval = self.make_rabbit_connection(
             host, exchange, queue_name, binding_key)
@@ -277,8 +283,22 @@ class PoseidonMain(object):
         mq_recv_thread = threading.Thread(target=channel.start_consuming)
         mq_recv_thread.start()
 
+    def do_work(self, item):
+        '''schuffle item to the correct handlers'''
+        itype, ivalue = self.make_type_val(item)
+
+        self.handle_item(itype, ivalue)
+        handle_list = self.Scheduler.get_handlers(itype)
+        if handle_list is not None:
+            for handle in handle_list:
+                handle(ivalue)
+        handle_list = self.Investigator.get_handlers(itype)
+        if handle_list is not None:
+            for handle in handle_list:
+                handle(ivalue)
+
     def process(self):
-        ''' process  '''
+        ''' processing loop  '''
         testing_loop = 10
 
         flag = False
@@ -301,6 +321,7 @@ class PoseidonMain(object):
             try:
                 item = self.m_queue.get(False)
                 self.logger.debug('item:{0}'.format(item))
+                self.logger.debug('found work')
                 workfound = True
             except Queue.Empty:
                 pass
@@ -308,19 +329,7 @@ class PoseidonMain(object):
             self.logger.debug('done looking for work!')
 
             if workfound:  # pragma no cover
-
-                itype, ivalue = self.make_type_val(item)
-
-                self.handle_item(itype, ivalue)
-
-                handle_list = self.Scheduler.get_handlers(itype)
-                if handle_list is not None:
-                    for handle in handle_list:
-                        handle(ivalue)
-                handle_list = self.Investigator.get_handlers(itype)
-                if handle_list is not None:
-                    for handle in handle_list:
-                        handle(ivalue)
+                self.do_work(item)
 
             elapsed = time.clock()
             elapsed = elapsed - start
@@ -337,7 +346,7 @@ def main(skip_rabbit=False):
     if not skip_rabbit:
         pmain.init_rabbit()
         pmain.start_channel(pmain.rabbit_channel_local,
-                            callback, 'poseidon_internals')
+                            callback, 'poseidon_main')
         # def start_channel(self, channel, callback, queue):
     pmain.process()
     return True

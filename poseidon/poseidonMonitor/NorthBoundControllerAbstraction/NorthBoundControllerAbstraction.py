@@ -13,10 +13,10 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-"""
+'''
 Created on 17 May 2016
 @author: dgrossman
-"""
+'''
 import hashlib
 import json
 import logging
@@ -41,6 +41,7 @@ module_logger = logging.getLogger(__name__)
 
 def callback(ch, method, properties, body, q=None):
     module_logger.debug(
+        ''' callback, places rabbit data into internal queue'''
         'got a message:{0} {1}'.format(method.routing_key, body))
     # TODO more
     if q is not None:
@@ -107,34 +108,15 @@ class Handle_Periodic(Monitor_Helper_Base):
             module_logger.critical('handle_periodic starting rabbit')
             self.start_rabbit()
 
-        # @TODO init the rabbitmq
+        # TODO init the rabbitmq
 
     # rabbit
     def start_rabbit(self):
+        ''' start the rabbit negotiations '''
         self.init_rabbit()
         if self.do_rabbit:
             self.start_channel(self.rabbit_channel_local,
                                callback, 'poseidon_NBCA')
-
-    def make_type_val(self, item):
-        ''' search messages and act  '''
-        endpoint = None
-        value = None
-
-        if isinstance(item, types.DictionaryType):
-            endpoint = item.get('endpoint')
-            value = item.get('value')
-            if endpoint == 'Main':
-                if value == 'shutdown':
-                    self.shutdown = True
-            return endpoint, value
-        if isinstance(item, types.StringType):
-            endpoint = 'None'
-            value = item
-            return endpoint, value
-
-        endpoint, value = 'Error', 'Error'
-        return endpoint, value
 
     def make_rabbit_connection(self, host, exchange, queue_name, keys):  # pragma: no cover
         '''
@@ -204,6 +186,7 @@ class Handle_Periodic(Monitor_Helper_Base):
         mq_recv_thread.start()
 
     def first_run(self):
+        ''' do some pre-run setup/configuration '''
         if self.configured:
             self.controller['URI'] = str(
                 self.mod_configuration['controller_uri'])
@@ -225,6 +208,7 @@ class Handle_Periodic(Monitor_Helper_Base):
 
     @staticmethod
     def make_hash(item):
+        ''' hash the metadata in a sane way'''
         h = hashlib.new('ripemd160')
         pre_h = str()
         post_h = None
@@ -235,6 +219,7 @@ class Handle_Periodic(Monitor_Helper_Base):
         return post_h
 
     def handle_item(self, item):
+        ''' perform an action based on rabbit item'''
         self.logger.debug('handle_item: {0}:{1}'.format(item, type(item)))
         itype = item[0]
         ivalue = item[1]
@@ -257,33 +242,15 @@ class Handle_Periodic(Monitor_Helper_Base):
                 self.bcf.mirror_ip(my_dict['ip-address'])
                 self.mirroring['my_hash'] = my_dict
 
-    def on_get(self, req, resp):
-        """Handles Get requests"""
-        # TODO schedule something to occur for updated flows
-
-        self.retval['service'] = self.owner.mod_name + ':' + self.mod_name
-        self.retval['times'] = self.times
-        self.retval['machines'] = None
-        self.retval['resp'] = 'bad'
-
-        current = None
-        parsed = None
-        workfound = False
-        item = None
-        try:
-            current = self.bcf.get_endpoints()
-            parsed = self.bcf.format_endpoints(current)
-        except:
-            self.logger.error(
-                'Could not establish connection to {0}.'.format(self.controller['URI']))
-            self.retval['controller'] = 'Could not establish connection to {0}.'.format(
-                self.controller['URI'])
-
+    def get_rabbit_work(self):
+        '''get work item from queue if exists'''
         # type , value
+        workfound = False
         self.logger.debug('about to look for work')
         try:
             item = self.m_queue.get(False)
             self.logger.debug('item:{0}'.format(item))
+            self.logger.debug('work found')
             workfound = True
         except Queue.Empty:
             pass
@@ -291,15 +258,15 @@ class Handle_Periodic(Monitor_Helper_Base):
 
         if workfound:
             self.handle_item(item)
-            self.logger.debug(
-                'should be working on something: {0}'.format(item))
 
-        machines = parsed
+        return item
 
-        # @TODO make this into a function
+    def find_new_machines(self, machines):
+        '''parse switch structure to find new machines added to network
+        since last call'''
         if self.first_time:
             self.first_time = False
-            # @TODO db call to see if really need to run things
+            # TODO db call to see if really need to run things
             for machine in machines:
                 h = self.make_hash(machine)
                 module_logger.critical(
@@ -313,14 +280,42 @@ class Handle_Periodic(Monitor_Helper_Base):
                         '***** detected new address {0}'.format(machine))
                     self.new_endpoints[h] = machine
 
+    def send_new_machines(self):
+        '''send listing of new machines to main for decisions'''
         for hashed, machine in self.new_endpoints.iteritems():
-            # @TODO write findings to main
+            # TODO write findings to main
             r_exchange = 'topic-poseidon-internal'
             r_key = 'poseidon.action.new_machine'
             r_msg = json.dumps({hashed: machine})
             self.rabbit_channel_local.basic_publish(exchange=r_exchange,
                                                     routing_key=r_key,
                                                     body=r_msg)
+
+    def on_get(self, req, resp):
+        '''Handles Get requests'''
+        self.retval['service'] = self.owner.mod_name + ':' + self.mod_name
+        self.retval['times'] = self.times
+        self.retval['machines'] = None
+        self.retval['resp'] = 'bad'
+
+        current = None
+        parsed = None
+        machines = None
+
+        try:
+            current = self.bcf.get_endpoints()
+            parsed = self.bcf.format_endpoints(current)
+            machines = parsed
+        except:
+            self.logger.error(
+                'Could not establish connection to {0}.'.format(self.controller['URI']))
+            self.retval['controller'] = 'Could not establish connection to {0}.'.format(
+                self.controller['URI'])
+
+        self.get_rabbit_work()
+        self.find_new_machines(machines)
+        self.send_new_machines()
+
         self.retval['machines'] = parsed
         self.retval['resp'] = 'ok'
         # TODO change response to something reflecting success of traversal
