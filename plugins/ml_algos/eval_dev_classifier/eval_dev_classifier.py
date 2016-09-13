@@ -23,7 +23,7 @@ device classifier.
 rabbitmq:
     host:       poseidon-rabbit
     exchange:   topic-poseidon-internal
-    key (out):	poseidon.algos.eval_dev_class
+    key (out):	poseidon.algos.eval_dev_class.#
 """
 import cPickle
 import logging
@@ -37,7 +37,8 @@ import pandas as pd
 from sklearn import preprocessing
 import base64
 
-LABEL_DICT = {0:'Nest', 1: 'TiVo', 2: 'FileServer', 3: 'Printer', 4:'Domain Controller', 5:'SonyTV'}
+LABEL_DICT = {0: 'Nest', 1: 'TiVo', 2: 'FileServer', 3: 'Printer', 4: 'Domain Controller', 5: 'SonyTV'}
+
 STORAGE_PORT = '28000'
 DATABASE = 'poseidon_records'
 COLLECTION = 'models_beta'
@@ -110,8 +111,13 @@ def rabbit_init(host, exchange, queue_name, rabbit_rec):  # pragma: no cover
 
 
 def load_model():
+    """
+    Loads machine learning model from database. Searches defined
+    database and collection then takes the first document found
+    and gets the model from it which is then encoded and loaded
+    as a pickled object. Returns None on error.
+    """
     try:
-
         query = {}
         ext = '/v1/storage/query/{database}/{collection}/{query_str}'.format(database=DATABASE,
                                                                              collection=COLLECTION,
@@ -120,6 +126,7 @@ def load_model():
         resp = requests.get(uri)
         if resp.status_code != requests.codes.ok:
             print 'error retrieving model from database'
+            return None
         model = json.loads(resp.text)['docs'][0]['model']
         model_str = base64.b64encode(model)
         model = cPickle.loads(base64.b64decode(model_str))
@@ -130,6 +137,11 @@ def load_model():
 
 
 def eval_dev_classifier(channel, path):
+    """
+    Uses the csv file from the given path as evaluation data for
+    pre-loaded model. Evaluates and sends the most common
+    classifiation using rabbitmq.
+    """
     
     #Load pretrained model 
     model = load_model()
@@ -163,17 +175,16 @@ def eval_dev_classifier(channel, path):
     for item in model_prediction:
         count_dict[item] += 1
 
-  
-    classification = max(count_dict.items(),lambda x: x[1])[0]
+    classification = max(count_dict.items(), lambda x: x[1])[0]
     classification = LABEL_DICT[classification]
-    print classification
+    print path, ' classified as: ', classification
 
-    routing_key = 'poseidon.algos.eval_dev_class'
+    # last field of routing key is id of flow taken from file name
+    flow_id = path.split('_')[1]
+    routing_key = 'poseidon.algos.eval_dev_class.' + flow_id
     channel.basic_publish(exchange='topic-poseidon-internal',
-                      routing_key=routing_key,
-                      body=classification)
-
-
+                          routing_key=routing_key,
+                          body=classification)
 
 
 def run_plugin(path, host):  # pragma: no cover
