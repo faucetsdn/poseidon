@@ -276,7 +276,7 @@ class Handle_Periodic(Monitor_Helper_Base):
         else:
             for machine in machines:
                 h = self.make_hash(machine)
-                if h not in self.prev_endpoints:
+                if h not in self.prev_endpoints and h not in self.mirroring:
                     module_logger.critical(
                         '***** detected new address {0}'.format(machine))
                     self.new_endpoints[h] = machine
