@@ -28,6 +28,8 @@ rabbitmq:
 import cPickle
 import logging
 import os
+import pika
+import requests
 import sys
 import time
 import json
@@ -170,14 +172,17 @@ def eval_dev_classifier(channel, path):
     #make predicition based on incoming data 
     model_prediction = model.predict(scaled_stats)
 
+
     count_dict = defaultdict(int)
 
     for item in model_prediction:
         count_dict[item] += 1
 
-    classification = max(count_dict.items(), lambda x: x[1])[0]
-    classification = LABEL_DICT[classification]
+    classification = max(count_dict.items(), key=lambda x: x[1])[0]
+
     print path, ' classified as: ', classification
+    classification = LABEL_DICT[classification]
+    
 
     # last field of routing key is id of flow taken from file name
     flow_id = path.split('_')[1]
@@ -200,6 +205,8 @@ def run_plugin(path, host):  # pragma: no cover
 
 if __name__ == '__main__':
     path_name = get_path()
+    print "path is", path_name
     host = get_host()
+    print "Host is", host
     if path_name and host:
         run_plugin(path_name, host)
