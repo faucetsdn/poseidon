@@ -1,4 +1,5 @@
 # Poseidon
+
 ![Poseidon Logo](/docs/fork.png)
 
 [![Build Status](https://circleci.com/gh/Lab41/poseidon.svg?style=shield&circle-token=29305a2d23d6cac65f811620d75bbe80732472dd)](https://circleci.com/gh/Lab41/poseidon) [![codecov](https://codecov.io/gh/Lab41/poseidon/branch/master/graph/badge.svg?token=ORXmFYC3MM)](https://codecov.io/gh/Lab41/poseidon)
@@ -21,7 +22,7 @@ make compose
 
 # Configuration
 ## docker-compose.yaml
-- `/data/db` directory for mongodb database; you can use a different directory by updating the `docker-compose.yaml` 
+- `/data/db` directory for mongodb database; you can use a different directory by updating the `docker-compose.yaml`
 - under the `storage` section, update `volumes` to `/path/to/your/dir:/data/db` with the path to the directory to store mongodb records.
 
 ## config/poseidon.config
@@ -38,7 +39,7 @@ the `docker-machine ip` if using boot2docker or similar - making sure that write
 - `collector_interval` to the collection interval in seconds (default is `30` for a capture length of 30 seconds)
 - `collector_filter` to limit what gets captured off the controller (default is empty string for no filters, see the collector documentation for details)
 - `vent_ip` to the ip of the box running the vent collector
-- `vent_port` to the external port of the nfilter vent container 
+- `vent_port` to the external port of the nfilter vent container
 - `storage_interface_ip` to the external ip of the poseidon-storage-interface container (NOTE: this should be the same as the `database` field of `PoseidonStorage`, unlesss the storage-interface container is being run on a different machine)
 - `storage_interface_port` to the external port of the poseidon-storage-interface container only if changed from the default of `28000`
 
@@ -48,8 +49,8 @@ the `docker-machine ip` if using boot2docker or similar - making sure that write
 
 # Required Dependencies
 
-- Docker (If installing from a clean machine, a startup.sh script resides in the repo that can be used to 
-install docker and docker-compose for an Ubunut 16.04 box. Make this script executable and then 
+- Docker (If installing from a clean machine, a startup.sh script resides in the repo that can be used to
+install docker and docker-compose for an Ubunut 16.04 box. Make this script executable and then
 run with `sudo ./startup.sh`.)
 - make
 - docker-compose (the 1.8 release of docker-compose can be installed with `make compose-install`)
