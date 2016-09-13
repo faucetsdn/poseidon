@@ -14,7 +14,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-poseidonStorage interface for mongodb container
+PoseidonStorage interface for mongodb container
 for persistent storage.
 
 NAMES: current databases and collections (subject to change)
@@ -62,33 +62,28 @@ bsonInputExceptions = (bson.errors.BSONError,
                        bson.errors.InvalidBSON)
 
 
-class poseidonStorage:
+class PoseidonStorage(object):
     """
-    poseidonStorage class for managing mongodb database,
+    PoseidonStorage class for managing mongodb database,
     brokers requests to database.
 
     NOTE: retrieves database host from config
     file in config/poseidon.config under the
-    [database] section.
+    [PoseidonMain] section.
     """
 
     def __init__(self):
-        self.modName = 'poseidonStorage'
-
         try:
             self.config = ConfigParser.ConfigParser()
             self.config.readfp(
                 open('/poseidonWork/config/poseidon.config'))
-            database_container_ip = self.config.get('database', 'ip')
+            section_name = 'PoseidonStorage'
+            field_name = 'database'
+            database_container_ip = self.config.get(section_name, field_name)
         except:  # pragma: no cover
             raise ValueError(
-                'poseidonStorage: could not find database ip address.')
+                'PoseidonStorage: could not find database ip address.')
         self.client = MongoClient(host=database_container_ip)
-
-        # create db named 'poseidon_records' (NOTE: db will not actually be
-        # created until first doc write).
-        # db stores reference object for the database
-        self.db = self.client.poseidon_records
 
 
 def get_allowed():
@@ -108,7 +103,7 @@ cors = CORS(allow_all_origins=True)
 public_cors = CORS(allow_all_origins=True)
 
 
-class db_database_names(poseidonStorage):
+class db_database_names(PoseidonStorage):
     """
     Request:
         URL:        /v1/storage/
@@ -126,7 +121,7 @@ class db_database_names(poseidonStorage):
         resp.body = MongoJSONEncoder().encode(ret)
 
 
-class db_collection_names(poseidonStorage):
+class db_collection_names(PoseidonStorage):
     """
     Request:
         URL:        /v1/storage/{database}
@@ -145,7 +140,7 @@ class db_collection_names(poseidonStorage):
         resp.body = MongoJSONEncoder().encode(ret)
 
 
-class db_collection_count(poseidonStorage):
+class db_collection_count(PoseidonStorage):
     """
     Request:
         URL:        /v1/storage/{database}/{collection}
@@ -164,7 +159,7 @@ class db_collection_count(poseidonStorage):
         resp.body = MongoJSONEncoder().encode(ret)
 
 
-class db_retrieve_doc(poseidonStorage):
+class db_retrieve_doc(PoseidonStorage):
     """
     Request:
         URL:        /v1/storage/doc/{database}/{collection}/{doc_id}
@@ -189,7 +184,7 @@ class db_retrieve_doc(poseidonStorage):
         resp.body = MongoJSONEncoder().encode(ret)
 
 
-class db_collection_query(poseidonStorage):
+class db_collection_query(PoseidonStorage):
     """
     Request:
         URL:        /v1/storage/query/{database}/{collection}/{query_str}
@@ -235,7 +230,7 @@ class db_collection_query(poseidonStorage):
         resp.body = MongoJSONEncoder().encode(ret)
 
 
-class db_add_one_doc(poseidonStorage):
+class db_add_one_doc(PoseidonStorage):
     """
     Request:
         URL:        /v1/storage/add_one_doc/{database}/{collection}
@@ -258,7 +253,7 @@ class db_add_one_doc(poseidonStorage):
         resp.body = MongoJSONEncoder().encode(ret)
 
 
-class db_add_many_docs(poseidonStorage):
+class db_add_many_docs(PoseidonStorage):
     """
     Request:
         URL:        /v1/storage/add_many_docs/{database}/{collection}
@@ -283,7 +278,7 @@ class db_add_many_docs(poseidonStorage):
         resp.body = MongoJSONEncoder().encode(ret)
 
 
-class db_update_one_doc(poseidonStorage):
+class db_update_one_doc(PoseidonStorage):
     """
     Request:
         URL:        /v1/storage/update_one_doc/{database}/{collection}/{filt}

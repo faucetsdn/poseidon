@@ -9,45 +9,58 @@ Can SDN and machine learning answer:
 - What devices comprise my network?
 - What are devices doing?
 
-# Getting Started
-
 # Install Instructions
 
 ```
 sudo mkdir -p /data/db
 git clone https://github.com/Lab41/poseidon.git
 cd poseidon
-make
+*editor* config/poseidon.config
+make compose
 ```
 
-If installing from a clean machine, a startup.sh script resides in the repo that can be used to 
-install docker and docker-compose for an Ubunut 16.04 box. Make this script executable and then 
-run with `sudo ./startup.sh`.
+# Configuration
+## docker-compose.yaml
+- `/data/db` directory for mongodb database; you can use a different directory by updating the `docker-compose.yaml` 
+- under the `storage` section, update `volumes` to `/path/to/your/dir:/data/db` with the path to the directory to store mongodb records.
+
+## config/poseidon.config
+### PoseidonStorage
+- Under the `[PoseidonStorage]` section, update the following:
+- `database` to the external ip of the host machine running mongodb (or
+the `docker-machine ip` if using boot2docker or similar - making sure that write-persistent volumes can be mounted). NOTE: without this configuration, poseidon will fail to build.
+
+### PoseidonMain
+- Under `[PoseidonMain]` section, update the following:
+- `database` to the name of the database storing the network graph documents (default is `poseidon_records`)
+- `collection` to the name of the collection storing the network graph documents (default is `netgraph_beta)
+- `collector_nic` to the nic on the machine running vent that is configured with the controller to capture traffic
+- `collector_interval` to the collection interval in seconds (default is `30` for a capture length of 30 seconds)
+- `collector_filter` to limit what gets captured off the controller (default is empty string for no filters, see the collector documentation for details)
+- `vent_ip` to the ip of the box running the vent collector
+- `vent_port` to the external port of the nfilter vent container 
+- `storage_interface_ip` to the external ip of the poseidon-storage-interface container (NOTE: this should be the same as the `database` field of `PoseidonStorage`, unlesss the storage-interface container is being run on a different machine)
+- `storage_interface_port` to the external port of the poseidon-storage-interface container only if changed from the default of `28000`
+
+### Controller
+- Update the `controller_uri` ip address, `contrller_user`, `controller_pass` of the `[NorthBoundControllerAbstraction:Handle_Periodic]` section. NOTE: without this configuration, poseidon will not be able to talk to the controller
+
 
 # Required Dependencies
 
-- Docker
+- Docker (If installing from a clean machine, a startup.sh script resides in the repo that can be used to 
+install docker and docker-compose for an Ubunut 16.04 box. Make this script executable and then 
+run with `sudo ./startup.sh`.)
 - make
-- docker-compose
-- `/data/db` directory for mongodb database; you can use a different directory by updating the `docker-compose.yaml` 
-- under the `storage` section, update `volumes` to `/path/to/your/dir:/data/db` with the path to the directory to store mongodb records.
-- The 1.8 release of docker-compose can be installed with `make compose-install`
-- Update the `ip` of the `[database]` section of `config/poseidon.config` to the external ip of the host machine running mongodb (or
-the `docker-machine ip` if using boot2docker or similar). NOTE: without this configuration, poseidon will fail to build.
-- Update the `controller_uri` ip address, `contrller_user`, `controller_pass` of the `[NorthBoundControllerAbstraction:Handle_Periodic]` section. NOTE: without this configuration, poseidon will not be able to talk to the controller
+- docker-compose (the 1.8 release of docker-compose can be installed with `make compose-install`)
 
-# Usage Examples
-
-```
-make compose
-```
 
 # Documentation
 - [Docs](https://github.com/Lab41/poseidon/tree/master/docs)
 
 # Tests
 
-Tests are currently written in py.test for Python.  The tests are automatically run when building the dockerfile.
+Tests are currently written in py.test for Python.  The tests are automatically run when building the containers.
 
 They can also be tested using:
 ```

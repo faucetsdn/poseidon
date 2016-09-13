@@ -33,6 +33,7 @@ import Queue
 import threading
 import time
 import types
+import requests
 from functools import partial
 from os import getenv
 
@@ -41,6 +42,7 @@ import pika
 from poseidon.poseidonMain.Config.Config import config_interface
 from poseidon.poseidonMain.Investigator.Investigator import investigator_interface
 from poseidon.poseidonMain.Scheduler.Scheduler import scheduler_interface
+
 
 # class NullHandler(logging.Handler):
 #     def emit(self, record):
@@ -187,6 +189,53 @@ class PoseidonMain(object):
                                                 routing_key=r_key,
                                                 body=r_msg)
 
+    def check_db(self, dev_hash, field):
+        '''
+        Given a device hash and field to look for in
+        its record, queries the database for device record
+        and returns the given field. Returns None on error.
+        '''
+        try:
+            query = {'dev_id': dev_hash}
+            ip = self.mod_configuration['storage_interface_ip']
+            port = self.mod_configuration['storage_interface_port']
+            uri = 'http://' + ip + ':' + port + \
+                  '/v1/storage/query/{database}/{collection}/{query_str}'.format(
+                   database=self.mod_configuration['database'],
+                   collection=self.mod_configuration['collection'],
+                   query_str=query)
+            resp = requests.get(uri)
+
+            # resp.text should load into dict 'docs' key for list of
+            # documents matching the query - should be only 1 match
+            resp = json.loads(resp.text)
+            if resp['count'] == 1:
+                db_doc = resp['docs'][0]
+                return db_doc[field]
+            else:
+                self.logger.debg('bad document in db: ' + str(db_doc))
+        except Exception, e:
+            self.logger.debug('failed to get record from db' + str(e))
+            return None
+
+    def start_vent_collector(self, dev_hash, num_captures=1):
+        '''
+        Given a device hash and optionally a number of captures
+        to be taken, starts vent collector for that device with the
+        options specified in poseidon.config.
+        '''
+        try:
+            payload = {"nic": self.mod_configuration['collector_nic'],
+                       "id": dev_hash,
+                       "interval": self.mod_configuration['collector_interval'],
+                       "filter": self.mod_configuration['collector_filter'],
+                       "iters": str(num_captures)}
+            vent_addr = self.mod_configuration['vent_ip'] + ':' + self.mod_configuration['vent_port']
+            uri = 'http://' + vent_addr + '/create'
+            resp = requests.post(uri, json=payload)
+        except Exception, e:
+            self.logger.debug('failed to start vent collector' + str(e))
+
     def handle_item(self, itype, ivalue):
         self.logger.debug('handle_item:{0}:{1}'.format(itype, ivalue))
         ivalue = json.loads(ivalue)
@@ -196,6 +245,7 @@ class PoseidonMain(object):
         if itype == 'poseidon.action.new_machine':
             self.logger.debug('***** new machine {0}'.format(ivalue))
             # tell monitor to monitor
+            self.start_vent_collector(ivalue)
             self.start_monitor(ivalue)
         if itype == 'poseidon.analytics.results.traditional':
             # TODO make a db call
@@ -210,6 +260,21 @@ class PoseidonMain(object):
                 self.logger.debug(
                     '***** allowing endpoint {0}:{1}'.format(itype,  ivalue))
                 self.stop_monitor(ivalue)
+        if 'poseidon.algos.eval_dev_class' in itype:
+            # result form eval device classifier with
+            # dev hash attached to end of routing key
+            dev_hash = ivalue.split('.')[-1]
+            prev_class = self.check_db(dev_hash, 'dev_classification')
+            monitoring_id = self.monitoring[dev_hash]
+            self.stop_monitor(monitoring_id)
+            if ivalue == prev_class:
+                self.logger.debug(
+                    '***** allowing endpoint {0}:{1}'.format(itype,  ivalue))
+                self.endpoint_allow(monitoring_id)
+            else:
+                self.logger.debug(
+                    '***** shutting down endpoint:{0}:{1}'.format(itype, ivalue))
+                self.endpoint_shutdown(monitoring_id)
 
     def make_rabbit_connection(self, host, exchange, queue_name, keys):  # pragma: no cover
         '''

@@ -35,7 +35,7 @@ from poseidonStorage import db_database_names
 from poseidonStorage import db_retrieve_doc
 from poseidonStorage import db_update_one_doc
 from poseidonStorage import main
-from poseidonStorage import poseidonStorage
+from poseidonStorage import PoseidonStorage
 
 
 application = falcon.API()
@@ -65,15 +65,15 @@ application.add_route(
     db_update_one_doc())
 
 
-def test_poseidonStorage():
+def test_PoseidonStorage():
     """
-    test of poseidonStorage class that
+    test of PoseidonStorage class that
     brokers communication with the mongodb container.
     client.address tests connection to database and returns
     tuple of host and port. default port for mongodb
     is 27017.
     """
-    ps = poseidonStorage()
+    ps = PoseidonStorage()
     assert isinstance(ps.client.address, type(()))
     assert ps.client.PORT == 27017
 

@@ -188,16 +188,6 @@ class Investigator(Main_Action_Base):
             ostr = 'duplicate record for machine: {0}'.format(ip_addr)
             self.logger.error(ostr)
 
-    def get_handlers(self, t):
-        handle_list = []
-        if t in self.handles:
-            handle_list.append(self.handles[t])
-
-        for helper in self.actions.itervalues():
-            if t in helper.handles:
-                handle_list.append(helper.handles[t])
-        return handle_list
-
 
 class Investigator_Response(Investigator):
     '''
