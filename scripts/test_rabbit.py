@@ -11,6 +11,7 @@ import datetime
 import time
 import pika
 
+
 def rabbit_init(host, exchange, queue_name, rabbit_rec):  # pragma: no cover
     """
     Connects to rabbitmq using the given hostname,
@@ -27,13 +28,10 @@ def rabbit_init(host, exchange, queue_name, rabbit_rec):  # pragma: no cover
             channel.exchange_declare(exchange=exchange, type='topic')
             result = channel.queue_declare(queue=queue_name, exclusive=True)
             wait = False
-            print('connected to rabbitmq...')
             print 'connected to rabbitmq...'
         except Exception, e:
             print 'waiting for connection to rabbitmq...'
             print str(e)
-            print(str(e))
-            print('waiting for connection to rabbitmq...')
             time.sleep(2)
             wait = True
 
