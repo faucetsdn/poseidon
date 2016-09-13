@@ -14,7 +14,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-poseidonStorage interface for mongodb container
+PoseidonStorage interface for mongodb container
 for persistent storage.
 
 NAMES: current databases and collections (subject to change)
@@ -62,9 +62,9 @@ bsonInputExceptions = (bson.errors.BSONError,
                        bson.errors.InvalidBSON)
 
 
-class poseidonStorage(object):
+class PoseidonStorage(object):
     """
-    poseidonStorage class for managing mongodb database,
+    PoseidonStorage class for managing mongodb database,
     brokers requests to database.
 
     NOTE: retrieves database host from config
@@ -73,7 +73,7 @@ class poseidonStorage(object):
     """
 
     def __init__(self):
-        self.modName = 'poseidonStorage'
+        self.modName = 'PoseidonStorage'
 
         try:
             self.config = ConfigParser.ConfigParser()
@@ -84,7 +84,7 @@ class poseidonStorage(object):
             database_container_ip = self.config.get(section_name, field_name)
         except:  # pragma: no cover
             raise ValueError(
-                'poseidonStorage: could not find database ip address.')
+                'PoseidonStorage: could not find database ip address.')
         self.client = MongoClient(host=database_container_ip)
 
 
@@ -105,7 +105,7 @@ cors = CORS(allow_all_origins=True)
 public_cors = CORS(allow_all_origins=True)
 
 
-class db_database_names(poseidonStorage):
+class db_database_names(PoseidonStorage):
     """
     Request:
         URL:        /v1/storage/
@@ -123,7 +123,7 @@ class db_database_names(poseidonStorage):
         resp.body = MongoJSONEncoder().encode(ret)
 
 
-class db_collection_names(poseidonStorage):
+class db_collection_names(PoseidonStorage):
     """
     Request:
         URL:        /v1/storage/{database}
@@ -142,7 +142,7 @@ class db_collection_names(poseidonStorage):
         resp.body = MongoJSONEncoder().encode(ret)
 
 
-class db_collection_count(poseidonStorage):
+class db_collection_count(PoseidonStorage):
     """
     Request:
         URL:        /v1/storage/{database}/{collection}
@@ -161,7 +161,7 @@ class db_collection_count(poseidonStorage):
         resp.body = MongoJSONEncoder().encode(ret)
 
 
-class db_retrieve_doc(poseidonStorage):
+class db_retrieve_doc(PoseidonStorage):
     """
     Request:
         URL:        /v1/storage/doc/{database}/{collection}/{doc_id}
@@ -186,7 +186,7 @@ class db_retrieve_doc(poseidonStorage):
         resp.body = MongoJSONEncoder().encode(ret)
 
 
-class db_collection_query(poseidonStorage):
+class db_collection_query(PoseidonStorage):
     """
     Request:
         URL:        /v1/storage/query/{database}/{collection}/{query_str}
@@ -232,7 +232,7 @@ class db_collection_query(poseidonStorage):
         resp.body = MongoJSONEncoder().encode(ret)
 
 
-class db_add_one_doc(poseidonStorage):
+class db_add_one_doc(PoseidonStorage):
     """
     Request:
         URL:        /v1/storage/add_one_doc/{database}/{collection}
@@ -255,7 +255,7 @@ class db_add_one_doc(poseidonStorage):
         resp.body = MongoJSONEncoder().encode(ret)
 
 
-class db_add_many_docs(poseidonStorage):
+class db_add_many_docs(PoseidonStorage):
     """
     Request:
         URL:        /v1/storage/add_many_docs/{database}/{collection}
@@ -280,7 +280,7 @@ class db_add_many_docs(poseidonStorage):
         resp.body = MongoJSONEncoder().encode(ret)
 
 
-class db_update_one_doc(poseidonStorage):
+class db_update_one_doc(PoseidonStorage):
     """
     Request:
         URL:        /v1/storage/update_one_doc/{database}/{collection}/{filt}
