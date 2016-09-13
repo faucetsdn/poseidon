@@ -44,11 +44,6 @@ from poseidon.poseidonMain.Investigator.Investigator import investigator_interfa
 from poseidon.poseidonMain.Scheduler.Scheduler import scheduler_interface
 
 
-STORAGE_PORT = '28000'
-DATABASE = 'poseidon_records'
-COLLECTION = 'netgraph_beta'
-
-
 # class NullHandler(logging.Handler):
 #     def emit(self, record):
 #         pass
