@@ -60,8 +60,11 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         '''
         r = self.get_resource(endpoints_resource)
         retval = JsonMixin.parse_json(r)
-        sout = 'get_endpoints return:{0}'.format(retval)
-        module_logger.debug(sout)
+        module_logger.debug('get_endpoints found:')
+        items = retval
+        for item in items:
+            module_logger.debug('{0}:{1}'.format(
+                dict(item).get('mac'), dict(item).get('ip-address')))
         return retval
 
     def get_switches(self, switches_resource='data/controller/applications/bcf/info/fabric/switch'):
