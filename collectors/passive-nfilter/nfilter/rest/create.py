@@ -32,8 +32,10 @@ class CreateR:
         # - nic
         # - interval
         # - filter
+        # - iters
         # should spin up a tcpdump container that writes out pcap files based on the filter
-        # needs to be attached to the nic specified
+        # needs to be attached to the nic specified, if iters is -1 then loops until killed,
+        # otherwise completes iters number of captures (and creates that many pcap files)
         # should keep track of container id, container name, and id of filter
         # and filter + whatever else is in payload in redis
 
@@ -46,6 +48,8 @@ class CreateR:
             return 'payload missing interval'
         if 'filter' not in payload:
             return 'payload missing filter'
+        if 'iters' not in payload:
+            return 'payload missing iters'
 
         # connect to redis
         r = None
@@ -72,7 +76,8 @@ class CreateR:
                 network_mode='host', binds=['/files:/files:rw'])
             container = c.create_container(image='collectors/passive-nfilter/nprocessor',
                                            command='/tmp/run.sh ' + payload['nic'] + ' ' + payload[
-                                               'interval'] + ' ' + payload['id'] + ' ' + payload['filter'],
+                                               'interval'] + ' ' + payload['id'] + ' ' + payload[
+                                               'filter'] + ' ' + payload['iters'],
                                            host_config=network_config)
             response = c.start(container=container.get('Id'))
 

@@ -13,7 +13,12 @@ http://192.168.99.100:32815/create
 Along with a payload that looks like this:
 
 ```
-{"nic":"eth1","id":"foo","interval":"300","filter":""}
+{"nic":"eth1","id":"foo","interval":"300","filter":"","iters":"-1"}
 ```
+for a continuously running filter, or like:
+```
+{"nic":"eth1","id":"foo","interval":"300","filter":"","iters":"1"}
+```
+for a filter to run `1` capture.
 
-In the payload, the `nic` will be the network controller you want to capture on, the `id` can be any unique value, the `interval` is the time in seconds to cut up the captures into for processing, and the `filter` is for limiting what gets captured off the network controller, if it's an empty string as in this example, there is no filter applied.
+In the payload, the `nic` will be the network controller you want to capture on, the `id` can be any unique value, the `interval` is the time in seconds to cut up the captures into for processing, the `filter` is for limiting what gets captured off the network controller, if it's an empty string as in this example, there is no filter applied, and the `iters` is for specifying the number of captures to make (if this is 0 or less then the collector will run until killed, otherwise it will make this many captures).
