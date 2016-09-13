@@ -129,7 +129,7 @@ def test_db_collection_count(client):
     """
     resp = client.get('/v1/storage/local/startup_log')
     assert resp.status == falcon.HTTP_OK
-    assert int(resp.body) == 1
+    assert int(resp.body) >= 1
 
 
 def test_db_retrieve_doc(client):
@@ -191,13 +191,13 @@ def test_db_add_one_doc(client):
                        'last_sent': '0-0-0 00:00:00.000000',
                        'last_received': '0-0-0 00:00:00.000000'}
     # adds doc to db
-    uri = '/v1/storage/add_one_doc/' + 'poseidon_records/' + 'network_graph'
+    uri = '/v1/storage/add_one_doc/' + 'test_poseidon_records/' + 'network_graph'
     resp = client.post(uri, data=json.dumps(doc))
     assert resp.status == falcon.HTTP_OK
     doc_id = json.loads(resp.body)
 
     # retrieves doc from db
-    uri = '/v1/storage/doc/' + 'poseidon_records/' + 'network_graph/' + doc_id
+    uri = '/v1/storage/doc/' + 'test_poseidon_records/' + 'network_graph/' + doc_id
     resp = client.get(uri)
     assert resp.status == falcon.HTTP_OK
     doc = json.loads(resp.body)
@@ -205,35 +205,35 @@ def test_db_add_one_doc(client):
     assert doc['packet_lengths'] == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
     # checks that collection is persistent
-    resp = client.get('/v1/storage/' + 'poseidon_records')
+    resp = client.get('/v1/storage/' + 'test_poseidon_records')
     assert resp.status == falcon.HTTP_OK
     assert 'network_graph' in json.loads(resp.body)
 
     # checks that number of documents in collection at least one now
-    resp = client.get('/v1/storage/' + 'poseidon_records/' + 'network_graph')
+    resp = client.get('/v1/storage/' + 'test_poseidon_records/' + 'network_graph')
     assert int(resp.body) >= 1
 
     # test a query of the inserted collection with a bad object id
     query = {'_id': 'xyz'}
     query = json.dumps(query)
-    resp = client.get('/v1/storage/query/' + 'poseidon_records/' + 'network_graph/' + query)
+    resp = client.get('/v1/storage/query/' + 'test_poseidon_records/' + 'network_graph/' + query)
     assert resp.status == falcon.HTTP_BAD_REQUEST
 
     # test a proper query of the collection for the inserted doc by id
     query = {'_id': doc_id}
     query = json.dumps(query)
-    resp = client.get('/v1/storage/query/' + 'poseidon_records/' + 'network_graph/' + query)
+    resp = client.get('/v1/storage/query/' + 'test_poseidon_records/' + 'network_graph/' + query)
     assert resp.status == falcon.HTTP_OK
     resp = json.loads(resp.body)
-    assert resp['count'] == 1
+    assert resp['count'] >= 1
 
     # test a collection query using the node_ip
     query = {'node_ip': 'TEST'}
     query = json.dumps(query)
-    resp = client.get('/v1/storage/query/' + 'poseidon_records/' + 'network_graph/' + query)
+    resp = client.get('/v1/storage/query/' + 'test_poseidon_records/' + 'network_graph/' + query)
     assert resp.status == falcon.HTTP_OK
     resp = json.loads(resp.body)
-    assert resp['count'] == 1
+    assert resp['count'] >= 1
     doc = resp['docs'][0]  # should only have 1 doc in list
     assert doc['node_ip'] == 'TEST'
     assert doc['flow_id'] == '6a32984d2348e23894f3298'
@@ -258,7 +258,7 @@ def test_db_add_many_docs(client):
 
     # insert 3 docs
     docs = [doc_one, doc_two, doc_thr]
-    uri = '/v1/storage/add_many_docs/'+'poseidon_records/'+'network_graph/'
+    uri = '/v1/storage/add_many_docs/'+'test_poseidon_records/'+'network_graph/'
     resp = client.post(uri, data=json.dumps(docs))
     assert resp.status == falcon.HTTP_OK
     resp = json.loads(resp.body)
@@ -267,7 +267,7 @@ def test_db_add_many_docs(client):
     # check that inserted docs are in collection
     query = {}
     query = json.dumps(query)
-    resp = client.get('/v1/storage/query/' + 'poseidon_records/' + 'network_graph/' + query)
+    resp = client.get('/v1/storage/query/' + 'test_poseidon_records/' + 'network_graph/' + query)
     assert resp.status == falcon.HTTP_OK
     resp = json.loads(resp.body)
     assert resp['count'] >= 3
@@ -284,7 +284,7 @@ def test_db_update_one_doc(client):
 
     # non-existent document
     filt = json.dumps(filt)
-    uri = '/v1/storage/update_one_doc/'+'poseidon_records/'+'network_graph/'+filt
+    uri = '/v1/storage/update_one_doc/'+'test_poseidon_records/'+'network_graph/'+filt
     resp = client.post(uri, data=json.dumps(update))
     assert resp.status == falcon.HTTP_BAD_REQUEST
     resp = json.loads(resp.body)
@@ -292,7 +292,7 @@ def test_db_update_one_doc(client):
 
     # insert doc
     doc = {'node_ip': 'GIRAFFE'}
-    uri = '/v1/storage/add_one_doc/' + 'poseidon_records/' + 'network_graph'
+    uri = '/v1/storage/add_one_doc/' + 'test_poseidon_records/' + 'network_graph'
     resp = client.post(uri, data=json.dumps(doc))
     assert resp.status == falcon.HTTP_OK
 
@@ -301,13 +301,13 @@ def test_db_update_one_doc(client):
     filt = {'_id': doc_id}
     filt = json.dumps(filt)
     update = {'$set': {'node_ip': 'HIPPO'}}
-    uri = '/v1/storage/update_one_doc/'+'poseidon_records/'+'network_graph/'+filt
+    uri = '/v1/storage/update_one_doc/'+'test_poseidon_records/'+'network_graph/'+filt
     resp = client.post(uri, data=json.dumps(update))
     assert resp.status == falcon.HTTP_OK
     assert json.loads(resp.body)['raw_result']['updatedExisting']
 
     # verify update to node_ip
-    uri = '/v1/storage/doc/' + 'poseidon_records/' + 'network_graph/' + doc_id
+    uri = '/v1/storage/doc/' + 'test_poseidon_records/' + 'network_graph/' + doc_id
     resp = client.get(uri)
     assert resp.status == falcon.HTTP_OK
     doc = json.loads(resp.body)
