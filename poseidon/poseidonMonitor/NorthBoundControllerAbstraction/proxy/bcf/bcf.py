@@ -211,8 +211,8 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
                     my_max = seq
             return (my_max + 1)
         else:
-            module_logger.error('get_highest could not find filter')
-            return None
+            module_logger.debug('noFilters online')
+            return 2
 
     def get_seq_by_ip(self, ip):
         my_filter = self.get_span_fabric()[0].get('filter')
