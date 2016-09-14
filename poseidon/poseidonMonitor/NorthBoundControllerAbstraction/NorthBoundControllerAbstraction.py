@@ -96,6 +96,7 @@ class Handle_Periodic(Monitor_Helper_Base):
         self.prev_endpoints = {}
         self.new_endpoints = {}
         self.mirroring = {}
+        self.shutdown = {}
         self.do_rabbit = True
         self.m_queue = Queue.Queue()
         self.rabbit_connection_local = None
@@ -171,7 +172,8 @@ class Handle_Periodic(Monitor_Helper_Base):
         host = 'poseidon-rabbit'
         exchange = 'topic-poseidon-internal'
         queue_name = 'poseidon_NBCA'
-        binding_key = ['poseidon.algos.#', 'poseidon.action.#']
+        # binding_key = ['poseidon.algos.#', 'poseidon.action.#']
+        binding_key = ['poseidon.action.#']
         retval = self.make_rabbit_connection(
             host, exchange, queue_name, binding_key)
         self.rabbit_channel_local = retval[0]
@@ -244,6 +246,28 @@ class Handle_Periodic(Monitor_Helper_Base):
                 self.bcf.mirror_ip(my_dict['ip-address'])
                 self.mirroring[my_hash] = my_dict
 
+        if itype == 'poseidon.action.endpoint_shutdown':
+            self.logger.debug(
+                'endpoint_shutdown:{0}:{1}'.format(ivalue, type(ivalue)))
+            for my_hash, my_dict in ivalue.iteritems():
+                bad_ip = my_dict.get('ip-address')
+                if bad_ip is not None:
+                    self.logger.debug(
+                        '****** shutdown {0}:{1}'.format(bad_ip, ivalue))
+                    self.bcf.shutdown_ip(bad_ip)
+                    self.shutdown[my_hash] = my_dict
+
+        if itype == 'poseidon.action.stop_monitor':
+            self.logger.debug('stop_monitor:{0}:{1}'.format(itype, ivalue))
+            for my_hash, my_dict in ivalue.iteritems():
+                self.logger.debug('stop_monitor_dict:{0}'.format(my_dict))
+                my_ip = my_dict.get('ip-address')
+                if my_ip is not None:
+                    self.logger.debug('***** shutting down {0}'.format(my_ip))
+                    self.bcf.unmirror_ip(my_ip)
+                    if my_hash in self.mirroring:
+                        self.mirroring.pop(my_hash)
+
     def get_rabbit_work(self):
         '''get work item from queue if exists'''
         # type , value
@@ -285,14 +309,17 @@ class Handle_Periodic(Monitor_Helper_Base):
 
     def print_state(self):
         self.logger.debug('**************PREV*****************')
-        for my_hash, my_value in self.prev_endpoints.iteritems():
-            self.logger.debug('P:{0}:{1}'.format(my_hash, my_value))
+        for my_hash, my_dict in self.prev_endpoints.iteritems():
+            self.logger.debug('P:{0}:{1}'.format(my_hash, my_dict))
         self.logger.debug('**************NEW******************')
-        for my_hash, my_value in self.new_endpoints.iteritems():
-            self.logger.debug('N:{0}:{1}'.format(my_hash, my_value))
+        for my_hash, my_dict in self.new_endpoints.iteritems():
+            self.logger.debug('N:{0}:{1}'.format(my_hash, my_dict))
         self.logger.debug('***********MIRRORING***************')
-        for my_hash, my_value in self.mirroring.iteritems():
-            self.logger.debug('M:{0}:{1}'.format(my_hash, my_value))
+        for my_hash, my_dict in self.mirroring.iteritems():
+            self.logger.debug('M:{0}:{1}'.format(my_hash, my_dict))
+        self.logger.debug('***********SHUTDOWN****************')
+        for my_hash, my_dict in self.shutdown.iteritems():
+            self.logger.debug('M:{0}:{1}'.format(my_hash, my_dict))
 
     def send_new_machines(self):
         '''send listing of new machines to main for decisions'''

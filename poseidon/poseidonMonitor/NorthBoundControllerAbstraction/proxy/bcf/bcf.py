@@ -165,10 +165,12 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             tenant = record.get('tenant')
             segment = record.get('segment')
             mac = record.get('mac')
-            name = '{0}{1}{2}'.format(tenant, segment, mac)
+            name = '{0}{1}{2}'.format(tenant, segment, mac).replace(':', '')
             if record.get('name') is not None:
                 name = record['name']
             module_logger.debug('bcf shutting down: {0}'.format(record))
+            module_logger.debug('t:{0} s:{1} n:{2} m{3} shut:{4}'.format(
+                tenant, segment, name, mac, shutdown))
             self.shutdown_endpoint(tenant, segment, name, mac, shutdown)
             shutdowns.append(record)
         return shutdowns
@@ -212,7 +214,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             return (my_max + 1)
         else:
             module_logger.debug('noFilters online')
-            return 0
+            return 1
 
     def get_seq_by_ip(self, ip):
         my_filter = self.get_span_fabric()[0].get('filter')

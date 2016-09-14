@@ -164,14 +164,21 @@ class PoseidonMain(object):
 
     def stop_monitor(self, ivalue):
         ''' stop monitoring an address'''
+
+        for my_hash, my_dict in ivalue.iteritems():
+            if my_hash in self.monitoring:
+                self.monitoring.pop(my_hash)
+
+        self.logger.debug('stop_monitor:{0},{1}'.format(ivalue, type(ivalue)))
         r_exchange = 'topic-poseidon-internal'
-        r_key = 'poseidon.action.start_monitor'
+        r_key = 'poseidon.action.stop_monitor'
         r_msg = json.dumps(ivalue)
         self.rabbit_channel_local.basic_publish(exchange=r_exchange,
                                                 routing_key=r_key,
                                                 body=r_msg)
 
     def endpoint_shutdown(self, ivalue):
+        self.logger.debug('endpoint_shutdown:{0}'.format(ivalue))
         ''' shutdown an endpoint '''
         r_exchange = 'topic-poseidon-internal'
         r_key = 'poseidon.action.endpoint_shutdown'
@@ -197,13 +204,15 @@ class PoseidonMain(object):
         '''
         try:
             query = {'dev_id': dev_hash}
+            query_string = str(query).replace("\'", "\"")
             ip = self.mod_configuration['storage_interface_ip']
             port = self.mod_configuration['storage_interface_port']
             uri = 'http://' + ip + ':' + port + \
                   '/v1/storage/query/{database}/{collection}/{query_str}'.format(
                       database=self.mod_configuration['database'],
                       collection=self.mod_configuration['collection'],
-                      query_str=query)
+                      query_str=query_string)
+            self.logger.error('check_db:{0}:{1}'.format(uri, type(uri)))
             resp = requests.get(uri)
             self.logger.debug('response from db:' + resp.text)
 
@@ -241,46 +250,49 @@ class PoseidonMain(object):
         except Exception, e:
             self.logger.debug('failed to start vent collector' + str(e))
 
+    @staticmethod
+    def just_the_hash(ivalue):
+        return ivalue.keys()[0]
+
     def handle_item(self, itype, ivalue):
         self.logger.debug('handle_item:{0}:{1}'.format(itype, ivalue))
-        ivalue = json.loads(ivalue)
+
+        # just get a string back from the ml stuff
+        if 'poseidon.algos.eval_dev_class' not in itype:
+            ivalue = json.loads(ivalue)
+
         if itype == 'poseidon.action.shutdown':
             self.logger.debug('***** shutting down')
             self.shutdown = True
         if itype == 'poseidon.action.new_machine':
             self.logger.debug('***** new machine {0}'.format(ivalue))
             # tell monitor to monitor
-            self.start_vent_collector(ivalue)
+            self.start_vent_collector(self.just_the_hash(ivalue))
             self.start_monitor(ivalue)
-        if itype == 'poseidon.analytics.results.traditional':
-            # TODO make a db call
-            # need to compare results to db
-            if False:
-                # if bad
-                self.logger.debug(
-                    '***** shutting down endpoint:{0}:{1}'.format(itype, ivalue))
-                self.endpoint_shutdown(ivalue)
-            else:
-                # if good
-                self.logger.debug(
-                    '***** allowing endpoint {0}:{1}'.format(itype,  ivalue))
-                self.stop_monitor(ivalue)
         if 'poseidon.algos.eval_dev_class' in itype:
+            # ivalue = classificationtype:<string>
             # result form eval device classifier with
             # dev hash attached to end of routing key
-            dev_hash = ivalue.split('.')[-1]
+            dev_hash = itype.split('.')[-1]
             prev_class = self.check_db(dev_hash, 'dev_classification')
+
             monitoring_id = self.monitoring[dev_hash]
-            self.stop_monitor(monitoring_id)
+            temp_d = {dev_hash: monitoring_id}
+
+            # self.stop_monitor(monitoring_id)
+            self.stop_monitor(temp_d)
+
             self.logger.debug('stopping monitoring on:' + itype)
+            self.logger.debug('classified as:{0}'.format(ivalue))
+            self.logger.debug('classified previously {0}'.format(prev_class))
             if ivalue == prev_class:
                 self.logger.debug(
-                    '***** allowing endpoint {0}:{1}'.format(itype,  ivalue))
-                self.endpoint_allow(monitoring_id)
+                    '***** allowing endpoint {0}:{1}'.format(itype,  temp_d))
+                self.endpoint_allow(temp_d)
             else:
                 self.logger.debug(
-                    '***** shutting down endpoint:{0}:{1}'.format(itype, ivalue))
-                self.endpoint_shutdown(monitoring_id)
+                    '***** shutting down endpoint:{0}:{1}'.format(itype, temp_d))
+                self.endpoint_shutdown(temp_d)
 
     def make_rabbit_connection(self, host, exchange, queue_name, keys):  # pragma: no cover
         '''
