@@ -76,8 +76,8 @@ class CreateR:
                 network_mode='host', binds=['/files:/files:rw'])
             container = c.create_container(image='collectors/passive-nfilter/nprocessor',
                                            command='/tmp/run.sh ' + payload['nic'] + ' ' + payload[
-                                               'interval'] + ' ' + payload['id'] + ' ' + payload[
-                                               'filter'] + ' ' + payload['iters'],
+                                               'interval'] + ' ' + payload['id'] + ' ' payload[
+                                               'iters'] + ' ' + payload['filter'],
                                            host_config=network_config)
             response = c.start(container=container.get('Id'))
 
