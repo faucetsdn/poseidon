@@ -33,11 +33,11 @@ import Queue
 import threading
 import time
 import types
-import requests
 from functools import partial
 from os import getenv
 
 import pika
+import requests
 
 from poseidon.poseidonMain.Config.Config import config_interface
 from poseidon.poseidonMain.Investigator.Investigator import investigator_interface
@@ -201,9 +201,9 @@ class PoseidonMain(object):
             port = self.mod_configuration['storage_interface_port']
             uri = 'http://' + ip + ':' + port + \
                   '/v1/storage/query/{database}/{collection}/{query_str}'.format(
-                   database=self.mod_configuration['database'],
-                   collection=self.mod_configuration['collection'],
-                   query_str=query)
+                      database=self.mod_configuration['database'],
+                      collection=self.mod_configuration['collection'],
+                      query_str=query)
             resp = requests.get(uri)
             self.logger.debug('response from db:' + resp.text)
 
@@ -227,13 +227,14 @@ class PoseidonMain(object):
         options specified in poseidon.config.
         '''
         try:
-            payload = {"nic": self.mod_configuration['collector_nic'],
-                       "id": dev_hash,
-                       "interval": self.mod_configuration['collector_interval'],
-                       "filter": self.mod_configuration['collector_filter'],
-                       "iters": str(num_captures)}
+            payload = {'nic': self.mod_configuration['collector_nic'],
+                       'id': dev_hash,
+                       'interval': self.mod_configuration['collector_interval'],
+                       'filter': self.mod_configuration['collector_filter'],
+                       'iters': str(num_captures)}
             self.logger.debug('vent payload: ' + str(payload))
-            vent_addr = self.mod_configuration['vent_ip'] + ':' + self.mod_configuration['vent_port']
+            vent_addr = self.mod_configuration[
+                'vent_ip'] + ':' + self.mod_configuration['vent_port']
             uri = 'http://' + vent_addr + '/create'
             resp = requests.post(uri, json=payload)
             self.logger.debug('collector repsonse: ' + resp.text)
@@ -401,6 +402,8 @@ class PoseidonMain(object):
             if workfound:  # pragma no cover
                 self.do_work(item)
 
+            self.print_state()
+
             elapsed = time.clock()
             elapsed = elapsed - start
 
@@ -408,6 +411,15 @@ class PoseidonMain(object):
                 elapsed * 1000)
             self.logger.debug(log_line)
         self.logger.debug('Shutting Down')
+
+    def print_state(self):
+        self.logger.debug('**********MONITORING**********')
+        for my_hash, my_value in self.monitoring.iteritems():
+            self.logger.debug('M:{0}:{1}'.format(my_hash, my_value))
+        self.logger.debug('***********SHUTDOWN***********')
+        for my_hash, my_value in self.shutdown.iteritems():
+            self.logger.debug('S:{0}:{1}'.format(my_hash, my_value))
+        self.logger.debug('******************************')
 
 
 def main(skip_rabbit=False):

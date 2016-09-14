@@ -283,6 +283,17 @@ class Handle_Periodic(Monitor_Helper_Base):
                         '***** detected new address {0}'.format(machine))
                     self.new_endpoints[h] = machine
 
+    def print_state(self):
+        self.logger.debug('**************PREV*****************')
+        for my_hash, my_value in self.prev_endpoints.iteritems():
+            self.logger.debug('P:{0}:{1}'.format(my_hash, my_value))
+        self.logger.debug('**************NEW******************')
+        for my_hash, my_value in self.new_endpoints.iteritems():
+            self.logger.debug('N:{0}:{1}'.format(my_hash, my_value))
+        self.logger.debug('***********MIRRORING***************')
+        for my_hash, my_value in self.mirroring.iteritems():
+            self.logger.debug('M:{0}:{1}'.format(my_hash, my_value))
+
     def send_new_machines(self):
         '''send listing of new machines to main for decisions'''
         for hashed, machine in self.new_endpoints.iteritems():
@@ -303,7 +314,7 @@ class Handle_Periodic(Monitor_Helper_Base):
 
         current = None
         parsed = None
-        machines = None
+        machines = {}
 
         try:
             current = self.bcf.get_endpoints()
@@ -316,8 +327,11 @@ class Handle_Periodic(Monitor_Helper_Base):
                 self.controller['URI'])
 
         self.get_rabbit_work()
+        self.logger.debug('MACHINES:{0}'.format(machines))
         self.find_new_machines(machines)
         self.send_new_machines()
+
+        self.print_state()
 
         self.retval['machines'] = parsed
         self.retval['resp'] = 'ok'
