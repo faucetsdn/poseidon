@@ -21,12 +21,13 @@ Created on 17 May 2016
 @author: dgrossman, tlanham
 '''
 import ast
+import json
 import logging
 import logging.config
 import sys
 import urllib
+
 import requests
-import json
 
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
 from poseidon.poseidonMain.Config.Config import Config
@@ -75,7 +76,7 @@ class Investigator(Main_Action_Base):
         for machine, config in self.vent_machines.iteritems():
             try:
                 resp = requests.post(
-                    self.vctrl_addr + '/machines/create', data={'machine':'vent1'})
+                    self.vctrl_addr + '/machines/create', data={'machine': 'vent1'})
             except:
                 self.logger.error(
                     'Main: Investigator: error on vent create request.')
@@ -165,7 +166,8 @@ class Investigator(Main_Action_Base):
         ip, then processes accordingly.
         '''
         query = {'node_ip': ip_addr}
-        uri = 'http://poseidon-storage-interface/v1/poseidon_records/network_graph/' + json.dumps(query)
+        uri = 'http://poseidon-storage-interface/v1/poseidon_records/network_graph/' + \
+            json.dumps(query)
         try:
             resp = requests.get(uri)
         except:
@@ -187,6 +189,10 @@ class Investigator(Main_Action_Base):
             # log error for investigation
             ostr = 'duplicate record for machine: {0}'.format(ip_addr)
             self.logger.error(ostr)
+
+    def get_handlers(self, itype):
+        ''' return algorihtms that respond to itype'''
+        return None
 
 
 class Investigator_Response(Investigator):
