@@ -212,7 +212,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             return (my_max + 1)
         else:
             module_logger.debug('noFilters online')
-            return 0
+            return 1
 
     def get_seq_by_ip(self, ip):
         my_filter = self.get_span_fabric()[0].get('filter')
