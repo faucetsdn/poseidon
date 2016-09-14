@@ -205,15 +205,17 @@ class PoseidonMain(object):
                    collection=self.mod_configuration['collection'],
                    query_str=query)
             resp = requests.get(uri)
+            self.logger.debug('response from db:' + resp.text)
 
             # resp.text should load into dict 'docs' key for list of
             # documents matching the query - should be only 1 match
             resp = json.loads(resp.text)
             if resp['count'] == 1:
                 db_doc = resp['docs'][0]
+                self.logger.debug('found db doc: ' + str(db_doc))
                 return db_doc[field]
             else:
-                self.logger.debg('bad document in db: ' + str(db_doc))
+                self.logger.debug('bad document in db: ' + str(db_doc))
         except Exception, e:
             self.logger.debug('failed to get record from db' + str(e))
             return None
@@ -230,9 +232,11 @@ class PoseidonMain(object):
                        "interval": self.mod_configuration['collector_interval'],
                        "filter": self.mod_configuration['collector_filter'],
                        "iters": str(num_captures)}
+            self.logger.debug('vent payload: ' + str(payload))
             vent_addr = self.mod_configuration['vent_ip'] + ':' + self.mod_configuration['vent_port']
             uri = 'http://' + vent_addr + '/create'
             resp = requests.post(uri, json=payload)
+            self.logger.debug('collector repsonse: ' + resp.text)
         except Exception, e:
             self.logger.debug('failed to start vent collector' + str(e))
 
@@ -267,6 +271,7 @@ class PoseidonMain(object):
             prev_class = self.check_db(dev_hash, 'dev_classification')
             monitoring_id = self.monitoring[dev_hash]
             self.stop_monitor(monitoring_id)
+            self.logger.debug('stopping monitoring on:' + itype)
             if ivalue == prev_class:
                 self.logger.debug(
                     '***** allowing endpoint {0}:{1}'.format(itype,  ivalue))
