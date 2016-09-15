@@ -224,7 +224,11 @@ class PoseidonMain(object):
                 self.logger.debug('found db doc: ' + str(db_doc))
                 return db_doc[field]
             else:
-                self.logger.debug('bad document in db: ' + str(db_doc))
+                if resp['count'] == 0:
+                    pass
+                    # TODO schedule endpoint for analysis
+                else:
+                    self.logger.debug('bad document in db: ' + str(resp))
         except Exception, e:
             self.logger.debug('failed to get record from db' + str(e))
             return None

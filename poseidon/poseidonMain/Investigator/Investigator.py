@@ -192,7 +192,7 @@ class Investigator(Main_Action_Base):
 
     def get_handlers(self, itype):
         ''' return algorihtms that respond to itype'''
-        return None
+        return []
 
 
 class Investigator_Response(Investigator):
