@@ -74,6 +74,6 @@ CPython version: 2.7.9
 OpenSSL version: OpenSSL 1.0.1e 11 Feb 2013
 ```
 
-the latest version of compose can always be pulled from the docker repo:`https://github.com/docker/compose/releases`
+the latest version of compose can always be pulled from the [docker repo](https://github.com/docker/compose/releases)
 # Contributing to Poseidon
 Want to contribute?  Awesome!  Issue a pull request or see more details [here](https://github.com/Lab41/poseidon/blob/master/CONTRIBUTING.md).
