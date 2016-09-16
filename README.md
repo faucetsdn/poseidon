@@ -32,7 +32,7 @@ the `docker-machine ip` if using boot2docker or similar - making sure that write
 ### PoseidonMain
 - Under `[PoseidonMain]` section, update the following:
 - `database` to the name of the database storing the network graph documents (default is `poseidon_records`)
-- `collection` to the name of the collection storing the network graph documents (default is `netgraph_beta)
+- `collection` to the name of the collection storing the network graph documents (default is `netgraph_beta`)
 - `collector_nic` to the nic on the machine running vent that is configured with the controller to capture traffic
 - `collector_interval` to the collection interval in seconds (default is `30` for a capture length of 30 seconds)
 - `collector_filter` to limit what gets captured off the controller (default is empty string for no filters, see the collector documentation for details)
@@ -62,5 +62,18 @@ They can also be tested using:
 make test
 ```
 
+# build is broke and is talking about docker-compose not working
+Installing docker-compose is usually a seperate event to installing docker.  Even if you installed docker-compose it may not be the most recent version.  The version that works with our `docker-compose.yaml`:
+
+docker-compose version
+
+'''
+docker-compose version 1.8.0, build f3628c7
+docker-py version: 1.9.0
+CPython version: 2.7.9
+OpenSSL version: OpenSSL 1.0.1e 11 Feb 2013
+'''
+
+the latest version of compose can always be pulled from the docker repo:`https://github.com/docker/compose/releases`
 # Contributing to Poseidon
 Want to contribute?  Awesome!  Issue a pull request or see more details [here](https://github.com/Lab41/poseidon/blob/master/CONTRIBUTING.md).
