@@ -67,12 +67,12 @@ Installing docker-compose is usually a seperate event to installing docker.  Eve
 
 docker-compose version
 
-'''
+```
 docker-compose version 1.8.0, build f3628c7
 docker-py version: 1.9.0
 CPython version: 2.7.9
 OpenSSL version: OpenSSL 1.0.1e 11 Feb 2013
-'''
+```
 
 the latest version of compose can always be pulled from the docker repo:`https://github.com/docker/compose/releases`
 # Contributing to Poseidon
