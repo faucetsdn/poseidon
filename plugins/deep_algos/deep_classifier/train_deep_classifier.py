@@ -58,6 +58,10 @@ from theano import tensor as T
 
 module_logger = logging.getLogger(__name__)
 
+fd = None
+STORAGE_PORT = '28000'
+DATABASE = 'poseidon_records'
+COLLECTION = 'models'
 
 def get_path():
     try:
@@ -469,10 +473,32 @@ def binaryPrecisionRecall(predictions, targets, numClasses = 4):  # pragma: no c
         module_logger.info('class '+str(cla)+' recall:    ', recall)
         module_logger.info('class '+str(cla)+' f1:        ', f1)
 
+def save_model(model):
+    """
+    Takes a model class to be saved and
+    serializes it, saves to a file, and
+    then adds to db.
+    """
+    cPickle.dump(model,
+                 open('deep_predict.pickle', 'wb'),
+                 cPickle.HIGHEST_PROTOCOL)
+
+    try:
+        model_str = cPickle.dumps(model, 0)  # uses lowest protocol for utf8 compliance when request is serialized
+        uri = 'http://' + os.environ['POSEIDON_HOST'] + ':' + STORAGE_PORT + \
+            '/v1/storage/add_one_doc/{database}/{collection}'.format(database=DATABASE,
+                                                                     collection=COLLECTION)
+        payload = {'model': model_str}
+        resp = requests.post(uri, data=json.dumps(payload))
+        if resp.status_code != 200:
+            module_logger.debug(str(resp.status_code))
+    except:
+        module_logger.debug('connection to storage-interface failed')
+
 
 def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOldTimeSteps, wtstd, 
              lr, decay, clippings, dimIn, dim, attentionEnc, attentionContext, numClasses, batch_size, epochs, 
-             trainPercent, dataPath, loadPrepedData=False):  # pragma: no cover
+             trainPercent, dataPath, loadPrepedData, channel):  # pragma: no cover
     print locals()
     print
     
@@ -706,10 +732,7 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
 
             #save the models
             if iteration % (numSessions / (5 * batch_size)) == 0:
-                pickleFile(classifierTrain, filePath='',
-                            fileName=runname+'TRAIN'+str(iteration))
-                pickleFile(classifierPredict, filePath='',
-                            fileName=runname+'PREDICT'+str(iteration))
+                save_model(classifierPredict)
 
         epochCost.append(np.mean(costCollect))
         trainAcc.append(np.mean(trainCollect))
@@ -726,28 +749,16 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
 
 def run_plugin(path, host):  # pragma: no cover
     exchange = 'topic-poseidon-internal'
-<<<<<<< HEAD
-    queue_name = 'NAME'
-    #channel, connection = rabbit_init(host=host,
-    #                                  exchange=exchange,
-    #                                  queue_name=queue_name)
-    print 'starting program'
-    dataPath = 'testpcap.cap'
-    train, predict = training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOldTimeSteps, wtstd, 
-             lr, decay, clippings, dimIn, dim, attentionEnc, attentionContext, numClasses, batch_size, epochs, 
-             trainPercent, dataPath, loadPrepedData)
-=======
-    queue_name = 'poseidon_internals'
-
+    queue_name = 'dl_algos_deep_classifier'
+    binding_key = 'poseidon.deep_classifier'
+    fd = open('temp_file', 'w+')
     channel, connection = rabbit_init(host=host,
                                       exchange=exchange,
                                       queue_name=queue_name,
                                       rabbit_rec=False)
-
-    train, predict = training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOldTimeSteps, wtstd,
-                              lr, decay, clippings, dimIn, dim, numClasses, batch_size, epochs,
-                              trainPercent, path, loadPrepedData)
-
+    train, predict = training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOldTimeSteps, wtstd, 
+             lr, decay, clippings, dimIn, dim, attentionEnc, attentionContext, numClasses, batch_size, epochs, 
+             trainPercent, path, loadPrepedData, channel)
 
 if __name__ == '__main__':
     path_name = get_path()
@@ -756,4 +767,3 @@ if __name__ == '__main__':
         run_plugin(path_name, host)
 
     print 'program completed'
->>>>>>> 3c47b0b1cc46ade825650ac7b8695ada16590822
