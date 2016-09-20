@@ -44,7 +44,7 @@ import random
 from copy import copy
 
 import blocks
-from blocks.bricks import Linear, Softmax, Softplus, NDimensionalSoftmax, BatchNormalizedMLP, Rectifier, Logistic, Tanh, MLP
+from blocks.bricks import Softmax, NDimensionalSoftmax, BatchNormalizedMLP, Tanh, MLP
 from blocks.bricks.recurrent import GatedRecurrent, Fork, LSTM
 from blocks.initialization import Constant, IsotropicGaussian, Identity, Uniform
 from blocks.bricks.cost import BinaryCrossEntropy, CategoricalCrossEntropy
@@ -58,6 +58,10 @@ from theano import tensor as T
 
 module_logger = logging.getLogger(__name__)
 
+fd = None
+STORAGE_PORT = '28000'
+DATABASE = 'poseidon_records'
+COLLECTION = 'models'
 
 def get_path():
     try:
@@ -126,28 +130,40 @@ def rabbit_init(host, exchange, queue_name, rabbit_rec):  # pragma: no cover
 os.environ['THEANO_FLAGS'] = 'floatX=float32,device=cpu' 
 sys.setrecursionlimit(100000)
 
-maxPackets = 2  # number of packets per session to use
-packetTimeSteps = 80  # number of hex characters in heading to use
-loadPrepedData = False  # if preprocessed data is already stored
-dataPath = '/data/fs4/home/bradh/bigFlows.pickle'
+maxPackets = 4
+loadPrepedData = True  # load preprocessed data
+#dataPath = '/data/fs4/datasets/pcaps/smallFlows.pcap'  # path to data
+dataPath = '/data/fs4/home/bradh/bigFlows.pickle'  # path to data
+savePath = '/data/fs4/home/bradh/outputs/'  # where to save outputs
 
-packetReverse = False  # reverse packet contents before encoding
-padOldTimeSteps = True  # for packets with len < packetTimeSteps
+packetTimeSteps = 40 # number of hex pairs (header chars / 2)
+packetReverse = False # reverse the order of packets ala seq2seq
+padOldTimeSteps = True # pad short sessions/packets at beginning(True) or end (False)
+onlyEssentials = True  # extracts only length,protocol,frag,srcIP,dstIP,srcport,dstport from header
+if onlyEssentials:  
+    packetTimeSteps = 16
 
-runname = 'hredClassify2smallpackets'
+runname = 'TEST4smallattn0'#'attn8full4class'
 rnnType = 'gru'  # gru or lstm
+attentionEnc = False
+attentionContext = False
 
-wtstd = 0.2  # weight initialization
+wtstd = 0.2  # standard dev for Isotropic weight initialization
 dimIn = 257  # hex has 256 characters + the <EOP> character
 dim = 100  # dimension reduction size
-batch_size = 20 
-numClasses = 4
-clippings = 1  # norm cuttoff for gradient clipping
+clippings = 1  # for gradient clipping
+batch_size = 20  
+binaryTarget = False
 
-epochs = 1
+if binaryTarget:
+    numClasses = 2
+else:
+    numClasses = 4
+
+epochs = 50 
 lr = 0.0001
 decay = 0.9
-trainPercent = 0.9  # percent of data in training set
+trainPercent = 0.9  # training testing split
 
 module_logger = logging.getLogger(__name__)
 
@@ -296,13 +312,14 @@ def oneHot(index, granular = 'hex'):  # pragma: no cover
 
 
 #TODO: add character level encoding
-def oneSessionEncoder(sessionPackets, hexDict, maxPackets = 2, packetTimeSteps = 100,
+def oneSessionEncoder(sessionPackets, hexDict, maxPackets, packetTimeSteps,
                       packetReverse = False, charLevel = False, padOldTimeSteps = True, 
                       onlyEssentials = False):    
             
     sessionCollect = []
     packetCollect = []
     
+    #TODO: add character-level encoding
     if charLevel:
         vecLen = 17
     else:
@@ -361,7 +378,7 @@ def oneSessionEncoder(sessionPackets, hexDict, maxPackets = 2, packetTimeSteps =
 
 
 def predictClass(predictFun, hexSessionsDict, comsDict, uniqIPs, hexDict, hexSessionsKeys,
-                 binaryTarget, numClasses, trainPercent = 0.9, dimIn=257, maxPackets=2,
+                 binaryTarget, numClasses, onlyEssentials, trainPercent = 0.9, dimIn=257, maxPackets=2,
                  packetTimeSteps = 16, padOldTimeSteps=True):
     
     testCollect = []
@@ -456,10 +473,32 @@ def binaryPrecisionRecall(predictions, targets, numClasses = 4):  # pragma: no c
         module_logger.info('class '+str(cla)+' recall:    ', recall)
         module_logger.info('class '+str(cla)+' f1:        ', f1)
 
+def save_model(model):
+    """
+    Takes a model class to be saved and
+    serializes it, saves to a file, and
+    then adds to db.
+    """
+    cPickle.dump(model,
+                 open('deep_predict.pickle', 'wb'),
+                 cPickle.HIGHEST_PROTOCOL)
+
+    try:
+        model_str = cPickle.dumps(model, 0)  # uses lowest protocol for utf8 compliance when request is serialized
+        uri = 'http://' + os.environ['POSEIDON_HOST'] + ':' + STORAGE_PORT + \
+            '/v1/storage/add_one_doc/{database}/{collection}'.format(database=DATABASE,
+                                                                     collection=COLLECTION)
+        payload = {'model': model_str}
+        resp = requests.post(uri, data=json.dumps(payload))
+        if resp.status_code != 200:
+            module_logger.debug(str(resp.status_code))
+    except:
+        module_logger.debug('connection to storage-interface failed')
+
 
 def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOldTimeSteps, wtstd, 
-             lr, decay, clippings, dimIn, dim, numClasses, batch_size, epochs, 
-             trainPercent, dataPath, loadPrepedData=False):  # pragma: no cover
+             lr, decay, clippings, dimIn, dim, attentionEnc, attentionContext, numClasses, batch_size, epochs, 
+             trainPercent, dataPath, loadPrepedData, channel):  # pragma: no cover
     print locals()
     print
     
@@ -523,7 +562,7 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
                 weights_init = linewt_init, biases_init = line_bias)
 
     #CLASSIFIER
-    bmlp = BatchNormalizedMLP( activations=[Logistic(),Logistic()], 
+    bmlp = BatchNormalizedMLP( activations=[Tanh(),Tanh()], 
                dims=[dim, dim, numClasses],
                weights_init=classifierWts,
                biases_init=Constant(0.0001) )
@@ -547,7 +586,30 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
         return hEnc
 
     hEnc, _ = theano.scan(onestepEnc, X) #(mini*numPackets, packetLen, 1, hexdictLen)
-    hEncReshape = T.reshape(hEnc[:,-1], (-1, maxPackets, 1, dim)) #[:,-1] takes the last rep for each packet
+        if attentionEnc:
+        
+        attentionmlpEnc = MLP(activations=[Tanh()], dims = [dim, 1], weights_init=attnWts,
+               biases_init=Constant(1.0))
+        attentionmlpEnc.initialize()
+
+        hEncAttn = T.reshape(hEnc, (-1, packetTimeSteps, dim))
+        def onestepEncAttn(hEncAttn):
+
+            preEncattn = attentionmlpEnc.apply(hEncAttn)
+            attEncsoft = Softmax()
+            attEncpyx = attEncsoft.apply(preEncattn.flatten())
+            attEncpred = attEncpyx.flatten()
+            attenc = T.mul(hEncAttn.dimshuffle(1,0), attEncpred).dimshuffle(1,0)
+
+            return attenc
+
+        attenc, _ = theano.scan(onestepEncAttn, hEncAttn)
+
+        hEncReshape = T.reshape(T.sum(attenc, axis = 1), (-1, maxPackets, 1, dim))
+
+    else:
+        hEncReshape = T.reshape(hEnc[:,-1], (-1, maxPackets, 1, dim)) #[:,-1] takes the last rep for each packet
+                                                                 #(mini, numPackets, 1, dimReduced)  #[:,-1] takes the last rep for each packet
                                                                  #(mini, numPackets, 1, dimReduced)
     def onestepContext(hEncReshape):
 
@@ -561,10 +623,30 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
         return hContext
 
     hContext, _ = theano.scan(onestepContext, hEncReshape)
-    hContextReshape = T.reshape(hContext[:,-1], (-1,dim))
+    
+    if attentionContext:
+        attentionmlpContext = MLP(activations=[Tanh()], dims = [dim, 1], weights_init=attnWts,
+               biases_init=Constant(1.0))
+        attentionmlpContext.initialize()
+
+        hContextAttn = T.reshape(hContext, (-1,maxPackets,dim))
+        def onestepContextAttn(hContextAttn):
+
+            preContextatt = attentionmlpContext.apply(hContextAttn)
+            attContextsoft = Softmax()
+            attContextpyx = attContextsoft.apply(preContextatt.flatten())
+            attContextpred = attContextpyx.flatten()
+            attcontext = T.mul(hContextAttn.dimshuffle(1,0), attContextpred).dimshuffle(1,0)
+
+            return attcontext
+
+        attcontext, _ = theano.scan(onestepContextAttn, hContextAttn)
+        hContextReshape = T.sum(attcontext, axis = 1)
+
+    else:
+        hContextReshape = T.reshape(hContext[:,-1], (-1,dim))
 
     data5, _ = forkDec.apply(hContextReshape)
-
     pyx = bmlp.apply(data5)
     softmax = Softmax()
     softoutClass = softmax.apply(pyx)
@@ -611,13 +693,9 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
     
                 adfun = adversarialfunctions.Adversary(sessionForEncoding)
                 adversaryList = [sessionForEncoding, 
-                                 #noisyPacketMaker(sessionForEncoding, maxPackets, packetTimeSteps, percentNoisy = 0.2),
                                  adfun.dstIpSwapOut(comsDict, uniqIPs),
                                  adfun.portDirSwitcher(),
-                                 adfun.ipDirSwitcher(),
-                                 #dstIpSwapOut(sessionForEncoding, comsDict, uniqIPs), 
-                                 #portDirSwitcher(sessionForEncoding), 
-                                 #ipDirSwitcher(sessionForEncoding)
+                                 adfun.ipDirSwitcher()]
                 abbyIndex = random.sample(range(len(adversaryList)), 1)[0]
 
                 targetClasses = [0]*numClasses
@@ -654,10 +732,7 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
 
             #save the models
             if iteration % (numSessions / (5 * batch_size)) == 0:
-                pickleFile(classifierTrain, filePath='',
-                            fileName=runname+'TRAIN'+str(iteration))
-                pickleFile(classifierPredict, filePath='',
-                            fileName=runname+'PREDICT'+str(iteration))
+                save_model(classifierPredict)
 
         epochCost.append(np.mean(costCollect))
         trainAcc.append(np.mean(trainCollect))
@@ -674,17 +749,16 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
 
 def run_plugin(path, host):  # pragma: no cover
     exchange = 'topic-poseidon-internal'
-    queue_name = 'poseidon_internals'
-
+    queue_name = 'dl_algos_deep_classifier'
+    binding_key = 'poseidon.deep_classifier'
+    fd = open('temp_file', 'w+')
     channel, connection = rabbit_init(host=host,
                                       exchange=exchange,
                                       queue_name=queue_name,
                                       rabbit_rec=False)
-
-    train, predict = training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOldTimeSteps, wtstd,
-                              lr, decay, clippings, dimIn, dim, numClasses, batch_size, epochs,
-                              trainPercent, path, loadPrepedData)
-
+    train, predict = training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOldTimeSteps, wtstd, 
+             lr, decay, clippings, dimIn, dim, attentionEnc, attentionContext, numClasses, batch_size, epochs, 
+             trainPercent, path, loadPrepedData, channel)
 
 if __name__ == '__main__':
     path_name = get_path()
