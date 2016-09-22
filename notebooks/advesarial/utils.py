@@ -1,4 +1,4 @@
-import cPickel
+import cPickle
 
 
 #load and save files and models
