@@ -1,6 +1,7 @@
 # Poseidon
 ![Poseidon Logo](/docs/fork.png)
 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Build Status](https://circleci.com/gh/Lab41/poseidon.svg?style=shield&circle-token=29305a2d23d6cac65f811620d75bbe80732472dd)](https://circleci.com/gh/Lab41/poseidon) [![codecov](https://codecov.io/gh/Lab41/poseidon/branch/master/graph/badge.svg?token=ORXmFYC3MM)](https://codecov.io/gh/Lab41/poseidon)
 
 Situational awareness underpins informed decisions. Understanding what comprises a network, and what network elements are doing is essential.  Without situational awareness and context, defending a network remains a difficult proposition.
