@@ -27,21 +27,21 @@ RUN for file in $(find poseidon/* -name "requirements.txt"); \
 ENV PYTHONUNBUFFERED 0
 EXPOSE 28000:27000
 
-ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:27000"]
-CMD ["poseidon.poseidonStorage.poseidonStorage:api"]
-
 # run linter
 #RUN pylint --disable=all --enable=classes --disable=W poseidonStorage
 
 # run tests
-RUN py.test -v \
---ignore=poseidon/poseidonMain \
---ignore=poseidon/poseidonMonitor \
---ignore=poseidon/periodically \
---ignore=poseidon/mockController \
---ignore=collectors \
-# comment out below for circle testing coverage 
-#--ignore=poseidon/poseidonStorage \
---ignore=plugins/ \
---cov=poseidon/poseidonStorage \
---cov-report term-missing --cov-config .coveragerc
+#RUN py.test -v \
+#--ignore=poseidon/poseidonMain \
+#--ignore=poseidon/poseidonMonitor \
+#--ignore=poseidon/periodically \
+#--ignore=poseidon/mockController \
+#--ignore=collectors \
+## comment out below for circle testing coverage 
+##--ignore=poseidon/poseidonStorage \
+#--ignore=plugins/ \
+#--cov=poseidon/poseidonStorage \
+#--cov-report term-missing --cov-config .coveragerc
+
+ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:27000"]
+CMD ["poseidon.poseidonStorage.poseidonStorage:api"]

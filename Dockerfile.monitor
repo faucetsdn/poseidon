@@ -36,9 +36,6 @@ RUN sphinx-apidoc -o docs poseidon -F --follow-links && cd docs && make html && 
 ENV PYTHONUNBUFFERED 0
 EXPOSE 4444:8004
 
-ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:8004"]
-CMD ["poseidon.poseidonMonitor.poseidonMonitor:api"]
-
 # run linter
 #RUN pylint --disable=all --enable=classes --disable=W poseidonMonitor
 
@@ -49,3 +46,6 @@ RUN py.test -v \
 --ignore=plugins/ \
 --cov=poseidon/poseidonMonitor \
 --cov=plugins --cov-report term-missing --cov-config .coveragerc
+
+ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:8004"]
+CMD ["poseidon.poseidonMonitor.poseidonMonitor:api"]

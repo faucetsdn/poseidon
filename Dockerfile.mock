@@ -27,8 +27,6 @@ RUN for file in $(find poseidon/* -name "requirements.txt"); \
 ENV PYTHONUNBUFFERED 0
 EXPOSE 3333:8003
 
-ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:8003"]
-CMD ["poseidon.mockController.mockController:api"]
 
 # install pytest
 RUN pip install pytest
@@ -41,3 +39,5 @@ RUN py.test -v \
 --cov=poseidon/poseidonMonitor \
 --cov=plugins --cov-report term-missing --cov-config .coveragerc
 
+ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:8003"]
+CMD ["poseidon.mockController.mockController:api"]
