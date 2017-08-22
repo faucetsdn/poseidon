@@ -32,7 +32,6 @@ import requests
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
 from poseidon.poseidonMain.Config.Config import Config
 
-
 module_logger = logging.getLogger(__name__)
 
 
