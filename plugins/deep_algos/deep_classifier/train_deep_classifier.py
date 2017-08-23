@@ -586,7 +586,7 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
         return hEnc
 
     hEnc, _ = theano.scan(onestepEnc, X) #(mini*numPackets, packetLen, 1, hexdictLen)
-        if attentionEnc:
+    if attentionEnc:
         
         attentionmlpEnc = MLP(activations=[Tanh()], dims = [dim, 1], weights_init=attnWts,
                biases_init=Constant(1.0))
