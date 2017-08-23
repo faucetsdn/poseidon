@@ -245,6 +245,7 @@ class PoseidonMain(object):
             vent_addr = self.mod_configuration[
                 'vent_ip'] + ':' + self.mod_configuration['vent_port']
             uri = 'http://' + vent_addr + '/create'
+            self.logger.debug('************************ VENT VENT VENT VENT VENT VENT MESSAGE {0}'.format(payload))
             resp = requests.post(uri, json=payload)
             self.logger.debug('collector repsonse: ' + resp.text)
         except Exception, e:
@@ -267,8 +268,11 @@ class PoseidonMain(object):
         if itype == 'poseidon.action.new_machine':
             self.logger.debug('***** new machine {0}'.format(ivalue))
             # tell monitor to monitor
-            self.start_vent_collector(self.just_the_hash(ivalue))
-            self.start_monitor(ivalue)
+
+            #keep from sending multiple starts to vent
+            if self.just_the_hash(ivalue) not in self.monitoring:
+                self.start_vent_collector(self.just_the_hash(ivalue))
+                self.start_monitor(ivalue)
         if 'poseidon.algos.eval_dev_class' in itype:
             # ivalue = classificationtype:<string>
             # result form eval device classifier with
