@@ -1,48 +1,73 @@
-import Sessionizer
 import sys
 import logging
 import json
 import subprocess
 import numpy as np
 
-module_logger = logging.getLogger(__name__)
+#module_logger = logging.getLogger(_name_)
 
-class HexSessionizer():
+class Sessionizer():
     def __init__(self, path):
         self.path = path
-        self.hex_sessions = {}
-
-    def read_pcap(self):  # pragma: no cover
-        print 'starting reading pcap file'
-        module_logger.debug('start reading pcap file {0}'.format(self.path))
-        self.hex_sessions = {} 
+        self.hex_packets = {}
+        self.orderedKeys = []
+        #self.hex_sessions = {}
         
-        proc = subprocess.Popen('tcpdump -nn -tttt -xx -r '+self.path,
-                                shell=True,
-                                stdout=subprocess.PIPE)
-        insert_num = 0  # keeps track of insertion order into dict
-        for packet in Sessionizer.process_packet(proc.stdout):
+    def packetizer(self, qacheck = False):
+        '''
+        returns a dictionary of hex headers for individual packets
+
+        path = string path to pcap file
+        qacheck = dictionary of packets that cannot be processed
+        '''
+        proc = subprocess.Popen('tcpdump -nn -tttt -xx -r '+self.path, shell=True, stdout=subprocess.PIPE)
+        insert_num=0
+        badPackets = {}
+        for packet in process_packet(proc.stdout):
             if not is_clean_packet(packet):
+                if qacheck:
+                    badPackets[(packet['src_ip']+":"+packet['src_port'], packet['dest_ip']+":"+packet['dest_port'], 
+                                insert_num)]=packet['data']
                 continue
+
             if 'data' in packet:
-                key = (packet['src_ip']+":"+packet['src_port'], packet['dest_ip']+":"+packet['dest_port'])
-                rev_key = (key[1], key[0])
-                if key in self.hex_sessions:
-                    self.hex_sessions[key][0].append(packet['data'])
-                elif rev_key in self.hex_sessions:
-                    self.hex_sessions[rev_key][0].append(packet['data'])
-                else:
-                    self.hex_sessions[key] = ([packet['data']], insert_num)
-                    insert_num += 1
-        module_logger.debug('finished reading pcap file {0}'.format(self.path))
-        print 'finished reading pcap file'
-        return self.hex_sessions
+                key = (packet['src_ip']+":"+packet['src_port'], packet['dest_ip']+":"+packet['dest_port'], insert_num)
+                self.hex_packets[key] = packet['data']
+            insert_num += 1
+        #module_logger.debug('finished reading pcap file {0}'.format(self.path))
+        print('finished reading pcap file')
+        if qacheck:
+            return self.hex_packets, badPackets
+        else:
+            return self.hex_packets    
+        
+    def order_keys(self):
+        """
+        Returns list of the hex sessions in (rough) time order.
+        """
+        def getitem(item):
+            return item[-1]
+        for key in sorted(self.hex_packets.keys(), key=getitem):
+            self.orderedKeys.append(key)
+        return self.orderedKeys
 
 
-    def internal_order_keys(self):
-        return Sessionizer.order_keys(self.hex_sessions)
-
-
+    def hexSessionizer(self):
+        '''
+        collects packets into sessions
+        dictOpackets = dictionary of packets, k=(srcip:srcport, dstip:dstport)
+        orderedKeys = list of time ordered keys for dictOpackets
+        '''
+        hex_sessions = {}
+        for pair in self.orderedKeys:
+            if pair[:2] not in hex_sessions or pair[:2][::-1] not in hex_sessions:
+                hex_sessions[pair[:2]]=[self.hex_packets[pair]]
+            else:
+                hex_sessions[pair[:2]].append(self.hex_packets[pair])
+        return hex_sessions
+   
+        
+            
 def removeBadSessionizer(hex_sessions, minPacketLen=80, saveFile=False, dataPath=None, fileName=None):
     for ses in hex_sessions.keys():
         paclens = []
@@ -52,22 +77,10 @@ def removeBadSessionizer(hex_sessions, minPacketLen=80, saveFile=False, dataPath
             del hex_sessions[ses]
 
     if saveFile:
-        print 'pickling sessions'
+        print('pickling sessions')
         pickleFile(hex_sessions, filePath=dataPath, fileName=fileName)
         
     return hex_sessions
-
-    
-def order_keys(hex_sessions):
-    """
-    Returns list of the hex sessions in (rough) time order.
-    """
-    orderedKeys = []
-
-    for key in sorted(hex_sessions.keys(), key=lambda key: hex_sessions[key][1]):
-        orderedKeys.append(key)
-
-    return orderedKeys
 
 
 def parse_header(line):  # pragma: no cover
@@ -160,10 +173,8 @@ def is_clean_packet(packet):  # pragma: no cover
     if packet['src_ip'].isalpha(): return False
     if packet['dest_ip'].isalpha(): return False
 
-    if 'data' in packet:
-        try:
-            int(packet['data'], 16)
-        except:
-            return False
-
     return True
+
+
+
+

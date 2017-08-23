@@ -214,7 +214,13 @@ class Handle_Periodic(Monitor_Helper_Base):
         h = hashlib.new('ripemd160')
         pre_h = str()
         post_h = None
-        for word in ['tenant', 'mac', 'segment', 'name', 'ip-address']:
+        #GROSSMAN dont nodchp -> dhcp withname makes different hashes
+        #{u'tenant': u'FLOORPLATE', u'mac': u'ac:87:a3:2b:7f:12', u'segment': u'prod', u'name': None, u'ip-address': u'10.179.0.100'}}^
+        #{u'tenant': u'FLOORPLATE', u'mac': u'ac:87:a3:2b:7f:12', u'segment': u'prod', u'name': u'demo-laptop', u'ip-address': u'10.179.0.100'}}
+        # ^^^ make different hashes if name is included
+      
+        #for word in ['tenant', 'mac', 'segment', 'name', 'ip-address']:
+        for word in ['tenant', 'mac', 'segment', 'ip-address']:
             pre_h = pre_h + str(item.get(str(word), 'missing'))
         h.update(pre_h)
         post_h = h.hexdigest()
