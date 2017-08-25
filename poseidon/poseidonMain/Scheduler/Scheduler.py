@@ -84,7 +84,7 @@ def thread_worker(schedule, logger):
         schedule.run_pending()
         logLine = 'scheduler woke {0}'.format(
             threading.current_thread().getName())
-        time.sleep(1) 
+        time.sleep(1)
         logger.debug(logLine)
 
 
@@ -98,8 +98,12 @@ class Scheduler(Main_Action_Base):
         self.schedule.clear()
         self.handles = dict()
         self.currentJobs = dict()
-        self.schedule_thread = threading.Thread(target=partial(
-            thread_worker, schedule=self.schedule, logger=self.logger), name='st_worker')
+        self.schedule_thread = threading.Thread(
+            target=partial(
+                thread_worker,
+                schedule=self.schedule,
+                logger=self.logger),
+            name='st_worker')
 
     @staticmethod
     def safe(func):
@@ -107,7 +111,7 @@ class Scheduler(Main_Action_Base):
         def wrapper(*args, **kwargs):
             try:
                 func(*args, **kwargs)
-            except:  # pragma: no cover
+            except BaseException:  # pragma: no cover
                 import traceback
                 badness = traceback.format_exc()
                 if 'log' in kwargs:
@@ -121,7 +125,7 @@ class Scheduler(Main_Action_Base):
         def wrapper(*args, **kwargs):
             try:
                 func(*args, **kwargs)
-            except:  # pragma: no cover
+            except BaseException:  # pragma: no cover
                 import traceback
                 badness = traceback.format_exc()
                 if 'log' in kwargs:

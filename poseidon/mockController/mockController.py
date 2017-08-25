@@ -39,6 +39,7 @@ def get_allowed():
         allow_origin = ''
     return allow_origin, rest_url
 
+
 allow_origin, rest_url = get_allowed()
 cors = CORS(allow_origins_list=[allow_origin])
 public_cors = CORS(allow_all_origins=True)

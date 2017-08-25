@@ -37,6 +37,7 @@ username = 'user'
 password = 'pass'
 cookie = 'cookie'
 
+
 def mock_factory(regex, filemap):
     @urlmatch(netloc=regex)
     def mock_fn(url, request):
@@ -54,6 +55,7 @@ def mock_factory(regex, filemap):
             raise Exception('Invalid URL: {0}' .format(url))
         return r
     return mock_fn
+
 
 def mock_factory2(regex):
     @urlmatch(netloc=regex)
@@ -89,11 +91,12 @@ def test_BcfProxy():
     """
     filemap = {
         '/data/controller/applications/bcf/info/fabric/switch': 'sample_switches.json',
-        '/data/controller/applications/bcf/info/endpoint-manager/tenant' : 'sample_tenants.json',
-        '/data/controller/applications/bcf/info/endpoint-manager/segment' : 'sample_segments.json',
-        '/data/controller/applications/bcf/info/endpoint-manager/endpoint' : 'sample_endpoints.json',
-        '/data/controller/applications/bcf/span-fabric' : 'sample_span_fabric.json',
-        '/data/controller/applications/bcf/span-fabric[name=%22vent%22]': 'sample_span_fabric.json', # %22 = url-encoded double quotes
+        '/data/controller/applications/bcf/info/endpoint-manager/tenant': 'sample_tenants.json',
+        '/data/controller/applications/bcf/info/endpoint-manager/segment': 'sample_segments.json',
+        '/data/controller/applications/bcf/info/endpoint-manager/endpoint': 'sample_endpoints.json',
+        '/data/controller/applications/bcf/span-fabric': 'sample_span_fabric.json',
+        # %22 = url-encoded double quotes
+        '/data/controller/applications/bcf/span-fabric[name=%22vent%22]': 'sample_span_fabric.json',
     }
     proxy = None
     with HTTMock(mock_factory(r'.*', filemap)):
@@ -113,23 +116,36 @@ def test_BcfProxy():
         span_fabric = proxy.get_span_fabric(span_name="vent")
         assert span_fabric
 
-
     with HTTMock(mock_factory2(r'.*')):
         # Normally shutdown_endpoint does not return a value.
         # You should call get_endpoint() afterwards to verify that a shutdown request went through.
         # In addition, the mock endpoint generated does not check for duplicates.
         # TODO: ***This code below is temporary.***
-        r = proxy.shutdown_endpoint(tenant="TENANT", segment="SEGMENT", endpoint_name="test", mac="00:00:00:00:00:00", shutdown=True)
+        r = proxy.shutdown_endpoint(
+            tenant="TENANT",
+            segment="SEGMENT",
+            endpoint_name="test",
+            mac="00:00:00:00:00:00",
+            shutdown=True)
         assert r
-        r = proxy.shutdown_endpoint(tenant="TENANT", segment="SEGMENT", endpoint_name="test", mac="00:00:00:00:00:00", shutdown=False)
+        r = proxy.shutdown_endpoint(
+            tenant="TENANT",
+            segment="SEGMENT",
+            endpoint_name="test",
+            mac="00:00:00:00:00:00",
+            shutdown=False)
         assert r
 
-        r = proxy.mirror_traffic(seq=2, mirror=True, tenant="TENANT", segment="SEGMENT")
+        r = proxy.mirror_traffic(
+            seq=2,
+            mirror=True,
+            tenant="TENANT",
+            segment="SEGMENT")
         assert r
         r = proxy.mirror_traffic(seq=2, mirror=False)
         assert r
 
-    r = lambda: None
+    def r(): return None
     r.text = ""
     BcfProxy.parse_json(r)
 
@@ -138,6 +154,7 @@ def test_BcfProxy():
     proxy.base_uri = "http://jsonplaceholder.typicode.com"
     r = proxy.post_resource('posts')
     r.raise_for_status()
-    r = proxy.request_resource(method="PUT", url="http://jsonplaceholder.typicode.com/posts/1")
+    r = proxy.request_resource(
+        method="PUT",
+        url="http://jsonplaceholder.typicode.com/posts/1")
     r.raise_for_status()
-

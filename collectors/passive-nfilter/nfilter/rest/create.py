@@ -21,9 +21,9 @@ class CreateR:
         payload = {}
         try:
             payload = ast.literal_eval(data)
-            if type(payload) != dict:
+            if not isinstance(payload, dict):
                 payload = ast.literal_eval(json.loads(data))
-        except:
+        except BaseException:
             # !! TODO parse out url parms...
             return 'malformed json body'
 
@@ -55,14 +55,14 @@ class CreateR:
         r = None
         try:
             r = redis.StrictRedis(host='redis', port=6379, db=0)
-        except:
+        except BaseException:
             return 'unable to connect to redis'
 
         # connect to docker
         c = None
         try:
             c = Client(base_url='unix://var/run/docker.sock')
-        except:
+        except BaseException:
             return 'unable to connect to docker'
 
         # store payload in redis
@@ -74,11 +74,19 @@ class CreateR:
         if c:
             network_config = c.create_host_config(
                 network_mode='host', binds=['/files:/files:rw'])
-            container = c.create_container(image='collectors/passive-nfilter/nprocessor',
-                                           command='/tmp/run.sh ' + payload['nic'] + ' ' + payload[
-                                               'interval'] + ' ' + payload['id'] + ' ' + payload[
-                                               'iters'] + ' ' + payload['filter'],
-                                           host_config=network_config)
+            container = c.create_container(
+                image='collectors/passive-nfilter/nprocessor',
+                command='/tmp/run.sh ' +
+                payload['nic'] +
+                ' ' +
+                payload['interval'] +
+                ' ' +
+                payload['id'] +
+                ' ' +
+                payload['iters'] +
+                ' ' +
+                payload['filter'],
+                host_config=network_config)
             response = c.start(container=container.get('Id'))
 
         return 'successfully created and started filter ' + str(payload['id'])

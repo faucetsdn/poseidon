@@ -30,7 +30,15 @@ module_logger = logging.getLogger(__name__)
 
 class BcfProxy(JsonMixin, CookieAuthControllerProxy):
 
-    def __init__(self, base_uri, login_resource='auth/login', auth={'user': None, 'password': None}, *args, **kwargs):
+    def __init__(
+            self,
+            base_uri,
+            login_resource='auth/login',
+            auth={
+                'user': None,
+                'password': None},
+            *args,
+            **kwargs):
         '''
         Initializes BcfProxy object.
 
@@ -54,7 +62,9 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
                 ret_list.append(ipa[0])
         return ret_list
 
-    def get_endpoints(self, endpoints_resource='data/controller/applications/bcf/info/endpoint-manager/endpoint'):
+    def get_endpoints(
+            self,
+            endpoints_resource='data/controller/applications/bcf/info/endpoint-manager/endpoint'):
         '''
         GET list of endpoints from the controller.
         '''
@@ -67,7 +77,9 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
                 dict(item).get('mac'), dict(item).get('ip-address')))
         return retval
 
-    def get_switches(self, switches_resource='data/controller/applications/bcf/info/fabric/switch'):
+    def get_switches(
+            self,
+            switches_resource='data/controller/applications/bcf/info/fabric/switch'):
         '''
         GET list of switches from the controller.
         '''
@@ -76,7 +88,9 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         module_logger.debug('get_switches return:{0}'.format(retval))
         return retval
 
-    def get_tenants(self, tenant_resource='data/controller/applications/bcf/info/endpoint-manager/tenant'):
+    def get_tenants(
+            self,
+            tenant_resource='data/controller/applications/bcf/info/endpoint-manager/tenant'):
         '''
         GET list of tenants from the controller.
         '''
@@ -86,7 +100,9 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         module_logger.debug(sout)
         return retval
 
-    def get_segments(self, segment_resource='data/controller/applications/bcf/info/endpoint-manager/segment'):
+    def get_segments(
+            self,
+            segment_resource='data/controller/applications/bcf/info/endpoint-manager/segment'):
         '''
         GET list of segments from the controller.
         '''
@@ -108,7 +124,10 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             d['name'] = s.get('name')
         return d
 
-    def get_span_fabric(self, span_name=None, span_fabric_resource='data/controller/applications/bcf/span-fabric'):
+    def get_span_fabric(
+            self,
+            span_name=None,
+            span_fabric_resource='data/controller/applications/bcf/span-fabric'):
         '''
         GET list of span fabric configuration.
 
@@ -175,7 +194,14 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             shutdowns.append(record)
         return shutdowns
 
-    def shutdown_endpoint(self, tenant, segment, endpoint_name, mac=None, shutdown=True, shutdown_resource="data/controller/applications/bcf/tenant[name=\"%s\"]/segment[name=\"%s\"]/endpoint"):
+    def shutdown_endpoint(
+            self,
+            tenant,
+            segment,
+            endpoint_name,
+            mac=None,
+            shutdown=True,
+            shutdown_resource="data/controller/applications/bcf/tenant[name=\"%s\"]/segment[name=\"%s\"]/endpoint"):
         '''
         PUT to jail (i.e. isolate) an endpoint from the network.
 
@@ -247,12 +273,14 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             module_logger.error('unmirror:{0}'.format(kill))
             self.mirror_traffic(kill, mirror=False)
 
-    def mirror_traffic(self,
-                       seq,
-                       mirror=True,
-                       span_name='vent',
-                       s_dict=None,
-                       fabric_span_endpoint="data/controller/applications/bcf/span-fabric[name=\"%s\"]", **target_kwargs):
+    def mirror_traffic(
+            self,
+            seq,
+            mirror=True,
+            span_name='vent',
+            s_dict=None,
+            fabric_span_endpoint="data/controller/applications/bcf/span-fabric[name=\"%s\"]",
+            **target_kwargs):
         '''
         mirror_traffic(q,mirror=True,s_dict = {'match-specificaiton' : {'dst-ip-cidr':'10.179.0.33/32'} ...
         NOTE: s_dict or kwargs, not both..

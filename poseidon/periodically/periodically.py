@@ -40,7 +40,7 @@ def makeCall(url):
             module_logger.info(page.readlines())
             ostr = 'wget {0}'.format(url)
             module_logger.info(ostr)
-        except:
+        except BaseException:
             ostr = 'Error contacting url: {0} retrying...'.format(url)
             module_logger.error(ostr)
 

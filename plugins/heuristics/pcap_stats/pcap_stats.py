@@ -51,7 +51,7 @@ module_logger = logging.getLogger(__name__)
 def get_path():
     try:
         path_name = sys.argv[1]
-    except:
+    except BaseException:
         module_logger.debug('no argv[1] for pathname')
         path_name = None
     return path_name
@@ -81,14 +81,14 @@ def rabbit_init(host, exchange, queue_name, rabbit_rec):  # pragma: no cover
     while wait:
         try:
             connection = pika.BlockingConnection(
-                              pika.ConnectionParameters(host=host))
+                pika.ConnectionParameters(host=host))
             channel = connection.channel()
             channel.exchange_declare(exchange=exchange, type='topic')
             result = channel.queue_declare(queue=queue_name, exclusive=True)
             wait = False
             module_logger.info('connected to rabbitmq...')
             print 'connected to rabbitmq...'
-        except Exception, e:
+        except Exception as e:
             print 'waiting for connection to rabbitmq...'
             print str(e)
             module_logger.info(str(e))

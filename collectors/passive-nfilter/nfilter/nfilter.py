@@ -45,5 +45,6 @@ class NFilter:
         )
         return urls
 
+
 if __name__ == '__main__':
     NFilterServer().app.run()

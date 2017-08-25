@@ -10,4 +10,5 @@ class EVERY(Enum):
     hour = 60
     day = 3600
 
+
 CRONSPEC = collections.namedtuple('CronSpec', ['occurs', 'starts'])

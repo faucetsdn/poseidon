@@ -67,7 +67,7 @@ def schedule_job_kickurl(url, logger):
             logger.info(page.readlines())
             ostr = 'wget {0}'.format(url)
             logger.info(ostr)
-        except:
+        except BaseException:
             ostr = 'Error connecting to url: {0} retrying...'.format(url)
             logger.info(ostr)
 
@@ -116,7 +116,6 @@ class PoseidonMain(object):
         self.monitoring = dict()
         self.shutdown = dict()
 
-
         for item in self.Config.get_section(self.config_section_name):
             my_k, my_v = item
             self.mod_configuration[my_k] = my_v
@@ -127,7 +126,7 @@ class PoseidonMain(object):
         url = self.mod_configuration['scan_url']
 
         self.Scheduler.schedule.every(scan_frequency).seconds.do(
-            partial(schedule_job_kickurl,url=url, logger=self.Scheduler.logger))
+            partial(schedule_job_kickurl, url=url, logger=self.Scheduler.logger))
 
     def init_logging(self):
         ''' setup the logging parameters for poseidon '''
@@ -174,7 +173,8 @@ class PoseidonMain(object):
                 self.monitoring[my_hash] = my_value
             else:
                 self.logger.debug(
-                    'already being monitored:{0}:{1}'.format(my_hash, my_value))
+                    'already being monitored:{0}:{1}'.format(
+                        my_hash, my_value))
 
     def stop_monitor(self, ivalue):
         ''' stop monitoring an address'''
@@ -239,7 +239,7 @@ class PoseidonMain(object):
                 return db_doc[field]
             else:
                 self.logger.debug('bad document in db: ' + str(db_doc))
-        except Exception, e:
+        except Exception as e:
             self.logger.debug('failed to get record from db' + str(e))
             return None
 
@@ -250,18 +250,19 @@ class PoseidonMain(object):
         options specified in poseidon.config.
         '''
         try:
-            payload = {'nic': self.mod_configuration['collector_nic'],
-                       'id': dev_hash,
-                       'interval': self.mod_configuration['collector_interval'],
-                       'filter': self.mod_configuration['collector_filter'],
-                       'iters': str(num_captures)}
+            payload = {
+                'nic': self.mod_configuration['collector_nic'],
+                'id': dev_hash,
+                'interval': self.mod_configuration['collector_interval'],
+                'filter': self.mod_configuration['collector_filter'],
+                'iters': str(num_captures)}
             self.logger.debug('vent payload: ' + str(payload))
             vent_addr = self.mod_configuration[
                 'vent_ip'] + ':' + self.mod_configuration['vent_port']
             uri = 'http://' + vent_addr + '/create'
             resp = requests.post(uri, json=payload)
             self.logger.debug('collector repsonse: ' + resp.text)
-        except Exception, e:
+        except Exception as e:
             self.logger.debug('failed to start vent collector' + str(e))
 
     @staticmethod
@@ -301,7 +302,7 @@ class PoseidonMain(object):
             self.logger.debug('classified previously {0}'.format(prev_class))
             if ivalue == prev_class:
                 self.logger.debug(
-                    '***** allowing endpoint {0}:{1}'.format(itype,  temp_d))
+                    '***** allowing endpoint {0}:{1}'.format(itype, temp_d))
                 self.endpoint_allow(temp_d)
             else:
                 self.logger.debug(

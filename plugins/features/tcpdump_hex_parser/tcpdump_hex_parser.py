@@ -38,7 +38,7 @@ def get_path():
     path = None
     try:
         path = sys.argv[1]
-    except:
+    except BaseException:
         module_logger.error('no path provided, quitting.')
     return path
 
@@ -54,7 +54,7 @@ def connections():
 
         channel.exchange_declare(exchange='topic-poseidon-internal',
                                  type='topic')
-    except:
+    except BaseException:
         module_logger.error('unable to connect to rabbitmq, quitting.')
     return channel, connection
 
@@ -128,10 +128,10 @@ def parse_header(line):
                         resolved_addrs.append(clean_addr)
                 if resolved_addrs:
                     ret_dict['dns_resolved'] = resolved_addrs
-    except:
+    except BaseException:
         try:
             ret_dict['length'] = int(line.split(' length ')[1].split(':')[0])
-        except:
+        except BaseException:
             ret_dict['length'] = 0
 
     return ret_dict
@@ -207,8 +207,9 @@ def run_tool(path):
         module_logger.info(ostr)
     try:
         connection.close()
-    except:
+    except BaseException:
         pass
+
 
 if __name__ == '__main__':
     path = get_path()

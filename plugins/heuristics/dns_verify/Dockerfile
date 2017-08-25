@@ -11,9 +11,9 @@ RUN apk add --update \
     tcpdump \
     && rm -rf /var/cache/apk/*
 
-ADD requirements.txt requirements.txt
+COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
-ADD dns_verify.py dns_verify.py
+COPY dns_verify.py dns_verify.py
 
 # entrypoint and cmd for vent injection of file name
 ENTRYPOINT ["python", "dns_verify.py"]

@@ -8,6 +8,6 @@ RUN apk add --update \
 
 VOLUME /tmp
 WORKDIR /tmp
-ADD run.sh run.sh
+COPY run.sh run.sh
 
 CMD /tmp/run.sh

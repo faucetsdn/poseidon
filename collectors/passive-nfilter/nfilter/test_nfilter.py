@@ -42,8 +42,15 @@ def test_create_r():
     testApp = start_web_app()
 
     # test create
-    r = testApp.post('/create', params={'id': 'foo', 'interval': '60', 'filter': '',
-                                        'nic': 'eth1'}, headers={'Content-Type': 'application/json'})
+    r = testApp.post(
+        '/create',
+        params={
+            'id': 'foo',
+            'interval': '60',
+            'filter': '',
+            'nic': 'eth1'},
+        headers={
+            'Content-Type': 'application/json'})
     assert r.status == 200
     r = testApp.post('/create', params={})
     assert r.status == 200
