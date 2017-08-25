@@ -22,7 +22,7 @@ class Learning(object):
         updates = []
 
         for p, g in zip(self.params, self.grads):
-            g = self.gradient_regularize(p, g, l1=self.l1, l2=self.l2)
+            g = self.gradient_regularize(p, g)
             acc = theano.shared(p.get_value() * 0.)
             acc_new = rho * acc + (1 - rho) * g ** 2
             updates.append((acc, acc_new))
