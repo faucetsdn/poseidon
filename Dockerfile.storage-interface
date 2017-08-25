@@ -30,16 +30,17 @@ EXPOSE 28000:27000
 # run linter
 #RUN pylint --disable=all --enable=classes --disable=W poseidonStorage
 
+#do the tests manually, as another container needs to be running
+
 # run tests
 #RUN py.test -v \
-#--ignore=poseidon/poseidonMain \
 #--ignore=poseidon/poseidonMonitor \
-#--ignore=poseidon/periodically \
+#--ignore=poseidon/poseidonMain \
 #--ignore=poseidon/mockController \
+#--ignore=poseidon/periodically \
+#--ignore=poseidon/collectors \
 #--ignore=collectors \
-## comment out below for circle testing coverage 
-##--ignore=poseidon/poseidonStorage \
-#--ignore=plugins/ \
+#--ignore=plugins \
 #--cov=poseidon/poseidonStorage \
 #--cov-report term-missing --cov-config .coveragerc
 

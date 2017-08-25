@@ -31,7 +31,7 @@ RUN for file in $(find plugins/* -name "requirements.txt"); \
     done
 
 # build documentation
-RUN ln -s /poseidonWork/plugins /poseidonWork/poseidon/poseidonMonitor/plugins
+#RUN ln -s /poseidonWork/plugins /poseidonWork/poseidon/poseidonMonitor/plugins
 RUN sphinx-apidoc -o docs poseidon -F --follow-links && cd docs && make html && make man
 
 ENV PYTHONUNBUFFERED 0
