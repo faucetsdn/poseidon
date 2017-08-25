@@ -1,4 +1,4 @@
-# After a brief pause we are ready to extend Poseidon. Look for additional refinements to the machine learning, a simpler architecture, and better results.  We start coding soon.
+#  We are coding again. After a brief pause we are ready to extend Poseidon. Look for additional refinements to the machine learning, a simpler architecture, and better results. 
 
 # Poseidon
 ![Poseidon Logo](/docs/fork.png) <a href="https://www.blackducksoftware.com/open-source-rookies-2016" ><img src="/docs/Rookies16Badge_1.png" width="100" alt="POSEIDON is now BlackDuck 2016 OpenSource Rookie of the year"></a>
