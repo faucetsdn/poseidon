@@ -525,9 +525,12 @@ def binaryPrecisionRecall(predictions, targets, numClasses=4):  # pragma: no cov
         recall = float(truePos) / (truePos + falseNeg + 0.00001)
         f1 = 2 * ((precision * recall) / (precision + recall + 0.00001))
 
-        module_logger.info('class ' + str(cla) + ' precision: ', precision)
-        module_logger.info('class ' + str(cla) + ' recall:    ', recall)
-        module_logger.info('class ' + str(cla) + ' f1:        ', f1)
+        ostr = 'class:{0} precision: {0}'.format(str(cla), precision)
+        module_logger.info(ostr)
+        ostr = 'class:{0} recall: {0}'.format(str(cla), recall)
+        module_logger.info(ostr)
+        ostr = 'class:{0} f1: {0}'.format(str(cla), f1)
+        module_logger.info(ostr)
 
 
 def save_model(model):
@@ -846,11 +849,12 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
                 costCollect.append(costfun[0])
                 trainCollect.append(
                     np.mean(np.argmax(costfun[-1], axis=1) == np.argmax(targetsMinibatch, axis=1)))
-                module_logger.info('   Iteration: ', iteration)
-                module_logger.info('   Cost: ', np.mean(costCollect))
-                module_logger.info(
-                    '   TRAIN accuracy: ',
-                    np.mean(trainCollect))
+                ostr = 'iteration: {0}'.format(iteration)
+                module_logger.info(ostr)
+                ostr = 'cost: {0}'.format(cost)
+                module_logger.info(ostr)
+                ostr = 'TRAIN accuracy: {0}'.format(np.mean(trainCollect))
+                module_logger.info(ostr)
                 print '   Iteration: ', iteration
                 print '   Cost: ', np.mean(costCollect)
                 print '   TRAIN accuracy: ', np.mean(trainCollect)
@@ -873,9 +877,9 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
         epochCost.append(np.mean(costCollect))
         trainAcc.append(np.mean(trainCollect))
 
-        module_logger.info('Epoch: ', epoch)
-        module_logger.info('Epoch cost average: ', epochCost[-1])
-        module_logger.info('Epoch TRAIN accuracy: ', trainAcc[-1])
+        module_logger.info('Epoch: {0}'.format(epoch))
+        module_logger.info('Epoch cost average: {0}'.format(epochCost[-1]))
+        module_logger.info('Epoch TRAIN accuracy: {0}'.format(trainAcc[-1]))
         print 'Epoch: ', epoch
         print 'Epoch cost average: ', epochCost[-1]
         print 'Epoch TRAIN accuracy: ', trainAcc[-1]
