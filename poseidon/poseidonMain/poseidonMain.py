@@ -192,8 +192,8 @@ class PoseidonMain(object):
                                                 body=r_msg)
 
     def endpoint_shutdown(self, ivalue):
-        self.logger.debug('endpoint_shutdown:{0}'.format(ivalue))
         ''' shutdown an endpoint '''
+        self.logger.debug('endpoint_shutdown:{0}'.format(ivalue))
         r_exchange = 'topic-poseidon-internal'
         r_key = 'poseidon.action.endpoint_shutdown'
         r_msg = json.dumps(ivalue)
@@ -366,12 +366,11 @@ class PoseidonMain(object):
         queue_name = 'vent_poseidon'
         binding_key = ['vent.#']
 
-        '''
-        retval = self.make_rabbit_connection(
-            host, exchange, queue_name, binding_key)
-        self.rabbit_channel_vent = retval[0]
-        self.rabbit_connection_vent = retval[1]
-        '''
+        # TODO verify that this is not needed
+        #retval = self.make_rabbit_connection(
+        #    host, exchange, queue_name, binding_key)
+        #self.rabbit_channel_vent = retval[0]
+        #self.rabbit_connection_vent = retval[1]
 
     def start_channel(self, channel, mycallback, queue):
         ''' handle threading for a messagetype '''
