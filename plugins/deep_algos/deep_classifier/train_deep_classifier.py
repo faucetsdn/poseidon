@@ -525,11 +525,11 @@ def binaryPrecisionRecall(predictions, targets, numClasses=4):  # pragma: no cov
         recall = float(truePos) / (truePos + falseNeg + 0.00001)
         f1 = 2 * ((precision * recall) / (precision + recall + 0.00001))
 
-        ostr = 'class:{0} precision: {0}'.format(str(cla), precision)
+        ostr = 'class:{0} precision: {1}'.format(str(cla), precision)
         module_logger.info(ostr)
-        ostr = 'class:{0} recall: {0}'.format(str(cla), recall)
+        ostr = 'class:{0} recall: {1}'.format(str(cla), recall)
         module_logger.info(ostr)
-        ostr = 'class:{0} f1: {0}'.format(str(cla), f1)
+        ostr = 'class:{0} f1: {1}'.format(str(cla), f1)
         module_logger.info(ostr)
 
 
