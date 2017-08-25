@@ -849,7 +849,7 @@ def training(runname, rnnType, maxPackets, packetTimeSteps, packetReverse, padOl
                 costCollect.append(costfun[0])
                 trainCollect.append(
                     np.mean(np.argmax(costfun[-1], axis=1) == np.argmax(targetsMinibatch, axis=1)))
-                ostr = 'iteration: {0}'.format(iteration)
+                ostr = 'Iteration: {0}'.format(iteration)
                 module_logger.info(ostr)
                 ostr = 'cost: {0}'.format(cost)
                 module_logger.info(ostr)

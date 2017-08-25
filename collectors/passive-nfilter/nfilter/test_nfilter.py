@@ -1,5 +1,4 @@
 #!/usr/bin/python
-import ast
 
 import nfilter
 import pytest

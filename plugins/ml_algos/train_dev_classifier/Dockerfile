@@ -15,7 +15,7 @@ RUN apt-get update && \
 
 # install module dependencies
 COPY requirements.txt requirements.txt
-RUN pip install pip --upgrade
+RUN pip install pip==9.0.1 --upgrade
 RUN pip install -r requirements.txt
 
 COPY train_dev_classifier.py train_dev_classifier.py

@@ -100,7 +100,7 @@ def rabbit_init(host, exchange, queue_name, rabbit_rec):  # pragma: no cover
     return channel, connection
 
 
-class DNSRecord:
+class DNSRecord():
     '''
     Class to keep track of resolved dns
     requests for a machine with address addr
