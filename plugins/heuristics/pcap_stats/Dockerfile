@@ -11,10 +11,10 @@ RUN apk add --update \
     tcpdump \
     && rm -rf /var/cache/apk/*
 
-ADD requirements.txt requirements.txt
+COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
-ADD pcap_stats.py pcap_stats.py 
-ADD pcap_stats_utils.py pcap_stats_utils.py
+COPY pcap_stats.py pcap_stats.py 
+COPY pcap_stats_utils.py pcap_stats_utils.py
 
 # entrypoint and cmd for vent injection of file name
 ENTRYPOINT ["python", "pcap_stats.py"]

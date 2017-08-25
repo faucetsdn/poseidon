@@ -24,7 +24,7 @@ RUN gunzip *.gz
 WORKDIR /Dshell
 RUN make
 
-ADD . /dshell_netflow
+COPY . /dshell_netflow
 WORKDIR /dshell_netflow
 RUN pip install -r requirements.txt
 

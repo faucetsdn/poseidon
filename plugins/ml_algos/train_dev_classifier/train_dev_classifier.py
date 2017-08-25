@@ -54,7 +54,7 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
             wait = False
             module_logger.info('connected to rabbitmq...')
             print 'connected to rabbitmq...'
-        except Exception, e:
+        except Exception as e:
             print 'waiting for connection to rabbitmq...'
             print str(e)
             module_logger.info(str(e))

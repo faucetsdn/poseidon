@@ -14,11 +14,11 @@ RUN apt-get update && \
     easy_install pip
 
 # install module dependencies
-ADD requirements.txt requirements.txt
+COPY requirements.txt requirements.txt
 RUN pip install pip --upgrade
 RUN pip install -r requirements.txt
 
-ADD eval_dev_classifier.py eval_dev_classifier.py
+COPY eval_dev_classifier.py eval_dev_classifier.py
 
 # added entrypoint and cmd for vent integration of file name
 ENTRYPOINT ["python", "eval_dev_classifier.py"]

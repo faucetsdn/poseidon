@@ -6,31 +6,46 @@ import numpy as np
 
 #module_logger = logging.getLogger(_name_)
 
+
 class Sessionizer():
     def __init__(self, path):
         self.path = path
         self.hex_packets = {}
         self.orderedKeys = []
         #self.hex_sessions = {}
-        
-    def packetizer(self, qacheck = False):
+
+    def packetizer(self, qacheck=False):
         '''
         returns a dictionary of hex headers for individual packets
         path = string path to pcap file
         qacheck = dictionary of packets that cannot be processed
         '''
-        proc = subprocess.Popen('tcpdump -nn -tttt -xx -r '+self.path, shell=True, stdout=subprocess.PIPE)
-        insert_num=0
+        proc = subprocess.Popen(
+            'tcpdump -nn -tttt -xx -r ' +
+            self.path,
+            shell=True,
+            stdout=subprocess.PIPE)
+        insert_num = 0
         badPackets = {}
         for packet in process_packet(proc.stdout):
             if not is_clean_packet(packet):
                 if qacheck:
-                    badPackets[(packet['src_ip']+":"+packet['src_port'], packet['dest_ip']+":"+packet['dest_port'], 
-                                insert_num)]=packet['data']
+                    badPackets[(packet['src_ip'] +
+                                ":" +
+                                packet['src_port'], packet['dest_ip'] +
+                                ":" +
+                                packet['dest_port'], insert_num)] = packet['data']
                 continue
 
             if 'data' in packet:
-                key = (packet['src_ip']+":"+packet['src_port'], packet['dest_ip']+":"+packet['dest_port'], insert_num)
+                key = (
+                    packet['src_ip'] +
+                    ":" +
+                    packet['src_port'],
+                    packet['dest_ip'] +
+                    ":" +
+                    packet['dest_port'],
+                    insert_num)
                 self.hex_packets[key] = packet['data']
             insert_num += 1
         #module_logger.debug('finished reading pcap file {0}'.format(self.path))
@@ -38,8 +53,8 @@ class Sessionizer():
         if qacheck:
             return self.hex_packets, badPackets
         else:
-            return self.hex_packets    
-        
+            return self.hex_packets
+
     def order_keys(self):
         """
         Returns list of the hex sessions in (rough) time order.
@@ -50,7 +65,6 @@ class Sessionizer():
             self.orderedKeys.append(key)
         return self.orderedKeys
 
-
     def hexSessionizer(self):
         '''
         collects packets into sessions
@@ -59,26 +73,31 @@ class Sessionizer():
         '''
         hex_sessions = {}
         for pair in self.orderedKeys:
-            if pair[:2] not in hex_sessions or pair[:2][::-1] not in hex_sessions:
-                hex_sessions[pair[:2]]=[self.hex_packets[pair]]
+            if pair[:2] not in hex_sessions or pair[:2][::-
+                                                        1] not in hex_sessions:
+                hex_sessions[pair[:2]] = [self.hex_packets[pair]]
             else:
                 hex_sessions[pair[:2]].append(self.hex_packets[pair])
         return hex_sessions
-   
-        
-            
-def removeBadSessionizer(hex_sessions, minPacketLen=80, saveFile=False, dataPath=None, fileName=None):
+
+
+def removeBadSessionizer(
+        hex_sessions,
+        minPacketLen=80,
+        saveFile=False,
+        dataPath=None,
+        fileName=None):
     for ses in hex_sessions.keys():
         paclens = []
         for pac in hex_sessions[ses][0]:
             paclens.append(len(pac))
-        if np.min(paclens)<minPacketLen:
+        if np.min(paclens) < minPacketLen:
             del hex_sessions[ses]
 
     if saveFile:
         print('pickling sessions')
         pickleFile(hex_sessions, filePath=dataPath, fileName=fileName)
-        
+
     return hex_sessions
 
 
@@ -143,7 +162,7 @@ def process_packet(output):  # pragma: no cover
                     ret_header = parse_header(line)
                     ret_dict.update(ret_header)
                     hasHeader = True
-                except:
+                except BaseException:
                     ret_header.clear()
                     ret_dict.clear()
                     ret_data = ''
@@ -166,11 +185,14 @@ def is_clean_packet(packet):  # pragma: no cover
     are valid address formats. Checks that packet data
     is hex. Returns True if all tests pass, False otherwise.
     """
-    if not packet['src_port'].isdigit(): return False
-    if not packet['dest_port'].isdigit(): return False
+    if not packet['src_port'].isdigit():
+        return False
+    if not packet['dest_port'].isdigit():
+        return False
 
-    if packet['src_ip'].isalpha(): return False
-    if packet['dest_ip'].isalpha(): return False
+    if packet['src_ip'].isalpha():
+        return False
+    if packet['dest_ip'].isalpha():
+        return False
 
     return True
-

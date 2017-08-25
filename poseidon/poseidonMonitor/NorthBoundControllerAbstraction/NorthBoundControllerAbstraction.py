@@ -73,7 +73,7 @@ class Handle_Resource(Monitor_Helper_Base):
         resp.content_type = 'text/text'
         try:
             resp.body = self.mod_name + ' found: {0}'.format(resource)
-        except:  # pragma: no cover
+        except BaseException:  # pragma: no cover
             pass
 
 
@@ -202,9 +202,10 @@ class Handle_Periodic(Monitor_Helper_Base):
             myauth['user'] = self.controller['USER']
             try:
                 self.bcf = BcfProxy(self.controller['URI'], auth=myauth)
-            except:
+            except BaseException:
                 self.logger.error(
-                    'BcfProxy coult not connect to {0}'.format(self.controller['URI']))
+                    'BcfProxy coult not connect to {0}'.format(
+                        self.controller['URI']))
         else:
             pass
 
@@ -214,12 +215,12 @@ class Handle_Periodic(Monitor_Helper_Base):
         h = hashlib.new('ripemd160')
         pre_h = str()
         post_h = None
-        #GROSSMAN dont nodchp -> dhcp withname makes different hashes
+        # GROSSMAN dont nodchp -> dhcp withname makes different hashes
         #{u'tenant': u'FLOORPLATE', u'mac': u'ac:87:a3:2b:7f:12', u'segment': u'prod', u'name': None, u'ip-address': u'10.179.0.100'}}^
         #{u'tenant': u'FLOORPLATE', u'mac': u'ac:87:a3:2b:7f:12', u'segment': u'prod', u'name': u'demo-laptop', u'ip-address': u'10.179.0.100'}}
         # ^^^ make different hashes if name is included
-      
-        #for word in ['tenant', 'mac', 'segment', 'name', 'ip-address']:
+
+        # for word in ['tenant', 'mac', 'segment', 'name', 'ip-address']:
         for word in ['tenant', 'mac', 'segment', 'ip-address']:
             pre_h = pre_h + str(item.get(str(word), 'missing'))
         h.update(pre_h)
@@ -353,9 +354,10 @@ class Handle_Periodic(Monitor_Helper_Base):
             current = self.bcf.get_endpoints()
             parsed = self.bcf.format_endpoints(current)
             machines = parsed
-        except:
+        except BaseException:
             self.logger.error(
-                'Could not establish connection to {0}.'.format(self.controller['URI']))
+                'Could not establish connection to {0}.'.format(
+                    self.controller['URI']))
             self.retval['controller'] = 'Could not establish connection to {0}.'.format(
                 self.controller['URI'])
 

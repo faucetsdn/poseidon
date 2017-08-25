@@ -47,7 +47,7 @@ def test_JsonMixin():
     assert parsed
 
     # Verify that blank text fields are parsed properly.
-    obj = lambda : None # Just a proxy object for attaching text field.
+    def obj(): return None  # Just a proxy object for attaching text field.
     obj.text = ""
     parsed = JsonMixin.parse_json(obj)
     assert parsed == {}

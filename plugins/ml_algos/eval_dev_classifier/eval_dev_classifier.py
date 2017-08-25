@@ -39,7 +39,13 @@ import pandas as pd
 from sklearn import preprocessing
 import base64
 
-LABEL_DICT = {0: 'Nest', 1: 'TiVo', 2: 'FileServer', 3: 'Printer', 4: 'Domain Controller', 5: 'SonyTV'}
+LABEL_DICT = {
+    0: 'Nest',
+    1: 'TiVo',
+    2: 'FileServer',
+    3: 'Printer',
+    4: 'Domain Controller',
+    5: 'SonyTV'}
 
 STORAGE_PORT = '28000'
 DATABASE = 'poseidon_records'
@@ -51,7 +57,7 @@ module_logger = logging.getLogger(__name__)
 def get_path():
     try:
         path_name = sys.argv[1]
-    except:
+    except BaseException:
         module_logger.debug('no argv[1] for pathname')
         path_name = None
     return path_name
@@ -81,14 +87,14 @@ def rabbit_init(host, exchange, queue_name, rabbit_rec):  # pragma: no cover
     while wait:
         try:
             connection = pika.BlockingConnection(
-                              pika.ConnectionParameters(host=host))
+                pika.ConnectionParameters(host=host))
             channel = connection.channel()
             channel.exchange_declare(exchange=exchange, type='topic')
             result = channel.queue_declare(queue=queue_name, exclusive=True)
             wait = False
             module_logger.info('connected to rabbitmq...')
             print 'connected to rabbitmq...'
-        except Exception, e:
+        except Exception as e:
             print 'waiting for connection to rabbitmq...'
             print str(e)
             module_logger.info(str(e))
@@ -121,10 +127,10 @@ def load_model():
     """
     try:
         query = {}
-        ext = '/v1/storage/query/{database}/{collection}/{query_str}'.format(database=DATABASE,
-                                                                             collection=COLLECTION,
-                                                                             query_str=query)
-        uri = 'http://' + os.environ['POSEIDON_HOST'] + ':' + STORAGE_PORT + ext
+        ext = '/v1/storage/query/{database}/{collection}/{query_str}'.format(
+            database=DATABASE, collection=COLLECTION, query_str=query)
+        uri = 'http://' + \
+            os.environ['POSEIDON_HOST'] + ':' + STORAGE_PORT + ext
         resp = requests.get(uri)
         if resp.status_code != requests.codes.ok:
             print 'error retrieving model from database'
@@ -132,8 +138,8 @@ def load_model():
         model = json.loads(resp.text)['docs'][0]['model']
         model_str = base64.b64encode(model)
         model = cPickle.loads(base64.b64decode(model_str))
-        return model 
-    except:
+        return model
+    except BaseException:
         print "Failed to load model"
         return None
 
@@ -144,34 +150,78 @@ def eval_dev_classifier(channel, path):
     pre-loaded model. Evaluates and sends the most common
     classifiation using rabbitmq.
     """
-    
-    #Load pretrained model 
+
+    # Load pretrained model
     model = load_model()
 
     if not model:
         print "Exiting"
-        return 
+        return
 
-    #Take flowparser csv and create "test" data
-    test_df = pd.read_csv(path,names=['srcip','srcport','dstip','dstport','proto','total_fpackets','total_fvolume',
-                                              'total_bpackets','total_bvolume','min_fpktl','mean_fpktl','max_fpktl','std_fpktl',
-                                              'min_bpktl','mean_bpktl','max_bpktl','std_bpktl','min_fiat','mean_fiat','max_fiat',
-                                              'std_fiat','min_biat','mean_biat','max_biat','std_biat','duration','min_active',
-                                              'mean_active','max_active','std_active','min_idle','mean_idle','max_idle','std_idle',
-                                              'sflow_fpackets','sflow_fbytes','sflow_bpackets','sflow_bbytes','fpsh_cnt','bpsh_cnt',
-                                              'furg_cnt','burg_cnt','total_fhlen','total_bhlen','misc'])
+    # Take flowparser csv and create "test" data
+    test_df = pd.read_csv(
+        path,
+        names=[
+            'srcip',
+            'srcport',
+            'dstip',
+            'dstport',
+            'proto',
+            'total_fpackets',
+            'total_fvolume',
+            'total_bpackets',
+            'total_bvolume',
+            'min_fpktl',
+            'mean_fpktl',
+            'max_fpktl',
+            'std_fpktl',
+            'min_bpktl',
+            'mean_bpktl',
+            'max_bpktl',
+            'std_bpktl',
+            'min_fiat',
+            'mean_fiat',
+            'max_fiat',
+            'std_fiat',
+            'min_biat',
+            'mean_biat',
+            'max_biat',
+            'std_biat',
+            'duration',
+            'min_active',
+            'mean_active',
+            'max_active',
+            'std_active',
+            'min_idle',
+            'mean_idle',
+            'max_idle',
+            'std_idle',
+            'sflow_fpackets',
+            'sflow_fbytes',
+            'sflow_bpackets',
+            'sflow_bbytes',
+            'fpsh_cnt',
+            'bpsh_cnt',
+            'furg_cnt',
+            'burg_cnt',
+            'total_fhlen',
+            'total_bhlen',
+            'misc'])
 
-    #extract relevant columns from flowparser csv 
-    test_df['port'] = test_df.apply(lambda x: min(x['srcport'],x['dstport']),axis=1)
+    # extract relevant columns from flowparser csv
+    test_df['port'] = test_df.apply(
+        lambda x: min(
+            x['srcport'],
+            x['dstport']),
+        axis=1)
     test_df = test_df.drop('misc', axis=1)
-    test_df = test_df.ix[:,'proto':'port']
+    test_df = test_df.ix[:, 'proto':'port']
 
-    #scale relevant statistics 
+    # scale relevant statistics
     scaled_stats = preprocessing.scale(test_df)
 
-    #make predicition based on incoming data 
+    # make predicition based on incoming data
     model_prediction = model.predict(scaled_stats)
-
 
     count_dict = defaultdict(int)
 
@@ -182,7 +232,6 @@ def eval_dev_classifier(channel, path):
 
     print path, ' classified as: ', classification
     classification = LABEL_DICT[classification]
-    
 
     # last field of routing key is id of flow taken from file name
     flow_id = path.split('_')[1]

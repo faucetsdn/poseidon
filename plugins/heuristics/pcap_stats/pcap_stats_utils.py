@@ -159,7 +159,7 @@ class MachineNode:
                 return statistics.stdev(self.packet_lens_sent)
             else:
                 return statistics.stdev(self.packet_lens_rec)
-        except:
+        except BaseException:
             return 'Error retrieving standard deviation.'
 
     def get_machines_sent_to(self):

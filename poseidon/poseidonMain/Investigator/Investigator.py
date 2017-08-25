@@ -64,7 +64,7 @@ class Investigator(Main_Action_Base):
         try:
             resp = requests.get(self.vctrl_addr + '/machines/list')
             self.vent_machines = ast.literal_eval(resp.body)
-        except:
+        except BaseException:
             self.logger.error('Main: Investigator: error on vctrl list')
 
     def vctrl_startup(self):
@@ -75,13 +75,24 @@ class Investigator(Main_Action_Base):
         for machine, config in self.vent_machines.iteritems():
             try:
                 resp = requests.post(
-                    self.vctrl_addr + '/machines/create', data={'machine': 'vent1'})
-            except:
+                    self.vctrl_addr +
+                    '/machines/create',
+                    data={
+                        'machine': 'vent1'})
+            except BaseException:
                 self.logger.error(
                     'Main: Investigator: error on vent create request.')
 
     @staticmethod
-    def format_vent_create(name, provider, body=None, group='poseidon-vent', labels='default', memory=4096, cpus=4, disk_sz=20000):
+    def format_vent_create(
+            name,
+            provider,
+            body=None,
+            group='poseidon-vent',
+            labels='default',
+            memory=4096,
+            cpus=4,
+            disk_sz=20000):
         '''
         Formats body dict for vcontrol machine create.
         Returns dict for vcontrol create request.
@@ -169,7 +180,7 @@ class Investigator(Main_Action_Base):
             json.dumps(query)
         try:
             resp = requests.get(uri)
-        except:
+        except BaseException:
             # error connecting to storage interface
             # log error
             self.logger.error(
@@ -217,7 +228,7 @@ class Investigator_Response(Investigator):
             try:
                 url = 'http://' + self.vctrl_addr + '/commands/deploy/' + machine
                 resp = requests.post(url)
-            except:
+            except BaseException:
                 self.logger.error(
                     'Main: Investigator: vent_preparation, vent request failed')
 
@@ -230,7 +241,7 @@ class Investigator_Response(Investigator):
         '''
         try:
             resp = requests.get('vent_url')
-        except:
+        except BaseException:
             self.logger.error(
                 'Main: Investigator: send_vent_jobs, vent request failed')
 
@@ -243,7 +254,7 @@ class Investigator_Response(Investigator):
         try:
             url = 'http://poseidon-storage-interface/v1/'
             resp = requests.get(url)
-        except:
+        except BaseException:
             pass
 
 

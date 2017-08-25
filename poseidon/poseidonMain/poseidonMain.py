@@ -33,23 +33,18 @@ import Queue
 import threading
 import time
 import types
+import urllib2
 from functools import partial
 from os import getenv
 
-import pika
 import requests
 
+import pika
 from poseidon.poseidonMain.Config.Config import config_interface
-from poseidon.poseidonMain.Investigator.Investigator import investigator_interface
+from poseidon.poseidonMain.Investigator.Investigator import \
+    investigator_interface
 from poseidon.poseidonMain.Scheduler.Scheduler import scheduler_interface
 
-
-# class NullHandler(logging.Handler):
-#     def emit(self, record):
-#         pass
-
-# h = NullHandler()
-#  module_logger = logging.getLogger(__name__).addHandler(h)
 logging.basicConfig(level=logging.DEBUG)
 module_logger = logging.getLogger(__name__)
 
@@ -63,6 +58,18 @@ def callback(ch, method, properties, body, q=None):
         q.put((method.routing_key, body))
     else:
         module_logger.error('posedionMain workQueue is None')
+
+
+def schedule_job_kickurl(url, logger):
+    if url:
+        try:
+            page = urllib2.urlopen(url)
+            logger.info(page.readlines())
+            ostr = 'wget {0}'.format(url)
+            logger.info(ostr)
+        except BaseException:
+            ostr = 'Error connecting to url: {0} retrying...'.format(url)
+            logger.info(ostr)
 
 
 class PoseidonMain(object):
@@ -115,6 +122,12 @@ class PoseidonMain(object):
 
         self.init_logging()
 
+        scan_frequency = int(self.mod_configuration['scan_frequency'])
+        url = self.mod_configuration['scan_url']
+
+        self.Scheduler.schedule.every(scan_frequency).seconds.do(
+            partial(schedule_job_kickurl, url=url, logger=self.Scheduler.logger))
+
     def init_logging(self):
         ''' setup the logging parameters for poseidon '''
         config = None
@@ -160,7 +173,8 @@ class PoseidonMain(object):
                 self.monitoring[my_hash] = my_value
             else:
                 self.logger.debug(
-                    'already being monitored:{0}:{1}'.format(my_hash, my_value))
+                    'already being monitored:{0}:{1}'.format(
+                        my_hash, my_value))
 
     def stop_monitor(self, ivalue):
         ''' stop monitoring an address'''
@@ -224,12 +238,8 @@ class PoseidonMain(object):
                 self.logger.debug('found db doc: ' + str(db_doc))
                 return db_doc[field]
             else:
-                if resp['count'] == 0:
-                    pass
-                    # TODO schedule endpoint for analysis
-                else:
-                    self.logger.debug('bad document in db: ' + str(resp))
-        except Exception, e:
+                self.logger.debug('bad document in db: ' + str(db_doc))
+        except Exception as e:
             self.logger.debug('failed to get record from db' + str(e))
             return None
 
@@ -240,19 +250,19 @@ class PoseidonMain(object):
         options specified in poseidon.config.
         '''
         try:
-            payload = {'nic': self.mod_configuration['collector_nic'],
-                       'id': dev_hash,
-                       'interval': self.mod_configuration['collector_interval'],
-                       'filter': self.mod_configuration['collector_filter'],
-                       'iters': str(num_captures)}
+            payload = {
+                'nic': self.mod_configuration['collector_nic'],
+                'id': dev_hash,
+                'interval': self.mod_configuration['collector_interval'],
+                'filter': self.mod_configuration['collector_filter'],
+                'iters': str(num_captures)}
             self.logger.debug('vent payload: ' + str(payload))
             vent_addr = self.mod_configuration[
                 'vent_ip'] + ':' + self.mod_configuration['vent_port']
             uri = 'http://' + vent_addr + '/create'
-            self.logger.debug('************************ VENT VENT VENT VENT VENT VENT MESSAGE {0}'.format(payload))
             resp = requests.post(uri, json=payload)
             self.logger.debug('collector repsonse: ' + resp.text)
-        except Exception, e:
+        except Exception as e:
             self.logger.debug('failed to start vent collector' + str(e))
 
     @staticmethod
@@ -272,11 +282,8 @@ class PoseidonMain(object):
         if itype == 'poseidon.action.new_machine':
             self.logger.debug('***** new machine {0}'.format(ivalue))
             # tell monitor to monitor
-
-            #keep from sending multiple starts to vent
-            if self.just_the_hash(ivalue) not in self.monitoring:
-                self.start_vent_collector(self.just_the_hash(ivalue))
-                self.start_monitor(ivalue)
+            self.start_vent_collector(self.just_the_hash(ivalue))
+            self.start_monitor(ivalue)
         if 'poseidon.algos.eval_dev_class' in itype:
             # ivalue = classificationtype:<string>
             # result form eval device classifier with
@@ -295,7 +302,7 @@ class PoseidonMain(object):
             self.logger.debug('classified previously {0}'.format(prev_class))
             if ivalue == prev_class:
                 self.logger.debug(
-                    '***** allowing endpoint {0}:{1}'.format(itype,  temp_d))
+                    '***** allowing endpoint {0}:{1}'.format(itype, temp_d))
                 self.endpoint_allow(temp_d)
             else:
                 self.logger.debug(
@@ -449,9 +456,11 @@ def main(skip_rabbit=False):
         pmain.init_rabbit()
         pmain.start_channel(pmain.rabbit_channel_local,
                             callback, 'poseidon_main')
+        pmain.Scheduler.schedule_thread.start()
         # def start_channel(self, channel, callback, queue):
     pmain.process()
     return True
+
 
 if __name__ == '__main__':  # pragma: no cover
     main(skip_rabbit=False)

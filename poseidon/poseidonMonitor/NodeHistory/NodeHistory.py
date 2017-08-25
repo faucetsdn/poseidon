@@ -58,7 +58,7 @@ class Handle_Default(Monitor_Helper_Base):
             query = {'node_ip': resource}
             query = urllib.unquote(query).encode('utf8')
             response = get('http://localhost:4444/v1/storage/' + query)
-        except:  # pragma: no cover
+        except BaseException:  # pragma: no cover
             response = 'failed'
         resp.body = json.dumps(response)
 

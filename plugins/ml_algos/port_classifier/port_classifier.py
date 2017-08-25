@@ -56,7 +56,7 @@ COLLECTION = 'models'
 def get_path():
     try:
         path_name = sys.argv[1]
-    except:
+    except BaseException:
         module_logger.debug('no argv[1] for pathname')
         path_name = None
     return path_name
@@ -86,14 +86,14 @@ def rabbit_init(host, exchange, queue_name, rabbit_rec):  # pragma: no cover
     while wait:
         try:
             connection = pika.BlockingConnection(
-                              pika.ConnectionParameters(host=host))
+                pika.ConnectionParameters(host=host))
             channel = connection.channel()
             channel.exchange_declare(exchange=exchange, type='topic')
             result = channel.queue_declare(queue=queue_name, exclusive=True)
             wait = False
             module_logger.info('connected to rabbitmq...')
             print 'connected to rabbitmq...'
-        except Exception, e:
+        except Exception as e:
             print 'waiting for connection to rabbitmq...'
             print str(e)
             module_logger.info(str(e))
@@ -130,7 +130,7 @@ def file_receive(ch, method, properties, body):
         fd.close()
         try:
             port_classifier(ch, 'temp_file')
-        except Exception, e:
+        except Exception as e:
             module_logger.debug(str(e))
     else:
         fd.write(body + '\n')
@@ -148,7 +148,8 @@ def save_model(model):
                  cPickle.HIGHEST_PROTOCOL)
 
     try:
-        model_str = cPickle.dumps(model, 0)  # uses lowest protocol for utf8 compliance when request is serialized
+        # uses lowest protocol for utf8 compliance when request is serialized
+        model_str = cPickle.dumps(model, 0)
         uri = 'http://' + os.environ['POSEIDON_HOST'] + ':' + STORAGE_PORT + \
             '/v1/storage/add_one_doc/{database}/{collection}'.format(database=DATABASE,
                                                                      collection=COLLECTION)
@@ -156,19 +157,60 @@ def save_model(model):
         resp = requests.post(uri, data=json.dumps(payload))
         if resp.status_code != 200:
             module_logger.debug(str(resp.status_code))
-    except:
+    except BaseException:
         module_logger.debug('connection to storage-interface failed')
 
 
 def port_classifier(channel, file):
     # Read in file
-    flow_df = pd.read_csv(file, names=['srcip', 'srcport', 'dstip', 'dstport', 'proto', 'total_fpackets', 'total_fvolume',
-                                       'total_bpackets', 'total_bvolume', 'min_fpktl', 'mean_fpktl', 'max_fpktl', 'std_fpktl',
-                                       'min_bpktl', 'mean_bpktl', 'max_bpktl', 'std_bpktl', 'min_fiat', 'mean_fiat', 'max_fiat',
-                                       'std_fiat', 'min_biat', 'mean_biat', 'max_biat', 'std_biat', 'duration', 'min_active',
-                                       'mean_active', 'max_active', 'std_active', 'min_idle', 'mean_idle', 'max_idle', 'std_idle',
-                                       'sflow_fpackets', 'sflow_fbytes', 'sflow_bpackets', 'sflow_bbytes', 'fpsh_cnt', 'bpsh_cnt',
-                                       'furg_cnt', 'burg_cnt', 'total_fhlen', 'total_bhlen', 'misc'])
+    flow_df = pd.read_csv(
+        file,
+        names=[
+            'srcip',
+            'srcport',
+            'dstip',
+            'dstport',
+            'proto',
+            'total_fpackets',
+            'total_fvolume',
+            'total_bpackets',
+            'total_bvolume',
+            'min_fpktl',
+            'mean_fpktl',
+            'max_fpktl',
+            'std_fpktl',
+            'min_bpktl',
+            'mean_bpktl',
+            'max_bpktl',
+            'std_bpktl',
+            'min_fiat',
+            'mean_fiat',
+            'max_fiat',
+            'std_fiat',
+            'min_biat',
+            'mean_biat',
+            'max_biat',
+            'std_biat',
+            'duration',
+            'min_active',
+            'mean_active',
+            'max_active',
+            'std_active',
+            'min_idle',
+            'mean_idle',
+            'max_idle',
+            'std_idle',
+            'sflow_fpackets',
+            'sflow_fbytes',
+            'sflow_bpackets',
+            'sflow_bbytes',
+            'fpsh_cnt',
+            'bpsh_cnt',
+            'furg_cnt',
+            'burg_cnt',
+            'total_fhlen',
+            'total_bhlen',
+            'misc'])
 
     # Remove uneccesary columns
     flow_df = flow_df.drop('misc', axis=1)

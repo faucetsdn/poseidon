@@ -145,6 +145,7 @@ def get_allowed():
         allow_origin = ''
     return allow_origin, rest_url
 
+
 allow_origin, rest_url = get_allowed()
 # cors = CORS(allow_origins_list=[allow_origin])
 cors = CORS(allow_all_origins=True)
@@ -168,7 +169,7 @@ class SwaggerAPI:
 
             with open(self.swagger_file, 'r') as f:
                 resp.body = f.read()
-        except:  # pragma: no cover
+        except BaseException:  # pragma: no cover
             resp.body = ''
 
 
@@ -183,7 +184,7 @@ class VersionResource:
         try:
             with open(self.version_file, 'r') as f:
                 version['version'] = f.read().strip()
-        except:  # pragma: no cover
+        except BaseException:  # pragma: no cover
             pass
         # get commit id (git commit ID)
         try:
@@ -195,13 +196,13 @@ class VersionResource:
                 version['commit'] = commit_id.strip() + '-dirty'
             else:
                 version['commit'] = commit_id.strip()
-        except:  # pragma: no cover
+        except BaseException:  # pragma: no cover
             pass
         # get runtime id (docker container ID)
         try:
             if 'HOSTNAME' in environ:
                 version['runtime'] = environ['HOSTNAME']
-        except:  # pragma: no cover
+        except BaseException:  # pragma: no cover
             pass
         resp.body = json.dumps(version)
 
@@ -221,7 +222,7 @@ class PCAPResource:
                      '-tttt'])
             else:
                 resp.body = 'not a pcap'
-        except:  # pragma: no cover
+        except BaseException:  # pragma: no cover
             resp.body = 'failed'
 
 

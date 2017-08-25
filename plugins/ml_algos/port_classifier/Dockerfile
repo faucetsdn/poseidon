@@ -18,11 +18,11 @@ RUN easy_install pip
 RUN pip install --upgrade pip 
 
 # install module dependencies
-ADD requirements.txt requirements.txt
+COPY requirements.txt requirements.txt
 RUN pip install pip --upgrade
 RUN pip install -r requirements.txt
 
-ADD port_classifier.py port_classifier.py
+COPY port_classifier.py port_classifier.py
 
 # added entrypoint and cmd for vent injection of file name
 ENTRYPOINT ["python", "port_classifier.py"]

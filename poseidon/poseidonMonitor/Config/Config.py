@@ -91,7 +91,7 @@ class Handle_FullConfig(Monitor_Helper_Base):
             for sec in self.owner.config.sections():
                 ret[sec] = self.owner.config.items(sec)
             retval = json.dumps(ret)
-        except:
+        except BaseException:
             self.logger.error('Failed to open config file.')
             retval = json.dumps('Failed to open config file.')
         return retval
@@ -117,7 +117,7 @@ class Handle_SectionConfig(Monitor_Helper_Base):
         retval = None
         try:
             retval = self.owner.config.items(section)
-        except:
+        except BaseException:
             retval = 'Failed to find section: {0}'.format(section)
         return retval
 
@@ -146,7 +146,7 @@ class Handle_FieldConfig(Monitor_Helper_Base):
         retval = ''
         try:
             retval = self.owner.config.get(section, field)
-        except:
+        except BaseException:
             retval = 'Can\'t find field: {0} in section: {1}'.format(
                 field, section)
         return retval

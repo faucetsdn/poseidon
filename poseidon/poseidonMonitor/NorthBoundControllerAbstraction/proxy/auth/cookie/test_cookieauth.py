@@ -66,6 +66,10 @@ def test_CookieAuthControllerProxy():
 
     with HTTMock(mock_factory(r'.*', filemap)):
         proxy = CookieAuthControllerProxy(
-            base_uri='http://localhost', login_resource='login', auth={'username': username, 'password': password})
+            base_uri='http://localhost',
+            login_resource='login',
+            auth={
+                'username': username,
+                'password': password})
         res = proxy.get_resource('resource')
         assert res
