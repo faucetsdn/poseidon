@@ -25,6 +25,9 @@ import schedule
 from poseidon.baseClasses.enums_tuples import CRONSPEC
 from poseidon.baseClasses.enums_tuples import EVERY
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
+from functools import partial
+import threading
+import time
 
 
 module_logger = logging.getLogger(__name__)
@@ -74,6 +77,17 @@ def rabbit_init(host, exchange, queue_name):  # pragma: no cover
 '''
 
 
+def thread_worker(schedule, logger):
+    logLine = 'starting thread_worker'
+    logger.debug(logLine)
+    while(True):
+        schedule.run_pending()
+        logLine = 'scheduler woke {0}'.format(
+            threading.current_thread().getName())
+        time.sleep(1) 
+        logger.debug(logLine)
+
+
 class Scheduler(Main_Action_Base):
 
     def __init__(self):
@@ -84,6 +98,8 @@ class Scheduler(Main_Action_Base):
         self.schedule.clear()
         self.handles = dict()
         self.currentJobs = dict()
+        self.schedule_thread = threading.Thread(target=partial(
+            thread_worker, schedule=self.schedule, logger=self.logger), name='st_worker')
 
     @staticmethod
     def safe(func):
@@ -216,5 +232,6 @@ class Scheduler(Main_Action_Base):
             if t in helper.handles:
                 handle_list.append(helper.handles[t])
         return handle_list
+
 
 scheduler_interface = Scheduler()
