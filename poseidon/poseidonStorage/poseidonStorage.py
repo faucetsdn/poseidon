@@ -29,15 +29,12 @@ Created on 17 May 2016
 """
 import ConfigParser
 import json
-import sys
 import bson
 import falcon
 from falcon_cors import CORS
 from pymongo import MongoClient
 from bson import ObjectId
 from os import environ
-from subprocess import check_output
-from urlparse import urlparse
 
 
 class MongoJSONEncoder(json.JSONEncoder):
@@ -359,7 +356,6 @@ def main():
     Initialization to run in mongo container -
     pull desired database options from config.
     """
-    pass
 
 
 if __name__ == '__main__':

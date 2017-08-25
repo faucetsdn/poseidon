@@ -17,7 +17,7 @@ RUN apt-get update && \
 ADD . /poseidonWork
 WORKDIR /poseidonWork
 ENV PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
-RUN pip install pip --upgrade
+RUN pip install pip==9.0.1 --upgrade
 
 # install dependencies of plugins for poseidon
 RUN for file in $(find poseidon/* -name "requirements.txt"); \

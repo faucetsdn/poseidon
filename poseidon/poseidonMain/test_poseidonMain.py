@@ -19,11 +19,8 @@ Test module for poseidonMain.py
 Created on 29 May 2016
 @author: dgrossman, tlanham
 """
-import json
 import logging
-from os import environ
 
-import pytest
 
 from poseidon.poseidonMain.poseidonMain import main
 from poseidon.poseidonMain.poseidonMain import PoseidonMain

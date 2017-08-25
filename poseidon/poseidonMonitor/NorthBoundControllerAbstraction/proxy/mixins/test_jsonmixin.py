@@ -22,7 +22,6 @@ import json
 import logging
 import os
 
-import pytest
 from httmock import response
 
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.mixins.jsonmixin import JsonMixin

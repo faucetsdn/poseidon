@@ -19,7 +19,6 @@ Test module for periodically
 Created on 28 June 2016
 @author: dgrossman, lanhamt
 """
-import pytest
 
 from poseidon.periodically.periodically import doSleep
 from poseidon.periodically.periodically import periodically

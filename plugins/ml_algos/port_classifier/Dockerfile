@@ -15,7 +15,7 @@ RUN apt-get update && \
     python-numpy
 
 RUN easy_install pip
-RUN pip install --upgrade pip 
+RUN pip install --upgrade pip==9.0.1
 
 # install module dependencies
 COPY requirements.txt requirements.txt

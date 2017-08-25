@@ -19,7 +19,6 @@ Test module for NorthBoundControllerAbstraction.py
 Created on 28 June 2016
 @author: dgrossman
 """
-import ast
 import logging
 
 import falcon

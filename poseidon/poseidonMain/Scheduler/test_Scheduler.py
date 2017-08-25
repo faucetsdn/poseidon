@@ -22,7 +22,6 @@ Created on 28 June 2016
 import logging
 import logging.config
 
-import pytest
 
 from poseidon.baseClasses.enums_tuples import CRONSPEC
 from poseidon.baseClasses.enums_tuples import EVERY

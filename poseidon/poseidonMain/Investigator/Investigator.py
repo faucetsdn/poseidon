@@ -24,8 +24,6 @@ import ast
 import json
 import logging
 import logging.config
-import sys
-import urllib
 
 import requests
 

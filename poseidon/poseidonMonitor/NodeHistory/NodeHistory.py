@@ -47,14 +47,13 @@ class Handle_Default(Monitor_Helper_Base):
     def on_get(req, resp, resource):
         resp.content_type = 'application/json'
         try:
-            """
-            connect to poseidon storage to query database
-            dump response from storage
-            db_collection_query
-            query = {'node_ip': resource}
-            urllib.unquote(query).encode('utf8')
+            # TODO look at this again
+            # connect to poseidon storage to query database
+            # dump response from storage
+            # db_collection_query
+            #query = {'node_ip': resource}
+            # urllib.unquote(query).encode('utf8')
 
-            """
             query = {'node_ip': resource}
             query = urllib.unquote(query).encode('utf8')
             response = get('http://localhost:4444/v1/storage/' + query)

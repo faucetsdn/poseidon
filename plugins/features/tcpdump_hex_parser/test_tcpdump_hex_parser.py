@@ -21,7 +21,6 @@ Created on 13 June 2016
 import re
 import sys
 
-import pytest
 from tcpdump_hex_parser import get_path
 from tcpdump_hex_parser import parse_data
 from tcpdump_hex_parser import parse_header

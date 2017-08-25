@@ -20,7 +20,6 @@ Test module for controllerproxy.
 """
 import logging
 
-import pytest
 
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.controllerproxy import ControllerProxy
 

@@ -21,7 +21,6 @@ and FlowRecord classes
 Created on 28 July 2016
 @author: lanhamt
 """
-import time
 from collections import defaultdict
 from datetime import datetime
 

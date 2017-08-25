@@ -21,7 +21,6 @@ Created on 28 June 2016
 @author: dgrossman, lanhamt
 """
 import os
-import bson
 import falcon
 import pytest
 import json
