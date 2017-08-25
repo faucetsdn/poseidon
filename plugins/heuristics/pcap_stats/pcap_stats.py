@@ -123,21 +123,21 @@ def db_update_worker():
     needs to be updated (ie any changes from last
     update) and at end of update, reset it.
     """
-    """
-    global flowRecordLock
-    while True:
-        try:
-            TODO: fix url for appropriate rest call
-            url = 'http://poseidon-storage-interface/v1/storage/update'
-            resp = requests.get(url)
-            # check update conditions
-            # flowRecordLock.acquire()
-            # update with rest call for appropriate docs
-            # flowRecordLock.release()
-        except:
-            module_logger.error('database update failed...')
-        time.sleep(10)
-    """
+    # TODO figure out what this is:
+    #global flowRecordLock
+    #while True:
+    #    try:
+    #        TODO: fix url for appropriate rest call
+    #        url = 'http://poseidon-storage-interface/v1/storage/update'
+    #        resp = requests.get(url)
+    #        # check update conditions
+    #        # flowRecordLock.acquire()
+    #        # update with rest call for appropriate docs
+    #        # flowRecordLock.release()
+    #    except:
+    #        module_logger.error('database update failed...')
+    #    time.sleep(10)
+    pass
 
 
 network_machines = []
