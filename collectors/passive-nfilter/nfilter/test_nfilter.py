@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import nfilter
-import pytest
 import web
 from paste.fixture import TestApp
 

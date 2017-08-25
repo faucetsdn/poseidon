@@ -22,7 +22,6 @@ import logging
 
 import schedule
 
-from poseidon.baseClasses.enums_tuples import CRONSPEC
 from poseidon.baseClasses.enums_tuples import EVERY
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
 from functools import partial

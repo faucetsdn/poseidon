@@ -21,7 +21,6 @@ Created on 13 June 2016
 """
 import sys
 
-import pytest
 from dshell_netflow_parser import get_path
 from dshell_netflow_parser import run_tool
 

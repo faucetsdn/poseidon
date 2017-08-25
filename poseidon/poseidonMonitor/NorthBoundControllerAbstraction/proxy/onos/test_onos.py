@@ -22,7 +22,6 @@ import json
 import logging
 import os
 
-import pytest
 from httmock import HTTMock
 from httmock import response
 from httmock import urlmatch

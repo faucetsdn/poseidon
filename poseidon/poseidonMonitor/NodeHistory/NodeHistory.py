@@ -48,11 +48,11 @@ class Handle_Default(Monitor_Helper_Base):
         resp.content_type = 'application/json'
         try:
             # TODO look at this again
-            #connect to poseidon storage to query database
-            #dump response from storage
-            #db_collection_query
+            # connect to poseidon storage to query database
+            # dump response from storage
+            # db_collection_query
             #query = {'node_ip': resource}
-            #urllib.unquote(query).encode('utf8')
+            # urllib.unquote(query).encode('utf8')
 
             query = {'node_ip': resource}
             query = urllib.unquote(query).encode('utf8')

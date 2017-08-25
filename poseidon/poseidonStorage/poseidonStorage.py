@@ -35,7 +35,6 @@ from falcon_cors import CORS
 from pymongo import MongoClient
 from bson import ObjectId
 from os import environ
-from urlparse import urlparse
 
 
 class MongoJSONEncoder(json.JSONEncoder):

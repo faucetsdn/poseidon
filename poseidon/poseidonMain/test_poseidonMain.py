@@ -21,7 +21,6 @@ Created on 29 May 2016
 """
 import logging
 
-import pytest
 
 from poseidon.poseidonMain.poseidonMain import main
 from poseidon.poseidonMain.poseidonMain import PoseidonMain
