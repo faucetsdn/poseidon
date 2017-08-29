@@ -24,12 +24,6 @@ RUN for file in $(find poseidon/* -name "requirements.txt"); \
         pip install -r $file; \
     done
 
-# install dependencies of collector for tests
-#RUN for file in $(find collectors/* -name "requirements.txt"); \
-#    do \
-#        pip install -r $file; \
-#    done
-
 ENV PYTHONUNBUFFERED 0
 EXPOSE 4444:8004
 

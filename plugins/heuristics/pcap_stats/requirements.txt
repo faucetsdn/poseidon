@@ -1,4 +1,4 @@
-pika
-statistics
-pymongo
-requests
+pika==0.10.0
+statistics==1.0.3.5
+pymongo==3.5.1
+requests==2.18.4
