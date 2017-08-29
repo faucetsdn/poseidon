@@ -318,7 +318,7 @@ class Handle_Periodic(Monitor_Helper_Base):
         self.logger.debug('*************KNOWN*****************')
         for my_hash, my_dict in self.prev_endpoints.iteritems():
             self.logger.debug('P:{0}:{1}'.format(my_hash, my_dict))
-        self.logger.debug('************UNKNOWN*(**************')
+        self.logger.debug('************UNKNOWN****************')
         for my_hash, my_dict in self.new_endpoints.iteritems():
             self.logger.debug('N:{0}:{1}'.format(my_hash, my_dict))
         self.logger.debug('***********MIRRORING***************')
