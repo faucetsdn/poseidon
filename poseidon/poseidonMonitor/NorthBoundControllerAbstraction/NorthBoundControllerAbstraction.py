@@ -315,18 +315,26 @@ class Handle_Periodic(Monitor_Helper_Base):
                     self.new_endpoints[h] = machine
 
     def print_state(self):
-        self.logger.debug('**************PREV*****************')
+        self.logger.debug('*************KNOWN*****************')
         for my_hash, my_dict in self.prev_endpoints.iteritems():
             self.logger.debug('P:{0}:{1}'.format(my_hash, my_dict))
-        self.logger.debug('**************NEW******************')
+        if len(self.prev_endpoints) == 0:
+            self.logger.debug('None')
+        self.logger.debug('************UNKNOWN****************')
         for my_hash, my_dict in self.new_endpoints.iteritems():
             self.logger.debug('N:{0}:{1}'.format(my_hash, my_dict))
+        if len(self.new_endpoints) == 0:
+            self.logger.debug('None')
         self.logger.debug('***********MIRRORING***************')
         for my_hash, my_dict in self.mirroring.iteritems():
             self.logger.debug('M:{0}:{1}'.format(my_hash, my_dict))
+        if len(self.mirroring) == 0:
+            self.logger.debug('None')
         self.logger.debug('***********SHUTDOWN****************')
         for my_hash, my_dict in self.shutdown.iteritems():
             self.logger.debug('M:{0}:{1}'.format(my_hash, my_dict))
+        if len(self.shutdown) == 0:
+            self.logger.debug('None')
 
     def send_new_machines(self):
         '''send listing of new machines to main for decisions'''

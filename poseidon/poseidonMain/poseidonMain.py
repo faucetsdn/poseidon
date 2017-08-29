@@ -442,9 +442,13 @@ class PoseidonMain(object):
         self.logger.debug('**********MONITORING**********')
         for my_hash, my_value in self.monitoring.iteritems():
             self.logger.debug('M:{0}:{1}'.format(my_hash, my_value))
+        if (len(self.monitoring) == 0):
+            self.logger.debug('None')
         self.logger.debug('***********SHUTDOWN***********')
         for my_hash, my_value in self.shutdown.iteritems():
             self.logger.debug('S:{0}:{1}'.format(my_hash, my_value))
+        if (len(self.shutdown)==0):
+            self.logger.debug('None')
         self.logger.debug('******************************')
 
 

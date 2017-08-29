@@ -27,9 +27,6 @@ RUN for file in $(find poseidon/* -name "requirements.txt"); \
 ENV PYTHONUNBUFFERED 0
 EXPOSE 3333:8003
 
-
-# install pytest
-RUN pip install pytest
 # run tests
 RUN py.test -v \
 --ignore=poseidon/poseidonMain \
