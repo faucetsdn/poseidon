@@ -315,10 +315,10 @@ class Handle_Periodic(Monitor_Helper_Base):
                     self.new_endpoints[h] = machine
 
     def print_state(self):
-        self.logger.debug('**************PREV*****************')
+        self.logger.debug('*************KNOWN*****************')
         for my_hash, my_dict in self.prev_endpoints.iteritems():
             self.logger.debug('P:{0}:{1}'.format(my_hash, my_dict))
-        self.logger.debug('**************NEW******************')
+        self.logger.debug('************UNKNOWN*(**************')
         for my_hash, my_dict in self.new_endpoints.iteritems():
             self.logger.debug('N:{0}:{1}'.format(my_hash, my_dict))
         self.logger.debug('***********MIRRORING***************')
