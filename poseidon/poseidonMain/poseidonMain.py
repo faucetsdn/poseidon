@@ -390,17 +390,12 @@ def main(skip_rabbit=False):
 	exchange = 'topic-poseidon-internal'
 	queue_name = 'poseidon_main'
 	binding_key = ['poseidon.algos.#', 'poseidon.action.#']
-	retval = rabbit.make_rabbit_connection(host, exchange, queue_name, 
+	retval = rabbit.make_rabbit_connection(host, exchange, queue_name,
 					       binding_key)
 	pmain.rabbit_channel_local = retval[0]
 	pmain.rabbit_channel_connection_local = retval[1]
-	rabbit.start_channel(pmain.rabbit_channel_local, callback, 
+	rabbit.start_channel(pmain.rabbit_channel_local, callback,
 			     'poseidon_main', pmain.m_queue)
-	"""
-        pmain.init_rabbit()
-        pmain.start_channel(pmain.rabbit_channel_local,
-                            callback, 'poseidon_main')
-	"""
         pmain.Scheduler.schedule_thread.start()
         # def start_channel(self, channel, callback, queue):
     pmain.process()

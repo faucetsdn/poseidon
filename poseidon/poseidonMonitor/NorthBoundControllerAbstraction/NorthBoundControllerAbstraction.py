@@ -119,12 +119,12 @@ class Handle_Periodic(Monitor_Helper_Base):
         exchange = 'topic-poseidon-internal'
         queue_name = 'poseidon_NBCA'
         binding_key = ['poseidon.action.#']
-        retval = rabbit.make_rabbit_connection(host, exchange, queue_name, 
+        retval = rabbit.make_rabbit_connection(host, exchange, queue_name,
                                                binding_key, total_sleep=30)
         self.rabbit_channel_local = retval[0]
         self.rabbit_connection_local = retval[1]
         self.do_rabbit = retval[2]
-        
+
         if self.do_rabbit:
             rabbit.start_channel(self.rabbit_channel_local,
                                  callback, 'poseidon_NBCA', self.m_queue)
