@@ -19,7 +19,6 @@ RUN pip install --upgrade pip==9.0.1
 
 # install module dependencies
 COPY requirements.txt requirements.txt
-RUN pip install pip --upgrade
 RUN pip install -r requirements.txt
 
 COPY port_classifier.py port_classifier.py
