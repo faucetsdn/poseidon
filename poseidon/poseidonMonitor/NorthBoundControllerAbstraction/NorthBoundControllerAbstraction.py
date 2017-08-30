@@ -27,8 +27,7 @@ import types
 from functools import partial
 from os import getenv
 
-import pika
-
+from poseidon.baseClasses.Rabbit_Base import Rabbit_Base
 from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.bcf import BcfProxy
@@ -113,79 +112,22 @@ class Handle_Periodic(Monitor_Helper_Base):
 
     # rabbit
     def start_rabbit(self):
-        ''' start the rabbit negotiations '''
-        self.init_rabbit()
-        if self.do_rabbit:
-            self.start_channel(self.rabbit_channel_local,
-                               callback, 'poseidon_NBCA')
-
-    def make_rabbit_connection(self, host, exchange, queue_name, keys):  # pragma: no cover
-        '''
-        Continuously loops trying to connect to rabbitmq,
-        once connected declares the exchange and queue for
-        processing algorithm results.
-        '''
-        wait = True
-        channel = None
-        connection = None
-        total_sleep = 30
-
-        while wait and total_sleep > 0:
-            try:
-                connection = pika.BlockingConnection(
-                    pika.ConnectionParameters(host=host))
-                channel = connection.channel()
-                channel.exchange_declare(exchange=exchange, type='topic')
-                channel.queue_declare(queue=queue_name, exclusive=True)
-                self.logger.debug(
-                    '************* connected to {0} rabbitMQ'.format(host))
-                wait = False
-            except Exception as e:
-                self.logger.debug(
-                    '************* waiting for {0} rabbitQM'.format(host))
-                self.logger.debug(str(e))
-                time.sleep(2)
-                total_sleep -= 2
-                wait = True
-
-        if wait:
-            self.do_rabbit = False
-
-        if isinstance(keys, types.ListType) and not wait:
-            for key in keys:
-                self.logger.debug(
-                    'array adding key:{0} to rabbitmq channel'.format(key))
-                channel.queue_bind(exchange=exchange,
-                                   queue=queue_name,
-                                   routing_key=key)
-
-        if isinstance(keys, types.StringType) and not wait:
-            self.logger.debug(
-                'string adding key:{0} to rabbitmq channel'.format(keys))
-            channel.queue_bind(exchange=exchange,
-                               queue=queue_name, routing_key=keys)
-
-        return channel, connection
-
-    def init_rabbit(self):  # pragma: no cover
-        ''' init_rabbit '''
+        ''' start the rabbit negotiations using the Rabbit base class'''
+        #self.init_rabbit()
+        rabbit = Rabbit_Base()
         host = 'poseidon-rabbit'
         exchange = 'topic-poseidon-internal'
         queue_name = 'poseidon_NBCA'
-        # binding_key = ['poseidon.algos.#', 'poseidon.action.#']
         binding_key = ['poseidon.action.#']
-        retval = self.make_rabbit_connection(
-            host, exchange, queue_name, binding_key)
+        retval = rabbit.make_rabbit_connection(host, exchange, queue_name, 
+                                               binding_key, total_sleep=30)
         self.rabbit_channel_local = retval[0]
         self.rabbit_connection_local = retval[1]
-
-    def start_channel(self, channel, mycallback, queue):
-        ''' handle threading for a messagetype '''
-        self.logger.debug('about to start channel {0}'.format(channel))
-        channel.basic_consume(
-            partial(mycallback, q=self.m_queue), queue=queue, no_ack=True)
-        mq_recv_thread = threading.Thread(target=channel.start_consuming)
-        mq_recv_thread.start()
+        self.do_rabbit = retval[2]
+        
+        if self.do_rabbit:
+            rabbit.start_channel(self.rabbit_channel_local,
+                                 callback, 'poseidon_NBCA', self.m_queue)
 
     def first_run(self):
         ''' do some pre-run setup/configuration '''

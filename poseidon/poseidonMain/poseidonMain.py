@@ -39,7 +39,7 @@ from os import getenv
 
 import requests
 
-import pika
+from poseidon.baseClasses.Rabbit_Base import Rabbit_Base
 from poseidon.poseidonMain.Config.Config import config_interface
 from poseidon.poseidonMain.Investigator.Investigator import \
     investigator_interface
@@ -309,77 +309,6 @@ class PoseidonMain(object):
                     '***** shutting down endpoint:{0}:{1}'.format(itype, temp_d))
                 self.endpoint_shutdown(temp_d)
 
-    def make_rabbit_connection(self, host, exchange, queue_name, keys):  # pragma: no cover
-        '''
-        Continuously loops trying to connect to rabbitmq,
-        once connected declares the exchange and queue for
-        processing algorithm results.
-        '''
-        wait = True
-        channel = None
-        connection = None
-
-        while wait:
-            try:
-                connection = pika.BlockingConnection(
-                    pika.ConnectionParameters(host=host))
-                channel = connection.channel()
-                channel.exchange_declare(exchange=exchange, type='topic')
-                channel.queue_declare(queue=queue_name, exclusive=True)
-                self.logger.debug('connected to {0} rabbitMQ'.format(host))
-                wait = False
-            except Exception as e:
-                self.logger.debug('waiting for {0} rabbitQM'.format(host))
-                self.logger.debug(str(e))
-                time.sleep(2)
-                wait = True
-
-        if isinstance(keys, types.ListType):
-            for key in keys:
-                self.logger.debug(
-                    'array adding key:{0} to rabbitmq channel'.format(key))
-                channel.queue_bind(exchange=exchange,
-                                   queue=queue_name,
-                                   routing_key=key)
-
-        if isinstance(keys, types.StringType):
-            self.logger.debug(
-                'string adding key:{0} to rabbitmq channel'.format(keys))
-            channel.queue_bind(exchange=exchange,
-                               queue=queue_name, routing_key=keys)
-
-        return channel, connection
-
-    def init_rabbit(self):  # pragma: no cover
-        ''' init_rabbit '''
-        host = 'poseidon-rabbit'
-        exchange = 'topic-poseidon-internal'
-        queue_name = 'poseidon_main'
-        binding_key = ['poseidon.algos.#', 'poseidon.action.#']
-        retval = self.make_rabbit_connection(
-            host, exchange, queue_name, binding_key)
-        self.rabbit_channel_local = retval[0]
-        self.rabbit_connection_local = retval[1]
-
-        host = 'poseidon-vent'
-        exchange = 'topic-vent-poseidon'
-        queue_name = 'vent_poseidon'
-        binding_key = ['vent.#']
-
-        # TODO verify that this is not needed
-        #retval = self.make_rabbit_connection(
-        #    host, exchange, queue_name, binding_key)
-        #self.rabbit_channel_vent = retval[0]
-        #self.rabbit_connection_vent = retval[1]
-
-    def start_channel(self, channel, mycallback, queue):
-        ''' handle threading for a messagetype '''
-        self.logger.debug('about to start channel {0}'.format(channel))
-        channel.basic_consume(
-            partial(mycallback, q=self.m_queue), queue=queue, no_ack=True)
-        mq_recv_thread = threading.Thread(target=channel.start_consuming)
-        mq_recv_thread.start()
-
     def do_work(self, item):
         '''schuffle item to the correct handlers'''
         itype, ivalue = self.make_type_val(item)
@@ -456,9 +385,22 @@ def main(skip_rabbit=False):
     ''' main function '''
     pmain = PoseidonMain(skip_rabbit=skip_rabbit)
     if not skip_rabbit:
+	rabbit = Rabbit_Base()
+	host = 'poseidon-rabbit'
+	exchange = 'topic-poseidon-internal'
+	queue_name = 'poseidon_main'
+	binding_key = ['poseidon.algos.#', 'poseidon.action.#']
+	retval = rabbit.make_rabbit_connection(host, exchange, queue_name, 
+					       binding_key)
+	pmain.rabbit_channel_local = retval[0]
+	pmain.rabbit_channel_connection_local = retval[1]
+	rabbit.start_channel(pmain.rabbit_channel_local, callback, 
+			     'poseidon_main', pmain.m_queue)
+	"""
         pmain.init_rabbit()
         pmain.start_channel(pmain.rabbit_channel_local,
                             callback, 'poseidon_main')
+	"""
         pmain.Scheduler.schedule_thread.start()
         # def start_channel(self, channel, callback, queue):
     pmain.process()
