@@ -282,8 +282,10 @@ class PoseidonMain(object):
         if itype == 'poseidon.action.new_machine':
             self.logger.debug('***** new machine {0}'.format(ivalue))
             # tell monitor to monitor
-            self.start_vent_collector(self.just_the_hash(ivalue))
-            self.start_monitor(ivalue)
+            # dont remonitor something you are monitoring
+            if self.just_the_hash(ivalue) not in self.monitoring:
+                self.start_vent_collector(self.just_the_hash(ivalue))
+                self.start_monitor(ivalue)
         if 'poseidon.algos.eval_dev_class' in itype:
             # ivalue = classificationtype:<string>
             # result form eval device classifier with
@@ -367,7 +369,7 @@ class PoseidonMain(object):
         binding_key = ['vent.#']
 
         # TODO verify that this is not needed
-        #retval = self.make_rabbit_connection(
+        # retval = self.make_rabbit_connection(
         #    host, exchange, queue_name, binding_key)
         #self.rabbit_channel_vent = retval[0]
         #self.rabbit_connection_vent = retval[1]
@@ -447,7 +449,7 @@ class PoseidonMain(object):
         self.logger.debug('***********SHUTDOWN***********')
         for my_hash, my_value in self.shutdown.iteritems():
             self.logger.debug('S:{0}:{1}'.format(my_hash, my_value))
-        if (len(self.shutdown)==0):
+        if (len(self.shutdown) == 0):
             self.logger.debug('None')
         self.logger.debug('******************************')
 
