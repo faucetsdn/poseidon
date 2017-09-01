@@ -2,8 +2,8 @@ FROM ubuntu:16.04
 MAINTAINER Travis Lanham <tlanham@iqt.org>
 
 # install packages
-RUN apt-get update && \
-    apt-get install -y \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
     git \
     make \
     python \
@@ -11,7 +11,9 @@ RUN apt-get update && \
     build-essential \
     python-setuptools \
     tcpdump && \
-    easy_install pip
+    easy_install pip \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # install module dependencies
 COPY requirements.txt requirements.txt
