@@ -1,13 +1,18 @@
 FROM ubuntu:16.04
 MAINTAINER Charlie Lewis <clewis@iqt.org>
 
-RUN apt-get update && apt-get install -y git \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+    git \
     python-crypto \
     python-dpkt \
     python-ipy \
     python-pip \
     python-pypcap \
-    wget
+    wget \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 
 RUN pip install pygeoip
 
