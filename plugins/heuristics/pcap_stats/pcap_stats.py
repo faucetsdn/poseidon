@@ -83,7 +83,7 @@ def rabbit_init(host, exchange, queue_name, rabbit_rec):  # pragma: no cover
             connection = pika.BlockingConnection(
                 pika.ConnectionParameters(host=host))
             channel = connection.channel()
-            channel.exchange_declare(exchange=exchange, type='topic')
+            channel.exchange_declare(exchange=exchange, exchange_type='topic')
             result = channel.queue_declare(queue=queue_name, exclusive=True)
             wait = False
             module_logger.info('connected to rabbitmq...')

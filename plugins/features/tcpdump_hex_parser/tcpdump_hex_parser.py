@@ -19,17 +19,10 @@ Tcpdump hex parser plugin
 Created on 13 June 2016
 @author: Charlie Lewis, David Grossman, Travis Lanham
 
-rabbitmq:
-    host:       poseidon-rabbit
-    exchange:   topic-poseidon-internal
-        keys:   poseidon.tcpdump_parser
-                poseidon.tcpdump_parser.dns
 """
 import logging
 import subprocess
 import sys
-
-import pika
 
 module_logger = logging.getLogger(__name__)
 
@@ -41,22 +34,6 @@ def get_path():
     except BaseException:
         module_logger.error('no path provided, quitting.')
     return path
-
-
-def connections():
-    """Handle connection setup to rabbitmq service"""
-    channel = None
-    connection = None
-    try:
-        connection = pika.BlockingConnection(pika.ConnectionParameters(
-            host='poseidon-rabbit'))
-        channel = connection.channel()
-
-        channel.exchange_declare(exchange='topic-poseidon-internal',
-                                 type='topic')
-    except BaseException:
-        module_logger.error('unable to connect to rabbitmq, quitting.')
-    return channel, connection
 
 
 def parse_header(line):
@@ -188,27 +165,14 @@ def run_tool(path):
     Tool entry point
     """
     module_logger.info('processing pcap results...')
-    channel, connection = connections()
     proc = subprocess.Popen(
         'tcpdump -nn -tttt -xx -r ' + path,
         shell=True,
         stdout=subprocess.PIPE)
     for packet in return_packet(proc.stdout):
-        message = str(packet)
-        if 'dns_resolved' in packet:
-            routing_key = 'poseidon.tcpdump_parser.dns'
-        else:
-            routing_key = 'poseidon.tcpdump_parser'
-        if channel is not None:
-            channel.basic_publish(exchange='topic-poseidon-internal',
-                                  routing_key=routing_key,
-                                  body=message)
-        ostr = ' [x] Sent {0}:{1}'.format(routing_key, message)
+        print(str(packet))
+        ostr = ' [x] Sent {1}'.format(message)
         module_logger.info(ostr)
-    try:
-        connection.close()
-    except BaseException:
-        pass
 
 
 if __name__ == '__main__':

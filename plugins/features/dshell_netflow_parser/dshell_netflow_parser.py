@@ -19,16 +19,10 @@ DShell netflow parser plugin
 Created on 13 June 2016
 @author: Charlie Lewis, Abhi Ganesh
 
-rabbitmq:
-    host:       poseidon-rabbit
-    exchange:   topic-poseidon-internal
-        keys:   poseidon.dshell
 """
 import logging
 import subprocess
 import sys
-
-import pika
 
 module_logger = logging.getLogger(__name__)
 
@@ -42,25 +36,8 @@ def get_path():
     return path
 
 
-def connections():
-    """Handle connection setup to rabbitmq service"""
-    channel = None
-    connection = None
-    try:
-        connection = pika.BlockingConnection(pika.ConnectionParameters(
-            host='poseidon-rabbit'))
-        channel = connection.channel()
-
-        channel.exchange_declare(exchange='topic-poseidon-internal',
-                                 type='topic')
-    except BaseException:
-        module_logger.error('unable to connect to rabbitmq, quitting.')
-    return channel, connection
-
-
 def run_tool(path):
     """Tool entry point"""
-    routing_key = 'poseidon.dshell'
     module_logger.info('processing pcap results...')
     subprocess.Popen(
         '/Dshell/dshell-decode -o /tmp/results.out -d netflow ' +
@@ -68,7 +45,6 @@ def run_tool(path):
         shell=True,
         stdout=subprocess.PIPE).wait()
 
-    channel, connection = connections()
     module_logger.info('sending pcap results...')
 
     try:
@@ -93,20 +69,11 @@ def run_tool(path):
                     data['dst_bytes'] = fields[14].strip()
                     data['duration'] = fields[15].strip()
                     data['tool'] = 'dshell_netflow'
-                    message = str(data)
-
-                    if channel:
-                        channel.basic_publish(
-                            exchange='topic_recs', routing_key=routing_key, body=message)
-                        ostr = ' [x] Sent {0}:{1}'.format(routing_key, message)
-                        module_logger.debug(ostr)
+                    print(str(data))
+                    ostr = ' [x] Sent {0}:{1}'.format(routing_key, message)
+                    module_logger.debug(ostr)
                 except BaseException:
                     pass
-    except BaseException:
-        pass
-
-    try:
-        connection.close()
     except BaseException:
         pass
 

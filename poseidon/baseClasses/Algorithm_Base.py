@@ -61,7 +61,7 @@ class Algorithm_Base(object):
                 time.sleep(2)
                 wait = True
 
-        if isinstance(keys, types.ListType):
+        if isinstance(keys, type.ListType):
             for key in keys:
                 self.logger.debug(
                     'array adding key:{0} to rabbitmq channel'.format(key))
