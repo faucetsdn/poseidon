@@ -21,16 +21,14 @@ Created on 17 May 2016
 @author: dgrossman, tlanham
 '''
 import ast
+import json
 import logging
 import logging.config
-import sys
-import urllib
+
 import requests
-import json
 
 from poseidon.baseClasses.Main_Action_Base import Main_Action_Base
 from poseidon.poseidonMain.Config.Config import Config
-
 
 module_logger = logging.getLogger(__name__)
 
@@ -64,7 +62,7 @@ class Investigator(Main_Action_Base):
         try:
             resp = requests.get(self.vctrl_addr + '/machines/list')
             self.vent_machines = ast.literal_eval(resp.body)
-        except:
+        except BaseException:
             self.logger.error('Main: Investigator: error on vctrl list')
 
     def vctrl_startup(self):
@@ -75,13 +73,24 @@ class Investigator(Main_Action_Base):
         for machine, config in self.vent_machines.iteritems():
             try:
                 resp = requests.post(
-                    self.vctrl_addr + '/machines/create', data={'machine':'vent1'})
-            except:
+                    self.vctrl_addr +
+                    '/machines/create',
+                    data={
+                        'machine': 'vent1'})
+            except BaseException:
                 self.logger.error(
                     'Main: Investigator: error on vent create request.')
 
     @staticmethod
-    def format_vent_create(name, provider, body=None, group='poseidon-vent', labels='default', memory=4096, cpus=4, disk_sz=20000):
+    def format_vent_create(
+            name,
+            provider,
+            body=None,
+            group='poseidon-vent',
+            labels='default',
+            memory=4096,
+            cpus=4,
+            disk_sz=20000):
         '''
         Formats body dict for vcontrol machine create.
         Returns dict for vcontrol create request.
@@ -165,10 +174,11 @@ class Investigator(Main_Action_Base):
         ip, then processes accordingly.
         '''
         query = {'node_ip': ip_addr}
-        uri = 'http://poseidon-storage-interface/v1/poseidon_records/network_graph/' + json.dumps(query)
+        uri = 'http://poseidon-storage-interface/v1/poseidon_records/network_graph/' + \
+            json.dumps(query)
         try:
             resp = requests.get(uri)
-        except:
+        except BaseException:
             # error connecting to storage interface
             # log error
             self.logger.error(
@@ -187,6 +197,10 @@ class Investigator(Main_Action_Base):
             # log error for investigation
             ostr = 'duplicate record for machine: {0}'.format(ip_addr)
             self.logger.error(ostr)
+
+    def get_handlers(self, itype):
+        ''' return algorihtms that respond to itype'''
+        return []
 
 
 class Investigator_Response(Investigator):
@@ -212,7 +226,7 @@ class Investigator_Response(Investigator):
             try:
                 url = 'http://' + self.vctrl_addr + '/commands/deploy/' + machine
                 resp = requests.post(url)
-            except:
+            except BaseException:
                 self.logger.error(
                     'Main: Investigator: vent_preparation, vent request failed')
 
@@ -225,7 +239,7 @@ class Investigator_Response(Investigator):
         '''
         try:
             resp = requests.get('vent_url')
-        except:
+        except BaseException:
             self.logger.error(
                 'Main: Investigator: send_vent_jobs, vent request failed')
 
@@ -238,7 +252,7 @@ class Investigator_Response(Investigator):
         try:
             url = 'http://poseidon-storage-interface/v1/'
             resp = requests.get(url)
-        except:
+        except BaseException:
             pass
 
 

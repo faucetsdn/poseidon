@@ -23,7 +23,6 @@ import logging
 import logging.config
 import os
 
-import pytest
 
 from poseidon.poseidonMain.Config.Config import CI_TESTING
 from poseidon.poseidonMain.Config.Config import config_interface

@@ -76,20 +76,15 @@ class Monitor_Helper_Base(Rock_Bottom):  # pragma: no cover
 
     def first_run(self):
         '''do special setup after configure'''
-        pass
 
     def on_post(self, req, resp):
         '''handle jrandom rest case'''
-        pass
 
     def on_put(self, req, resp, name):
         '''handle jrandom rest case'''
-        pass
 
     def on_get(self, req, resp):
         '''handle jrandom rest case'''
-        pass
 
     def on_delete(self, req, resp):
         '''handle jrandom rest case'''
-        pass

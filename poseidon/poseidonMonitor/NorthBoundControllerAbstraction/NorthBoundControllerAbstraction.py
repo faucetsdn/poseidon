@@ -27,8 +27,7 @@ import types
 from functools import partial
 from os import getenv
 
-import pika
-
+from poseidon.baseClasses.Rabbit_Base import Rabbit_Base
 from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.bcf import BcfProxy
@@ -73,7 +72,7 @@ class Handle_Resource(Monitor_Helper_Base):
         resp.content_type = 'text/text'
         try:
             resp.body = self.mod_name + ' found: {0}'.format(resource)
-        except:  # pragma: no cover
+        except BaseException:  # pragma: no cover
             pass
 
 
@@ -96,6 +95,7 @@ class Handle_Periodic(Monitor_Helper_Base):
         self.prev_endpoints = {}
         self.new_endpoints = {}
         self.mirroring = {}
+        self.shutdown = {}
         self.do_rabbit = True
         self.m_queue = Queue.Queue()
         self.rabbit_connection_local = None
@@ -112,78 +112,22 @@ class Handle_Periodic(Monitor_Helper_Base):
 
     # rabbit
     def start_rabbit(self):
-        ''' start the rabbit negotiations '''
-        self.init_rabbit()
-        if self.do_rabbit:
-            self.start_channel(self.rabbit_channel_local,
-                               callback, 'poseidon_NBCA')
-
-    def make_rabbit_connection(self, host, exchange, queue_name, keys):  # pragma: no cover
-        '''
-        Continuously loops trying to connect to rabbitmq,
-        once connected declares the exchange and queue for
-        processing algorithm results.
-        '''
-        wait = True
-        channel = None
-        connection = None
-        total_sleep = 30
-
-        while wait and total_sleep > 0:
-            try:
-                connection = pika.BlockingConnection(
-                    pika.ConnectionParameters(host=host))
-                channel = connection.channel()
-                channel.exchange_declare(exchange=exchange, type='topic')
-                channel.queue_declare(queue=queue_name, exclusive=True)
-                self.logger.debug(
-                    '************* connected to {0} rabbitMQ'.format(host))
-                wait = False
-            except Exception as e:
-                self.logger.debug(
-                    '************* waiting for {0} rabbitQM'.format(host))
-                self.logger.debug(str(e))
-                time.sleep(2)
-                total_sleep -= 2
-                wait = True
-
-        if wait:
-            self.do_rabbit = False
-
-        if isinstance(keys, types.ListType) and not wait:
-            for key in keys:
-                self.logger.debug(
-                    'array adding key:{0} to rabbitmq channel'.format(key))
-                channel.queue_bind(exchange=exchange,
-                                   queue=queue_name,
-                                   routing_key=key)
-
-        if isinstance(keys, types.StringType) and not wait:
-            self.logger.debug(
-                'string adding key:{0} to rabbitmq channel'.format(keys))
-            channel.queue_bind(exchange=exchange,
-                               queue=queue_name, routing_key=keys)
-
-        return channel, connection
-
-    def init_rabbit(self):  # pragma: no cover
-        ''' init_rabbit '''
+        ''' start the rabbit negotiations using the Rabbit base class'''
+        #self.init_rabbit()
+        rabbit = Rabbit_Base()
         host = 'poseidon-rabbit'
         exchange = 'topic-poseidon-internal'
         queue_name = 'poseidon_NBCA'
-        binding_key = ['poseidon.algos.#', 'poseidon.action.#']
-        retval = self.make_rabbit_connection(
-            host, exchange, queue_name, binding_key)
+        binding_key = ['poseidon.action.#']
+        retval = rabbit.make_rabbit_connection(host, exchange, queue_name,
+                                               binding_key, total_sleep=30)
         self.rabbit_channel_local = retval[0]
         self.rabbit_connection_local = retval[1]
+        self.do_rabbit = retval[2]
 
-    def start_channel(self, channel, mycallback, queue):
-        ''' handle threading for a messagetype '''
-        self.logger.debug('about to start channel {0}'.format(channel))
-        channel.basic_consume(
-            partial(mycallback, q=self.m_queue), queue=queue, no_ack=True)
-        mq_recv_thread = threading.Thread(target=channel.start_consuming)
-        mq_recv_thread.start()
+        if self.do_rabbit:
+            rabbit.start_channel(self.rabbit_channel_local,
+                                 callback, 'poseidon_NBCA', self.m_queue)
 
     def first_run(self):
         ''' do some pre-run setup/configuration '''
@@ -200,9 +144,10 @@ class Handle_Periodic(Monitor_Helper_Base):
             myauth['user'] = self.controller['USER']
             try:
                 self.bcf = BcfProxy(self.controller['URI'], auth=myauth)
-            except:
+            except BaseException:
                 self.logger.error(
-                    'BcfProxy coult not connect to {0}'.format(self.controller['URI']))
+                    'BcfProxy coult not connect to {0}'.format(
+                        self.controller['URI']))
         else:
             pass
 
@@ -212,7 +157,13 @@ class Handle_Periodic(Monitor_Helper_Base):
         h = hashlib.new('ripemd160')
         pre_h = str()
         post_h = None
-        for word in ['tenant', 'mac', 'segment', 'name', 'ip-address']:
+        # GROSSMAN dont nodchp -> dhcp withname makes different hashes
+        #{u'tenant': u'FLOORPLATE', u'mac': u'ac:87:a3:2b:7f:12', u'segment': u'prod', u'name': None, u'ip-address': u'10.179.0.100'}}^
+        #{u'tenant': u'FLOORPLATE', u'mac': u'ac:87:a3:2b:7f:12', u'segment': u'prod', u'name': u'demo-laptop', u'ip-address': u'10.179.0.100'}}
+        # ^^^ make different hashes if name is included
+
+        # for word in ['tenant', 'mac', 'segment', 'name', 'ip-address']:
+        for word in ['tenant', 'mac', 'segment', 'ip-address']:
             pre_h = pre_h + str(item.get(str(word), 'missing'))
         h.update(pre_h)
         post_h = h.hexdigest()
@@ -243,6 +194,28 @@ class Handle_Periodic(Monitor_Helper_Base):
                     'mirroring[{0}]={1}'.format(my_hash, my_dict))
                 self.bcf.mirror_ip(my_dict['ip-address'])
                 self.mirroring[my_hash] = my_dict
+
+        if itype == 'poseidon.action.endpoint_shutdown':
+            self.logger.debug(
+                'endpoint_shutdown:{0}:{1}'.format(ivalue, type(ivalue)))
+            for my_hash, my_dict in ivalue.iteritems():
+                bad_ip = my_dict.get('ip-address')
+                if bad_ip is not None:
+                    self.logger.debug(
+                        '****** shutdown {0}:{1}'.format(bad_ip, ivalue))
+                    self.bcf.shutdown_ip(bad_ip)
+                    self.shutdown[my_hash] = my_dict
+
+        if itype == 'poseidon.action.stop_monitor':
+            self.logger.debug('stop_monitor:{0}:{1}'.format(itype, ivalue))
+            for my_hash, my_dict in ivalue.iteritems():
+                self.logger.debug('stop_monitor_dict:{0}'.format(my_dict))
+                my_ip = my_dict.get('ip-address')
+                if my_ip is not None:
+                    self.logger.debug('***** shutting down {0}'.format(my_ip))
+                    self.bcf.unmirror_ip(my_ip)
+                    if my_hash in self.mirroring:
+                        self.mirroring.pop(my_hash)
 
     def get_rabbit_work(self):
         '''get work item from queue if exists'''
@@ -283,6 +256,28 @@ class Handle_Periodic(Monitor_Helper_Base):
                         '***** detected new address {0}'.format(machine))
                     self.new_endpoints[h] = machine
 
+    def print_state(self):
+        self.logger.debug('*************KNOWN*****************')
+        for my_hash, my_dict in self.prev_endpoints.iteritems():
+            self.logger.debug('P:{0}:{1}'.format(my_hash, my_dict))
+        if len(self.prev_endpoints) == 0:
+            self.logger.debug('None')
+        self.logger.debug('************UNKNOWN****************')
+        for my_hash, my_dict in self.new_endpoints.iteritems():
+            self.logger.debug('N:{0}:{1}'.format(my_hash, my_dict))
+        if len(self.new_endpoints) == 0:
+            self.logger.debug('None')
+        self.logger.debug('***********MIRRORING***************')
+        for my_hash, my_dict in self.mirroring.iteritems():
+            self.logger.debug('M:{0}:{1}'.format(my_hash, my_dict))
+        if len(self.mirroring) == 0:
+            self.logger.debug('None')
+        self.logger.debug('***********SHUTDOWN****************')
+        for my_hash, my_dict in self.shutdown.iteritems():
+            self.logger.debug('M:{0}:{1}'.format(my_hash, my_dict))
+        if len(self.shutdown) == 0:
+            self.logger.debug('None')
+
     def send_new_machines(self):
         '''send listing of new machines to main for decisions'''
         for hashed, machine in self.new_endpoints.iteritems():
@@ -303,21 +298,25 @@ class Handle_Periodic(Monitor_Helper_Base):
 
         current = None
         parsed = None
-        machines = None
+        machines = {}
 
         try:
             current = self.bcf.get_endpoints()
             parsed = self.bcf.format_endpoints(current)
             machines = parsed
-        except:
+        except BaseException:
             self.logger.error(
-                'Could not establish connection to {0}.'.format(self.controller['URI']))
+                'Could not establish connection to {0}.'.format(
+                    self.controller['URI']))
             self.retval['controller'] = 'Could not establish connection to {0}.'.format(
                 self.controller['URI'])
 
         self.get_rabbit_work()
+        self.logger.debug('MACHINES:{0}'.format(machines))
         self.find_new_machines(machines)
         self.send_new_machines()
+
+        self.print_state()
 
         self.retval['machines'] = parsed
         self.retval['resp'] = 'ok'

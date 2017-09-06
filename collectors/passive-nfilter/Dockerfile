@@ -6,7 +6,7 @@ RUN apk add --update \
     py-pip \
     && rm -rf /var/cache/apk/*
 
-ADD . /nfilter
+COPY . /nfilter
 RUN pip install -r /nfilter/requirements.txt
 WORKDIR /nfilter/nfilter
 RUN pip install -r requirements.txt

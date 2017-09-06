@@ -1,5 +1,6 @@
-numpy
-ipaddress
+numpy==1.13.1
+ipaddress==1.0.18
 theano
 picklable_itertools
-h5py
+h5py==2.7.0
+git+git://github.com/mila-udem/blocks.git@stable

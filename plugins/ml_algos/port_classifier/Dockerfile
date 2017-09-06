@@ -2,8 +2,8 @@ FROM ubuntu:16.04
 MAINTAINER Travis Lanham <tlanham@iqt.org>
 
 # install packages
-RUN apt-get update && \
-    apt-get install -y \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
     git \
     make \
     python \
@@ -12,17 +12,18 @@ RUN apt-get update && \
     python-setuptools \
     tcpdump \
     python-pip \
-    python-numpy
+    python-numpy \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN easy_install pip
-RUN pip install --upgrade pip 
+RUN pip install --upgrade pip==9.0.1
 
 # install module dependencies
-ADD requirements.txt requirements.txt
-RUN pip install pip --upgrade
+COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
-ADD port_classifier.py port_classifier.py
+COPY port_classifier.py port_classifier.py
 
 # added entrypoint and cmd for vent injection of file name
 ENTRYPOINT ["python", "port_classifier.py"]

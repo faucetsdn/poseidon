@@ -21,7 +21,6 @@ Created on 28 June 2016
 """
 import logging
 
-import pytest
 
 from poseidon.poseidonMain.Investigator.Investigator import Investigator
 from poseidon.poseidonMain.Investigator.Investigator import Investigator_Response

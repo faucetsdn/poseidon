@@ -14,7 +14,6 @@ class Sessionizer():
     def packetizer(self, qacheck=False):
         '''
         returns a dictionary of hex headers for individual packets
-
         path = string path to pcap file
         qacheck = dictionary of packets that cannot be processed
         '''
@@ -103,11 +102,11 @@ def parse_header(line):  # pragma: no cover
     ret_dict = {}
     h = line.split()
     if h[2] == 'IP6':
-
-        #Conditional formatting based on ethernet type.
-        #IPv4 format: 0.0.0.0.port
-        #IPv6 format (one of many): 0:0:0:0:0:0.port
-
+        """
+        Conditional formatting based on ethernet type.
+        IPv4 format: 0.0.0.0.port
+        IPv6 format (one of many): 0:0:0:0:0:0.port
+        """
         ret_dict['src_port'] = h[3].split('.')[-1]
         ret_dict['src_ip'] = h[3].split('.')[0]
         ret_dict['dest_port'] = h[5].split('.')[-1].split(':')[0]

@@ -3,8 +3,8 @@
 NIC="$1"
 INTERVAL="$2"
 ID="$3"
-FILTER="$4"
-ITERS="$5"
+ITERS="$4"
+FILTER="$5"
 
 # if ITERS is non-negative then do the capture ITERS times
 if [ $ITERS -gt "0" ]; then

@@ -21,7 +21,6 @@ and FlowRecord classes
 Created on 28 July 2016
 @author: lanhamt
 """
-import time
 from collections import defaultdict
 from datetime import datetime
 
@@ -159,7 +158,7 @@ class MachineNode:
                 return statistics.stdev(self.packet_lens_sent)
             else:
                 return statistics.stdev(self.packet_lens_rec)
-        except:
+        except BaseException:
             return 'Error retrieving standard deviation.'
 
     def get_machines_sent_to(self):

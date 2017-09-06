@@ -47,7 +47,7 @@ class Handle_Default(Monitor_Helper_Base):
         resp.content_type = 'text/text'
         try:
             resp.body = self.mod_name + ' found: {0}'.format(resource)
-        except:  # pragma: no cover
+        except BaseException:  # pragma: no cover
             self.logger.error('failed')
             resp.body = 'failed'
 

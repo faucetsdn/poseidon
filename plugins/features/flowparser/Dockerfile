@@ -9,7 +9,7 @@ RUN apk add --update \
     libpcap \
     libpcap-dev
 
-ADD . src/flowparser
+COPY . src/flowparser
 
 # install rabbitmq package
 RUN go get github.com/streadway/amqp

@@ -29,15 +29,12 @@ Created on 17 May 2016
 """
 import ConfigParser
 import json
-import sys
 import bson
 import falcon
 from falcon_cors import CORS
 from pymongo import MongoClient
 from bson import ObjectId
 from os import environ
-from subprocess import check_output
-from urlparse import urlparse
 
 
 class MongoJSONEncoder(json.JSONEncoder):
@@ -46,6 +43,7 @@ class MongoJSONEncoder(json.JSONEncoder):
     ObjectId objects and datetime objects
     for serialization.
     """
+
     def default(self, o):
         if isinstance(o, ObjectId):
             return str(o)
@@ -80,7 +78,7 @@ class PoseidonStorage(object):
             section_name = 'PoseidonStorage'
             field_name = 'database'
             database_container_ip = self.config.get(section_name, field_name)
-        except:  # pragma: no cover
+        except BaseException:  # pragma: no cover
             raise ValueError(
                 'PoseidonStorage: could not find database ip address.')
         self.client = MongoClient(host=database_container_ip)
@@ -97,6 +95,7 @@ def get_allowed():
     else:
         allow_origin = ''
     return allow_origin, rest_url
+
 
 allow_origin, rest_url = get_allowed()
 cors = CORS(allow_all_origins=True)
@@ -115,7 +114,7 @@ class db_database_names(PoseidonStorage):
     def on_get(self, req, resp):
         try:
             ret = self.client.database_names()
-        except:  # pragma: no cover
+        except BaseException:  # pragma: no cover
             ret = 'Error in connecting to mongo container'
             resp.status = falcon.HTTP_INTERNAL_SERVER_ERROR
         resp.body = MongoJSONEncoder().encode(ret)
@@ -134,7 +133,7 @@ class db_collection_names(PoseidonStorage):
     def on_get(self, req, resp, database):
         try:
             ret = self.client[database].collection_names()
-        except:  # pragma: no cover
+        except BaseException:  # pragma: no cover
             ret = 'Error on retrieving colleciton names.'
             resp.status = falcon.HTTP_INTERNAL_SERVER_ERROR
         resp.body = MongoJSONEncoder().encode(ret)
@@ -153,7 +152,7 @@ class db_collection_count(PoseidonStorage):
     def on_get(self, req, resp, database, collection):
         try:
             ret = self.client[database][collection].count()
-        except:  # pragma: no cover
+        except BaseException:  # pragma: no cover
             ret = 'Error retrieving collection doc count.'
             resp.status = falcon.HTTP_INTERNAL_SERVER_ERROR
         resp.body = MongoJSONEncoder().encode(ret)
@@ -178,7 +177,7 @@ class db_retrieve_doc(PoseidonStorage):
         except bsonInputExceptions:
             ret = 'Bad document id.'
             resp.status = falcon.HTTP_BAD_REQUEST
-        except:  # pragma: no cover
+        except BaseException:  # pragma: no cover
             ret = 'Error retrieving document with id: ' + doc_id + '.'
             resp.status = falcon.HTTP_INTERNAL_SERVER_ERROR
         resp.body = MongoJSONEncoder().encode(ret)
@@ -214,16 +213,16 @@ class db_collection_query(PoseidonStorage):
                     doc_list.append(doc)
                 ret['docs'] = doc_list
                 ret['count'] = cursor.count()
-        except bsonInputExceptions, e:  # pragma: no cover
+        except bsonInputExceptions as e:  # pragma: no cover
             ret['count'] = -1
             ret['error'] = str(e)
             resp.status = falcon.HTTP_BAD_REQUEST
-        except (TypeError, ValueError), e:  # pragma: no cover
+        except (TypeError, ValueError) as e:  # pragma: no cover
             # bad query string
             ret['count'] = -1
             ret['error'] = str(e)
             resp.status = falcon.HTTP_BAD_REQUEST
-        except Exception, e:  # pragma: no cover
+        except Exception as e:  # pragma: no cover
             ret['count'] = -1
             ret['error'] = str(e)
             resp.status = falcon.HTTP_INTERNAL_SERVER_ERROR
@@ -247,7 +246,7 @@ class db_add_one_doc(PoseidonStorage):
             data_dict = json.loads(data)
             ret = self.client[database][collection].insert_one(data_dict)
             ret = ret.inserted_id
-        except Exception, e:  # pragma: no cover
+        except Exception as e:  # pragma: no cover
             ret = str(e)
             resp.status = falcon.HTTP_INTERNAL_SERVER_ERROR
         resp.body = MongoJSONEncoder().encode(ret)
@@ -272,7 +271,7 @@ class db_add_many_docs(PoseidonStorage):
             ret = []
             for obj_id in result.inserted_ids:
                 ret.append(obj_id)
-        except Exception, e:  # pragma: no cover
+        except Exception as e:  # pragma: no cover
             ret = str(e)
             resp.status = falcon.HTTP_INTERNAL_SERVER_ERROR
         resp.body = MongoJSONEncoder().encode(ret)
@@ -302,7 +301,8 @@ class db_update_one_doc(PoseidonStorage):
             filt = json.loads(filt)
             if '_id' in filt:
                 filt['_id'] = ObjectId(filt['_id'])
-            result = self.client[database][collection].update_one(filt, doc_update)
+            result = self.client[database][collection].update_one(
+                filt, doc_update)
             if result.modified_count == 1:
                 ret['success'] = 1
                 ret['raw_result'] = result.raw_result
@@ -311,10 +311,10 @@ class db_update_one_doc(PoseidonStorage):
         except bsonInputExceptions:  # pragma: no cover
             ret['success'] = 0
             resp.status = falcon.HTTP_BAD_REQUEST
-        except ValueError, TypeError:
+        except ValueError as TypeError:
             ret['success'] = 0
             resp.status = falcon.HTTP_BAD_REQUEST
-        except Exception, e:  # pragma: no cover
+        except Exception as e:  # pragma: no cover
             ret['success'] = 0
             resp.status = falcon.HTTP_INTERNAL_SERVER_ERROR
         resp.body = MongoJSONEncoder().encode(ret)
@@ -356,7 +356,6 @@ def main():
     Initialization to run in mongo container -
     pull desired database options from config.
     """
-    pass
 
 
 if __name__ == '__main__':

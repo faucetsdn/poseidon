@@ -20,7 +20,6 @@ Test module for controllerproxy.
 """
 import logging
 
-import pytest
 
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.controllerproxy import ControllerProxy
 
@@ -37,5 +36,7 @@ def test_ControllerProxy():
     r.raise_for_status()
     r = proxy.post_resource('posts')
     r.raise_for_status()
-    r = proxy.request_resource(method="PUT", url="http://jsonplaceholder.typicode.com/posts/1")
+    r = proxy.request_resource(
+        method="PUT",
+        url="http://jsonplaceholder.typicode.com/posts/1")
     r.raise_for_status()

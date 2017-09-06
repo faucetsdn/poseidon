@@ -16,7 +16,7 @@ RUN apt-get update && \
 ADD . /poseidonWork
 WORKDIR /poseidonWork
 ENV PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
-RUN pip install pip --upgrade
+RUN pip install pip==9.0.1 --upgrade
 
 # install dependencies of poseidon modules for poseidon
 RUN for file in $(find poseidon/* -name "requirements.txt"); \
@@ -24,20 +24,8 @@ RUN for file in $(find poseidon/* -name "requirements.txt"); \
         pip install -r $file; \
     done
 
-# install dependencies of collector for tests
-RUN for file in $(find collectors/* -name "requirements.txt"); \
-    do \
-        pip install -r $file; \
-    done
-
-# build documentation
-RUN sphinx-apidoc -o docs poseidon -F --follow-links && cd docs && make html && make man
-
 ENV PYTHONUNBUFFERED 0
 EXPOSE 4444:8004
-
-ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:8004"]
-CMD ["poseidon.poseidonMonitor.poseidonMonitor:api"]
 
 # run linter
 #RUN pylint --disable=all --enable=classes --disable=W poseidonMonitor
@@ -45,7 +33,16 @@ CMD ["poseidon.poseidonMonitor.poseidonMonitor:api"]
 # run tests
 RUN py.test -v \
 --ignore=poseidon/poseidonMain \
+--ignore=poseidon/mockController \
 --ignore=poseidon/poseidonStorage \
---ignore=plugins/ \
+--ignore=poseidon/periodically \
+--ignore=poseidon/collectors \
+--ignore=collectors \
+--ignore=plugins \
 --cov=poseidon/poseidonMonitor \
---cov=plugins --cov-report term-missing --cov-config .coveragerc
+--cov-report term-missing --cov-config .coveragerc
+
+
+
+ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:8004"]
+CMD ["poseidon.poseidonMonitor.poseidonMonitor:api"]

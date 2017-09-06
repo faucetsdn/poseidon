@@ -1,5 +1,5 @@
 FROM ubuntu:16.04
-MAINTAINER Charlie Lewis <clewis@iqt.org>
+MAINTAINER dgrossman <dgrossman@iqt.org>
 
 RUN apt-get update && \
     apt-get install -y \
@@ -16,7 +16,7 @@ RUN apt-get update && \
 ADD . /poseidonWork
 WORKDIR /poseidonWork
 ENV PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
-RUN pip install pip --upgrade
+RUN pip install pip==9.0.1 --upgrade
 
 # install dependencies of plugins for poseidon
 RUN for file in $(find poseidon/* -name "requirements.txt"); \
@@ -24,25 +24,16 @@ RUN for file in $(find poseidon/* -name "requirements.txt"); \
         pip install -r $file; \
     done
 
-# install dependencies of plugins for tests
-RUN for file in $(find plugins/* -name "requirements.txt"); \
-    do \
-        pip install -r $file; \
-    done
-
-# install dependencies of collectors for tests
-RUN for file in $(find collectors/* -name "requirements.txt"); \
-    do \
-        pip install -r $file; \
-    done
-
 # run tests
 RUN py.test -v \
---cov=poseidon/poseidonMain \
 --ignore=poseidon/poseidonMonitor \
+--ignore=poseidon/mockController \
 --ignore=poseidon/poseidonStorage \
 --ignore=poseidon/periodically \
 --ignore=poseidon/collectors \
+--ignore=collectors \
+--ignore=plugins \
+--cov=poseidon/poseidonMain \
 --cov-report term-missing --cov-config .coveragerc
 
 ENV PYTHONUNBUFFERED 0

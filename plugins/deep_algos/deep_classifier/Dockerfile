@@ -2,8 +2,8 @@ FROM ubuntu:16.04
 MAINTAINER Travis Lanham <tlanham@iqt.org>
 
 # install packages
-RUN apt-get update && \
-    apt-get install -y \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
     git \
     make \
     python \
@@ -13,11 +13,13 @@ RUN apt-get update && \
     libhdf5-dev \
     python-tables \
     tcpdump && \
-    easy_install pip
+    easy_install pip \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # install module dependencies
-ADD requirements.txt requirements.txt
-RUN pip install pip --upgrade
+COPY requirements.txt requirements.txt
+RUN pip install pip==9.0.1 --upgrade
 RUN pip install -r requirements.txt
 
 # install blocks
@@ -26,7 +28,7 @@ RUN pip install git+git://github.com/mila-udem/blocks.git@stable \
   -r https://raw.githubusercontent.com/mila-udem/blocks/stable/requirements.txt
 RUN pip install numpy --upgrade
 
-ADD train_deep_classifier.py train_deep_classifier.py
+COPY train_deep_classifier.py train_deep_classifier.py
 
 # entrypoint command - file appended
 ENTRYPOINT ["python", "train_deep_classifier.py"]

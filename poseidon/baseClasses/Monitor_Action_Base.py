@@ -74,7 +74,6 @@ class Monitor_Action_Base(Rock_Bottom):  # pragma: no cover
 
     def first_run(self):
         """do any special setup after the configure"""
-        pass
 
     def configure_endpoints(self):
         """call stored classes setups and first runs"""

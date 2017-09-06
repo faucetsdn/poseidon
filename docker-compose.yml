@@ -87,7 +87,7 @@ services:
         ipv4_address: 172.16.201.15
     command: --smallfiles --rest --httpinterface
     volumes:
-      - /data/db:/data/db
+      - /tmp/db:/data/db
   storage-interface:
     image: poseidon-storage-interface
     container_name: poseidon-storage-interface
@@ -103,19 +103,7 @@ services:
       - ALLOW_ORIGIN=http://172.16.201.16:28000
     links:
       - storage:poseidon-storage
-  periodically:
-    image: poseidon-periodically
-    container_name: poseidon-periodically
-    build:
-      context: .
-      dockerfile: Dockerfile.periodically
-    networks:
-      app_net:
-        ipv4_address: 172.16.201.17
-    links:
-      - mock:mock-controller
       - monitor:poseidon-monitor
-      - rabbit:poseidon-rabbit
   rabbit:
     image: rabbitmq:management
     container_name: poseidon-rabbit

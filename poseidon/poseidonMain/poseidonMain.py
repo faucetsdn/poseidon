@@ -33,23 +33,18 @@ import Queue
 import threading
 import time
 import types
-import requests
+import urllib2
 from functools import partial
 from os import getenv
 
-import pika
+import requests
 
+from poseidon.baseClasses.Rabbit_Base import Rabbit_Base
 from poseidon.poseidonMain.Config.Config import config_interface
-from poseidon.poseidonMain.Investigator.Investigator import investigator_interface
+from poseidon.poseidonMain.Investigator.Investigator import \
+    investigator_interface
 from poseidon.poseidonMain.Scheduler.Scheduler import scheduler_interface
 
-
-# class NullHandler(logging.Handler):
-#     def emit(self, record):
-#         pass
-
-# h = NullHandler()
-#  module_logger = logging.getLogger(__name__).addHandler(h)
 logging.basicConfig(level=logging.DEBUG)
 module_logger = logging.getLogger(__name__)
 
@@ -63,6 +58,18 @@ def callback(ch, method, properties, body, q=None):
         q.put((method.routing_key, body))
     else:
         module_logger.error('posedionMain workQueue is None')
+
+
+def schedule_job_kickurl(url, logger):
+    if url:
+        try:
+            page = urllib2.urlopen(url)
+            logger.info(page.readlines())
+            ostr = 'wget {0}'.format(url)
+            logger.info(ostr)
+        except BaseException:
+            ostr = 'Error connecting to url: {0} retrying...'.format(url)
+            logger.info(ostr)
 
 
 class PoseidonMain(object):
@@ -115,6 +122,12 @@ class PoseidonMain(object):
 
         self.init_logging()
 
+        scan_frequency = int(self.mod_configuration['scan_frequency'])
+        url = self.mod_configuration['scan_url']
+
+        self.Scheduler.schedule.every(scan_frequency).seconds.do(
+            partial(schedule_job_kickurl, url=url, logger=self.Scheduler.logger))
+
     def init_logging(self):
         ''' setup the logging parameters for poseidon '''
         config = None
@@ -160,12 +173,19 @@ class PoseidonMain(object):
                 self.monitoring[my_hash] = my_value
             else:
                 self.logger.debug(
-                    'already being monitored:{0}:{1}'.format(my_hash, my_value))
+                    'already being monitored:{0}:{1}'.format(
+                        my_hash, my_value))
 
     def stop_monitor(self, ivalue):
         ''' stop monitoring an address'''
+
+        for my_hash, my_dict in ivalue.iteritems():
+            if my_hash in self.monitoring:
+                self.monitoring.pop(my_hash)
+
+        self.logger.debug('stop_monitor:{0},{1}'.format(ivalue, type(ivalue)))
         r_exchange = 'topic-poseidon-internal'
-        r_key = 'poseidon.action.start_monitor'
+        r_key = 'poseidon.action.stop_monitor'
         r_msg = json.dumps(ivalue)
         self.rabbit_channel_local.basic_publish(exchange=r_exchange,
                                                 routing_key=r_key,
@@ -173,6 +193,7 @@ class PoseidonMain(object):
 
     def endpoint_shutdown(self, ivalue):
         ''' shutdown an endpoint '''
+        self.logger.debug('endpoint_shutdown:{0}'.format(ivalue))
         r_exchange = 'topic-poseidon-internal'
         r_key = 'poseidon.action.endpoint_shutdown'
         r_msg = json.dumps(ivalue)
@@ -197,24 +218,28 @@ class PoseidonMain(object):
         '''
         try:
             query = {'dev_id': dev_hash}
+            query_string = str(query).replace("\'", "\"")
             ip = self.mod_configuration['storage_interface_ip']
             port = self.mod_configuration['storage_interface_port']
             uri = 'http://' + ip + ':' + port + \
                   '/v1/storage/query/{database}/{collection}/{query_str}'.format(
-                   database=self.mod_configuration['database'],
-                   collection=self.mod_configuration['collection'],
-                   query_str=query)
+                      database=self.mod_configuration['database'],
+                      collection=self.mod_configuration['collection'],
+                      query_str=query_string)
+            self.logger.error('check_db:{0}:{1}'.format(uri, type(uri)))
             resp = requests.get(uri)
+            self.logger.debug('response from db:' + resp.text)
 
             # resp.text should load into dict 'docs' key for list of
             # documents matching the query - should be only 1 match
             resp = json.loads(resp.text)
             if resp['count'] == 1:
                 db_doc = resp['docs'][0]
+                self.logger.debug('found db doc: ' + str(db_doc))
                 return db_doc[field]
             else:
-                self.logger.debg('bad document in db: ' + str(db_doc))
-        except Exception, e:
+                self.logger.debug('bad document in db: ' + str(db_doc))
+        except Exception as e:
             self.logger.debug('failed to get record from db' + str(e))
             return None
 
@@ -225,128 +250,66 @@ class PoseidonMain(object):
         options specified in poseidon.config.
         '''
         try:
-            payload = {"nic": self.mod_configuration['collector_nic'],
-                       "id": dev_hash,
-                       "interval": self.mod_configuration['collector_interval'],
-                       "filter": self.mod_configuration['collector_filter'],
-                       "iters": str(num_captures)}
-            vent_addr = self.mod_configuration['vent_ip'] + ':' + self.mod_configuration['vent_port']
+            payload = {
+                'nic': self.mod_configuration['collector_nic'],
+                'id': dev_hash,
+                'interval': self.mod_configuration['collector_interval'],
+                'filter': self.mod_configuration['collector_filter'],
+                'iters': str(num_captures)}
+            self.logger.debug('vent payload: ' + str(payload))
+            vent_addr = self.mod_configuration[
+                'vent_ip'] + ':' + self.mod_configuration['vent_port']
             uri = 'http://' + vent_addr + '/create'
             resp = requests.post(uri, json=payload)
-        except Exception, e:
+            self.logger.debug('collector repsonse: ' + resp.text)
+        except Exception as e:
             self.logger.debug('failed to start vent collector' + str(e))
+
+    @staticmethod
+    def just_the_hash(ivalue):
+        return ivalue.keys()[0]
 
     def handle_item(self, itype, ivalue):
         self.logger.debug('handle_item:{0}:{1}'.format(itype, ivalue))
-        ivalue = json.loads(ivalue)
+
+        # just get a string back from the ml stuff
+        if 'poseidon.algos.eval_dev_class' not in itype:
+            ivalue = json.loads(ivalue)
+
         if itype == 'poseidon.action.shutdown':
             self.logger.debug('***** shutting down')
             self.shutdown = True
         if itype == 'poseidon.action.new_machine':
             self.logger.debug('***** new machine {0}'.format(ivalue))
             # tell monitor to monitor
-            self.start_vent_collector(ivalue)
-            self.start_monitor(ivalue)
-        if itype == 'poseidon.analytics.results.traditional':
-            # TODO make a db call
-            # need to compare results to db
-            if False:
-                # if bad
-                self.logger.debug(
-                    '***** shutting down endpoint:{0}:{1}'.format(itype, ivalue))
-                self.endpoint_shutdown(ivalue)
-            else:
-                # if good
-                self.logger.debug(
-                    '***** allowing endpoint {0}:{1}'.format(itype,  ivalue))
-                self.stop_monitor(ivalue)
+            # dont remonitor something you are monitoring
+            if self.just_the_hash(ivalue) not in self.monitoring:
+                self.start_vent_collector(self.just_the_hash(ivalue))
+                self.start_monitor(ivalue)
         if 'poseidon.algos.eval_dev_class' in itype:
+            # ivalue = classificationtype:<string>
             # result form eval device classifier with
             # dev hash attached to end of routing key
-            dev_hash = ivalue.split('.')[-1]
+            dev_hash = itype.split('.')[-1]
             prev_class = self.check_db(dev_hash, 'dev_classification')
+
             monitoring_id = self.monitoring[dev_hash]
-            self.stop_monitor(monitoring_id)
+            temp_d = {dev_hash: monitoring_id}
+
+            # self.stop_monitor(monitoring_id)
+            self.stop_monitor(temp_d)
+
+            self.logger.debug('stopping monitoring on:' + itype)
+            self.logger.debug('classified as:{0}'.format(ivalue))
+            self.logger.debug('classified previously {0}'.format(prev_class))
             if ivalue == prev_class:
                 self.logger.debug(
-                    '***** allowing endpoint {0}:{1}'.format(itype,  ivalue))
-                self.endpoint_allow(monitoring_id)
+                    '***** allowing endpoint {0}:{1}'.format(itype, temp_d))
+                self.endpoint_allow(temp_d)
             else:
                 self.logger.debug(
-                    '***** shutting down endpoint:{0}:{1}'.format(itype, ivalue))
-                self.endpoint_shutdown(monitoring_id)
-
-    def make_rabbit_connection(self, host, exchange, queue_name, keys):  # pragma: no cover
-        '''
-        Continuously loops trying to connect to rabbitmq,
-        once connected declares the exchange and queue for
-        processing algorithm results.
-        '''
-        wait = True
-        channel = None
-        connection = None
-
-        while wait:
-            try:
-                connection = pika.BlockingConnection(
-                    pika.ConnectionParameters(host=host))
-                channel = connection.channel()
-                channel.exchange_declare(exchange=exchange, type='topic')
-                channel.queue_declare(queue=queue_name, exclusive=True)
-                self.logger.debug('connected to {0} rabbitMQ'.format(host))
-                wait = False
-            except Exception as e:
-                self.logger.debug('waiting for {0} rabbitQM'.format(host))
-                self.logger.debug(str(e))
-                time.sleep(2)
-                wait = True
-
-        if isinstance(keys, types.ListType):
-            for key in keys:
-                self.logger.debug(
-                    'array adding key:{0} to rabbitmq channel'.format(key))
-                channel.queue_bind(exchange=exchange,
-                                   queue=queue_name,
-                                   routing_key=key)
-
-        if isinstance(keys, types.StringType):
-            self.logger.debug(
-                'string adding key:{0} to rabbitmq channel'.format(keys))
-            channel.queue_bind(exchange=exchange,
-                               queue=queue_name, routing_key=keys)
-
-        return channel, connection
-
-    def init_rabbit(self):  # pragma: no cover
-        ''' init_rabbit '''
-        host = 'poseidon-rabbit'
-        exchange = 'topic-poseidon-internal'
-        queue_name = 'poseidon_main'
-        binding_key = ['poseidon.algos.#', 'poseidon.action.#']
-        retval = self.make_rabbit_connection(
-            host, exchange, queue_name, binding_key)
-        self.rabbit_channel_local = retval[0]
-        self.rabbit_connection_local = retval[1]
-
-        host = 'poseidon-vent'
-        exchange = 'topic-vent-poseidon'
-        queue_name = 'vent_poseidon'
-        binding_key = ['vent.#']
-
-        '''
-        retval = self.make_rabbit_connection(
-            host, exchange, queue_name, binding_key)
-        self.rabbit_channel_vent = retval[0]
-        self.rabbit_connection_vent = retval[1]
-        '''
-
-    def start_channel(self, channel, mycallback, queue):
-        ''' handle threading for a messagetype '''
-        self.logger.debug('about to start channel {0}'.format(channel))
-        channel.basic_consume(
-            partial(mycallback, q=self.m_queue), queue=queue, no_ack=True)
-        mq_recv_thread = threading.Thread(target=channel.start_consuming)
-        mq_recv_thread.start()
+                    '***** shutting down endpoint:{0}:{1}'.format(itype, temp_d))
+                self.endpoint_shutdown(temp_d)
 
     def do_work(self, item):
         '''schuffle item to the correct handlers'''
@@ -396,6 +359,8 @@ class PoseidonMain(object):
             if workfound:  # pragma no cover
                 self.do_work(item)
 
+            self.print_state()
+
             elapsed = time.clock()
             elapsed = elapsed - start
 
@@ -404,17 +369,40 @@ class PoseidonMain(object):
             self.logger.debug(log_line)
         self.logger.debug('Shutting Down')
 
+    def print_state(self):
+        self.logger.debug('**********MONITORING**********')
+        for my_hash, my_value in self.monitoring.iteritems():
+            self.logger.debug('M:{0}:{1}'.format(my_hash, my_value))
+        if (len(self.monitoring) == 0):
+            self.logger.debug('None')
+        self.logger.debug('***********SHUTDOWN***********')
+        for my_hash, my_value in self.shutdown.iteritems():
+            self.logger.debug('S:{0}:{1}'.format(my_hash, my_value))
+        if (len(self.shutdown) == 0):
+            self.logger.debug('None')
+        self.logger.debug('******************************')
+
 
 def main(skip_rabbit=False):
     ''' main function '''
     pmain = PoseidonMain(skip_rabbit=skip_rabbit)
     if not skip_rabbit:
-        pmain.init_rabbit()
-        pmain.start_channel(pmain.rabbit_channel_local,
-                            callback, 'poseidon_main')
+	rabbit = Rabbit_Base()
+	host = 'poseidon-rabbit'
+	exchange = 'topic-poseidon-internal'
+	queue_name = 'poseidon_main'
+	binding_key = ['poseidon.algos.#', 'poseidon.action.#']
+	retval = rabbit.make_rabbit_connection(host, exchange, queue_name,
+					       binding_key)
+	pmain.rabbit_channel_local = retval[0]
+	pmain.rabbit_channel_connection_local = retval[1]
+	rabbit.start_channel(pmain.rabbit_channel_local, callback,
+			     'poseidon_main', pmain.m_queue)
+        pmain.Scheduler.schedule_thread.start()
         # def start_channel(self, channel, callback, queue):
     pmain.process()
     return True
+
 
 if __name__ == '__main__':  # pragma: no cover
     main(skip_rabbit=False)

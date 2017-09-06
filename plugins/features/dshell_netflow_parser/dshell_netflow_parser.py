@@ -37,7 +37,7 @@ def get_path():
     path = None
     try:
         path = sys.argv[1]
-    except:
+    except BaseException:
         module_logger.error('no path provided, quitting.')
     return path
 
@@ -53,7 +53,7 @@ def connections():
 
         channel.exchange_declare(exchange='topic-poseidon-internal',
                                  type='topic')
-    except:
+    except BaseException:
         module_logger.error('unable to connect to rabbitmq, quitting.')
     return channel, connection
 
@@ -100,15 +100,16 @@ def run_tool(path):
                             exchange='topic_recs', routing_key=routing_key, body=message)
                         ostr = ' [x] Sent {0}:{1}'.format(routing_key, message)
                         module_logger.debug(ostr)
-                except:
+                except BaseException:
                     pass
-    except:
+    except BaseException:
         pass
 
     try:
         connection.close()
-    except:
+    except BaseException:
         pass
+
 
 if __name__ == '__main__':
     path = get_path()

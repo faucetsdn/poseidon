@@ -1,23 +1,28 @@
-import cPickel
+import cPickle
 
 
-#load and save files and models
-def pickleFile(thing2save, file2save2 = None, filePath='/work/notebooks/drawModels/', fileName = 'myModels'):
-    
-    if file2save2 == None:
-        f=file(filePath+fileName+'.pickle', 'wb')
+# load and save files and models
+def pickleFile(
+        thing2save,
+        file2save2=None,
+        filePath='/work/notebooks/drawModels/',
+        fileName='myModels'):
+
+    if file2save2 is None:
+        f = file(filePath + fileName + '.pickle', 'wb')
     else:
-        f=file(filePath+file2save2, 'wb')
-        
+        f = file(filePath + file2save2, 'wb')
+
     cPickle.dump(thing2save, f, protocol=cPickle.HIGHEST_PROTOCOL)
 
     f.close()
-    
+
+
 def loadFile(filePath):
     file2open = file(filePath, 'rb')
     loadedFile = cPickle.load(file2open)
     file2open.close()
-    
+
     return loadedFile
 
 
@@ -34,35 +39,36 @@ def hexTokenizer():
     ,   FA, FB, FC, FD, FE, FF'.replace('\t', '')
 
     hexList = [x.strip() for x in hexstring.lower().split(',')]
-    hexList.append('<EOP>') #End Of Packet token
-    #EOS token??????
+    hexList.append('<EOP>')  # End Of Packet token
+    # EOS token??????
     hexDict = {}
 
     for key, val in enumerate(hexList):
         if len(val) == 1:
-            val = '0'+val
-        hexDict[val] = key  #dictionary: k=hex, v=int  
-    
+            val = '0' + val
+        hexDict[val] = key  # dictionary: k=hex, v=int
+
     return hexDict
 
+
 def srcIpDict(hexSessionDict):
-    ''' 
-    input: dictionary of key = sessions, value = list of HEX HEADERS of packets in session
-    output: dictionary of key = source IP, value/subkey = dictionary of destination IPs, 
-                                           subvalue = [[sport], [dport], [plen], [protocol]]
-    
     '''
-    
-    srcIpDict = {}   
-    uniqIPs = [] #some ips are dest only. this will collect all ips, not just srcIpDict.keys()
-    
+    input: dictionary of key = sessions, value = list of HEX HEADERS of packets in session
+    output: dictionary of key = source IP, value/subkey = dictionary of destination IPs,
+                                           subvalue = [[sport], [dport], [plen], [protocol]]
+
+    '''
+
+    srcIpDict = {}
+    uniqIPs = []  # some ips are dest only. this will collect all ips, not just srcIpDict.keys()
+
     for session in hexSessionDict.keys():
-        
+
         for rawpacket in hexSessionDict[session][0]:
             packet = copy(rawpacket)
-            
+
             dstIpSubDict = {}
-            
+
             sourceMAC = packet[:12]
             destMAC = packet[12:24]
             srcip = packet[52:60]
@@ -71,15 +77,22 @@ def srcIpDict(hexSessionDict):
             dport = packet[72:76]
             plen = packet[32:36]
             protocol = packet[46:48]
-            
+
             uniqIPs = list(set(uniqIPs) | set([dstip, srcip]))
 
             if srcip not in srcIpDict:
-                dstIpSubDict[dstip] = [[sport], [dport], [plen], [protocol], [sourceMAC], [destMAC]]
+                dstIpSubDict[dstip] = [
+                    [sport],
+                    [dport],
+                    [plen],
+                    [protocol],
+                    [sourceMAC],
+                    [destMAC]]
                 srcIpDict[srcip] = dstIpSubDict
 
-            if dstip not in srcIpDict[srcip]:    
-                srcIpDict[srcip][dstip] = [[sport], [dport], [plen], [protocol], [sourceMAC], [destMAC]]
+            if dstip not in srcIpDict[srcip]:
+                srcIpDict[srcip][dstip] = [[sport], [dport], [
+                    plen], [protocol], [sourceMAC], [destMAC]]
             else:
                 srcIpDict[srcip][dstip][0].append(sport)
                 srcIpDict[srcip][dstip][1].append(dport)
@@ -87,23 +100,24 @@ def srcIpDict(hexSessionDict):
                 srcIpDict[srcip][dstip][3].append(protocol)
                 srcIpDict[srcip][dstip][4].append(sourceMAC)
                 srcIpDict[srcip][dstip][5].append(destMAC)
-                
+
     return srcIpDict, uniqIPs
 
 
 def dictUniquerizer(dictOdictsOlistOlists):
     '''
     input is the output of srcIpDict
-    input: dictionary of dictionaries that have a list of lists 
+    input: dictionary of dictionaries that have a list of lists
            ex. srcIpDict[srcip][dstip] = [[sport], [dport], [plen], [protocol]]
     output: dictionary of dictionaries with list of lists with unique items in the final sublist
-    
+
     WARNING: will overwrite your input dictionary. Make a copy if you want to preserve dictOdictsOlistOlists.
     '''
-    #dictCopy
+    # dictCopy
     for key in dictOdictsOlistOlists.keys():
         for subkey in dictOdictsOlistOlists[key].keys():
             for sublist in xrange(len(dictOdictsOlistOlists[key][subkey])):
-                dictOdictsOlistOlists[key][subkey][sublist] = list(set(dictOdictsOlistOlists[key][subkey][sublist]))
-    
+                dictOdictsOlistOlists[key][subkey][sublist] = list(
+                    set(dictOdictsOlistOlists[key][subkey][sublist]))
+
     return dictOdictsOlistOlists

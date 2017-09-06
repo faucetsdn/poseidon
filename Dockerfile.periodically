@@ -1,5 +1,5 @@
 FROM ubuntu:16.04
-MAINTAINER dgrossman dgrossman@iqt.org
+MAINTAINER dgrossman <dgrossman@iqt.org>
 
 RUN apt-get update && \
     apt-get install -y \
@@ -17,7 +17,7 @@ RUN apt-get update && \
 ADD . /poseidonWork
 WORKDIR /poseidonWork
 ENV PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
-RUN pip install pip --upgrade
+RUN pip install pip==9.0.1 --upgrade
 
 # install dependencies of plugins for poseidon
 RUN for file in $(find poseidon/* -name "requirements.txt"); \
