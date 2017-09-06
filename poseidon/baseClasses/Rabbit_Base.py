@@ -47,8 +47,8 @@ class Rabbit_Base(object):
         '''
         wait = True
         do_rabbit = True
-	rabbit_channel = None
-	rabbit_connection = None
+        rabbit_channel = None
+        rabbit_connection = None
 
         while wait and total_sleep > 0:
             try:
@@ -56,8 +56,8 @@ class Rabbit_Base(object):
                     pika.ConnectionParameters(host=host))
                 rabbit_channel = rabbit_connection.channel()
                 rabbit_channel.exchange_declare(exchange=exchange,
-					        type='topic')
-		rabbit_channel.queue_declare(queue=queue_name, exclusive=True)
+                    exchange_type='topic')
+                rabbit_channel.queue_declare(queue=queue_name, exclusive=True)
                 self.logger.debug('connected to {0} rabbitmq...'.format(host))
                 wait = False
             except Exception as e:
