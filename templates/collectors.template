@@ -1,9 +1,0 @@
-[info]
-name = Collectors
-
-[service]
-schedule = {"all":"continuous"}
-
-[passive-nfilter]
-Env = ["PYTHONUNBUFFERED=0"]
-HostConfig = {"Binds": ["/var/run/docker.sock:/var/run/docker.sock"], "Links": ["core-aaa-redis:redis"], "PublishAllPorts": true}
