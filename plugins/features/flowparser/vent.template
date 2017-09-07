@@ -1,0 +1,8 @@
+[info]
+name = Flowparser Feature generation from PCAPs
+groups = pcap
+
+[settings]
+mime_types = application/vnd.tcpdump.pcap
+ext_types = pcap
+process_base = yes

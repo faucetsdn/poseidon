@@ -1,0 +1,10 @@
+[info]
+name = Train Device Classifier
+groups = csv
+
+[settings]
+ext_types = csv
+process_base = yes
+
+[docker]
+environment = ["POSEIDON_HOST=0.0.0.0"]
