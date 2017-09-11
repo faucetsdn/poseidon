@@ -113,7 +113,7 @@ class Handle_Periodic(Monitor_Helper_Base):
     # rabbit
     def start_rabbit(self):
         ''' start the rabbit negotiations using the Rabbit base class'''
-        #self.init_rabbit()
+        # self.init_rabbit()
         rabbit = Rabbit_Base()
         host = 'poseidon-rabbit'
         exchange = 'topic-poseidon-internal'

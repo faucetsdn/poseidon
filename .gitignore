@@ -77,6 +77,7 @@ target/
 #other crap
 **/.ropeproject
 checkscript.sh
+.vscode/**
 
 #flowparser
 plugins/features/flowparser/flowparser
