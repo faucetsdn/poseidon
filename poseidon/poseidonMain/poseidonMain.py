@@ -60,6 +60,26 @@ def callback(ch, method, properties, body, q=None):
         module_logger.error('posedionMain workQueue is None')
 
 
+def start_investigating():
+    pass
+
+
+def schedule_job_reinvestigation(max_investigations, reinvestigation, logger):
+    ostr = 'reinvestagtion time'
+    logger.info(ostr)
+    currently_investigating = len(reinvestigation)
+    if currently_investigating < max_investigations:
+        ostr = 'room to investigate'
+        logger.info(ostr)
+        for x in range(max_investigations - currently_investigating):
+            ostr = 'starting investigation {0}'.format(x)
+            logger.info(ostr)
+            start_investigating()
+    else:
+        ostr = 'investigators all busy'
+        logger.info(ostr)
+
+
 def schedule_job_kickurl(url, logger):
     if url:
         try:
@@ -113,8 +133,9 @@ class PoseidonMain(object):
 
         self.Scheduler.configure()
         self.Scheduler.configure_endpoints()
-        self.monitoring = dict()
-        self.shutdown = dict()
+        self.monitoring = {}
+        self.reinvestigation = {}
+        self.shutdown = {}
 
         for item in self.Config.get_section(self.config_section_name):
             my_k, my_v = item
@@ -127,6 +148,13 @@ class PoseidonMain(object):
 
         self.Scheduler.schedule.every(scan_frequency).seconds.do(
             partial(schedule_job_kickurl, url=url, logger=self.Scheduler.logger))
+
+        reinvestigation_frequency = int(
+            self.mod_configuration['reinvestigation_frequency'])
+        max_concurrent_reinvestigations = int(
+            self.mod_configuration['max_concurrent_reinvestigations'])
+        self.Scheduler.schedule.every(reinvestigation_frequency).seconds.do(
+            partial(schedule_job_reinvestigation, max_investigations=max_concurrent_reinvestigations, reinvestigation=self.reinvestigation, logger=self.Scheduler.logger))
 
     def init_logging(self):
         ''' setup the logging parameters for poseidon '''
@@ -371,15 +399,25 @@ class PoseidonMain(object):
 
     def print_state(self):
         self.logger.debug('**********MONITORING**********')
-        for my_hash, my_value in self.monitoring.iteritems():
-            self.logger.debug('M:{0}:{1}'.format(my_hash, my_value))
         if (len(self.monitoring) == 0):
             self.logger.debug('None')
+        else:
+            for my_hash, my_value in self.monitoring.iteritems():
+                self.logger.debug('M:{0}:{1}'.format(my_hash, my_value))
+
         self.logger.debug('***********SHUTDOWN***********')
-        for my_hash, my_value in self.shutdown.iteritems():
-            self.logger.debug('S:{0}:{1}'.format(my_hash, my_value))
         if (len(self.shutdown) == 0):
             self.logger.debug('None')
+        else:
+            for my_hash, my_value in self.shutdown.iteritems():
+                self.logger.debug('S:{0}:{1}'.format(my_hash, my_value))
+
+        self.logger.debug('*******REINVESTIGATING********')
+        if (len(self.reinvestigation) == 0):
+            self.logger.debug('None')
+        else:
+            for my_hash, my_value in self.reinvestigation.iteritems():
+                self.logger.debug('M:{0}:{1}'.format(my_hash, my_value))
         self.logger.debug('******************************')
 
 
