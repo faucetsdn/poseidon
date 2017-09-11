@@ -125,7 +125,7 @@ def db_update_worker():
     """
     # TODO figure out what this is:
     #global flowRecordLock
-    #while True:
+    # while True:
     #    try:
     #        TODO: fix url for appropriate rest call
     #        url = 'http://poseidon-storage-interface/v1/storage/update'
