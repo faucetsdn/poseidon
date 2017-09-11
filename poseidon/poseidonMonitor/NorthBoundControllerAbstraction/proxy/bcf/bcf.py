@@ -43,7 +43,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         Example usage:
         bcf = BcfProxy("https://127.0.0.1:8443/api/v1/", auth={"user": "USER", "password": "PASSWORD"})
         '''
-        default_auth ={ 'user': None, 'password': None},
+        default_auth = {'user': None, 'password': None},
 
         auth = auth or default_auth
 
