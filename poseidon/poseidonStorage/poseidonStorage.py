@@ -308,10 +308,7 @@ class db_update_one_doc(PoseidonStorage):
                 ret['raw_result'] = result.raw_result
             else:
                 ret['success'] = 0
-        except bsonInputExceptions:  # pragma: no cover
-            ret['success'] = 0
-            resp.status = falcon.HTTP_BAD_REQUEST
-        except ValueError as TypeError:
+        except (bsonInputExceptions, TypeError, ValueError) as e:  # pragma: no cover
             ret['success'] = 0
             resp.status = falcon.HTTP_BAD_REQUEST
         except Exception as e:  # pragma: no cover
