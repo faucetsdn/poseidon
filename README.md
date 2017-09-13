@@ -19,7 +19,8 @@ sudo mkdir -p /data/db
 git clone https://github.com/Lab41/poseidon.git
 cd poseidon
 *editor* config/poseidon.config
-make compose
+docker-compose build
+docker-compose up
 ```
 
 # Configuration
@@ -52,8 +53,7 @@ the `docker-machine ip` if using boot2docker or similar - making sure that write
 - Docker (If installing from a clean machine, a startup.sh script resides in the repo that can be used to 
 install docker and docker-compose for an Ubunut 16.04 box. Make this script executable and then 
 run with `sudo ./startup.sh`.)
-- make
-- docker-compose (the 1.8 release of docker-compose can be installed with `make compose-install`)
+- docker-compose 
 
 # Documentation
 - [Docs](https://github.com/Lab41/poseidon/tree/master/docs)
@@ -61,9 +61,8 @@ run with `sudo ./startup.sh`.)
 # Tests
 Tests are currently written in py.test for Python.  The tests are automatically run when building the containers.
 
-They can also be tested using:
 ```
-make test
+docker-compose build 
 ```
 
 # build is broke and is talking about docker-compose not working
