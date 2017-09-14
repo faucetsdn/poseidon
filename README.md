@@ -5,8 +5,8 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![CircleCI](https://circleci.com/gh/CyberReboot/poseidon.svg?style=shield)](https://circleci.com/gh/CyberReboot/poseidon)
-[![codecov](https://codecov.io/gh/Lab41/poseidon/branch/master/graph/badge.svg?token=ORXmFYC3MM)](https://codecov.io/gh/Lab41/poseidon)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/3ea08f0c632148538f6f947677f42aa2)](https://www.codacy.com/app/d-grossman/poseidon?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Lab41/poseidon&amp;utm_campaign=Badge_Grade)
+[![codecov](https://codecov.io/gh/CyberReboot/poseidon/branch/master/graph/badge.svg?token=ORXmFYC3MM)](https://codecov.io/gh/CyberReboot/poseidon)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/3ea08f0c632148538f6f947677f42aa2)](https://www.codacy.com/app/d-grossman/poseidon?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=CyberReboot/poseidon&amp;utm_campaign=Badge_Grade)
 
 Situational awareness underpins informed decisions. Understanding what comprises a network, and what network elements are doing is essential.  Without situational awareness and context, defending a network remains a difficult proposition.
 
@@ -17,7 +17,7 @@ Can SDN and machine learning answer:
 # Install Instructions
 ```
 sudo mkdir -p /data/db
-git clone https://github.com/Lab41/poseidon.git
+git clone https://github.com/CyberReboot/poseidon.git
 cd poseidon
 *editor* config/poseidon.config
 docker-compose build
@@ -57,7 +57,7 @@ run with `sudo ./startup.sh`.)
 - docker-compose 
 
 # Documentation
-- [Docs](https://github.com/Lab41/poseidon/tree/master/docs)
+- [Docs](https://github.com/CyberReboot/poseidon/tree/master/docs)
 
 # Tests
 Tests are currently written in py.test for Python.  The tests are automatically run when building the containers.
@@ -80,4 +80,4 @@ OpenSSL version: OpenSSL 1.0.1e 11 Feb 2013
 
 the latest version of compose can always be pulled from the [docker repo](https://github.com/docker/compose/releases)
 # Contributing to Poseidon
-Want to contribute?  Awesome!  Issue a pull request or see more details [here](https://github.com/Lab41/poseidon/blob/master/CONTRIBUTING.md).
+Want to contribute?  Awesome!  Issue a pull request or see more details [here](https://github.com/CyberReboot/poseidon/blob/master/CONTRIBUTING.md).

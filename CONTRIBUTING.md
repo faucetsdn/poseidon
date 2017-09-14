@@ -24,7 +24,7 @@ that feature *on top of* poseidon.
 ### Create issues...
 
 Any significant improvement should be documented as [a github
-issue](https://github.com/Lab41/poseidon/issues) before anybody
+issue](https://github.com/CyberReboot/poseidon/issues) before anybody
 starts working on it.
 
 ### ...but check for existing issues first!

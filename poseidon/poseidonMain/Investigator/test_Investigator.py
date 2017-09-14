@@ -32,15 +32,6 @@ def test_Investigator():
     Investigator()
 
 
-def test_config_vctrl_machines():
-    investigator = Investigator()
-    investigator.config_dict[
-        'vent_machine_test'] = 'name=triton provider=amphitrite cpus=500'
-    assert 'triton' not in investigator.vent_machines
-    investigator.vent_machines['trident1'] = '0.0.0.0'
-    investigator.vctrl_startup()
-
-
 def test_update_config():
     investigator = Investigator()
     investigator.logger = module_logger
@@ -105,6 +96,4 @@ def test_process_new_machine():
 
 def test_Investigator_Response():
     ir = Investigator_Response()
-    ir.vent_preparation()
-    ir.send_vent_jobs()
     ir.update_record()
