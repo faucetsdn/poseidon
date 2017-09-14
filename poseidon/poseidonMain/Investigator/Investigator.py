@@ -48,71 +48,6 @@ class Investigator(Main_Action_Base):
         self.rules = {}
         self.update_rules()
 
-        self.vent_machines = {}
-        self.vctrl_list()
-        self.vctrl_startup()
-        self.vctrl_addr = 'http://' + self.config_dict['vctrl_addr']
-
-    def vctrl_list(self):
-        '''
-        Retrieves list of vent machines running on vcontrol
-        instance. Gets list of machines as json and evaluates
-        into dict to update dict of available vent machines.
-        '''
-        try:
-            resp = requests.get(self.vctrl_addr + '/machines/list')
-            self.vent_machines = ast.literal_eval(resp.body)
-        except BaseException:
-            self.logger.error('Main: Investigator: error on vctrl list')
-
-    def vctrl_startup(self):
-        '''
-        For each vent endpoint machine descriped in the Investigator
-        config section, registers the machine with vcontrol.
-        '''
-        for machine, config in self.vent_machines.iteritems():
-            try:
-                resp = requests.post(
-                    self.vctrl_addr +
-                    '/machines/create',
-                    data={
-                        'machine': 'vent1'})
-            except BaseException:
-                self.logger.error(
-                    'Main: Investigator: error on vent create request.')
-
-    @staticmethod
-    def format_vent_create(
-            name,
-            provider,
-            body=None,
-            group='poseidon-vent',
-            labels='default',
-            memory=4096,
-            cpus=4,
-            disk_sz=20000):
-        '''
-        Formats body dict for vcontrol machine create.
-        Returns dict for vcontrol create request.
-
-        NOTE: name and provider are required parameters,
-        the rest can be covered by defaults.
-        '''
-        body = body or {}
-        body['name'] = name
-        body['provider'] = provider
-        if 'group' not in body:
-            body['group'] = group
-        if 'labels' not in body:
-            body['labels'] = labels
-        if 'memory' not in body:
-            body['memory'] = memory
-        if 'cpus' not in body:
-            body['cpus'] = cpus
-        if 'disk_sz' not in body:
-            body['disk_sz'] = disk_sz
-        return body
-
     def update_config(self):
         '''
         Updates configuration based on config file
@@ -215,33 +150,6 @@ class Investigator_Response(Investigator):
         super(Investigator_Response, self).__init__()
         self.logger = module_logger
         self.jobs = {}
-
-    def vent_preparation(self):
-        '''
-        Prepares vent jobs based on algorithms
-        available to be used and investigator
-        rules.
-        '''
-        for machine in self.vent_machines:
-            try:
-                url = 'http://' + self.vctrl_addr + '/commands/deploy/' + machine
-                resp = requests.post(url)
-            except BaseException:
-                self.logger.error(
-                    'Main: Investigator: vent_preparation, vent request failed')
-
-    def send_vent_jobs(self):
-        '''
-        Connects to vent and sends prepared
-        jobs for analysis, waits for results
-        and then continues with appropriate
-        response.
-        '''
-        try:
-            resp = requests.get('vent_url')
-        except BaseException:
-            self.logger.error(
-                'Main: Investigator: send_vent_jobs, vent request failed')
 
     @staticmethod
     def update_record():
