@@ -96,6 +96,7 @@ class Handle_Periodic(Monitor_Helper_Base):
         self.new_endpoints = {}
         self.mirroring = {}
         self.shutdown = {}
+        self.reinvestigation = {}
         self.do_rabbit = True
         self.m_queue = Queue.Queue()
         self.rabbit_connection_local = None
@@ -258,25 +259,40 @@ class Handle_Periodic(Monitor_Helper_Base):
 
     def print_state(self):
         self.logger.debug('*************KNOWN*****************')
-        for my_hash, my_dict in self.prev_endpoints.iteritems():
-            self.logger.debug('P:{0}:{1}'.format(my_hash, my_dict))
         if len(self.prev_endpoints) == 0:
             self.logger.debug('None')
+        else:
+            for my_hash, my_dict in self.prev_endpoints.iteritems():
+                self.logger.debug('P:{0}:{1}'.format(my_hash, my_dict))
+
         self.logger.debug('************UNKNOWN****************')
-        for my_hash, my_dict in self.new_endpoints.iteritems():
-            self.logger.debug('N:{0}:{1}'.format(my_hash, my_dict))
         if len(self.new_endpoints) == 0:
             self.logger.debug('None')
+        else:
+            for my_hash, my_dict in self.new_endpoints.iteritems():
+                self.logger.debug('N:{0}:{1}'.format(my_hash, my_dict))
+
         self.logger.debug('***********MIRRORING***************')
-        for my_hash, my_dict in self.mirroring.iteritems():
-            self.logger.debug('M:{0}:{1}'.format(my_hash, my_dict))
         if len(self.mirroring) == 0:
             self.logger.debug('None')
+        else:
+            for my_hash, my_dict in self.mirroring.iteritems():
+                self.logger.debug('M:{0}:{1}'.format(my_hash, my_dict))
+
         self.logger.debug('***********SHUTDOWN****************')
-        for my_hash, my_dict in self.shutdown.iteritems():
-            self.logger.debug('M:{0}:{1}'.format(my_hash, my_dict))
         if len(self.shutdown) == 0:
             self.logger.debug('None')
+        else:    
+            for my_hash, my_dict in self.shutdown.iteritems():
+                self.logger.debug('M:{0}:{1}'.format(my_hash, my_dict))
+
+        self.logger.debug('***********REINVESTIGATING*********')
+        if len(self.reinvestigation) == 0:
+            self.logger.debug('None')
+        else:
+            for my_hash, my_dict in self.reinvestigation.iteritems():
+                self.logger.debug('M:{0}:{1}'.format(my_hash, my_dict))
+        self.logger.debug('***********************************')
 
     def send_new_machines(self):
         '''send listing of new machines to main for decisions'''
