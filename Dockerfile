@@ -1,5 +1,4 @@
 FROM ubuntu:16.04
-MAINTAINER dgrossman <dgrossman@iqt.org>
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -10,12 +9,10 @@ RUN apt-get update && \
     python-dev \
     python-pip \
     python-setuptools \
-    python-sphinx \
-    tcpdump \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-ADD . /poseidonWork
+COPY . /poseidonWork
 WORKDIR /poseidonWork
 ENV PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
 RUN pip install pip==9.0.1 --upgrade
@@ -27,23 +24,13 @@ RUN for file in $(find poseidon/* -name "requirements.txt"); \
     done
 
 ENV PYTHONUNBUFFERED 0
-EXPOSE 4444:8004
 
 # run linter
 #RUN pylint --disable=all --enable=classes --disable=W poseidonMonitor
 
 # run tests
 RUN py.test -v \
---ignore=poseidon/poseidonMain \
---ignore=poseidon/mockController \
---ignore=poseidon/poseidonStorage \
---ignore=poseidon/periodically \
---ignore=poseidon/collectors \
---ignore=collectors \
---ignore=plugins \
 --cov=poseidon/poseidonMonitor \
 --cov-report term-missing --cov-config .coveragerc
-
-
 
 CMD ["python","/poseidonWork/poseidon/poseidonMonitor/poseidonMonitor.py"]

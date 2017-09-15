@@ -242,6 +242,8 @@ class Monitor(object):
                 self.logger.debug(
                     'updating:{0}:{1}->{2}'.format(my_hash, current_state, next_state))
                 if next_state == 'MIRRORING':
+                    self.logger.debug('*********** MIRROR PORT ***********')
+
                     self.logger.debug('*********** NOTIFY VENT ***********')
                 self.uss.change_endpoint_state(my_hash, next_state)
 
@@ -274,8 +276,8 @@ def main(skip_rabbit=False):
         exchange = 'topic-poseidon-internal'
         queue_name = 'poseidon_main'
         binding_key = ['poseidon.algos.#', 'poseidon.action.#']
-        retval = rabbit.make_rabbit_connection(host, port, exchange, queue_name,
-                                               binding_key)
+        retval = rabbit.make_rabbit_connection(
+            host, port, exchange, queue_name, binding_key)
         pmain.rabbit_channel_local = retval[0]
         pmain.rabbit_channel_connection_local = retval[1]
         rabbit.start_channel(pmain.rabbit_channel_local, callback,
