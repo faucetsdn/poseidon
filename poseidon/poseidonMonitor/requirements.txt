@@ -1,9 +1,9 @@
-falcon==1.2.0
-falcon-cors==1.1.7
-gunicorn==19.7.1
+enum==0.4.6
 httmock==1.2.6
+mock==2.0.0
+pika==0.11.0
 pylint==1.7.2
-pytest==3.2.1
 pytest-cov==2.5.1
-pytest-falcon==0.4.2
+pytest==3.2.1
 requests==2.18.4
+schedule==0.4.3
