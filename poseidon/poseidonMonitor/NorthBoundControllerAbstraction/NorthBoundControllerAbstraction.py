@@ -162,7 +162,6 @@ class Update_Switch_State(Monitor_Helper_Base):
                 module_logger.critical(
                     'adding address to known systems {0}'.format(machine))
                 self.make_endpoint_dict(h, 'KNOWN', machine)
-                #self.prev_endpoints[h] = machine
         else:
             for machine in machines:
                 h = self.make_hash(machine)
@@ -170,7 +169,6 @@ class Update_Switch_State(Monitor_Helper_Base):
                     module_logger.critical(
                         '***** detected new address {0}'.format(machine))
                     self.make_endpoint_dict(h, 'UNKNOWN', machine)
-                    #self.new_endpoints[h] = machine
 
     def print_endpoint_state(self):
         def same_old(logger, state, letter, endpoint_states):
