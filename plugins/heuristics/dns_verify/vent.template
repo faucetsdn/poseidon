@@ -1,6 +1,0 @@
-[info]
-name = DNS Verify
-groups = pcap
-
-[docker]
-environment = ["POSEIDON_HOST=0.0.0.0"]

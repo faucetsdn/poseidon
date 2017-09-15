@@ -44,15 +44,6 @@ def app():
     return application
 
 
-def test_NorthBoundControllerAbstraction(client):
-    """
-    Tests the NorthBoundControllerAbstraction
-    Handle_Resource class
-    """
-    resp = client.get('/v1/Nbca/resource/someNbcaRequest')
-    assert resp.status == falcon.HTTP_OK
-
-
 def test_NorthBoundControllerAbstraction_periodic(client):
     #    """
     #    Tests NorthBoundControllerAbstraction Handle_Periodic
