@@ -34,6 +34,7 @@ import threading
 import time
 import types
 import urllib2
+from collections import defaultdict
 from functools import partial
 from os import getenv
 
@@ -47,6 +48,9 @@ from poseidon.poseidonMain.Scheduler.Scheduler import scheduler_interface
 
 logging.basicConfig(level=logging.DEBUG)
 module_logger = logging.getLogger(__name__)
+
+ENDPOINT_STATES = [('K', 'KNOWN'), ('U', 'UNKNOWN'), ('M', 'MIRRORING'),
+                   ('S', 'SHUTDOWN'), ('R', 'REINVESTIGATING')]
 
 
 def callback(ch, method, properties, body, q=None):
@@ -64,10 +68,16 @@ def start_investigating():
     pass
 
 
-def schedule_job_reinvestigation(max_investigations, reinvestigation, logger):
+def schedule_job_reinvestigation(max_investigations, endpoints, logger):
     ostr = 'reinvestagtion time'
     logger.info(ostr)
-    currently_investigating = len(reinvestigation)
+
+    currently_investigating = 0
+    for my_hash, my_value in endpoints.iteritems():
+        if 'state' in my_value:
+            if my_value['state'] == 'REINVESTIGATION':
+                currently_investigating += 1
+
     if currently_investigating < max_investigations:
         ostr = 'room to investigate'
         logger.info(ostr)
@@ -109,7 +119,7 @@ class PoseidonMain(object):
         self.logger.debug('logger started')
 
         self.m_queue = Queue.Queue()
-        self.shutdown = False
+        self.shutdown_flag = False
 
         self.mod_configuration = dict()
 
@@ -133,9 +143,12 @@ class PoseidonMain(object):
 
         self.Scheduler.configure()
         self.Scheduler.configure_endpoints()
-        self.monitoring = {}
-        self.reinvestigation = {}
-        self.shutdown = {}
+
+        self.endpoint_states = defaultdict(dict)
+
+        # self.monitoring = {}
+        # self.reinvestigation = {}
+        # self.shutdown = {}
 
         for item in self.Config.get_section(self.config_section_name):
             my_k, my_v = item
@@ -154,7 +167,7 @@ class PoseidonMain(object):
         max_concurrent_reinvestigations = int(
             self.mod_configuration['max_concurrent_reinvestigations'])
         self.Scheduler.schedule.every(reinvestigation_frequency).seconds.do(
-            partial(schedule_job_reinvestigation, max_investigations=max_concurrent_reinvestigations, reinvestigation=self.reinvestigation, logger=self.Scheduler.logger))
+            partial(schedule_job_reinvestigation, max_investigations=max_concurrent_reinvestigations, endpoints=self.endpoint_states, logger=self.Scheduler.logger))
 
     def init_logging(self):
         ''' setup the logging parameters for poseidon '''
@@ -181,6 +194,10 @@ class PoseidonMain(object):
 
         return endpoint, value
 
+    def make_endpoint_dict(self, hash, state, data):
+        self.endpoint_states[hash]['state'] = state
+        self.endpoint_states[hash]['endpoint'] = data
+
     def start_monitor(self, ivalue):
         ''' start monitoring an address'''
         self.logger.debug('start_monitor:{0},{1}'.format(ivalue, type(ivalue)))
@@ -190,26 +207,51 @@ class PoseidonMain(object):
 
         for my_hash, my_value in ivalue.iteritems():
 
-            if my_hash not in self.monitoring:
+            # if my_hash not in monitoring:
+            if my_hash not in self.endpoint_states:
+
                 self.logger.debug(
                     'starting monitoring:{0}:{1}'.format(my_hash, my_value))
+
                 # TODO MSG the collector to begin waiting. contents of my_value
-                #
                 self.rabbit_channel_local.basic_publish(exchange=r_exchange,
                                                         routing_key=r_key,
                                                         body=r_msg)
-                self.monitoring[my_hash] = my_value
+
+                make_endpoint_dict(my_hash, 'MONITORING', my_value)
+                # self.monitoring[my_hash] = my_value
+
             else:
-                self.logger.debug(
-                    'already being monitored:{0}:{1}'.format(
-                        my_hash, my_value))
+                # check to make sure that item is in the monitoring state
+                if self.endpoint_states[my_hash]['state'] == 'MONITORING':
+                    self.logger.debug(
+                        'already being monitored:{0}:{1}'.format(
+                            my_hash, my_value))
+                else:
+                    # endpoint was there for another reason, put into the monitoring state
+                    # do the monitoring
+                    update_state(my_hash, 'MONITORING')
+                    self.logger.debug(
+                        'starting monitoring:{0}:{1}'.format(my_hash, my_value))
+
+                    self.endpoint_states[my_hash]['state'] = 'MONITORING'
+                    self.rabbit_channel_local.basic_publish(exchange=r_exchange,
+                                                            routing_key=r_key,
+                                                            body=r_msg)
+
+    def update_state(self, my_hash, new_state):
+        if my_hash in self.endpoint_states:
+            old_state = self.endpoint_staes[my_hash]['state']
+            self.logger.debug(
+                'endpoint changing state:{0}:{1}'.format(old_state, new_state))
+            self.endpoint_states[hash]['state'] = new_state
 
     def stop_monitor(self, ivalue):
         ''' stop monitoring an address'''
 
         for my_hash, my_dict in ivalue.iteritems():
-            if my_hash in self.monitoring:
-                self.monitoring.pop(my_hash)
+            if my_hash in self.endpoint_states:
+                update_state(my_hash, 'KNOWN')
 
         self.logger.debug('stop_monitor:{0},{1}'.format(ivalue, type(ivalue)))
         r_exchange = 'topic-poseidon-internal'
@@ -230,7 +272,7 @@ class PoseidonMain(object):
                                                 body=r_msg)
 
     def endpoint_allow(self, ivalue):
-        ''' shutdown an endpoint '''
+        ''' allow an endpoint '''
         r_exchange = 'topic-poseidon-internal'
         r_key = 'poseidon.action.endpoint_allow'
         r_msg = json.dumps(ivalue)
@@ -306,14 +348,25 @@ class PoseidonMain(object):
 
         if itype == 'poseidon.action.shutdown':
             self.logger.debug('***** shutting down')
-            self.shutdown = True
+            self.shutdown_flag = True
         if itype == 'poseidon.action.new_machine':
             self.logger.debug('***** new machine {0}'.format(ivalue))
             # tell monitor to monitor
             # dont remonitor something you are monitoring
-            if self.just_the_hash(ivalue) not in self.monitoring:
-                self.start_vent_collector(self.just_the_hash(ivalue))
-                self.start_monitor(ivalue)
+            if self.just_the_hash(ivalue) not in self.endpoint_states:
+                # didnt exist
+                for my_hash, my_dict in ivalue.iteritems():
+                    self.endpoint_states[my_hash]['state'] = 'MONITORING'
+                    self.endpoint_states[my_hash]['endpoint'] = my_dict
+                    self.start_vent_collector(self.just_the_hash(ivalue))
+                    self.start_monitor(ivalue)
+            else:
+                # already existed in another state
+                for my_hash, my_dict in ivalue.iteritems():
+                    self.update_state(my_hash, 'MONITORING')
+                    self.start_vent_collector(self.just_the_hash(ivalue))
+                    self.start_monitor(ivalue)
+
         if 'poseidon.algos.eval_dev_class' in itype:
             # ivalue = classificationtype:<string>
             # result form eval device classifier with
@@ -363,7 +416,7 @@ class PoseidonMain(object):
 
         self.logger.debug('PRODUCTION = {0}'.format(
             getenv('PRODDUCTION', 'False')))
-        while not self.shutdown and testing_loop > 0:
+        while not self.shutdown_flag and testing_loop > 0:
             item = None
             workfound = False
             start = time.clock()
@@ -398,27 +451,20 @@ class PoseidonMain(object):
         self.logger.debug('Shutting Down')
 
     def print_state(self):
-        self.logger.debug('**********MONITORING**********')
-        if (len(self.monitoring) == 0):
-            self.logger.debug('None')
-        else:
-            for my_hash, my_value in self.monitoring.iteritems():
-                self.logger.debug('M:{0}:{1}'.format(my_hash, my_value))
+        def same_old(logger, state, letter, endpoint_states):
+            logger.debug('*******{0}*********'.format(state))
+            out_flag = False
+            for my_hash in endpoint_states.keys():
+                my_dict = endpoint_states[my_hash]
+                if my_dict['state'] == state:
+                    out_flag = True
+                    logger.debug('{0}:{1}:{2}'.format(
+                        letter, my_hash, my_dict['endpoint']))
+            if not out_flag:
+                logger.debug('None')
 
-        self.logger.debug('***********SHUTDOWN***********')
-        if (len(self.shutdown) == 0):
-            self.logger.debug('None')
-        else:
-            for my_hash, my_value in self.shutdown.iteritems():
-                self.logger.debug('S:{0}:{1}'.format(my_hash, my_value))
-
-        self.logger.debug('*******REINVESTIGATING********')
-        if (len(self.reinvestigation) == 0):
-            self.logger.debug('None')
-        else:
-            for my_hash, my_value in self.reinvestigation.iteritems():
-                self.logger.debug('M:{0}:{1}'.format(my_hash, my_value))
-        self.logger.debug('******************************')
+        for l, s in ENDPOINT_STATES:
+            same_old(self.logger, s, l, self.endpoint_states)
 
 
 def main(skip_rabbit=False):

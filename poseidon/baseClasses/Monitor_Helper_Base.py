@@ -65,8 +65,13 @@ class Monitor_Helper_Base(Rock_Bottom):  # pragma: no cover
             return
         self.mod_configuration = dict()
         conf = self.owner.owner.Config.get_endpoint('Handle_SectionConfig')
+        ostr = '********** conf:{0}'.format(conf)
+        print ostr
         if conf is not None:
             for item in conf.direct_get(self.config_section_name):
+                ostr = '********** item:{0}'.format(item)
+                self.logger.debug(ostr)
+                print ostr
                 k, v = item
                 self.mod_configuration[k] = v
                 ostr = 'config:{0}:{1}'.format(
