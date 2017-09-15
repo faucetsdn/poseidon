@@ -28,16 +28,3 @@ from poseidon.poseidonMain.poseidonMain import PoseidonMain
 module_logger = logging.getLogger(__name__)
 
 
-def test_make_type_val():
-    endpoint = 'poseidon.action.shutdown'
-    value = 'shutdown'
-    d = (endpoint, value)
-
-    a = PoseidonMain(skip_rabbit=True)
-    t, v = a.make_type_val(d)
-    assert t == 'poseidon.action.shutdown'
-    assert v == 'shutdown'
-
-
-def test_poseidonMain_main():
-    a = main(skip_rabbit=True)
