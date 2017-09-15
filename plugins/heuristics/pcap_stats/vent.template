@@ -1,6 +1,0 @@
-[info]
-name = PCAP Stats
-groups = pcap
-
-[docker]
-environment = ["POSEIDON_HOST=0.0.0.0"]

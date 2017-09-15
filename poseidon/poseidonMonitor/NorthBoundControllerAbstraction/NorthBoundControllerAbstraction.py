@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 #   Copyright (c) 2016 In-Q-Tel, Inc, All Rights Reserved.
 #
@@ -26,28 +25,13 @@ import time
 import types
 from functools import partial
 from os import getenv
+from collections import defaultdict
 
-from poseidon.baseClasses.Rabbit_Base import Rabbit_Base
 from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.bcf import BcfProxy
-# import ast
-# import requests
 
-# logging.basicConfig()
 module_logger = logging.getLogger(__name__)
-
-
-def callback(ch, method, properties, body, q=None):
-    module_logger.debug(
-        ''' callback, places rabbit data into internal queue'''
-        'got a message:{0} {1}'.format(method.routing_key, body))
-    # TODO more
-    if q is not None:
-        q.put((method.routing_key, body))
-    else:
-        module_logger.error(
-            'NorthBoundControllerAbstraction workQueue is None')
 
 
 class NorthBoundControllerAbstraction(Monitor_Action_Base):
@@ -60,27 +44,11 @@ class NorthBoundControllerAbstraction(Monitor_Action_Base):
         self.config_section_name = self.mod_name
 
 
-class Handle_Resource(Monitor_Helper_Base):
-
-    def __init__(self):
-        super(Handle_Resource, self).__init__()
-        self.logger = module_logger
-        self.mod_name = self.__class__.__name__
-
-    def on_get(self, req, resp, resource):
-        ''' handle reading endpoint '''
-        resp.content_type = 'text/text'
-        try:
-            resp.body = self.mod_name + ' found: {0}'.format(resource)
-        except BaseException:  # pragma: no cover
-            pass
-
-
-class Handle_Periodic(Monitor_Helper_Base):
+class Update_Switch_State(Monitor_Helper_Base):
     ''' handle periodic process, determine if switch state updated '''
 
     def __init__(self):
-        super(Handle_Periodic, self).__init__()
+        super(Update_Switch_State, self).__init__()
         self.logger = module_logger
         self.mod_name = self.__class__.__name__
         self.retval = {}
@@ -92,43 +60,11 @@ class Handle_Periodic(Monitor_Helper_Base):
         self.controller['PASS'] = None
         self.bcf = None
         self.first_time = True
-        self.prev_endpoints = {}
-        self.new_endpoints = {}
-        self.mirroring = {}
-        self.shutdown = {}
-        self.reinvestigation = {}
-        self.do_rabbit = True
+        self.endpoint_states = defaultdict(dict)
         self.m_queue = Queue.Queue()
-        self.rabbit_connection_local = None
-        self.rabbit_channel_local = None
 
-        if getenv('SKIPRABBIT') is None:
-            module_logger.critical('handle_periodic skipping rabbit')
-            self.do_rabbit = False
-        else:
-            module_logger.critical('handle_periodic starting rabbit')
-            self.start_rabbit()
-
-        # TODO init the rabbitmq
-
-    # rabbit
-    def start_rabbit(self):
-        ''' start the rabbit negotiations using the Rabbit base class'''
-        # self.init_rabbit()
-        rabbit = Rabbit_Base()
-        host = 'poseidon-rabbit'
-        exchange = 'topic-poseidon-internal'
-        queue_name = 'poseidon_NBCA'
-        binding_key = ['poseidon.action.#']
-        retval = rabbit.make_rabbit_connection(host, exchange, queue_name,
-                                               binding_key, total_sleep=30)
-        self.rabbit_channel_local = retval[0]
-        self.rabbit_connection_local = retval[1]
-        self.do_rabbit = retval[2]
-
-        if self.do_rabbit:
-            rabbit.start_channel(self.rabbit_channel_local,
-                                 callback, 'poseidon_NBCA', self.m_queue)
+    def return_endpoint_state(self):
+        return self.endpoint_states
 
     def first_run(self):
         ''' do some pre-run setup/configuration '''
@@ -158,12 +94,12 @@ class Handle_Periodic(Monitor_Helper_Base):
         h = hashlib.new('ripemd160')
         pre_h = str()
         post_h = None
-        # GROSSMAN dont nodchp -> dhcp withname makes different hashes
-        #{u'tenant': u'FLOORPLATE', u'mac': u'ac:87:a3:2b:7f:12', u'segment': u'prod', u'name': None, u'ip-address': u'10.179.0.100'}}^
-        #{u'tenant': u'FLOORPLATE', u'mac': u'ac:87:a3:2b:7f:12', u'segment': u'prod', u'name': u'demo-laptop', u'ip-address': u'10.179.0.100'}}
+        # nodhcp -> dhcp withname makes different hashes
+        # {u'tenant': u'FLOORPLATE', u'mac': u'ac:87:a3:2b:7f:12', u'segment': u'prod', u'name': None, u'ip-address': u'10.179.0.100'}}^
+        # {u'tenant': u'FLOORPLATE', u'mac': u'ac:87:a3:2b:7f:12', u'segment': u'prod', u'name': u'demo-laptop', u'ip-address': u'10.179.0.100'}}
         # ^^^ make different hashes if name is included
-
         # for word in ['tenant', 'mac', 'segment', 'name', 'ip-address']:
+
         for word in ['tenant', 'mac', 'segment', 'ip-address']:
             pre_h = pre_h + str(item.get(str(word), 'missing'))
         h.update(pre_h)
@@ -194,7 +130,8 @@ class Handle_Periodic(Monitor_Helper_Base):
                 self.logger.debug(
                     'mirroring[{0}]={1}'.format(my_hash, my_dict))
                 self.bcf.mirror_ip(my_dict['ip-address'])
-                self.mirroring[my_hash] = my_dict
+                self.endpoint_states[my_hash]['state'] = 'MIRRORING'
+                #self.mirroring[my_hash] = my_dict
 
         if itype == 'poseidon.action.endpoint_shutdown':
             self.logger.debug(
@@ -205,7 +142,8 @@ class Handle_Periodic(Monitor_Helper_Base):
                     self.logger.debug(
                         '****** shutdown {0}:{1}'.format(bad_ip, ivalue))
                     self.bcf.shutdown_ip(bad_ip)
-                    self.shutdown[my_hash] = my_dict
+                    self.endpoint_states[my_hash]['state'] = 'SHUTDOWN'
+                    #self.shutdown[my_hash] = my_dict
 
         if itype == 'poseidon.action.stop_monitor':
             self.logger.debug('stop_monitor:{0}:{1}'.format(itype, ivalue))
@@ -215,28 +153,18 @@ class Handle_Periodic(Monitor_Helper_Base):
                 if my_ip is not None:
                     self.logger.debug('***** shutting down {0}'.format(my_ip))
                     self.bcf.unmirror_ip(my_ip)
-                    if my_hash in self.mirroring:
-                        self.mirroring.pop(my_hash)
+                    if self.endpoint_states[my_hash]['state'] == 'MIRRORING':
+                        self.endpoint_states[my_hahs]['state'] = 'KNOWN'
 
-    def get_rabbit_work(self):
-        '''get work item from queue if exists'''
-        # type , value
-        workfound = False
-        item = None
-        self.logger.debug('about to look for work')
-        try:
-            item = self.m_queue.get(False)
-            self.logger.debug('item:{0}'.format(item))
-            self.logger.debug('work found')
-            workfound = True
-        except Queue.Empty:
-            pass
-        self.logger.debug('done looking for work!')
+                    # if my_hash in self.mirroring:
+                    #    self.mirroring.pop(my_hash)
 
-        if workfound:
-            self.handle_item(item)
+    def make_endpoint_dict(self, hash, state, data):
+        self.endpoint_states[hash]['state'] = state
+        self.endpoint_states[hash]['endpoint'] = data
 
-        return item
+    def change_endpoint_state(self, hash, new_state):
+        self.endpoint_states[hash]['state'] = new_state
 
     def find_new_machines(self, machines):
         '''parse switch structure to find new machines added to network
@@ -248,64 +176,40 @@ class Handle_Periodic(Monitor_Helper_Base):
                 h = self.make_hash(machine)
                 module_logger.critical(
                     'adding address to known systems {0}'.format(machine))
-                self.prev_endpoints[h] = machine
+                self.make_endpoint_dict(h, 'KNOWN', machine)
+                #self.prev_endpoints[h] = machine
         else:
             for machine in machines:
                 h = self.make_hash(machine)
-                if h not in self.prev_endpoints and h not in self.mirroring:
+                if h not in self.endpoint_states:
                     module_logger.critical(
                         '***** detected new address {0}'.format(machine))
-                    self.new_endpoints[h] = machine
+                    self.make_endpoint_dict(h, 'UNKNOWN', machine)
+                    #self.new_endpoints[h] = machine
 
-    def print_state(self):
-        self.logger.debug('*************KNOWN*****************')
-        if len(self.prev_endpoints) == 0:
-            self.logger.debug('None')
-        else:
-            for my_hash, my_dict in self.prev_endpoints.iteritems():
-                self.logger.debug('P:{0}:{1}'.format(my_hash, my_dict))
+    def print_endpoint_state(self):
+        def same_old(logger, state, letter, endpoint_states):
+            logger.debug('*******{0}*********'.format(state))
 
-        self.logger.debug('************UNKNOWN****************')
-        if len(self.new_endpoints) == 0:
-            self.logger.debug('None')
-        else:
-            for my_hash, my_dict in self.new_endpoints.iteritems():
-                self.logger.debug('N:{0}:{1}'.format(my_hash, my_dict))
+            out_flag = False
+            for my_hash in endpoint_states.keys():
+                my_dict = endpoint_states[my_hash]
+                if my_dict['state'] == state:
+                    out_flag = True
+                    logger.debug('{0}:{1}:{2}'.format(
+                        letter, my_hash, my_dict['endpoint']))
+            if not out_flag:
+                logger.debug('None')
 
-        self.logger.debug('***********MIRRORING***************')
-        if len(self.mirroring) == 0:
-            self.logger.debug('None')
-        else:
-            for my_hash, my_dict in self.mirroring.iteritems():
-                self.logger.debug('M:{0}:{1}'.format(my_hash, my_dict))
+        states = [('K', 'KNOWN'), ('U', 'UNKNOWN'), ('M', 'MIRRORING'),
+                  ('S', 'SHUTDOWN'), ('R', 'REINVESTIGATING')]
 
-        self.logger.debug('***********SHUTDOWN****************')
-        if len(self.shutdown) == 0:
-            self.logger.debug('None')
-        else:    
-            for my_hash, my_dict in self.shutdown.iteritems():
-                self.logger.debug('M:{0}:{1}'.format(my_hash, my_dict))
+        for l, s in states:
+            same_old(self.logger, s, l, self.endpoint_states)
 
-        self.logger.debug('***********REINVESTIGATING*********')
-        if len(self.reinvestigation) == 0:
-            self.logger.debug('None')
-        else:
-            for my_hash, my_dict in self.reinvestigation.iteritems():
-                self.logger.debug('M:{0}:{1}'.format(my_hash, my_dict))
-        self.logger.debug('***********************************')
+        self.logger.debug('****************')
 
-    def send_new_machines(self):
-        '''send listing of new machines to main for decisions'''
-        for hashed, machine in self.new_endpoints.iteritems():
-            # TODO write findings to main
-            r_exchange = 'topic-poseidon-internal'
-            r_key = 'poseidon.action.new_machine'
-            r_msg = json.dumps({hashed: machine})
-            self.rabbit_channel_local.basic_publish(exchange=r_exchange,
-                                                    routing_key=r_key,
-                                                    body=r_msg)
-
-    def on_get(self, req, resp):
+    def update_endpoint_state(self):
         '''Handles Get requests'''
         self.retval['service'] = self.owner.mod_name + ':' + self.mod_name
         self.retval['times'] = self.times
@@ -327,20 +231,18 @@ class Handle_Periodic(Monitor_Helper_Base):
             self.retval['controller'] = 'Could not establish connection to {0}.'.format(
                 self.controller['URI'])
 
-        self.get_rabbit_work()
         self.logger.debug('MACHINES:{0}'.format(machines))
         self.find_new_machines(machines)
-        self.send_new_machines()
 
-        self.print_state()
+        self.print_endpoint_state()
 
         self.retval['machines'] = parsed
         self.retval['resp'] = 'ok'
-        # TODO change response to something reflecting success of traversal
+
         self.times = self.times + 1
-        resp.body = json.dumps(self.retval)
+
+        return json.dumps(self.retval)
 
 
 controller_interface = NorthBoundControllerAbstraction()
-controller_interface.add_endpoint('Handle_Periodic', Handle_Periodic)
-controller_interface.add_endpoint('Handle_Resource', Handle_Resource)
+controller_interface.add_endpoint('Update_Switch_State', Update_Switch_State)

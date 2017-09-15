@@ -22,71 +22,174 @@ Created on 17 May 2016
 import json
 import logging
 import logging.config
-from os import environ
-from os import getenv
-from subprocess import call
-from subprocess import check_output
+import Queue
+import signal
+import sys
+import threading
+import time
+from collections import defaultdict
+from functools import partial
+from os import environ, getenv
+from subprocess import call, check_output
 
-import falcon
-from falcon_cors import CORS
+import schedule
 
-from poseidon.poseidonMonitor.Action.Action import action_interface
+from poseidon.baseClasses.Rabbit_Base import Rabbit_Base
 from poseidon.poseidonMonitor.Config.Config import config_interface
-from poseidon.poseidonMonitor.NodeHistory.NodeHistory import nodehistory_interface
-from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import controller_interface
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import \
+    controller_interface
 
+ENDPOINT_STATES = [('K', 'KNOWN'), ('U', 'UNKNOWN'), ('M', 'MIRRORING'),
+                   ('S', 'SHUTDOWN'), ('R', 'REINVESTIGATING')]
 
 module_logger = logging.getLogger(__name__)
+
+CTRL_C = False
+
+
+def schedule_job_kickurl(func, logger):
+    logger.debug('kick')
+    func.NorthBoundControllerAbstraction.get_endpoint(
+        'Update_Switch_State').update_endpoint_state()
+
+
+def callback(ch, method, properties, body, q=None):
+    ''' callback, places rabbit data into internal queue'''
+    module_logger.debug('got a message: {0}:{1}:{2}'.format(
+        method.routing_key, body, type(body)))
+    # TODO more
+    if q is not None:
+        q.put((method.routing_key, body))
+    else:
+        module_logger.debug('posedionMain workQueue is None')
+
+
+def schedule_thread_worker(schedule, logger):
+    logLine = 'starting thread_worker'
+    logger.debug(logLine)
+    while(True):
+        schedule.run_pending()
+        logLine = 'scheduler woke {0}'.format(
+            threading.current_thread().getName())
+        time.sleep(1)
+        logger.debug(logLine)
+
+
+def start_investigating():
+    pass
+
+
+def schedule_job_reinvestigation(max_investigations, endpoints, logger):
+    ostr = 'reinvestagtion time'
+    logger.debug(ostr)
+
+    currently_investigating = 0
+    for my_hash, my_value in endpoints.iteritems():
+        if 'state' in my_value:
+            if my_value['state'] == 'REINVESTIGATION':
+                currently_investigating += 1
+
+    if currently_investigating < max_investigations:
+        ostr = 'room to investigate'
+        logger.debug(ostr)
+        for x in range(max_investigations - currently_investigating):
+            ostr = 'starting investigation {0}'.format(x)
+            logger.debug(ostr)
+            start_investigating()
+    else:
+        ostr = 'investigators all busy'
+        logger.debug(ostr)
 
 
 class Monitor(object):
 
-    def __init__(self):
+    def __init__(self, skip_rabbit):
         # get the logger setup
         self.logger = module_logger
         self.mod_configuration = dict()
         logging.basicConfig(level=logging.DEBUG)
 
         self.mod_name = self.__class__.__name__
+        self.skip_rabbit = skip_rabbit
+
+        # timer class to call things periodically in own thread
+        self.schedule = schedule
+
+        # rabbit
+        self.rabbit_channel_local = None
+        self.rabbit_chanel_connection_local = None
+
         self.actions = dict()
         self.Config = config_interface
         self.Config.set_owner(self)
-        self.NodeHistory = nodehistory_interface
-        self.NodeHistory.set_owner(self)
         self.NorthBoundControllerAbstraction = controller_interface
         self.NorthBoundControllerAbstraction.set_owner(self)
-        self.Action = action_interface
-        self.Action.set_owner(self)
+
+        self.uss = None
 
         # wire up handlers for Config
-        self.logger.info('handler Config')
+        self.logger.debug('handler Config')
+
         # check
         self.Config.configure()
         self.Config.first_run()
         self.Config.configure_endpoints()
 
-        # wire up handlers for NodeHistory
-        self.logger.info('handler NodeHistory')
-        self.NodeHistory.configure()
-        self.NodeHistory.first_run()
-        self.NodeHistory.configure_endpoints()
+        self.m_queue = Queue.Queue()
 
         # wire up handlers for NorthBoundControllerAbstraction
-        self.logger.info('handler NorthBoundControllerAbstraction')
+        self.logger.debug('handler NorthBoundControllerAbstraction')
+
         # check
         self.NorthBoundControllerAbstraction.configure()
         self.NorthBoundControllerAbstraction.first_run()
         self.NorthBoundControllerAbstraction.configure_endpoints()
 
-        # wire up handlers for Action
-        self.logger.info('handler Action')
-        # check
-        self.Action.configure()
-        self.Action.first_run()
-        self.Action.configure_endpoints()
-        self.logger.info('----------------------')
+        self.logger.debug('----------------------')
         self.configSelf()
         self.init_logging()
+
+        scan_frequency = int(self.mod_configuration['scan_frequency'])
+        self.schedule.every(scan_frequency).seconds.do(
+            partial(schedule_job_kickurl, func=self, logger=self.logger))
+
+        reinvestigation_frequency = int(
+            self.mod_configuration['reinvestigation_frequency'])
+        max_concurrent_reinvestigations = int(
+            self.mod_configuration['max_concurrent_reinvestigations'])
+
+        self.schedule.every(reinvestigation_frequency).seconds.do(
+            partial(schedule_job_reinvestigation,
+                    max_investigations=max_concurrent_reinvestigations,
+                    endpoints=self.NorthBoundControllerAbstraction.get_endpoint(
+                        'Update_Switch_State').endpoint_states,
+                    logger=self.logger))
+
+        self.schedule_thread = threading.Thread(
+            target=partial(
+                schedule_thread_worker,
+                schedule=self.schedule,
+                logger=self.logger),
+            name='st_worker')
+
+    def print_endpoint_state(self, endpoint_states):
+        def same_old(logger, state, letter, endpoint_states):
+            logger.debug('*******{0}*********'.format(state))
+
+            out_flag = False
+            for my_hash in endpoint_states.keys():
+                my_dict = endpoint_states[my_hash]
+                if my_dict['state'] == state:
+                    out_flag = True
+                    logger.debug('{0}:{1}:{2}'.format(
+                        letter, my_hash, my_dict['endpoint']))
+            if not out_flag:
+                logger.debug('None')
+
+        for l, s in ENDPOINT_STATES:
+            same_old(self.logger, s, l, endpoint_states)
+
+        self.logger.debug('****************')
 
     def init_logging(self):
         ''' setup logging  '''
@@ -111,162 +214,78 @@ class Monitor(object):
             k, v = item
             self.mod_configuration[k] = v
         ostr = '{0}:config:{1}'.format(self.mod_name, self.mod_configuration)
-        self.logger.info(ostr)
+        self.logger.debug(ostr)
 
-    def add_endpoint(self, name, handler):
-        ''' add a function by name  '''
-        a = handler()
-        a.owner = self
-        self.actions[name] = a
+    def update_state(self, endpoint_states):
+        ret_val = []
+        next_state = None
+        current_state = None
+        for my_hash in endpoint_states.keys():
+            my_dict = endpoint_states[my_hash]
+            current_state = my_dict['state']
+            if current_state == 'UNKNOWN':
+                next_state = 'MIRRORING'
+                ret_val.append((my_hash, current_state, next_state))
+        return ret_val
 
-    def del_endpoint(self, name):
-        ''' remove a function by name or None  '''
-        if name in self.actions:
-            self.actions.pop(name)
+    def process(self):
+        while not CTRL_C:
+            time.sleep(1)
+            found_work, item = self.get_q_item()
+            self.logger.debug('woke from sleeping')
+            self.logger.debug('work:{0},item:{1}'.format(found_work, item))
+            state_transitions = self.update_state(
+                self.uss.return_endpoint_state())
+            self.print_endpoint_state(self.uss.return_endpoint_state())
+            for transition in state_transitions:
+                my_hash, current_state, next_state = transition
+                self.logger.debug(
+                    'updating:{0}:{1}->{2}'.format(my_hash, current_state, next_state))
+                if next_state == 'MIRRORING':
+                    self.logger.debug('*********** NOTIFY VENT ***********')
+                self.uss.change_endpoint_state(my_hash, next_state)
 
-    def get_endpoint(self, name):
-        ''' get a function by name or None  '''
-        if name in self.actions:
-            return self.actions.get(name)
-        else:
-            return None
+    def get_q_item(self):
+        found_work = False
+        item = None
 
-
-def get_allowed():
-    ''' setup who is allowed to view rest page '''
-    rest_url = 'localhost:4444'
-    if 'ALLOW_ORIGIN' in environ:
-        allow_origin = environ['ALLOW_ORIGIN']
-        host_port = allow_origin.split('//')[1]
-        host = host_port.split(':')[0]
-        port = str(int(host_port.split(':')[1]))
-        rest_url = host + ':' + port
-    else:
-        allow_origin = ''
-    return allow_origin, rest_url
-
-
-allow_origin, rest_url = get_allowed()
-# cors = CORS(allow_origins_list=[allow_origin])
-cors = CORS(allow_all_origins=True)
-public_cors = CORS(allow_all_origins=True)
-
-
-class SwaggerAPI:
-    """Serve up swagger API"""
-    swagger_file = 'poseidon/poseidonMonitor/swagger.yaml'
-
-    def on_get(self, req, resp):
-        """Handles GET requests"""
-        resp.content_type = 'text/yaml'
         try:
-            # update mydomain with current running host and port
-            with open(self.swagger_file, 'r') as f:
-                filedata = f.read()
-            newdata = filedata.replace('mydomain', rest_url)
-            with open(self.swagger_file, 'w') as f:
-                f.write(newdata)
-
-            with open(self.swagger_file, 'r') as f:
-                resp.body = f.read()
-        except BaseException:  # pragma: no cover
-            resp.body = ''
-
-
-class VersionResource:
-    """Serve up the current version and build information"""
-    version_file = 'VERSION'
-
-    def on_get(self, req, resp):
-        """Handles GET requests"""
-        version = {}
-        # get version number (from VERSION file)
-        try:
-            with open(self.version_file, 'r') as f:
-                version['version'] = f.read().strip()
-        except BaseException:  # pragma: no cover
+            item = self.m_queue.get(False)
+            found = True
+        except Queue.Empty:
             pass
-        # get commit id (git commit ID)
-        try:
-            cmd = 'git -C poseidon rev-parse HEAD'
-            commit_id = check_output(cmd, shell=True)
-            cmd = 'git -C poseidon diff-index --quiet HEAD --'
-            dirty = call(cmd, shell=True)
-            if dirty != 0:
-                version['commit'] = commit_id.strip() + '-dirty'
-            else:
-                version['commit'] = commit_id.strip()
-        except BaseException:  # pragma: no cover
-            pass
-        # get runtime id (docker container ID)
-        try:
-            if 'HOSTNAME' in environ:
-                version['runtime'] = environ['HOSTNAME']
-        except BaseException:  # pragma: no cover
-            pass
-        resp.body = json.dumps(version)
+
+        return (found_work, item)
 
 
-class PCAPResource:
-    """Serve up parsed PCAP files"""
-    @staticmethod
-    def on_get(req, resp, pcap_file, output_type):
-        resp.content_type = 'text/text'
-        try:
-            if output_type == 'pcap' and pcap_file.split('.')[1] == 'pcap':
-                resp.body = check_output(
-                    ['/usr/sbin/tcpdump',
-                     '-r',
-                     '/tmp/' + pcap_file,
-                     '-ne',
-                     '-tttt'])
-            else:
-                resp.body = 'not a pcap'
-        except BaseException:  # pragma: no cover
-            resp.body = 'failed'
+def signal_handler(signal, frame):
+    CTRL_C = True
 
 
-# create callable WSGI app instance for gunicorn
-api = falcon.API(middleware=[cors.middleware])
+def main(skip_rabbit=False):
+    ''' main function '''
+    pmain = Monitor(skip_rabbit=skip_rabbit)
+    pmain.uss = pmain.NorthBoundControllerAbstraction.get_endpoint(
+        'Update_Switch_State')
+    if not skip_rabbit:
+        rabbit = Rabbit_Base()
+        host = pmain.mod_configuration['rabbit-server']
+        port = int(pmain.mod_configuration['rabbit-port'])
+        exchange = 'topic-poseidon-internal'
+        queue_name = 'poseidon_main'
+        binding_key = ['poseidon.algos.#', 'poseidon.action.#']
+        retval = rabbit.make_rabbit_connection(host, port, exchange, queue_name,
+                                               binding_key)
+        pmain.rabbit_channel_local = retval[0]
+        pmain.rabbit_channel_connection_local = retval[1]
+        rabbit.start_channel(pmain.rabbit_channel_local, callback,
+                             'poseidon_main', pmain.m_queue)
+        # def start_channel(self, channel, callback, queue):
+        pmain.schedule_thread.start()
+    signal.signal(signal.SIGINT, signal_handler)
+    pmain.process()
+    sys.exit(0)
 
-# register the local classes
-poseidon_monitor = Monitor()
-poseidon_monitor.add_endpoint('Handle_PCAP', PCAPResource)
-poseidon_monitor.add_endpoint('Handle_Yaml', SwaggerAPI)
-poseidon_monitor.add_endpoint('Handle_Version', VersionResource)
 
-# make sure to update the yaml file when you add a new route
-
-# 'local' routes
-api.add_route('/v1/version', poseidon_monitor.get_endpoint('Handle_Version'))
-api.add_route('/v1/pcap/{pcap_file}/{output_type}',
-              poseidon_monitor.get_endpoint('Handle_PCAP'))
-api.add_route('/swagger.yaml', poseidon_monitor.get_endpoint('Handle_Yaml'))
-
-# access to the other components of PoseidonRest
-
-# nbca routes
-api.add_route('/v1/nbca/{resource}',
-              poseidon_monitor.NorthBoundControllerAbstraction
-              .get_endpoint('Handle_Resource'))
-api.add_route('/v1/polling',
-              poseidon_monitor.NorthBoundControllerAbstraction
-              .get_endpoint('Handle_Periodic'))
-
-# config routes
-api.add_route('/v1/config',
-              poseidon_monitor.Config.get_endpoint('Handle_FullConfig'))
-api.add_route('/v1/config/{section}',
-              poseidon_monitor.Config.get_endpoint('Handle_SectionConfig'))
-api.add_route('/v1/config/{section}/{field}',
-              poseidon_monitor.Config.get_endpoint('Handle_FieldConfig'))
-
-# nodehistory routes
-api.add_route('/v1/history/{resource}',
-              poseidon_monitor.NodeHistory.get_endpoint('Handle_Default'))
-
-# action routes
-api.add_route('/v1/action/{resource}',
-              poseidon_monitor.Action.get_endpoint('Handle_Default'))
-
-# storage routes
+if __name__ == '__main__':
+    main(skip_rabbit=False)
