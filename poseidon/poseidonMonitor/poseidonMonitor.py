@@ -243,6 +243,7 @@ class Monitor(object):
                     'updating:{0}:{1}->{2}'.format(my_hash, current_state, next_state))
                 if next_state == 'MIRRORING':
                     self.logger.debug('*********** MIRROR PORT ***********')
+                    
                     self.logger.debug('*********** NOTIFY VENT ***********')
                 self.uss.change_endpoint_state(my_hash, next_state)
 
