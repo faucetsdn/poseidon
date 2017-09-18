@@ -30,7 +30,6 @@ import time
 from collections import defaultdict
 from functools import partial
 from os import environ, getenv
-from subprocess import call, check_output
 
 import schedule
 
@@ -125,8 +124,6 @@ class Monitor(object):
         self.NorthBoundControllerAbstraction = controller_interface
         self.NorthBoundControllerAbstraction.set_owner(self)
 
-        self.uss = None
-
         # wire up handlers for Config
         self.logger.debug('handler Config')
 
@@ -144,6 +141,10 @@ class Monitor(object):
         self.NorthBoundControllerAbstraction.configure()
         self.NorthBoundControllerAbstraction.first_run()
         self.NorthBoundControllerAbstraction.configure_endpoints()
+
+        # make a shortcut
+        self.uss = self.NorthBoundControllerAbstraction.get_endpoint(
+            'Update_Switch_State')
 
         self.logger.debug('----------------------')
         self.configSelf()
@@ -228,6 +229,28 @@ class Monitor(object):
                 ret_val.append((my_hash, current_state, next_state))
         return ret_val
 
+    def start_vent_collector(self, dev_hash, num_captures=1):
+        '''
+        Given a device hash and optionally a number of captures
+        to be taken, starts vent collector for that device with the
+        options specified in poseidon.config.
+        '''
+        try:
+            payload = {
+                'nic': self.mod_configuration['collector_nic'],
+                'id': dev_hash,
+                'interval': self.mod_configuration['collector_interval'],
+                'filter': self.mod_configuration['collector_filter'],
+                'iters': str(num_captures)}
+            self.logger.debug('vent payload: ' + str(payload))
+            vent_addr = self.mod_configuration[
+                'vent_ip'] + ':' + self.mod_configuration['vent_port']
+            uri = 'http://' + vent_addr + '/create'
+            resp = requests.post(uri, json=payload)
+            self.logger.debug('collector repsonse: ' + resp.text)
+        except Exception as e:
+            self.logger.debug('failed to start vent collector' + str(e))
+
     def process(self):
         while not CTRL_C:
             time.sleep(1)
@@ -243,6 +266,9 @@ class Monitor(object):
                     'updating:{0}:{1}->{2}'.format(my_hash, current_state, next_state))
                 if next_state == 'MIRRORING':
                     self.logger.debug('*********** NOTIFY VENT ***********')
+                    self.start_vent_collector(my_hash)
+                    self.logger.debug('*********** MIRROR PORT ***********')
+                    self.uss.mirror_endpoint(my_hash)
                 self.uss.change_endpoint_state(my_hash, next_state)
 
     def get_q_item(self):
@@ -265,8 +291,6 @@ def signal_handler(signal, frame):
 def main(skip_rabbit=False):
     ''' main function '''
     pmain = Monitor(skip_rabbit=skip_rabbit)
-    pmain.uss = pmain.NorthBoundControllerAbstraction.get_endpoint(
-        'Update_Switch_State')
     if not skip_rabbit:
         rabbit = Rabbit_Base()
         host = pmain.mod_configuration['rabbit-server']
@@ -274,8 +298,8 @@ def main(skip_rabbit=False):
         exchange = 'topic-poseidon-internal'
         queue_name = 'poseidon_main'
         binding_key = ['poseidon.algos.#', 'poseidon.action.#']
-        retval = rabbit.make_rabbit_connection(host, port, exchange, queue_name,
-                                               binding_key)
+        retval = rabbit.make_rabbit_connection(
+            host, port, exchange, queue_name, binding_key)
         pmain.rabbit_channel_local = retval[0]
         pmain.rabbit_channel_connection_local = retval[1]
         rabbit.start_channel(pmain.rabbit_channel_local, callback,
@@ -284,6 +308,7 @@ def main(skip_rabbit=False):
         pmain.schedule_thread.start()
     signal.signal(signal.SIGINT, signal_handler)
     pmain.process()
+    pmain.logger.debug('Exiting')
     sys.exit(0)
 
 

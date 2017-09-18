@@ -23,13 +23,14 @@ import Queue
 import threading
 import time
 import types
+from collections import defaultdict
 from functools import partial
 from os import getenv
-from collections import defaultdict
 
 from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
-from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.bcf import BcfProxy
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.bcf import \
+    BcfProxy
 
 module_logger = logging.getLogger(__name__)
 
@@ -106,65 +107,55 @@ class Update_Switch_State(Monitor_Helper_Base):
         post_h = h.hexdigest()
         return post_h
 
-    def handle_item(self, item):
-        ''' perform an action based on rabbit item'''
-        self.logger.debug('handle_item: {0}:{1}'.format(item, type(item)))
-        itype = item[0]
-        ivalue = item[1]
-        ivalue = json.loads(ivalue)
-        self.logger.debug(
-            'handle_item: ivalue json: {0}:{1}'.format(ivalue, type(ivalue)))
+    def get_endpoint_state(self, my_hash):
+        if my_hash in self.endpoint_states:
+            return self.endpoint_states[my_hash]['state']
+        return None
 
-        if itype == 'poseidon.action.start_monitor':
-            for my_hash, my_dict in ivalue.iteritems():
-                if my_hash in self.new_endpoints:
-                    v = self.new_endpoints.pop(my_hash)
-                    self.logger.debug(
-                        'removed {0} from new_endpoints'.format(v))
-                else:
-                    self.logger.debug('could not find {0} in {1}'.format(
-                        my_hash, self.new_endpoints))
+    def get_endpoint_ip(self, my_hash):
+        if my_hash in self.endpoint_states:
+            return self.endpoint_states[my_hash]['endpoint']['ip-address']
+        return None
 
+    def shutdown_endpoint(self, my_hash, next_state='SHUTDOWN'):
+        if my_hash in self.endpoint_states:
+            if self.get_endpoint_state(my_hash) != next_state:
+                my_ip = self.get_endpoint_ip(my_hash)
+                self.bcf.shutdown_ip(my_ip)
+                self.change_endpoint_state(my_hash, next_state)
                 self.logger.debug(
-                    'mirroring :{0}'.format(my_dict['ip-address']))
+                    'endpoint:{0}:{1}:{2}'.format(my_hash, my_ip, next_state))
+                return True
+        return False
+
+    def mirror_endpoint(self, my_hash, next_state='MIRRORING'):
+        if my_hash in self.endpoint_states:
+            if self.get_endpoint_state(my_hash) != next_state:
+                my_ip = self.get_endpoint_ip(my_hash)
+                self.bcf.mirror_ip(my_ip)
+                self.change_endpoint_state(my_hash, next_state)
                 self.logger.debug(
-                    'mirroring[{0}]={1}'.format(my_hash, my_dict))
-                self.bcf.mirror_ip(my_dict['ip-address'])
-                self.endpoint_states[my_hash]['state'] = 'MIRRORING'
-                #self.mirroring[my_hash] = my_dict
+                    'endpoint:{0}:{1}:{2}'.format(my_hash, my_ip, next_state))
+                return True
+        return False
 
-        if itype == 'poseidon.action.endpoint_shutdown':
-            self.logger.debug(
-                'endpoint_shutdown:{0}:{1}'.format(ivalue, type(ivalue)))
-            for my_hash, my_dict in ivalue.iteritems():
-                bad_ip = my_dict.get('ip-address')
-                if bad_ip is not None:
-                    self.logger.debug(
-                        '****** shutdown {0}:{1}'.format(bad_ip, ivalue))
-                    self.bcf.shutdown_ip(bad_ip)
-                    self.endpoint_states[my_hash]['state'] = 'SHUTDOWN'
-                    #self.shutdown[my_hash] = my_dict
+    def make_known_endpoint(self, my_hash, next_state='KNOWN'):
+        if my_hash in self.endpoint_states:
+            if self.get_endpoint_state(my_hash) != next_state:
+                my_ip = self.get_endpoint_ip(my_hash)
+                self.bcf.unmirror_ip(my_ip)
+                self.change_endpoint_state(my_hash, 'KNOWN')
+                self.logger.debug(
+                    'endpoint:{0}:{1}:{2}'.format(my_hash, my_ip, next_state))
+                return True
+        return False
 
-        if itype == 'poseidon.action.stop_monitor':
-            self.logger.debug('stop_monitor:{0}:{1}'.format(itype, ivalue))
-            for my_hash, my_dict in ivalue.iteritems():
-                self.logger.debug('stop_monitor_dict:{0}'.format(my_dict))
-                my_ip = my_dict.get('ip-address')
-                if my_ip is not None:
-                    self.logger.debug('***** shutting down {0}'.format(my_ip))
-                    self.bcf.unmirror_ip(my_ip)
-                    if self.endpoint_states[my_hash]['state'] == 'MIRRORING':
-                        self.endpoint_states[my_hahs]['state'] = 'KNOWN'
+    def make_endpoint_dict(self, my_hash, state, data):
+        self.endpoint_states[my_hash]['state'] = state
+        self.endpoint_states[my_hash]['endpoint'] = data
 
-                    # if my_hash in self.mirroring:
-                    #    self.mirroring.pop(my_hash)
-
-    def make_endpoint_dict(self, hash, state, data):
-        self.endpoint_states[hash]['state'] = state
-        self.endpoint_states[hash]['endpoint'] = data
-
-    def change_endpoint_state(self, hash, new_state):
-        self.endpoint_states[hash]['state'] = new_state
+    def change_endpoint_state(self, my_hash, new_state):
+        self.endpoint_states[my_hash]['state'] = new_state
 
     def find_new_machines(self, machines):
         '''parse switch structure to find new machines added to network
@@ -177,7 +168,6 @@ class Update_Switch_State(Monitor_Helper_Base):
                 module_logger.critical(
                     'adding address to known systems {0}'.format(machine))
                 self.make_endpoint_dict(h, 'KNOWN', machine)
-                #self.prev_endpoints[h] = machine
         else:
             for machine in machines:
                 h = self.make_hash(machine)
@@ -185,7 +175,6 @@ class Update_Switch_State(Monitor_Helper_Base):
                     module_logger.critical(
                         '***** detected new address {0}'.format(machine))
                     self.make_endpoint_dict(h, 'UNKNOWN', machine)
-                    #self.new_endpoints[h] = machine
 
     def print_endpoint_state(self):
         def same_old(logger, state, letter, endpoint_states):

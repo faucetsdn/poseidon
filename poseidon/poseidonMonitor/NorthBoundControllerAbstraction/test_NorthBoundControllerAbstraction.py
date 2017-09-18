@@ -21,43 +21,8 @@ Created on 28 June 2016
 """
 import logging
 
-import falcon
 import pytest
 
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import controller_interface
 
 module_logger = logging.getLogger(__name__)
-
-
-application = falcon.API()
-application.add_route(
-    '/v1/Nbca/resource/{resource}',
-    controller_interface.get_endpoint('Handle_Resource'))
-application.add_route(
-    '/v1/Nbca/periodic',
-    controller_interface.get_endpoint('Handle_Periodic'))
-
-
-# exposes the application for testing
-@pytest.fixture
-def app():
-    return application
-
-
-def test_NorthBoundControllerAbstraction_periodic(client):
-    #    """
-    #    Tests NorthBoundControllerAbstraction Handle_Periodic
-    #    class.
-    #    """
-    #    resp = client.get('/v1/Nbca/periodic')
-    #    assert resp.status == falcon.HTTP_OK
-    #    package = ast.literal_eval(resp.body)
-    #    assert isinstance(package['times'], int)
-    #    assert 'controller' in package
-    #    assert 'service' in package
-    #    if 'establish' in package['controller']:
-    #        assert 'Could not' in package['controller']
-    #    else:
-    #        assert int(package['controller']) <= 10
-    #        assert int(package['controller']) >= 1
-    pass

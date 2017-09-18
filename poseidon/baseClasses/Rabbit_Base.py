@@ -53,7 +53,7 @@ class Rabbit_Base(object):
         while wait and total_sleep > 0:
             try:
                 rabbit_connection = pika.BlockingConnection(
-                    pika.ConnectionParameters(host=host,port=port))
+                    pika.ConnectionParameters(host=host, port=port))
                 rabbit_channel = rabbit_connection.channel()
                 rabbit_channel.exchange_declare(exchange=exchange,
                                                 exchange_type='topic')
