@@ -1,4 +1,5 @@
 FROM ubuntu:16.04
+Maintainer dgrossman@iqt.org
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -15,18 +16,11 @@ RUN apt-get update && \
 COPY . /poseidonWork
 WORKDIR /poseidonWork
 ENV PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
-RUN pip install pip==9.0.1 --upgrade
 
 # install dependencies of poseidon modules for poseidon
-RUN for file in $(find poseidon/* -name "requirements.txt"); \
-    do \
-        pip install -r $file; \
-    done
+RUN find . -name requirements.txt -type f -exec pip install -r {} \;
 
 ENV PYTHONUNBUFFERED 0
-
-# run linter
-#RUN pylint --disable=all --enable=classes --disable=W poseidonMonitor
 
 # run tests
 RUN py.test -v \
