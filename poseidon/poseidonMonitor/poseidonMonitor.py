@@ -31,6 +31,7 @@ from collections import defaultdict
 from functools import partial
 from os import environ, getenv
 
+import requests
 import schedule
 
 from poseidon.baseClasses.Rabbit_Base import Rabbit_Base
@@ -81,11 +82,12 @@ def start_investigating():
 def schedule_job_reinvestigation(max_investigations, endpoints, logger):
     ostr = 'reinvestagtion time'
     logger.debug(ostr)
+    logger.debug('endpoints:{0}'.format(endpoints))
 
     currently_investigating = 0
     for my_hash, my_value in endpoints.iteritems():
         if 'state' in my_value:
-            if my_value['state'] == 'REINVESTIGATION':
+            if my_value['state'] == 'REINVESTIGATING':
                 currently_investigating += 1
 
     if currently_investigating < max_investigations:
@@ -240,7 +242,7 @@ class Monitor(object):
                 'nic': self.mod_configuration['collector_nic'],
                 'id': dev_hash,
                 'interval': self.mod_configuration['collector_interval'],
-                'filter': self.mod_configuration['collector_filter'],
+                'filter': '\'host {0}\''.format(self.uss.get_endpoint_ip(dev_hash)),
                 'iters': str(num_captures)}
             self.logger.debug('vent payload: ' + str(payload))
             vent_addr = self.mod_configuration[
