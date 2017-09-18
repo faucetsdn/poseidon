@@ -110,11 +110,17 @@ class Update_Switch_State(Monitor_Helper_Base):
     def get_endpoint_state(self, my_hash):
         if my_hash in self.endpoint_states:
             return self.endpoint_states[my_hash]['state']
+        return None
+
+    def get_endpoint_ip(self, my_hash):
+        if my_hash in self.endpoint_states:
+            return self.endpoint_states[my_hash]['endpoint']['ip-address']
+        return None
 
     def shutdown_endpoint(self, my_hash, next_state='SHUTDOWN'):
         if my_hash in self.endpoint_states:
-            if self.get_endpoint_State(my_hash) != next_state:
-                my_ip = endpoint_states[my_hash]['endpoint']['ip-address']
+            if self.get_endpoint_state(my_hash) != next_state:
+                my_ip = self.get_endpoint_ip(my_hash)
                 self.bcf.shutdown_ip(my_ip)
                 self.change_endpoint_state(my_hash, next_state)
                 self.logger.debug(
@@ -125,9 +131,9 @@ class Update_Switch_State(Monitor_Helper_Base):
     def mirror_endpoint(self, my_hash, next_state='MIRRORING'):
         if my_hash in self.endpoint_states:
             if self.get_endpoint_state(my_hash) != next_state:
-                my_ip = endpoint_states[my_hash]['endpoint']['ip-address']
-                self.change_endpoint_state(my_hash, next_state)
+                my_ip = self.get_endpoint_ip(my_hash)
                 self.bcf.mirror_ip(my_ip)
+                self.change_endpoint_state(my_hash, next_state)
                 self.logger.debug(
                     'endpoint:{0}:{1}:{2}'.format(my_hash, my_ip, next_state))
                 return True
@@ -135,8 +141,8 @@ class Update_Switch_State(Monitor_Helper_Base):
 
     def make_known_endpoint(self, my_hash, next_state='KNOWN'):
         if my_hash in self.endpoint_states:
-            if self.get_endpoint_State(my_hash) != next_state:
-                my_ip = endpoint_states[my_hash]['endpoint']['ip-address']
+            if self.get_endpoint_state(my_hash) != next_state:
+                my_ip = self.get_endpoint_ip(my_hash)
                 self.bcf.unmirror_ip(my_ip)
                 self.change_endpoint_state(my_hash, 'KNOWN')
                 self.logger.debug(
