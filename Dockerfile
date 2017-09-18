@@ -13,6 +13,8 @@ RUN apt-get update && \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+RUN pip install pip==9.0.1 --upgrade
+
 COPY . /poseidonWork
 WORKDIR /poseidonWork
 ENV PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
