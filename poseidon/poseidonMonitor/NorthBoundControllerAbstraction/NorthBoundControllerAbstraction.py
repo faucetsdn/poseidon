@@ -20,12 +20,7 @@ import hashlib
 import json
 import logging
 import Queue
-import threading
-import time
-import types
 from collections import defaultdict
-from functools import partial
-from os import getenv
 
 from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
