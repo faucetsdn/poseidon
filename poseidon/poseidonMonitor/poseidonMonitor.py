@@ -27,9 +27,8 @@ import signal
 import sys
 import threading
 import time
-from collections import defaultdict
 from functools import partial
-from os import environ, getenv
+from os import getenv
 
 import requests
 import schedule
@@ -242,7 +241,8 @@ class Monitor(object):
                 'nic': self.mod_configuration['collector_nic'],
                 'id': dev_hash,
                 'interval': self.mod_configuration['collector_interval'],
-                'filter': '\'host {0}\''.format(self.uss.get_endpoint_ip(dev_hash)),
+                'filter': '\'host {0}\''.format(
+                    self.uss.get_endpoint_ip(dev_hash)),
                 'iters': str(num_captures)}
             self.logger.debug('vent payload: ' + str(payload))
             vent_addr = self.mod_configuration[
