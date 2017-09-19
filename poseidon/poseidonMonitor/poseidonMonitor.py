@@ -279,7 +279,7 @@ class Monitor(object):
 
         try:
             item = self.m_queue.get(False)
-            found = True
+            found_work = True
         except Queue.Empty:
             pass
 
