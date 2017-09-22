@@ -96,8 +96,8 @@ class Handle_FullConfig(Monitor_Helper_Base):
             retval = json.dumps('Failed to open config file.')
         return retval
 
-    def on_get(self, req, resp):
-        resp.body = self.direct_get()
+    # def on_get(self, req, resp):
+    #    resp.body = self.direct_get()
 
 
 class Handle_SectionConfig(Monitor_Helper_Base):
@@ -122,10 +122,10 @@ class Handle_SectionConfig(Monitor_Helper_Base):
         return retval
 
     # rest way
-    def on_get(self, req, resp, section):
-        ''' use the rest interface to return  '''
-        ret_sec = self.direct_get(section)
-        resp.body = json.dumps(ret_sec)
+    # def on_get(self, req, resp, section):
+    #    ''' use the rest interface to return  '''
+    #    ret_sec = self.direct_get(section)
+    #    resp.body = json.dumps(ret_sec)
 
 
 class Handle_FieldConfig(Monitor_Helper_Base):
@@ -151,14 +151,14 @@ class Handle_FieldConfig(Monitor_Helper_Base):
                 field, section)
         return retval
 
-    def on_get(self, req, resp, section, field):
-        """
-        Requests should have a section of the config
-        file and variable/field in that section to be
-        returned in the response body.
-        """
-        resp.content_type = 'text/text'
-        resp.body = self.direct_get(field, section)
+    # def on_get(self, req, resp, section, field):
+    #    """
+    #    Requests should have a section of the config
+    #    file and variable/field in that section to be
+    #    returned in the response body.
+    #    """
+    #    resp.content_type = 'text/text'
+    #    resp.body = self.direct_get(field, section)
 
 
 config_interface = Config()

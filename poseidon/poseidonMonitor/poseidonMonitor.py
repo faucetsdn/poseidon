@@ -316,11 +316,14 @@ def main(skip_rabbit=False):
         pmain.rabbit_channel_local = retval[0]
         pmain.rabbit_channel_connection_local = retval[1]
         pmain.rabbit_thread = rabbit.start_channel(
-            pmain.rabbit_channel_local, rabbit_callback, 'poseidon_main', pmain.m_queue)
+            pmain.rabbit_channel_local,
+            rabbit_callback,
+            'poseidon_main',
+            pmain.m_queue)
         # def start_channel(self, channel, callback, queue):
         pmain.schedule_thread.start()
-    
-    #loop here until told not to
+
+    # loop here until told not to
     pmain.process()
 
     pmain.logger.debug('SHUTTING DOWN')
