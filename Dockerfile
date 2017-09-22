@@ -1,5 +1,5 @@
 FROM ubuntu:16.04
-Maintainer dgrossman@iqt.org
+MAINTAINER dgrossman@iqt.org
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -23,6 +23,12 @@ ENV PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
 RUN find . -name requirements.txt -type f -exec pip install -r {} \;
 
 ENV PYTHONUNBUFFERED 0
+
+# Add Tini
+ENV TINI_VERSION v0.16.1
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
+RUN chmod +x /tini
+ENTRYPOINT ["/tini", "--"]
 
 # run tests
 RUN py.test -v \

@@ -52,7 +52,7 @@ def schedule_job_kickurl(func, logger):
         'Update_Switch_State').update_endpoint_state()
 
 
-def callback(ch, method, properties, body, q=None):
+def rabbit_callback(ch, method, properties, body, q=None):
     ''' callback, places rabbit data into internal queue'''
     module_logger.debug('got a message: {0}:{1}:{2}'.format(
         method.routing_key, body, type(body)))
@@ -64,14 +64,17 @@ def callback(ch, method, properties, body, q=None):
 
 
 def schedule_thread_worker(schedule, logger):
+    global CTRL_C
     logLine = 'starting thread_worker'
     logger.debug(logLine)
-    while(True):
+    while not CTRL_C:
         schedule.run_pending()
         logLine = 'scheduler woke {0}'.format(
             threading.current_thread().getName())
         time.sleep(1)
         logger.debug(logLine)
+    logger.debug('Threading stop:{0}'.format(
+        threading.current_thread().getName()))
 
 
 def start_investigating():
@@ -118,6 +121,7 @@ class Monitor(object):
         # rabbit
         self.rabbit_channel_local = None
         self.rabbit_chanel_connection_local = None
+        self.rabbit_thread = None
 
         self.actions = dict()
         self.Config = config_interface
@@ -254,7 +258,10 @@ class Monitor(object):
             self.logger.debug('failed to start vent collector' + str(e))
 
     def process(self):
+        global CTRL_C
+        signal.signal(signal.SIGINT, partial(self.signal_handler))
         while not CTRL_C:
+            self.logger.debug('***************CTRL_C:{0}'.format(CTRL_C))
             time.sleep(1)
             found_work, item = self.get_q_item()
             self.logger.debug('woke from sleeping')
@@ -279,15 +286,19 @@ class Monitor(object):
 
         try:
             item = self.m_queue.get(False)
-            found = True
+            found_work = True
         except Queue.Empty:
             pass
 
         return (found_work, item)
 
-
-def signal_handler(signal, frame):
-    CTRL_C = True
+    def signal_handler(self, signal, frame):
+        global CTRL_C
+        CTRL_C = True
+        self.logger.debug('=================CTRLC{0}'.format(CTRL_C))
+        for job in self.schedule.jobs:
+            self.logger.debug('CTRLC:{0}'.format(job))
+            self.schedule.cancel_job(job)
 
 
 def main(skip_rabbit=False):
@@ -304,13 +315,21 @@ def main(skip_rabbit=False):
             host, port, exchange, queue_name, binding_key)
         pmain.rabbit_channel_local = retval[0]
         pmain.rabbit_channel_connection_local = retval[1]
-        rabbit.start_channel(pmain.rabbit_channel_local, callback,
-                             'poseidon_main', pmain.m_queue)
+        pmain.rabbit_thread = rabbit.start_channel(
+            pmain.rabbit_channel_local,
+            rabbit_callback,
+            'poseidon_main',
+            pmain.m_queue)
         # def start_channel(self, channel, callback, queue):
         pmain.schedule_thread.start()
-    signal.signal(signal.SIGINT, signal_handler)
+
+    # loop here until told not to
     pmain.process()
-    pmain.logger.debug('Exiting')
+
+    pmain.logger.debug('SHUTTING DOWN')
+    pmain.rabbit_channel_connection_local.close()
+    pmain.rabbit_channel_local.close()
+    pmain.logger.debug('EXITING')
     sys.exit(0)
 
 
