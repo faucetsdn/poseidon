@@ -36,6 +36,7 @@ class Logger:
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
 
+    # timestamp - logger_level - class:line number - message
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - '
                                   '%(module)s:%(lineno)-3d - %(message)s')
 
@@ -44,8 +45,7 @@ class Logger:
     sys_err.setFormatter(formatter)
     logger.addHandler(sys_err)
 
-    # type in the address explicitly . Python doesn't like it if the host is
-    # in variable form
+    # don't try to connect to a syslog address if one was not supplied
     if host != 'NOT_CONFIGURED':
         sys_log = logging.handlers.SysLogHandler(address=(host, port),
                                                  socktype=socket.SOCK_STREAM)
@@ -53,7 +53,7 @@ class Logger:
         logger.addHandler(sys_log)
 
     # logger prints twice if this is not set to false
-    logger.propagate = False
+    #logger.propagate = False
 
     @staticmethod
     def set_level(level):
