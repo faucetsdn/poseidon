@@ -222,7 +222,7 @@ class Monitor(object):
         ostr = '{0}:config:{1}'.format(self.mod_name, self.mod_configuration)
         self.logger.debug(ostr)
 
-    def update_state(self, endpoint_states):
+    def update_state(self, endpoint_states, rabbit_transitions):
         ret_val = []
         next_state = None
         current_state = None
@@ -232,6 +232,11 @@ class Monitor(object):
             if current_state == 'UNKNOWN':
                 next_state = 'MIRRORING'
                 ret_val.append((my_hash, current_state, next_state))
+        for my_hash in rabbit_transitions.keys():
+            my_dict = endpoint_states[my_hash]
+            current_state = my_dict['state']
+            next_state = rabbit_transitions[my_hash]
+            ret_Val.append((my_hash, current_State, next_state))
         return ret_val
 
     def start_vent_collector(self, dev_hash, num_captures=1):
@@ -257,17 +262,33 @@ class Monitor(object):
         except Exception as e:
             self.logger.debug('failed to start vent collector' + str(e))
 
+    def process_rabbit_message(self, item):
+        self.logger.debug('rabbit_message:{1}'.format(found_work, item))
+        my_obj = json.loads(item)
+        source = my_obj[0]
+        ret_val = {}
+        self.logger.debug('source:{0}'.format(source))
+        if source is not None and source == 'poseidon.algos.ML.results':
+            value = my_obj[1]
+            self.logger.debug('value:{0}'.format(value))
+        # TODO do something with reccomendation
+        return ret_val
+
     def process(self):
         global CTRL_C
         signal.signal(signal.SIGINT, partial(self.signal_handler))
         while not CTRL_C:
             self.logger.debug('***************CTRL_C:{0}'.format(CTRL_C))
             time.sleep(1)
-            found_work, item = self.get_q_item()
             self.logger.debug('woke from sleeping')
-            self.logger.debug('work:{0},item:{1}'.format(found_work, item))
+            found_work, item = self.get_q_item()
+            rabbit_transitions = {}
+
+            if found_work:
+                rabbit_transitions = self.process_rabbit_message(item)
+
             state_transitions = self.update_state(
-                self.uss.return_endpoint_state())
+                self.uss.return_endpoint_state(), rabbit_transitions)
             self.print_endpoint_state(self.uss.return_endpoint_state())
             for transition in state_transitions:
                 my_hash, current_state, next_state = transition
