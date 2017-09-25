@@ -111,7 +111,6 @@ class Monitor(object):
         self.logger = module_logger.logger
         self.mod_configuration = dict()
         module_logger.logger_config(None)
-        module_logger.set_level('DEBUG')
 
         self.mod_name = self.__class__.__name__
         self.skip_rabbit = skip_rabbit
@@ -129,6 +128,11 @@ class Monitor(object):
         self.Config.set_owner(self)
         self.NorthBoundControllerAbstraction = controller_interface
         self.NorthBoundControllerAbstraction.set_owner(self)
+
+        self.configSelf()
+
+        # set the logger level
+        module_logger.set_level(self.mod_configuration['logger_level'])
 
         # wire up handlers for Config
         self.logger.debug('handler Config')
@@ -153,7 +157,6 @@ class Monitor(object):
             'Update_Switch_State')
 
         self.logger.debug('----------------------')
-        self.configSelf()
         self.init_logging()
 
         scan_frequency = int(self.mod_configuration['scan_frequency'])

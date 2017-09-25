@@ -25,7 +25,6 @@ from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.auth.cookie.
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.mixins.jsonmixin import JsonMixin
 
 module_logger = Logger
-module_logger.set_level('DEBUG')
 module_logger = module_logger.logger
 
 
