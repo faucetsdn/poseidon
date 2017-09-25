@@ -18,6 +18,7 @@
 """
 import logging
 import logging.handlers
+import os
 import socket
 
 
@@ -26,8 +27,8 @@ class Logger:
     Base logger class that handles logging. Outputs to both stderr and a user
     specified syslog. To log, use the class's variable 'logger'
     """
-    host = 'localhost'
-    port = 514
+    host = os.getenv('SYS_LOG_HOST', 'NOT_CONFIGURED')
+    port = int(os.getenv('SYS_LOG_PORT', 514))
 
     level_int = {'CRITICAL': 50, 'ERROR': 40, 'WARNING': 30,
                       'INFO': 20, 'DEBUG' : 10}
@@ -41,16 +42,15 @@ class Logger:
     # have it sent to both stderr and a user defined syslog
     sys_err = logging.StreamHandler()
     sys_err.setFormatter(formatter)
+    logger.addHandler(sys_err)
 
     # type in the address explicitly . Python doesn't like it if the host is
     # in variable form
-    sys_log = logging.handlers.SysLogHandler(address=(host, port),
-                                             socktype=socket.SOCK_STREAM)
-    sys_log.setFormatter(formatter)
-
-    logger.addHandler(sys_err)
-    logger.addHandler(sys_log)
-    sys_log.setFormatter(formatter)
+    if host != 'NOT_CONFIGURED':
+        sys_log = logging.handlers.SysLogHandler(address=(host, port),
+                                                 socktype=socket.SOCK_STREAM)
+        sys_log.setFormatter(formatter)
+        logger.addHandler(sys_log)
 
     # logger prints twice if this is not set to false
     logger.propagate = False
