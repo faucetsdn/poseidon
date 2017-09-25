@@ -44,7 +44,7 @@ class Logger:
 
     # type in the address explicitly . Python doesn't like it if the host is
     # in variable form
-    sys_log = logging.handlers.SysLogHandler(address=('10.179.0.101', port),
+    sys_log = logging.handlers.SysLogHandler(address=(host, port),
                                              socktype=socket.SOCK_STREAM)
     sys_log.setFormatter(formatter)
 
