@@ -264,13 +264,12 @@ class Monitor(object):
 
     def process_rabbit_message(self, item):
         self.logger.debug('rabbit_message:{1}'.format(found_work, item))
-        my_obj = json.loads(item)
-        source = my_obj[0]
+        routing_key, my_obj = item
+        my_obj = json.loads(my_obj)
         ret_val = {}
-        self.logger.debug('source:{0}'.format(source))
-        if source is not None and source == 'poseidon.algos.ML.results':
-            value = my_obj[1]
-            self.logger.debug('value:{0}'.format(value))
+        self.logger.debug('routing_key:{0}'.format(routing_key))
+        if routing_key is not None and routing_key == 'poseidon.algos.ML.results':
+            self.logger.debug('value:{0}'.format(my_obj))
         # TODO do something with reccomendation
         return ret_val
 
