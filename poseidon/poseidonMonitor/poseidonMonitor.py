@@ -300,8 +300,6 @@ class Monitor(object):
         for job in self.schedule.jobs:
             self.logger.debug('CTRLC:{0}'.format(job))
             self.schedule.cancel_job(job)
-            #d = docker.from_env()
-
 
 
 def main(skip_rabbit=False):
