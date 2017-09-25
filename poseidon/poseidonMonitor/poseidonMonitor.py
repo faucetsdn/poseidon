@@ -32,6 +32,7 @@ from os import getenv
 
 import requests
 import schedule
+import random
 
 from poseidon.baseClasses.Rabbit_Base import Rabbit_Base
 from poseidon.poseidonMonitor.Config.Config import config_interface
@@ -85,20 +86,29 @@ def schedule_job_reinvestigation(max_investigations, endpoints, logger):
     ostr = 'reinvestagtion time'
     logger.debug(ostr)
     logger.debug('endpoints:{0}'.format(endpoints))
+    candidates = []
 
     currently_investigating = 0
     for my_hash, my_value in endpoints.iteritems():
         if 'state' in my_value:
             if my_value['state'] == 'REINVESTIGATING':
                 currently_investigating += 1
+            elif my_value['state'] == 'KNOWN':
+                candidates.append(my_hash)
+
+    # get random order of things that are known
+    random.shuffle(candidates)
 
     if currently_investigating < max_investigations:
         ostr = 'room to investigate'
         logger.debug(ostr)
         for x in range(max_investigations - currently_investigating):
-            ostr = 'starting investigation {0}'.format(x)
-            logger.debug(ostr)
-            start_investigating()
+            if len(candidates) >= 1:
+                chosen = candidates.pop()
+                ostr = 'starting investigation {0}:{1}'.format(x, chosen)
+                logger.debug(ostr)
+                #endpoints[chosen]['next-state'] = 'REINVESTIGATING'
+                start_investigating()
     else:
         ostr = 'investigators all busy'
         logger.debug(ostr)
