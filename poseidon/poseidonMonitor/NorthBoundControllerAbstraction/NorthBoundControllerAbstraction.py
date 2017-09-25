@@ -27,7 +27,7 @@ from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.bcf import \
     BcfProxy
 
-module_logger = Logger(__name__)
+module_logger = Logger
 
 
 class NorthBoundControllerAbstraction(Monitor_Action_Base):

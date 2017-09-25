@@ -18,16 +18,13 @@ Created on 25 July 2016
 @author: kylez,dgrossman
 '''
 import json
-#import logging
 from urlparse import urljoin
 
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.auth.cookie.cookieauth import CookieAuthControllerProxy
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.mixins.jsonmixin import JsonMixin
 
-#logging.basicConfig(level=logging.DEBUG)
-#module_logger = logging.getLogger(__name__)
-module_logger = Logger(__name__)
+module_logger = Logger
 module_logger.set_level('DEBUG')
 module_logger = module_logger.logger
 

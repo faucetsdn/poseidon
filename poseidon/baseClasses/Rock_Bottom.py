@@ -16,12 +16,9 @@
 """ Created on  18 July 2016
 @author: dgrossman
 """
-#import logging
-
 from Logger_Base import Logger
 
-#module_logger = logging.getLogger(__name__)
-module_logger = Logger(__name__).logger
+module_logger = Logger.logger
 
 
 class Rock_Bottom(object):

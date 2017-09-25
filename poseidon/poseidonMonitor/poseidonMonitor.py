@@ -41,7 +41,7 @@ from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.NorthBoundControll
 ENDPOINT_STATES = [('K', 'KNOWN'), ('U', 'UNKNOWN'), ('M', 'MIRRORING'),
                    ('S', 'SHUTDOWN'), ('R', 'REINVESTIGATING')]
 
-module_logger = Logger(__name__)
+module_logger = Logger
 
 CTRL_C = False
 
@@ -112,7 +112,6 @@ class Monitor(object):
         self.mod_configuration = dict()
         module_logger.logger_config(None)
         module_logger.set_level('DEBUG')
-        self.count = 1
 
         self.mod_name = self.__class__.__name__
         self.skip_rabbit = skip_rabbit

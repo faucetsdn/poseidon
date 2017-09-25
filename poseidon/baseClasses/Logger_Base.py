@@ -26,42 +26,44 @@ class Logger:
     Base logger class that handles logging. Outputs to both stderr and a user
     specified syslog. To log, use the class's variable 'logger'
     """
-    def __init__(self, name):
-        host = 'l0.179.0.101'
-        port = 514
+    host = 'localhost'
+    port = 514
 
-        self.count = 0
-        self.level_int = {'CRITICAL': 50, 'ERROR': 40, 'WARNING': 30,
-                          'INFO': 20, 'DEBUG' : 10}
+    level_int = {'CRITICAL': 50, 'ERROR': 40, 'WARNING': 30,
+                      'INFO': 20, 'DEBUG' : 10}
 
-        self.logger = logging.getLogger(name)
-        self.logger.setLevel(logging.DEBUG)
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
 
-        formatter = logging.Formatter('%(asctime)s - %(levelname)s - '
-                                      '%(module)s:%(lineno)-3d - %(message)s')
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - '
+                                  '%(module)s:%(lineno)-3d - %(message)s')
 
-        # have it sent to both stderr and a user defined syslog
-        sys_err = logging.StreamHandler()
-        sys_err.setFormatter(formatter)
+    # have it sent to both stderr and a user defined syslog
+    sys_err = logging.StreamHandler()
+    sys_err.setFormatter(formatter)
 
-        #sys_log = logging.handlers.SysLogHandler(address=(host, port),
-        #                                         socktype=socket.SOCK_STREAM)
-        #sys_log.setFormatter(formatter)
+    # type in the address explicitly . Python doesn't like it if the host is
+    # in variable form
+    sys_log = logging.handlers.SysLogHandler(address=('10.179.0.101', port),
+                                             socktype=socket.SOCK_STREAM)
+    sys_log.setFormatter(formatter)
 
-        self.logger.addHandler(sys_err)
-        #self.logger.addHandler(sys_log)
-        #sys_log.setFormatter(formatter)
+    logger.addHandler(sys_err)
+    logger.addHandler(sys_log)
+    sys_log.setFormatter(formatter)
 
-        # logger prints twice if this is not set to false
-        self.logger.propagate = False
-        
-    def set_level(self, level):
+    # logger prints twice if this is not set to false
+    logger.propagate = False
+
+    @staticmethod
+    def set_level(level):
         """
         Set the logger level. That level and above gets logged.
         """
-        self.logger.setLevel(self.level_int[level.upper()])
+        Logger.logger.setLevel(Logger.level_int[level.upper()])
 
-    def logger_config(self, config):
+    @staticmethod
+    def logger_config(config):
         """
         Load configuration files if they exist for loggers.
         """
@@ -69,10 +71,3 @@ class Logger:
             logging.config.dictConfigClass(config)
         else:
             logging.basicConfig()
-
-    def debug(self, message):
-        if self.count % 10 == 0:
-            self.logger.debug(message)
-            self.count = 1
-        else:
-            self.count += 1

@@ -16,7 +16,6 @@
 ''' Created on 21 August 2017
 @author: dgrossman
 '''
-#import logging
 import pika
 import threading
 import time
@@ -26,8 +25,7 @@ from functools import partial
 from Logger_Base import Logger
 
 
-#module_logger = logging.getLogger(__name__)
-module_logger = Logger(__name__)
+module_logger = Logger
 
 
 class Rabbit_Base(object):

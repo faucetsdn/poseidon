@@ -17,13 +17,10 @@
 Created on 14 July 2016
 @author: dgrossman
 '''
-#import logging
-
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.baseClasses.Rock_Bottom import Rock_Bottom
 
-#module_logger = logging.getLogger(__name__)
-module_logger = Logger(__name__)
+module_logger = Logger
 
 
 class Monitor_Helper_Base(Rock_Bottom):  # pragma: no cover
@@ -42,7 +39,6 @@ class Monitor_Helper_Base(Rock_Bottom):  # pragma: no cover
         if owner.logger is not None:
             self.logger = owner.logger
         else:
-            #self.logger = logging.getLogger(__name__)
             self.logger = module_logger.logger
 
         self.logger.debug('set_owner = {0}'.format(owner.mod_name))

@@ -17,12 +17,10 @@
 Created on 14 Jul 2016
 @author: dgrossman
 """
-#import logging
-
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.baseClasses.Rock_Bottom import Rock_Bottom
 
-module_logger = Logger(__name__)
+module_logger = Logger
 
 """ Base call stubs
 

@@ -19,7 +19,6 @@ Test module for bcf.
 @author: kylez
 """
 import json
-#import logging
 import os
 
 from httmock import HTTMock
@@ -30,8 +29,8 @@ from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.bcf import BcfProxy
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.sample_state import span_fabric_state
 
-#module_logger = logging.getLogger(__name__)
-module_logger = Logger(__name__).logger
+module_logger = Logger
+module_logger = module_logger.logger
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 username = 'user'
