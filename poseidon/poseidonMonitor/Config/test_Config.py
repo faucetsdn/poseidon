@@ -19,13 +19,12 @@ Test module for Config.py
 Created on 28 June 2016
 @author: dgrossman, lanhamt
 """
-import logging
-
 import pytest
 
+from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.Config.Config import config_interface
 
-module_logger = logging.getLogger(__name__)
+module_logger = Logger.logger
 
 
 # exposes the application for testing

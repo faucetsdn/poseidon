@@ -19,17 +19,16 @@ Test module for jsonmixin.
 @author: kylez
 """
 import json
-import logging
 import os
 
 from httmock import response
 
+from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.mixins.jsonmixin import JsonMixin
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 
-module_logger = logging.getLogger(__name__)
-
+moudle_logger = Logger.logger
 
 def test_JsonMixin():
     """
