@@ -19,16 +19,16 @@ Test module for basicauth.
 @author: kylez
 """
 import base64
-import logging
 import os
 
 from httmock import HTTMock
 from httmock import response
 from httmock import urlmatch
 
+from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.auth.basic.basicauth import BasicAuthControllerProxy
 
-module_logger = logging.getLogger(__name__)
+module_logger = Logger.logger
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 username = 'user'

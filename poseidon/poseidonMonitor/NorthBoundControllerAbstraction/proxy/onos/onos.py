@@ -17,12 +17,12 @@
 Created on 25 July 2016
 @author: kylez
 """
-import logging
-
+from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.auth.basic.basicauth import BasicAuthControllerProxy
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.mixins.jsonmixin import JsonMixin
 
-module_logger = logging.getLogger(__name__)
+module_logger = Logger
+module_logger = module_logger.logger
 
 
 class OnosProxy(JsonMixin, BasicAuthControllerProxy):

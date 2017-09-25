@@ -20,8 +20,6 @@ Created on 17 May 2016
 @author: Charlie Lewis, dgrossman
 """
 import json
-import logging
-import logging.config
 import Queue
 import signal
 import sys
@@ -34,6 +32,7 @@ import requests
 import schedule
 import random
 
+from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.baseClasses.Rabbit_Base import Rabbit_Base
 from poseidon.poseidonMonitor.Config.Config import config_interface
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import \
@@ -42,7 +41,7 @@ from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.NorthBoundControll
 ENDPOINT_STATES = [('K', 'KNOWN'), ('U', 'UNKNOWN'), ('M', 'MIRRORING'),
                    ('S', 'SHUTDOWN'), ('R', 'REINVESTIGATING')]
 
-module_logger = logging.getLogger(__name__)
+module_logger = Logger
 
 CTRL_C = False
 
@@ -55,13 +54,13 @@ def schedule_job_kickurl(func, logger):
 
 def rabbit_callback(ch, method, properties, body, q=None):
     ''' callback, places rabbit data into internal queue'''
-    module_logger.debug('got a message: {0}:{1}:{2}'.format(
+    module_logger.logger.debug('got a message: {0}:{1}:{2}'.format(
         method.routing_key, body, type(body)))
     # TODO more
     if q is not None:
         q.put((method.routing_key, body))
     else:
-        module_logger.debug('posedionMain workQueue is None')
+        module_logger.logger.debug('posedionMain workQueue is None')
 
 
 def schedule_thread_worker(schedule, logger):
@@ -118,9 +117,9 @@ class Monitor(object):
 
     def __init__(self, skip_rabbit):
         # get the logger setup
-        self.logger = module_logger
+        self.logger = module_logger.logger
         self.mod_configuration = dict()
-        logging.basicConfig(level=logging.DEBUG)
+        module_logger.logger_config(None)
 
         self.mod_name = self.__class__.__name__
         self.skip_rabbit = skip_rabbit
@@ -138,6 +137,11 @@ class Monitor(object):
         self.Config.set_owner(self)
         self.NorthBoundControllerAbstraction = controller_interface
         self.NorthBoundControllerAbstraction.set_owner(self)
+
+        self.configSelf()
+
+        # set the logger level
+        module_logger.set_level(self.mod_configuration['logger_level'])
 
         # wire up handlers for Config
         self.logger.debug('handler Config')
@@ -162,7 +166,6 @@ class Monitor(object):
             'Update_Switch_State')
 
         self.logger.debug('----------------------')
-        self.configSelf()
         self.init_logging()
 
         scan_frequency = int(self.mod_configuration['scan_frequency'])
@@ -197,15 +200,15 @@ class Monitor(object):
                 my_dict = endpoint_states[my_hash]
                 if my_dict['state'] == state:
                     out_flag = True
-                    logger.debug('{0}:{1}:{2}'.format(
-                        letter, my_hash, my_dict['endpoint']))
+                    logger.debug(('{0}:{1}:{2}'.format(
+                      letter, my_hash, my_dict['endpoint'])))
             if not out_flag:
                 logger.debug('None')
 
         for l, s in ENDPOINT_STATES:
             same_old(self.logger, s, l, endpoint_states)
 
-        self.logger.debug('****************')
+            self.logger.debug('****************')
 
     def init_logging(self):
         ''' setup logging  '''
@@ -219,9 +222,7 @@ class Monitor(object):
         if path is not None:
             with open(path, 'rt') as f:
                 config = json.load(f)
-            logging.config.dictConfig(config)
-        else:
-            logging.basicConfig(level=logging.DEBUG)
+        module_logger.logger_config(config)
 
     def configSelf(self):
         ''' get configuraiton for this module '''
