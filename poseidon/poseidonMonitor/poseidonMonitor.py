@@ -21,7 +21,6 @@ Created on 17 May 2016
 """
 import json
 import Queue
-import pprint
 import signal
 import sys
 import threading
@@ -222,7 +221,7 @@ class Monitor(object):
             k, v = item
             self.mod_configuration[k] = v
         ostr = '{0}:config:{1}'.format(self.mod_name, self.mod_configuration)
-        self.logger.debug(pprint.pprint(ostr, width=-1))
+        self.logger.debug(ostr)
 
     def update_state(self, endpoint_states):
         ret_val = []
