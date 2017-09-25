@@ -40,20 +40,18 @@ class Logger:
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - '
                                   '%(module)s:%(lineno)-3d - %(message)s')
 
-    # have it sent to both stderr and a user defined syslog
+    # set the logger to log to stderr
     sys_err = logging.StreamHandler()
     sys_err.setFormatter(formatter)
     logger.addHandler(sys_err)
 
     # don't try to connect to a syslog address if one was not supplied
     if host != 'NOT_CONFIGURED':
+        # if a syslog address was supplied, log to it
         sys_log = logging.handlers.SysLogHandler(address=(host, port),
                                                  socktype=socket.SOCK_STREAM)
         sys_log.setFormatter(formatter)
         logger.addHandler(sys_log)
-
-    # logger prints twice if this is not set to false
-    #logger.propagate = False
 
     @staticmethod
     def set_level(level):
