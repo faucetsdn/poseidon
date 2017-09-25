@@ -19,17 +19,19 @@ Created on 25 July 2016
 @author: kylez
 """
 import logging
+import requests
 from urlparse import urljoin
 
-import requests
+from poseidon.baseClasses.Logger_Base import Logger
 
-module_logger = logging.getLogger(__name__)
+#module_logger = logging.getLogger(__name__)
+module_logger = Logger(__name__)
 
 
 class ControllerProxy(object):
 
     def __init__(self, base_uri, *args, **kwargs):
-        self.logger = module_logger
+        self.logger = module_logger.logger
         self.base_uri = base_uri
         self.session = requests.Session()
 

@@ -23,14 +23,14 @@ Created on 17 May 2016
 """
 import ConfigParser
 import json
-import logging
 import os
 
+from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 
 
-module_logger = logging.getLogger(__name__)
+module_logger = Logger(__name__)
 
 # poseidonWork created in docker containers
 config_template_path = '/poseidonWork/config/poseidon.config'
@@ -40,7 +40,7 @@ class Config(Monitor_Action_Base):
 
     def __init__(self):
         super(Config, self).__init__()
-        self.logger = module_logger
+        self.logger = module_logger.logger
         self.CONFIG = None
         self.mod_name = self.__class__.__name__
         self.config_section_name = self.mod_name
@@ -81,7 +81,7 @@ class Handle_FullConfig(Monitor_Helper_Base):
     def __init__(self):
         super(Handle_FullConfig, self).__init__()
         self.mod_name = self.__class__.__name__
-        self.logger = module_logger
+        self.logger = module_logger.logger
 
     def direct_get(self):
         ''' get the config from the owner '''
@@ -136,7 +136,7 @@ class Handle_FieldConfig(Monitor_Helper_Base):
 
     def __init__(self):
         super(Handle_FieldConfig, self).__init__()
-        self.logger = module_logger
+        self.logger = module_logger.logger
         self.mod_name = self.__class__.__name__
 
     def direct_get(self, field, section):

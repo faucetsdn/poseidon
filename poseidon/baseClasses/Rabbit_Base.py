@@ -16,26 +16,27 @@
 ''' Created on 21 August 2017
 @author: dgrossman
 '''
-import logging
+#import logging
+import pika
 import threading
 import time
 import types
 from functools import partial
 
-import pika
+from Logger_Base import Logger
 
-module_logger = logging.getLogger(__name__)
+
+#module_logger = logging.getLogger(__name__)
+module_logger = Logger(__name__)
 
 
 class Rabbit_Base(object):
-    '''Comment Goes Here
-
-    Attributes:
-
+    '''
+    Base Class for RabbitMQ
     '''
 
     def __init__(self):
-        self.logger = module_logger
+        self.logger = module_logger.logger
 
     def make_rabbit_connection(self, host, port, exchange, queue_name, keys,
                                total_sleep=float('inf')):  # pragma: no cover

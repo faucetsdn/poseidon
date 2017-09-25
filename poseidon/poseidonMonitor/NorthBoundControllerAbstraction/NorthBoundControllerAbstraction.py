@@ -18,16 +18,16 @@ Created on 17 May 2016
 '''
 import hashlib
 import json
-import logging
 import Queue
 from collections import defaultdict
 
+from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.bcf import \
     BcfProxy
 
-module_logger = logging.getLogger(__name__)
+module_logger = Logger(__name__)
 
 
 class NorthBoundControllerAbstraction(Monitor_Action_Base):
@@ -35,7 +35,7 @@ class NorthBoundControllerAbstraction(Monitor_Action_Base):
 
     def __init__(self):
         super(NorthBoundControllerAbstraction, self).__init__()
-        self.logger = module_logger
+        self.logger = module_logger.logger
         self.mod_name = self.__class__.__name__
         self.config_section_name = self.mod_name
 
@@ -45,7 +45,7 @@ class Update_Switch_State(Monitor_Helper_Base):
 
     def __init__(self):
         super(Update_Switch_State, self).__init__()
-        self.logger = module_logger
+        self.logger = module_logger.logger
         self.mod_name = self.__class__.__name__
         self.retval = {}
         self.times = 0
@@ -160,14 +160,14 @@ class Update_Switch_State(Monitor_Helper_Base):
             # TODO db call to see if really need to run things
             for machine in machines:
                 h = self.make_hash(machine)
-                module_logger.critical(
+                self.logger.critical(
                     'adding address to known systems {0}'.format(machine))
                 self.make_endpoint_dict(h, 'KNOWN', machine)
         else:
             for machine in machines:
                 h = self.make_hash(machine)
                 if h not in self.endpoint_states:
-                    module_logger.critical(
+                    self.logger.critical(
                         '***** detected new address {0}'.format(machine))
                     self.make_endpoint_dict(h, 'UNKNOWN', machine)
 
