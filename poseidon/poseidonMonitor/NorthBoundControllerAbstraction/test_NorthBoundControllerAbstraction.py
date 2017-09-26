@@ -19,10 +19,9 @@ Test module for NorthBoundControllerAbstraction.py
 Created on 28 June 2016
 @author: dgrossman
 """
-import logging
-
 import pytest
 
+from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import controller_interface
 
-module_logger = logging.getLogger(__name__)
+module_logger = Logger.logger

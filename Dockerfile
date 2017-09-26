@@ -23,6 +23,8 @@ ENV PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
 RUN find . -name requirements.txt -type f -exec pip install -r {} \;
 
 ENV PYTHONUNBUFFERED 0
+ENV SYS_LOG_HOST NOT_CONFIGURED
+ENV SYS_LOG_PORT 514
 
 # Add Tini
 ENV TINI_VERSION v0.16.1
