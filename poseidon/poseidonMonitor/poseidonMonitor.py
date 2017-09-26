@@ -106,11 +106,7 @@ def schedule_job_reinvestigation(max_investigations, endpoints, logger):
                 chosen = candidates.pop()
                 ostr = 'starting investigation {0}:{1}'.format(x, chosen)
                 logger.debug(ostr)
-<<<<<<< HEAD
                 endpoints[chosen]['next-state'] = 'REINVESTIGATING'
-=======
-                #endpoints[chosen]['next-state'] = 'REINVESTIGATING'
->>>>>>> b91952bccfc3420b21f8018363fe6163c23835f4
                 start_investigating()
     else:
         ostr = 'investigators all busy'
@@ -237,34 +233,18 @@ class Monitor(object):
         ostr = '{0}:config:{1}'.format(self.mod_name, self.mod_configuration)
         self.logger.debug(ostr)
 
-<<<<<<< HEAD
     def update_next_state(self, endpoint_states, rabbit_transitions):
-=======
-    def update_state(self, endpoint_states, rabbit_transitions):
-        ret_val = []
->>>>>>> b91952bccfc3420b21f8018363fe6163c23835f4
         next_state = None
         current_state = None
         for my_hash in endpoint_states.keys():
             my_dict = endpoint_states[my_hash]
             current_state = my_dict['state']
             if current_state == 'UNKNOWN':
-<<<<<<< HEAD
                 my_dict['next-state'] = 'MIRRORING'
         for my_hash in rabbit_transitions.keys():
             my_dict = endpoint_states[my_hash]
             current_state = my_dict['state']
             my_dict['next-state'] = rabbit_transitions[my_hash]
-=======
-                next_state = 'MIRRORING'
-                ret_val.append((my_hash, current_state, next_state))
-        for my_hash in rabbit_transitions.keys():
-            my_dict = endpoint_states[my_hash]
-            current_state = my_dict['state']
-            next_state = rabbit_transitions[my_hash]
-            ret_Val.append((my_hash, current_State, next_state))
-        return ret_val
->>>>>>> b91952bccfc3420b21f8018363fe6163c23835f4
 
     def start_vent_collector(self, dev_hash, num_captures=1):
         '''
