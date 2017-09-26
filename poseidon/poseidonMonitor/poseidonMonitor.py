@@ -236,7 +236,7 @@ class Monitor(object):
     def update_next_state(self, rabbit_transitions):
         next_state = None
         current_state = None
-        endpoint_state = self.uss.return_endpoint_state()
+        endpoint_states = self.uss.return_endpoint_state()
         for my_hash in endpoint_states.keys():
             my_dict = endpoint_states[my_hash]
             current_state = my_dict['state']
