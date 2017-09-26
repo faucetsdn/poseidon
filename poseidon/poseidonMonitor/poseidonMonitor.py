@@ -30,6 +30,7 @@ from os import getenv
 
 import requests
 import schedule
+import random
 
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.baseClasses.Rabbit_Base import Rabbit_Base
@@ -84,20 +85,29 @@ def schedule_job_reinvestigation(max_investigations, endpoints, logger):
     ostr = 'reinvestagtion time'
     logger.debug(ostr)
     logger.debug('endpoints:{0}'.format(endpoints))
+    candidates = []
 
     currently_investigating = 0
     for my_hash, my_value in endpoints.iteritems():
         if 'state' in my_value:
             if my_value['state'] == 'REINVESTIGATING':
                 currently_investigating += 1
+            elif my_value['state'] == 'KNOWN':
+                candidates.append(my_hash)
+
+    # get random order of things that are known
+    random.shuffle(candidates)
 
     if currently_investigating < max_investigations:
         ostr = 'room to investigate'
         logger.debug(ostr)
         for x in range(max_investigations - currently_investigating):
-            ostr = 'starting investigation {0}'.format(x)
-            logger.debug(ostr)
-            start_investigating()
+            if len(candidates) >= 1:
+                chosen = candidates.pop()
+                ostr = 'starting investigation {0}:{1}'.format(x, chosen)
+                logger.debug(ostr)
+                #endpoints[chosen]['next-state'] = 'REINVESTIGATING'
+                start_investigating()
     else:
         ostr = 'investigators all busy'
         logger.debug(ostr)
@@ -223,7 +233,7 @@ class Monitor(object):
         ostr = '{0}:config:{1}'.format(self.mod_name, self.mod_configuration)
         self.logger.debug(ostr)
 
-    def update_state(self, endpoint_states):
+    def update_state(self, endpoint_states, rabbit_transitions):
         ret_val = []
         next_state = None
         current_state = None
@@ -233,6 +243,11 @@ class Monitor(object):
             if current_state == 'UNKNOWN':
                 next_state = 'MIRRORING'
                 ret_val.append((my_hash, current_state, next_state))
+        for my_hash in rabbit_transitions.keys():
+            my_dict = endpoint_states[my_hash]
+            current_state = my_dict['state']
+            next_state = rabbit_transitions[my_hash]
+            ret_Val.append((my_hash, current_State, next_state))
         return ret_val
 
     def start_vent_collector(self, dev_hash, num_captures=1):
@@ -258,17 +273,32 @@ class Monitor(object):
         except Exception as e:
             self.logger.debug('failed to start vent collector' + str(e))
 
+    def process_rabbit_message(self, item):
+        self.logger.debug('rabbit_message:{1}'.format(found_work, item))
+        routing_key, my_obj = item
+        my_obj = json.loads(my_obj)
+        ret_val = {}
+        self.logger.debug('routing_key:{0}'.format(routing_key))
+        if routing_key is not None and routing_key == 'poseidon.algos.ML.results':
+            self.logger.debug('value:{0}'.format(my_obj))
+        # TODO do something with reccomendation
+        return ret_val
+
     def process(self):
         global CTRL_C
         signal.signal(signal.SIGINT, partial(self.signal_handler))
         while not CTRL_C:
             self.logger.debug('***************CTRL_C:{0}'.format(CTRL_C))
             time.sleep(1)
-            found_work, item = self.get_q_item()
             self.logger.debug('woke from sleeping')
-            self.logger.debug('work:{0},item:{1}'.format(found_work, item))
+            found_work, item = self.get_q_item()
+            rabbit_transitions = {}
+
+            if found_work:
+                rabbit_transitions = self.process_rabbit_message(item)
+
             state_transitions = self.update_state(
-                self.uss.return_endpoint_state())
+                self.uss.return_endpoint_state(), rabbit_transitions)
             self.print_endpoint_state(self.uss.return_endpoint_state())
             for transition in state_transitions:
                 my_hash, current_state, next_state = transition
