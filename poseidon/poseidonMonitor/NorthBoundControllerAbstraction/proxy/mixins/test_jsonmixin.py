@@ -30,6 +30,7 @@ cur_dir = os.path.dirname(os.path.realpath(__file__))
 
 moudle_logger = Logger.logger
 
+
 def test_JsonMixin():
     """
     Tests JsonMixin

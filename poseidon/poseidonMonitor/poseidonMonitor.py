@@ -200,8 +200,11 @@ class Monitor(object):
                 my_dict = endpoint_states[my_hash]
                 if my_dict['state'] == state:
                     out_flag = True
-                    logger.debug('{0}:{1}:{2}->{3}:{4}'.format(letter, my_hash,
-                                                               my_dict['state'], my_dict['next-state'], my_dict['endpoint']))
+                    logger.debug('{0}:{1}:{2}->{3}:{4}'.format(letter,
+                                                               my_hash,
+                                                               my_dict['state'],
+                                                               my_dict['next-state'],
+                                                               my_dict['endpoint']))
             if not out_flag:
                 logger.debug('None')
 

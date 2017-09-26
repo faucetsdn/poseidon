@@ -25,6 +25,7 @@ from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.controllerpr
 
 module_logger = Logger.logger
 
+
 def test_ControllerProxy():
     """
     Tests ControllerProxy

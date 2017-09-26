@@ -31,7 +31,7 @@ class Logger:
     port = int(os.getenv('SYS_LOG_PORT', 514))
 
     level_int = {'CRITICAL': 50, 'ERROR': 40, 'WARNING': 30,
-                      'INFO': 20, 'DEBUG' : 10}
+                 'INFO': 20, 'DEBUG': 10}
 
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
