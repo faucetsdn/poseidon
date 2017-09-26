@@ -117,7 +117,7 @@ class Update_Switch_State(Monitor_Helper_Base):
             if self.get_endpoint_state(my_hash) != next_state:
                 my_ip = self.get_endpoint_ip(my_hash)
                 self.bcf.shutdown_ip(my_ip)
-                self.change_endpoint_state(my_hash, next_state)
+                self.change_endpoint_state(my_hash)
                 self.logger.debug(
                     'endpoint:{0}:{1}:{2}'.format(my_hash, my_ip, next_state))
                 return True
@@ -128,7 +128,7 @@ class Update_Switch_State(Monitor_Helper_Base):
             if self.get_endpoint_state(my_hash) != next_state:
                 my_ip = self.get_endpoint_ip(my_hash)
                 self.bcf.mirror_ip(my_ip)
-                self.change_endpoint_state(my_hash, next_state)
+                self.change_endpoint_state(my_hash)
                 self.logger.debug(
                     'endpoint:{0}:{1}:{2}'.format(my_hash, my_ip, next_state))
                 return True
@@ -147,10 +147,12 @@ class Update_Switch_State(Monitor_Helper_Base):
 
     def make_endpoint_dict(self, my_hash, state, data):
         self.endpoint_states[my_hash]['state'] = state
+        self.endpoint_states[my_hash]['next-state'] = 'NONE'
         self.endpoint_states[my_hash]['endpoint'] = data
 
-    def change_endpoint_state(self, my_hash, new_state):
-        self.endpoint_states[my_hash]['state'] = new_state
+    def change_endpoint_state(self, my_hash, new_state=None):
+        self.endpoint_states[my_hash]['state'] = new_state or self.endpoint_states[my_hash]['next-state']
+        self.endpoint_states[my_hash]['next-state'] = 'NONE'
 
     def find_new_machines(self, machines):
         '''parse switch structure to find new machines added to network
@@ -180,8 +182,8 @@ class Update_Switch_State(Monitor_Helper_Base):
                 my_dict = endpoint_states[my_hash]
                 if my_dict['state'] == state:
                     out_flag = True
-                    logger.debug('{0}:{1}:{2}'.format(
-                        letter, my_hash, my_dict['endpoint']))
+                    logger.debug('{0}:{1}:{2}->{3}:{4}'.format(
+                        letter, my_hash,my_dict['state'],my_dict['next-state'] , my_dict['endpoint']))
             if not out_flag:
                 logger.debug('None')
 
