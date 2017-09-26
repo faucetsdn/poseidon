@@ -35,6 +35,7 @@ class Logger:
 
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
+    logger.propagate = False
 
     # timestamp - logger_level - class:line number - message
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - '
