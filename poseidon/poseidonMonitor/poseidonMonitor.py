@@ -90,7 +90,7 @@ def schedule_job_reinvestigation(max_investigations, endpoints, logger):
     currently_investigating = 0
     for my_hash, my_value in endpoints.iteritems():
         if 'state' in my_value:
-            if my_value['state'] == 'REINVESTIGATING':
+            if my_value['state'] == 'REINVESTIGATING' or my_value['next-state'] == 'REINVESTIGATING':
                 currently_investigating += 1
             elif my_value['state'] == 'KNOWN':
                 candidates.append(my_hash)
@@ -106,7 +106,7 @@ def schedule_job_reinvestigation(max_investigations, endpoints, logger):
                 chosen = candidates.pop()
                 ostr = 'starting investigation {0}:{1}'.format(x, chosen)
                 logger.debug(ostr)
-                #endpoints[chosen]['next-state'] = 'REINVESTIGATING'
+                endpoints[chosen]['next-state'] = 'REINVESTIGATING'
                 start_investigating()
     else:
         ostr = 'investigators all busy'
@@ -200,8 +200,8 @@ class Monitor(object):
                 my_dict = endpoint_states[my_hash]
                 if my_dict['state'] == state:
                     out_flag = True
-                    logger.debug(('{0}:{1}:{2}'.format(
-                      letter, my_hash, my_dict['endpoint'])))
+                    logger.debug('{0}:{1}:{2}->{3}:{4}'.format(letter, my_hash,
+                                                               my_dict['state'], my_dict['next-state'], my_dict['endpoint']))
             if not out_flag:
                 logger.debug('None')
 
@@ -233,22 +233,18 @@ class Monitor(object):
         ostr = '{0}:config:{1}'.format(self.mod_name, self.mod_configuration)
         self.logger.debug(ostr)
 
-    def update_state(self, endpoint_states, rabbit_transitions):
-        ret_val = []
+    def update_next_state(self, endpoint_states, rabbit_transitions):
         next_state = None
         current_state = None
         for my_hash in endpoint_states.keys():
             my_dict = endpoint_states[my_hash]
             current_state = my_dict['state']
             if current_state == 'UNKNOWN':
-                next_state = 'MIRRORING'
-                ret_val.append((my_hash, current_state, next_state))
+                my_dict['next-state'] = 'MIRRORING'
         for my_hash in rabbit_transitions.keys():
             my_dict = endpoint_states[my_hash]
             current_state = my_dict['state']
-            next_state = rabbit_transitions[my_hash]
-            ret_Val.append((my_hash, current_State, next_state))
-        return ret_val
+            my_dict['next-state'] = rabbit_transitions[my_hash]
 
     def start_vent_collector(self, dev_hash, num_captures=1):
         '''
@@ -273,7 +269,7 @@ class Monitor(object):
         except Exception as e:
             self.logger.debug('failed to start vent collector' + str(e))
 
-    def process_rabbit_message(self, item):
+    def get_rabbit_message(self, item):
         self.logger.debug('rabbit_message:{1}'.format(found_work, item))
         routing_key, my_obj = item
         my_obj = json.loads(my_obj)
@@ -294,22 +290,42 @@ class Monitor(object):
             found_work, item = self.get_q_item()
             rabbit_transitions = {}
 
+            # plan out the transitions
             if found_work:
-                rabbit_transitions = self.process_rabbit_message(item)
+                # TODO make this read until nothing in q
+                rabbit_transitions = self.get_rabbit_message(item)
 
-            state_transitions = self.update_state(
-                self.uss.return_endpoint_state(), rabbit_transitions)
-            self.print_endpoint_state(self.uss.return_endpoint_state())
-            for transition in state_transitions:
-                my_hash, current_state, next_state = transition
-                self.logger.debug(
-                    'updating:{0}:{1}->{2}'.format(my_hash, current_state, next_state))
+            eps = self.uss.return_endpoint_state()
+
+            state_transitions = self.update_next_state(
+                eps, rabbit_transitions)
+
+            self.print_endpoint_state(eps)
+
+            # make the transitions
+
+            for endpoint_hash in eps.keys():
+                current_state = eps[endpoint_hash]['state']
+                next_state = eps[endpoint_hash]['next-state']
+
+                # dont do anything
+                if next_state == 'NONE':
+                    continue
+
                 if next_state == 'MIRRORING':
-                    self.logger.debug('*********** NOTIFY VENT ***********')
-                    self.start_vent_collector(my_hash)
-                    self.logger.debug('*********** MIRROR PORT ***********')
-                    self.uss.mirror_endpoint(my_hash)
-                self.uss.change_endpoint_state(my_hash, next_state)
+                    self.logger.debug(
+                        'updating:{0}:{1}->{2}'.format(endpoint_hash, current_state, next_state))
+                    self.logger.debug('*********** U NOTIFY VENT ***********')
+                    self.start_vent_collector(endpoint_hash)
+                    self.logger.debug('*********** U MIRROR PORT ***********')
+                    self.uss.mirror_endpoint(endpoint_hash)
+                if next_state == 'REINVESTIGATING':
+                    self.logger.debug(
+                        'updating:{0}:{1}->{2}'.format(endpoint_hash, current_state, next_state))
+                    self.logger.debug('*********** R NOTIFY VENT ***********')
+                    self.start_vent_collector(endpoint_hash)
+                    self.logger.debug('*********** R MIRROR PORT ***********')
+                    self.uss.mirror_endpoint(endpoint_hash)
 
     def get_q_item(self):
         found_work = False
