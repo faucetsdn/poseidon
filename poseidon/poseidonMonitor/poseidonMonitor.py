@@ -200,8 +200,11 @@ class Monitor(object):
                 my_dict = endpoint_states[my_hash]
                 if my_dict['state'] == state:
                     out_flag = True
-                    logger.debug('{0}:{1}:{2}->{3}:{4}'.format(letter, my_hash,
-                                                               my_dict['state'], my_dict['next-state'], my_dict['endpoint']))
+                    logger.debug('{0}:{1}:{2}->{3}:{4}'.format(letter,
+                                                               my_hash,
+                                                               my_dict['state'],
+                                                               my_dict['next-state'],
+                                                               my_dict['endpoint']))
             if not out_flag:
                 logger.debug('None')
 
@@ -233,9 +236,10 @@ class Monitor(object):
         ostr = '{0}:config:{1}'.format(self.mod_name, self.mod_configuration)
         self.logger.debug(ostr)
 
-    def update_next_state(self, endpoint_states, rabbit_transitions):
+    def update_next_state(self, rabbit_transitions):
         next_state = None
         current_state = None
+        endpoint_states = self.uss.return_endpoint_state()
         for my_hash in endpoint_states.keys():
             my_dict = endpoint_states[my_hash]
             current_state = my_dict['state']
@@ -270,7 +274,7 @@ class Monitor(object):
             self.logger.debug('failed to start vent collector' + str(e))
 
     def get_rabbit_message(self, item):
-        self.logger.debug('rabbit_message:{1}'.format(found_work, item))
+        self.logger.debug('rabbit_message:{1}'.format(item))
         routing_key, my_obj = item
         my_obj = json.loads(my_obj)
         ret_val = {}
@@ -297,8 +301,7 @@ class Monitor(object):
 
             eps = self.uss.return_endpoint_state()
 
-            state_transitions = self.update_next_state(
-                eps, rabbit_transitions)
+            state_transitions = self.update_next_state(rabbit_transitions)
 
             self.print_endpoint_state(eps)
 
