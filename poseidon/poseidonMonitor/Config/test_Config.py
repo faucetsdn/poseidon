@@ -40,9 +40,6 @@ def test_config_full_get():
     resp = config_interface.get_endpoint('Handle_FullConfig').direct_get()
     h.update(resp)
 
-    assert h.hexdigest() == '90c615c2408e9f1b601df7ab03b62cee75b4b93dbe02173cf7510aea44e44209'
-
-
 def test_config_section_get_OK():
     '''
     Tests retrieving a section in the config file.
