@@ -371,7 +371,7 @@ class Monitor(object):
                 self.schedule.cancel_job(job)
             self.rabbit_channel_connection_local.close()
             sys.exit()
-        except:
+        except BaseException:
             pass
 
 
