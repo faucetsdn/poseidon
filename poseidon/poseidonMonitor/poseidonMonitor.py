@@ -47,6 +47,7 @@ CTRL_C = False
 
 
 def schedule_job_kickurl(func, logger):
+    ''' periodically ask the controller for its state '''
     logger.debug('kick')
     func.NorthBoundControllerAbstraction.get_endpoint(
         'Update_Switch_State').update_endpoint_state()
@@ -64,6 +65,7 @@ def rabbit_callback(ch, method, properties, body, q=None):
 
 
 def schedule_thread_worker(schedule, logger):
+    ''' schedule thread, takes care of running processes in the future '''
     global CTRL_C
     logLine = 'starting thread_worker'
     logger.debug(logLine)
@@ -75,13 +77,11 @@ def schedule_thread_worker(schedule, logger):
         logger.debug(logLine)
     logger.debug('Threading stop:{0}'.format(
         threading.current_thread().getName()))
-
-
-def start_investigating():
-    pass
+    sys.exit()
 
 
 def schedule_job_reinvestigation(max_investigations, endpoints, logger):
+    ''' put endpoints into the reinvestigation state if possible '''
     ostr = 'reinvestagtion time'
     logger.debug(ostr)
     logger.debug('endpoints:{0}'.format(endpoints))
@@ -107,7 +107,6 @@ def schedule_job_reinvestigation(max_investigations, endpoints, logger):
                 ostr = 'starting investigation {0}:{1}'.format(x, chosen)
                 logger.debug(ostr)
                 endpoints[chosen]['next-state'] = 'REINVESTIGATING'
-                start_investigating()
     else:
         ostr = 'investigators all busy'
         logger.debug(ostr)
@@ -192,6 +191,7 @@ class Monitor(object):
             name='st_worker')
 
     def print_endpoint_state(self, endpoint_states):
+        ''' debug output showing the state of endpoints '''
         def same_old(logger, state, letter, endpoint_states):
             logger.debug('*******{0}*********'.format(state))
 
@@ -237,6 +237,7 @@ class Monitor(object):
         self.logger.debug(ostr)
 
     def update_next_state(self, rabbit_transitions):
+        ''' generate the next_state from known information '''
         next_state = None
         current_state = None
         endpoint_states = self.uss.return_endpoint_state()
@@ -274,17 +275,31 @@ class Monitor(object):
             self.logger.debug('failed to start vent collector' + str(e))
 
     def get_rabbit_message(self, item):
-        self.logger.debug('rabbit_message:{1}'.format(item))
-        routing_key, my_obj = item
-        my_obj = json.loads(my_obj)
+        ''' read a message off the rabbit_q
+        the message should be from 'poseidon.algos.ML.results'
+        the message should be (hash,msg)
+        '''
+        global CTRL_C
         ret_val = {}
-        self.logger.debug('routing_key:{0}'.format(routing_key))
-        if routing_key is not None and routing_key == 'poseidon.algos.ML.results':
-            self.logger.debug('value:{0}'.format(my_obj))
-        # TODO do something with reccomendation
+
+        if not CTRL_C:
+            self.logger.debug('rabbit_message:{1}'.format(item))
+            routing_key, my_obj = item
+            my_obj = json.loads(my_obj)
+            self.logger.debug('routing_key:{0}'.format(routing_key))
+            if routing_key is not None and routing_key == 'poseidon.algos.ML.results':
+                self.logger.debug('value:{0}'.format(my_obj))
+            # TODO do something with reccomendation
         return ret_val
 
     def process(self):
+        ''' processing event loop
+        while should not be shutdown
+           get data from rabbit
+           calculate endpoint next_state
+           effect changes to endpoints to make state=next_state
+        '''
+
         global CTRL_C
         signal.signal(signal.SIGINT, partial(self.signal_handler))
         while not CTRL_C:
@@ -331,24 +346,33 @@ class Monitor(object):
                     self.uss.mirror_endpoint(endpoint_hash)
 
     def get_q_item(self):
+        ''' attempt to get a workitem from the queue'''
         found_work = False
         item = None
+        global CTRL_C
 
-        try:
-            item = self.m_queue.get(False)
-            found_work = True
-        except Queue.Empty:
-            pass
+        if not CTRL_C:
+            try:
+                item = self.m_queue.get(False)
+                found_work = True
+            except Queue.Empty:
+                pass
 
         return (found_work, item)
 
     def signal_handler(self, signal, frame):
+        ''' hopefully eat a CTRL_C and signal system shutdown '''
         global CTRL_C
         CTRL_C = True
         self.logger.debug('=================CTRLC{0}'.format(CTRL_C))
-        for job in self.schedule.jobs:
-            self.logger.debug('CTRLC:{0}'.format(job))
-            self.schedule.cancel_job(job)
+        try:
+            for job in self.schedule.jobs:
+                self.logger.debug('CTRLC:{0}'.format(job))
+                self.schedule.cancel_job(job)
+            self.rabbit_channel_connection_local.close()
+            sys.exit()
+        except:
+            pass
 
 
 def main(skip_rabbit=False):
@@ -377,8 +401,8 @@ def main(skip_rabbit=False):
     pmain.process()
 
     pmain.logger.debug('SHUTTING DOWN')
-    pmain.rabbit_channel_connection_local.close()
-    #pmain.rabbit_channel_local.close()
+    # pmain.rabbit_channel_connection_local.close()
+    # pmain.rabbit_channel_local.close()
     pmain.logger.debug('EXITING')
     sys.exit(0)
 
