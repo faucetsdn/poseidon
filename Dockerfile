@@ -34,7 +34,7 @@ ENTRYPOINT ["/tini", "--"]
 
 # run tests
 RUN py.test -v \
---cov=poseidon/poseidonMonitor \
+--cov=poseidon \
 --cov-report term-missing --cov-config .coveragerc
 
 CMD ["python","/poseidonWork/poseidon/poseidonMonitor/poseidonMonitor.py"]

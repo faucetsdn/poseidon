@@ -48,8 +48,10 @@ class Config(Monitor_Action_Base):
 
         self.config = ConfigParser.ConfigParser()
         if os.environ.get('POSEIDON_CONFIG') is not None:
-            self.logger.info('From the Environment')
-            self.config_path = os.environ.get('POSEIDON_CONFIG')
+            self.logger.info(
+                'From the Environment')               # pragma: no cover
+            self.config_path = os.environ.get(
+                'POSEIDON_CONFIG')               # pragma: no cover
         else:
             self.logger.info('From the Docker hardcode')
             self.config_path = config_template_path
