@@ -86,7 +86,7 @@ class Update_Switch_State(Monitor_Helper_Base):
 
     @staticmethod
     def make_hash(item):
-        ''' hash the metadata in a sane way'''
+        ''' hash the metadata in a sane way '''
         h = hashlib.new('ripemd160')
         pre_h = str()
         post_h = None
@@ -103,21 +103,25 @@ class Update_Switch_State(Monitor_Helper_Base):
         return post_h
 
     def get_endpoint_state(self, my_hash):
+        ''' return the state associated with a hash '''
         if my_hash in self.endpoint_states:
             return self.endpoint_states[my_hash]['state']
         return None
 
     def get_endpoint_next(self, my_hash):
+        ''' return the next_state associated with a hash '''
         if my_hash in self.endpoint_states:
             return self.endpoint_states[my_hash]['next-state']
         return None
 
     def get_endpoint_ip(self, my_hash):
+        ''' return the ip address associated with a hash '''
         if my_hash in self.endpoint_states:
             return self.endpoint_states[my_hash]['endpoint']['ip-address']
         return None
 
     def shutdown_endpoint(self, my_hash):
+        ''' tell the controller to shutdown an endpoint by hash '''
         if my_hash in self.endpoint_states:
             my_ip = self.get_endpoint_ip(my_hash)
             next_state = self.get_endpoint_next(my_hash)
@@ -129,6 +133,7 @@ class Update_Switch_State(Monitor_Helper_Base):
         return False
 
     def mirror_endpoint(self, my_hash):
+        ''' tell the controller to begin mirroring traffic '''
         if my_hash in self.endpoint_states:
             my_ip = self.get_endpoint_ip(my_hash)
             next_state = self.get_endpoint_next(my_hash)
@@ -140,6 +145,7 @@ class Update_Switch_State(Monitor_Helper_Base):
         return False
 
     def make_known_endpoint(self, my_hash):
+        ''' take an endpoint from MIRRORING/REINVESTIGATION to KNOWN '''
         if my_hash in self.endpoint_states:
             my_ip = self.get_endpoint_ip(my_hash)
             next_state = self.get_endpoint_next(my_hash)
@@ -151,11 +157,13 @@ class Update_Switch_State(Monitor_Helper_Base):
         return False
 
     def make_endpoint_dict(self, my_hash, state, data):
+        ''' make a new endpoint '''
         self.endpoint_states[my_hash]['state'] = state
         self.endpoint_states[my_hash]['next-state'] = 'NONE'
         self.endpoint_states[my_hash]['endpoint'] = data
 
     def change_endpoint_state(self, my_hash, new_state=None):
+        ''' update the state of an endpoint '''
         self.endpoint_states[my_hash]['state'] = new_state or self.endpoint_states[my_hash]['next-state']
         self.endpoint_states[my_hash]['next-state'] = 'NONE'
 
@@ -179,6 +187,7 @@ class Update_Switch_State(Monitor_Helper_Base):
                     self.make_endpoint_dict(h, 'UNKNOWN', machine)
 
     def print_endpoint_state(self):
+        ''' debug output about what the current state of endpoints is '''
         def same_old(logger, state, letter, endpoint_states):
             logger.debug('*******{0}*********'.format(state))
 
