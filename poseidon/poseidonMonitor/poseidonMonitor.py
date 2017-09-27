@@ -378,7 +378,7 @@ def main(skip_rabbit=False):
 
     pmain.logger.debug('SHUTTING DOWN')
     pmain.rabbit_channel_connection_local.close()
-    pmain.rabbit_channel_local.close()
+    #pmain.rabbit_channel_local.close()
     pmain.logger.debug('EXITING')
     sys.exit(0)
 
