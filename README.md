@@ -30,8 +30,8 @@ docker run poseidon
 
 ## config/poseidon.config
 ### [Monitor]
-rabbit-server =  `RABBIT_SERVER`  
-rabbit-port = `RABBIT_PORT`  
+rabbit_server =  `RABBIT_SERVER`  
+rabbit_port = `RABBIT_PORT`  
 collector_nic = `COLLECTOR_NIC`  
 vent_ip = `VENT_IP`  
 vent_port = `VENT_PORT`  
