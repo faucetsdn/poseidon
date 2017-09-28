@@ -48,8 +48,8 @@ controller_user = `USERNAME`
 controller_pass = `PASSWORD`  
 
 `CONTROLLER_SERVER` - BCF controller ip  
-`USERNAME` - username for bcf login  
-`PASSWORD` - password for bcf login  
+`USERNAME` - username for BCF login  
+`PASSWORD` - password for BCF login  
 
 
 # Required Dependencies
