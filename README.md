@@ -29,26 +29,28 @@ docker run poseidon
 # Configuration
 
 ## config/poseidon.config
-### Monitor
-- Under the `[Monitor]` section, update the following:
-- `rabbit-server` to the external ip of the vent rabbit server
-- `rabbit-port` to the port that the vent rabbit server is running
+### [Monitor]
+rabbit_server =  `RABBIT_SERVER`  
+rabbit_port = `RABBIT_PORT`  
+collector_nic = `COLLECTOR_NIC`  
+vent_ip = `VENT_IP`  
+vent_port = `VENT_PORT`  
+  
+`RABBIT_SERVER` - ip address of the rabbit-mq server   
+`RABBIT_PORT` - rabbit-mq server server port  
+`COLLECTOR_NIC` - name of the network interface that will be listening for packets  
+`VENT_IP` - ip address of serever running vent  
+`VENT_PORT` - vent server port  
 
-### NorthBoundControllerAbstraction:Update_Switch_State
-- Under `[NorthBoundControllerAbstraction:Update_Switch_State]` section, update the following:
-- `controller_uri` to the url for your controller
-- `controller_user` username for logging into your controller
-- `controller_pass` password for logging into your controller
+### [NorthBoundControllerAbstraction:Update_Switch_State]
+controller_uri = https://`CONTROLLER_SERVER`:8443/api/v1/  
+controller_user = `USERNAME`  
+controller_pass = `PASSWORD`  
 
-### the following will be removed/moving around..
-- `collection` to the name of the collection storing the network graph documents (default is `netgraph_beta`)
-- `collector_nic` to the nic on the machine running vent that is configured with the controller to capture traffic
-- `collector_interval` to the collection interval in seconds (default is `30` for a capture length of 30 seconds)
-- `collector_filter` to limit what gets captured off the controller (default is empty string for no filters, see the collector documentation for details)
-- `vent_ip` to the ip of the box running the vent collector
-- `vent_port` to the external port of the nfilter vent container 
-- `storage_interface_ip` to the external ip of the poseidon-storage-interface container (NOTE: this should be the same as the `database` field of `PoseidonStorage`, unlesss the storage-interface container is being run on a different machine)
-- `storage_interface_port` to the external port of the poseidon-storage-interface container only if changed from the default of `28000`
+`CONTROLLER_SERVER` - BCF controller ip  
+`USERNAME` - username for BCF login  
+`PASSWORD` - password for BCF login  
+
 
 # Required Dependencies
 - Docker

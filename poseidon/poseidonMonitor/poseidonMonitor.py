@@ -380,8 +380,8 @@ def main(skip_rabbit=False):
     pmain = Monitor(skip_rabbit=skip_rabbit)
     if not skip_rabbit:
         rabbit = Rabbit_Base()
-        host = pmain.mod_configuration['rabbit-server']
-        port = int(pmain.mod_configuration['rabbit-port'])
+        host = pmain.mod_configuration['rabbit_server']
+        port = int(pmain.mod_configuration['rabbit_port'])
         exchange = 'topic-poseidon-internal'
         queue_name = 'poseidon_main'
         binding_key = ['poseidon.algos.#', 'poseidon.action.#']
