@@ -265,7 +265,7 @@ class Monitor(object):
                 'filter': '\'host {0}\''.format(
                     self.uss.get_endpoint_ip(dev_hash)),
                 'iters': str(num_captures)}
-            self.logger.debug('vent payload: ' + str(payload))
+            self.logger.debug('vent payload: ' + json.dumps(payload))
             vent_addr = self.mod_configuration[
                 'vent_ip'] + ':' + self.mod_configuration['vent_port']
             uri = 'http://' + vent_addr + '/create'

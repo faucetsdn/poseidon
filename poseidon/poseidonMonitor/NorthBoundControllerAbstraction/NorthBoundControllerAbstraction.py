@@ -60,6 +60,7 @@ class Update_Switch_State(Monitor_Helper_Base):
         self.m_queue = Queue.Queue()
 
     def return_endpoint_state(self):
+        ''' give access to the endpoint_states '''
         return self.endpoint_states
 
     def first_run(self):
