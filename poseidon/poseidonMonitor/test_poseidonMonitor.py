@@ -55,3 +55,19 @@ def test_start_vent_collector():
     dev_hash = 'test'
     num_cuptures = 3
     mock_monitor.start_vent_collector(dev_hash, num_cuptures)
+
+def test_get_q_item():
+    class MockMQueue:
+        def get(self, block):
+            return "Item"
+
+    poseidonMonitor.CTRL_C = False
+
+    class MockMonitor(Monitor):
+        # no need to init the monitor
+        def __init__(self):
+            pass
+
+    mock_monitor = MockMonitor()
+    mock_monitor.m_queue = MockMQueue()
+    assert (True, "Item") == mock_monitor.get_q_item()
