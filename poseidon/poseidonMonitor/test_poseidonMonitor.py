@@ -42,5 +42,4 @@ def test_get_q_item():
 
     mock_monitor = MockMonitor()
     mock_monitor.m_queue = MockMQueue()
-    # signal handler seem to simply exit and kill all the jobs no matter what we pass
     assert (True, "Item") == mock_monitor.get_q_item()
