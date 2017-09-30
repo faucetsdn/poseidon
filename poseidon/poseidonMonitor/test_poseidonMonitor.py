@@ -24,15 +24,12 @@ import pytest
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.poseidonMonitor import Monitor
 from poseidon.poseidonMonitor import poseidonMonitor
+import json
 
 module_logger = Logger.logger
 
 
-def test_get_q_item():
-    class MockMQueue:
-        def get(self, block):
-            return "Item"
-
+def test_get_rabbit_message():
     poseidonMonitor.CTRL_C = False
 
     class MockMonitor(Monitor):
@@ -41,5 +38,7 @@ def test_get_q_item():
             pass
 
     mock_monitor = MockMonitor()
-    mock_monitor.m_queue = MockMQueue()
-    assert (True, "Item") == mock_monitor.get_q_item()
+    mock_monitor.logger = module_logger
+    test_dict_to_return = {'test': True}
+    item = ('poseidon.algos.ML.results', json.dumps(test_dict_to_return))
+    assert test_dict_to_return == mock_monitor.get_rabbit_message(item)
