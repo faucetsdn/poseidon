@@ -82,7 +82,7 @@ def schedule_thread_worker(schedule, logger):
 
 def schedule_job_reinvestigation(max_investigations, endpoints, logger):
     ''' put endpoints into the reinvestigation state if possible '''
-    ostr = 'reinvestagtion time'
+    ostr = 'reinvestigation time'
     logger.debug(ostr)
     logger.debug('endpoints:{0}'.format(endpoints))
     candidates = []
