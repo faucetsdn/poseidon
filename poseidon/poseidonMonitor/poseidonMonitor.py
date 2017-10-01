@@ -257,6 +257,12 @@ class Monitor(object):
         to be taken, starts vent collector for that device with the
         options specified in poseidon.config.
         '''
+        endpoint_states = self.uss.return_endpoint_state()
+        try:
+            metadata = endpoint_states.get(dev_hash, {})
+        except AttributeError:
+            # If return_endpoint_state() returns NoneType
+            metadata = {}
         try:
             payload = {
                 'nic': self.mod_configuration['collector_nic'],
@@ -264,7 +270,8 @@ class Monitor(object):
                 'interval': self.mod_configuration['collector_interval'],
                 'filter': '\'host {0}\''.format(
                     self.uss.get_endpoint_ip(dev_hash)),
-                'iters': str(num_captures)}
+                'iters': str(num_captures),
+                'metadata': metadata}
             self.logger.debug('vent payload: ' + str(payload))
             vent_addr = self.mod_configuration[
                 'vent_ip'] + ':' + self.mod_configuration['vent_port']

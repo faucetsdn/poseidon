@@ -39,12 +39,19 @@ def test_start_vent_collector():
     poseidonMonitor.CTRL_C = False
     poseidonMonitor.requests = requests()
 
+    class MockUSS:
+        @staticmethod
+        def return_endpoint_state():
+            # Really don't care endpoint state here
+            return {}
+
     class MockMonitor(Monitor):
         mod_configuration = {
             'collector_nic': 2,
             'vent_ip': '0.0.0.0',
             'vent_port': '8080',
         }
+        uss = MockUSS()
 
         # no need to init the monitor
         def __init__(self):
@@ -55,6 +62,7 @@ def test_start_vent_collector():
     dev_hash = 'test'
     num_cuptures = 3
     mock_monitor.start_vent_collector(dev_hash, num_cuptures)
+
 
 def test_get_q_item():
     class MockMQueue:
