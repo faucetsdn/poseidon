@@ -50,11 +50,19 @@ def test_start_vent_collector():
         def __init__(self):
             pass
 
+    class MockUSS:
+        @staticmethod
+        def return_endpoint_state():
+            # Really don't care endpoint state here
+            return {}
+
     mock_monitor = MockMonitor()
     mock_monitor.logger = module_logger
     dev_hash = 'test'
     num_cuptures = 3
+    mock_monitor.uss = MockUSS()
     mock_monitor.start_vent_collector(dev_hash, num_cuptures)
+
 
 def test_get_q_item():
     class MockMQueue:
