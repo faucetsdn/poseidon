@@ -79,3 +79,12 @@ def test_get_q_item():
     mock_monitor = MockMonitor()
     mock_monitor.m_queue = MockMQueue()
     assert (True, "Item") == mock_monitor.get_q_item()
+
+
+def test_schedule_job_reinvestigation():
+    end_points = {
+        "hash_0": {"state": "REINVESTIGATING", "next-state": "UNKNOWN"},
+        "hash_1": {"state": "UNKNOWN", "next-state": "REINVESTIGATING"},
+        "hash_2": {"state": "known", "next-state": "UNKNOWN"}
+    }
+    poseidonMonitor.schedule_job_reinvestigation(2, end_points, module_logger)
