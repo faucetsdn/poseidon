@@ -153,3 +153,31 @@ def test_print_endpoint_state():
     mock_monitor =  MockMonitor()
     mock_monitor.logger = module_logger
     mock_monitor.print_endpoint_state(end_points)
+
+
+def test_configSelf():
+    class MockMonitor(Monitor):
+        mod_name = 'testingConfigSelf'
+
+        mod_configuration = [1, 2, 3, 4]
+
+        # no need to init the monitor
+        def __init__(self):
+            pass
+
+    class MockSectionConfig:
+        def direct_get(self, mod_name):
+            assert "testingConfigSelf" == mod_name
+            return [(1, "YOYO")]
+
+    class MockConfig():
+        def get_endpoint(self, endpoint_type):
+            assert "Handle_SectionConfig" == endpoint_type
+            section_conf = MockSectionConfig()
+            return section_conf
+
+    mock_monitor = MockMonitor()
+    mock_monitor.Config = MockConfig()
+    mock_monitor.logger = module_logger
+    mock_monitor.configSelf()
+    assert mock_monitor.mod_configuration[1] == "YOYO"
