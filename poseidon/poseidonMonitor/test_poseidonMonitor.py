@@ -139,3 +139,17 @@ def test_schedule_job_reinvestigation():
         "hash_2": {"state": "known", "next-state": "UNKNOWN"}
     }
     poseidonMonitor.schedule_job_reinvestigation(2, end_points, module_logger)
+
+def test_print_endpoint_state():
+    class MockMonitor(Monitor):
+        # no need to init the monitor
+        def __init__(self):
+            pass
+    end_points = {
+        "hash_0": {"state": "REINVESTIGATING", "next-state": "UNKNOWN", "endpoint":"test1"},
+        "hash_1": {"state": "UNKNOWN", "next-state": "REINVESTIGATING", "endpoint":"test2"},
+        "hash_2": {"state": "known", "next-state": "UNKNOWN", "endpoint":"test3"}
+    }
+    mock_monitor =  MockMonitor()
+    mock_monitor.logger = module_logger
+    mock_monitor.print_endpoint_state(end_points)
