@@ -17,11 +17,10 @@
 Created on 14 Jul 2016
 @author: dgrossman
 """
-import logging
-
+from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.baseClasses.Rock_Bottom import Rock_Bottom
 
-module_logger = logging.getLogger(__name__)
+module_logger = Logger
 
 """ Base call stubs
 
@@ -47,7 +46,7 @@ class Monitor_Action_Base(Rock_Bottom):  # pragma: no cover
         """
 
         self.owner = owner
-        self.logger = module_logger
+        self.logger = module_logger.logger
         if self.owner.mod_name is not None:
             self.config_section_name = self.owner.mod_name + ':' + self.mod_name
         else:

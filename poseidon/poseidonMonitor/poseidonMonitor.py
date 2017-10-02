@@ -20,73 +20,198 @@ Created on 17 May 2016
 @author: Charlie Lewis, dgrossman
 """
 import json
-import logging
-import logging.config
-from os import environ
+import Queue
+import signal
+import sys
+import threading
+import time
+from functools import partial
 from os import getenv
-from subprocess import call
-from subprocess import check_output
 
-import falcon
-from falcon_cors import CORS
+import requests
+import schedule
+import random
 
-from poseidon.poseidonMonitor.Action.Action import action_interface
+from poseidon.baseClasses.Logger_Base import Logger
+from poseidon.baseClasses.Rabbit_Base import Rabbit_Base
 from poseidon.poseidonMonitor.Config.Config import config_interface
-from poseidon.poseidonMonitor.NodeHistory.NodeHistory import nodehistory_interface
-from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import controller_interface
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import \
+    controller_interface
+
+ENDPOINT_STATES = [('K', 'KNOWN'), ('U', 'UNKNOWN'), ('M', 'MIRRORING'),
+                   ('S', 'SHUTDOWN'), ('R', 'REINVESTIGATING')]
+
+module_logger = Logger
+
+CTRL_C = False
 
 
-module_logger = logging.getLogger(__name__)
+def schedule_job_kickurl(func, logger):
+    ''' periodically ask the controller for its state '''
+    logger.debug('kick')
+    func.NorthBoundControllerAbstraction.get_endpoint(
+        'Update_Switch_State').update_endpoint_state()
+
+
+def rabbit_callback(ch, method, properties, body, q=None):
+    ''' callback, places rabbit data into internal queue'''
+    module_logger.logger.debug('got a message: {0}:{1}:{2}'.format(
+        method.routing_key, body, type(body)))
+    # TODO more
+    if q is not None:
+        q.put((method.routing_key, body))
+    else:
+        module_logger.logger.debug('posedionMain workQueue is None')
+
+
+def schedule_thread_worker(schedule, logger):
+    ''' schedule thread, takes care of running processes in the future '''
+    global CTRL_C
+    logLine = 'starting thread_worker'
+    logger.debug(logLine)
+    while not CTRL_C:
+        schedule.run_pending()
+        logLine = 'scheduler woke {0}'.format(
+            threading.current_thread().getName())
+        time.sleep(1)
+        logger.debug(logLine)
+    logger.debug('Threading stop:{0}'.format(
+        threading.current_thread().getName()))
+    sys.exit()
+
+
+def schedule_job_reinvestigation(max_investigations, endpoints, logger):
+    ''' put endpoints into the reinvestigation state if possible '''
+    ostr = 'reinvestigation time'
+    logger.debug(ostr)
+    logger.debug('endpoints:{0}'.format(endpoints))
+    candidates = []
+
+    currently_investigating = 0
+    for my_hash, my_value in endpoints.iteritems():
+        if 'state' in my_value:
+            if my_value['state'] == 'REINVESTIGATING' or my_value['next-state'] == 'REINVESTIGATING':
+                currently_investigating += 1
+            elif my_value['state'] == 'KNOWN':
+                candidates.append(my_hash)
+
+    # get random order of things that are known
+    random.shuffle(candidates)
+
+    if currently_investigating < max_investigations:
+        ostr = 'room to investigate'
+        logger.debug(ostr)
+        for x in range(max_investigations - currently_investigating):
+            if len(candidates) >= 1:
+                chosen = candidates.pop()
+                ostr = 'starting investigation {0}:{1}'.format(x, chosen)
+                logger.debug(ostr)
+                endpoints[chosen]['next-state'] = 'REINVESTIGATING'
+    else:
+        ostr = 'investigators all busy'
+        logger.debug(ostr)
 
 
 class Monitor(object):
 
-    def __init__(self):
+    def __init__(self, skip_rabbit):
         # get the logger setup
-        self.logger = module_logger
+        self.logger = module_logger.logger
         self.mod_configuration = dict()
-        logging.basicConfig(level=logging.DEBUG)
+        module_logger.logger_config(None)
 
         self.mod_name = self.__class__.__name__
+        self.skip_rabbit = skip_rabbit
+
+        # timer class to call things periodically in own thread
+        self.schedule = schedule
+
+        # rabbit
+        self.rabbit_channel_local = None
+        self.rabbit_chanel_connection_local = None
+        self.rabbit_thread = None
+
         self.actions = dict()
         self.Config = config_interface
         self.Config.set_owner(self)
-        self.NodeHistory = nodehistory_interface
-        self.NodeHistory.set_owner(self)
         self.NorthBoundControllerAbstraction = controller_interface
         self.NorthBoundControllerAbstraction.set_owner(self)
-        self.Action = action_interface
-        self.Action.set_owner(self)
+
+        self.configSelf()
+
+        # set the logger level
+        module_logger.set_level(self.mod_configuration['logger_level'])
 
         # wire up handlers for Config
-        self.logger.info('handler Config')
+        self.logger.debug('handler Config')
+
         # check
         self.Config.configure()
         self.Config.first_run()
         self.Config.configure_endpoints()
 
-        # wire up handlers for NodeHistory
-        self.logger.info('handler NodeHistory')
-        self.NodeHistory.configure()
-        self.NodeHistory.first_run()
-        self.NodeHistory.configure_endpoints()
+        self.m_queue = Queue.Queue()
 
         # wire up handlers for NorthBoundControllerAbstraction
-        self.logger.info('handler NorthBoundControllerAbstraction')
+        self.logger.debug('handler NorthBoundControllerAbstraction')
+
         # check
         self.NorthBoundControllerAbstraction.configure()
         self.NorthBoundControllerAbstraction.first_run()
         self.NorthBoundControllerAbstraction.configure_endpoints()
 
-        # wire up handlers for Action
-        self.logger.info('handler Action')
-        # check
-        self.Action.configure()
-        self.Action.first_run()
-        self.Action.configure_endpoints()
-        self.logger.info('----------------------')
-        self.configSelf()
+        # make a shortcut
+        self.uss = self.NorthBoundControllerAbstraction.get_endpoint(
+            'Update_Switch_State')
+
+        self.logger.debug('----------------------')
         self.init_logging()
+
+        scan_frequency = int(self.mod_configuration['scan_frequency'])
+        self.schedule.every(scan_frequency).seconds.do(
+            partial(schedule_job_kickurl, func=self, logger=self.logger))
+
+        reinvestigation_frequency = int(
+            self.mod_configuration['reinvestigation_frequency'])
+        max_concurrent_reinvestigations = int(
+            self.mod_configuration['max_concurrent_reinvestigations'])
+
+        self.schedule.every(reinvestigation_frequency).seconds.do(
+            partial(schedule_job_reinvestigation,
+                    max_investigations=max_concurrent_reinvestigations,
+                    endpoints=self.NorthBoundControllerAbstraction.get_endpoint(
+                        'Update_Switch_State').endpoint_states,
+                    logger=self.logger))
+
+        self.schedule_thread = threading.Thread(
+            target=partial(
+                schedule_thread_worker,
+                schedule=self.schedule,
+                logger=self.logger),
+            name='st_worker')
+
+    def print_endpoint_state(self, endpoint_states):
+        ''' debug output showing the state of endpoints '''
+        def same_old(logger, state, letter, endpoint_states):
+            logger.debug('*******{0}*********'.format(state))
+
+            out_flag = False
+            for my_hash in endpoint_states.keys():
+                my_dict = endpoint_states[my_hash]
+                if my_dict['state'] == state:
+                    out_flag = True
+                    logger.debug('{0}:{1}:{2}->{3}:{4}'.format(letter,
+                                                               my_hash,
+                                                               my_dict['state'],
+                                                               my_dict['next-state'],
+                                                               my_dict['endpoint']))
+            if not out_flag:
+                logger.debug('None')
+
+        for l, s in ENDPOINT_STATES:
+            same_old(self.logger, s, l, endpoint_states)
+
+            self.logger.debug('****************')
 
     def init_logging(self):
         ''' setup logging  '''
@@ -100,9 +225,7 @@ class Monitor(object):
         if path is not None:
             with open(path, 'rt') as f:
                 config = json.load(f)
-            logging.config.dictConfig(config)
-        else:
-            logging.basicConfig(level=logging.DEBUG)
+        module_logger.logger_config(config)
 
     def configSelf(self):
         ''' get configuraiton for this module '''
@@ -111,162 +234,185 @@ class Monitor(object):
             k, v = item
             self.mod_configuration[k] = v
         ostr = '{0}:config:{1}'.format(self.mod_name, self.mod_configuration)
-        self.logger.info(ostr)
+        self.logger.debug(ostr)
 
-    def add_endpoint(self, name, handler):
-        ''' add a function by name  '''
-        a = handler()
-        a.owner = self
-        self.actions[name] = a
+    def update_next_state(self, rabbit_transitions):
+        ''' generate the next_state from known information '''
+        next_state = None
+        current_state = None
+        endpoint_states = self.uss.return_endpoint_state()
+        for my_hash in endpoint_states.keys():
+            my_dict = endpoint_states[my_hash]
+            current_state = my_dict['state']
+            if current_state == 'UNKNOWN':
+                my_dict['next-state'] = 'MIRRORING'
+        for my_hash in rabbit_transitions.keys():
+            my_dict = endpoint_states[my_hash]
+            current_state = my_dict['state']
+            my_dict['next-state'] = rabbit_transitions[my_hash]
 
-    def del_endpoint(self, name):
-        ''' remove a function by name or None  '''
-        if name in self.actions:
-            self.actions.pop(name)
-
-    def get_endpoint(self, name):
-        ''' get a function by name or None  '''
-        if name in self.actions:
-            return self.actions.get(name)
-        else:
-            return None
-
-
-def get_allowed():
-    ''' setup who is allowed to view rest page '''
-    rest_url = 'localhost:4444'
-    if 'ALLOW_ORIGIN' in environ:
-        allow_origin = environ['ALLOW_ORIGIN']
-        host_port = allow_origin.split('//')[1]
-        host = host_port.split(':')[0]
-        port = str(int(host_port.split(':')[1]))
-        rest_url = host + ':' + port
-    else:
-        allow_origin = ''
-    return allow_origin, rest_url
-
-
-allow_origin, rest_url = get_allowed()
-# cors = CORS(allow_origins_list=[allow_origin])
-cors = CORS(allow_all_origins=True)
-public_cors = CORS(allow_all_origins=True)
-
-
-class SwaggerAPI:
-    """Serve up swagger API"""
-    swagger_file = 'poseidon/poseidonMonitor/swagger.yaml'
-
-    def on_get(self, req, resp):
-        """Handles GET requests"""
-        resp.content_type = 'text/yaml'
+    def start_vent_collector(self, dev_hash, num_captures=1):
+        '''
+        Given a device hash and optionally a number of captures
+        to be taken, starts vent collector for that device with the
+        options specified in poseidon.config.
+        '''
+        endpoint_states = self.uss.return_endpoint_state()
         try:
-            # update mydomain with current running host and port
-            with open(self.swagger_file, 'r') as f:
-                filedata = f.read()
-            newdata = filedata.replace('mydomain', rest_url)
-            with open(self.swagger_file, 'w') as f:
-                f.write(newdata)
-
-            with open(self.swagger_file, 'r') as f:
-                resp.body = f.read()
-        except BaseException:  # pragma: no cover
-            resp.body = ''
-
-
-class VersionResource:
-    """Serve up the current version and build information"""
-    version_file = 'VERSION'
-
-    def on_get(self, req, resp):
-        """Handles GET requests"""
-        version = {}
-        # get version number (from VERSION file)
+            metadata = endpoint_states.get(dev_hash, {})
+        except AttributeError:
+            # If return_endpoint_state() returns NoneType
+            metadata = {}
         try:
-            with open(self.version_file, 'r') as f:
-                version['version'] = f.read().strip()
-        except BaseException:  # pragma: no cover
+            payload = {
+                'nic': self.mod_configuration['collector_nic'],
+                'id': dev_hash,
+                'interval': self.mod_configuration['collector_interval'],
+                'filter': '\'host {0}\''.format(
+                    self.uss.get_endpoint_ip(dev_hash)),
+                'iters': str(num_captures),
+                'metadata': metadata}
+            self.logger.debug('vent payload: ' + str(payload))
+            vent_addr = self.mod_configuration[
+                'vent_ip'] + ':' + self.mod_configuration['vent_port']
+            uri = 'http://' + vent_addr + '/create'
+            resp = requests.post(uri, json=payload)
+            self.logger.debug('collector repsonse: ' + resp.text)
+        except Exception as e:
+            self.logger.debug('failed to start vent collector' + str(e))
+
+    def get_rabbit_message(self, item):
+        ''' read a message off the rabbit_q
+        the message should be from 'poseidon.algos.ML.results'
+        the message should be (hash,msg)
+        '''
+        global CTRL_C
+        ret_val = {}
+
+        if not CTRL_C:
+            self.logger.debug('rabbit_message:{1}'.format(item))
+            routing_key, my_obj = item
+            my_obj = json.loads(my_obj)
+            self.logger.debug('routing_key:{0}'.format(routing_key))
+            if routing_key is not None and routing_key == 'poseidon.algos.ML.results':
+                self.logger.debug('value:{0}'.format(my_obj))
+            # TODO do something with reccomendation
+        return ret_val
+
+    def process(self):
+        ''' processing event loop
+        while should not be shutdown
+           get data from rabbit
+           calculate endpoint next_state
+           effect changes to endpoints to make state=next_state
+        '''
+
+        global CTRL_C
+        signal.signal(signal.SIGINT, partial(self.signal_handler))
+        while not CTRL_C:
+            self.logger.debug('***************CTRL_C:{0}'.format(CTRL_C))
+            time.sleep(1)
+            self.logger.debug('woke from sleeping')
+            found_work, item = self.get_q_item()
+            rabbit_transitions = {}
+
+            # plan out the transitions
+            if found_work:
+                # TODO make this read until nothing in q
+                rabbit_transitions = self.get_rabbit_message(item)
+
+            eps = self.uss.return_endpoint_state()
+
+            state_transitions = self.update_next_state(rabbit_transitions)
+
+            self.print_endpoint_state(eps)
+
+            # make the transitions
+
+            for endpoint_hash in eps.keys():
+                current_state = eps[endpoint_hash]['state']
+                next_state = eps[endpoint_hash]['next-state']
+
+                # dont do anything
+                if next_state == 'NONE':
+                    continue
+
+                if next_state == 'MIRRORING':
+                    self.logger.debug(
+                        'updating:{0}:{1}->{2}'.format(endpoint_hash, current_state, next_state))
+                    self.logger.debug('*********** U NOTIFY VENT ***********')
+                    self.start_vent_collector(endpoint_hash)
+                    self.logger.debug('*********** U MIRROR PORT ***********')
+                    self.uss.mirror_endpoint(endpoint_hash)
+                if next_state == 'REINVESTIGATING':
+                    self.logger.debug(
+                        'updating:{0}:{1}->{2}'.format(endpoint_hash, current_state, next_state))
+                    self.logger.debug('*********** R NOTIFY VENT ***********')
+                    self.start_vent_collector(endpoint_hash)
+                    self.logger.debug('*********** R MIRROR PORT ***********')
+                    self.uss.mirror_endpoint(endpoint_hash)
+
+    def get_q_item(self):
+        ''' attempt to get a workitem from the queue'''
+        found_work = False
+        item = None
+        global CTRL_C
+
+        if not CTRL_C:
+            try:
+                item = self.m_queue.get(False)
+                found_work = True
+            except Queue.Empty:
+                pass
+
+        return (found_work, item)
+
+    def signal_handler(self, signal, frame):
+        ''' hopefully eat a CTRL_C and signal system shutdown '''
+        global CTRL_C
+        CTRL_C = True
+        self.logger.debug('=================CTRLC{0}'.format(CTRL_C))
+        try:
+            for job in self.schedule.jobs:
+                self.logger.debug('CTRLC:{0}'.format(job))
+                self.schedule.cancel_job(job)
+            self.rabbit_channel_connection_local.close()
+            sys.exit()
+        except BaseException:
             pass
-        # get commit id (git commit ID)
-        try:
-            cmd = 'git -C poseidon rev-parse HEAD'
-            commit_id = check_output(cmd, shell=True)
-            cmd = 'git -C poseidon diff-index --quiet HEAD --'
-            dirty = call(cmd, shell=True)
-            if dirty != 0:
-                version['commit'] = commit_id.strip() + '-dirty'
-            else:
-                version['commit'] = commit_id.strip()
-        except BaseException:  # pragma: no cover
-            pass
-        # get runtime id (docker container ID)
-        try:
-            if 'HOSTNAME' in environ:
-                version['runtime'] = environ['HOSTNAME']
-        except BaseException:  # pragma: no cover
-            pass
-        resp.body = json.dumps(version)
 
 
-class PCAPResource:
-    """Serve up parsed PCAP files"""
-    @staticmethod
-    def on_get(req, resp, pcap_file, output_type):
-        resp.content_type = 'text/text'
-        try:
-            if output_type == 'pcap' and pcap_file.split('.')[1] == 'pcap':
-                resp.body = check_output(
-                    ['/usr/sbin/tcpdump',
-                     '-r',
-                     '/tmp/' + pcap_file,
-                     '-ne',
-                     '-tttt'])
-            else:
-                resp.body = 'not a pcap'
-        except BaseException:  # pragma: no cover
-            resp.body = 'failed'
+def main(skip_rabbit=False):
+    ''' main function '''
+    pmain = Monitor(skip_rabbit=skip_rabbit)
+    if not skip_rabbit:
+        rabbit = Rabbit_Base()
+        host = pmain.mod_configuration['rabbit_server']
+        port = int(pmain.mod_configuration['rabbit_port'])
+        exchange = 'topic-poseidon-internal'
+        queue_name = 'poseidon_main'
+        binding_key = ['poseidon.algos.#', 'poseidon.action.#']
+        retval = rabbit.make_rabbit_connection(
+            host, port, exchange, queue_name, binding_key)
+        pmain.rabbit_channel_local = retval[0]
+        pmain.rabbit_channel_connection_local = retval[1]
+        pmain.rabbit_thread = rabbit.start_channel(
+            pmain.rabbit_channel_local,
+            rabbit_callback,
+            'poseidon_main',
+            pmain.m_queue)
+        # def start_channel(self, channel, callback, queue):
+        pmain.schedule_thread.start()
+
+    # loop here until told not to
+    pmain.process()
+
+    pmain.logger.debug('SHUTTING DOWN')
+    # pmain.rabbit_channel_connection_local.close()
+    # pmain.rabbit_channel_local.close()
+    pmain.logger.debug('EXITING')
+    sys.exit(0)
 
 
-# create callable WSGI app instance for gunicorn
-api = falcon.API(middleware=[cors.middleware])
-
-# register the local classes
-poseidon_monitor = Monitor()
-poseidon_monitor.add_endpoint('Handle_PCAP', PCAPResource)
-poseidon_monitor.add_endpoint('Handle_Yaml', SwaggerAPI)
-poseidon_monitor.add_endpoint('Handle_Version', VersionResource)
-
-# make sure to update the yaml file when you add a new route
-
-# 'local' routes
-api.add_route('/v1/version', poseidon_monitor.get_endpoint('Handle_Version'))
-api.add_route('/v1/pcap/{pcap_file}/{output_type}',
-              poseidon_monitor.get_endpoint('Handle_PCAP'))
-api.add_route('/swagger.yaml', poseidon_monitor.get_endpoint('Handle_Yaml'))
-
-# access to the other components of PoseidonRest
-
-# nbca routes
-api.add_route('/v1/nbca/{resource}',
-              poseidon_monitor.NorthBoundControllerAbstraction
-              .get_endpoint('Handle_Resource'))
-api.add_route('/v1/polling',
-              poseidon_monitor.NorthBoundControllerAbstraction
-              .get_endpoint('Handle_Periodic'))
-
-# config routes
-api.add_route('/v1/config',
-              poseidon_monitor.Config.get_endpoint('Handle_FullConfig'))
-api.add_route('/v1/config/{section}',
-              poseidon_monitor.Config.get_endpoint('Handle_SectionConfig'))
-api.add_route('/v1/config/{section}/{field}',
-              poseidon_monitor.Config.get_endpoint('Handle_FieldConfig'))
-
-# nodehistory routes
-api.add_route('/v1/history/{resource}',
-              poseidon_monitor.NodeHistory.get_endpoint('Handle_Default'))
-
-# action routes
-api.add_route('/v1/action/{resource}',
-              poseidon_monitor.Action.get_endpoint('Handle_Default'))
-
-# storage routes
+if __name__ == '__main__':
+    main(skip_rabbit=False)

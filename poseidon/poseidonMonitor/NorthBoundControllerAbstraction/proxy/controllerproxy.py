@@ -18,12 +18,13 @@ Created on 25 July 2016
 
 @author: kylez
 """
-import logging
+import requests
 from urlparse import urljoin
 
-import requests
+from poseidon.baseClasses.Logger_Base import Logger
 
-module_logger = logging.getLogger(__name__)
+module_logger = Logger
+module_logger = module_logger.logger
 
 
 class ControllerProxy(object):

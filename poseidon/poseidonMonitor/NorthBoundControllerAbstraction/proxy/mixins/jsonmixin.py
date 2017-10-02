@@ -18,9 +18,9 @@ Created on 25 July 2016
 @author: kylez
 """
 import json
-import logging
 
-module_logger = logging.getLogger(__name__)
+from poseidon.baseClasses.Logger_Base import Logger
+module_logger = Logger.logger
 
 
 class JsonMixin:

@@ -16,28 +16,27 @@
 ''' Created on 21 August 2017
 @author: dgrossman
 '''
-import logging
+import pika
 import threading
 import time
 import types
 from functools import partial
 
-import pika
-
-module_logger = logging.getLogger(__name__)
+from Logger_Base import Logger
 
 
-class Rabbit_Base(object):
-    '''Comment Goes Here
+module_logger = Logger
 
-    Attributes:
 
+class Rabbit_Base(object):          # pragma: no cover
+    '''
+    Base Class for RabbitMQ
     '''
 
     def __init__(self):
-        self.logger = module_logger
+        self.logger = module_logger.logger
 
-    def make_rabbit_connection(self, host, exchange, queue_name, keys,
+    def make_rabbit_connection(self, host, port, exchange, queue_name, keys,
                                total_sleep=float('inf')):  # pragma: no cover
         '''
         Connects to rabbitmq using the given hostname,
@@ -53,7 +52,7 @@ class Rabbit_Base(object):
         while wait and total_sleep > 0:
             try:
                 rabbit_connection = pika.BlockingConnection(
-                    pika.ConnectionParameters(host=host))
+                    pika.ConnectionParameters(host=host, port=port))
                 rabbit_channel = rabbit_connection.channel()
                 rabbit_channel.exchange_declare(exchange=exchange,
                                                 exchange_type='topic')

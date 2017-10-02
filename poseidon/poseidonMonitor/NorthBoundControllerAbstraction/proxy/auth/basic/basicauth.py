@@ -17,11 +17,10 @@
 Created on 25 July 2016
 @author: kylez
 """
-import logging
-
+from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.controllerproxy import ControllerProxy
 
-module_logger = logging.getLogger(__name__)
+module_logger = Logger.logger
 
 
 class BasicAuthControllerProxy(ControllerProxy):
