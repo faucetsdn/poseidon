@@ -1,15 +1,17 @@
-import hashlib
-import json
-
 """
 Created on 2 October 2017
 @author: Jorissss
 """
 
+import hashlib
+import json
+
+
+
 class EndPoint:
     def __init__(self, data):
-        self.state = ''
-        self.next_state = ''
+        self.state = 'NONE'
+        self.next_state = 'NONE'
         self.data = dict(data)
 
     @staticmethod
