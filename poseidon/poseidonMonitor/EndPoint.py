@@ -1,10 +1,10 @@
 import hashlib
 import json
 
-'''
+"""
 Created on 2 October 2017
 @author: Jorissss
-'''
+"""
 
 class EndPoint:
     def __init__(self, data):
@@ -42,9 +42,9 @@ class EndPoint:
         return json.dumps(self.data)
 
     @classmethod
-    def from_json(cls, object):
+    def from_json(cls, json_obj):
         '''initialize object from json'''
-        return cls(json.loads(object))
+        return cls(json.loads(json_obj))
 
     def update_state(self, next_s='NONE'):
         '''state <- next_state, next_state <- 'NONE' or a string that is passed as a parameter'''
