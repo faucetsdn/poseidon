@@ -1,4 +1,6 @@
 """
+Test module for endPoint.py
+
 Created on 2 October 2017
 @author: Jorissss
 """
@@ -15,9 +17,7 @@ test_data = {u'tenant': u'FLOORPLATE',
 def test_endpoint_creation():
     endpoint1 = endPoint.EndPoint(test_data)
     endpoint2 = endPoint.EndPoint.from_json(endpoint1.to_json())
-    print (endpoint1)
-    print (endpoint2)
-    assert endpoint1.to_str() == endpoint2.to_str()
+
     assert endpoint1.make_hash() == endpoint2.make_hash()
 
 def test_endpoint_state_default():
