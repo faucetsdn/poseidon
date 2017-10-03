@@ -24,6 +24,7 @@ import pytest
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.poseidonMonitor import Monitor
 from poseidon.poseidonMonitor import poseidonMonitor
+import json
 
 module_logger = Logger.logger
 
@@ -113,6 +114,9 @@ def test_get_q_item():
     mock_monitor.m_queue = MockMQueue()
     assert (True, "Item") == mock_monitor.get_q_item()
 
+def test_get_rabbit_message():
+    poseidonMonitor.CTRL_C = False
+
 def test_rabbit_callback():
     mock_method = lambda: None
     mock_method.routing_key = "test_routing_key"
@@ -145,6 +149,12 @@ def test_print_endpoint_state():
         # no need to init the monitor
         def __init__(self):
             pass
+
+    mock_monitor = MockMonitor()
+    mock_monitor.logger = module_logger
+    test_dict_to_return = {'test': True}
+    item = ('poseidon.algos.ML.results', json.dumps(test_dict_to_return))
+    assert test_dict_to_return == mock_monitor.get_rabbit_message(item)
     end_points = {
         "hash_0": {"state": "REINVESTIGATING", "next-state": "UNKNOWN", "endpoint":"test1"},
         "hash_1": {"state": "UNKNOWN", "next-state": "REINVESTIGATING", "endpoint":"test2"},

@@ -290,13 +290,15 @@ class Monitor(object):
         ret_val = {}
 
         if not CTRL_C:
-            self.logger.debug('rabbit_message:{1}'.format(item))
             routing_key, my_obj = item
+            self.logger.debug('rabbit_message:{0}'.format(my_obj))
             my_obj = json.loads(my_obj)
             self.logger.debug('routing_key:{0}'.format(routing_key))
             if routing_key is not None and routing_key == 'poseidon.algos.ML.results':
                 self.logger.debug('value:{0}'.format(my_obj))
             # TODO do something with reccomendation
+            if my_obj:
+                ret_val = my_obj
         return ret_val
 
     def process(self):
