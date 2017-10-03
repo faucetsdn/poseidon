@@ -73,12 +73,19 @@ def test_start_vent_collector():
     poseidonMonitor.CTRL_C = False
     poseidonMonitor.requests = requests()
 
+    class MockUSS:
+        @staticmethod
+        def return_endpoint_state():
+            # Really don't care endpoint state here
+            return {}
+
     class MockMonitor(Monitor):
         mod_configuration = {
             'collector_nic': 2,
             'vent_ip': '0.0.0.0',
             'vent_port': '8080',
         }
+        uss = MockUSS()
 
         # no need to init the monitor
         def __init__(self):
@@ -107,10 +114,37 @@ def test_get_q_item():
     mock_monitor.m_queue = MockMQueue()
     assert (True, "Item") == mock_monitor.get_q_item()
 
-
 def test_get_rabbit_message():
     poseidonMonitor.CTRL_C = False
 
+def test_rabbit_callback():
+    mock_method = lambda: None
+    mock_method.routing_key = "test_routing_key"
+
+    class MockQueue:
+        item = None
+
+        def put(self, item):
+            self.item = item
+            return True
+
+        # used for testing to verify that we put right stuff there
+        def get_item(self):
+            return self.item
+
+    mock_queue = MockQueue()
+    poseidonMonitor.rabbit_callback("Channel", mock_method, "properties", "body", mock_queue)
+    assert mock_queue.get_item() == (mock_method.routing_key, "body")
+
+def test_schedule_job_reinvestigation():
+    end_points = {
+        "hash_0": {"state": "REINVESTIGATING", "next-state": "UNKNOWN"},
+        "hash_1": {"state": "UNKNOWN", "next-state": "REINVESTIGATING"},
+        "hash_2": {"state": "known", "next-state": "UNKNOWN"}
+    }
+    poseidonMonitor.schedule_job_reinvestigation(2, end_points, module_logger)
+
+def test_print_endpoint_state():
     class MockMonitor(Monitor):
         # no need to init the monitor
         def __init__(self):
@@ -121,3 +155,39 @@ def test_get_rabbit_message():
     test_dict_to_return = {'test': True}
     item = ('poseidon.algos.ML.results', json.dumps(test_dict_to_return))
     assert test_dict_to_return == mock_monitor.get_rabbit_message(item)
+    end_points = {
+        "hash_0": {"state": "REINVESTIGATING", "next-state": "UNKNOWN", "endpoint":"test1"},
+        "hash_1": {"state": "UNKNOWN", "next-state": "REINVESTIGATING", "endpoint":"test2"},
+        "hash_2": {"state": "known", "next-state": "UNKNOWN", "endpoint":"test3"}
+    }
+    mock_monitor =  MockMonitor()
+    mock_monitor.logger = module_logger
+    mock_monitor.print_endpoint_state(end_points)
+
+
+def test_configSelf():
+    class MockMonitor(Monitor):
+        mod_name = 'testingConfigSelf'
+
+        mod_configuration = [1, 2, 3, 4]
+
+        # no need to init the monitor
+        def __init__(self):
+            pass
+
+    class MockSectionConfig:
+        def direct_get(self, mod_name):
+            assert "testingConfigSelf" == mod_name
+            return [(1, "YOYO")]
+
+    class MockConfig():
+        def get_endpoint(self, endpoint_type):
+            assert "Handle_SectionConfig" == endpoint_type
+            section_conf = MockSectionConfig()
+            return section_conf
+
+    mock_monitor = MockMonitor()
+    mock_monitor.Config = MockConfig()
+    mock_monitor.logger = module_logger
+    mock_monitor.configSelf()
+    assert mock_monitor.mod_configuration[1] == "YOYO"
