@@ -19,7 +19,6 @@ Test module for Config.py
 Created on 28 June 2016
 @author: dgrossman, lanhamt
 '''
-import pytest
 import hashlib
 import json
 
@@ -39,6 +38,7 @@ def test_config_full_get():
     '''
     resp = config_interface.get_endpoint('Handle_FullConfig').direct_get()
     h.update(resp)
+
 
 def test_config_section_get_OK():
     '''

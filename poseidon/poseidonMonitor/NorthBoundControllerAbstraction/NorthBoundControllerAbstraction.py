@@ -60,6 +60,7 @@ class Update_Switch_State(Monitor_Helper_Base):
         self.m_queue = Queue.Queue()
 
     def return_endpoint_state(self):
+        ''' give access to the endpoint_states '''
         return self.endpoint_states
 
     def first_run(self):
@@ -164,7 +165,8 @@ class Update_Switch_State(Monitor_Helper_Base):
 
     def change_endpoint_state(self, my_hash, new_state=None):
         ''' update the state of an endpoint '''
-        self.endpoint_states[my_hash]['state'] = new_state or self.endpoint_states[my_hash]['next-state']
+        self.endpoint_states[my_hash][
+            'state'] = new_state or self.endpoint_states[my_hash]['next-state']
         self.endpoint_states[my_hash]['next-state'] = 'NONE'
 
     def find_new_machines(self, machines):
