@@ -9,7 +9,7 @@ import json
 class EndPoint:
     def __init__(self, data, state='NONE', next_state='NONE'):
         self.state = state
-        self.next_state = state
+        self.next_state = next_state
         self.data = dict(data)
 
     def make_hash(self):
@@ -31,9 +31,9 @@ class EndPoint:
 
     def to_str(self):
         '''make string representation of internals of object'''
-        strep = 'state: ' + self.state + '\n'
-        strep += 'next_state: ' + self.next_state + '\n'
-        strep += 'data: ' + str(self.data)
+        strep = 'state: ' + self.state
+        strep += ', next_state: ' + self.next_state
+        strep += ', data: ' + str(self.data)
         return strep
 
     def to_json(self):
