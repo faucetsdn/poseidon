@@ -34,7 +34,7 @@ class EndPoint:
         strep = 'state: ' + self.state + '\n'
         strep += 'next_state: ' + self.next_state + '\n'
         strep += 'data: ' + str(self.data)
-        return strep
+        return strep.encode('utf-8')
 
     def to_json(self):
         '''return a json view of the object'''
