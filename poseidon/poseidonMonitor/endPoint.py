@@ -6,16 +6,13 @@ Created on 2 October 2017
 import hashlib
 import json
 
-
-
 class EndPoint:
-    def __init__(self, data):
-        self.state = 'NONE'
-        self.next_state = 'NONE'
+    def __init__(self, data, state='NONE', next_state='NONE'):
+        self.state = state
+        self.next_state = state
         self.data = dict(data)
 
-    @staticmethod
-    def make_hask(self):
+    def make_hash(self):
         ''' hash the metadata in a sane way '''
         h = hashlib.new('ripemd160')
         pre_h = str()
@@ -28,7 +25,7 @@ class EndPoint:
 
         for word in ['tenant', 'mac', 'segment', 'ip-address']:
             pre_h = pre_h + str(self.data.get(str(word), 'missing'))
-        h.update(pre_h)
+        h.update(pre_h.encode('utf-8'))
         post_h = h.hexdigest()
         return post_h
 
@@ -41,12 +38,15 @@ class EndPoint:
 
     def to_json(self):
         '''return a json view of the object'''
-        return json.dumps(self.data)
+        return json.dumps({ 'endpoint_data': self.data
+                          , 'state': self.state
+                          , 'next_state': self.next_state })
 
     @classmethod
     def from_json(cls, json_obj):
         '''initialize object from json'''
-        return cls(json.loads(json_obj))
+        obj_dict = json.loads(json_obj)
+        return cls(obj_dict['endpoint_data'], obj_dict['state'], obj_dict['next_state'])
 
     def update_state(self, next_s='NONE'):
         '''state <- next_state, next_state <- 'NONE' or a string that is passed as a parameter'''
