@@ -15,10 +15,10 @@ test_data = {u'tenant': u'FLOORPLATE',
              u'ip-address': u'102.179.20.100'}
 
 
-def test_endpoint_creation():
+def test_endpoint_creation_no_state():
     endpoint1 = endPoint.EndPoint(test_data)
     endpoint2 = endPoint.EndPoint.from_json(endpoint1.to_json())
-
+1
     assert endpoint1.make_hash() == endpoint2.make_hash()
 
 def test_endpoint_creation_with_state():
