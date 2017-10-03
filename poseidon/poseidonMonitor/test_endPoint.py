@@ -19,7 +19,6 @@ def test_endpoint_creation():
     endpoint1 = endPoint.EndPoint(test_data)
     endpoint2 = endPoint.EndPoint.from_json(endpoint1.to_json())
 
-    assert endpoint1.to_str() == endpoint2.to_str()
     assert endpoint1.make_hash() == endpoint2.make_hash()
 
 def test_endpoint_creation_with_state():
