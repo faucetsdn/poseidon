@@ -19,7 +19,6 @@ Test module for poseidonMonitor.py
 Created on 28 June 2016
 @author: dgrossman, MShel
 """
-import pytest
 
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.poseidonMonitor import Monitor
@@ -39,6 +38,7 @@ def test_signal_handler():
 
     class MockMonitor(Monitor):
         # no need to init the monitor
+
         def __init__(self):
             pass
 
@@ -56,14 +56,17 @@ def test_signal_handler():
     mock_monitor.schedule = MockScheduele()
     mock_monitor.rabbit_channel_connection_local = MockRabbitConnection()
     mock_monitor.logger = module_logger
-    # signal handler seem to simply exit and kill all the jobs no matter what we pass
+    # signal handler seem to simply exit and kill all the jobs no matter what
+    # we pass
     mock_monitor.signal_handler(None, None)
-    assert ['job1 cancelled', 'job2 cancelled', 'job3 cancelled'] == mock_monitor.schedule.call_log
+    assert ['job1 cancelled', 'job2 cancelled',
+            'job3 cancelled'] == mock_monitor.schedule.call_log
     assert True == mock_monitor.rabbit_channel_connection_local.connection_closed
 
 
 def test_start_vent_collector():
     class requests():
+
         @staticmethod
         def post(uri, json):
             mock_response = lambda: None
@@ -74,6 +77,7 @@ def test_start_vent_collector():
     poseidonMonitor.requests = requests()
 
     class MockUSS:
+
         @staticmethod
         def return_endpoint_state():
             # Really don't care endpoint state here
@@ -100,6 +104,7 @@ def test_start_vent_collector():
 
 def test_get_q_item():
     class MockMQueue:
+
         def get(self, block):
             return "Item"
 
@@ -107,6 +112,7 @@ def test_get_q_item():
 
     class MockMonitor(Monitor):
         # no need to init the monitor
+
         def __init__(self):
             pass
 
@@ -114,8 +120,10 @@ def test_get_q_item():
     mock_monitor.m_queue = MockMQueue()
     assert (True, "Item") == mock_monitor.get_q_item()
 
+
 def test_get_rabbit_message():
     poseidonMonitor.CTRL_C = False
+
 
 def test_rabbit_callback():
     mock_method = lambda: None
@@ -133,8 +141,14 @@ def test_rabbit_callback():
             return self.item
 
     mock_queue = MockQueue()
-    poseidonMonitor.rabbit_callback("Channel", mock_method, "properties", "body", mock_queue)
+    poseidonMonitor.rabbit_callback(
+        "Channel",
+        mock_method,
+        "properties",
+        "body",
+        mock_queue)
     assert mock_queue.get_item() == (mock_method.routing_key, "body")
+
 
 def test_schedule_job_reinvestigation():
     end_points = {
@@ -144,9 +158,11 @@ def test_schedule_job_reinvestigation():
     }
     poseidonMonitor.schedule_job_reinvestigation(2, end_points, module_logger)
 
+
 def test_print_endpoint_state():
     class MockMonitor(Monitor):
         # no need to init the monitor
+
         def __init__(self):
             pass
 
@@ -156,11 +172,19 @@ def test_print_endpoint_state():
     item = ('poseidon.algos.ML.results', json.dumps(test_dict_to_return))
     assert test_dict_to_return == mock_monitor.get_rabbit_message(item)
     end_points = {
-        "hash_0": {"state": "REINVESTIGATING", "next-state": "UNKNOWN", "endpoint":"test1"},
-        "hash_1": {"state": "UNKNOWN", "next-state": "REINVESTIGATING", "endpoint":"test2"},
-        "hash_2": {"state": "known", "next-state": "UNKNOWN", "endpoint":"test3"}
-    }
-    mock_monitor =  MockMonitor()
+        "hash_0": {
+            "state": "REINVESTIGATING",
+            "next-state": "UNKNOWN",
+            "endpoint": "test1"},
+        "hash_1": {
+            "state": "UNKNOWN",
+            "next-state": "REINVESTIGATING",
+            "endpoint": "test2"},
+        "hash_2": {
+            "state": "known",
+            "next-state": "UNKNOWN",
+            "endpoint": "test3"}}
+    mock_monitor = MockMonitor()
     mock_monitor.logger = module_logger
     mock_monitor.print_endpoint_state(end_points)
 
@@ -176,11 +200,13 @@ def test_configSelf():
             pass
 
     class MockSectionConfig:
+
         def direct_get(self, mod_name):
             assert "testingConfigSelf" == mod_name
             return [(1, "YOYO")]
 
     class MockConfig():
+
         def get_endpoint(self, endpoint_type):
             assert "Handle_SectionConfig" == endpoint_type
             section_conf = MockSectionConfig()

@@ -90,7 +90,8 @@ def schedule_job_reinvestigation(max_investigations, endpoints, logger):
     currently_investigating = 0
     for my_hash, my_value in endpoints.iteritems():
         if 'state' in my_value:
-            if my_value['state'] == 'REINVESTIGATING' or my_value['next-state'] == 'REINVESTIGATING':
+            if my_value['state'] == 'REINVESTIGATING' or my_value[
+                    'next-state'] == 'REINVESTIGATING':
                 currently_investigating += 1
             elif my_value['state'] == 'KNOWN':
                 candidates.append(my_hash)
