@@ -197,7 +197,7 @@ class Monitor(object):
             logger.debug('*******{0}*********'.format(state))
 
             out_flag = False
-            for my_hash in endpoint_states.keys():
+            for my_hash in endpoint_states:
                 my_dict = endpoint_states[my_hash]
                 if my_dict['state'] == state:
                     out_flag = True
@@ -242,12 +242,12 @@ class Monitor(object):
         next_state = None
         current_state = None
         endpoint_states = self.uss.return_endpoint_state()
-        for my_hash in endpoint_states.keys():
+        for my_hash in endpoint_states:
             my_dict = endpoint_states[my_hash]
             current_state = my_dict['state']
             if current_state == 'UNKNOWN':
                 my_dict['next-state'] = 'MIRRORING'
-        for my_hash in rabbit_transitions.keys():
+        for my_hash in rabbit_transitions:
             my_dict = endpoint_states[my_hash]
             current_state = my_dict['state']
             my_dict['next-state'] = rabbit_transitions[my_hash]
@@ -333,7 +333,7 @@ class Monitor(object):
 
             # make the transitions
 
-            for endpoint_hash in eps.keys():
+            for endpoint_hash in eps:
                 current_state = eps[endpoint_hash]['state']
                 next_state = eps[endpoint_hash]['next-state']
 
