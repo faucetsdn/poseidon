@@ -21,7 +21,10 @@ Created on 17 May 2016
 @author: Charlie Lewis, dgrossman
 """
 import json
-import Queue
+try:
+    import Queue
+except ImportError:
+    import queue as Queue
 import signal
 import sys
 import threading
