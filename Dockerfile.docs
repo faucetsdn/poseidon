@@ -12,5 +12,6 @@ RUN pip install Sphinx==1.4
 RUN pip install sphinx_rtd_theme
 RUN pip install alabaster 
 RUN pip install sphinx_bootstrap_theme
+RUN pip install recommonmark
 
 CMD ["/bin/bash"]
