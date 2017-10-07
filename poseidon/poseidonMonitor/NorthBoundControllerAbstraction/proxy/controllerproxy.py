@@ -19,8 +19,10 @@ Created on 25 July 2016
 @author: kylez
 """
 import requests
-from urlparse import urljoin
-
+try:
+    from urlparse import urljoin
+except ImportError:
+    from urllib.parse import urljoin
 from poseidon.baseClasses.Logger_Base import Logger
 
 module_logger = Logger

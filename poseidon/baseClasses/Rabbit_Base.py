@@ -22,7 +22,7 @@ import time
 import types
 from functools import partial
 
-from Logger_Base import Logger
+from .Logger_Base import Logger
 
 
 module_logger = Logger

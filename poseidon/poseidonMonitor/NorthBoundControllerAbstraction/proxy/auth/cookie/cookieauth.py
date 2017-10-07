@@ -17,8 +17,10 @@
 Created on 25 July 2016
 @author: kylez
 """
-from urlparse import urljoin
-
+try:
+    from urlparse import urljoin
+except ImportError:
+    from urllib.parse import urljoin
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.controllerproxy import ControllerProxy
 

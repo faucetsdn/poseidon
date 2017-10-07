@@ -21,7 +21,10 @@ file.
 Created on 17 May 2016
 @author: dgrossman, lanhamt
 """
-import ConfigParser
+try:
+    import ConfigParser
+except ImportError:
+    import configparser as ConfigParser
 import json
 import os
 
