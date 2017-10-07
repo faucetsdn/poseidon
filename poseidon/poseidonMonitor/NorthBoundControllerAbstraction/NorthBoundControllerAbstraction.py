@@ -1,4 +1,5 @@
-#
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #   Copyright (c) 2016 In-Q-Tel, Inc, All Rights Reserved.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
