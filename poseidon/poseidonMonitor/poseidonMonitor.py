@@ -204,8 +204,10 @@ class Monitor(object):
                     out_flag = True
                     logger.debug('{0}:{1}:{2}->{3}:{4}'.format(letter,
                                                                my_hash,
-                                                               my_dict['state'],
-                                                               my_dict['next-state'],
+                                                               my_dict[
+                                                                   'state'],
+                                                               my_dict[
+                                                                   'next-state'],
                                                                my_dict['endpoint']))
             if not out_flag:
                 logger.debug('None')
@@ -305,11 +307,14 @@ class Monitor(object):
         return ret_val
 
     def process(self):
-        ''' processing event loop
+        '''
+        processing event loop
+        {
         while should not be shutdown
-           get data from rabbit
-           calculate endpoint next_state
-           effect changes to endpoints to make state=next_state
+        get data from rabbit
+        calculate endpoint next_state
+        effect changes to endpoints to make state=next_state
+        }
         '''
 
         global CTRL_C

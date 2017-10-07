@@ -285,6 +285,11 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             fabric_span_endpoint="data/controller/applications/bcf/span-fabric[name=\"%s\"]",
             **target_kwargs):
         '''
+        mirror_traffic doc string
+        '''
+
+
+        '''
         mirror_traffic(q,mirror=True,s_dict = {'match-specificaiton' : {'dst-ip-cidr':'10.179.0.33/32'} ...
         NOTE: s_dict or kwargs, not both..
 
