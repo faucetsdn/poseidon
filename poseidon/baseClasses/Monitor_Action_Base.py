@@ -32,7 +32,7 @@ class Monitor_Action_Base(Rock_Bottom):  # pragma: no cover
 
     '''
 
-    """ 
+    """
     Base call stubs
 
     Args:

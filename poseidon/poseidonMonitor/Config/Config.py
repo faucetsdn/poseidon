@@ -22,7 +22,7 @@ file.
 Created on 17 May 2016
 @author: dgrossman, lanhamt
 """
-import ConfigParser
+import configparser as ConfigParser
 import json
 import os
 

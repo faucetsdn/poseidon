@@ -19,7 +19,7 @@ Created on 17 May 2016
 '''
 import hashlib
 import json
-import Queue
+import queue as Queue
 from collections import defaultdict
 
 from poseidon.baseClasses.Logger_Base import Logger

@@ -38,7 +38,7 @@ def test_config_full_get():
     Tests retrieving the entire config file.
     '''
     resp = config_interface.get_endpoint('Handle_FullConfig').direct_get()
-    h.update(resp)
+    h.update(resp.encode('utf-8'))
 
 
 def test_config_section_get_OK():
