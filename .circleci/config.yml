@@ -11,5 +11,5 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip install -r requirements.txt
-      - run: py.test -v --cov=poseidon --cov-report term-missing
+      - run: pytest -v --cov=poseidon --cov-report term-missing
       - run: bash <(curl -s https://codecov.io/bash) -t 992b90e5-a0b2-45c5-b9d5-3baddc184162
