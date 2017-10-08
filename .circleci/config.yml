@@ -5,7 +5,7 @@ jobs:
       - image: circleci/python:3.6.2
     steps:
       - checkout
-      - run 
+      - run:
           name: install python deps in venv
           command: |
             python3 -m venv venv
