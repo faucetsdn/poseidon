@@ -1,4 +1,5 @@
-FROM ubuntu:16.04
+FROM continuumio/anaconda3
+
 MAINTAINER dgrossman@iqt.org
 
 RUN apt-get update 
