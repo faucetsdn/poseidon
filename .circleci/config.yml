@@ -5,7 +5,8 @@ jobs:
       - image: circleci/python:3.6.2
     steps:
       - checkout
-      - run: mkdir -p /usr/local/lib/python3.6/site-packages/chardet-3.0.4.dist-info
+      - run: python3 -m venv venv
+      - run . venv/bin/activate
       - run: pip install -r requirements.txt
       - run: pip install pytest==2.9.1
       - run: py.test -v --cov=poseidon --cov-report term-missing
