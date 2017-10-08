@@ -3,7 +3,7 @@ jobs:
   build:
     docker:
       - image: circleci/python:3.6.2
-    working_directory: ~/poseidonWork
+    working_directory: /tmp//poseidonWork
     steps:
       - checkout
       - restore_cache:
