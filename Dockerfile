@@ -3,8 +3,8 @@ MAINTAINER dgrossman@iqt.org
 
 #RUN pip install pip==9.0.1 --upgrade
 
-COPY . /poseidonWork
-WORKDIR /poseidonWork
+COPY . /tmp/poseidonWork
+WORKDIR /tmp/poseidonWork
 ENV PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
 
 # install dependencies of poseidon modules for poseidon

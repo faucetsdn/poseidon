@@ -34,7 +34,7 @@ from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 module_logger = Logger
 
 # poseidonWork created in docker containers
-config_template_path = '/poseidonWork/config/poseidon.config'
+config_template_path = '/tmp/poseidonWork/config/poseidon.config'
 
 
 class Config(Monitor_Action_Base):
