@@ -23,9 +23,9 @@ WORKDIR /poseidonWork
 ENV PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
 
 # install dependencies of poseidon modules for poseidon
+RUN ln -s /poseidonWork /tmp/poseidonWork 
 RUN find . -name requirements.txt -type f -exec pip install -r {} \;
 RUN sphinx-apidoc -o docs poseidon -F --follow-links && cd docs && make html && make man
-
 
 WORKDIR /poseidonWork/docs/_build/html
 

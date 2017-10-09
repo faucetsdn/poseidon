@@ -1,8 +1,6 @@
 FROM continuumio/anaconda3
 MAINTAINER dgrossman@iqt.org
 
-#RUN pip install pip==9.0.1 --upgrade
-
 COPY . /tmp/poseidonWork
 WORKDIR /tmp/poseidonWork
 ENV PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
