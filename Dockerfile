@@ -1,8 +1,9 @@
 FROM continuumio/anaconda3
 MAINTAINER dgrossman@iqt.org
 
-COPY . /tmp/poseidonWork
-WORKDIR /tmp/poseidonWork
+COPY . /poseidonWork
+WORKDIR /poseidonWork
+RUN ln -s /poseidonWork /tmp/poseidonWork 
 ENV PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
 
 # install dependencies of poseidon modules for poseidon
