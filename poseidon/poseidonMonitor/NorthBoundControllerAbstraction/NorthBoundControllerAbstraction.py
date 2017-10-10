@@ -100,7 +100,7 @@ class Update_Switch_State(Monitor_Helper_Base):
 
         for word in ['tenant', 'mac', 'segment', 'ip-address']:
             pre_h = pre_h + str(item.get(str(word), 'missing'))
-        h.update(pre_h)
+        h.update(pre_h.encode('utf-8'))
         post_h = h.hexdigest()
         return post_h
 

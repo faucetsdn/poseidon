@@ -71,7 +71,7 @@ class Rabbit_Base(object):          # pragma: no cover
         if wait:
             do_rabbit = False
 
-        if isinstance(keys, types.ListType) and not wait:
+        if isinstance(keys, list) and not wait:
             for key in keys:
                 self.logger.debug(
                     'array adding key:{0} to rabbitmq channel'.format(key))
@@ -79,7 +79,7 @@ class Rabbit_Base(object):          # pragma: no cover
                                           queue=queue_name,
                                           routing_key=key)
 
-        if isinstance(keys, types.StringType) and not wait:
+        if isinstance(keys, str) and not wait:
             self.logger.debug(
                 'string adding key:{0} to rabbitmq channel'.format(keys))
             rabbit_channel.queue_bind(exchange=exchange,
