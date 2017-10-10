@@ -19,7 +19,7 @@ Created on 25 July 2016
 @author: kylez,dgrossman
 '''
 import json
-from urlparse import urljoin
+from urllib.parse import urljoin
 
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.auth.cookie.cookieauth import CookieAuthControllerProxy
@@ -287,7 +287,6 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         '''
         mirror_traffic doc string
         '''
-
 
         '''
         mirror_traffic(q,mirror=True,s_dict = {'match-specificaiton' : {'dst-ip-cidr':'10.179.0.33/32'} ...

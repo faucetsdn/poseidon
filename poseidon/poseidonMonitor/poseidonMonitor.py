@@ -21,7 +21,7 @@ Created on 17 May 2016
 @author: Charlie Lewis, dgrossman
 """
 import json
-import Queue
+import queue as Queue
 import signal
 import sys
 import threading
@@ -89,7 +89,7 @@ def schedule_job_reinvestigation(max_investigations, endpoints, logger):
     candidates = []
 
     currently_investigating = 0
-    for my_hash, my_value in endpoints.iteritems():
+    for my_hash, my_value in endpoints.items():
         if 'state' in my_value:
             if my_value['state'] == 'REINVESTIGATING' or my_value[
                     'next-state'] == 'REINVESTIGATING':

@@ -20,7 +20,7 @@ Created on 25 July 2016
 @author: kylez
 """
 import requests
-from urlparse import urljoin
+from urllib.parse import urljoin
 
 from poseidon.baseClasses.Logger_Base import Logger
 

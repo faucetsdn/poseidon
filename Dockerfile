@@ -1,22 +1,9 @@
-FROM ubuntu:16.04
+FROM continuumio/anaconda3
 MAINTAINER dgrossman@iqt.org
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    build-essential \
-    git \
-    make \
-    python \
-    python-dev \
-    python-pip \
-    python-setuptools \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN pip install pip==9.0.1 --upgrade
 
 COPY . /poseidonWork
 WORKDIR /poseidonWork
+RUN ln -s /poseidonWork /tmp/poseidonWork 
 ENV PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
 
 # install dependencies of poseidon modules for poseidon
@@ -33,8 +20,6 @@ RUN chmod +x /tini
 ENTRYPOINT ["/tini", "--"]
 
 # run tests
-RUN py.test -v \
---cov=poseidon \
---cov-report term-missing --cov-config .coveragerc
+RUN py.test -v --cov=./poseidon -c .coveragerc
 
 CMD ["python","/poseidonWork/poseidon/poseidonMonitor/poseidonMonitor.py"]

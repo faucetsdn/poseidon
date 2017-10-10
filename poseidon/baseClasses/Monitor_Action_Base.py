@@ -32,7 +32,7 @@ class Monitor_Action_Base(Rock_Bottom):  # pragma: no cover
 
     '''
 
-    """ 
+    """
     Base call stubs
 
     Args:
@@ -86,7 +86,7 @@ class Monitor_Action_Base(Rock_Bottom):  # pragma: no cover
     def configure_endpoints(self):
         """call stored classes setups and first runs"""
         if self.owner and self.configured:
-            for k, v in self.actions.iteritems():
+            for k, v in self.actions.items():
                 ostr = 'about to configure {0}'.format(k)
                 self.logger.debug(ostr)
                 v.configure()

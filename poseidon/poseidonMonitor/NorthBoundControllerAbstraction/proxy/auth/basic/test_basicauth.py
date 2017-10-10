@@ -32,8 +32,8 @@ from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.auth.basic.b
 module_logger = Logger.logger
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
-username = 'user'
-password = 'pass'
+username = b'user'
+password = b'pass'
 
 
 def mock_factory(regex, filemap):
@@ -41,8 +41,13 @@ def mock_factory(regex, filemap):
     def mock_fn(url, request):
         if url.path not in filemap:  # pragma: no cover
             raise Exception('Invalid URL: {0}'.format(url))
-        user, pass_ = base64.b64decode(
-            request.headers['Authorization'].split()[1]).split(':')
+        r_header = request.headers['Authorization']
+        s_header = r_header.split()[1]
+        to_encode = bytes(s_header.encode('utf-8'))
+        encoded = base64.b64decode(to_encode)
+        print('type', type(encoded))
+
+        user, pass_ = (encoded).split(b':')
         assert user == username
         assert pass_ == password
         with open(os.path.join(cur_dir, filemap[url.path])) as f:
