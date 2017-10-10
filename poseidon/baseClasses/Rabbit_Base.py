@@ -20,7 +20,6 @@
 import pika
 import threading
 import time
-import types
 from functools import partial
 
 from .Logger_Base import Logger
