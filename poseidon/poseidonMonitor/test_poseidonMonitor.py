@@ -70,7 +70,7 @@ def test_start_vent_collector():
 
         @staticmethod
         def post(uri, json):
-            mock_response = lambda: None
+            def mock_response(): return None
             mock_response.text = "success"
             return mock_response
 
@@ -127,7 +127,7 @@ def test_get_rabbit_message():
 
 
 def test_rabbit_callback():
-    mock_method = lambda: None
+    def mock_method(): return None
     mock_method.routing_key = "test_routing_key"
 
     class MockQueue:
@@ -218,3 +218,26 @@ def test_configSelf():
     mock_monitor.logger = module_logger
     mock_monitor.configSelf()
     assert mock_monitor.mod_configuration[1] == "YOYO"
+
+
+def test_update_next_state():
+
+    class Mock_Update_Switch_State():
+
+        def __init__(self):
+            self.endpoints = dict({'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {'state': 'UNKNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.00.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}},
+                                   'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
+
+        def return_endpoint_state(self):
+            return self.endpoints
+
+    class MockMonitor(Monitor):
+
+        def __init__(self):
+            self.uss = Mock_Update_Switch_State()
+
+    monitor = MockMonitor()
+    monitor.update_next_state(
+        {'d60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': 'TESTSTATE'})
+    correct_answer = dict({'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {'state': 'UNKNOWN', 'next-state': 'MIRRORING', 'endpoint': {'ip-address': '10.00.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}}, 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {'state': 'KNOWN', 'next-state': 'TESTSTATE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
+    assert str(correct_answer) == str(monitor.uss.return_endpoint_state())
