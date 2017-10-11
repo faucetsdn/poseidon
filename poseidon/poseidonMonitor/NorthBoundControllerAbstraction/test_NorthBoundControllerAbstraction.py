@@ -153,3 +153,16 @@ def test_get_endpoinit_next():
     next_state = uss.get_endpoint_next('3da53a95ae5d034ae37b539a24370260a36f8bb2')
     
     assert 'NONE' == next_state
+
+   
+def test_get_endpoinit_state():
+    uss = Update_Switch_State()
+    uss.first_time = False
+    endpoint_data = dict({'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3',
+                          'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None})
+    hash_value = '3da53a95ae5d034ae37b539a24370260a36f8bb2'
+    state = 'TEST_STATE'
+    uss.make_endpoint_dict(hash_value, state, endpoint_data) 
+    next_state = uss.get_endpoint_state('3da53a95ae5d034ae37b539a24370260a36f8bb2')
+    
+    assert 'TEST_STATE' == next_state 
