@@ -72,3 +72,24 @@ def test_file_new_machines_later():
                    '3da53a95ae5d034ae37b539a24370260a36f8bb2': {'state': 'UNKNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
     uss.find_new_machines(machines)
     assert str(answer) == str(dict(uss.endpoint_states))
+
+
+def test_make_known_endpoint():
+    class Mock_bcf():
+        def __init__(self):
+            pass
+
+        def unmirror_ip(self, my_ip):
+            assert my_ip == '10.0.0.99'
+
+    uss = Update_Switch_State()
+    uss.first_time = False
+    uss.bcf = Mock_bcf()
+    machines = [{'ip-address': '10.0.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None},
+                {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}]
+    uss.find_new_machines(machines)
+
+    uss.make_known_endpoint('3da53a95ae5d034ae37b539a24370260a36f8bb2')
+    answer = dict({'d502caea3609d553ab16a00c554f0602c1419f58': {'state': 'UNKNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}},
+                   '3da53a95ae5d034ae37b539a24370260a36f8bb2': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
+    assert str(answer) == str(dict(uss.endpoint_states))
