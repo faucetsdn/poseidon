@@ -3,6 +3,8 @@ jobs:
   build:
     docker:
       - image: circleci/python:3.6.2
+        environment:
+          POSEIDON_CONFIG: /tmp/poseidonWork/config/poseidon.config
     working_directory: /tmp/poseidonWork
     steps:
       - checkout
