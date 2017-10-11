@@ -122,5 +122,6 @@ def test_make_endpoint_dict():
     hash_value = '3da53a95ae5d034ae37b539a24370260a36f8bb2'
     state = 'KNOWN'
     uss.make_endpoint_dict(hash_value, state, endpoint_data)
-    answer = dict({'3da53a95ae5d034ae37b539a24370260a36f8bb2': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
+    answer = dict({'3da53a95ae5d034ae37b539a24370260a36f8bb2': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {
+                  'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
     assert str(answer) == str(dict(uss.endpoint_states))
