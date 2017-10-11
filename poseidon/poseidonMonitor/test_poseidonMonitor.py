@@ -24,6 +24,7 @@ Created on 28 June 2016
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.poseidonMonitor import Monitor
 from poseidon.poseidonMonitor import poseidonMonitor
+from poseidon.poseidonMonitor.poseidonMonitor import schedule_job_kickurl
 import json
 
 module_logger = Logger.logger
@@ -281,3 +282,35 @@ def test_configSelf():
     answer = dict({1: 'one', 2: 'two', 3: 'three'})
 
     assert str(answer) == str(dict(monitor.mod_configuration))
+
+
+def test_schedule_job_kickurl():
+    
+    class MockLogger():
+        def __init__(self):
+            pass
+
+        def debug(self,logline):
+            pass
+
+    
+    class helper():
+        def __init__(self):
+            pass
+            
+        def update_endpoint_state(self):
+            pass
+
+    class MockNorthBoundControllerAbstraction():
+        def __init__(self):
+            pass
+
+        def get_endpoint(self,some_word):
+            return helper()
+
+    class func():
+        def __init__(self):
+            self.NorthBoundControllerAbstraction = MockNorthBoundControllerAbstraction()
+            pass
+
+    schedule_job_kickurl(func(),MockLogger())
