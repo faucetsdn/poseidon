@@ -314,3 +314,7 @@ def test_schedule_job_kickurl():
             pass
 
     schedule_job_kickurl(func(),MockLogger())
+
+def test_Monitor_init():
+    monitor = Monitor(skip_rabbit=True)
+
