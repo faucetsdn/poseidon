@@ -182,3 +182,45 @@ def test_return_endpoint_state():
                   'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
     assert str(answer) == str(dict(uss.return_endpoint_state()))
     assert uss.return_endpoint_state() == uss.endpoint_states
+
+
+def test_first_run():
+
+    def BcfProxy(uri, auth):
+        internal_auth = {}
+        internal_auth['password'] = 'TEST_PASS'
+        internal_auth['user'] = 'TEST_USER'
+
+        assert uri == 'TEST_URI'
+        assert str(auth) == str(internal_auth)
+
+    uss = Update_Switch_State()
+    uss.mod_configuration = dict()
+    uss.configured = True
+    uss.mod_configuration['controller_uri'] = 'TEST_URI'
+    uss.mod_configuration['controller_user'] = 'TEST_USER'
+    uss.mod_configuration['controller_pass'] = 'TEST_PASS'
+
+    uss.first_run()
+    assert uss.controller['URI'] == 'TEST_URI'
+    assert uss.controller['USER'] == 'TEST_USER'
+    assert uss.controller['PASS'] == 'TEST_PASS'
+
+
+def test_shutdown_endpoint():
+    class Mockbcf():
+        def __init__(self):
+            pass
+
+        def shutdown_ip(self, ip):
+            assert ip == '10.0.0.99'
+
+    uss = Update_Switch_State()
+    uss.bcf = Mockbcf()
+    uss.endpoint_states = dict({'d502caea3609d553ab16a00c554f0602c1419f58': {'state': 'UNKNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}},
+                                '3da53a95ae5d034ae37b539a24370260a36f8bb2': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
+    ret_val = uss.shutdown_endpoint('3da53a95ae5d034ae37b539a24370260a36f8bb2')
+    assert ret_val
+    ret_val = uss.shutdown_endpoint('NOT_A_HASH')
+    assert not ret_val
+
