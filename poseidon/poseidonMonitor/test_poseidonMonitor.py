@@ -239,5 +239,45 @@ def test_update_next_state():
     monitor = MockMonitor()
     monitor.update_next_state(
         {'d60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': 'TESTSTATE'})
-    correct_answer = dict({'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {'state': 'UNKNOWN', 'next-state': 'MIRRORING', 'endpoint': {'ip-address': '10.00.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}}, 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {'state': 'KNOWN', 'next-state': 'TESTSTATE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
+    correct_answer = dict({'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {'state': 'UNKNOWN', 'next-state': 'MIRRORING', 'endpoint': {'ip-address': '10.00.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}},
+                           'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {'state': 'KNOWN', 'next-state': 'TESTSTATE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
     assert str(correct_answer) == str(monitor.uss.return_endpoint_state())
+
+
+def test_configSelf():
+    class MockMonitor(Monitor):
+        def __init__(self):
+            self.mod_name = None
+            self.mod_configuration = dict()
+            pass
+
+    class MockConfig():
+        def __init__(self):
+            pass
+
+        def get_endpoint(self, sectionType):
+            return MockConfig()
+
+        def direct_get(self, name):
+            ret_val = dict()
+            ret_val[1] = 'one'
+            ret_val[2] = 'two'
+            ret_val[3] = 'three'
+            return [(x, ret_val[x]) for x in ret_val]
+
+    class MockLogger():
+        def __init__(self):
+            pass
+
+        def debug(self, words):
+            pass
+
+    monitor = MockMonitor()
+    monitor.logger = MockLogger()
+    monitor.Config = MockConfig()
+
+    monitor.configSelf()
+
+    answer = dict({1: 'one', 2: 'two', 3: 'three'})
+
+    assert str(answer) == str(dict(monitor.mod_configuration))
