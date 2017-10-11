@@ -224,3 +224,20 @@ def test_shutdown_endpoint():
     ret_val = uss.shutdown_endpoint('NOT_A_HASH')
     assert not ret_val
 
+
+def test_mirror_endpoint():
+    class Mockbcf():
+        def __init__(self):
+            pass
+
+        def mirror_ip(self, ip):
+            assert ip == '10.0.0.99'
+
+    uss = Update_Switch_State()
+    uss.bcf = Mockbcf()
+    uss.endpoint_states = dict({'d502caea3609d553ab16a00c554f0602c1419f58': {'state': 'UNKNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}},
+                                '3da53a95ae5d034ae37b539a24370260a36f8bb2': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
+    ret_val = uss.mirror_endpoint('3da53a95ae5d034ae37b539a24370260a36f8bb2')
+    assert ret_val
+    ret_val = uss.mirror_endpoint('NOT_A_HASH')
+    assert not ret_val
