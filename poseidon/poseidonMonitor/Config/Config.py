@@ -33,9 +33,6 @@ from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 
 module_logger = Logger
 
-# poseidonWork created in docker containers
-config_template_path = '/tmp/poseidonWork/config/poseidon.config'
-
 
 class Config(Monitor_Action_Base):
 
@@ -54,8 +51,7 @@ class Config(Monitor_Action_Base):
             self.config_path = os.environ.get(
                 'POSEIDON_CONFIG')               # pragma: no cover
         else:
-            self.logger.info('From the Docker hardcode')
-            self.config_path = config_template_path
+            raise Exception('Could not find poseidon config. Make sure to set the POSEIDON_CONFIG environment variable')
         self.config.readfp(open(self.config_path, 'r'))
 
     def configure(self):

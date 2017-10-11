@@ -3,8 +3,8 @@ MAINTAINER dgrossman@iqt.org
 
 COPY . /poseidonWork
 WORKDIR /poseidonWork
-RUN ln -s /poseidonWork /tmp/poseidonWork 
 ENV PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
+ENV POSEIDON_CONFIG /poseidonWork/config/poseidon.config
 
 # install dependencies of poseidon modules for poseidon
 RUN find . -name requirements.txt -type f -exec pip install -r {} \;
