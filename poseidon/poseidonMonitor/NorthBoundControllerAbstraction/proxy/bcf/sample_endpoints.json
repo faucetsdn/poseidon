@@ -17,8 +17,8 @@
     "segment" : "poseidon",
     "tenant" : "poseidon"
   } ],
-  "leaf-group" : "00:00:00:00:00:00:00:00",
-  "mac" : "00:00:00:00:00:00",
+  "leaf-group" : "00:00:00:00:00:00:00:11",
+  "mac" : "00:00:00:00:00:01",
   "nat-endpoint" : false,
   "remote" : false,
   "segment" : "poseidon",
@@ -39,14 +39,14 @@
   "detail" : "true",
   "interface" : "ethernet01",
   "ip-address" : [ {
-    "ip-address" : "10.0.0.1",
+    "ip-address" : "10.0.0.2",
     "ip-state" : "learned",
     "mac" : "00:00:00:00:00:00",
     "segment" : "poseidon",
     "tenant" : "poseidon"
   } ],
-  "leaf-group" : "00:00:00:00:00:00:00:00",
-  "mac" : "00:00:00:00:00:00",
+  "leaf-group" : "00:00:00:00:00:00:00:22",
+  "mac" : "00:00:00:00:00:02",
   "nat-endpoint" : false,
   "remote" : false,
   "segment" : "poseidon",
