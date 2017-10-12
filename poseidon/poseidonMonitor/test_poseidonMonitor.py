@@ -285,19 +285,18 @@ def test_configSelf():
 
 
 def test_schedule_job_kickurl():
-    
+
     class MockLogger():
         def __init__(self):
             pass
 
-        def debug(self,logline):
+        def debug(self, logline):
             pass
 
-    
     class helper():
         def __init__(self):
             pass
-            
+
         def update_endpoint_state(self):
             pass
 
@@ -305,7 +304,7 @@ def test_schedule_job_kickurl():
         def __init__(self):
             pass
 
-        def get_endpoint(self,some_word):
+        def get_endpoint(self, some_word):
             return helper()
 
     class func():
@@ -313,8 +312,8 @@ def test_schedule_job_kickurl():
             self.NorthBoundControllerAbstraction = MockNorthBoundControllerAbstraction()
             pass
 
-    schedule_job_kickurl(func(),MockLogger())
+    schedule_job_kickurl(func(), MockLogger())
+
 
 def test_Monitor_init():
     monitor = Monitor(skip_rabbit=True)
-
