@@ -362,3 +362,48 @@ def test_get_seq_by_ip():
     ret_val =  bcf.get_seq_by_ip('10.0.0.2')
     answer = list()
     assert answer == ret_val
+
+
+def test_mirror_ip():
+        
+    class MockBcfProxy(BcfProxy):
+        def __init__(self):
+            self.endpoints = None
+            self.span_fabric = None
+
+        def get_endpoints(self):
+            return self.endpoints
+
+        def mirror_traffic(self,seq,mirror=True,span_name='vent',s_dict=None,fabric_span_endpoint='',**target_kwargs):
+            pass
+
+        def get_span_fabric(self):
+            return self.span_fabric
+
+        def shutdown_endpoint(self,tenant, segment, name, mac, shutdown):
+            pass
+        
+    bcf = MockBcfProxy()
+
+    filemap = {
+        '/data/controller/applications/bcf/info/fabric/switch': 'sample_switches.json',
+        '/data/controller/applications/bcf/info/endpoint-manager/tenant': 'sample_tenants.json',
+        '/data/controller/applications/bcf/info/endpoint-manager/segment': 'sample_segments.json',
+        '/data/controller/applications/bcf/info/endpoint-manager/endpoint': 'sample_endpoints.json',
+        '/data/controller/applications/bcf/span-fabric': 'sample_span_fabric.json',
+        # %22 = url-encoded double quotes
+        '/data/controller/applications/bcf/span-fabric[name=%22vent%22]': 'sample_span_fabric.json',
+    }
+    proxy = None
+    endpoints = None
+    span_fabric = None
+    with HTTMock(mock_factory(r'.*', filemap)):
+        proxy = BcfProxy('http://localhost', 'login',
+                         {'username': username, 'password': password})
+
+        endpoints = proxy.get_endpoints()
+        span_fabric = proxy.get_span_fabric()
+
+    bcf.endpoints = endpoints
+    bcf.span_fabric = span_fabric
+    ret_val =  bcf.mirror_ip('10.0.0.2')
