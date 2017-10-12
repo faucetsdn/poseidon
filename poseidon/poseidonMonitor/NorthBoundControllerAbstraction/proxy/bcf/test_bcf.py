@@ -159,3 +159,12 @@ def test_BcfProxy():
         method="PUT",
         url="http://jsonplaceholder.typicode.com/posts/1")
     r.raise_for_status()
+
+
+def test_format_endpoints():
+    input_data = list([{'attachment-point': {'switch-interface': {'interface': 'ethernet16', 'switch': 'leaf02'}, 'type': 'switch-interface'}, 'attachment-point-state': 'learned', 'created-since': '2017-09-18T16:28:34.694Z', 'detail': 'true', 'interface': 'ethernet16', 'ip-address': [{'ip-address': '10.0.0.101', 'ip-state': 'learned', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE'}], 'leaf-group': '00:00:f4:8e:38:16:a3:73', 'mac': 'f8:b1:56:fe:f2:de', 'nat-endpoint': False, 'remote': False, 'segment': 'prod', 'state': 'Active', 'switch': 'leaf02', 'tenant': 'FLOORPLATE', 'vlan': -1},
+                       {'attachment-point': {'switch-interface': {'interface': 'ethernet42', 'switch': 'leaf01'}, 'type': 'switch-interface'}, 'attachment-point-state': 'learned', 'created-since': '2017-07-11T23:56:23.888Z', 'detail': 'true', 'interface': 'ethernet42', 'leaf-group': '00:00:f4:8e:38:16:b3:73', 'mac': '20:4c:9e:5f:e3:a3', 'nat-endpoint': False, 'remote': False, 'segment': 'to-core-router', 'state': 'Active', 'switch': 'leaf01', 'tenant': 'EXTERNAL', 'vlan': -1}])
+
+    output = BcfProxy.format_endpoints(input_data)
+    answer = list([{'ip-address': '10.0.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}])
+    assert str(answer) == str(output)
