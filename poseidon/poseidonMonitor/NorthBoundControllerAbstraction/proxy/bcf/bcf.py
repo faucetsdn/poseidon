@@ -115,18 +115,6 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         module_logger.debug(sout)
         return retval
 
-    @staticmethod
-    def format_span_fabric(span):
-        d = dict()
-        d['ports'] = None
-        d['name'] = None
-
-        if span is not None and span[0] is not None:
-            s = span[0]
-            d['ports'] = s.get('filter')
-            d['name'] = s.get('name')
-        return d
-
     def get_span_fabric(
             self,
             span_name=None,
