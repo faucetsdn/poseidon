@@ -241,3 +241,14 @@ def test_mirror_endpoint():
     assert ret_val
     ret_val = uss.mirror_endpoint('NOT_A_HASH')
     assert not ret_val
+
+
+def test_print_endpoint_state():
+    uss = Update_Switch_State()
+    uss.first_time = False
+    endpoint_data = dict({'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3',
+                          'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None})
+    hash_value = '3da53a95ae5d034ae37b539a24370260a36f8bb2'
+    state = 'TEST_STATE'
+    uss.make_endpoint_dict(hash_value, state, endpoint_data)
+    uss.print_endpoint_state()
