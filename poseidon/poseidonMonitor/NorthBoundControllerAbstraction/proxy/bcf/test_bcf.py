@@ -166,5 +166,40 @@ def test_format_endpoints():
                        {'attachment-point': {'switch-interface': {'interface': 'ethernet42', 'switch': 'leaf01'}, 'type': 'switch-interface'}, 'attachment-point-state': 'learned', 'created-since': '2017-07-11T23:56:23.888Z', 'detail': 'true', 'interface': 'ethernet42', 'leaf-group': '00:00:f4:8e:38:16:b3:73', 'mac': '20:4c:9e:5f:e3:a3', 'nat-endpoint': False, 'remote': False, 'segment': 'to-core-router', 'state': 'Active', 'switch': 'leaf01', 'tenant': 'EXTERNAL', 'vlan': -1}])
 
     output = BcfProxy.format_endpoints(input_data)
-    answer = list([{'ip-address': '10.0.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}])
+    answer = list([{'ip-address': '10.0.0.101', 'mac': 'f8:b1:56:fe:f2:de',
+                    'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}])
     assert str(answer) == str(output)
+
+
+def test_get_byip():
+
+    class MockBcfProxy(BcfProxy):
+        def __init__(self):
+            self.endpoints = None
+
+        def get_endpoints(self):
+            return self.endpoints
+
+    bcf = MockBcfProxy()
+
+    filemap = {
+        '/data/controller/applications/bcf/info/fabric/switch': 'sample_switches.json',
+        '/data/controller/applications/bcf/info/endpoint-manager/tenant': 'sample_tenants.json',
+        '/data/controller/applications/bcf/info/endpoint-manager/segment': 'sample_segments.json',
+        '/data/controller/applications/bcf/info/endpoint-manager/endpoint': 'sample_endpoints.json',
+        '/data/controller/applications/bcf/span-fabric': 'sample_span_fabric.json',
+        # %22 = url-encoded double quotes
+        '/data/controller/applications/bcf/span-fabric[name=%22vent%22]': 'sample_span_fabric.json',
+    }
+    proxy = None
+    endpoints = None
+    with HTTMock(mock_factory(r'.*', filemap)):
+        proxy = BcfProxy('http://localhost', 'login',
+                         {'username': username, 'password': password})
+
+        endpoints = proxy.get_endpoints()
+    bcf.endpoints = endpoints
+    ret_val = bcf.get_byip('10.0.0.1')
+    answer = list([{'ip-address': '10.0.0.1', 'ip-state': 'learned', 'mac': '00:00:00:00:00:00',
+                    'segment': 'poseidon', 'tenant': 'poseidon', 'name': None}])
+    assert str(answer) == str(ret_val)
