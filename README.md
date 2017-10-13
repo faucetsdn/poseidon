@@ -22,7 +22,7 @@ Can SDN and machine learning answer:
 git clone https://github.com/CyberReboot/poseidon.git
 cd poseidon
 *editor* config/poseidon.config
-docker build -f ./Dockerfile -t poseidon .
+docker build -f ./Dockerfile.poseidon -t poseidon .
 docker run poseidon
 ```
 
