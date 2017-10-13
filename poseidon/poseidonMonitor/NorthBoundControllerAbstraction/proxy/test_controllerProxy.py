@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 #   Copyright (c) 2016 In-Q-Tel, Inc, All Rights Reserved.
 #
@@ -18,12 +19,12 @@ Test module for controllerproxy.
 
 @author: kylez
 """
-import logging
+#import logging
 
-
+from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.controllerproxy import ControllerProxy
 
-module_logger = logging.getLogger(__name__)
+module_logger = Logger.logger
 
 
 def test_ControllerProxy():

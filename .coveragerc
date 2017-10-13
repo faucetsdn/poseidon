@@ -23,3 +23,6 @@ ignore_errors = True
 
 [html]
 directory = coverage_html_report
+
+[pytest]
+python_files=test_*.py

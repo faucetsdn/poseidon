@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 #   Copyright (c) 2016 In-Q-Tel, Inc, All Rights Reserved.
 #
@@ -19,16 +20,16 @@ Test module for jsonmixin.
 @author: kylez
 """
 import json
-import logging
 import os
 
 from httmock import response
 
+from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.mixins.jsonmixin import JsonMixin
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 
-module_logger = logging.getLogger(__name__)
+moudle_logger = Logger.logger
 
 
 def test_JsonMixin():
@@ -45,6 +46,8 @@ def test_JsonMixin():
     parsed = JsonMixin.parse_json(res)
     assert parsed
 
+
+def test_empty():
     # Verify that blank text fields are parsed properly.
     def obj(): return None  # Just a proxy object for attaching text field.
     obj.text = ""

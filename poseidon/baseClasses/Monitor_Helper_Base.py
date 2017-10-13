@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 #   Copyright (c) 2016 In-Q-Tel, Inc, All Rights Reserved.
 #
@@ -17,11 +18,10 @@
 Created on 14 July 2016
 @author: dgrossman
 '''
-import logging
-
+from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.baseClasses.Rock_Bottom import Rock_Bottom
 
-module_logger = logging.getLogger(__name__)
+module_logger = Logger
 
 
 class Monitor_Helper_Base(Rock_Bottom):  # pragma: no cover
@@ -40,7 +40,7 @@ class Monitor_Helper_Base(Rock_Bottom):  # pragma: no cover
         if owner.logger is not None:
             self.logger = owner.logger
         else:
-            self.logger = logging.getLogger(__name__)
+            self.logger = module_logger.logger
 
         self.logger.debug('set_owner = {0}'.format(owner.mod_name))
         self.owner = owner
@@ -66,12 +66,12 @@ class Monitor_Helper_Base(Rock_Bottom):  # pragma: no cover
         self.mod_configuration = dict()
         conf = self.owner.owner.Config.get_endpoint('Handle_SectionConfig')
         ostr = '********** conf:{0}'.format(conf)
-        print ostr
+        print(ostr)
         if conf is not None:
             for item in conf.direct_get(self.config_section_name):
                 ostr = '********** item:{0}'.format(item)
                 self.logger.debug(ostr)
-                print ostr
+                print(ostr)
                 k, v = item
                 self.mod_configuration[k] = v
                 ostr = 'config:{0}:{1}'.format(
@@ -82,14 +82,14 @@ class Monitor_Helper_Base(Rock_Bottom):  # pragma: no cover
     def first_run(self):
         '''do special setup after configure'''
 
-    def on_post(self, req, resp):
-        '''handle jrandom rest case'''
+    # def on_post(self, req, resp):
+    #    '''handle jrandom rest case'''
 
-    def on_put(self, req, resp, name):
-        '''handle jrandom rest case'''
+    # def on_put(self, req, resp, name):
+    #    '''handle jrandom rest case'''
 
-    def on_get(self, req, resp):
-        '''handle jrandom rest case'''
+    # def on_get(self, req, resp):
+    #    '''handle jrandom rest case'''
 
-    def on_delete(self, req, resp):
-        '''handle jrandom rest case'''
+    # def on_delete(self, req, resp):
+    #    '''handle jrandom rest case'''

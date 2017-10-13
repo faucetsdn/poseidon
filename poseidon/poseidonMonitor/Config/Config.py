@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 #   Copyright (c) 2016 In-Q-Tel, Inc, All Rights Reserved.
 #
@@ -21,26 +22,23 @@ file.
 Created on 17 May 2016
 @author: dgrossman, lanhamt
 """
-import ConfigParser
+import configparser as ConfigParser
 import json
-import logging
 import os
 
+from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 
 
-module_logger = logging.getLogger(__name__)
-
-# poseidonWork created in docker containers
-config_template_path = '/poseidonWork/config/poseidon.config'
+module_logger = Logger
 
 
 class Config(Monitor_Action_Base):
 
     def __init__(self):
         super(Config, self).__init__()
-        self.logger = module_logger
+        self.logger = module_logger.logger
         self.CONFIG = None
         self.mod_name = self.__class__.__name__
         self.config_section_name = self.mod_name
@@ -48,11 +46,12 @@ class Config(Monitor_Action_Base):
 
         self.config = ConfigParser.ConfigParser()
         if os.environ.get('POSEIDON_CONFIG') is not None:
-            self.logger.info('From the Environment')
-            self.config_path = os.environ.get('POSEIDON_CONFIG')
+            self.logger.info(
+                'From the Environment')               # pragma: no cover
+            self.config_path = os.environ.get(
+                'POSEIDON_CONFIG')               # pragma: no cover
         else:
-            self.logger.info('From the Docker hardcode')
-            self.config_path = config_template_path
+            raise Exception('Could not find poseidon config. Make sure to set the POSEIDON_CONFIG environment variable')
         self.config.readfp(open(self.config_path, 'r'))
 
     def configure(self):
@@ -81,7 +80,7 @@ class Handle_FullConfig(Monitor_Helper_Base):
     def __init__(self):
         super(Handle_FullConfig, self).__init__()
         self.mod_name = self.__class__.__name__
-        self.logger = module_logger
+        self.logger = module_logger.logger
 
     def direct_get(self):
         ''' get the config from the owner '''
@@ -96,8 +95,8 @@ class Handle_FullConfig(Monitor_Helper_Base):
             retval = json.dumps('Failed to open config file.')
         return retval
 
-    def on_get(self, req, resp):
-        resp.body = self.direct_get()
+    # def on_get(self, req, resp):
+    #    resp.body = self.direct_get()
 
 
 class Handle_SectionConfig(Monitor_Helper_Base):
@@ -122,10 +121,10 @@ class Handle_SectionConfig(Monitor_Helper_Base):
         return retval
 
     # rest way
-    def on_get(self, req, resp, section):
-        ''' use the rest interface to return  '''
-        ret_sec = self.direct_get(section)
-        resp.body = json.dumps(ret_sec)
+    # def on_get(self, req, resp, section):
+    #    ''' use the rest interface to return  '''
+    #    ret_sec = self.direct_get(section)
+    #    resp.body = json.dumps(ret_sec)
 
 
 class Handle_FieldConfig(Monitor_Helper_Base):
@@ -136,7 +135,7 @@ class Handle_FieldConfig(Monitor_Helper_Base):
 
     def __init__(self):
         super(Handle_FieldConfig, self).__init__()
-        self.logger = module_logger
+        self.logger = module_logger.logger
         self.mod_name = self.__class__.__name__
 
     def direct_get(self, field, section):
@@ -151,14 +150,14 @@ class Handle_FieldConfig(Monitor_Helper_Base):
                 field, section)
         return retval
 
-    def on_get(self, req, resp, section, field):
-        """
-        Requests should have a section of the config
-        file and variable/field in that section to be
-        returned in the response body.
-        """
-        resp.content_type = 'text/text'
-        resp.body = self.direct_get(field, section)
+    # def on_get(self, req, resp, section, field):
+    #    """
+    #    Requests should have a section of the config
+    #    file and variable/field in that section to be
+    #    returned in the response body.
+    #    """
+    #    resp.content_type = 'text/text'
+    #    resp.body = self.direct_get(field, section)
 
 
 config_interface = Config()

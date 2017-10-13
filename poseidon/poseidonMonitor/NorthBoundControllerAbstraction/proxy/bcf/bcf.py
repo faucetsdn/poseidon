@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 #   Copyright (c) 2016 In-Q-Tel, Inc, All Rights Reserved.
 #
@@ -18,14 +19,14 @@ Created on 25 July 2016
 @author: kylez,dgrossman
 '''
 import json
-import logging
-from urlparse import urljoin
+from urllib.parse import urljoin
 
+from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.auth.cookie.cookieauth import CookieAuthControllerProxy
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.mixins.jsonmixin import JsonMixin
 
-logging.basicConfig(level=logging.DEBUG)
-module_logger = logging.getLogger(__name__)
+module_logger = Logger
+module_logger = module_logger.logger
 
 
 class BcfProxy(JsonMixin, CookieAuthControllerProxy):
@@ -113,18 +114,6 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         sout = 'get_segments return:{0}'.format(retval)
         module_logger.debug(sout)
         return retval
-
-    @staticmethod
-    def format_span_fabric(span):
-        d = dict()
-        d['ports'] = None
-        d['name'] = None
-
-        if span is not None and span[0] is not None:
-            s = span[0]
-            d['ports'] = s.get('filter')
-            d['name'] = s.get('name')
-        return d
 
     def get_span_fabric(
             self,
@@ -283,6 +272,10 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             s_dict=None,
             fabric_span_endpoint="data/controller/applications/bcf/span-fabric[name=\"%s\"]",
             **target_kwargs):
+        '''
+        mirror_traffic doc string
+        '''
+
         '''
         mirror_traffic(q,mirror=True,s_dict = {'match-specificaiton' : {'dst-ip-cidr':'10.179.0.33/32'} ...
         NOTE: s_dict or kwargs, not both..

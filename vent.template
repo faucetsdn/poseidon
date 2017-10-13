@@ -1,0 +1,6 @@
+[info]
+name = poseidon
+groups = poseidon
+
+[settings]
+instances = 1

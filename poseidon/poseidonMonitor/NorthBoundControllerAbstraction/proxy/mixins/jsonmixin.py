@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 #   Copyright (c) 2016 In-Q-Tel, Inc, All Rights Reserved.
 #
@@ -18,9 +19,9 @@ Created on 25 July 2016
 @author: kylez
 """
 import json
-import logging
 
-module_logger = logging.getLogger(__name__)
+from poseidon.baseClasses.Logger_Base import Logger
+module_logger = Logger.logger
 
 
 class JsonMixin:

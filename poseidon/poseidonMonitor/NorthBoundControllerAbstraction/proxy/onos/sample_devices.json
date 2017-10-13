@@ -1,1 +1,0 @@
-{"devices":[{"id":"of:0000000000000001","type":"SWITCH","available":true,"role":"MASTER","mfr":"Nicira, Inc.","hw":"Open vSwitch","sw":"2.3.0","serial":"None","chassisId":"1","annotations":{"managementAddress":"127.0.0.1","protocol":"OF_13","channelId":"127.0.0.1:56850"}}]}

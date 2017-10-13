@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 #   Copyright (c) 2017 In-Q-Tel, Inc, All Rights Reserved.
 #
@@ -16,26 +17,24 @@
 ''' Created on 21 August 2017
 @author: dgrossman
 '''
-import logging
+import pika
 import threading
 import time
-import types
 from functools import partial
 
-import pika
-
-module_logger = logging.getLogger(__name__)
+from .Logger_Base import Logger
 
 
-class Rabbit_Base(object):
-    '''Comment Goes Here
+module_logger = Logger
 
-    Attributes:
 
+class Rabbit_Base(object):          # pragma: no cover
+    '''
+    Base Class for RabbitMQ
     '''
 
     def __init__(self):
-        self.logger = module_logger
+        self.logger = module_logger.logger
 
     def make_rabbit_connection(self, host, port, exchange, queue_name, keys,
                                total_sleep=float('inf')):  # pragma: no cover
@@ -71,7 +70,7 @@ class Rabbit_Base(object):
         if wait:
             do_rabbit = False
 
-        if isinstance(keys, types.ListType) and not wait:
+        if isinstance(keys, list) and not wait:
             for key in keys:
                 self.logger.debug(
                     'array adding key:{0} to rabbitmq channel'.format(key))
@@ -79,7 +78,7 @@ class Rabbit_Base(object):
                                           queue=queue_name,
                                           routing_key=key)
 
-        if isinstance(keys, types.StringType) and not wait:
+        if isinstance(keys, str) and not wait:
             self.logger.debug(
                 'string adding key:{0} to rabbitmq channel'.format(keys))
             rabbit_channel.queue_bind(exchange=exchange,
