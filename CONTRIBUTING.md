@@ -97,4 +97,4 @@ It is every maintainer's responsibility to:
 
 Just like everything else: by making a pull request :)
 
-*Derivative work from [Docker](https://github.com/doocker/docker/blob/master/CONTRIBUTING.md).*
+*Derivative work from [Docker](https://github.com/moby/moby/blob/master/CONTRIBUTING.md).*
