@@ -350,7 +350,7 @@ def test_process():
                                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {'state': 'KNOWN', 'next-state': 'REINVESTIGATING', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
                 return endpoints
 
-        def mirror_endpoint(self):
+        def mirror_endpoint(self,endpoint_hash):
             pass
 
     def start_vent_collector(endpoint_hash):
