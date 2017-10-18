@@ -14,11 +14,22 @@ test_data = {u'tenant': u'FLOORPLATE',
              u'name': None,
              u'ip-address': u'102.179.20.100'}
 
+def is_same(e1,e2):
+    assert e1.state == e2.state
+    assert e1.next_state == e2.next_state
+
+    for k in e1.data:
+        assert e1.data[k] == e2.data[k]
+
+    for k in e2.data:
+        assert e1.data[k] == e2.data[k]
 
 def test_endpoint_creation_no_state():
     endpoint1 = endPoint.EndPoint(test_data)
     endpoint2 = endPoint.EndPoint.from_json(endpoint1.to_json())
-
+    
+    is_same(endpoint1,endpoint2)
+    
     assert endpoint1.make_hash() == endpoint2.make_hash()
 
 def test_endpoint_creation_with_state():
