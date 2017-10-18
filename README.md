@@ -42,6 +42,11 @@ make run_poseidon
 ```
 This first builds poseidon, then runs it. After it finishes running, the container is removed.
 
+To populate the current volume with the contents of the containers' "poseidonWork/" directory, run:
+```
+make run_dev
+```
+
 To run poseidon with sh as entrypoing, run:
 ```
 make run_sh
