@@ -6,5 +6,5 @@ pytest-cov==2.5.1
 pytest==3.2.1
 requests==2.18.4
 schedule==0.4.3
-urllib3
-certifi
+urllib3==1.22
+certifi==2017.7.27.1
