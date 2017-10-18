@@ -154,7 +154,6 @@ def test_rabbit_callback():
     assert mock_queue.get_item() == (mock_method.routing_key, "body")
 
 
-
 def test_schedule_job_reinvestigation():
     end_points = {
         "hash_0": {"state": "REINVESTIGATING", "next-state": "UNKNOWN"},
@@ -322,33 +321,96 @@ def test_schedule_job_kickurl():
 def test_Monitor_init():
     monitor = Monitor(skip_rabbit=True)
 
-def test_schedule_thread_worker():
+
+def test_process():
     from threading import Thread
-    import time    
+    import time
 
     def thread1():
         global CTRL_C
         CTRL_C['STOP'] = False
-        print('about to go to sleep',CTRL_C)
+        print('about to go to sleep', CTRL_C)
         time.sleep(5)
         CTRL_C['STOP'] = True
-        print('wokefrom sleep',CTRL_C)
+        print('wokefrom sleep', CTRL_C)
 
     class mockLogger():
-        def __init__ (self):
+        def __init__(self):
             pass
-        def debug(self,string):
+
+        def debug(self, string):
+            pass
+
+    class mockuss():
+        def __init__(self):
+            pass
+
+        def return_endpoint_state(self):
+                endpoints = dict({'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {'state': 'UNKNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.00.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}},
+                                   'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
+                return endpoints
+
+        def mirror_endpoint(self):
+            pass
+
+    def start_vent_collector(endpoint_hash):
+        pass
+
+    class MockMonitor(Monitor):
+        # no need to init the monitor
+
+        def __init__(self):
+            pass
+
+        def get_q_item(self):
+            return (False,{})
+
+    mock_monitor = MockMonitor()
+    mock_monitor.uss = mockuss()
+    mock_start_vent_collector = start_vent_collector
+    mock_monitor.logger = module_logger
+
+    t1 = Thread(target=thread1)
+    t1.start()
+    try:
+        mock_monitor.process()        
+    except SystemExit:
+        pass
+
+    t1.join()
+
+
+
+def test_schedule_thread_worker():
+    from threading import Thread
+    import time
+
+    def thread1():
+        global CTRL_C
+        CTRL_C['STOP'] = False
+        print('about to go to sleep', CTRL_C)
+        time.sleep(5)
+        CTRL_C['STOP'] = True
+        print('wokefrom sleep', CTRL_C)
+
+    class mockLogger():
+        def __init__(self):
+            pass
+
+        def debug(self, string):
             pass
 
     class mockSchedule():
-        def __init__ (self):
+        def __init__(self):
             pass
+
         def run_pending(self):
             pass
 
     class mocksys():
         def __init__(self):
             pass
+
         def exit(self):
             pass
 
@@ -356,8 +418,8 @@ def test_schedule_thread_worker():
     t1 = Thread(target=thread1)
     t1.start()
     try:
-        schedule_thread_worker(mockSchedule(),mockLogger())
+        schedule_thread_worker(mockSchedule(), mockLogger())
     except SystemExit:
         pass
-    
+
     t1.join()
