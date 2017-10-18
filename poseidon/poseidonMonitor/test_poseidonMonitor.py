@@ -125,7 +125,7 @@ def test_get_q_item():
     assert (True, "Item") == mock_monitor.get_q_item()
 
 
-def test_get_rabbit_message():
+def format_rabbit_message():
     poseidonMonitor.CTRL_C['STOP'] = False
 
 
@@ -173,9 +173,11 @@ def test_print_endpoint_state():
 
     mock_monitor = MockMonitor()
     mock_monitor.logger = module_logger
-    test_dict_to_return = {'test': True}
+    test_dict_to_return = {'b8d31352453a65036b4343f34c2a93f5d5442b70': {'valid': True, 'classification': {'labels': ['Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
+        0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {'investigate': True, 'behavior': 'normal'}}}
+
     item = ('poseidon.algos.ML.results', json.dumps(test_dict_to_return))
-    assert test_dict_to_return == mock_monitor.get_rabbit_message(item)
+    #assert test_dict_to_return == mock_monitor.format_rabbit_message(item)
     end_points = {
         "hash_0": {
             "state": "REINVESTIGATING",
@@ -241,10 +243,12 @@ def test_update_next_state():
             self.uss = Mock_Update_Switch_State()
 
     monitor = MockMonitor()
-    monitor.update_next_state(
-        {'d60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': 'TESTSTATE'})
+    ml_return = {'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {'valid': True, 'classification': {'labels': ['Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
+        0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {'investigate': True, 'behavior': 'normal'}}}
+
+    monitor.update_next_state(ml_return)
     correct_answer = dict({'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {'state': 'UNKNOWN', 'next-state': 'MIRRORING', 'endpoint': {'ip-address': '10.00.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}},
-                           'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {'state': 'KNOWN', 'next-state': 'TESTSTATE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
+                           'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
     assert str(correct_answer) == str(monitor.uss.return_endpoint_state())
 
 
@@ -346,9 +350,9 @@ def test_process():
             pass
 
         def return_endpoint_state(self):
-                endpoints = dict({'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {'state': 'UNKNOWN', 'next-state': 'MIRRORING', 'endpoint': {'ip-address': '10.00.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}},
-                                   'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {'state': 'KNOWN', 'next-state': 'REINVESTIGATING', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
-                return endpoints
+            endpoints = dict({'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {'state': 'UNKNOWN', 'next-state': 'MIRRORING', 'endpoint': {'ip-address': '10.00.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}},
+                              'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {'state': 'KNOWN', 'next-state': 'REINVESTIGATING', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
+            return endpoints
 
         def mirror_endpoint(self,endpoint_hash):
             pass
@@ -363,7 +367,7 @@ def test_process():
             pass
 
         def get_q_item(self):
-            return (False,{})
+            return (False, {})
 
     mock_monitor = MockMonitor()
     mock_monitor.uss = mockuss()
@@ -373,12 +377,11 @@ def test_process():
     t1 = Thread(target=thread1)
     t1.start()
     try:
-        mock_monitor.process()        
+        mock_monitor.process()
     except SystemExit:
         pass
 
     t1.join()
-
 
 
 def test_schedule_thread_worker():
