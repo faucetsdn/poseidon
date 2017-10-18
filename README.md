@@ -47,7 +47,7 @@ To populate the current volume with the contents of the containers' "poseidonWor
 make run_dev
 ```
 
-To run poseidon with sh as entrypoing, run:
+To run poseidon with sh as entrypoint, run:
 ```
 make run_sh
 ```
