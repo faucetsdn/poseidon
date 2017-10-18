@@ -27,6 +27,7 @@ from poseidon.baseClasses.Logger_Base import Logger
 module_logger = Logger
 module_logger = module_logger.logger
 
+requests.packages.urllib3.disable_warnings() 
 
 class ControllerProxy(object):
 
