@@ -43,6 +43,7 @@ ENDPOINT_STATES = [('K', 'KNOWN'), ('U', 'UNKNOWN'), ('M', 'MIRRORING'),
                    ('S', 'SHUTDOWN'), ('R', 'REINVESTIGATING')]
 
 module_logger = Logger
+requests.packages.urllib3.disable_warnings() 
 
 CTRL_C = False
 
