@@ -2,10 +2,13 @@ TAG=${WHOAMI}-poseidon
 WHOAMI := $(shell who | awk '{print $$1}')
 
 build_poseidon:
-	docker build -f ./Dockerfile -t $(TAG) .
+	docker build -f ./Dockerfile.poseidon -t $(TAG) .
 
 run_poseidon: build_poseidon
 	docker run --rm -it $(TAG)
+
+run_dev:
+	docker run --rm -v "$(shell pwd):/poseidonWork" -it $(TAG)
 
 run_sh: build_poseidon
 	docker run --rm -it --entrypoint sh $(TAG)
