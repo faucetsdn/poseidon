@@ -45,7 +45,8 @@ ENDPOINT_STATES = [('K', 'KNOWN'), ('U', 'UNKNOWN'), ('M', 'MIRRORING'),
 module_logger = Logger
 requests.packages.urllib3.disable_warnings() 
 
-CTRL_C = False
+CTRL_C = dict()
+CTRL_C['STOP'] = False
 
 
 def schedule_job_kickurl(func, logger):
@@ -71,7 +72,9 @@ def schedule_thread_worker(schedule, logger):
     global CTRL_C
     logLine = 'starting thread_worker'
     logger.debug(logLine)
-    while not CTRL_C:
+    while not CTRL_C['STOP']:
+        print('looping',CTRL_C)
+        sys.stdout.flush()
         schedule.run_pending()
         logLine = 'scheduler woke {0}'.format(
             threading.current_thread().getName())
@@ -295,7 +298,7 @@ class Monitor(object):
         global CTRL_C
         ret_val = {}
 
-        if not CTRL_C:
+        if not CTRL_C['STOP']:
             routing_key, my_obj = item
             self.logger.debug('rabbit_message:{0}'.format(my_obj))
             my_obj = json.loads(my_obj)
@@ -320,7 +323,7 @@ class Monitor(object):
 
         global CTRL_C
         signal.signal(signal.SIGINT, partial(self.signal_handler))
-        while not CTRL_C:
+        while not CTRL_C['STOP']:
             self.logger.debug('***************CTRL_C:{0}'.format(CTRL_C))
             time.sleep(1)
             self.logger.debug('woke from sleeping')
@@ -369,7 +372,7 @@ class Monitor(object):
         item = None
         global CTRL_C
 
-        if not CTRL_C:
+        if not CTRL_C['STOP']:
             try:
                 item = self.m_queue.get(False)
                 found_work = True
@@ -381,7 +384,7 @@ class Monitor(object):
     def signal_handler(self, signal, frame):
         ''' hopefully eat a CTRL_C and signal system shutdown '''
         global CTRL_C
-        CTRL_C = True
+        CTRL_C['STOP'] = True
         self.logger.debug('=================CTRLC{0}'.format(CTRL_C))
         try:
             for job in self.schedule.jobs:

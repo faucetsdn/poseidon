@@ -24,7 +24,8 @@ Created on 28 June 2016
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.poseidonMonitor import Monitor
 from poseidon.poseidonMonitor import poseidonMonitor
-from poseidon.poseidonMonitor.poseidonMonitor import schedule_job_kickurl
+from poseidon.poseidonMonitor.poseidonMonitor import schedule_job_kickurl, schedule_thread_worker
+from poseidon.poseidonMonitor.poseidonMonitor import CTRL_C
 import json
 
 
@@ -76,7 +77,7 @@ def test_start_vent_collector():
             mock_response.text = "success"
             return mock_response
 
-    poseidonMonitor.CTRL_C = False
+    poseidonMonitor.CTRL_C['STOP'] = False
     poseidonMonitor.requests = requests()
 
     class MockUSS:
@@ -111,7 +112,7 @@ def test_get_q_item():
         def get(self, block):
             return "Item"
 
-    poseidonMonitor.CTRL_C = False
+    poseidonMonitor.CTRL_C['STOP'] = False
 
     class MockMonitor(Monitor):
         # no need to init the monitor
@@ -125,7 +126,7 @@ def test_get_q_item():
 
 
 def test_get_rabbit_message():
-    poseidonMonitor.CTRL_C = False
+    poseidonMonitor.CTRL_C['STOP'] = False
 
 
 def test_rabbit_callback():
@@ -153,12 +154,14 @@ def test_rabbit_callback():
     assert mock_queue.get_item() == (mock_method.routing_key, "body")
 
 
+
 def test_schedule_job_reinvestigation():
     end_points = {
         "hash_0": {"state": "REINVESTIGATING", "next-state": "UNKNOWN"},
         "hash_1": {"state": "UNKNOWN", "next-state": "REINVESTIGATING"},
         "hash_2": {"state": "known", "next-state": "UNKNOWN"}
     }
+
     poseidonMonitor.schedule_job_reinvestigation(2, end_points, module_logger)
 
 
@@ -318,3 +321,43 @@ def test_schedule_job_kickurl():
 
 def test_Monitor_init():
     monitor = Monitor(skip_rabbit=True)
+
+def test_schedule_thread_worker():
+    from threading import Thread
+    import time    
+
+    def thread1():
+        global CTRL_C
+        CTRL_C['STOP'] = False
+        print('about to go to sleep',CTRL_C)
+        time.sleep(5)
+        CTRL_C['STOP'] = True
+        print('wokefrom sleep',CTRL_C)
+
+    class mockLogger():
+        def __init__ (self):
+            pass
+        def debug(self,string):
+            pass
+
+    class mockSchedule():
+        def __init__ (self):
+            pass
+        def run_pending(self):
+            pass
+
+    class mocksys():
+        def __init__(self):
+            pass
+        def exit(self):
+            pass
+
+    sys = mocksys()
+    t1 = Thread(target=thread1)
+    t1.start()
+    try:
+        schedule_thread_worker(mockSchedule(),mockLogger())
+    except SystemExit:
+        pass
+    
+    t1.join()
