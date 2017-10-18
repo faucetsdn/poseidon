@@ -25,6 +25,38 @@ cd poseidon
 docker build -f ./Dockerfile.poseidon -t poseidon .
 docker run poseidon
 ```
+# Makefile Options
+
+You can use `make` to simplify the building process.
+To build the container, simply run:
+
+```
+git clone https://github.com/CyberReboot/poseidon.git
+cd poseidon
+make build_poseidon
+```
+
+To build and run the container, run this command from inside the poseidon directory:
+```
+make run_poseidon
+```
+This first builds poseidon, then runs it. After it finishes running, the container is removed.
+
+To run poseidon with sh as entrypoing, run:
+```
+make run_sh
+```
+This also removes the container after it has finished running.
+
+If you want to build the docs, then invoke:
+```
+make build_docs
+```
+
+To build and then open the docs in a container on port 8080:
+```
+make run_docs
+```
 
 # Configuration
 
