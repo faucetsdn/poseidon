@@ -228,15 +228,26 @@ def test_configSelf():
 
 
 def test_update_next_state():
+    
+
+    class MockLogger():
+        def __init__(self):
+            pass
+        
+        def debug(self,msg):
+            pass
+
 
     class Mock_Update_Switch_State():
 
         def __init__(self):
             self.endpoints = dict({'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {'state': 'UNKNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.00.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}},
                                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
+            self.logger = None
 
         def return_endpoint_state(self):
             return self.endpoints
+
 
     class MockMonitor(Monitor):
 
@@ -244,6 +255,7 @@ def test_update_next_state():
             self.uss = Mock_Update_Switch_State()
 
     monitor = MockMonitor()
+    monitor.logger = MockLogger()
     ml_return = {'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {'valid': True, 'classification': {'labels': ['Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
         0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {'investigate': True, 'behavior': 'normal'}}}
 
