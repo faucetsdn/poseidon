@@ -125,8 +125,9 @@ def test_get_q_item():
     assert (True, "Item") == mock_monitor.get_q_item()
 
 
-def format_rabbit_message():
+def test_format_rabbit_message():
     poseidonMonitor.CTRL_C['STOP'] = False
+
 
 
 def test_rabbit_callback():
@@ -176,8 +177,8 @@ def test_print_endpoint_state():
     test_dict_to_return = {'b8d31352453a65036b4343f34c2a93f5d5442b70': {'valid': True, 'classification': {'labels': ['Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
         0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {'investigate': True, 'behavior': 'normal'}}}
 
-    item = ('poseidon.algos.ML.results', json.dumps(test_dict_to_return))
-    #assert test_dict_to_return == mock_monitor.format_rabbit_message(item)
+    item = ('poseidon.algos.decider', json.dumps(test_dict_to_return))
+    assert test_dict_to_return == mock_monitor.format_rabbit_message(item)
     end_points = {
         "hash_0": {
             "state": "REINVESTIGATING",

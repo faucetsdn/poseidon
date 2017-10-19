@@ -257,16 +257,37 @@ class Monitor(object):
         for my_hash in ml_returns:
             if my_hash in endpoint_states:
                 endpoint_dict = endpoint_states[my_hash]
+                '''
+                    {'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {
+                        'classification': {
+                            'confidences': [0.9983864533039954,
+                                            0.0010041873867962805,
+                                            0.00042691313815914093],
+                            'labels': ['Unknown',
+                                      'Smartphone',
+                                      'Developer '
+                                      'workstation']
+                             },
+                            'decisions': {
+                                            'behavior': 'normal',
+                                            'investigate': True
+                             },
+                            'timestamp': 1508366767.45571,
+                            'valid': True
+                        }
+                    }
+                '''
+                    # TODO is this the best place for this?
                 if ml_returns[my_hash]['valid']:
-                   #TODO is this the best place for this? 
                     current_state = endpoint_dict['state']
-                    if current_state == 'REINVESTIGATING' :
-                        if ml_returns[my_hash]['behavior'] == 'normal':
+                    ml_decision = ml_returns[my_hash]['decisions']['behavior']
+                    if current_state == 'REINVESTIGATING':
+                        if ml_decision == 'normal':
                             endpoint_dict['next-state'] = 'KNOWN'
                         else:
                             endpoint_dict['next-state'] = 'UNKNOWN'
-                    if current_state == 'MIRRORING' :
-                        if ml_returns[my_hash]['behavior'] == 'normal':
+                    if current_state == 'MIRRORING':
+                        if ml_decision == 'normal':
                             endpoint_dict['next_state'] = 'KNOWN'
                         else:
                             endpoint_dict['next_state'] = 'SHUTDOWN'
@@ -297,7 +318,7 @@ class Monitor(object):
             vent_addr = self.mod_configuration[
                 'vent_ip'] + ':' + self.mod_configuration['vent_port']
             uri = 'http://' + vent_addr + '/create'
-            
+
             resp = requests.post(uri, data=json.dumps(payload))
 
             self.logger.debug('collector response: ' + resp.text)
