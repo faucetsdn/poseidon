@@ -146,13 +146,12 @@ class Update_Switch_State(Monitor_Helper_Base):
             return True
         return False
 
-    def make_known_endpoint(self, my_hash):
-        ''' take an endpoint from MIRRORING/REINVESTIGATION to KNOWN '''
+    def unmirror_endpoint(self, my_hash):
+        ''' tell the controller to unmirror traffic '''
         if my_hash in self.endpoint_states:
             my_ip = self.get_endpoint_ip(my_hash)
             next_state = self.get_endpoint_next(my_hash)
             self.bcf.unmirror_ip(my_ip)
-            self.change_endpoint_state(my_hash, new_state='KNOWN')
             self.logger.debug(
                 'endpoint:{0}:{1}:{2}'.format(my_hash, my_ip, next_state))
             return True

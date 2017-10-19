@@ -281,16 +281,21 @@ class Monitor(object):
                 if ml_returns[my_hash]['valid']:
                     current_state = endpoint_dict['state']
                     ml_decision = ml_returns[my_hash]['decisions']['behavior']
+                    self.logger.debug('ML_DECISION:{0}'.format(ml_decision))
                     if current_state == 'REINVESTIGATING':
                         if ml_decision == 'normal':
                             endpoint_dict['next-state'] = 'KNOWN'
+                            self.logger.debug('REINVESTIGATION Making KNOWN')
                         else:
                             endpoint_dict['next-state'] = 'UNKNOWN'
+                            self.logger.debug('REINVESTIGATION Making UNKNOWN')
                     if current_state == 'MIRRORING':
                         if ml_decision == 'normal':
                             endpoint_dict['next_state'] = 'KNOWN'
+                            self.logger.debug('MIRRORING Making KNOWN')
                         else:
                             endpoint_dict['next_state'] = 'SHUTDOWN'
+                            self.logger.debug('MIRRORING Making SHUTDOWN')
 
     def start_vent_collector(self, dev_hash, num_captures=1):
         '''
@@ -402,6 +407,16 @@ class Monitor(object):
                     self.start_vent_collector(endpoint_hash)
                     self.logger.debug('*********** R MIRROR PORT ***********')
                     self.uss.mirror_endpoint(endpoint_hash)
+                if next_state == 'KNOWN':
+                    if current_state == 'REINVESTIGATING':
+                        self.logger.debug('*********** R UN-MIRROR PORT ***********')
+                        self.uss.unmirror_endpoint(endpoint_hash)
+                        self.uss.change_endpoint_state(endpoint_hash)
+                    if current_state == 'UNKNOWN':
+                        self.logger.debug('*********** U UN-MIRROR PORT ***********')
+                        self.uss.unmirror_endpoint(endpoint_hash)
+                        self.uss.change_endpoint_state(endpoint_hash)
+
 
     def get_q_item(self):
         ''' attempt to get a workitem from the queue'''
