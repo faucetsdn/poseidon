@@ -169,6 +169,10 @@ class Update_Switch_State(Monitor_Helper_Base):
             'state'] = new_state or self.endpoint_states[my_hash]['next-state']
         self.endpoint_states[my_hash]['next-state'] = 'NONE'
 
+    def change_endpoint_nextstate(self, my_hash, next_state):
+        ''' updaate the next state of an endpoint '''
+        self.endpoint_state[my_hash]['next-state'] = next_state
+
     def find_new_machines(self, machines):
         '''parse switch structure to find new machines added to network
         since last call'''
