@@ -1,5 +1,4 @@
-TAG=${WHOAMI}-poseidon
-WHOAMI := $(shell who | awk '{print $$1}')
+TAG=`whoami`-poseidon
 
 build_poseidon:
 	docker build -f ./Dockerfile.poseidon -t $(TAG) .
