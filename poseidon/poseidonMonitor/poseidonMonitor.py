@@ -284,17 +284,17 @@ class Monitor(object):
                     self.logger.debug('ML_DECISION:{0}'.format(ml_decision))
                     if current_state == 'REINVESTIGATING':
                         if ml_decision == 'normal':
-                            endpoint_dict['next-state'] = 'KNOWN'
+                            self.uss.change_endpoint_nextstate(my_hash,'KNOWN')
                             self.logger.debug('REINVESTIGATION Making KNOWN')
                         else:
-                            endpoint_dict['next-state'] = 'UNKNOWN'
+                            self.uss.change_endpoint_nextstate(my_hash,'UNKNOWN')
                             self.logger.debug('REINVESTIGATION Making UNKNOWN')
                     if current_state == 'MIRRORING':
                         if ml_decision == 'normal':
-                            endpoint_dict['next_state'] = 'KNOWN'
+                            self.uss.change_endpoint_nextstate(my_hash,'KNOWN')
                             self.logger.debug('MIRRORING Making KNOWN')
                         else:
-                            endpoint_dict['next_state'] = 'SHUTDOWN'
+                            self.uss.change_endpoint_nextstate(my_hash,'SHUTDOWN')
                             self.logger.debug('MIRRORING Making SHUTDOWN')
 
     def start_vent_collector(self, dev_hash, num_captures=1):
