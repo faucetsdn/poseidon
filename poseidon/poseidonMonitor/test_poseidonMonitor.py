@@ -129,7 +129,6 @@ def test_format_rabbit_message():
     poseidonMonitor.CTRL_C['STOP'] = False
 
 
-
 def test_rabbit_callback():
     def mock_method(): return None
     mock_method.routing_key = "test_routing_key"
@@ -229,27 +228,41 @@ def test_configSelf():
 
 def test_update_next_state():
 
+    class MockLogger():
+        def __init__(self):
+            pass
+
+        def debug(self, msg):
+            print(msg)
+            pass
+
     class Mock_Update_Switch_State():
 
         def __init__(self):
             self.endpoints = dict({'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {'state': 'UNKNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.00.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}},
-                                   'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
+                                   'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {'state': 'MIRRORING', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
+            self.logger = None
 
         def return_endpoint_state(self):
             return self.endpoints
 
+        def change_endpoint_nextstate(self, my_hash, state):
+            self.endpoints[my_hash]['next-state'] = state
+
     class MockMonitor(Monitor):
 
         def __init__(self):
-            self.uss = Mock_Update_Switch_State()
+            self.uss = None
 
     monitor = MockMonitor()
-    ml_return = {'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {'valid': True, 'classification': {'labels': ['Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
+    monitor.uss = Mock_Update_Switch_State()
+    monitor.logger = MockLogger()
+    ml_return = {'d60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {'valid': True, 'classification': {'labels': ['Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
         0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {'investigate': True, 'behavior': 'normal'}}}
 
     monitor.update_next_state(ml_return)
     correct_answer = dict({'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {'state': 'UNKNOWN', 'next-state': 'MIRRORING', 'endpoint': {'ip-address': '10.00.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}},
-                           'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
+                           'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {'state': 'MIRRORING', 'next-state': 'KNOWN', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
     assert str(correct_answer) == str(monitor.uss.return_endpoint_state())
 
 
@@ -355,7 +368,7 @@ def test_process():
                               'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {'state': 'KNOWN', 'next-state': 'REINVESTIGATING', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
             return endpoints
 
-        def mirror_endpoint(self,endpoint_hash):
+        def mirror_endpoint(self, endpoint_hash):
             pass
 
     def start_vent_collector(endpoint_hash):
