@@ -1,5 +1,4 @@
 .circleci
-.coveragerc
 .gitignore
 .git
 AUTHORS
