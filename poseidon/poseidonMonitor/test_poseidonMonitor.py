@@ -158,10 +158,11 @@ def test_schedule_job_reinvestigation():
     end_points = {
         "hash_0": {"state": "REINVESTIGATING", "next-state": "UNKNOWN"},
         "hash_1": {"state": "UNKNOWN", "next-state": "REINVESTIGATING"},
-        "hash_2": {"state": "known", "next-state": "UNKNOWN"}
+        "hash_2": {"state": "KNOWN", "next-state": "UNKNOWN"},
+        "hash_3": {"state": "UNKNOWN", "next-state": "REINVESTIGATING"},
     }
 
-    poseidonMonitor.schedule_job_reinvestigation(2, end_points, module_logger)
+    poseidonMonitor.schedule_job_reinvestigation(4, end_points, module_logger)
 
 
 def test_print_endpoint_state():
