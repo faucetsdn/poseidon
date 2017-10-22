@@ -399,6 +399,7 @@ def test_process():
                 'state'] = self.endpoint_states[endpoint_hash]['next-state']
             self.endpoint_states[endpoint_hash]['next-state'] = 'NONE'
 
+
     def start_vent_collector(endpoint_hash):
         pass
 
@@ -409,7 +410,10 @@ def test_process():
             pass
 
         def get_q_item(self):
-            return (False, {})
+            return (True, {})
+
+        def format_rabbit_message(self,item):
+            return {}
 
     mock_monitor = MockMonitor()
     mock_monitor.uss = mockuss()
