@@ -381,6 +381,7 @@ def test_process():
         def __init__(self):
             self.endpoint_states = dict({'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {'state': 'UNKNOWN', 'next-state': 'MIRRORING', 'endpoint': {'ip-address': '10.00.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}},
                                          'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {'state': 'KNOWN', 'next-state': 'REINVESTIGATING', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}},
+                                         'd60c5fa5c980b1cd791208eaf62aba9fb46d3aab': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}},
                                          'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': {'state': 'REINVESTIGATING', 'next-state': 'KNOWN', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}},
                                          'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': {'state': 'UNKNOWN', 'next-state': 'KNOWN', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
 
@@ -423,9 +424,12 @@ def test_process():
         pass
 
     t1.join()
-    
-    answer = dict({'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {'state': 'UNKNOWN', 'next-state': 'MIRRORING', 'endpoint': {'ip-address': '10.00.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}}, 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {'state': 'KNOWN', 'next-state': 'REINVESTIGATING', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}, 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}, 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': {'state': 'UNKNOWN', 'next-state': 'MIRRORING', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
 
+    answer = dict({'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {'state': 'UNKNOWN', 'next-state': 'MIRRORING', 'endpoint': {'ip-address': '10.00.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}},
+                   'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {'state': 'KNOWN', 'next-state': 'REINVESTIGATING', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}},
+                   'd60c5fa5c980b1cd791208eaf62aba9fb46d3aab': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}},
+                   'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}, 
+                   'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
 
     assert str(answer) == str(mock_monitor.uss.return_endpoint_state())
 
