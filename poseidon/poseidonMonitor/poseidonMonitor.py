@@ -456,7 +456,7 @@ class Monitor(object):
             pass
 
 
-def main(skip_rabbit=False):
+def main(skip_rabbit=False): # pragma: no cover
     ''' main function '''
     pmain = Monitor(skip_rabbit=skip_rabbit)
     if not skip_rabbit:
