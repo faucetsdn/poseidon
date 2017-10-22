@@ -175,6 +175,9 @@ def test_schedule_job_reinvestigation():
 
     poseidonMonitor.schedule_job_reinvestigation(4, end_points, module_logger)
 
+
+
+
 def test_print_endpoint_state():
     class MockMonitor(Monitor):
         # no need to init the monitor
@@ -207,34 +210,7 @@ def test_print_endpoint_state():
     mock_monitor.print_endpoint_state(end_points)
 
 
-def test_configSelf():
-    class MockMonitor(Monitor):
-        mod_name = 'testingConfigSelf'
 
-        mod_configuration = [1, 2, 3, 4]
-
-        # no need to init the monitor
-        def __init__(self):
-            pass
-
-    class MockSectionConfig:
-
-        def direct_get(self, mod_name):
-            assert "testingConfigSelf" == mod_name
-            return [(1, "YOYO")]
-
-    class MockConfig():
-
-        def get_endpoint(self, endpoint_type):
-            assert "Handle_SectionConfig" == endpoint_type
-            section_conf = MockSectionConfig()
-            return section_conf
-
-    mock_monitor = MockMonitor()
-    mock_monitor.Config = MockConfig()
-    mock_monitor.logger = module_logger
-    mock_monitor.configSelf()
-    assert mock_monitor.mod_configuration[1] == "YOYO"
 
 
 def test_update_next_state():
@@ -327,6 +303,40 @@ def test_configSelf():
 
     assert str(answer) == str(dict(monitor.mod_configuration))
 
+def test_configSelf2():
+    
+    class MockMonitor(Monitor):
+
+        def __init__(self):
+            self.mod_name = 'testingConfigSelf'
+            self.mod_configuration = [1, 2, 3, 4]
+
+    class MockSectionConfig():
+
+        def __init__(self):
+            pass
+
+        def direct_get(self, mod_name):
+            assert "testingConfigSelf" == mod_name
+            return [(1, "YOYO")]
+
+    class MockConfig():
+
+        def __init__(self):
+            pass
+
+        def get_endpoint(self, endpoint_type):
+            assert "Handle_SectionConfig" == endpoint_type
+            section_conf = MockSectionConfig()
+            return section_conf
+
+    mock_monitor = MockMonitor()
+    mock_monitor.Config = MockConfig()
+    mock_monitor.logger = module_logger
+    mock_monitor.configSelf()
+
+    assert mock_monitor.mod_configuration[1] == "YOYO"
+
 
 def test_schedule_job_kickurl():
 
@@ -410,7 +420,6 @@ def test_process():
                 'state'] = self.endpoint_states[endpoint_hash]['next-state']
             self.endpoint_states[endpoint_hash]['next-state'] = 'NONE'
 
-
     def start_vent_collector(endpoint_hash):
         pass
 
@@ -423,7 +432,7 @@ def test_process():
         def get_q_item(self):
             return (True, {})
 
-        def format_rabbit_message(self,item):
+        def format_rabbit_message(self, item):
             return {}
 
     mock_monitor = MockMonitor()
@@ -443,7 +452,7 @@ def test_process():
     answer = dict({'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {'state': 'UNKNOWN', 'next-state': 'MIRRORING', 'endpoint': {'ip-address': '10.00.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}},
                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {'state': 'KNOWN', 'next-state': 'REINVESTIGATING', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}},
                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aab': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}},
-                   'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}, 
+                   'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}},
                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
 
     assert str(answer) == str(mock_monitor.uss.return_endpoint_state())
