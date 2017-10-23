@@ -70,12 +70,14 @@ def test_signal_handler():
 
 def test_start_vent_collector():
     class requests():
-
-        def post(uri, json):
+        
+        def __init__(self):
             pass
-            #def mock_response(): return None
-            #mock_response.text = "success"
-            #return mock_response
+
+        #def post(uri, json):
+        #    def mock_response(): return None
+        #    mock_response.text = "success"
+        #    return mock_response
 
     poseidonMonitor.CTRL_C['STOP'] = False
     poseidonMonitor.requests = requests()
@@ -420,8 +422,8 @@ def test_process():
                 'state'] = self.endpoint_states[endpoint_hash]['next-state']
             self.endpoint_states[endpoint_hash]['next-state'] = 'NONE'
 
-    def start_vent_collector(endpoint_hash):
-        pass
+    #def start_vent_collector(endpoint_hash):
+    #    pass
 
     class MockMonitor(Monitor):
         # no need to init the monitor
@@ -437,15 +439,17 @@ def test_process():
 
     mock_monitor = MockMonitor()
     mock_monitor.uss = mockuss()
-    mock_start_vent_collector = start_vent_collector
+    #mock_start_vent_collector = start_vent_collector
     mock_monitor.logger = mockLogger()
 
     t1 = Thread(target=thread1)
     t1.start()
-    try:
-        mock_monitor.process()
-    except SystemExit:
-        pass
+    mock_monitor.process()
+
+    #try:
+    #    mock_monitor.process()
+    #except SystemExit:
+    #    pass
 
     t1.join()
 
@@ -491,8 +495,8 @@ def test_schedule_thread_worker():
         def __init__(self):
             pass
 
-        def exit(self):
-            pass
+        #def exit(self):
+        #    pass
 
     sys = mocksys()
     t1 = Thread(target=thread1)
