@@ -25,7 +25,6 @@ from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.poseidonMonitor import Monitor
 from poseidon.poseidonMonitor import poseidonMonitor
 from poseidon.poseidonMonitor.poseidonMonitor import schedule_job_kickurl, schedule_thread_worker
-from poseidon.poseidonMonitor.poseidonMonitor import CTRL_C
 import json
 
 
@@ -70,11 +69,11 @@ def test_signal_handler():
 
 def test_start_vent_collector():
     class requests():
-        
+
         def __init__(self):
             pass
 
-        #def post(uri, json):
+        # def post(uri, json):
         #    def mock_response(): return None
         #    mock_response.text = "success"
         #    return mock_response
@@ -178,8 +177,6 @@ def test_schedule_job_reinvestigation():
     poseidonMonitor.schedule_job_reinvestigation(4, end_points, module_logger)
 
 
-
-
 def test_print_endpoint_state():
     class MockMonitor(Monitor):
         # no need to init the monitor
@@ -189,8 +186,22 @@ def test_print_endpoint_state():
 
     mock_monitor = MockMonitor()
     mock_monitor.logger = module_logger
-    test_dict_to_return = {'b8d31352453a65036b4343f34c2a93f5d5442b70': {'valid': True, 'classification': {'labels': ['Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
-        0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {'investigate': True, 'behavior': 'normal'}}}
+    test_dict_to_return = {
+        'b8d31352453a65036b4343f34c2a93f5d5442b70': {
+            'valid': True,
+            'classification': {
+                'labels': [
+                    'Unknown',
+                    'Smartphone',
+                    'Developer workstation'],
+                'confidences': [
+                    0.9983864533039954,
+                    0.0010041873867962805,
+                    0.00042691313815914093]},
+            'timestamp': 1508366767.45571,
+            'decisions': {
+                'investigate': True,
+                'behavior': 'normal'}}}
 
     item = ('poseidon.algos.decider', json.dumps(test_dict_to_return))
     assert test_dict_to_return == mock_monitor.format_rabbit_message(item)
@@ -212,9 +223,6 @@ def test_print_endpoint_state():
     mock_monitor.print_endpoint_state(end_points)
 
 
-
-
-
 def test_update_next_state():
 
     class MockLogger():
@@ -224,16 +232,57 @@ def test_update_next_state():
 
         def debug(self, msg):
             print(msg)
-            pass
 
     class Mock_Update_Switch_State():
 
         def __init__(self):
-            self.endpoints = dict({'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {'state': 'UNKNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.00.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}},
-                                   'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {'state': 'MIRRORING', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}},
-                                   'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': {'state': 'MIRRORING', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}},
-                                   'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': {'state': 'REINVESTIGATING', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}},
-                                   'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': {'state': 'REINVESTIGATING', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
+            self.endpoints = dict(
+                {
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {
+                        'state': 'UNKNOWN',
+                        'next-state': 'NONE',
+                        'endpoint': {
+                            'ip-address': '10.00.0.101',
+                            'mac': 'f8:b1:56:fe:f2:de',
+                            'segment': 'prod',
+                            'tenant': 'FLOORPLATE',
+                            'name': None}},
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {
+                        'state': 'MIRRORING',
+                        'next-state': 'NONE',
+                        'endpoint': {
+                            'ip-address': '10.0.0.99',
+                            'mac': '20:4c:9e:5f:e3:c3',
+                            'segment': 'to-core-router',
+                            'tenant': 'EXTERNAL',
+                            'name': None}},
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': {
+                        'state': 'MIRRORING',
+                        'next-state': 'NONE',
+                        'endpoint': {
+                            'ip-address': '10.0.0.99',
+                            'mac': '20:4c:9e:5f:e3:c3',
+                            'segment': 'to-core-router',
+                            'tenant': 'EXTERNAL',
+                            'name': None}},
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': {
+                        'state': 'REINVESTIGATING',
+                        'next-state': 'NONE',
+                        'endpoint': {
+                            'ip-address': '10.0.0.99',
+                            'mac': '20:4c:9e:5f:e3:c3',
+                            'segment': 'to-core-router',
+                            'tenant': 'EXTERNAL',
+                            'name': None}},
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': {
+                        'state': 'REINVESTIGATING',
+                        'next-state': 'NONE',
+                        'endpoint': {
+                            'ip-address': '10.0.0.99',
+                            'mac': '20:4c:9e:5f:e3:c3',
+                            'segment': 'to-core-router',
+                            'tenant': 'EXTERNAL',
+                            'name': None}}})
             self.logger = None
 
         def return_endpoint_state(self):
@@ -251,15 +300,76 @@ def test_update_next_state():
     monitor.uss = Mock_Update_Switch_State()
     monitor.logger = MockLogger()
     ml_return = {
-        'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {'valid': True, 'classification': {'labels': ['Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {'investigate': True, 'behavior': 'normal'}},
-        'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': {'valid': True, 'classification': {'labels': ['Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {'investigate': True, 'behavior': 'abnormal'}},
-        'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': {'valid': True, 'classification': {'labels': ['Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {'investigate': True, 'behavior': 'normal'}},
-        'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': {'valid': True, 'classification': {'labels': ['Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {'investigate': True, 'behavior': 'abnormal'}}
-    }
+        'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {
+            'valid': True, 'classification': {
+                'labels': [
+                    'Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
+                    0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {
+                        'investigate': True, 'behavior': 'normal'}}, 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': {
+                            'valid': True, 'classification': {
+                                'labels': [
+                                    'Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
+                                        0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {
+                                            'investigate': True, 'behavior': 'abnormal'}}, 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': {
+                                                'valid': True, 'classification': {
+                                                    'labels': [
+                                                        'Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
+                                                            0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {
+                                                                'investigate': True, 'behavior': 'normal'}}, 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': {
+                                                                    'valid': True, 'classification': {
+                                                                        'labels': [
+                                                                            'Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
+                                                                                0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {
+                                                                                    'investigate': True, 'behavior': 'abnormal'}}}
 
     monitor.update_next_state(ml_return)
-    correct_answer = dict({'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {'state': 'UNKNOWN', 'next-state': 'MIRRORING', 'endpoint': {'ip-address': '10.00.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}}, 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {'state': 'MIRRORING', 'next-state': 'KNOWN', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}, 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': {'state': 'MIRRORING', 'next-state': 'SHUTDOWN', 'endpoint': {
-                          'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}, 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': {'state': 'REINVESTIGATING', 'next-state': 'KNOWN', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}, 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': {'state': 'REINVESTIGATING', 'next-state': 'UNKNOWN', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
+    correct_answer = dict(
+        {
+            '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {
+                'state': 'UNKNOWN',
+                'next-state': 'MIRRORING',
+                'endpoint': {
+                    'ip-address': '10.00.0.101',
+                    'mac': 'f8:b1:56:fe:f2:de',
+                    'segment': 'prod',
+                    'tenant': 'FLOORPLATE',
+                    'name': None}},
+            'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {
+                'state': 'MIRRORING',
+                'next-state': 'KNOWN',
+                'endpoint': {
+                    'ip-address': '10.0.0.99',
+                    'mac': '20:4c:9e:5f:e3:c3',
+                    'segment': 'to-core-router',
+                    'tenant': 'EXTERNAL',
+                    'name': None}},
+            'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': {
+                'state': 'MIRRORING',
+                'next-state': 'SHUTDOWN',
+                'endpoint': {
+                    'ip-address': '10.0.0.99',
+                    'mac': '20:4c:9e:5f:e3:c3',
+                    'segment': 'to-core-router',
+                    'tenant': 'EXTERNAL',
+                    'name': None}},
+            'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': {
+                'state': 'REINVESTIGATING',
+                'next-state': 'KNOWN',
+                'endpoint': {
+                    'ip-address': '10.0.0.99',
+                    'mac': '20:4c:9e:5f:e3:c3',
+                    'segment': 'to-core-router',
+                    'tenant': 'EXTERNAL',
+                    'name': None}},
+            'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': {
+                'state': 'REINVESTIGATING',
+                'next-state': 'UNKNOWN',
+                'endpoint': {
+                    'ip-address': '10.0.0.99',
+                    'mac': '20:4c:9e:5f:e3:c3',
+                    'segment': 'to-core-router',
+                    'tenant': 'EXTERNAL',
+                    'name': None}}})
 
     assert str(correct_answer) == str(monitor.uss.return_endpoint_state())
 
@@ -270,7 +380,6 @@ def test_configSelf():
         def __init__(self):
             self.mod_name = None
             self.mod_configuration = dict()
-            pass
 
     class MockConfig():
 
@@ -305,8 +414,9 @@ def test_configSelf():
 
     assert str(answer) == str(dict(monitor.mod_configuration))
 
+
 def test_configSelf2():
-    
+
     class MockMonitor(Monitor):
 
         def __init__(self):
@@ -370,7 +480,6 @@ def test_schedule_job_kickurl():
 
         def __init__(self):
             self.NorthBoundControllerAbstraction = MockNorthBoundControllerAbstraction()
-            pass
 
     schedule_job_kickurl(func(), MockLogger())
 
@@ -402,11 +511,53 @@ def test_process():
     class mockuss():
 
         def __init__(self):
-            self.endpoint_states = dict({'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {'state': 'UNKNOWN', 'next-state': 'MIRRORING', 'endpoint': {'ip-address': '10.00.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}},
-                                         'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {'state': 'KNOWN', 'next-state': 'REINVESTIGATING', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}},
-                                         'd60c5fa5c980b1cd791208eaf62aba9fb46d3aab': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}},
-                                         'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': {'state': 'REINVESTIGATING', 'next-state': 'KNOWN', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}},
-                                         'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': {'state': 'UNKNOWN', 'next-state': 'KNOWN', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
+            self.endpoint_states = dict(
+                {
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {
+                        'state': 'UNKNOWN',
+                        'next-state': 'MIRRORING',
+                        'endpoint': {
+                            'ip-address': '10.00.0.101',
+                            'mac': 'f8:b1:56:fe:f2:de',
+                            'segment': 'prod',
+                            'tenant': 'FLOORPLATE',
+                            'name': None}},
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {
+                        'state': 'KNOWN',
+                        'next-state': 'REINVESTIGATING',
+                        'endpoint': {
+                            'ip-address': '10.0.0.99',
+                            'mac': '20:4c:9e:5f:e3:c3',
+                            'segment': 'to-core-router',
+                            'tenant': 'EXTERNAL',
+                            'name': None}},
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aab': {
+                        'state': 'KNOWN',
+                        'next-state': 'NONE',
+                        'endpoint': {
+                            'ip-address': '10.0.0.99',
+                            'mac': '20:4c:9e:5f:e3:c3',
+                            'segment': 'to-core-router',
+                            'tenant': 'EXTERNAL',
+                            'name': None}},
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': {
+                        'state': 'REINVESTIGATING',
+                        'next-state': 'KNOWN',
+                        'endpoint': {
+                            'ip-address': '10.0.0.99',
+                            'mac': '20:4c:9e:5f:e3:c3',
+                            'segment': 'to-core-router',
+                            'tenant': 'EXTERNAL',
+                            'name': None}},
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': {
+                        'state': 'UNKNOWN',
+                        'next-state': 'KNOWN',
+                        'endpoint': {
+                            'ip-address': '10.0.0.99',
+                            'mac': '20:4c:9e:5f:e3:c3',
+                            'segment': 'to-core-router',
+                            'tenant': 'EXTERNAL',
+                            'name': None}}})
 
         def return_endpoint_state(self):
             return self.endpoint_states
@@ -422,7 +573,7 @@ def test_process():
                 'state'] = self.endpoint_states[endpoint_hash]['next-state']
             self.endpoint_states[endpoint_hash]['next-state'] = 'NONE'
 
-    #def start_vent_collector(endpoint_hash):
+    # def start_vent_collector(endpoint_hash):
     #    pass
 
     class MockMonitor(Monitor):
@@ -446,18 +597,60 @@ def test_process():
     t1.start()
     mock_monitor.process()
 
-    #try:
+    # try:
     #    mock_monitor.process()
-    #except SystemExit:
+    # except SystemExit:
     #    pass
 
     t1.join()
 
-    answer = dict({'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {'state': 'UNKNOWN', 'next-state': 'MIRRORING', 'endpoint': {'ip-address': '10.00.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}},
-                   'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {'state': 'KNOWN', 'next-state': 'REINVESTIGATING', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}},
-                   'd60c5fa5c980b1cd791208eaf62aba9fb46d3aab': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}},
-                   'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}},
-                   'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
+    answer = dict(
+        {
+            '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {
+                'state': 'UNKNOWN',
+                'next-state': 'MIRRORING',
+                'endpoint': {
+                    'ip-address': '10.00.0.101',
+                    'mac': 'f8:b1:56:fe:f2:de',
+                    'segment': 'prod',
+                    'tenant': 'FLOORPLATE',
+                    'name': None}},
+            'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {
+                'state': 'KNOWN',
+                'next-state': 'REINVESTIGATING',
+                'endpoint': {
+                    'ip-address': '10.0.0.99',
+                    'mac': '20:4c:9e:5f:e3:c3',
+                    'segment': 'to-core-router',
+                    'tenant': 'EXTERNAL',
+                    'name': None}},
+            'd60c5fa5c980b1cd791208eaf62aba9fb46d3aab': {
+                'state': 'KNOWN',
+                'next-state': 'NONE',
+                'endpoint': {
+                    'ip-address': '10.0.0.99',
+                    'mac': '20:4c:9e:5f:e3:c3',
+                    'segment': 'to-core-router',
+                    'tenant': 'EXTERNAL',
+                    'name': None}},
+            'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': {
+                'state': 'KNOWN',
+                'next-state': 'NONE',
+                'endpoint': {
+                    'ip-address': '10.0.0.99',
+                    'mac': '20:4c:9e:5f:e3:c3',
+                    'segment': 'to-core-router',
+                    'tenant': 'EXTERNAL',
+                    'name': None}},
+            'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': {
+                'state': 'KNOWN',
+                'next-state': 'NONE',
+                'endpoint': {
+                    'ip-address': '10.0.0.99',
+                    'mac': '20:4c:9e:5f:e3:c3',
+                    'segment': 'to-core-router',
+                    'tenant': 'EXTERNAL',
+                    'name': None}}})
 
     assert str(answer) == str(mock_monitor.uss.return_endpoint_state())
 
@@ -495,7 +688,7 @@ def test_schedule_thread_worker():
         def __init__(self):
             pass
 
-        #def exit(self):
+        # def exit(self):
         #    pass
 
     sys = mocksys()
