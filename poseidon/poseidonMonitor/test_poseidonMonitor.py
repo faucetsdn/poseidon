@@ -24,6 +24,7 @@ Created on 28 June 2016
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.poseidonMonitor import Monitor
 from poseidon.poseidonMonitor import poseidonMonitor
+from poseidon.poseidonMonitor.poseidonMonitor import CTRL_C
 from poseidon.poseidonMonitor.poseidonMonitor import schedule_job_kickurl, schedule_thread_worker
 import json
 
@@ -597,9 +598,10 @@ def test_process():
     t1.start()
     mock_monitor.process()
 
-    # try:
-    #    mock_monitor.process()
-    # except SystemExit:
+    #try:
+    #    #mock_monitor.process()
+    #    pass
+    #except SystemExit:
     #    pass
 
     t1.join()
