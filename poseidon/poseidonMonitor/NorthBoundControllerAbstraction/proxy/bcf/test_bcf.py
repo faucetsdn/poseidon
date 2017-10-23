@@ -285,14 +285,14 @@ def test_get_highest():
             self.endpoints = None
             self.span_fabric = None
 
-        def get_endpoints(self):
-            return self.endpoints
+       # def get_endpoints(self):
+       #     return self.endpoints
 
-        def get_span_fabric(self):
-            return self.span_fabric
+       # def get_span_fabric(self):
+       #     return self.span_fabric
 
-        def shutdown_endpoint(self, tenant, segment, name, mac, shutdown):
-            pass
+       # def shutdown_endpoint(self, tenant, segment, name, mac, shutdown):
+       #     pass
 
     bcf = MockBcfProxy()
 
@@ -330,14 +330,14 @@ def test_get_seq_by_ip():
             self.endpoints = None
             self.span_fabric = None
 
-        def get_endpoints(self):
-            return self.endpoints
+        #def get_endpoints(self):
+        #    return self.endpoints
 
         def get_span_fabric(self):
             return self.span_fabric
 
-        def shutdown_endpoint(self, tenant, segment, name, mac, shutdown):
-            pass
+        #def shutdown_endpoint(self, tenant, segment, name, mac, shutdown):
+        #    pass
 
     bcf = MockBcfProxy()
 
@@ -374,8 +374,8 @@ def test_mirror_ip():
             self.endpoints = None
             self.span_fabric = None
 
-        def get_endpoints(self):
-            return self.endpoints
+        #def get_endpoints(self):
+        #    return self.endpoints
 
         def mirror_traffic(self, seq, mirror=True, span_name='vent', s_dict=None, fabric_span_endpoint='', **target_kwargs):
             pass
@@ -383,8 +383,8 @@ def test_mirror_ip():
         def get_span_fabric(self):
             return self.span_fabric
 
-        def shutdown_endpoint(self, tenant, segment, name, mac, shutdown):
-            pass
+        #def shutdown_endpoint(self, tenant, segment, name, mac, shutdown):
+        #    pass
 
     bcf = MockBcfProxy()
 
@@ -418,17 +418,17 @@ def test_unmirror_ip():
             self.endpoints = None
             self.span_fabric = None
 
-        def get_endpoints(self):
-            return self.endpoints
+        #def get_endpoints(self):
+        #    return self.endpoints
 
-        def mirror_traffic(self, seq, mirror=True, span_name='vent', s_dict=None, fabric_span_endpoint='', **target_kwargs):
-            pass
+        #def mirror_traffic(self, seq, mirror=True, span_name='vent', s_dict=None, fabric_span_endpoint='', **target_kwargs):
+        #    pass
 
         def get_span_fabric(self):
             return self.span_fabric
 
-        def shutdown_endpoint(self, tenant, segment, name, mac, shutdown):
-            pass
+        #def shutdown_endpoint(self, tenant, segment, name, mac, shutdown):
+        #    pass
 
     bcf = MockBcfProxy()
 
