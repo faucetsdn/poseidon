@@ -71,11 +71,11 @@ def test_signal_handler():
 def test_start_vent_collector():
     class requests():
 
-        @staticmethod
         def post(uri, json):
-            def mock_response(): return None
-            mock_response.text = "success"
-            return mock_response
+            pass
+            #def mock_response(): return None
+            #mock_response.text = "success"
+            #return mock_response
 
     poseidonMonitor.CTRL_C['STOP'] = False
     poseidonMonitor.requests = requests()
@@ -438,7 +438,7 @@ def test_process():
     mock_monitor = MockMonitor()
     mock_monitor.uss = mockuss()
     mock_start_vent_collector = start_vent_collector
-    mock_monitor.logger = module_logger
+    mock_monitor.logger = mockLogger()
 
     t1 = Thread(target=thread1)
     t1.start()

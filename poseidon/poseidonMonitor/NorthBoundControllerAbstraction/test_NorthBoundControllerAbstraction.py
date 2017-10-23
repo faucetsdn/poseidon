@@ -98,9 +98,6 @@ def test_get_endpoint_ip():
         def __init__(self):
             pass
 
-        def unmirror_ip(self, my_ip):
-            assert my_ip == '10.0.0.99'
-
     uss = Update_Switch_State()
     uss.first_time = False
     uss.bcf = Mock_bcf()
@@ -183,14 +180,6 @@ def test_return_endpoint_state():
 
 
 def test_first_run():
-
-    def BcfProxy(uri, auth):
-        internal_auth = {}
-        internal_auth['password'] = 'TEST_PASS'
-        internal_auth['user'] = 'TEST_USER'
-
-        assert uri == 'TEST_URI'
-        assert str(auth) == str(internal_auth)
 
     uss = Update_Switch_State()
     uss.mod_configuration = dict()
