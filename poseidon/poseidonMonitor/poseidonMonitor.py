@@ -253,7 +253,7 @@ class Monitor(object):
             my_dict = endpoint_states[my_hash]
             current_state = my_dict['state']
 
-            #TODO move this lower with the rest of the checks
+            # TODO move this lower with the rest of the checks
             if current_state == 'UNKNOWN':
                 if my_dict['next-state'] != 'KNOWN':
                     my_dict['next-state'] = 'MIRRORING'
@@ -280,24 +280,28 @@ class Monitor(object):
                         }
                     }
                 '''
-                    # TODO is this the best place for this?
+                # TODO is this the best place for this?
                 if ml_returns[my_hash]['valid']:
                     current_state = endpoint_dict['state']
                     ml_decision = ml_returns[my_hash]['decisions']['behavior']
                     self.logger.debug('ML_DECISION:{0}'.format(ml_decision))
                     if current_state == 'REINVESTIGATING':
                         if ml_decision == 'normal':
-                            self.uss.change_endpoint_nextstate(my_hash,'KNOWN')
+                            self.uss.change_endpoint_nextstate(
+                                my_hash, 'KNOWN')
                             self.logger.debug('REINVESTIGATION Making KNOWN')
                         else:
-                            self.uss.change_endpoint_nextstate(my_hash,'UNKNOWN')
+                            self.uss.change_endpoint_nextstate(
+                                my_hash, 'UNKNOWN')
                             self.logger.debug('REINVESTIGATION Making UNKNOWN')
                     if current_state == 'MIRRORING':
                         if ml_decision == 'normal':
-                            self.uss.change_endpoint_nextstate(my_hash,'KNOWN')
+                            self.uss.change_endpoint_nextstate(
+                                my_hash, 'KNOWN')
                             self.logger.debug('MIRRORING Making KNOWN')
                         else:
-                            self.uss.change_endpoint_nextstate(my_hash,'SHUTDOWN')
+                            self.uss.change_endpoint_nextstate(
+                                my_hash, 'SHUTDOWN')
                             self.logger.debug('MIRRORING Making SHUTDOWN')
 
     def start_vent_collector(self, dev_hash, num_captures=1):
@@ -412,18 +416,19 @@ class Monitor(object):
                     self.uss.mirror_endpoint(endpoint_hash)
                 if next_state == 'KNOWN':
                     if current_state == 'REINVESTIGATING':
-                        self.logger.debug('*********** R UN-MIRROR PORT ***********')
+                        self.logger.debug(
+                            '*********** R UN-MIRROR PORT ***********')
                         self.uss.unmirror_endpoint(endpoint_hash)
                         self.uss.change_endpoint_state(endpoint_hash)
                     if current_state == 'UNKNOWN':
-                        self.logger.debug('*********** U UN-MIRROR PORT ***********')
+                        self.logger.debug(
+                            '*********** U UN-MIRROR PORT ***********')
                         self.uss.unmirror_endpoint(endpoint_hash)
                         self.uss.change_endpoint_state(endpoint_hash)
 
-
     def get_q_item(self):
         ''' attempt to get a workitem from the queue'''
-        ''' m_queue -> (routing_key, body) 
+        ''' m_queue -> (routing_key, body)
             a read from get_q_item should be of the form
             (boolean,(routing_key, body))
 
@@ -456,7 +461,7 @@ class Monitor(object):
             pass
 
 
-def main(skip_rabbit=False): # pragma: no cover
+def main(skip_rabbit=False):  # pragma: no cover
     ''' main function '''
     pmain = Monitor(skip_rabbit=skip_rabbit)
     if not skip_rabbit:

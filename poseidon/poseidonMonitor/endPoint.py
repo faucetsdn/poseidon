@@ -21,7 +21,9 @@ Created on 2 October 2017
 import hashlib
 import json
 
+
 class EndPoint:
+
     def __init__(self, data, state='NONE', next_state='NONE'):
         self.state = state
         self.next_state = next_state
@@ -53,15 +55,17 @@ class EndPoint:
 
     def to_json(self):
         '''return a json view of the object'''
-        return json.dumps({ 'endpoint_data': self.data
-                          , 'state': self.state
-                          , 'next_state': self.next_state })
+        return json.dumps({'endpoint_data': self.data,
+                           'state': self.state, 'next_state': self.next_state})
 
     @classmethod
     def from_json(cls, json_obj):
         '''initialize object from json'''
         obj_dict = json.loads(json_obj)
-        return cls(obj_dict['endpoint_data'], obj_dict['state'], obj_dict['next_state'])
+        return cls(
+            obj_dict['endpoint_data'],
+            obj_dict['state'],
+            obj_dict['next_state'])
 
     def update_state(self, next_s='NONE'):
         '''state <- next_state, next_state <- 'NONE' or a string that is passed as a parameter'''
