@@ -171,7 +171,7 @@ class Update_Switch_State(Monitor_Helper_Base):
 
     def change_endpoint_nextstate(self, my_hash, next_state):
         ''' updaate the next state of an endpoint '''
-        self.endpoint_state[my_hash]['next-state'] = next_state
+        self.endpoint_states[my_hash]['next-state'] = next_state
 
     def find_new_machines(self, machines):
         '''parse switch structure to find new machines added to network
@@ -181,14 +181,14 @@ class Update_Switch_State(Monitor_Helper_Base):
             # TODO db call to see if really need to run things
             for machine in machines:
                 h = self.make_hash(machine)
-                self.logger.critical(
+                self.logger.debug(
                     'adding address to known systems {0}'.format(machine))
                 self.make_endpoint_dict(h, 'KNOWN', machine)
         else:
             for machine in machines:
                 h = self.make_hash(machine)
                 if h not in self.endpoint_states:
-                    self.logger.critical(
+                    self.logger.debug(
                         '***** detected new address {0}'.format(machine))
                     self.make_endpoint_dict(h, 'UNKNOWN', machine)
 
@@ -233,7 +233,7 @@ class Update_Switch_State(Monitor_Helper_Base):
             current = self.bcf.get_endpoints()
             parsed = self.bcf.format_endpoints(current)
             machines = parsed
-        except BaseException:
+        except BaseException:  # pragma: no cover
             self.logger.error(
                 'Could not establish connection to {0}.'.format(
                     self.controller['URI']))
