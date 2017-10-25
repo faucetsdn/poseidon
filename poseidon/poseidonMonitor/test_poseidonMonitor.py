@@ -172,6 +172,14 @@ def test_rabbit_callback():
         mock_queue)
     assert mock_queue.get_item() == (mock_method.routing_key, "body")
 
+    poseidonMonitor.rabbit_callback(
+        "Channel",
+        mock_method,
+        "properties",
+        "body",
+        None)
+
+
 
 def test_schedule_job_reinvestigation():
 
