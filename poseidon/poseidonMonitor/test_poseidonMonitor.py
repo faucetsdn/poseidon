@@ -60,8 +60,10 @@ def test_signal_handler():
     mock_monitor.schedule = MockScheduele()
     mock_monitor.rabbit_channel_connection_local = MockRabbitConnection()
     mock_monitor.logger = module_logger
+
     # signal handler seem to simply exit and kill all the jobs no matter what
     # we pass
+
     mock_monitor.signal_handler(None, None)
     assert ['job1 cancelled', 'job2 cancelled',
             'job3 cancelled'] == mock_monitor.schedule.call_log
@@ -132,8 +134,11 @@ def test_format_rabbit_message():
 
 
 def test_rabbit_callback():
-    def mock_method(): return None
+    def mock_method(): return True
     mock_method.routing_key = "test_routing_key"
+
+    # force mock_method coverage
+    assert mock_method()
 
     class MockQueue:
         item = None
@@ -232,7 +237,7 @@ def test_update_next_state():
             pass
 
         def debug(self, msg):
-            print(msg)
+            pass
 
     class Mock_Update_Switch_State():
 
@@ -306,22 +311,25 @@ def test_update_next_state():
                 'labels': [
                     'Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
                     0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {
-                        'investigate': True, 'behavior': 'normal'}}, 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': {
-                            'valid': True, 'classification': {
-                                'labels': [
-                                    'Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
-                                        0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {
-                                            'investigate': True, 'behavior': 'abnormal'}}, 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': {
-                                                'valid': True, 'classification': {
-                                                    'labels': [
-                                                        'Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
-                                                            0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {
-                                                                'investigate': True, 'behavior': 'normal'}}, 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': {
-                                                                    'valid': True, 'classification': {
-                                                                        'labels': [
-                                                                            'Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
-                                                                                0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {
-                                                                                    'investigate': True, 'behavior': 'abnormal'}}}
+                        'investigate': True, 'behavior': 'normal'}},
+        'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': {
+            'valid': True, 'classification': {
+                'labels': [
+                    'Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
+                    0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {
+                'investigate': True, 'behavior': 'abnormal'}},
+        'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': {
+            'valid': True, 'classification': {
+                'labels': [
+                    'Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
+                    0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {
+                'investigate': True, 'behavior': 'normal'}},
+        'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': {
+            'valid': True, 'classification': {
+                'labels': [
+                    'Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
+                    0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {
+                'investigate': True, 'behavior': 'abnormal'}}}
 
     monitor.update_next_state(ml_return)
     correct_answer = dict(
@@ -402,7 +410,7 @@ def test_configSelf():
         def __init__(self):
             pass
 
-        def debug(self, words):
+        def debug(self, msg):
             pass
 
     monitor = MockMonitor()
@@ -458,7 +466,7 @@ def test_schedule_job_kickurl():
         def __init__(self):
             pass
 
-        def debug(self, logline):
+        def debug(self, msg):
             pass
 
     class helper():
@@ -506,7 +514,7 @@ def test_process():
         def __init__(self):
             pass
 
-        def debug(self, string):
+        def debug(self, msg):
             pass
 
     class mockuss():
@@ -674,7 +682,7 @@ def test_schedule_thread_worker():
         def __init__(self):
             pass
 
-        def debug(self, string):
+        def debug(self, msg):
             pass
 
     class mockSchedule():

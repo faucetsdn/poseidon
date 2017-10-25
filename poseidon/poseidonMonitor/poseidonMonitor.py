@@ -208,10 +208,8 @@ class Monitor(object):
                     out_flag = True
                     logger.debug('{0}:{1}:{2}->{3}:{4}'.format(letter,
                                                                my_hash,
-                                                               my_dict[
-                                                                   'state'],
-                                                               my_dict[
-                                                                   'next-state'],
+                                                               my_dict['state'],
+                                                               my_dict['next-state'],
                                                                my_dict['endpoint']))
             if not out_flag:
                 logger.debug('None')
