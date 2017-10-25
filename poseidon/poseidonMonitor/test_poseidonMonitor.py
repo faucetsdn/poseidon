@@ -234,11 +234,7 @@ def test_update_next_state():
             pass
 
         def debug(self, msg):
-<<<<<<< HEAD
             pass
-=======
-            print(msg)
->>>>>>> 5b55555cc06b77453f19ff41913dee0d3fb10433
 
     class Mock_Update_Switch_State():
 
@@ -312,7 +308,6 @@ def test_update_next_state():
                 'labels': [
                     'Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
                     0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {
-<<<<<<< HEAD
                         'investigate': True, 'behavior': 'normal'}},
         'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': {
             'valid': True, 'classification': {
@@ -332,24 +327,6 @@ def test_update_next_state():
                     'Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
                     0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {
                 'investigate': True, 'behavior': 'abnormal'}}}
-=======
-                        'investigate': True, 'behavior': 'normal'}}, 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': {
-                            'valid': True, 'classification': {
-                                'labels': [
-                                    'Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
-                                        0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {
-                                            'investigate': True, 'behavior': 'abnormal'}}, 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': {
-                                                'valid': True, 'classification': {
-                                                    'labels': [
-                                                        'Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
-                                                            0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {
-                                                                'investigate': True, 'behavior': 'normal'}}, 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': {
-                                                                    'valid': True, 'classification': {
-                                                                        'labels': [
-                                                                            'Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
-                                                                                0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {
-                                                                                    'investigate': True, 'behavior': 'abnormal'}}}
->>>>>>> 5b55555cc06b77453f19ff41913dee0d3fb10433
 
     monitor.update_next_state(ml_return)
     correct_answer = dict(
@@ -409,10 +386,6 @@ def test_configSelf():
         def __init__(self):
             self.mod_name = None
             self.mod_configuration = dict()
-<<<<<<< HEAD
-            pass
-=======
->>>>>>> 5b55555cc06b77453f19ff41913dee0d3fb10433
 
     class MockConfig():
 
@@ -513,10 +486,6 @@ def test_schedule_job_kickurl():
 
         def __init__(self):
             self.NorthBoundControllerAbstraction = MockNorthBoundControllerAbstraction()
-<<<<<<< HEAD
-            pass
-=======
->>>>>>> 5b55555cc06b77453f19ff41913dee0d3fb10433
 
     schedule_job_kickurl(func(), MockLogger())
 
@@ -597,31 +566,7 @@ def test_process():
                             'name': None}}})
 
         def return_endpoint_state(self):
-<<<<<<< HEAD
-            endpoints = dict(
-                {
-                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {
-                        'state': 'UNKNOWN',
-                        'next-state': 'MIRRORING',
-                        'endpoint': {
-                            'ip-address': '10.00.0.101',
-                            'mac': 'f8:b1:56:fe:f2:de',
-                            'segment': 'prod',
-                            'tenant': 'FLOORPLATE',
-                            'name': None}},
-                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {
-                        'state': 'KNOWN',
-                        'next-state': 'REINVESTIGATING',
-                        'endpoint': {
-                            'ip-address': '10.0.0.99',
-                            'mac': '20:4c:9e:5f:e3:c3',
-                            'segment': 'to-core-router',
-                            'tenant': 'EXTERNAL',
-                            'name': None}}})
-            return endpoints
-=======
             return self.endpoint_states
->>>>>>> 5b55555cc06b77453f19ff41913dee0d3fb10433
 
         def mirror_endpoint(self, endpoint_hash):
             pass
@@ -646,12 +591,6 @@ def test_process():
         def get_q_item(self):
             return (True, {})
 
-<<<<<<< HEAD
-    mock_monitor = MockMonitor()
-    mock_monitor.uss = mockuss()
-    mock_start_vent_collector = start_vent_collector
-    mock_monitor.logger = module_logger
-=======
         def format_rabbit_message(self, item):
             return {}
 
@@ -659,7 +598,6 @@ def test_process():
     mock_monitor.uss = mockuss()
     #mock_start_vent_collector = start_vent_collector
     mock_monitor.logger = mockLogger()
->>>>>>> 5b55555cc06b77453f19ff41913dee0d3fb10433
 
     t1 = Thread(target=thread1)
     t1.start()
