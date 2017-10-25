@@ -39,6 +39,7 @@ class MockLogger:
         pass
 
 module_logger = MockLogger()
+module_logger.debug('cover this')
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 username = 'user'
@@ -458,6 +459,10 @@ def test_mirror_ip():
         def get_span_fabric(self):
             return self.span_fabric
 
+        def bad_get_highest(self, spanFabric):
+            return None
+        
+
         # def shutdown_endpoint(self, tenant, segment, name, mac, shutdown):
         #    pass
 
@@ -472,6 +477,8 @@ def test_mirror_ip():
         # %22 = url-encoded double quotes
         '/data/controller/applications/bcf/span-fabric[name=%22vent%22]': 'sample_span_fabric.json',
     }
+
+
     proxy = None
     endpoints = None
     span_fabric = None
@@ -484,6 +491,9 @@ def test_mirror_ip():
 
     bcf.endpoints = endpoints
     bcf.span_fabric = span_fabric
+    ret_val = bcf.mirror_ip('10.0.0.2')
+
+    bcf.get_highest = bcf.bad_get_highest
     ret_val = bcf.mirror_ip('10.0.0.2')
 
 

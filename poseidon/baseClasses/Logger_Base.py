@@ -18,6 +18,7 @@
 @author: Jeff Wang
 """
 import logging
+import logging.config
 import logging.handlers
 import os
 import socket
@@ -48,12 +49,12 @@ class Logger:
     logger.addHandler(sys_err)
 
     # don't try to connect to a syslog address if one was not supplied
-    if host != 'NOT_CONFIGURED':
+    if host != 'NOT_CONFIGURED': # pragma: no cover
         # if a syslog address was supplied, log to it
-        sys_log = logging.handlers.SysLogHandler(address=(host, port),
-                                                 socktype=socket.SOCK_STREAM)
-        sys_log.setFormatter(formatter)
-        logger.addHandler(sys_log)
+        sys_log = logging.handlers.SysLogHandler(address=(host, port), 
+                                                 socktype=socket.SOCK_STREAM)  
+        sys_log.setFormatter(formatter) 
+        logger.addHandler(sys_log) 
 
     @staticmethod
     def set_level(level):
