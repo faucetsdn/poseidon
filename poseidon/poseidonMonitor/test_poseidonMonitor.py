@@ -29,10 +29,15 @@ from poseidon.poseidonMonitor.poseidonMonitor import schedule_job_kickurl, sched
 import json
 
 
-module_logger = Logger.logger
-
-
 def test_signal_handler():
+
+    class MockLogger:
+        def __init__(self):
+            pass
+
+        def debug(self, msg):
+            pass
+
     class MockRabbitConnection:
         connection_closed = False
 
@@ -59,7 +64,7 @@ def test_signal_handler():
     mock_monitor = MockMonitor()
     mock_monitor.schedule = MockScheduele()
     mock_monitor.rabbit_channel_connection_local = MockRabbitConnection()
-    mock_monitor.logger = module_logger
+    mock_monitor.logger = MockLogger()
 
     # signal handler seem to simply exit and kill all the jobs no matter what
     # we pass
@@ -91,6 +96,13 @@ def test_start_vent_collector():
             # Really don't care endpoint state here
             return {}
 
+    class MockLogger:
+        def __init__(self):
+            pass
+
+        def debug(self, msg):
+            pass
+
     class MockMonitor(Monitor):
         mod_configuration = {
             'collector_nic': 2,
@@ -104,7 +116,7 @@ def test_start_vent_collector():
             pass
 
     mock_monitor = MockMonitor()
-    mock_monitor.logger = module_logger
+    mock_monitor.logger = MockLogger()
     dev_hash = 'test'
     num_cuptures = 3
     mock_monitor.start_vent_collector(dev_hash, num_cuptures)
@@ -160,8 +172,24 @@ def test_rabbit_callback():
         mock_queue)
     assert mock_queue.get_item() == (mock_method.routing_key, "body")
 
+    poseidonMonitor.rabbit_callback(
+        "Channel",
+        mock_method,
+        "properties",
+        "body",
+        None)
+
+
 
 def test_schedule_job_reinvestigation():
+
+    class MockLogger:
+        def __init__(self):
+            pass
+
+        def debug(self, msg):
+            pass
+
     end_points = {
         "hash_0": {"state": "REINVESTIGATING", "next-state": "UNKNOWN"},
         "hash_1": {"state": "UNKNOWN", "next-state": "REINVESTIGATING"},
@@ -169,7 +197,7 @@ def test_schedule_job_reinvestigation():
         "hash_3": {"state": "UNKNOWN", "next-state": "REINVESTIGATING"},
     }
 
-    poseidonMonitor.schedule_job_reinvestigation(4, end_points, module_logger)
+    poseidonMonitor.schedule_job_reinvestigation(4, end_points, MockLogger())
 
     end_points = {
         "hash_0": {"state": "REINVESTIGATING", "next-state": "UNKNOWN"},
@@ -180,10 +208,18 @@ def test_schedule_job_reinvestigation():
         "hash_5": {"state": "UNKNOWN", "next-state": "REINVESTIGATING"},
     }
 
-    poseidonMonitor.schedule_job_reinvestigation(4, end_points, module_logger)
+    poseidonMonitor.schedule_job_reinvestigation(4, end_points, MockLogger())
 
 
 def test_print_endpoint_state():
+
+    class MockLogger:
+        def __init__(self):
+            pass
+
+        def debug(self, msg):
+            pass
+
     class MockMonitor(Monitor):
         # no need to init the monitor
 
@@ -191,7 +227,7 @@ def test_print_endpoint_state():
             pass
 
     mock_monitor = MockMonitor()
-    mock_monitor.logger = module_logger
+    mock_monitor.logger = MockLogger()
     test_dict_to_return = {
         'b8d31352453a65036b4343f34c2a93f5d5442b70': {
             'valid': True,
@@ -225,7 +261,7 @@ def test_print_endpoint_state():
             "next-state": "UNKNOWN",
             "endpoint": "test3"}}
     mock_monitor = MockMonitor()
-    mock_monitor.logger = module_logger
+    mock_monitor.logger = MockLogger()
     mock_monitor.print_endpoint_state(end_points)
 
 
@@ -441,6 +477,13 @@ def test_configSelf2():
             assert "testingConfigSelf" == mod_name
             return [(1, "YOYO")]
 
+    class MockLogger:
+        def __init__(self):
+            pass
+
+        def debug(self, msg):
+            pass
+
     class MockConfig():
 
         def __init__(self):
@@ -453,7 +496,7 @@ def test_configSelf2():
 
     mock_monitor = MockMonitor()
     mock_monitor.Config = MockConfig()
-    mock_monitor.logger = module_logger
+    mock_monitor.logger = MockLogger()
     mock_monitor.configSelf()
 
     assert mock_monitor.mod_configuration[1] == "YOYO"
@@ -606,10 +649,10 @@ def test_process():
     t1.start()
     mock_monitor.process()
 
-    #try:
+    # try:
     #    #mock_monitor.process()
     #    pass
-    #except SystemExit:
+    # except SystemExit:
     #    pass
 
     t1.join()

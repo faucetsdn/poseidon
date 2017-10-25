@@ -30,8 +30,16 @@ from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.bcf import BcfProxy
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.sample_state import span_fabric_state
 
-module_logger = Logger
-module_logger = module_logger.logger
+
+class MockLogger:
+    def __init__(self):
+        pass
+
+    def debug(self, msg):
+        pass
+
+module_logger = MockLogger()
+module_logger.debug('cover this')
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 username = 'user'
@@ -149,7 +157,7 @@ def test_BcfProxy():
     def r(): return True
     r.text = ""
 
-    # cover object 
+    # cover object
     assert r()
 
     BcfProxy.parse_json(r)
@@ -327,6 +335,14 @@ def test_shutdown_ip():
 
     assert str(answer) == str(ret_val)
 
+    ret_val = bcf.shutdown_ip('10.0.0.1', mac_addr='00:00:00:00:00:01')
+    answer = list([{'mac': '00:00:00:00:00:01',
+                    'name': None,
+                    'tenant': 'poseidon',
+                    'segment': 'poseidon'}])
+
+    assert str(answer) == str(ret_val)
+
 
 def test_get_highest():
 
@@ -443,6 +459,10 @@ def test_mirror_ip():
         def get_span_fabric(self):
             return self.span_fabric
 
+        def bad_get_highest(self, spanFabric):
+            return None
+        
+
         # def shutdown_endpoint(self, tenant, segment, name, mac, shutdown):
         #    pass
 
@@ -457,6 +477,8 @@ def test_mirror_ip():
         # %22 = url-encoded double quotes
         '/data/controller/applications/bcf/span-fabric[name=%22vent%22]': 'sample_span_fabric.json',
     }
+
+
     proxy = None
     endpoints = None
     span_fabric = None
@@ -469,6 +491,9 @@ def test_mirror_ip():
 
     bcf.endpoints = endpoints
     bcf.span_fabric = span_fabric
+    ret_val = bcf.mirror_ip('10.0.0.2')
+
+    bcf.get_highest = bcf.bad_get_highest
     ret_val = bcf.mirror_ip('10.0.0.2')
 
 
