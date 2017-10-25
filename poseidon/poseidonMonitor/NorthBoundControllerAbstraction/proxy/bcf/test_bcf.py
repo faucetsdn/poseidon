@@ -146,8 +146,12 @@ def test_BcfProxy():
         r = proxy.mirror_traffic(seq=2, mirror=False)
         assert r
 
-    def r(): return None
+    def r(): return True
     r.text = ""
+
+    # cover object 
+    assert r()
+
     BcfProxy.parse_json(r)
 
     proxy.session.cookies.clear_session_cookies()
