@@ -423,13 +423,8 @@ def test_mirror_ip():
             self.endpoints = None
             self.span_fabric = None
 
-<<<<<<< HEAD
-        def get_endpoints(self):
-            return self.endpoints
-=======
         # def get_endpoints(self):
         #    return self.endpoints
->>>>>>> 5b55555cc06b77453f19ff41913dee0d3fb10433
 
         def mirror_traffic(
                 self,
@@ -484,20 +479,8 @@ def test_unmirror_ip():
         # def get_endpoints(self):
         #    return self.endpoints
 
-<<<<<<< HEAD
-        def mirror_traffic(
-                self,
-                seq,
-                mirror=True,
-                span_name='vent',
-                s_dict=None,
-                fabric_span_endpoint='',
-                **target_kwargs):
-            pass
-=======
         # def mirror_traffic(self, seq, mirror=True, span_name='vent', s_dict=None, fabric_span_endpoint='', **target_kwargs):
         #    pass
->>>>>>> 5b55555cc06b77453f19ff41913dee0d3fb10433
 
         def get_span_fabric(self):
             return self.span_fabric
