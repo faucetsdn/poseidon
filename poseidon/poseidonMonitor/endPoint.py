@@ -23,6 +23,7 @@ import json
 
 
 class EndPoint:
+
     def __init__(self, data, state='NONE', next_state='NONE'):
         self.state = state
         self.next_state = next_state

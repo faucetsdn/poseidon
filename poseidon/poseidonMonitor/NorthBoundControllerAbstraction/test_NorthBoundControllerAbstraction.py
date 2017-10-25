@@ -32,6 +32,7 @@ module_logger = Logger.logger
 def test_update_endpoint_state():
 
     class mybcf():
+
         def __init__(self):
             pass
 
@@ -136,6 +137,7 @@ def test_file_new_machines_later():
 
 def test_unmirror_endpoint():
     class Mock_bcf():
+
         def __init__(self):
             pass
 
@@ -164,11 +166,9 @@ def test_unmirror_endpoint():
 
 def test_get_endpoint_ip():
     class Mock_bcf():
+
         def __init__(self):
             pass
-
-        def unmirror_ip(self, my_ip):
-            assert my_ip == '10.0.0.99'
 
     uss = Update_Switch_State()
     uss.first_time = False
@@ -303,14 +303,6 @@ def test_return_endpoint_state():
 
 def test_first_run():
 
-    def BcfProxy(uri, auth):
-        internal_auth = {}
-        internal_auth['password'] = 'TEST_PASS'
-        internal_auth['user'] = 'TEST_USER'
-
-        assert uri == 'TEST_URI'
-        assert str(auth) == str(internal_auth)
-
     uss = Update_Switch_State()
     uss.mod_configuration = dict()
     uss.configured = True
@@ -326,6 +318,7 @@ def test_first_run():
 
 def test_shutdown_endpoint():
     class Mockbcf():
+
         def __init__(self):
             pass
 
@@ -362,6 +355,7 @@ def test_shutdown_endpoint():
 
 def test_mirror_endpoint():
     class Mockbcf():
+
         def __init__(self):
             pass
 

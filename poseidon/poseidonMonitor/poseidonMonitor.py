@@ -250,8 +250,11 @@ class Monitor(object):
         for my_hash in endpoint_states:
             my_dict = endpoint_states[my_hash]
             current_state = my_dict['state']
+
+            # TODO move this lower with the rest of the checks
             if current_state == 'UNKNOWN':
-                my_dict['next-state'] = 'MIRRORING'
+                if my_dict['next-state'] != 'KNOWN':
+                    my_dict['next-state'] = 'MIRRORING'
         for my_hash in ml_returns:
             if my_hash in endpoint_states:
                 endpoint_dict = endpoint_states[my_hash]
@@ -456,7 +459,7 @@ class Monitor(object):
             pass
 
 
-def main(skip_rabbit=False):
+def main(skip_rabbit=False):  # pragma: no cover
     ''' main function '''
     pmain = Monitor(skip_rabbit=skip_rabbit)
     if not skip_rabbit:

@@ -20,7 +20,6 @@ Test module for endPoint.py
 Created on 2 October 2017
 @author: Jorissss
 """
-import pytest
 
 from poseidon.poseidonMonitor import endPoint
 

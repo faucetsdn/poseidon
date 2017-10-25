@@ -209,6 +209,7 @@ def test_format_endpoints():
 def test_get_byip():
 
     class MockBcfProxy(BcfProxy):
+
         def __init__(self):
             self.endpoints = None
 
@@ -247,6 +248,7 @@ def test_get_byip():
 def test_get_bymac():
 
     class MockBcfProxy(BcfProxy):
+
         def __init__(self):
             self.endpoints = None
 
@@ -281,6 +283,7 @@ def test_get_bymac():
 def test_shutdown_ip():
 
     class MockBcfProxy(BcfProxy):
+
         def __init__(self):
             self.endpoints = None
 
@@ -324,18 +327,19 @@ def test_shutdown_ip():
 def test_get_highest():
 
     class MockBcfProxy(BcfProxy):
+
         def __init__(self):
             self.endpoints = None
             self.span_fabric = None
 
-        def get_endpoints(self):
-            return self.endpoints
+       # def get_endpoints(self):
+       #     return self.endpoints
 
-        def get_span_fabric(self):
-            return self.span_fabric
+       # def get_span_fabric(self):
+       #     return self.span_fabric
 
-        def shutdown_endpoint(self, tenant, segment, name, mac, shutdown):
-            pass
+       # def shutdown_endpoint(self, tenant, segment, name, mac, shutdown):
+       #     pass
 
     bcf = MockBcfProxy()
 
@@ -369,18 +373,19 @@ def test_get_highest():
 def test_get_seq_by_ip():
 
     class MockBcfProxy(BcfProxy):
+
         def __init__(self):
             self.endpoints = None
             self.span_fabric = None
 
-        def get_endpoints(self):
-            return self.endpoints
+        # def get_endpoints(self):
+        #    return self.endpoints
 
         def get_span_fabric(self):
             return self.span_fabric
 
-        def shutdown_endpoint(self, tenant, segment, name, mac, shutdown):
-            pass
+        # def shutdown_endpoint(self, tenant, segment, name, mac, shutdown):
+        #    pass
 
     bcf = MockBcfProxy()
 
@@ -413,12 +418,18 @@ def test_get_seq_by_ip():
 def test_mirror_ip():
 
     class MockBcfProxy(BcfProxy):
+
         def __init__(self):
             self.endpoints = None
             self.span_fabric = None
 
+<<<<<<< HEAD
         def get_endpoints(self):
             return self.endpoints
+=======
+        # def get_endpoints(self):
+        #    return self.endpoints
+>>>>>>> 5b55555cc06b77453f19ff41913dee0d3fb10433
 
         def mirror_traffic(
                 self,
@@ -433,8 +444,8 @@ def test_mirror_ip():
         def get_span_fabric(self):
             return self.span_fabric
 
-        def shutdown_endpoint(self, tenant, segment, name, mac, shutdown):
-            pass
+        # def shutdown_endpoint(self, tenant, segment, name, mac, shutdown):
+        #    pass
 
     bcf = MockBcfProxy()
 
@@ -465,13 +476,15 @@ def test_mirror_ip():
 def test_unmirror_ip():
 
     class MockBcfProxy(BcfProxy):
+
         def __init__(self):
             self.endpoints = None
             self.span_fabric = None
 
-        def get_endpoints(self):
-            return self.endpoints
+        # def get_endpoints(self):
+        #    return self.endpoints
 
+<<<<<<< HEAD
         def mirror_traffic(
                 self,
                 seq,
@@ -481,12 +494,16 @@ def test_unmirror_ip():
                 fabric_span_endpoint='',
                 **target_kwargs):
             pass
+=======
+        # def mirror_traffic(self, seq, mirror=True, span_name='vent', s_dict=None, fabric_span_endpoint='', **target_kwargs):
+        #    pass
+>>>>>>> 5b55555cc06b77453f19ff41913dee0d3fb10433
 
         def get_span_fabric(self):
             return self.span_fabric
 
-        def shutdown_endpoint(self, tenant, segment, name, mac, shutdown):
-            pass
+        # def shutdown_endpoint(self, tenant, segment, name, mac, shutdown):
+        #    pass
 
     bcf = MockBcfProxy()
 
