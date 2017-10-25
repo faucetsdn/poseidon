@@ -149,7 +149,7 @@ def test_BcfProxy():
     def r(): return True
     r.text = ""
 
-    # cover object 
+    # cover object
     assert r()
 
     BcfProxy.parse_json(r)
@@ -324,6 +324,14 @@ def test_shutdown_ip():
                     'segment': 'poseidon',
                     'tenant': 'poseidon',
                     'name': None}])
+
+    assert str(answer) == str(ret_val)
+
+    ret_val = bcf.shutdown_ip('10.0.0.1', mac_addr='00:00:00:00:00:01')
+    answer = list([{'mac': '00:00:00:00:00:01',
+                    'name': None,
+                    'tenant': 'poseidon',
+                    'segment': 'poseidon'}])
 
     assert str(answer) == str(ret_val)
 
