@@ -261,7 +261,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
     def unmirror_ip(self, ip):
         kill_list = self.get_seq_by_ip(ip)
         for kill in kill_list:
-            module_logger.error('unmirror:{0}'.format(kill))
+            module_logger.debug('unmirror:{0}'.format(kill))
             self.mirror_traffic(kill, mirror=False)
 
     def mirror_traffic(
@@ -350,5 +350,5 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         r = self.request_resource(method='PUT', url=uri, data=json.dumps(data))
         retval = BcfProxy.parse_json(r)
         sout = 'mirror_traffic return:{0}'.format(retval)
-        module_logger.error(sout)
+        module_logger.debug(sout)
         return retval

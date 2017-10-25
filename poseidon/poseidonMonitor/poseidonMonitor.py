@@ -43,8 +43,10 @@ ENDPOINT_STATES = [('K', 'KNOWN'), ('U', 'UNKNOWN'), ('M', 'MIRRORING'),
                    ('S', 'SHUTDOWN'), ('R', 'REINVESTIGATING')]
 
 module_logger = Logger
+requests.packages.urllib3.disable_warnings()
 
-CTRL_C = False
+CTRL_C = dict()
+CTRL_C['STOP'] = False
 
 
 def schedule_job_kickurl(func, logger):
@@ -70,7 +72,9 @@ def schedule_thread_worker(schedule, logger):
     global CTRL_C
     logLine = 'starting thread_worker'
     logger.debug(logLine)
-    while not CTRL_C:
+    while not CTRL_C['STOP']:
+        print('looping', CTRL_C)
+        sys.stdout.flush()
         schedule.run_pending()
         logLine = 'scheduler woke {0}'.format(
             threading.current_thread().getName())
@@ -204,10 +208,8 @@ class Monitor(object):
                     out_flag = True
                     logger.debug('{0}:{1}:{2}->{3}:{4}'.format(letter,
                                                                my_hash,
-                                                               my_dict[
-                                                                   'state'],
-                                                               my_dict[
-                                                                   'next-state'],
+                                                               my_dict['state'],
+                                                               my_dict['next-state'],
                                                                my_dict['endpoint']))
             if not out_flag:
                 logger.debug('None')
@@ -240,7 +242,7 @@ class Monitor(object):
         ostr = '{0}:config:{1}'.format(self.mod_name, self.mod_configuration)
         self.logger.debug(ostr)
 
-    def update_next_state(self, rabbit_transitions):
+    def update_next_state(self, ml_returns):
         ''' generate the next_state from known information '''
         next_state = None
         current_state = None
@@ -248,12 +250,57 @@ class Monitor(object):
         for my_hash in endpoint_states:
             my_dict = endpoint_states[my_hash]
             current_state = my_dict['state']
+
+            # TODO move this lower with the rest of the checks
             if current_state == 'UNKNOWN':
-                my_dict['next-state'] = 'MIRRORING'
-        for my_hash in rabbit_transitions:
-            my_dict = endpoint_states[my_hash]
-            current_state = my_dict['state']
-            my_dict['next-state'] = rabbit_transitions[my_hash]
+                if my_dict['next-state'] != 'KNOWN':
+                    my_dict['next-state'] = 'MIRRORING'
+        for my_hash in ml_returns:
+            if my_hash in endpoint_states:
+                endpoint_dict = endpoint_states[my_hash]
+                '''
+                    {'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {
+                        'classification': {
+                            'confidences': [0.9983864533039954,
+                                            0.0010041873867962805,
+                                            0.00042691313815914093],
+                            'labels': ['Unknown',
+                                      'Smartphone',
+                                      'Developer '
+                                      'workstation']
+                             },
+                            'decisions': {
+                                            'behavior': 'normal',
+                                            'investigate': True
+                             },
+                            'timestamp': 1508366767.45571,
+                            'valid': True
+                        }
+                    }
+                '''
+                # TODO is this the best place for this?
+                if ml_returns[my_hash]['valid']:
+                    current_state = endpoint_dict['state']
+                    ml_decision = ml_returns[my_hash]['decisions']['behavior']
+                    self.logger.debug('ML_DECISION:{0}'.format(ml_decision))
+                    if current_state == 'REINVESTIGATING':
+                        if ml_decision == 'normal':
+                            self.uss.change_endpoint_nextstate(
+                                my_hash, 'KNOWN')
+                            self.logger.debug('REINVESTIGATION Making KNOWN')
+                        else:
+                            self.uss.change_endpoint_nextstate(
+                                my_hash, 'UNKNOWN')
+                            self.logger.debug('REINVESTIGATION Making UNKNOWN')
+                    if current_state == 'MIRRORING':
+                        if ml_decision == 'normal':
+                            self.uss.change_endpoint_nextstate(
+                                my_hash, 'KNOWN')
+                            self.logger.debug('MIRRORING Making KNOWN')
+                        else:
+                            self.uss.change_endpoint_nextstate(
+                                my_hash, 'SHUTDOWN')
+                            self.logger.debug('MIRRORING Making SHUTDOWN')
 
     def start_vent_collector(self, dev_hash, num_captures=1):
         '''
@@ -275,35 +322,36 @@ class Monitor(object):
                 'filter': '\'host {0}\''.format(
                     self.uss.get_endpoint_ip(dev_hash)),
                 'iters': str(num_captures),
-                'metadata': metadata}
+                'metadata': str(metadata)}
             self.logger.debug('vent payload: ' + str(payload))
 
             vent_addr = self.mod_configuration[
                 'vent_ip'] + ':' + self.mod_configuration['vent_port']
             uri = 'http://' + vent_addr + '/create'
-            resp = requests.post(uri, json=payload)
-            self.logger.debug('collector repsonse: ' + resp.text)
+
+            resp = requests.post(uri, data=json.dumps(payload))
+
+            self.logger.debug('collector response: ' + resp.text)
         except Exception as e:
             self.logger.debug('failed to start vent collector' + str(e))
 
-    def get_rabbit_message(self, item):
+    def format_rabbit_message(self, item):
         ''' read a message off the rabbit_q
-        the message should be from 'poseidon.algos.ML.results'
-        the message should be (hash,msg)
+        the message should be item = (routing_key,msg)
         '''
-        global CTRL_C
         ret_val = {}
 
-        if not CTRL_C:
-            routing_key, my_obj = item
-            self.logger.debug('rabbit_message:{0}'.format(my_obj))
-            my_obj = json.loads(my_obj)
-            self.logger.debug('routing_key:{0}'.format(routing_key))
-            if routing_key is not None and routing_key == 'poseidon.algos.ML.results':
-                self.logger.debug('value:{0}'.format(my_obj))
-            # TODO do something with reccomendation
-            if my_obj:
-                ret_val = my_obj
+        routing_key, my_obj = item
+        self.logger.debug('rabbit_message:{0}'.format(my_obj))
+        # my_obj: (hash,data)
+        my_obj = json.loads(my_obj)
+        self.logger.debug('routing_key:{0}'.format(routing_key))
+        if routing_key is not None and routing_key == 'poseidon.algos.decider':
+            self.logger.debug('decider value:{0}'.format(my_obj))
+            # if valid response then send along otherwise nothing
+            for key in my_obj:
+                ret_val[key] = my_obj[key]
+        # TODO do something with reccomendation
         return ret_val
 
     def process(self):
@@ -319,21 +367,24 @@ class Monitor(object):
 
         global CTRL_C
         signal.signal(signal.SIGINT, partial(self.signal_handler))
-        while not CTRL_C:
+        while not CTRL_C['STOP']:
             self.logger.debug('***************CTRL_C:{0}'.format(CTRL_C))
             time.sleep(1)
             self.logger.debug('woke from sleeping')
             found_work, item = self.get_q_item()
-            rabbit_transitions = {}
+            ml_returns = {}
 
             # plan out the transitions
             if found_work:
                 # TODO make this read until nothing in q
-                rabbit_transitions = self.get_rabbit_message(item)
+                ml_returns = self.format_rabbit_message(item)
+                self.logger.debug("\n\n\n**********************")
+                self.logger.debug('ml_returns:{0}'.format(ml_returns))
+                self.logger.debug("**********************\n\n\n")
 
             eps = self.uss.return_endpoint_state()
 
-            state_transitions = self.update_next_state(rabbit_transitions)
+            state_transitions = self.update_next_state(ml_returns)
 
             self.print_endpoint_state(eps)
 
@@ -361,14 +412,30 @@ class Monitor(object):
                     self.start_vent_collector(endpoint_hash)
                     self.logger.debug('*********** R MIRROR PORT ***********')
                     self.uss.mirror_endpoint(endpoint_hash)
+                if next_state == 'KNOWN':
+                    if current_state == 'REINVESTIGATING':
+                        self.logger.debug(
+                            '*********** R UN-MIRROR PORT ***********')
+                        self.uss.unmirror_endpoint(endpoint_hash)
+                        self.uss.change_endpoint_state(endpoint_hash)
+                    if current_state == 'UNKNOWN':
+                        self.logger.debug(
+                            '*********** U UN-MIRROR PORT ***********')
+                        self.uss.unmirror_endpoint(endpoint_hash)
+                        self.uss.change_endpoint_state(endpoint_hash)
 
     def get_q_item(self):
         ''' attempt to get a workitem from the queue'''
+        ''' m_queue -> (routing_key, body)
+            a read from get_q_item should be of the form
+            (boolean,(routing_key, body))
+
+        '''
         found_work = False
         item = None
         global CTRL_C
 
-        if not CTRL_C:
+        if not CTRL_C['STOP']:
             try:
                 item = self.m_queue.get(False)
                 found_work = True
@@ -380,7 +447,7 @@ class Monitor(object):
     def signal_handler(self, signal, frame):
         ''' hopefully eat a CTRL_C and signal system shutdown '''
         global CTRL_C
-        CTRL_C = True
+        CTRL_C['STOP'] = True
         self.logger.debug('=================CTRLC{0}'.format(CTRL_C))
         try:
             for job in self.schedule.jobs:
@@ -392,7 +459,7 @@ class Monitor(object):
             pass
 
 
-def main(skip_rabbit=False):
+def main(skip_rabbit=False):  # pragma: no cover
     ''' main function '''
     pmain = Monitor(skip_rabbit=skip_rabbit)
     if not skip_rabbit:

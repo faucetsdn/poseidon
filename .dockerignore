@@ -1,0 +1,14 @@
+.circleci
+.gitignore
+.git
+AUTHORS
+CHANGELOG.md
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+Dockerfile.docs
+Dockerfile.poseidon
+LICENSE
+MAINTAINERS.md
+Makefile
+README.md
+VERSION
