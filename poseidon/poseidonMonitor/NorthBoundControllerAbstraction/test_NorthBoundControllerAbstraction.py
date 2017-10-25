@@ -36,8 +36,16 @@ def test_update_endpoint_state():
             pass
 
         def format_endpoints(self, data):
-            a = [{'ip-address': '10.0.0.1', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None},
-                 {'ip-address': '10.0.0.2', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}]
+            a = [{'ip-address': '10.0.0.1',
+                  'mac': 'f8:b1:56:fe:f2:de',
+                  'segment': 'prod',
+                  'tenant': 'FLOORPLATE',
+                  'name': None},
+                 {'ip-address': '10.0.0.2',
+                  'mac': '20:4c:9e:5f:e3:c3',
+                  'segment': 'to-core-router',
+                  'tenant': 'EXTERNAL',
+                  'name': None}]
 
             return a
 
@@ -55,21 +63,73 @@ def test_update_endpoint_state():
 def test_find_new_machines_first_time():
     uss = Update_Switch_State()
     uss.first_time = True
-    machines = [{'ip-address': '10.0.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None},
-                {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}]
+    machines = [{'ip-address': '10.0.0.101',
+                 'mac': 'f8:b1:56:fe:f2:de',
+                 'segment': 'prod',
+                 'tenant': 'FLOORPLATE',
+                 'name': None},
+                {'ip-address': '10.0.0.99',
+                 'mac': '20:4c:9e:5f:e3:c3',
+                 'segment': 'to-core-router',
+                 'tenant': 'EXTERNAL',
+                 'name': None}]
     uss.find_new_machines(machines)
-    answer = dict({"d502caea3609d553ab16a00c554f0602c1419f58": {"state": "KNOWN", "next-state": "NONE", "endpoint": {"ip-address": "10.0.0.101", "mac": "f8:b1:56:fe:f2:de", "segment": "prod", "tenant": "FLOORPLATE", "name": None}},
-                   "3da53a95ae5d034ae37b539a24370260a36f8bb2": {"state": "KNOWN", "next-state": "NONE", "endpoint": {"ip-address": "10.0.0.99", "mac": "20:4c:9e:5f:e3:c3", "segment": "to-core-router", "tenant": "EXTERNAL", "name": None}}})
+    answer = dict(
+        {
+            "d502caea3609d553ab16a00c554f0602c1419f58": {
+                "state": "KNOWN",
+                "next-state": "NONE",
+                "endpoint": {
+                    "ip-address": "10.0.0.101",
+                    "mac": "f8:b1:56:fe:f2:de",
+                    "segment": "prod",
+                    "tenant": "FLOORPLATE",
+                    "name": None}},
+            "3da53a95ae5d034ae37b539a24370260a36f8bb2": {
+                "state": "KNOWN",
+                "next-state": "NONE",
+                "endpoint": {
+                    "ip-address": "10.0.0.99",
+                    "mac": "20:4c:9e:5f:e3:c3",
+                    "segment": "to-core-router",
+                    "tenant": "EXTERNAL",
+                    "name": None}}})
     assert str(answer) == str(dict(uss.endpoint_states))
 
 
 def test_file_new_machines_later():
     uss = Update_Switch_State()
     uss.first_time = False
-    machines = [{'ip-address': '10.0.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None},
-                {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}]
-    answer = dict({'d502caea3609d553ab16a00c554f0602c1419f58': {'state': 'UNKNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}},
-                   '3da53a95ae5d034ae37b539a24370260a36f8bb2': {'state': 'UNKNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
+    machines = [{'ip-address': '10.0.0.101',
+                 'mac': 'f8:b1:56:fe:f2:de',
+                 'segment': 'prod',
+                 'tenant': 'FLOORPLATE',
+                 'name': None},
+                {'ip-address': '10.0.0.99',
+                 'mac': '20:4c:9e:5f:e3:c3',
+                 'segment': 'to-core-router',
+                 'tenant': 'EXTERNAL',
+                 'name': None}]
+    answer = dict(
+        {
+            'd502caea3609d553ab16a00c554f0602c1419f58': {
+                'state': 'UNKNOWN',
+                'next-state': 'NONE',
+                'endpoint': {
+                    'ip-address': '10.0.0.101',
+                    'mac': 'f8:b1:56:fe:f2:de',
+                    'segment': 'prod',
+                    'tenant': 'FLOORPLATE',
+                    'name': None}},
+            '3da53a95ae5d034ae37b539a24370260a36f8bb2': {
+                'state': 'UNKNOWN',
+                'next-state': 'NONE',
+                'endpoint': {
+                    'ip-address': '10.0.0.99',
+                    'mac': '20:4c:9e:5f:e3:c3',
+                    'segment': 'to-core-router',
+                    'tenant': 'EXTERNAL',
+                    'name': None}}})
     uss.find_new_machines(machines)
     assert str(answer) == str(dict(uss.endpoint_states))
 
@@ -85,12 +145,21 @@ def test_unmirror_endpoint():
     uss = Update_Switch_State()
     uss.first_time = False
     uss.bcf = Mock_bcf()
-    machines = [{'ip-address': '10.0.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None},
-                {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}]
+    machines = [{'ip-address': '10.0.0.101',
+                 'mac': 'f8:b1:56:fe:f2:de',
+                 'segment': 'prod',
+                 'tenant': 'FLOORPLATE',
+                 'name': None},
+                {'ip-address': '10.0.0.99',
+                 'mac': '20:4c:9e:5f:e3:c3',
+                 'segment': 'to-core-router',
+                 'tenant': 'EXTERNAL',
+                 'name': None}]
     uss.find_new_machines(machines)
 
     assert uss.unmirror_endpoint('3da53a95ae5d034ae37b539a24370260a36f8bb2')
-    assert not uss.unmirror_endpoint('4da53a95ae5d034ae37b539a24370260a36f8bb2')
+    assert not uss.unmirror_endpoint(
+        '4da53a95ae5d034ae37b539a24370260a36f8bb2')
 
 
 def test_get_endpoint_ip():
@@ -104,8 +173,16 @@ def test_get_endpoint_ip():
     uss = Update_Switch_State()
     uss.first_time = False
     uss.bcf = Mock_bcf()
-    machines = [{'ip-address': '10.0.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None},
-                {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}]
+    machines = [{'ip-address': '10.0.0.101',
+                 'mac': 'f8:b1:56:fe:f2:de',
+                 'segment': 'prod',
+                 'tenant': 'FLOORPLATE',
+                 'name': None},
+                {'ip-address': '10.0.0.99',
+                 'mac': '20:4c:9e:5f:e3:c3',
+                 'segment': 'to-core-router',
+                 'tenant': 'EXTERNAL',
+                 'name': None}]
     uss.find_new_machines(machines)
     retval = uss.get_endpoint_ip('3da53a95ae5d034ae37b539a24370260a36f8bb2')
     answer = '10.0.0.99'
@@ -115,26 +192,50 @@ def test_get_endpoint_ip():
 def test_make_endpoint_dict():
     uss = Update_Switch_State()
     uss.first_time = False
-    endpoint_data = dict({'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3',
-                          'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None})
+    endpoint_data = dict({'ip-address': '10.0.0.99',
+                          'mac': '20:4c:9e:5f:e3:c3',
+                          'segment': 'to-core-router',
+                          'tenant': 'EXTERNAL',
+                          'name': None})
     hash_value = '3da53a95ae5d034ae37b539a24370260a36f8bb2'
     state = 'KNOWN'
     uss.make_endpoint_dict(hash_value, state, endpoint_data)
-    answer = dict({'3da53a95ae5d034ae37b539a24370260a36f8bb2': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {
-                  'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
+    answer = dict(
+        {
+            '3da53a95ae5d034ae37b539a24370260a36f8bb2': {
+                'state': 'KNOWN',
+                'next-state': 'NONE',
+                'endpoint': {
+                    'ip-address': '10.0.0.99',
+                    'mac': '20:4c:9e:5f:e3:c3',
+                    'segment': 'to-core-router',
+                    'tenant': 'EXTERNAL',
+                    'name': None}}})
     assert str(answer) == str(dict(uss.endpoint_states))
 
 
 def test_change_endpoint_state():
     uss = Update_Switch_State()
     uss.first_time = False
-    endpoint_data = dict({'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3',
-                          'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None})
+    endpoint_data = dict({'ip-address': '10.0.0.99',
+                          'mac': '20:4c:9e:5f:e3:c3',
+                          'segment': 'to-core-router',
+                          'tenant': 'EXTERNAL',
+                          'name': None})
     hash_value = '3da53a95ae5d034ae37b539a24370260a36f8bb2'
     state = 'KNOWN'
     uss.make_endpoint_dict(hash_value, state, endpoint_data)
-    answer = dict({'3da53a95ae5d034ae37b539a24370260a36f8bb2': {'state': 'TEST_STATE', 'next-state': 'NONE', 'endpoint': {
-                  'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
+    answer = dict(
+        {
+            '3da53a95ae5d034ae37b539a24370260a36f8bb2': {
+                'state': 'TEST_STATE',
+                'next-state': 'NONE',
+                'endpoint': {
+                    'ip-address': '10.0.0.99',
+                    'mac': '20:4c:9e:5f:e3:c3',
+                    'segment': 'to-core-router',
+                    'tenant': 'EXTERNAL',
+                    'name': None}}})
     uss.change_endpoint_state(
         '3da53a95ae5d034ae37b539a24370260a36f8bb2', new_state='TEST_STATE')
     assert str(answer) == str(dict(uss.endpoint_states))
@@ -143,8 +244,11 @@ def test_change_endpoint_state():
 def test_get_endpoinit_next():
     uss = Update_Switch_State()
     uss.first_time = False
-    endpoint_data = dict({'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3',
-                          'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None})
+    endpoint_data = dict({'ip-address': '10.0.0.99',
+                          'mac': '20:4c:9e:5f:e3:c3',
+                          'segment': 'to-core-router',
+                          'tenant': 'EXTERNAL',
+                          'name': None})
     hash_value = '3da53a95ae5d034ae37b539a24370260a36f8bb2'
     state = 'KNOWN'
     uss.make_endpoint_dict(hash_value, state, endpoint_data)
@@ -157,8 +261,11 @@ def test_get_endpoinit_next():
 def test_get_endpoinit_state():
     uss = Update_Switch_State()
     uss.first_time = False
-    endpoint_data = dict({'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3',
-                          'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None})
+    endpoint_data = dict({'ip-address': '10.0.0.99',
+                          'mac': '20:4c:9e:5f:e3:c3',
+                          'segment': 'to-core-router',
+                          'tenant': 'EXTERNAL',
+                          'name': None})
     hash_value = '3da53a95ae5d034ae37b539a24370260a36f8bb2'
     state = 'TEST_STATE'
     uss.make_endpoint_dict(hash_value, state, endpoint_data)
@@ -171,13 +278,25 @@ def test_get_endpoinit_state():
 def test_return_endpoint_state():
     uss = Update_Switch_State()
     uss.first_time = False
-    endpoint_data = dict({'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3',
-                          'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None})
+    endpoint_data = dict({'ip-address': '10.0.0.99',
+                          'mac': '20:4c:9e:5f:e3:c3',
+                          'segment': 'to-core-router',
+                          'tenant': 'EXTERNAL',
+                          'name': None})
     hash_value = '3da53a95ae5d034ae37b539a24370260a36f8bb2'
     state = 'TEST_STATE'
     uss.make_endpoint_dict(hash_value, state, endpoint_data)
-    answer = dict({'3da53a95ae5d034ae37b539a24370260a36f8bb2': {'state': 'TEST_STATE', 'next-state': 'NONE', 'endpoint': {
-                  'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
+    answer = dict(
+        {
+            '3da53a95ae5d034ae37b539a24370260a36f8bb2': {
+                'state': 'TEST_STATE',
+                'next-state': 'NONE',
+                'endpoint': {
+                    'ip-address': '10.0.0.99',
+                    'mac': '20:4c:9e:5f:e3:c3',
+                    'segment': 'to-core-router',
+                    'tenant': 'EXTERNAL',
+                    'name': None}}})
     assert str(answer) == str(dict(uss.return_endpoint_state()))
     assert uss.return_endpoint_state() == uss.endpoint_states
 
@@ -215,8 +334,26 @@ def test_shutdown_endpoint():
 
     uss = Update_Switch_State()
     uss.bcf = Mockbcf()
-    uss.endpoint_states = dict({'d502caea3609d553ab16a00c554f0602c1419f58': {'state': 'UNKNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}},
-                                '3da53a95ae5d034ae37b539a24370260a36f8bb2': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
+    uss.endpoint_states = dict(
+        {
+            'd502caea3609d553ab16a00c554f0602c1419f58': {
+                'state': 'UNKNOWN',
+                'next-state': 'NONE',
+                'endpoint': {
+                    'ip-address': '10.0.0.101',
+                    'mac': 'f8:b1:56:fe:f2:de',
+                    'segment': 'prod',
+                    'tenant': 'FLOORPLATE',
+                    'name': None}},
+            '3da53a95ae5d034ae37b539a24370260a36f8bb2': {
+                'state': 'KNOWN',
+                'next-state': 'NONE',
+                'endpoint': {
+                    'ip-address': '10.0.0.99',
+                    'mac': '20:4c:9e:5f:e3:c3',
+                    'segment': 'to-core-router',
+                    'tenant': 'EXTERNAL',
+                    'name': None}}})
     ret_val = uss.shutdown_endpoint('3da53a95ae5d034ae37b539a24370260a36f8bb2')
     assert ret_val
     ret_val = uss.shutdown_endpoint('NOT_A_HASH')
@@ -233,8 +370,26 @@ def test_mirror_endpoint():
 
     uss = Update_Switch_State()
     uss.bcf = Mockbcf()
-    uss.endpoint_states = dict({'d502caea3609d553ab16a00c554f0602c1419f58': {'state': 'UNKNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.101', 'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}},
-                                '3da53a95ae5d034ae37b539a24370260a36f8bb2': {'state': 'KNOWN', 'next-state': 'NONE', 'endpoint': {'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3', 'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None}}})
+    uss.endpoint_states = dict(
+        {
+            'd502caea3609d553ab16a00c554f0602c1419f58': {
+                'state': 'UNKNOWN',
+                'next-state': 'NONE',
+                'endpoint': {
+                    'ip-address': '10.0.0.101',
+                    'mac': 'f8:b1:56:fe:f2:de',
+                    'segment': 'prod',
+                    'tenant': 'FLOORPLATE',
+                    'name': None}},
+            '3da53a95ae5d034ae37b539a24370260a36f8bb2': {
+                'state': 'KNOWN',
+                'next-state': 'NONE',
+                'endpoint': {
+                    'ip-address': '10.0.0.99',
+                    'mac': '20:4c:9e:5f:e3:c3',
+                    'segment': 'to-core-router',
+                    'tenant': 'EXTERNAL',
+                    'name': None}}})
     ret_val = uss.mirror_endpoint('3da53a95ae5d034ae37b539a24370260a36f8bb2')
     assert ret_val
     ret_val = uss.mirror_endpoint('NOT_A_HASH')
@@ -244,8 +399,11 @@ def test_mirror_endpoint():
 def test_print_endpoint_state():
     uss = Update_Switch_State()
     uss.first_time = False
-    endpoint_data = dict({'ip-address': '10.0.0.99', 'mac': '20:4c:9e:5f:e3:c3',
-                          'segment': 'to-core-router', 'tenant': 'EXTERNAL', 'name': None})
+    endpoint_data = dict({'ip-address': '10.0.0.99',
+                          'mac': '20:4c:9e:5f:e3:c3',
+                          'segment': 'to-core-router',
+                          'tenant': 'EXTERNAL',
+                          'name': None})
     hash_value = '3da53a95ae5d034ae37b539a24370260a36f8bb2'
     state = 'TEST_STATE'
     uss.make_endpoint_dict(hash_value, state, endpoint_data)

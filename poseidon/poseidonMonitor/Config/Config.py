@@ -51,7 +51,8 @@ class Config(Monitor_Action_Base):
             self.config_path = os.environ.get(
                 'POSEIDON_CONFIG')               # pragma: no cover
         else:
-            raise Exception('Could not find poseidon config. Make sure to set the POSEIDON_CONFIG environment variable')
+            raise Exception(
+                'Could not find poseidon config. Make sure to set the POSEIDON_CONFIG environment variable')
         self.config.readfp(open(self.config_path, 'r'))
 
     def configure(self):
