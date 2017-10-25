@@ -30,8 +30,15 @@ from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.bcf import BcfProxy
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.sample_state import span_fabric_state
 
-module_logger = Logger
-module_logger = module_logger.logger
+
+class MockLogger:
+    def __init__(self):
+        pass
+
+    def debug(self, msg):
+        pass
+
+module_logger = MockLogger()
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 username = 'user'
