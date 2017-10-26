@@ -43,5 +43,5 @@ def test_logger_base():
     with open(path, 'rt') as f:
         config = json.load(f)
 
-    logger.logger_config(None) 
+    logger.logger_config(None)
     logger.logger_config(config)
