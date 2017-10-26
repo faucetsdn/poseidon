@@ -92,10 +92,6 @@ Tests are currently written in py.test for Python.  The tests are automatically 
 ## Contributing
 Want to contribute?  Awesome!  Issue a pull request or see more details [here](https://github.com/CyberReboot/poseidon/blob/master/CONTRIBUTING.md).
 
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
-
 ## Authors
 
 * [Lab41 Poseidon Team](https://github.com/CyberReboot/poseidon)
@@ -107,7 +103,7 @@ See also the list of [contributors](https://github.com/CyberReboot/poseidon/grap
 This project is licensed under the Apache License - see the [LICENSE.md](LICENSE.md) file for details
 
 ## Documentation
-- [Docs](https://github.com/CyberReboot/poseidon/tree/master/docs)
+- [Additional Documentation](https://github.com/CyberReboot/poseidon/tree/master/docs)
 
 
 
