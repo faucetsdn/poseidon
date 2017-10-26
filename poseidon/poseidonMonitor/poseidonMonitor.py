@@ -73,7 +73,7 @@ def schedule_thread_worker(schedule, logger):
     logLine = 'starting thread_worker'
     logger.debug(logLine)
     while not CTRL_C['STOP']:
-        print('looping', CTRL_C)
+        #print('looping', CTRL_C)
         sys.stdout.flush()
         schedule.run_pending()
         logLine = 'scheduler woke {0}'.format(
