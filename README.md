@@ -1,23 +1,23 @@
-#  We are coding again. After a brief pause we are ready to extend Poseidon. Look for additional refinements to the machine learning, a simpler architecture, and better results. 
-
-# Status
-Currently the code is going through a simplification stage.  Many classes are being axed to get things to run in a single docker container.  The code at this point is not functional.
-
 # Poseidon
-<img src="/docs/img/poseidon-logo.png" width="50" height="75"/><a href="https://www.blackducksoftware.com/open-source-rookies-2016" ><img src="/docs/Rookies16Badge_1.png" width="100" alt="POSEIDON is now BlackDuck 2016 OpenSource Rookie of the year"></a>
+<img src="/docs/img/poseidon-logo.png" width="50" height="75"/><a href="https://www.blackducksoftware.com/open-source-rookies-2016" ><img src="/docs/img/Rookies16Badge_1.png" width="100" alt="POSEIDON is now BlackDuck 2016 OpenSource Rookie of the year"></a>
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![CircleCI](https://circleci.com/gh/CyberReboot/poseidon.svg?style=shield)](https://circleci.com/gh/CyberReboot/poseidon)
 [![codecov](https://codecov.io/gh/CyberReboot/poseidon/branch/master/graph/badge.svg?token=ORXmFYC3MM)](https://codecov.io/gh/CyberReboot/poseidon)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/3ea08f0c632148538f6f947677f42aa2)](https://www.codacy.com/app/d-grossman/poseidon?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=CyberReboot/poseidon&amp;utm_campaign=Badge_Grade)
 
-Situational awareness underpins informed decisions. Understanding what comprises a network, and what network elements are doing is essential.  Without situational awareness and context, defending a network remains a difficult proposition.
+Software Defined Network Situational Awareness
 
-Can SDN and machine learning answer:
-- What devices comprise my network?
-- What are devices doing?
+This challenge is a joint challenge between two IQT Labs: Lab41 and Cyber Reboot. Current software defined network offerings lack tangible security emphasis much less methods to enhance operational security. Without situational awareness and context, defending a network remains a difficult proposition. This challenge will utilize SDN and machine learning to determine what is on the network, and what is it doing. This goal will help sponsors leverage SDN to provide situational awareness and better defend their networks.
 
-# Install Instructions
+## Getting Started
+
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+
+### Prerequisites
+[Docker Installed](https://www.docker.com/)
+
+### Installing
 ```
 git clone https://github.com/CyberReboot/poseidon.git
 cd poseidon
@@ -25,7 +25,8 @@ cd poseidon
 docker build -f ./Dockerfile.poseidon -t poseidon .
 docker run poseidon
 ```
-# Makefile Options
+
+### Makefile Options
 
 You can use `make` to simplify the building process.
 To build the container, simply run:
@@ -62,10 +63,8 @@ To build and then open the docs in a container on port 8080:
 ```
 make run_docs
 ```
-
-# Configuration
-
-## config/poseidon.config
+## Configuration
+config/poseidon.config
 ### [Monitor]
 rabbit_server =  `RABBIT_SERVER`  
 rabbit_port = `RABBIT_PORT`  
@@ -88,15 +87,33 @@ controller_pass = `PASSWORD`
 `USERNAME` - username for BCF login  
 `PASSWORD` - password for BCF login  
 
-
-# Required Dependencies
-- Docker
-
-# Documentation
-- [Docs](https://github.com/CyberReboot/poseidon/tree/master/docs)
-
-# Tests
+## Running the tests
 Tests are currently written in py.test for Python.  The tests are automatically run when building the containers.
 
-# Contributing to Poseidon
+## Contributing
 Want to contribute?  Awesome!  Issue a pull request or see more details [here](https://github.com/CyberReboot/poseidon/blob/master/CONTRIBUTING.md).
+
+## Authors
+
+* [Lab41 Poseidon Team](https://github.com/CyberReboot/poseidon)
+
+See also the list of [contributors](https://github.com/CyberReboot/poseidon/graphs/contributors) who participated in this project.
+
+## License
+
+This project is licensed under the Apache License - see the [LICENSE.md](LICENSE.md) file for details
+
+## Documentation
+- [Additional Documentation](https://github.com/CyberReboot/poseidon/tree/master/docs)
+
+
+
+
+
+
+
+
+
+
+
+
