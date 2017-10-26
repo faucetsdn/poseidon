@@ -164,6 +164,35 @@ def test_unmirror_endpoint():
         '4da53a95ae5d034ae37b539a24370260a36f8bb2')
 
 
+def test_get_endpoint_state():
+    class Mock_bcf():
+
+        def __init__(self):
+            pass
+
+    uss = Update_Switch_State()
+    uss.first_time = False
+    uss.bcf = Mock_bcf()
+    machines = [{'ip-address': '10.0.0.101',
+                 'mac': 'f8:b1:56:fe:f2:de',
+                 'segment': 'prod',
+                 'tenant': 'FLOORPLATE',
+                 'name': None},
+                {'ip-address': '10.0.0.99',
+                 'mac': '20:4c:9e:5f:e3:c3',
+                 'segment': 'to-core-router',
+                 'tenant': 'EXTERNAL',
+                 'name': None}]
+    uss.find_new_machines(machines)
+    retval = uss.get_endpoint_state('3da53a95ae5d034ae37b539a24370260a36f8bb2')
+    answer = 'UNKNOWN'
+    assert retval == answer
+
+    retval = uss.get_endpoint_state('NOT-A-HASH')
+    answer = None
+    assert retval == answer
+
+
 def test_get_endpoint_ip():
     class Mock_bcf():
 
@@ -186,6 +215,10 @@ def test_get_endpoint_ip():
     uss.find_new_machines(machines)
     retval = uss.get_endpoint_ip('3da53a95ae5d034ae37b539a24370260a36f8bb2')
     answer = '10.0.0.99'
+    assert retval == answer
+
+    retval = uss.get_endpoint_ip('NOT-A-HASH')
+    answer = None
     assert retval == answer
 
 
@@ -241,6 +274,33 @@ def test_change_endpoint_state():
     assert str(answer) == str(dict(uss.endpoint_states))
 
 
+def test_change_endpoint_nextstate():
+    uss = Update_Switch_State()
+    uss.first_time = False
+    endpoint_data = dict({'ip-address': '10.0.0.99',
+                          'mac': '20:4c:9e:5f:e3:c3',
+                          'segment': 'to-core-router',
+                          'tenant': 'EXTERNAL',
+                          'name': None})
+    hash_value = '3da53a95ae5d034ae37b539a24370260a36f8bb2'
+    state = 'KNOWN'
+    uss.make_endpoint_dict(hash_value, state, endpoint_data)
+    answer = dict(
+        {
+            '3da53a95ae5d034ae37b539a24370260a36f8bb2': {
+                'state': 'KNOWN',
+                'next-state': 'TEST_STATE',
+                'endpoint': {
+                    'ip-address': '10.0.0.99',
+                    'mac': '20:4c:9e:5f:e3:c3',
+                    'segment': 'to-core-router',
+                    'tenant': 'EXTERNAL',
+                    'name': None}}})
+    uss.change_endpoint_nextstate(
+        '3da53a95ae5d034ae37b539a24370260a36f8bb2', next_state='TEST_STATE')
+    assert str(answer) == str(dict(uss.endpoint_states))
+
+
 def test_get_endpoinit_next():
     uss = Update_Switch_State()
     uss.first_time = False
@@ -256,6 +316,9 @@ def test_get_endpoinit_next():
         '3da53a95ae5d034ae37b539a24370260a36f8bb2')
 
     assert 'NONE' == next_state
+
+    next_state = uss.get_endpoint_next('NOT-A-HASH')
+    assert next_state is None
 
 
 def test_get_endpoinit_state():
@@ -305,11 +368,11 @@ def test_first_run():
 
     uss = Update_Switch_State()
     uss.mod_configuration = dict()
-    uss.configured = True
     uss.mod_configuration['controller_uri'] = 'TEST_URI'
     uss.mod_configuration['controller_user'] = 'TEST_USER'
     uss.mod_configuration['controller_pass'] = 'TEST_PASS'
 
+    uss.configured = True
     uss.first_run()
     assert uss.controller['URI'] == 'TEST_URI'
     assert uss.controller['USER'] == 'TEST_USER'

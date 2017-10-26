@@ -52,7 +52,7 @@ def test_empty():
     def obj(): return True  # Just a proxy object for attaching text field.
     obj.text = ""
 
-    #see if this forces coverge of obj
+    # see if this forces coverge of obj
     assert obj()
 
     parsed = JsonMixin.parse_json(obj)
