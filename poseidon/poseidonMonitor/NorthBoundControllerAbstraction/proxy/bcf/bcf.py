@@ -339,7 +339,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
                 new_filter.update(target_kwargs)
             new_filter['seq'] = seq
             # update?
-            print(type(data))
+            #print(type(data))
             # empty capture list
             if 'filter' not in data:
                 data['filter'] = []
