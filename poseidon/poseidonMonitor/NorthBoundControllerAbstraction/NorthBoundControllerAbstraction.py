@@ -195,20 +195,20 @@ class Update_Switch_State(Monitor_Helper_Base):
     def print_endpoint_state(self):
         ''' debug output about what the current state of endpoints is '''
         def same_old(logger, state, letter, endpoint_states):
-            logger.debug('*******{0}*********'.format(state))
+            logger.info('*******{0}*********'.format(state))
 
             out_flag = False
             for my_hash in endpoint_states.keys():
                 my_dict = endpoint_states[my_hash]
                 if my_dict['state'] == state:
                     out_flag = True
-                    logger.debug('{0}:{1}:{2}->{3}:{4}'.format(letter,
+                    logger.info('{0}:{1}:{2}->{3}:{4}'.format(letter,
                                                                my_hash,
                                                                my_dict['state'],
                                                                my_dict['next-state'],
                                                                my_dict['endpoint']))
             if not out_flag:
-                logger.debug('None')
+                logger.info('None')
 
         states = [('K', 'KNOWN'), ('U', 'UNKNOWN'), ('M', 'MIRRORING'),
                   ('S', 'SHUTDOWN'), ('R', 'REINVESTIGATING')]
@@ -216,7 +216,7 @@ class Update_Switch_State(Monitor_Helper_Base):
         for l, s in states:
             same_old(self.logger, s, l, self.endpoint_states)
 
-        self.logger.debug('****************')
+        self.logger.info('****************')
 
     def update_endpoint_state(self):
         '''Handles Get requests'''

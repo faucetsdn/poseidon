@@ -4,3 +4,6 @@ groups = poseidon
 
 [settings]
 instances = 1
+
+[docker]
+links = {"RabbitMQ":"RABBIT_SERVER", "NetworkTap":"VENT_IP"}
