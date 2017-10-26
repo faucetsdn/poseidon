@@ -62,9 +62,9 @@ To build and then open the docs in a container on port 8080:
 ```
 make run_docs
 ```
-### Configuration
+## Configuration
 config/poseidon.config
-#### [Monitor]
+### [Monitor]
 rabbit_server =  `RABBIT_SERVER`  
 rabbit_port = `RABBIT_PORT`  
 collector_nic = `COLLECTOR_NIC`  
@@ -77,7 +77,7 @@ vent_port = `VENT_PORT`
 `VENT_IP` - ip address of serever running vent  
 `VENT_PORT` - vent server port  
 
-#### [NorthBoundControllerAbstraction:Update_Switch_State]
+### [NorthBoundControllerAbstraction:Update_Switch_State]
 controller_uri = https://`CONTROLLER_SERVER`:8443/api/v1/  
 controller_user = `USERNAME`  
 controller_pass = `PASSWORD`  
