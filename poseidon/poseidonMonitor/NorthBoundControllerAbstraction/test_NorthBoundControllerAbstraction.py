@@ -300,6 +300,7 @@ def test_change_endpoint_nextstate():
         '3da53a95ae5d034ae37b539a24370260a36f8bb2', next_state='TEST_STATE')
     assert str(answer) == str(dict(uss.endpoint_states))
 
+
 def test_get_endpoinit_next():
     uss = Update_Switch_State()
     uss.first_time = False
@@ -317,7 +318,7 @@ def test_get_endpoinit_next():
     assert 'NONE' == next_state
 
     next_state = uss.get_endpoint_next('NOT-A-HASH')
-    assert next_state == None
+    assert next_state is None
 
 
 def test_get_endpoinit_state():

@@ -180,7 +180,6 @@ def test_rabbit_callback():
         None)
 
 
-
 def test_schedule_job_reinvestigation():
 
     class MockLogger:
