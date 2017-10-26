@@ -209,6 +209,11 @@ def test_schedule_job_reinvestigation():
 
     poseidonMonitor.schedule_job_reinvestigation(4, end_points, MockLogger())
 
+    end_points = {}
+    poseidonMonitor.schedule_job_reinvestigation(4, end_points, MockLogger())
+
+    end_points = {"hash_0": {"MALFORMED": "YES"}}
+    poseidonMonitor.schedule_job_reinvestigation(4, end_points, MockLogger())
 
 def test_print_endpoint_state():
 
