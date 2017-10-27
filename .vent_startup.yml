@@ -1,0 +1,40 @@
+https://github.com/cyberreboot/vent:
+    elasticsearch:
+        build: yes
+        start: yes
+    file_drop:
+        build: yes
+        start: yes
+    network_tap:
+        build: yes
+        start: yes
+    rabbitmq:
+        build: yes
+        start: yes
+    redis:
+        build: yes
+        start: yes
+    rmq_es_connector:
+        build: yes
+        start: yes
+    rq_dashboard:
+        build: yes
+        start: yes
+    rq_worker:
+        build: yes
+        start: yes
+    syslog:
+        build: yes
+        start: yes
+https://github.com/cyberreboot/poseidon:
+    '@poseidon':
+        build: yes
+        start: yes
+https://github.com/cyberreboot/vent-plugins:
+    pcap_to_node_pcap:
+        build: yes
+https://github.com/lab41/poseidonml:
+    abnormaldetector@classify:
+        build: yes
+    nodeclassifier@eval:
+        build: yes
