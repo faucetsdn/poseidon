@@ -1,6 +1,9 @@
 FROM frolvlad/alpine-python3
 MAINTAINER dgrossman@iqt.org
 
+# Add Tini
+RUN apk add --update --repository http://dl-4.alpinelinux.org/alpine/edge/testing/ tini
+
 COPY . /poseidonWork
 WORKDIR /poseidonWork
 ENV PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
@@ -14,13 +17,8 @@ ENV PYTHONUNBUFFERED 0
 ENV SYS_LOG_HOST NOT_CONFIGURED
 ENV SYS_LOG_PORT 514
 
-# Add Tini
-ENV TINI_VERSION v0.16.1
-ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
-RUN chmod +x /tini
-ENTRYPOINT ["/tini", "--"]
-
 # run tests
 RUN py.test -v -vv --cov-report term-missing --cov=./poseidon -c .coveragerc
 
-CMD ["python","/poseidonWork/poseidon/poseidonMonitor/poseidonMonitor.py"]
+ENTRYPOINT ["tini", "--"]
+CMD ["/usr/bin/python3", "/poseidonWork/poseidon/poseidonMonitor/poseidonMonitor.py"]
