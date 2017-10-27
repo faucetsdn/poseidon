@@ -1,4 +1,4 @@
-FROM continuumio/anaconda3
+FROM frolvlad/alpine-python3
 MAINTAINER dgrossman@iqt.org
 
 COPY . /poseidonWork
