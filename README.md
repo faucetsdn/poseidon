@@ -87,6 +87,52 @@ controller_pass = `PASSWORD`
 `USERNAME` - username for BCF login  
 `PASSWORD` - password for BCF login  
 
+## Running Poseidon with Vent
+
+Export `controller_uri`, `controller_user`, and `controller_pass` environment variables to match your connection details for your BCF controller.
+Also make any additional configuration changes to `.plugin_config.yml`
+
+```
+export controller_uri=https://x.x.x.x:8443/api/v1/
+export controller_user=user
+export controller_pass=pass
+```
+
+```
+git clone https://github.com/CyberReboot/poseidon.git
+cd poseidon
+docker run -it \
+           -v /var/run/docker.sock:/var/run/docker.sock \
+           -v /opt/vent_files:/opt/vent_files \
+           -v $(pwd)/.plugin_config.yml:/root/.plugin_config.yml \
+           -v $(pwd)/.vent_startup.yml:/root/.vent_startup.yml \
+           -e controller_uri=$controller_uri \
+           -e controller_user=$controller_user \
+           -e controller_pass=$controller_pass \
+           --name vent \
+           cyberreboot/vent
+```
+
+* Note: if use Docker for Mac, you'll need to create a directory `/opt/vent_files` and add it to shared directories in preferences.
+
+To look at the logs:
+
+```
+docker logs -f cyberreboot-vent-syslog-master
+```
+
+If you quit out of the vent container, you can start it again with:
+
+```
+docker start vent
+```
+
+And then attach to the console with:
+
+```
+docker attach vent
+```
+
 ## Running the tests
 Tests are currently written in py.test for Python.  The tests are automatically run when building the containers.
 
