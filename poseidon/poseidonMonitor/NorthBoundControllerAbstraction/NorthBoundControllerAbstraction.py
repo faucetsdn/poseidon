@@ -213,10 +213,12 @@ class Update_Switch_State(Monitor_Helper_Base):
         states = [('K', 'KNOWN'), ('U', 'UNKNOWN'), ('M', 'MIRRORING'),
                   ('S', 'SHUTDOWN'), ('R', 'REINVESTIGATING')]
 
+        self.logger.info('====START')
         for l, s in states:
             same_old(self.logger, s, l, self.endpoint_states)
 
         self.logger.info('****************')
+        self.logger.info('====STOP')
 
     def update_endpoint_state(self):
         '''Handles Get requests'''
