@@ -19,43 +19,41 @@ Created on 27 Oct 2017
 '''
 
 
-
 import sys
-import os
 import time
-
 
 
 def posArray(character, string):
     return [pos for pos, char in enumerate(string) if char == character]
 
+
 def parseLine(line):
     parts = line[71:].strip()
 
     toparse = parts
-    
+
     if '*******' in toparse:
-        return ((False,None))
+        return ((False, None))
     if toparse.startswith('None'):
-        return ((False,None))
+        return ((False, None))
     if toparse[1] != ':':
-        return ((False,None))
-    pos = posArray(':',toparse)
-    state_trans = toparse[pos[1]+1:pos[2]]
-    manual = (toparse[pos[2]+1:])[1:-1]
+        return ((False, None))
+    pos = posArray(':', toparse)
+    state_trans = toparse[pos[1] + 1:pos[2]]
+    manual = (toparse[pos[2] + 1:])[1:-1]
 
     d = dict()
-    kv = manual.split(',') 
+    kv = manual.split(',')
     for item in kv:
-        #print('item',item)
-        key,value = item.split(':',1)   
-        #print('k',key,'v',value)
-        d[key.strip().lstrip()[1:-1]]=value.strip().lstrip()[1:-1]
+        # print('item',item)
+        key, value = item.split(':', 1)
+        # print('k',key,'v',value)
+        d[key.strip().lstrip()[1:-1]] = value.strip().lstrip()[1:-1]
 
-    print('dict',d)
+    print('dict', d)
     endpoint_dict = d
 
-    return((True,(endpoint_dict['ip-address'],state_trans)))
+    return((True, (endpoint_dict['ip-address'], state_trans)))
 
 
 def getUpdateIterator():
@@ -79,8 +77,8 @@ def getUpdateIterator():
             else:
                 yield(y_va)
                 found = True
-                y_va=list()
-            
+                y_va = list()
+
 
 if __name__ == "__main__":
     for x in getUpdateIterator():
@@ -89,4 +87,3 @@ if __name__ == "__main__":
         for lines in x:
             print(lines)
         time.sleep(2)
-   
