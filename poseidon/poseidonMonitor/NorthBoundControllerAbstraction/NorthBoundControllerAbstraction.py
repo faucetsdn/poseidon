@@ -203,10 +203,10 @@ class Update_Switch_State(Monitor_Helper_Base):
                 if my_dict['state'] == state:
                     out_flag = True
                     logger.info('{0}:{1}:{2}->{3}:{4}'.format(letter,
-                                                               my_hash,
-                                                               my_dict['state'],
-                                                               my_dict['next-state'],
-                                                               my_dict['endpoint']))
+                                                              my_hash,
+                                                              my_dict['state'],
+                                                              my_dict['next-state'],
+                                                              my_dict['endpoint']))
             if not out_flag:
                 logger.info('None')
 

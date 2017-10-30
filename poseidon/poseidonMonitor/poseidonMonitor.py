@@ -225,10 +225,10 @@ class Monitor(object):
 
         path = getenv('loggingFile')
 
-        if path is None:
+        if path is None:  # pragma: no cover
             path = self.mod_configuration.get('loggingFile')
 
-        if path is not None:
+        if path is not None:  # pragma: no cover
             with open(path, 'rt') as f:
                 config = json.load(f)
         module_logger.logger_config(config)
@@ -309,30 +309,27 @@ class Monitor(object):
         options specified in poseidon.config.
         '''
         endpoint_states = self.uss.return_endpoint_state()
-        try:
-            metadata = endpoint_states.get(dev_hash, {})
-        except AttributeError:
-            # If return_endpoint_state() returns NoneType
-            metadata = {}
-        try:
-            payload = {
-                'nic': self.mod_configuration['collector_nic'],
-                'id': dev_hash,
-                'interval': self.mod_configuration['collector_interval'],
-                'filter': '\'host {0}\''.format(
-                    self.uss.get_endpoint_ip(dev_hash)),
-                'iters': str(num_captures),
-                'metadata': str(metadata)}
-            self.logger.debug('vent payload: ' + str(payload))
+        metadata = endpoint_states.get(dev_hash, {})
 
-            vent_addr = self.mod_configuration[
-                'vent_ip'] + ':' + self.mod_configuration['vent_port']
-            uri = 'http://' + vent_addr + '/create'
+        payload = {
+            'nic': self.mod_configuration['collector_nic'],
+            'id': dev_hash,
+            'interval': self.mod_configuration['collector_interval'],
+            'filter': '\'host {0}\''.format(
+                self.uss.get_endpoint_ip(dev_hash)),
+            'iters': str(num_captures),
+            'metadata': str(metadata)}
 
+        self.logger.debug('vent payload: ' + str(payload))
+
+        vent_addr = self.mod_configuration['vent_ip'] + \
+            ':' + self.mod_configuration['vent_port']
+        uri = 'http://' + vent_addr + '/create'
+
+        try:
             resp = requests.post(uri, data=json.dumps(payload))
-
             self.logger.debug('collector response: ' + resp.text)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.debug('failed to start vent collector' + str(e))
 
     def format_rabbit_message(self, item):
@@ -346,7 +343,7 @@ class Monitor(object):
         # my_obj: (hash,data)
         my_obj = json.loads(my_obj)
         self.logger.debug('routing_key:{0}'.format(routing_key))
-        if routing_key is not None and routing_key == 'poseidon.algos.decider':
+        if routing_key == 'poseidon.algos.decider':
             self.logger.debug('decider value:{0}'.format(my_obj))
             # if valid response then send along otherwise nothing
             for key in my_obj:
@@ -439,7 +436,7 @@ class Monitor(object):
             try:
                 item = self.m_queue.get(False)
                 found_work = True
-            except Queue.Empty:
+            except Queue.Empty:  # pragma: no cover
                 pass
 
         return (found_work, item)
@@ -455,7 +452,7 @@ class Monitor(object):
                 self.schedule.cancel_job(job)
             self.rabbit_channel_connection_local.close()
             sys.exit()
-        except BaseException:
+        except BaseException:  # pragma: no cover
             pass
 
 
