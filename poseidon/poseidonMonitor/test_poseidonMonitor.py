@@ -76,6 +76,14 @@ def test_signal_handler():
 
 
 def test_start_vent_collector():
+
+    class MockLogger:
+        def __init__(self):
+            pass
+
+        def debug(self, msg):
+            pass
+
     class requests():
 
         def __init__(self):
@@ -96,24 +104,21 @@ def test_start_vent_collector():
             # Really don't care endpoint state here
             return {}
 
-    class MockLogger:
-        def __init__(self):
-            pass
-
-        def debug(self, msg):
-            pass
+        def get_endpoint_ip(self, hash):
+            return '0.0.0.0'
 
     class MockMonitor(Monitor):
-        mod_configuration = {
-            'collector_nic': 2,
-            'vent_ip': '0.0.0.0',
-            'vent_port': '8080',
-        }
-        uss = MockUSS()
 
-        # no need to init the monitor
         def __init__(self):
-            pass
+
+            self.mod_configuration = dict({
+                'collector_interval': 900,
+                'collector_nic': 2,
+                'vent_ip': '0.0.0.0',
+                'vent_port': '8080',
+            })
+
+            self.uss = MockUSS()
 
     mock_monitor = MockMonitor()
     mock_monitor.logger = MockLogger()
@@ -214,6 +219,7 @@ def test_schedule_job_reinvestigation():
 
     end_points = {"hash_0": {"MALFORMED": "YES"}}
     poseidonMonitor.schedule_job_reinvestigation(4, end_points, MockLogger())
+
 
 def test_print_endpoint_state():
 
@@ -556,7 +562,7 @@ def test_process():
         CTRL_C['STOP'] = True
         print('wokefrom sleep', CTRL_C)
 
-    class mockLogger():
+    class MockLogger():
 
         def __init__(self):
             pass
@@ -564,7 +570,7 @@ def test_process():
         def debug(self, msg):
             pass
 
-    class mockuss():
+    class MockUss():
 
         def __init__(self):
             self.endpoint_states = dict(
@@ -628,15 +634,20 @@ def test_process():
             self.endpoint_states[endpoint_hash][
                 'state'] = self.endpoint_states[endpoint_hash]['next-state']
             self.endpoint_states[endpoint_hash]['next-state'] = 'NONE'
-
-    # def start_vent_collector(endpoint_hash):
-    #    pass
+        
+        def get_endpoint_ip(self, hash):
+            return '0.0.0.0'
 
     class MockMonitor(Monitor):
         # no need to init the monitor
 
         def __init__(self):
-            pass
+             self.mod_configuration = {
+                'collector_interval': 900,
+                'collector_nic': 2,
+                'vent_ip': '0.0.0.0',
+                'vent_port': '8080',
+            }
 
         def get_q_item(self):
             return (True, {})
@@ -645,19 +656,12 @@ def test_process():
             return {}
 
     mock_monitor = MockMonitor()
-    mock_monitor.uss = mockuss()
-    #mock_start_vent_collector = start_vent_collector
-    mock_monitor.logger = mockLogger()
+    mock_monitor.uss = MockUss()
+    mock_monitor.logger = MockLogger()
 
     t1 = Thread(target=thread1)
     t1.start()
     mock_monitor.process()
-
-    # try:
-    #    #mock_monitor.process()
-    #    pass
-    # except SystemExit:
-    #    pass
 
     t1.join()
 
@@ -724,7 +728,7 @@ def test_schedule_thread_worker():
         CTRL_C['STOP'] = True
         print('wokefrom sleep', CTRL_C)
 
-    class mockLogger():
+    class MockLogger():
 
         def __init__(self):
             pass
@@ -752,7 +756,7 @@ def test_schedule_thread_worker():
     t1 = Thread(target=thread1)
     t1.start()
     try:
-        schedule_thread_worker(mockSchedule(), mockLogger())
+        schedule_thread_worker(mockSchedule(), MockLogger())
     except SystemExit:
         pass
 
