@@ -157,6 +157,33 @@ def test_get_q_item():
 def test_format_rabbit_message():
     poseidonMonitor.CTRL_C['STOP'] = False
 
+    class MockLogger:
+        def __init__(self):
+            pass
+
+        def debug(self, msg):
+            pass
+
+    class MockMonitor(Monitor):
+        
+        def __init__(self):
+            pass
+
+    mockMonitor = MockMonitor()
+    mockMonitor.logger = MockLogger()
+
+    data = dict({'Key1':'Val1'})
+    message = ('poseidon.algos.decider',json.dumps(data))
+    retval = mockMonitor.format_rabbit_message(message)
+
+    assert retval == data
+
+    message = (None,json.dumps(data))
+    retval = mockMonitor.format_rabbit_message(message)
+
+    assert retval == {}
+
+
 
 def test_rabbit_callback():
     def mock_method(): return True
@@ -682,6 +709,9 @@ def test_process():
         def get_q_item(self):
             return (True, {})
 
+        def bad_get_q_item(self):
+            return (False, {})
+
         def format_rabbit_message(self, item):
             return {}
 
@@ -744,6 +774,14 @@ def test_process():
                     'name': None}}})
 
     assert str(answer) == str(mock_monitor.uss.return_endpoint_state())
+
+    mock_monitor.get_q_item = mock_monitor.bad_get_q_item
+
+    t1 = Thread(target=thread1)
+    t1.start()
+    mock_monitor.process()
+
+    t1.join() 
 
 
 def test_schedule_thread_worker():

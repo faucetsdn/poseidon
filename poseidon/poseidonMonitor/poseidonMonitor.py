@@ -343,7 +343,7 @@ class Monitor(object):
         # my_obj: (hash,data)
         my_obj = json.loads(my_obj)
         self.logger.debug('routing_key:{0}'.format(routing_key))
-        if routing_key is not None and routing_key == 'poseidon.algos.decider':
+        if routing_key == 'poseidon.algos.decider':
             self.logger.debug('decider value:{0}'.format(my_obj))
             # if valid response then send along otherwise nothing
             for key in my_obj:
