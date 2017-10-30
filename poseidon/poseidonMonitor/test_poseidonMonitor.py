@@ -92,6 +92,10 @@ def test_start_vent_collector():
         def post(uri, json, data):
            def mock_response(): return None
            mock_response.text = "success"
+           #cover object
+           a = mock_response()
+           assert a == None
+           assert mock_response.text == "success"
            return mock_response
 
     poseidonMonitor.CTRL_C['STOP'] = False
@@ -144,6 +148,10 @@ def test_get_q_item():
     mock_monitor = MockMonitor()
     mock_monitor.m_queue = MockMQueue()
     assert (True, "Item") == mock_monitor.get_q_item()
+
+    poseidonMonitor.CTRL_C['STOP'] = True
+    mock_monitor.m_queue = MockMQueue()
+    assert (False, None) == mock_monitor.get_q_item()
 
 
 def test_format_rabbit_message():
@@ -438,6 +446,17 @@ def test_update_next_state():
                         'investigate': True, 'behavior': 'normal'}}}
 
     monitor.update_next_state(ml_return)
+
+    ml_return = {
+        'NOT_FOUND': {
+            'valid': False, 'classification': {
+                'labels': [
+                    'Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
+                    0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {
+                        'investigate': True, 'behavior': 'normal'}}}
+
+    monitor.update_next_state(ml_return)
+
 
 
 def test_configSelf():
