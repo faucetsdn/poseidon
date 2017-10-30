@@ -326,6 +326,7 @@ class Monitor(object):
             ':' + self.mod_configuration['vent_port']
         uri = 'http://' + vent_addr + '/create'
 
+        resp = requests.post(uri, data=json.dumps(payload))
         try:
             resp = requests.post(uri, data=json.dumps(payload))
             self.logger.debug('collector response: ' + resp.text)

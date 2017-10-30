@@ -89,10 +89,10 @@ def test_start_vent_collector():
         def __init__(self):
             pass
 
-        # def post(uri, json):
-        #    def mock_response(): return None
-        #    mock_response.text = "success"
-        #    return mock_response
+        def post(uri, json, data):
+           def mock_response(): return None
+           mock_response.text = "success"
+           return mock_response
 
     poseidonMonitor.CTRL_C['STOP'] = False
     poseidonMonitor.requests = requests()
@@ -210,6 +210,7 @@ def test_schedule_job_reinvestigation():
         "hash_3": {"state": "UNKNOWN", "next-state": "REINVESTIGATING"},
         "hash_4": {"state": "UNKNOWN", "next-state": "REINVESTIGATING"},
         "hash_5": {"state": "UNKNOWN", "next-state": "REINVESTIGATING"},
+        "hash_6": {"state": "OTHER-STATE", "next-state": "UNKNOWN"}
     }
 
     poseidonMonitor.schedule_job_reinvestigation(4, end_points, MockLogger())
@@ -427,6 +428,16 @@ def test_update_next_state():
                     'name': None}}})
 
     assert str(correct_answer) == str(monitor.uss.return_endpoint_state())
+
+    ml_return = {
+        'NOT_FOUND': {
+            'valid': True, 'classification': {
+                'labels': [
+                    'Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
+                    0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {
+                        'investigate': True, 'behavior': 'normal'}}}
+
+    monitor.update_next_state(ml_return)
 
 
 def test_configSelf():
