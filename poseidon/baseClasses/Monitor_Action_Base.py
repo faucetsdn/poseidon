@@ -27,10 +27,6 @@ module_logger = Logger
 
 
 class Monitor_Action_Base(Rock_Bottom):  # pragma: no cover
-    '''
-    monitor_action_base docstring
-
-    '''
 
     """
     Base call stubs
