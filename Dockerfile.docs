@@ -1,4 +1,4 @@
-FROM ubuntu:17.10
+FROM ubuntu:latest
 
 MAINTAINER dgrossman@iqt.org
 
