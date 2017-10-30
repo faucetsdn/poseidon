@@ -90,13 +90,13 @@ def test_start_vent_collector():
             pass
 
         def post(uri, json, data):
-           def mock_response(): return None
-           mock_response.text = "success"
-           #cover object
-           a = mock_response()
-           assert a == None
-           assert mock_response.text == "success"
-           return mock_response
+            def mock_response(): return None
+            mock_response.text = "success"
+            # cover object
+            a = mock_response()
+            assert a is None
+            assert mock_response.text == "success"
+            return mock_response
 
     poseidonMonitor.CTRL_C['STOP'] = False
     poseidonMonitor.requests = requests()
@@ -165,24 +165,23 @@ def test_format_rabbit_message():
             pass
 
     class MockMonitor(Monitor):
-        
+
         def __init__(self):
             pass
 
     mockMonitor = MockMonitor()
     mockMonitor.logger = MockLogger()
 
-    data = dict({'Key1':'Val1'})
-    message = ('poseidon.algos.decider',json.dumps(data))
+    data = dict({'Key1': 'Val1'})
+    message = ('poseidon.algos.decider', json.dumps(data))
     retval = mockMonitor.format_rabbit_message(message)
 
     assert retval == data
 
-    message = (None,json.dumps(data))
+    message = (None, json.dumps(data))
     retval = mockMonitor.format_rabbit_message(message)
 
     assert retval == {}
-
 
 
 def test_rabbit_callback():
@@ -466,24 +465,41 @@ def test_update_next_state():
 
     ml_return = {
         'NOT_FOUND': {
-            'valid': True, 'classification': {
+            'valid': True,
+            'classification': {
                 'labels': [
-                    'Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
-                    0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {
-                        'investigate': True, 'behavior': 'normal'}}}
+                    'Unknown',
+                    'Smartphone',
+                    'Developer workstation'],
+                'confidences': [
+                    0.9983864533039954,
+                    0.0010041873867962805,
+                    0.00042691313815914093]},
+            'timestamp': 1508366767.45571,
+            'decisions': {
+                'investigate': True,
+                'behavior': 'normal'}}}
 
     monitor.update_next_state(ml_return)
 
     ml_return = {
         'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': {
-            'valid': False, 'classification': {
+            'valid': False,
+            'classification': {
                 'labels': [
-                    'Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
-                    0.9983864533039954, 0.0010041873867962805, 0.00042691313815914093]}, 'timestamp': 1508366767.45571, 'decisions': {
-                        'investigate': True, 'behavior': 'normal'}}}
+                    'Unknown',
+                    'Smartphone',
+                    'Developer workstation'],
+                'confidences': [
+                    0.9983864533039954,
+                    0.0010041873867962805,
+                    0.00042691313815914093]},
+            'timestamp': 1508366767.45571,
+            'decisions': {
+                'investigate': True,
+                'behavior': 'normal'}}}
 
     monitor.update_next_state(ml_return)
-
 
 
 def test_configSelf():
@@ -691,7 +707,7 @@ def test_process():
             self.endpoint_states[endpoint_hash][
                 'state'] = self.endpoint_states[endpoint_hash]['next-state']
             self.endpoint_states[endpoint_hash]['next-state'] = 'NONE'
-        
+
         def get_endpoint_ip(self, hash):
             return '0.0.0.0'
 
@@ -699,7 +715,7 @@ def test_process():
         # no need to init the monitor
 
         def __init__(self):
-             self.mod_configuration = {
+            self.mod_configuration = {
                 'collector_interval': 900,
                 'collector_nic': 2,
                 'vent_ip': '0.0.0.0',
@@ -781,7 +797,7 @@ def test_process():
     t1.start()
     mock_monitor.process()
 
-    t1.join() 
+    t1.join()
 
 
 def test_schedule_thread_worker():

@@ -225,10 +225,10 @@ class Monitor(object):
 
         path = getenv('loggingFile')
 
-        if path is None: # pragma: no cover
+        if path is None:  # pragma: no cover
             path = self.mod_configuration.get('loggingFile')
 
-        if path is not None: # pragma: no cover
+        if path is not None:  # pragma: no cover
             with open(path, 'rt') as f:
                 config = json.load(f)
         module_logger.logger_config(config)
@@ -329,7 +329,7 @@ class Monitor(object):
         try:
             resp = requests.post(uri, data=json.dumps(payload))
             self.logger.debug('collector response: ' + resp.text)
-        except Exception as e: # pragma: no cover
+        except Exception as e:  # pragma: no cover
             self.logger.debug('failed to start vent collector' + str(e))
 
     def format_rabbit_message(self, item):
@@ -432,11 +432,11 @@ class Monitor(object):
         item = None
         global CTRL_C
 
-        if not CTRL_C['STOP']: 
+        if not CTRL_C['STOP']:
             try:
                 item = self.m_queue.get(False)
                 found_work = True
-            except Queue.Empty: # pragma: no cover
+            except Queue.Empty:  # pragma: no cover
                 pass
 
         return (found_work, item)
@@ -452,7 +452,7 @@ class Monitor(object):
                 self.schedule.cancel_job(job)
             self.rabbit_channel_connection_local.close()
             sys.exit()
-        except BaseException: # pragma: no cover
+        except BaseException:  # pragma: no cover
             pass
 
 
