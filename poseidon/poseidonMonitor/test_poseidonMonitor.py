@@ -448,7 +448,7 @@ def test_update_next_state():
     monitor.update_next_state(ml_return)
 
     ml_return = {
-        'NOT_FOUND': {
+        'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': {
             'valid': False, 'classification': {
                 'labels': [
                     'Unknown', 'Smartphone', 'Developer workstation'], 'confidences': [
