@@ -1,5 +1,5 @@
 FROM frolvlad/alpine-python3
-MAINTAINER dgrossman@iqt.org
+LABEL maintainer="dgrossman@iqt.org"
 
 # Add Tini
 RUN apk add --update --repository http://dl-4.alpinelinux.org/alpine/edge/testing/ tini
