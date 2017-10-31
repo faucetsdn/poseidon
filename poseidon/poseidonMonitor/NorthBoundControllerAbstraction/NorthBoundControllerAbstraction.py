@@ -203,20 +203,22 @@ class Update_Switch_State(Monitor_Helper_Base):
                 if my_dict['state'] == state:
                     out_flag = True
                     logger.info('{0}:{1}:{2}->{3}:{4}'.format(letter,
-                                                               my_hash,
-                                                               my_dict['state'],
-                                                               my_dict['next-state'],
-                                                               my_dict['endpoint']))
+                                                              my_hash,
+                                                              my_dict['state'],
+                                                              my_dict['next-state'],
+                                                              my_dict['endpoint']))
             if not out_flag:
                 logger.info('None')
 
         states = [('K', 'KNOWN'), ('U', 'UNKNOWN'), ('M', 'MIRRORING'),
                   ('S', 'SHUTDOWN'), ('R', 'REINVESTIGATING')]
 
+        self.logger.info('====START')
         for l, s in states:
             same_old(self.logger, s, l, self.endpoint_states)
 
         self.logger.info('****************')
+        self.logger.info('====STOP')
 
     def update_endpoint_state(self):
         '''Handles Get requests'''
