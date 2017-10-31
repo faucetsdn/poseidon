@@ -1,6 +1,6 @@
 FROM ubuntu:latest
 
-MAINTAINER dgrossman@iqt.org
+LABEL dgrossman@iqt.org
 
 RUN apt-get update && apt-get install  -y python3 python3-pip \
     texlive \
