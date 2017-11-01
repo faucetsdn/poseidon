@@ -125,7 +125,7 @@ you will need to add support for moving arbitrary endpoint data around your netw
 
 ```
 ! span-fabric
-span-fabric SOME_NAME_YOU_MAKE_UP
+span-fabric vent
   active
   destination interface-group ig1
   priority 1
@@ -142,13 +142,18 @@ interface-group ig1
 
 ### NOTE:
 
-If the interface-group ig1 is reserved in your install, you will need to modify dest-interface-group in:
+If the interface-group `ig1` is reserved in your install, you will need to modify dest-interface-group in:
 ```
 poseidon/poseidonMonitor/NorthBoundControllerAbstraction/proxy/bcf/bcf.py:            "dest-interface-group": "ig1",
 poseidon/poseidonMonitor/NorthBoundControllerAbstraction/proxy/bcf/sample_state.py:    "dest-interface-group": "ig1",
 ```
 
-
+if the span-fabrc `vent` is reserved in your install, you will need to modify the span_name, and other variables in:
+```
+/poseidon/poseidonMonitor/NorthBoundControllerAbstraction/proxy/bcf/bcf.py
+/poseidon/poseidonMonitor/NorthBoundControllerAbstraction/proxy/bcf/test_bcf.py
+/poseidon/poseidonMonitor/NorthBoundControllerAbstraction/proxy/bcf/sample_state.py
+```
 
 To look at the logs:
 
