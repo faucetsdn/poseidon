@@ -20,8 +20,14 @@ Test module for endPoint.py
 Created on 2 October 2017
 @author: Jorissss
 """
+from mock import *
+from datetime import datetime, timedelta
+import time # so we can override time.time
 
 from poseidon.poseidonMonitor import endPoint
+
+mock_time = Mock()
+mock_time.return_value = time.mktime(datetime(2011, 6, 21).timetuple())
 
 test_data = {u'tenant': u'FLOORPLATE',
              u'mac': u'de:ad:be:ef:7f:12',
@@ -34,11 +40,11 @@ def is_same(e1, e2):
     assert e1.state == e2.state
     assert e1.next_state == e2.next_state
 
-    for k in e1.data:
-        assert e1.data[k] == e2.data[k]
+    for k in e1.endpoint_data:
+        assert e1.endpoint_data[k] == e2.endpoint_data[k]
 
-    for k in e2.data:
-        assert e1.data[k] == e2.data[k]
+    for k in e2.endpoint_data:
+        assert e1.endpoint_data[k] == e2.endpoint_data[k]
 
 
 def test_endpoint_creation_no_state():
@@ -55,10 +61,10 @@ def test_endpoint_creation_with_state():
     endpoint1 = endPoint.EndPoint(test_data, state='TEST1')
     endpoint2 = endPoint.EndPoint(test_data, next_state='TEST2')
     endpoint3 = endPoint.EndPoint(test_data, state='TEST1', next_state='TEST2')
-    assert 'state: NONE, next_state: NONE, data: ' in endpoint0.to_str()
-    assert 'state: TEST1, next_state: NONE, data: ' in endpoint1.to_str()
-    assert 'state: NONE, next_state: TEST2, data: ' in endpoint2.to_str()
-    assert 'state: TEST1, next_state: TEST2, data: ' in endpoint3.to_str()
+    assert 'prev_state: None, state: NONE, next_state: NONE, transition_time: 0' in endpoint0.to_str()
+    assert 'prev_state: None, state: TEST1, next_state: NONE, transition_time: 0' in endpoint1.to_str()
+    assert 'prev_state: None, state: NONE, next_state: TEST2, transition_time: 0' in endpoint2.to_str()
+    assert 'prev_state: None, state: TEST1, next_state: TEST2, transition_time: 0' in endpoint3.to_str()
 
 
 def test_endpoint_state_default():
@@ -67,3 +73,12 @@ def test_endpoint_state_default():
     endpoint1.update_state()
 
     assert endpoint1.state == 'UNKNOWN' and endpoint1.next_state == 'NONE'
+
+
+def test_elapsed_time():
+    time.time = mock_time
+    endpoint1 = endPoint.EndPoint(test_data)
+    e1 = endpoint1.elapsed_time(0)
+    assert e1 == 1308614400.0
+    e2 = endpoint1.elapsed_time()
+    assert e2 == 1308614400.0
