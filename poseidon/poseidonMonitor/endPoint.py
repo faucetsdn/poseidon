@@ -20,14 +20,17 @@ Created on 2 October 2017
 
 import hashlib
 import json
+import time
 
 
 class EndPoint:
 
-    def __init__(self, data, state='NONE', next_state='NONE'):
+    def __init__(self, endpoint_data, prev_state='None', state='NONE', next_state='NONE'):
+        self.transition_time = 0
+        self.prev_state = prev_state
         self.state = state
         self.next_state = next_state
-        self.data = dict(data)
+        self.endpoint_data = dict(endpoint_data)
 
     def make_hash(self):
         ''' hash the metadata in a sane way '''
@@ -41,22 +44,27 @@ class EndPoint:
         # for word in ['tenant', 'mac', 'segment', 'name', 'ip-address']:
 
         for word in ['tenant', 'mac', 'segment', 'ip-address']:
-            pre_h = pre_h + str(self.data.get(str(word), 'missing'))
+            pre_h = pre_h + str(self.endpoint_data.get(str(word), 'missing'))
         h.update(pre_h.encode('utf-8'))
         post_h = h.hexdigest()
         return post_h
 
     def to_str(self):
         '''make string representation of internals of object'''
-        strep = 'state: ' + self.state
+        strep = 'prev_state: ' + self.prev_state
+        strep += ', state: ' + self.state
         strep += ', next_state: ' + self.next_state
-        strep += ', data: ' + str(self.data)
+        strep += ', transition_time: ' + str(self.transition_time)
+        strep += ', endpoint_data: ' + str(self.endpoint_data)
         return strep
 
     def to_json(self):
         '''return a json view of the object'''
-        return json.dumps({'endpoint_data': self.data,
-                           'state': self.state, 'next_state': self.next_state})
+        return json.dumps({'prev_state': self.prev_state,
+                           'state': self.state,
+                           'next_state': self.next_state,
+                           'transition_time': self.transition_time,
+                           'endpoint_data': self.endpoint_data})
 
     @classmethod
     def from_json(cls, json_obj):
@@ -64,10 +72,19 @@ class EndPoint:
         obj_dict = json.loads(json_obj)
         return cls(
             obj_dict['endpoint_data'],
+            obj_dict['prev_state'],
             obj_dict['state'],
             obj_dict['next_state'])
 
     def update_state(self, next_s='NONE'):
         '''state <- next_state, next_state <- 'NONE' or a string that is passed as a parameter'''
+        self.transition_time = time.time()
+        self.prev_state = self.state
         self.state = self.next_state
         self.next_state = next_s
+
+    def elapsed_time(self, when=None):
+        if when is None:
+            return time.time() - self.transition_time
+        else:
+            return time.time() - when
