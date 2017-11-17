@@ -14,36 +14,49 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-"""
-Created on 25 July 2016
-
-@author: kylez
-"""
-import requests
-from urllib.parse import urljoin
-
+'''
+Created on 17 November 2017
+@author: cglewis
+'''
 from poseidon.baseClasses.Logger_Base import Logger
 
 module_logger = Logger
 module_logger = module_logger.logger
 
-requests.packages.urllib3.disable_warnings()
 
+class FaucetProxy:
 
-class ControllerProxy(object):
+    def __init__(self):
+        '''Initializes Faucet object.'''
+        pass
 
-    def __init__(self, base_uri, *args, **kwargs):
-        self.logger = module_logger
-        self.base_uri = base_uri
-        self.session = requests.Session()
-
-    def get_resource(self, resource, *args, **kwargs):
-        uri = urljoin(self.base_uri, resource)
-        return self.session.get(uri, *args, **kwargs)
-
-    def post_resource(self, resource, *args, **kwargs):
-        uri = urljoin(self.base_uri, resource)
-        return self.session.post(uri, *args, **kwargs)
-
-    def request_resource(self, *args, **kwargs):
-        return self.session.request(*args, **kwargs)
+    def format_endpoints(self):
+        pass
+    def get_endpoints(self):
+        pass
+    def get_switches(self):
+        pass
+    def get_tenants(self):
+        pass
+    def get_segments(self):
+        pass
+    def get_span_fabric(self):
+        pass
+    def get_byip(self):
+        pass
+    def get_bymac(self):
+        pass
+    def shutdown_ip(self):
+        pass
+    def shutdown_endpoint(self):
+        pass
+    def get_highest(self):
+        pass
+    def get_seq_by_ip(self):
+        pass
+    def mirror_ip(self):
+        pass
+    def unmirror_ip(self):
+        pass
+    def mirror_traffic(self):
+        pass

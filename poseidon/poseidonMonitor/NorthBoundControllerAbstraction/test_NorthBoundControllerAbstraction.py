@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#   Copyright (c) 2016 In-Q-Tel, Inc, All Rights Reserved.
+#   Copyright (c) 2016-2017 In-Q-Tel, Inc, All Rights Reserved.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ def test_update_endpoint_state():
             pass
 
     uss = controller_interface.get_endpoint('Update_Switch_State')
-    uss.bcf = mybcf()
+    uss.sdnc = mybcf()
     output = json.loads(uss.update_endpoint_state())
     correct_output = json.loads(
         '{"service": "NorthBoundControllerAbstraction:Update_Switch_State", "times": 0, "machines": [{"ip-address": "10.0.0.1", "mac": "f8:b1:56:fe:f2:de", "segment": "prod", "tenant": "FLOORPLATE", "name": null}, {"ip-address": "10.0.0.2", "mac": "20:4c:9e:5f:e3:c3", "segment": "to-core-router", "tenant": "EXTERNAL", "name": null}], "resp": "ok"}')
@@ -146,7 +146,7 @@ def test_unmirror_endpoint():
 
     uss = Update_Switch_State()
     uss.first_time = False
-    uss.bcf = Mock_bcf()
+    uss.sdnc = Mock_bcf()
     machines = [{'ip-address': '10.0.0.101',
                  'mac': 'f8:b1:56:fe:f2:de',
                  'segment': 'prod',
@@ -172,7 +172,7 @@ def test_get_endpoint_state():
 
     uss = Update_Switch_State()
     uss.first_time = False
-    uss.bcf = Mock_bcf()
+    uss.sdnc = Mock_bcf()
     machines = [{'ip-address': '10.0.0.101',
                  'mac': 'f8:b1:56:fe:f2:de',
                  'segment': 'prod',
@@ -201,7 +201,7 @@ def test_get_endpoint_ip():
 
     uss = Update_Switch_State()
     uss.first_time = False
-    uss.bcf = Mock_bcf()
+    uss.sdnc = Mock_bcf()
     machines = [{'ip-address': '10.0.0.101',
                  'mac': 'f8:b1:56:fe:f2:de',
                  'segment': 'prod',
@@ -364,19 +364,43 @@ def test_return_endpoint_state():
     assert uss.return_endpoint_state() == uss.endpoint_states
 
 
-def test_first_run():
+def test_first_run_bcf():
 
     uss = Update_Switch_State()
     uss.mod_configuration = dict()
     uss.mod_configuration['controller_uri'] = 'TEST_URI'
     uss.mod_configuration['controller_user'] = 'TEST_USER'
     uss.mod_configuration['controller_pass'] = 'TEST_PASS'
+    uss.mod_configuration['controller_type'] = 'bcf'
 
     uss.configured = True
     uss.first_run()
     assert uss.controller['URI'] == 'TEST_URI'
     assert uss.controller['USER'] == 'TEST_USER'
     assert uss.controller['PASS'] == 'TEST_PASS'
+    assert uss.controller['TYPE'] == 'bcf'
+
+
+def test_first_run_faucet():
+
+    uss = Update_Switch_State()
+    uss.mod_configuration = dict()
+    uss.mod_configuration['controller_type'] = 'faucet'
+
+    uss.configured = True
+    uss.first_run()
+    assert uss.controller['TYPE'] == 'faucet'
+
+
+def test_first_run_unknown():
+
+    uss = Update_Switch_State()
+    uss.mod_configuration = dict()
+    uss.mod_configuration['controller_type'] = 'dummy'
+
+    uss.configured = True
+    uss.first_run()
+    assert uss.controller['TYPE'] == 'dummy'
 
 
 def test_shutdown_endpoint():
@@ -389,7 +413,7 @@ def test_shutdown_endpoint():
             assert ip == '10.0.0.99'
 
     uss = Update_Switch_State()
-    uss.bcf = Mockbcf()
+    uss.sdnc = Mockbcf()
     uss.endpoint_states = dict(
         {
             'd502caea3609d553ab16a00c554f0602c1419f58': {
@@ -426,7 +450,7 @@ def test_mirror_endpoint():
             assert ip == '10.0.0.99'
 
     uss = Update_Switch_State()
-    uss.bcf = Mockbcf()
+    uss.sdnc = Mockbcf()
     uss.endpoint_states = dict(
         {
             'd502caea3609d553ab16a00c554f0602c1419f58': {

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#   Copyright (c) 2016 In-Q-Tel, Inc, All Rights Reserved.
+#   Copyright (c) 2016-2017 In-Q-Tel, Inc, All Rights Reserved.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -223,10 +223,10 @@ class Monitor(object):
         ''' setup logging  '''
         config = None
 
-        path = getenv('loggingFile')
+        path = getenv('logging_file')
 
         if path is None:  # pragma: no cover
-            path = self.mod_configuration.get('loggingFile')
+            path = self.mod_configuration.get('logging_file')
 
         if path is not None:  # pragma: no cover
             with open(path, 'rt') as f:

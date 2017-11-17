@@ -15,18 +15,30 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Created on 25 July 2016
-@author: kylez
+Test module for faucet.
+
+@author: cglewis
 """
-from poseidon.baseClasses.Logger_Base import Logger
-from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.controllerproxy import ControllerProxy
-
-module_logger = Logger.logger
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.faucet.faucet import FaucetProxy
 
 
-class BasicAuthControllerProxy(ControllerProxy):
-
-    def __init__(self, base_uri, auth, *args, **kwargs):
-        super(BasicAuthControllerProxy, self).__init__(
-            base_uri, *args, **kwargs)
-        self.session.auth = auth
+def test_FaucetProxy():
+    """
+    Tests Faucet
+    """
+    proxy = FaucetProxy()
+    proxy.format_endpoints()
+    proxy.get_endpoints()
+    proxy.get_switches()
+    proxy.get_tenants()
+    proxy.get_segments()
+    proxy.get_span_fabric()
+    proxy.get_byip()
+    proxy.get_bymac()
+    proxy.shutdown_ip()
+    proxy.shutdown_endpoint()
+    proxy.get_highest()
+    proxy.get_seq_by_ip()
+    proxy.mirror_ip()
+    proxy.unmirror_ip()
+    proxy.mirror_traffic()
