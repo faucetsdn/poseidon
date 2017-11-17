@@ -22,7 +22,7 @@ Test module for faucet.
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.faucet.faucet import FaucetProxy
 
 
-def test_FauctProxy():
+def test_FaucetProxy():
     """
     Tests Faucet
     """

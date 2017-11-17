@@ -30,33 +30,33 @@ class FaucetProxy:
         '''Initializes Faucet object.'''
         pass
 
-    def format_endpoints():
+    def format_endpoints(self):
         pass
-    def get_endpoints():
+    def get_endpoints(self):
         pass
-    def get_switches():
+    def get_switches(self):
         pass
-    def get_tenants():
+    def get_tenants(self):
         pass
-    def get_segments():
+    def get_segments(self):
         pass
-    def get_span_fabric():
+    def get_span_fabric(self):
         pass
-    def get_byip():
+    def get_byip(self):
         pass
-    def get_bymac():
+    def get_bymac(self):
         pass
-    def shutdown_ip():
+    def shutdown_ip(self):
         pass
-    def shutdown_endpoint():
+    def shutdown_endpoint(self):
         pass
-    def get_highest():
+    def get_highest(self):
         pass
-    def get_seq_by_ip():
+    def get_seq_by_ip(self):
         pass
-    def mirror_ip():
+    def mirror_ip(self):
         pass
-    def unmirror_ip():
+    def unmirror_ip(self):
         pass
-    def mirror_traffic():
+    def mirror_traffic(self):
         pass
