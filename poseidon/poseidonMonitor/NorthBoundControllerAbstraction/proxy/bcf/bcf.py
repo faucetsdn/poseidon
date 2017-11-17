@@ -153,7 +153,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
 
     def get_bymac(self, mac_addr):
         '''
-        return recrods about mac address from get_endpoints
+        return records about mac address from get_endpoints
         '''
         endpoints = self.get_endpoints()
         match_list = []

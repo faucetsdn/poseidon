@@ -223,10 +223,10 @@ class Monitor(object):
         ''' setup logging  '''
         config = None
 
-        path = getenv('loggingFile')
+        path = getenv('logging_file')
 
         if path is None:  # pragma: no cover
-            path = self.mod_configuration.get('loggingFile')
+            path = self.mod_configuration.get('logging_file')
 
         if path is not None:  # pragma: no cover
             with open(path, 'rt') as f:
