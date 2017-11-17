@@ -115,6 +115,46 @@ docker run -it \
 
 * Note: if use Docker for Mac, you'll need to create a directory `/opt/vent_files` and add it to shared directories in preferences.
 
+## Bigswitch configuration modifications
+you will need to add support for moving arbitrary endpoint data around your network.  The bigswitch config will need an admin will need to add
+1. span-fabric
+1. interface-group
+
+### span-fabric
+
+
+```
+! span-fabric
+span-fabric vent
+  active
+  destination interface-group ig1
+  priority 1
+```
+
+### interface-group
+```
+! interface-group
+interface-group ig1
+  description 'packets get mirrored here to be processed'
+  mode span-fabric
+  member switch YOUR_LEAF_SWITCH interface YOUR_INTERFACE_WHERE_VENT_WILL_RECORD_TRAFFIC_FROM
+```
+
+### NOTE:
+
+If the interface-group `ig1` is reserved in your install, you will need to modify dest-interface-group in:
+```
+poseidon/poseidonMonitor/NorthBoundControllerAbstraction/proxy/bcf/bcf.py:            "dest-interface-group": "ig1",
+poseidon/poseidonMonitor/NorthBoundControllerAbstraction/proxy/bcf/sample_state.py:    "dest-interface-group": "ig1",
+```
+
+if the span-fabrc `vent` is reserved in your install, you will need to modify the span_name, and other variables in:
+```
+/poseidon/poseidonMonitor/NorthBoundControllerAbstraction/proxy/bcf/bcf.py
+/poseidon/poseidonMonitor/NorthBoundControllerAbstraction/proxy/bcf/test_bcf.py
+/poseidon/poseidonMonitor/NorthBoundControllerAbstraction/proxy/bcf/sample_state.py
+```
+
 To look at the logs:
 
 ```
