@@ -4,11 +4,11 @@ LABEL maintainer="dgrossman@iqt.org"
 # Add Tini
 RUN apk add --update --repository http://dl-4.alpinelinux.org/alpine/edge/testing/ tini
 
-COPY . /poseidonWork
-WORKDIR /poseidonWork
-ENV PYTHONPATH /poseidonWork/poseidon:$PYTHONPATH
-ENV POSEIDON_CONFIG /poseidonWork/config/poseidon.config
-ENV POSEIDON_LOGGER /poseidonWork/logging.json
+COPY . /tmp/poseidonWork
+WORKDIR /tmp/poseidonWork
+ENV PYTHONPATH /tmp/poseidonWork/poseidon:$PYTHONPATH
+ENV POSEIDON_CONFIG /tmp/poseidonWork/config/poseidon.config
+ENV POSEIDON_LOGGER /tmp/poseidonWork/logging.json
 
 # install dependencies of poseidon modules for poseidon
 RUN find . -name requirements.txt -type f -exec pip install -r {} \;
@@ -21,4 +21,4 @@ ENV SYS_LOG_PORT 514
 RUN py.test -v -vv --cov-report term-missing --cov=./poseidon -c .coveragerc
 
 ENTRYPOINT ["tini", "--"]
-CMD ["/usr/bin/python3", "/poseidonWork/poseidon/poseidonMonitor/poseidonMonitor.py"]
+CMD ["/usr/bin/python3", "/tmp/poseidonWork/poseidon/poseidonMonitor/poseidonMonitor.py"]
