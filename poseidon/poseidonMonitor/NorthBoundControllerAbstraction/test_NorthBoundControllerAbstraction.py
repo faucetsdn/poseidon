@@ -364,7 +364,7 @@ def test_return_endpoint_state():
     assert uss.return_endpoint_state() == uss.endpoint_states
 
 
-def test_first_run():
+def test_first_run_bcf():
 
     uss = Update_Switch_State()
     uss.mod_configuration = dict()
@@ -379,6 +379,17 @@ def test_first_run():
     assert uss.controller['USER'] == 'TEST_USER'
     assert uss.controller['PASS'] == 'TEST_PASS'
     assert uss.controller['TYPE'] == 'bcf'
+
+
+def test_first_run_faucet():
+
+    uss = Update_Switch_State()
+    uss.mod_configuration = dict()
+    uss.mod_configuration['controller_type'] = 'faucet'
+
+    uss.configured = True
+    uss.first_run()
+    assert uss.controller['TYPE'] == 'faucet'
 
 
 def test_shutdown_endpoint():
