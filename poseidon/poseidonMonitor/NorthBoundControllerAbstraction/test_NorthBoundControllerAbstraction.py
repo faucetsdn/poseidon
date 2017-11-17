@@ -392,6 +392,17 @@ def test_first_run_faucet():
     assert uss.controller['TYPE'] == 'faucet'
 
 
+def test_first_run_unknown():
+
+    uss = Update_Switch_State()
+    uss.mod_configuration = dict()
+    uss.mod_configuration['controller_type'] = 'dummy'
+
+    uss.configured = True
+    uss.first_run()
+    assert uss.controller['TYPE'] == 'dummy'
+
+
 def test_shutdown_endpoint():
     class Mockbcf():
 
