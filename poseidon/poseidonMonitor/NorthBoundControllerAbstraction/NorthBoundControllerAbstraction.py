@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#   Copyright (c) 2016 In-Q-Tel, Inc, All Rights Reserved.
+#   Copyright (c) 2016-2017 In-Q-Tel, Inc, All Rights Reserved.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -269,7 +269,6 @@ class Update_Switch_State(Monitor_Helper_Base):
 
         self.times = self.times + 1
 
-        self.logger.info("MACHIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIINES:" + str(machines))
         return json.dumps(self.retval)
 
 
