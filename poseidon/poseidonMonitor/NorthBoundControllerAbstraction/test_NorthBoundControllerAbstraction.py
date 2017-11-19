@@ -389,6 +389,8 @@ def test_first_run_faucet():
     uss.mod_configuration['controller_uri'] = 'localhost'
     uss.mod_configuration['controller_pass'] = 'TEST_PASS'
     uss.mod_configuration['controller_user'] = 'self'
+    uss.mod_configuration['controller_config_file'] = '/etc/ryu/faucet/faucet.yaml'
+    uss.mod_configuration['controller_log_file'] = '/var/log/ryu/faucet/faucet.log'
 
     uss.configured = True
     uss.first_run()
@@ -396,6 +398,8 @@ def test_first_run_faucet():
     assert uss.controller['URI'] == 'localhost'
     assert uss.controller['USER'] == 'self'
     assert uss.controller['PASS'] == 'TEST_PASS'
+    assert uss.controller['CONFIG_FILE'] == '/etc/ryu/faucet/faucet.yaml'
+    assert uss.controller['LOG_FILE'] == '/var/log/ryu/faucet/faucet.log'
 
 
 def test_first_run_unknown():

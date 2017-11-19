@@ -26,9 +26,22 @@ module_logger = Logger.logger
 
 class FaucetProxy(Connection):
 
-    def __init__(self, host, user=None, pw=None, *args, **kwargs):
+    def __init__(self,
+                 host,
+                 user=None,
+                 pw=None,
+                 config_file=None,
+                 log_file=None,
+                 *args,
+                 **kwargs):
         '''Initializes Faucet object.'''
-        super(FaucetProxy, self).__init__(host, user, pw, *args, **kwargs)
+        super(FaucetProxy, self).__init__(host,
+                                          user,
+                                          pw,
+                                          config_file,
+                                          log_file,
+                                          *args,
+                                          **kwargs)
 
     @staticmethod
     def format_endpoints(data):
@@ -37,10 +50,16 @@ class FaucetProxy(Connection):
         '''
         ret_list = list()
         # TODO
-        return []
+        ret_list.append(data)
+        return ret_list
 
     def get_endpoints(self):
-        pass
+        self.receive_file('log')
+        data = ''
+        with open('/tmp/faucet.log', 'r') as f:
+            for line in f:
+                data += line
+        return data
 
     def get_switches(self):
         pass

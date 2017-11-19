@@ -92,12 +92,21 @@ class Update_Switch_State(Monitor_Helper_Base):
             elif self.controller['TYPE'] == 'faucet':
                 self.controller['URI'] = str(
                     self.mod_configuration['controller_uri'])
+                # TODO set defaults if these are not set
                 self.controller['USER'] = str(
                     self.mod_configuration['controller_user'])
                 self.controller['PASS'] = str(
                     self.mod_configuration['controller_pass'])
+                self.controller['CONFIG_FILE'] = str(
+                    self.mod_configuration['controller_config_file'])
+                self.controller['LOG_FILE'] = str(
+                    self.mod_configuration['controller_log_file'])
                 try:
-                    self.sdnc = FaucetProxy(host=self.controller['URI'], user=self.controller['USER'], pw=self.controller['PASS'])
+                    self.sdnc = FaucetProxy(host=self.controller['URI'],
+                                            user=self.controller['USER'],
+                                            pw=self.controller['PASS'],
+                                            config_file=self.controller['CONFIG_FILE'],
+                                            log_file=self.controller['LOG_FILE'])
                     self.sdnc.connect()
                 except BaseException as e:
                     self.logger.error(
