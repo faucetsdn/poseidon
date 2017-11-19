@@ -20,11 +20,12 @@ Created on 17 November 2017
 '''
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.faucet.connection import Connection
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.faucet.parser import Parser
 
 module_logger = Logger.logger
 
 
-class FaucetProxy(Connection):
+class FaucetProxy(Connection, Parser):
 
     def __init__(self,
                  host,
@@ -59,6 +60,7 @@ class FaucetProxy(Connection):
         with open('/tmp/faucet.log', 'r') as f:
             for line in f:
                 data += line
+        self.receive_file('config')
         return data
 
     def get_switches(self):
@@ -94,10 +96,12 @@ class FaucetProxy(Connection):
 
     def shutdown_ip(self, ip_addr, shutdown=True, mac_addr=None):
         shutdowns = []
+        self.config('/tmp/faucet.yaml')
         # TODO
         return shutdowns
 
     def shutdown_endpoint(self):
+        self.config('/tmp/faucet.yaml')
         pass
 
     def get_highest(self):
@@ -107,10 +111,13 @@ class FaucetProxy(Connection):
         pass
 
     def mirror_ip(self):
+        self.config('/tmp/faucet.yaml')
         pass
 
     def unmirror_ip(self):
+        self.config('/tmp/faucet.yaml')
         pass
 
     def mirror_traffic(self):
+        self.config('/tmp/faucet.yaml')
         pass

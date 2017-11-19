@@ -32,6 +32,10 @@ def test_FaucetProxy():
         f = open('/tmp/faucet.log', 'r')
     except FileNotFoundError:
         f = open('/tmp/faucet.log', 'w')
+    try:
+        f = open('/tmp/faucet.yaml', 'r')
+    except FileNotFoundError:
+        f = open('/tmp/faucet.yaml', 'w')
     proxy.get_endpoints()
     proxy.get_switches()
     proxy.get_span_fabric()
