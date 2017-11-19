@@ -26,16 +26,14 @@ def test_FaucetProxy():
     """
     Tests Faucet
     """
-    proxy = FaucetProxy()
-    proxy.format_endpoints()
+    proxy = FaucetProxy('foo')
+    FaucetProxy.format_endpoints("foo")
     proxy.get_endpoints()
     proxy.get_switches()
-    proxy.get_tenants()
-    proxy.get_segments()
     proxy.get_span_fabric()
-    proxy.get_byip()
-    proxy.get_bymac()
-    proxy.shutdown_ip()
+    proxy.get_byip('10.0.0.9')
+    proxy.get_bymac('00:00:00:00:12:00')
+    proxy.shutdown_ip('10.0.0.9')
     proxy.shutdown_endpoint()
     proxy.get_highest()
     proxy.get_seq_by_ip()

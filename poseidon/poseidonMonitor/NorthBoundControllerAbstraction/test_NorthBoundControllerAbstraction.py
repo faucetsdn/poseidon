@@ -386,10 +386,16 @@ def test_first_run_faucet():
     uss = Update_Switch_State()
     uss.mod_configuration = dict()
     uss.mod_configuration['controller_type'] = 'faucet'
+    uss.mod_configuration['controller_uri'] = 'localhost'
+    uss.mod_configuration['controller_pass'] = 'TEST_PASS'
+    uss.mod_configuration['controller_user'] = 'self'
 
     uss.configured = True
     uss.first_run()
     assert uss.controller['TYPE'] == 'faucet'
+    assert uss.controller['URI'] == 'localhost'
+    assert uss.controller['USER'] == 'self'
+    assert uss.controller['PASS'] == 'TEST_PASS'
 
 
 def test_first_run_unknown():
