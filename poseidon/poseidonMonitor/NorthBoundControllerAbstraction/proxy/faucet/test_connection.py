@@ -15,32 +15,22 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Test module for faucet.
+Test module for faucet connection.
 
 @author: cglewis
 """
-from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.faucet.faucet import FaucetProxy
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.faucet.connection import Connection
 
 
-def test_FaucetProxy():
+def test_Connection():
     """
-    Tests Faucet
+    Tests Connection
     """
-    proxy = FaucetProxy('foo')
-    FaucetProxy.format_endpoints("foo")
-    try:
-        f = open('/tmp/faucet.log', 'r')
-    except FileNotFoundError:
-        f = open('/tmp/faucet.log', 'w')
-    proxy.get_endpoints()
-    proxy.get_switches()
-    proxy.get_span_fabric()
-    proxy.get_byip('10.0.0.9')
-    proxy.get_bymac('00:00:00:00:12:00')
-    proxy.shutdown_ip('10.0.0.9')
-    proxy.shutdown_endpoint()
-    proxy.get_highest()
-    proxy.get_seq_by_ip()
-    proxy.mirror_ip()
-    proxy.unmirror_ip()
-    proxy.mirror_traffic()
+    conn = Connection('foo')
+    conn.connect()
+    conn.close_connection()
+    conn.exec_command('foo')
+    conn.receive_file('config')
+    conn.receive_file('log')
+    conn.send_file('config')
+    conn.send_file('log')

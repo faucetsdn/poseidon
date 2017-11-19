@@ -28,18 +28,25 @@ module_logger = Logger.logger
 
 class Connection:
 
-    def __init__(self, host, user=None, pw=None, *args, **kwargs):
+    def __init__(self, host, user=None, pw=None, config_file=None, log_file=None, *args, **kwargs):
         self.logger = module_logger
         self.host = host
         self.user = user
         self.pw = pw
+        self.config_file = config_file
+        self.log_file = log_file
+        self.ssh = None
 
     def connect(self):
-        ssh = SSHClient()
-        ssh.set_missing_host_key_policy(AutoAddPolicy())
-        ssh.load_system_host_keys()
-        ssh.connect(self.host, username=self.user, password=self.pw)
-        self.ssh = ssh
+        # TODO better logging
+        try:
+            ssh = SSHClient()
+            ssh.set_missing_host_key_policy(AutoAddPolicy())
+            ssh.load_system_host_keys()
+            ssh.connect(self.host, username=self.user, password=self.pw)
+            self.ssh = ssh
+        except Exception as e:  # pragma: no cover
+            pass
 
     def close_connection(self):
         if self.ssh:
@@ -48,8 +55,30 @@ class Connection:
     def exec_command(self, command):
         pass
 
-    def receive_file(self, file_path):
-        pass
+    def receive_file(self, f_type):
+        # TODO better logging
+        try:
+            scp = SCPClient(self.ssh.get_transport())
+            if f_type == 'config':
+                scp.get(self.config_file, local_path='/tmp/faucet.yaml')
+            elif f_type == 'log':
+                scp.get(self.log_file, local_path='/tmp/faucet.log')
+            else:
+                pass
+            scp.close()
+        except Exception as e:  # pragma: no cover
+            pass
 
-    def send_file(self, file_path):
-        pass
+    def send_file(self, f_type):
+        # TODO better logging
+        try:
+            scp = SCPClient(self.ssh.get_transport())
+            if f_type == 'config':
+                scp.put('/tmp/faucet.yaml', self.config_file)
+            elif f_type == 'log':
+                scp.put('/tmp/faucet.log', self.log_file)
+            else:
+                pass
+            scp.close()
+        except Exception as e:  # pragma: no cover
+            pass
