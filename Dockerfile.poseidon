@@ -7,7 +7,8 @@ RUN apk upgrade --no-cache && \
     python3 \
     python3-dev \
     py3-paramiko \
-    tini && \
+    tini \
+    yaml-dev && \
     pip3 install --no-cache-dir --trusted-host pypi.python.org --upgrade pip && \
     rm -rf /var/cache/* && \
     rm -rf /root/.cache/*
