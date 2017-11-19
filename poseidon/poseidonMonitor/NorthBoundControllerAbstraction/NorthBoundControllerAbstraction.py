@@ -90,12 +90,19 @@ class Update_Switch_State(Monitor_Helper_Base):
                         'BcfProxy could not connect to {0}'.format(
                             self.controller['URI']))
             elif self.controller['TYPE'] == 'faucet':
+                self.controller['URI'] = str(
+                    self.mod_configuration['controller_uri'])
+                self.controller['USER'] = str(
+                    self.mod_configuration['controller_user'])
+                self.controller['PASS'] = str(
+                    self.mod_configuration['controller_pass'])
                 try:
-                    self.sdnc = FaucetProxy()
-                except BaseException:
+                    self.sdnc = FaucetProxy(host=self.controller['URI'], user=self.controller['USER'], pw=self.controller['PASS'])
+                    self.sdnc.connect()
+                except BaseException as e:
                     self.logger.error(
-                        'FaucetProxy could not connect to {0}'.format(
-                            self.controller['URI']))
+                        'FaucetProxy could not connect to {0} because {1}'.format(
+                            self.controller['URI'], e))
             else:
                 self.logger.error(
                     'Unknown SDN controller type {0}'.format(

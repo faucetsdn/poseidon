@@ -19,44 +19,79 @@ Created on 17 November 2017
 @author: cglewis
 '''
 from poseidon.baseClasses.Logger_Base import Logger
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.faucet.connection import Connection
 
-module_logger = Logger
-module_logger = module_logger.logger
+module_logger = Logger.logger
 
 
-class FaucetProxy:
+class FaucetProxy(Connection):
 
-    def __init__(self):
+    def __init__(self, host, user=None, pw=None, *args, **kwargs):
         '''Initializes Faucet object.'''
-        pass
+        super(FaucetProxy, self).__init__(host, user, pw, *args, **kwargs)
 
-    def format_endpoints(self):
-        pass
+    @staticmethod
+    def format_endpoints(data):
+        '''
+        return only the information needed for the application
+        '''
+        ret_list = list()
+        # TODO
+        return []
+
     def get_endpoints(self):
         pass
+
     def get_switches(self):
         pass
-    def get_tenants(self):
+
+    def get_ports(self):
         pass
-    def get_segments(self):
+
+    def get_vlans(self):
         pass
+
     def get_span_fabric(self):
         pass
-    def get_byip(self):
-        pass
-    def get_bymac(self):
-        pass
-    def shutdown_ip(self):
-        pass
+
+    def get_byip(self, ipaddr):
+        '''
+        return records about ip addresses from get_endpoints
+        to be used by shutdown_ip
+        '''
+        endpoints = self.get_endpoints()
+        match_list = []
+        # TODO
+        return match_list
+
+    def get_bymac(self, mac_addr):
+        '''
+        return records about mac address from get_endpoints
+        '''
+        endpoints = self.get_endpoints()
+        match_list = []
+        # TODO
+        return match_list
+
+    def shutdown_ip(self, ip_addr, shutdown=True, mac_addr=None):
+        shutdowns = []
+        # TODO
+        return shutdowns
+
     def shutdown_endpoint(self):
         pass
+
     def get_highest(self):
         pass
+
     def get_seq_by_ip(self):
         pass
+
     def mirror_ip(self):
         pass
+
     def unmirror_ip(self):
         pass
+
     def mirror_traffic(self):
         pass
