@@ -45,7 +45,7 @@ class Connection:
             ssh.load_system_host_keys()
             ssh.connect(self.host, username=self.user, password=self.pw)
             self.ssh = ssh
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             pass
 
     def close_connection(self):
@@ -66,7 +66,7 @@ class Connection:
             else:
                 pass
             scp.close()
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             pass
 
     def send_file(self, f_type):
@@ -80,5 +80,5 @@ class Connection:
             else:
                 pass
             scp.close()
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             pass

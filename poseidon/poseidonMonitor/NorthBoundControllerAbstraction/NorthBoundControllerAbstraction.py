@@ -108,7 +108,7 @@ class Update_Switch_State(Monitor_Helper_Base):
                                             config_file=self.controller['CONFIG_FILE'],
                                             log_file=self.controller['LOG_FILE'])
                     self.sdnc.connect()
-                except BaseException as e:
+                except BaseException as e:  # pragma: no cover
                     self.logger.error(
                         'FaucetProxy could not connect to {0} because {1}'.format(
                             self.controller['URI'], e))
