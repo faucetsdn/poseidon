@@ -107,7 +107,6 @@ class Update_Switch_State(Monitor_Helper_Base):
                                             pw=self.controller['PASS'],
                                             config_file=self.controller['CONFIG_FILE'],
                                             log_file=self.controller['LOG_FILE'])
-                    self.sdnc.connect()
                 except BaseException as e:  # pragma: no cover
                     self.logger.error(
                         'FaucetProxy could not connect to {0} because {1}'.format(
@@ -268,10 +267,10 @@ class Update_Switch_State(Monitor_Helper_Base):
             current = self.sdnc.get_endpoints()
             parsed = self.sdnc.format_endpoints(current)
             machines = parsed
-        except BaseException:  # pragma: no cover
+        except BaseException as e:  # pragma: no cover
             self.logger.error(
-                'Could not establish connection to {0}.'.format(
-                    self.controller['URI']))
+                'Could not establish connection to {0} because {1}.'.format(
+                    self.controller['URI'], e))
             self.retval['controller'] = 'Could not establish connection to {0}.'.format(
                 self.controller['URI'])
 

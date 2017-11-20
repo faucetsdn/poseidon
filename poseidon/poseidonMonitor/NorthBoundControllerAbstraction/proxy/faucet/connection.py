@@ -37,7 +37,7 @@ class Connection:
         self.log_file = log_file
         self.ssh = None
 
-    def connect(self):
+    def _connect(self):
         # TODO better logging
         try:
             ssh = SSHClient()
@@ -48,7 +48,7 @@ class Connection:
         except Exception as e:  # pragma: no cover
             pass
 
-    def close_connection(self):
+    def _disconnect(self):
         if self.ssh:
             self.ssh.close()
 
@@ -56,6 +56,7 @@ class Connection:
         pass
 
     def receive_file(self, f_type):
+        self._connect()
         # TODO better logging
         try:
             scp = SCPClient(self.ssh.get_transport())
@@ -68,8 +69,10 @@ class Connection:
             scp.close()
         except Exception as e:  # pragma: no cover
             pass
+        self._disconnect()
 
     def send_file(self, f_type):
+        self._connect()
         # TODO better logging
         try:
             scp = SCPClient(self.ssh.get_transport())
@@ -82,3 +85,4 @@ class Connection:
             scp.close()
         except Exception as e:  # pragma: no cover
             pass
+        self._disconnect()
