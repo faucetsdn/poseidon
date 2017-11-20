@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#   Copyright (c) 2016 In-Q-Tel, Inc, All Rights Reserved.
+#   Copyright (c) 2016-2017 In-Q-Tel, Inc, All Rights Reserved.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -153,7 +153,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
 
     def get_bymac(self, mac_addr):
         '''
-        return recrods about mac address from get_endpoints
+        return records about mac address from get_endpoints
         '''
         endpoints = self.get_endpoints()
         match_list = []

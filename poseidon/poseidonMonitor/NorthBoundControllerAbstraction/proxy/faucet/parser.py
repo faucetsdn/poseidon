@@ -15,29 +15,27 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Test module for controllerproxy.
-
-@author: kylez
+Created on 19 November 2017
+@author: cglewis
 """
-#import logging
+from yaml import load, dump
+from yaml import CLoader as Loader, CDumper as Dumper
 
 from poseidon.baseClasses.Logger_Base import Logger
-from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.controllerproxy import ControllerProxy
 
 module_logger = Logger.logger
 
 
-def test_ControllerProxy():
-    """
-    Tests ControllerProxy
-    # http://jsonplaceholder.typicode.com: Fake online REST API for testing.
-    """
-    proxy = ControllerProxy('http://jsonplaceholder.typicode.com')
-    r = proxy.get_resource('posts')
-    r.raise_for_status()
-    r = proxy.post_resource('posts')
-    r.raise_for_status()
-    r = proxy.request_resource(
-        method="PUT",
-        url="http://jsonplaceholder.typicode.com/posts/1")
-    r.raise_for_status()
+class Parser:
+
+    def __init__(self):
+        self.logger = module_logger
+
+    def config(self, config_file):
+        stream = open(config_file, 'r')
+        document = dump(load(stream), default_flow_style=False)
+        self.logger.info(document)
+
+    def log(self, log_file):
+        pass
+

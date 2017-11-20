@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#   Copyright (c) 2016 In-Q-Tel, Inc, All Rights Reserved.
+#   Copyright (c) 2016-2017 In-Q-Tel, Inc, All Rights Reserved.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.bcf import \
     BcfProxy
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.faucet.faucet import \
+    FaucetProxy
 
 module_logger = Logger
 
@@ -55,7 +57,8 @@ class Update_Switch_State(Monitor_Helper_Base):
         self.controller['URI'] = None
         self.controller['USER'] = None
         self.controller['PASS'] = None
-        self.bcf = None
+        self.controller['TYPE'] = None
+        self.sdnc = None
         self.first_time = True
         self.endpoint_states = defaultdict(dict)
         self.m_queue = Queue.Queue()
@@ -67,22 +70,51 @@ class Update_Switch_State(Monitor_Helper_Base):
     def first_run(self):
         ''' do some pre-run setup/configuration '''
         if self.configured:
-            self.controller['URI'] = str(
-                self.mod_configuration['controller_uri'])
-            self.controller['USER'] = str(
-                self.mod_configuration['controller_user'])
-            self.controller['PASS'] = str(
-                self.mod_configuration['controller_pass'])
+            self.controller['TYPE'] = str(
+                self.mod_configuration['controller_type'])
+            if self.controller['TYPE'] == 'bcf':
+                self.controller['URI'] = str(
+                    self.mod_configuration['controller_uri'])
+                self.controller['USER'] = str(
+                    self.mod_configuration['controller_user'])
+                self.controller['PASS'] = str(
+                    self.mod_configuration['controller_pass'])
 
-            myauth = {}
-            myauth['password'] = self.controller['PASS']
-            myauth['user'] = self.controller['USER']
-            try:
-                self.bcf = BcfProxy(self.controller['URI'], auth=myauth)
-            except BaseException:
+                myauth = {}
+                myauth['password'] = self.controller['PASS']
+                myauth['user'] = self.controller['USER']
+                try:
+                    self.sdnc = BcfProxy(self.controller['URI'], auth=myauth)
+                except BaseException:
+                    self.logger.error(
+                        'BcfProxy could not connect to {0}'.format(
+                            self.controller['URI']))
+            elif self.controller['TYPE'] == 'faucet':
+                self.controller['URI'] = str(
+                    self.mod_configuration['controller_uri'])
+                # TODO set defaults if these are not set
+                self.controller['USER'] = str(
+                    self.mod_configuration['controller_user'])
+                self.controller['PASS'] = str(
+                    self.mod_configuration['controller_pass'])
+                self.controller['CONFIG_FILE'] = str(
+                    self.mod_configuration['controller_config_file'])
+                self.controller['LOG_FILE'] = str(
+                    self.mod_configuration['controller_log_file'])
+                try:
+                    self.sdnc = FaucetProxy(host=self.controller['URI'],
+                                            user=self.controller['USER'],
+                                            pw=self.controller['PASS'],
+                                            config_file=self.controller['CONFIG_FILE'],
+                                            log_file=self.controller['LOG_FILE'])
+                except BaseException as e:  # pragma: no cover
+                    self.logger.error(
+                        'FaucetProxy could not connect to {0} because {1}'.format(
+                            self.controller['URI'], e))
+            else:
                 self.logger.error(
-                    'BcfProxy coult not connect to {0}'.format(
-                        self.controller['URI']))
+                    'Unknown SDN controller type {0}'.format(
+                        self.controller['TYPE']))
         else:
             pass
 
@@ -127,7 +159,7 @@ class Update_Switch_State(Monitor_Helper_Base):
         if my_hash in self.endpoint_states:
             my_ip = self.get_endpoint_ip(my_hash)
             next_state = self.get_endpoint_next(my_hash)
-            self.bcf.shutdown_ip(my_ip)
+            self.sdnc.shutdown_ip(my_ip)
             self.change_endpoint_state(my_hash)
             self.logger.debug(
                 'endpoint:{0}:{1}:{2}'.format(my_hash, my_ip, next_state))
@@ -139,7 +171,7 @@ class Update_Switch_State(Monitor_Helper_Base):
         if my_hash in self.endpoint_states:
             my_ip = self.get_endpoint_ip(my_hash)
             next_state = self.get_endpoint_next(my_hash)
-            self.bcf.mirror_ip(my_ip)
+            self.sdnc.mirror_ip(my_ip)
             self.change_endpoint_state(my_hash)
             self.logger.debug(
                 'endpoint:{0}:{1}:{2}'.format(my_hash, my_ip, next_state))
@@ -151,7 +183,7 @@ class Update_Switch_State(Monitor_Helper_Base):
         if my_hash in self.endpoint_states:
             my_ip = self.get_endpoint_ip(my_hash)
             next_state = self.get_endpoint_next(my_hash)
-            self.bcf.unmirror_ip(my_ip)
+            self.sdnc.unmirror_ip(my_ip)
             self.logger.debug(
                 'endpoint:{0}:{1}:{2}'.format(my_hash, my_ip, next_state))
             return True
@@ -232,13 +264,13 @@ class Update_Switch_State(Monitor_Helper_Base):
         machines = {}
 
         try:
-            current = self.bcf.get_endpoints()
-            parsed = self.bcf.format_endpoints(current)
+            current = self.sdnc.get_endpoints()
+            parsed = self.sdnc.format_endpoints(current)
             machines = parsed
-        except BaseException:  # pragma: no cover
+        except BaseException as e:  # pragma: no cover
             self.logger.error(
-                'Could not establish connection to {0}.'.format(
-                    self.controller['URI']))
+                'Could not establish connection to {0} because {1}.'.format(
+                    self.controller['URI'], e))
             self.retval['controller'] = 'Could not establish connection to {0}.'.format(
                 self.controller['URI'])
 

@@ -15,18 +15,17 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-Created on 25 July 2016
-@author: kylez
+Test module for faucet parser.
+
+@author: cglewis
 """
-from poseidon.baseClasses.Logger_Base import Logger
-from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.controllerproxy import ControllerProxy
-
-module_logger = Logger.logger
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.faucet.parser import Parser
 
 
-class BasicAuthControllerProxy(ControllerProxy):
-
-    def __init__(self, base_uri, auth, *args, **kwargs):
-        super(BasicAuthControllerProxy, self).__init__(
-            base_uri, *args, **kwargs)
-        self.session.auth = auth
+def test_Parser():
+    """
+    Tests Parser
+    """
+    parser = Parser()
+    parser.config('/tmp/faucet.yaml')
+    parser.log('/tmp/faucet.log')
