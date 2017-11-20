@@ -16,6 +16,7 @@ poseidon:
 
     NorthBoundControllerAbstraction:Update_Switch_State:
         config: True
+        controller_type: bcf
         controller_uri: https://CONTROLLER_IP:8443/api/v1/
         controller_user: CONTROLLER_USER
         controller_pass: CONTROLLER_PASS
