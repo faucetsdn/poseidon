@@ -27,8 +27,8 @@ def test_Connection():
     Tests Connection
     """
     conn = Connection('foo')
-    conn.connect()
-    conn.close_connection()
+    conn._connect()
+    conn._disconnect()
     conn.exec_command('foo')
     conn.receive_file('config')
     conn.receive_file('log')

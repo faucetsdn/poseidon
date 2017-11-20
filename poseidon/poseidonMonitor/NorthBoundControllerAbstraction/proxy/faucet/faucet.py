@@ -50,18 +50,44 @@ class FaucetProxy(Connection, Parser):
         return only the information needed for the application
         '''
         ret_list = list()
-        # TODO
-        ret_list.append(data)
+        for d in data:
+            md = d[0]
+            del md['ip-state']
+            md['name'] = None
+            ret_list.append(md)
         return ret_list
 
     def get_endpoints(self):
         self.receive_file('log')
-        data = ''
+        retval = []
+
+        # NOTE very fragile, prone to errors
+        mac_table = {}
         with open('/tmp/faucet.log', 'r') as f:
             for line in f:
-                data += line
-        self.receive_file('config')
-        return data
+                if 'L2 learned' in line:
+                    learned_mac = line.split()
+                    data = {'ip-address': learned_mac[16][0:-1],
+                            'ip-state': 'L2 learned',
+                            'mac': learned_mac[10],
+                            'segment': learned_mac[7][1:-1],
+                            'tenant': learned_mac[21]+learned_mac[22]}
+                    if learned_mac[10] in mac_table:
+                        dup = False
+                        for d in mac_table[learned_mac[10]]:
+                            if data == d:
+                                dup = True
+                        if dup:
+                            mac_table[learned_mac[10]].remove(data)
+                        mac_table[learned_mac[10]].insert(0, data)
+                    else:
+                        mac_table[learned_mac[10]] = [data]
+        module_logger.debug('get_endpoints found:')
+        for mac in mac_table:
+            module_logger.debug('{0}:{1}'.format(
+                mac, mac_table[mac]))
+            retval.append(mac_table[mac])
+        return retval
 
     def get_switches(self):
         pass
