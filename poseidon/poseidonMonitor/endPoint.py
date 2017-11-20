@@ -26,7 +26,7 @@ import time
 class EndPoint:
 
     def __init__(self, endpoint_data, prev_state='None', state='NONE', next_state='NONE'):
-        self.transition_time = 0
+        self.transition_time = time.time()
         self.prev_state = prev_state
         self.state = state
         self.next_state = next_state

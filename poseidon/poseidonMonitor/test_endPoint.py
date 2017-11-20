@@ -56,7 +56,9 @@ def test_endpoint_creation_no_state():
     assert endpoint1.make_hash() == endpoint2.make_hash()
 
 
+
 def test_endpoint_creation_with_state():
+    time.time = mock_time
     endpoint0 = endPoint.EndPoint(test_data)
     endpoint1 = endPoint.EndPoint(test_data, state='TEST1')
     endpoint2 = endPoint.EndPoint(test_data, next_state='TEST2')
@@ -78,7 +80,8 @@ def test_endpoint_state_default():
 def test_elapsed_time():
     time.time = mock_time
     endpoint1 = endPoint.EndPoint(test_data)
+    # should be 0 as time.time always returns the same thing in mock
     e1 = endpoint1.elapsed_time(0)
-    assert e1 == 1308614400.0
+    assert e1 == 0
     e2 = endpoint1.elapsed_time()
-    assert e2 == 1308614400.0
+    assert e2 == 0
