@@ -34,7 +34,5 @@ https://github.com/cyberreboot/vent-plugins:
     pcap_to_node_pcap:
         build: yes
 https://github.com/lab41/poseidonml:
-    abnormaldetector@classify:
-        build: yes
     nodeclassifier@eval:
         build: yes
