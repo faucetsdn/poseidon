@@ -26,9 +26,5 @@ ENV PYTHONUNBUFFERED 0
 ENV SYS_LOG_HOST NOT_CONFIGURED
 ENV SYS_LOG_PORT 514
 
-# run tests
-#RUN py.test -s -v -vv --cov-report term-missing --cov=./poseidon -c .coveragerc
-RUN py.test  -v -vv --cov-report term-missing --cov=./poseidon -c .coveragerc
-
 ENTRYPOINT ["tini", "--"]
 CMD ["/usr/bin/python3", "/tmp/poseidonWork/poseidon/poseidonMonitor/poseidonMonitor.py"]
