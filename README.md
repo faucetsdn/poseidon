@@ -63,6 +63,12 @@ To build and then open the docs in a container on port 8080:
 ```
 make run_docs
 ```
+
+To run tests:
+```
+make run_tests
+```
+
 ## Configuration
 config/poseidon.config
 ### [Monitor]
