@@ -24,6 +24,7 @@ Created on 28 June 2016
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import controller_interface
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import Update_Switch_State
+from poseidon.poseidonMonitor.endPoint import EndPoint
 import json
 
 module_logger = Logger.logger
@@ -95,7 +96,11 @@ def test_find_new_machines_first_time():
                     "segment": "to-core-router",
                     "tenant": "EXTERNAL",
                     "name": None}}})
-    assert str(answer) == str(dict(uss.endpoint_states))
+    #assert str(answer) == str(dict(uss.endpoint_states))
+    for key in answer:
+        assert answer[key]['state'] == uss.endpoint_states[key].state
+        for next_key in answer[key]['endpoint']:
+            assert answer[key]['endpoint'][next_key] == uss.endpoint_states[key].endpoint_data[next_key]
 
 
 def test_file_new_machines_later():
@@ -132,7 +137,13 @@ def test_file_new_machines_later():
                     'tenant': 'EXTERNAL',
                     'name': None}}})
     uss.find_new_machines(machines)
-    assert str(answer) == str(dict(uss.endpoint_states))
+
+    #assert str(answer) == str(dict(uss.endpoint_states))
+    for key in answer:
+        assert answer[key]['state'] == uss.endpoint_states[key].state
+        assert answer[key]['next-state'] == uss.endpoint_states[key].next_state
+        for key2 in answer[key]['endpoint']:
+            assert answer[key]['endpoint'][key2] == uss.endpoint_states[key].endpoint_data[key2]
 
 
 def test_unmirror_endpoint():
@@ -244,7 +255,13 @@ def test_make_endpoint_dict():
                     'segment': 'to-core-router',
                     'tenant': 'EXTERNAL',
                     'name': None}}})
-    assert str(answer) == str(dict(uss.endpoint_states))
+
+    #assert str(answer) == str(dict(uss.endpoint_states))
+    for key in answer:
+        assert answer[key]['state'] == uss.endpoint_states[key].state
+        assert answer[key]['next-state'] == uss.endpoint_states[key].next_state
+        for key2 in answer[key]['endpoint']:
+            assert answer[key]['endpoint'][key2] == uss.endpoint_states[key].endpoint_data[key2]
 
 
 def test_change_endpoint_state():
@@ -271,7 +288,12 @@ def test_change_endpoint_state():
                     'name': None}}})
     uss.change_endpoint_state(
         '3da53a95ae5d034ae37b539a24370260a36f8bb2', new_state='TEST_STATE')
-    assert str(answer) == str(dict(uss.endpoint_states))
+    #assert str(answer) == str(dict(uss.endpoint_states))
+    for key in answer:
+        assert answer[key]['state'] == uss.endpoint_states[key].state
+        assert answer[key]['next-state'] == uss.endpoint_states[key].next_state
+        for key2 in answer[key]['endpoint']:
+            assert answer[key]['endpoint'][key2] == uss.endpoint_states[key].endpoint_data[key2]
 
 
 def test_change_endpoint_nextstate():
@@ -298,7 +320,12 @@ def test_change_endpoint_nextstate():
                     'name': None}}})
     uss.change_endpoint_nextstate(
         '3da53a95ae5d034ae37b539a24370260a36f8bb2', next_state='TEST_STATE')
-    assert str(answer) == str(dict(uss.endpoint_states))
+    #assert str(answer) == str(dict(uss.endpoint_states))
+    for key in answer:
+        assert answer[key]['state'] == uss.endpoint_states[key].state
+        assert answer[key]['next-state'] == uss.endpoint_states[key].next_state
+        for key2 in answer[key]['endpoint']:
+            assert answer[key]['endpoint'][key2] == uss.endpoint_states[key].endpoint_data[key2]
 
 
 def test_get_endpoinit_next():
@@ -351,17 +378,24 @@ def test_return_endpoint_state():
     uss.make_endpoint_dict(hash_value, state, endpoint_data)
     answer = dict(
         {
-            '3da53a95ae5d034ae37b539a24370260a36f8bb2': {
-                'state': 'TEST_STATE',
-                'next-state': 'NONE',
-                'endpoint': {
-                    'ip-address': '10.0.0.99',
-                    'mac': '20:4c:9e:5f:e3:c3',
-                    'segment': 'to-core-router',
-                    'tenant': 'EXTERNAL',
-                    'name': None}}})
-    assert str(answer) == str(dict(uss.return_endpoint_state()))
-    assert uss.return_endpoint_state() == uss.endpoint_states
+            '3da53a95ae5d034ae37b539a24370260a36f8bb2': EndPoint({
+                'ip-address': '10.0.0.99',
+                'mac': '20:4c:9e:5f:e3:c3',
+                'segment': 'to-core-router',
+                'tenant': 'EXTERNAL',
+                'name': None},
+                prev_state='NONE', state='TEST_STATE', next_state='NONE')
+
+        })
+    eps = uss.return_endpoint_state()
+    key ='3da53a95ae5d034ae37b539a24370260a36f8bb2' 
+    assert eps[key].state == answer[key].state
+    assert eps[key].next_state == answer[key].next_state
+    for key2 in eps[key].endpoint_data:
+        assert eps[key].endpoint_data[key2] == answer[key].endpoint_data[key2]
+    
+    #assert str(answer) == str(dict(uss.return_endpoint_state()))
+    #assert uss.return_endpoint_state() == uss.endpoint_states
 
 
 def test_first_run_bcf():
@@ -426,24 +460,22 @@ def test_shutdown_endpoint():
     uss.sdnc = Mockbcf()
     uss.endpoint_states = dict(
         {
-            'd502caea3609d553ab16a00c554f0602c1419f58': {
-                'state': 'UNKNOWN',
-                'next-state': 'NONE',
-                'endpoint': {
-                    'ip-address': '10.0.0.101',
-                    'mac': 'f8:b1:56:fe:f2:de',
-                    'segment': 'prod',
-                    'tenant': 'FLOORPLATE',
-                    'name': None}},
-            '3da53a95ae5d034ae37b539a24370260a36f8bb2': {
-                'state': 'KNOWN',
-                'next-state': 'NONE',
-                'endpoint': {
-                    'ip-address': '10.0.0.99',
-                    'mac': '20:4c:9e:5f:e3:c3',
-                    'segment': 'to-core-router',
-                    'tenant': 'EXTERNAL',
-                    'name': None}}})
+            'd502caea3609d553ab16a00c554f0602c1419f58': EndPoint({
+                'ip-address': '10.0.0.101',
+                'mac': 'f8:b1:56:fe:f2:de',
+                'segment': 'prod',
+                'tenant': 'FLOORPLATE',
+                'name': None},
+                prev_state='NONE', state='UNKNOWN', next_state='NONE'),
+            '3da53a95ae5d034ae37b539a24370260a36f8bb2': EndPoint({
+                'ip-address': '10.0.0.99',
+                'mac': '20:4c:9e:5f:e3:c3',
+                'segment': 'to-core-router',
+                'tenant': 'EXTERNAL',
+                'name': None},
+                prev_state='NONE', state='KNOWN', next_state='NONE')
+
+        })
     ret_val = uss.shutdown_endpoint('3da53a95ae5d034ae37b539a24370260a36f8bb2')
     assert ret_val
     ret_val = uss.shutdown_endpoint('NOT_A_HASH')
@@ -463,24 +495,22 @@ def test_mirror_endpoint():
     uss.sdnc = Mockbcf()
     uss.endpoint_states = dict(
         {
-            'd502caea3609d553ab16a00c554f0602c1419f58': {
-                'state': 'UNKNOWN',
-                'next-state': 'NONE',
-                'endpoint': {
-                    'ip-address': '10.0.0.101',
-                    'mac': 'f8:b1:56:fe:f2:de',
-                    'segment': 'prod',
-                    'tenant': 'FLOORPLATE',
-                    'name': None}},
-            '3da53a95ae5d034ae37b539a24370260a36f8bb2': {
-                'state': 'KNOWN',
-                'next-state': 'NONE',
-                'endpoint': {
-                    'ip-address': '10.0.0.99',
-                    'mac': '20:4c:9e:5f:e3:c3',
-                    'segment': 'to-core-router',
-                    'tenant': 'EXTERNAL',
-                    'name': None}}})
+            'd502caea3609d553ab16a00c554f0602c1419f58': EndPoint({
+                'ip-address': '10.0.0.101',
+                'mac': 'f8:b1:56:fe:f2:de',
+                'segment': 'prod',
+                'tenant': 'FLOORPLATE',
+                'name': None},
+                prev_state='NONE', state='UNKNOWN', next_state='NONE'),
+            '3da53a95ae5d034ae37b539a24370260a36f8bb2': EndPoint({
+                'ip-address': '10.0.0.99',
+                'mac': '20:4c:9e:5f:e3:c3',
+                'segment': 'to-core-router',
+                'tenant': 'EXTERNAL',
+                'name': None},
+                prev_state='NONE', state='KNOWN', next_state='NONE'),
+
+        })
     ret_val = uss.mirror_endpoint('3da53a95ae5d034ae37b539a24370260a36f8bb2')
     assert ret_val
     ret_val = uss.mirror_endpoint('NOT_A_HASH')
