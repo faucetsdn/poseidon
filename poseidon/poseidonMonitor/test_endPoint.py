@@ -56,15 +56,17 @@ def test_endpoint_creation_no_state():
     assert endpoint1.make_hash() == endpoint2.make_hash()
 
 
+
 def test_endpoint_creation_with_state():
+    time.time = mock_time
     endpoint0 = endPoint.EndPoint(test_data)
     endpoint1 = endPoint.EndPoint(test_data, state='TEST1')
     endpoint2 = endPoint.EndPoint(test_data, next_state='TEST2')
     endpoint3 = endPoint.EndPoint(test_data, state='TEST1', next_state='TEST2')
-    assert 'prev_state: None, state: NONE, next_state: NONE, transition_time: 0' in endpoint0.to_str()
-    assert 'prev_state: None, state: TEST1, next_state: NONE, transition_time: 0' in endpoint1.to_str()
-    assert 'prev_state: None, state: NONE, next_state: TEST2, transition_time: 0' in endpoint2.to_str()
-    assert 'prev_state: None, state: TEST1, next_state: TEST2, transition_time: 0' in endpoint3.to_str()
+    assert 'prev_state: None, state: NONE, next_state: NONE, transition_time: 1308614400.0' in endpoint0.to_str()
+    assert 'prev_state: None, state: TEST1, next_state: NONE, transition_time: 1308614400.0' in endpoint1.to_str()
+    assert 'prev_state: None, state: NONE, next_state: TEST2, transition_time: 1308614400.0' in endpoint2.to_str()
+    assert 'prev_state: None, state: TEST1, next_state: TEST2, transition_time: 1308614400.0' in endpoint3.to_str()
 
 
 def test_endpoint_state_default():
@@ -81,4 +83,4 @@ def test_elapsed_time():
     e1 = endpoint1.elapsed_time(0)
     assert e1 == 1308614400.0
     e2 = endpoint1.elapsed_time()
-    assert e2 == 1308614400.0
+    assert e2 == 0

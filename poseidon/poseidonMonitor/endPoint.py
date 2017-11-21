@@ -26,11 +26,14 @@ import time
 class EndPoint:
 
     def __init__(self, endpoint_data, prev_state='None', state='NONE', next_state='NONE'):
-        self.transition_time = 0
+        self.transition_time = time.time()
         self.prev_state = prev_state
         self.state = state
         self.next_state = next_state
-        self.endpoint_data = dict(endpoint_data)
+        if endpoint_data is not None:
+            self.endpoint_data = dict(endpoint_data)
+        else:
+            self.endpoint_data = {}
 
     def make_hash(self):
         ''' hash the metadata in a sane way '''

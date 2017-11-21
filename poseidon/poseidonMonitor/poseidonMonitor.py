@@ -22,6 +22,7 @@ Created on 17 May 2016
 """
 import json
 import queue as Queue
+import random
 import signal
 import sys
 import threading
@@ -31,11 +32,11 @@ from os import getenv
 
 import requests
 import schedule
-import random
 
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.baseClasses.Rabbit_Base import Rabbit_Base
 from poseidon.poseidonMonitor.Config.Config import config_interface
+from poseidon.poseidonMonitor.endPoint import EndPoint
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import \
     controller_interface
 
@@ -203,14 +204,14 @@ class Monitor(object):
 
             out_flag = False
             for my_hash in endpoint_states:
-                my_dict = endpoint_states[my_hash]
-                if my_dict['state'] == state:
+                endpoint = endpoint_states[my_hash]
+                if endpoint.state == state:
                     out_flag = True
                     logger.debug('{0}:{1}:{2}->{3}:{4}'.format(letter,
                                                                my_hash,
-                                                               my_dict['state'],
-                                                               my_dict['next-state'],
-                                                               my_dict['endpoint']))
+                                                               endpoint.state,
+                                                               endpoint.next_state,
+                                                               endpoint.endpoint_data))
             if not out_flag:
                 logger.debug('None')
 
@@ -248,16 +249,17 @@ class Monitor(object):
         current_state = None
         endpoint_states = self.uss.return_endpoint_state()
         for my_hash in endpoint_states:
-            my_dict = endpoint_states[my_hash]
-            current_state = my_dict['state']
+            endpoint = endpoint_states[my_hash]
+            current_state = endpoint.state
 
             # TODO move this lower with the rest of the checks
             if current_state == 'UNKNOWN':
-                if my_dict['next-state'] != 'KNOWN':
-                    my_dict['next-state'] = 'MIRRORING'
+                if endpoint.next_state  != 'KNOWN':
+                    endpoint.next_state = 'MIRRORING'
+
         for my_hash in ml_returns:
             if my_hash in endpoint_states:
-                endpoint_dict = endpoint_states[my_hash]
+                endpoint = endpoint_states[my_hash]
                 '''
                     {'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {
                         'classification': {
@@ -280,7 +282,7 @@ class Monitor(object):
                 '''
                 # TODO is this the best place for this?
                 if ml_returns[my_hash]['valid']:
-                    current_state = endpoint_dict['state']
+                    current_state = endpoint.state
                     ml_decision = ml_returns[my_hash]['decisions']['behavior']
                     self.logger.debug('ML_DECISION:{0}'.format(ml_decision))
                     if current_state == 'REINVESTIGATING':
@@ -309,7 +311,7 @@ class Monitor(object):
         options specified in poseidon.config.
         '''
         endpoint_states = self.uss.return_endpoint_state()
-        metadata = endpoint_states.get(dev_hash, {})
+        endpoint = endpoint_states.get(dev_hash, EndPoint(None))
 
         payload = {
             'nic': self.mod_configuration['collector_nic'],
@@ -318,7 +320,7 @@ class Monitor(object):
             'filter': '\'host {0}\''.format(
                 self.uss.get_endpoint_ip(dev_hash)),
             'iters': str(num_captures),
-            'metadata': str(metadata)}
+            'metadata': endpoint.to_str()}
 
         self.logger.debug('vent payload: ' + str(payload))
 
@@ -388,8 +390,8 @@ class Monitor(object):
             # make the transitions
 
             for endpoint_hash in eps:
-                current_state = eps[endpoint_hash]['state']
-                next_state = eps[endpoint_hash]['next-state']
+                current_state = eps[endpoint_hash].state
+                next_state = eps[endpoint_hash].next_state
 
                 # dont do anything
                 if next_state == 'NONE':
