@@ -26,8 +26,8 @@ import json
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor import poseidonMonitor
 from poseidon.poseidonMonitor.endPoint import EndPoint
-from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.UpdateSwitchState import \
-    Endpoint_Wrapper
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.EndpointWrapper import Endpoint_Wrapper
+
 from poseidon.poseidonMonitor.poseidonMonitor import (CTRL_C, Monitor,
                                                       schedule_job_kickurl,
                                                       schedule_thread_worker)

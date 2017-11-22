@@ -92,7 +92,7 @@ def schedule_job_reinvestigation(max_investigations, endpoints, logger):
     candidates = []
 
     currently_investigating = 0
-    for my_hash, my_value in endpoints.items():
+    for my_hash, my_value in endpoints.state.items():
         if 'state' in my_value:
             if my_value['state'] == 'REINVESTIGATING' or my_value[
                     'next-state'] == 'REINVESTIGATING':
@@ -185,7 +185,7 @@ class Monitor(object):
             partial(schedule_job_reinvestigation,
                     max_investigations=max_concurrent_reinvestigations,
                     endpoints=self.NorthBoundControllerAbstraction.get_endpoint(
-                        'Update_Switch_State').endpoints.state,
+                        'Update_Switch_State').endpoints,
                     logger=self.logger))
 
         self.schedule_thread = threading.Thread(
