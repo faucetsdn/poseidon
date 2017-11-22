@@ -137,14 +137,11 @@ class FaucetProxy(Connection, Parser):
     def get_seq_by_ip(self):
         pass
 
-    def mirror_ip(self):
+    def mirror_ip(self, ip):
         self.config('/tmp/faucet.yaml')
-        pass
 
-    def unmirror_ip(self):
+    def unmirror_ip(self, ip):
         self.config('/tmp/faucet.yaml')
-        pass
 
     def mirror_traffic(self):
         self.config('/tmp/faucet.yaml')
-        pass
