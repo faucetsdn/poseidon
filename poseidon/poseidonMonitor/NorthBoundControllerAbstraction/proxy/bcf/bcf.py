@@ -24,7 +24,7 @@ from urllib.parse import urljoin
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.auth.cookie.cookieauth import CookieAuthControllerProxy
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.mixins.jsonmixin import JsonMixin
-from poseidon.poseidonMonitor.endPoint import EndPoint
+#from poseidon.poseidonMonitor.endPoint import EndPoint
 
 module_logger = Logger
 module_logger = module_logger.logger
