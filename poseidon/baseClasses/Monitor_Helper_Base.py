@@ -65,31 +65,19 @@ class Monitor_Helper_Base(Rock_Bottom):  # pragma: no cover
             return
         self.mod_configuration = dict()
         conf = self.owner.owner.Config.get_endpoint('Handle_SectionConfig')
-        ostr = '********** conf:{0}'.format(conf)
-        print(ostr)
+        #ostr = '********** conf:{0}'.format(conf)
+        #print(ostr)
         if conf is not None:
             for item in conf.direct_get(self.config_section_name):
-                ostr = '********** item:{0}'.format(item)
-                self.logger.debug(ostr)
+                #ostr = '********** item:{0}'.format(item)
+                #self.logger.debug(ostr)
                 print(ostr)
                 k, v = item
                 self.mod_configuration[k] = v
-                ostr = 'config:{0}:{1}'.format(
-                    self.config_section_name, self.mod_configuration)
-                self.logger.debug(ostr)
+                #ostr = 'config:{0}:{1}'.format(
+                #    self.config_section_name, self.mod_configuration)
+                #self.logger.debug(ostr)
             self.configured = True
 
     def first_run(self):
         '''do special setup after configure'''
-
-    # def on_post(self, req, resp):
-    #    '''handle jrandom rest case'''
-
-    # def on_put(self, req, resp, name):
-    #    '''handle jrandom rest case'''
-
-    # def on_get(self, req, resp):
-    #    '''handle jrandom rest case'''
-
-    # def on_delete(self, req, resp):
-    #    '''handle jrandom rest case'''
