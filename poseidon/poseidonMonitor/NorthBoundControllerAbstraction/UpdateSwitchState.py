@@ -17,10 +17,8 @@
 Created on 20 Nov 2017
 @author: dgrossman
 '''
-import hashlib
 import json
 import queue as Queue
-from collections import defaultdict
 
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
