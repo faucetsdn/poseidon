@@ -19,8 +19,10 @@ Created on 17 November 2017
 @author: cglewis
 '''
 from poseidon.baseClasses.Logger_Base import Logger
-from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.faucet.connection import Connection
-from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.faucet.parser import Parser
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.faucet.connection import \
+    Connection
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.faucet.parser import \
+    Parser
 
 module_logger = Logger.logger
 
@@ -71,7 +73,7 @@ class FaucetProxy(Connection, Parser):
                             'ip-state': 'L2 learned',
                             'mac': learned_mac[10],
                             'segment': learned_mac[7][1:-1],
-                            'tenant': learned_mac[21]+learned_mac[22]}
+                            'tenant': learned_mac[21] + learned_mac[22]}
                     if learned_mac[10] in mac_table:
                         dup = False
                         for d in mac_table[learned_mac[10]]:
@@ -128,7 +130,6 @@ class FaucetProxy(Connection, Parser):
 
     def shutdown_endpoint(self):
         self.config('/tmp/faucet.yaml')
-        pass
 
     def get_highest(self):
         pass

@@ -40,8 +40,6 @@ from poseidon.poseidonMonitor.endPoint import EndPoint
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import \
     controller_interface
 
-ENDPOINT_STATES = [('K', 'KNOWN'), ('U', 'UNKNOWN'), ('M', 'MIRRORING'),
-                   ('S', 'SHUTDOWN'), ('R', 'REINVESTIGATING')]
 
 module_logger = Logger
 requests.packages.urllib3.disable_warnings()
@@ -94,13 +92,11 @@ def schedule_job_reinvestigation(max_investigations, endpoints, logger):
     candidates = []
 
     currently_investigating = 0
-    for my_hash, my_value in endpoints.items():
-        if 'state' in my_value:
-            if my_value['state'] == 'REINVESTIGATING' or my_value[
-                    'next-state'] == 'REINVESTIGATING':
-                currently_investigating += 1
-            elif my_value['state'] == 'KNOWN':
-                candidates.append(my_hash)
+    for my_hash, my_value in endpoints.state.items():
+        if my_value.state == 'REINVESTIGATING' or my_value.next_state == 'REINVESTIGATING':
+            currently_investigating += 1
+        elif my_value.state == 'KNOWN':
+            candidates.append(my_hash)
 
     # get random order of things that are known
     random.shuffle(candidates)
@@ -113,7 +109,7 @@ def schedule_job_reinvestigation(max_investigations, endpoints, logger):
                 chosen = candidates.pop()
                 ostr = 'starting investigation {0}:{1}'.format(x, chosen)
                 logger.debug(ostr)
-                endpoints[chosen]['next-state'] = 'REINVESTIGATING'
+                endpoints.state[chosen].next_state = 'REINVESTIGATING'
     else:
         ostr = 'investigators all busy'
         logger.debug(ostr)
@@ -187,7 +183,7 @@ class Monitor(object):
             partial(schedule_job_reinvestigation,
                     max_investigations=max_concurrent_reinvestigations,
                     endpoints=self.NorthBoundControllerAbstraction.get_endpoint(
-                        'Update_Switch_State').endpoint_states,
+                        'Update_Switch_State').endpoints,
                     logger=self.logger))
 
         self.schedule_thread = threading.Thread(
@@ -196,29 +192,6 @@ class Monitor(object):
                 schedule=self.schedule,
                 logger=self.logger),
             name='st_worker')
-
-    def print_endpoint_state(self, endpoint_states):
-        ''' debug output showing the state of endpoints '''
-        def same_old(logger, state, letter, endpoint_states):
-            logger.debug('*******{0}*********'.format(state))
-
-            out_flag = False
-            for my_hash in endpoint_states:
-                endpoint = endpoint_states[my_hash]
-                if endpoint.state == state:
-                    out_flag = True
-                    logger.debug('{0}:{1}:{2}->{3}:{4}'.format(letter,
-                                                               my_hash,
-                                                               endpoint.state,
-                                                               endpoint.next_state,
-                                                               endpoint.endpoint_data))
-            if not out_flag:
-                logger.debug('None')
-
-        for l, s in ENDPOINT_STATES:
-            same_old(self.logger, s, l, endpoint_states)
-
-            self.logger.debug('****************')
 
     def init_logging(self):
         ''' setup logging  '''
@@ -247,19 +220,19 @@ class Monitor(object):
         ''' generate the next_state from known information '''
         next_state = None
         current_state = None
-        endpoint_states = self.uss.return_endpoint_state()
-        for my_hash in endpoint_states:
-            endpoint = endpoint_states[my_hash]
+        endpoints = self.uss.return_endpoint_state()
+        for my_hash in endpoints.state:
+            endpoint = endpoints.state[my_hash]
             current_state = endpoint.state
 
             # TODO move this lower with the rest of the checks
             if current_state == 'UNKNOWN':
-                if endpoint.next_state  != 'KNOWN':
+                if endpoint.next_state != 'KNOWN':
                     endpoint.next_state = 'MIRRORING'
 
         for my_hash in ml_returns:
-            if my_hash in endpoint_states:
-                endpoint = endpoint_states[my_hash]
+            if my_hash in endpoints.state:
+                endpoint = endpoints.state[my_hash]
                 '''
                     {'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {
                         'classification': {
@@ -310,15 +283,15 @@ class Monitor(object):
         to be taken, starts vent collector for that device with the
         options specified in poseidon.config.
         '''
-        endpoint_states = self.uss.return_endpoint_state()
-        endpoint = endpoint_states.get(dev_hash, EndPoint(None))
+        endpoints = self.uss.return_endpoint_state()
+        endpoint = endpoints.state.get(dev_hash, EndPoint(None))
 
         payload = {
             'nic': self.mod_configuration['collector_nic'],
             'id': dev_hash,
             'interval': self.mod_configuration['collector_interval'],
             'filter': '\'host {0}\''.format(
-                self.uss.get_endpoint_ip(dev_hash)),
+                self.uss.endpoints.get_endpoint_ip(dev_hash)),
             'iters': str(num_captures),
             'metadata': endpoint.to_str()}
 
@@ -381,17 +354,17 @@ class Monitor(object):
                 self.logger.debug('ml_returns:{0}'.format(ml_returns))
                 self.logger.debug("**********************\n\n\n")
 
-            eps = self.uss.return_endpoint_state()
+            eps = self.uss.endpoints
 
             state_transitions = self.update_next_state(ml_returns)
 
-            self.print_endpoint_state(eps)
+            eps.print_endpoint_state()
 
             # make the transitions
 
-            for endpoint_hash in eps:
-                current_state = eps[endpoint_hash].state
-                next_state = eps[endpoint_hash].next_state
+            for endpoint_hash in eps.state:
+                current_state = eps.get_endpoint_state(endpoint_hash)
+                next_state = eps.get_endpoint_next(endpoint_hash)
 
                 # dont do anything
                 if next_state == 'NONE':
@@ -416,12 +389,12 @@ class Monitor(object):
                         self.logger.debug(
                             '*********** R UN-MIRROR PORT ***********')
                         self.uss.unmirror_endpoint(endpoint_hash)
-                        self.uss.change_endpoint_state(endpoint_hash)
+                        eps.change_endpoint_state(endpoint_hash)
                     if current_state == 'UNKNOWN':
                         self.logger.debug(
                             '*********** U UN-MIRROR PORT ***********')
                         self.uss.unmirror_endpoint(endpoint_hash)
-                        self.uss.change_endpoint_state(endpoint_hash)
+                        eps.change_endpoint_state(endpoint_hash)
 
     def get_q_item(self):
         ''' attempt to get a workitem from the queue'''

@@ -17,18 +17,8 @@
 Created on 17 May 2016
 @author: dgrossman
 '''
-import hashlib
-import json
-import queue as Queue
-from collections import defaultdict
-
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
-from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
-from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.bcf import \
-    BcfProxy
-from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.faucet.faucet import \
-    FaucetProxy
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.UpdateSwitchState import \
     Update_Switch_State
 
