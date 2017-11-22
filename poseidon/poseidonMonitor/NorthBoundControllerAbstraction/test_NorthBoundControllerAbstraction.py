@@ -388,6 +388,12 @@ def test_first_run_bcf():
     assert uss.controller['PASS'] == 'TEST_PASS'
     assert uss.controller['TYPE'] == 'bcf'
 
+    uss = Update_Switch_State()
+    uss.configured = False
+    uss.first_run()
+
+ 
+
 
 def test_first_run_faucet():
 
