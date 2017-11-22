@@ -30,6 +30,11 @@ import json
 module_logger = Logger.logger
 
 
+def make_endpoint_dict(e_dict, my_hash, state, data):
+    ''' make a new endpoint '''
+    e_dict[my_hash] = EndPoint(data, state=state)
+
+
 def test_update_endpoint_state():
 
     class mybcf():
@@ -98,9 +103,9 @@ def test_find_new_machines_first_time():
                     "name": None}}})
     #assert str(answer) == str(dict(uss.endpoint_states))
     for key in answer:
-        assert answer[key]['state'] == uss.endpoint_states[key].state
+        assert answer[key]['state'] == uss.endpoints.state[key].state
         for next_key in answer[key]['endpoint']:
-            assert answer[key]['endpoint'][next_key] == uss.endpoint_states[key].endpoint_data[next_key]
+            assert answer[key]['endpoint'][next_key] == uss.endpoints.state[key].endpoint_data[next_key]
 
 
 def test_file_new_machines_later():
@@ -140,10 +145,10 @@ def test_file_new_machines_later():
 
     #assert str(answer) == str(dict(uss.endpoint_states))
     for key in answer:
-        assert answer[key]['state'] == uss.endpoint_states[key].state
-        assert answer[key]['next-state'] == uss.endpoint_states[key].next_state
+        assert answer[key]['state'] == uss.endpoints.state[key].state
+        assert answer[key]['next-state'] == uss.endpoints.state[key].next_state
         for key2 in answer[key]['endpoint']:
-            assert answer[key]['endpoint'][key2] == uss.endpoint_states[key].endpoint_data[key2]
+            assert answer[key]['endpoint'][key2] == uss.endpoints.state[key].endpoint_data[key2]
 
 
 def test_unmirror_endpoint():
@@ -195,11 +200,11 @@ def test_get_endpoint_state():
                  'tenant': 'EXTERNAL',
                  'name': None}]
     uss.find_new_machines(machines)
-    retval = uss.get_endpoint_state('3da53a95ae5d034ae37b539a24370260a36f8bb2')
+    retval = uss.endpoints.get_endpoint_state('3da53a95ae5d034ae37b539a24370260a36f8bb2')
     answer = 'UNKNOWN'
     assert retval == answer
 
-    retval = uss.get_endpoint_state('NOT-A-HASH')
+    retval = uss.endpoints.get_endpoint_state('NOT-A-HASH')
     answer = None
     assert retval == answer
 
@@ -224,44 +229,13 @@ def test_get_endpoint_ip():
                  'tenant': 'EXTERNAL',
                  'name': None}]
     uss.find_new_machines(machines)
-    retval = uss.get_endpoint_ip('3da53a95ae5d034ae37b539a24370260a36f8bb2')
+    retval = uss.endpoints.get_endpoint_ip('3da53a95ae5d034ae37b539a24370260a36f8bb2')
     answer = '10.0.0.99'
     assert retval == answer
 
-    retval = uss.get_endpoint_ip('NOT-A-HASH')
+    retval = uss.endpoints.get_endpoint_ip('NOT-A-HASH')
     answer = None
     assert retval == answer
-
-
-def test_make_endpoint_dict():
-    uss = Update_Switch_State()
-    uss.first_time = False
-    endpoint_data = dict({'ip-address': '10.0.0.99',
-                          'mac': '20:4c:9e:5f:e3:c3',
-                          'segment': 'to-core-router',
-                          'tenant': 'EXTERNAL',
-                          'name': None})
-    hash_value = '3da53a95ae5d034ae37b539a24370260a36f8bb2'
-    state = 'KNOWN'
-    uss.make_endpoint_dict(hash_value, state, endpoint_data)
-    answer = dict(
-        {
-            '3da53a95ae5d034ae37b539a24370260a36f8bb2': {
-                'state': 'KNOWN',
-                'next-state': 'NONE',
-                'endpoint': {
-                    'ip-address': '10.0.0.99',
-                    'mac': '20:4c:9e:5f:e3:c3',
-                    'segment': 'to-core-router',
-                    'tenant': 'EXTERNAL',
-                    'name': None}}})
-
-    #assert str(answer) == str(dict(uss.endpoint_states))
-    for key in answer:
-        assert answer[key]['state'] == uss.endpoint_states[key].state
-        assert answer[key]['next-state'] == uss.endpoint_states[key].next_state
-        for key2 in answer[key]['endpoint']:
-            assert answer[key]['endpoint'][key2] == uss.endpoint_states[key].endpoint_data[key2]
 
 
 def test_change_endpoint_state():
@@ -274,7 +248,7 @@ def test_change_endpoint_state():
                           'name': None})
     hash_value = '3da53a95ae5d034ae37b539a24370260a36f8bb2'
     state = 'KNOWN'
-    uss.make_endpoint_dict(hash_value, state, endpoint_data)
+    make_endpoint_dict(uss.endpoints.state, hash_value, state, endpoint_data)
     answer = dict(
         {
             '3da53a95ae5d034ae37b539a24370260a36f8bb2': {
@@ -286,14 +260,14 @@ def test_change_endpoint_state():
                     'segment': 'to-core-router',
                     'tenant': 'EXTERNAL',
                     'name': None}}})
-    uss.change_endpoint_state(
+    uss.endpoints.change_endpoint_state(
         '3da53a95ae5d034ae37b539a24370260a36f8bb2', new_state='TEST_STATE')
     #assert str(answer) == str(dict(uss.endpoint_states))
     for key in answer:
-        assert answer[key]['state'] == uss.endpoint_states[key].state
-        assert answer[key]['next-state'] == uss.endpoint_states[key].next_state
+        assert answer[key]['state'] == uss.endpoints.state[key].state
+        assert answer[key]['next-state'] == uss.endpoints.state[key].next_state
         for key2 in answer[key]['endpoint']:
-            assert answer[key]['endpoint'][key2] == uss.endpoint_states[key].endpoint_data[key2]
+            assert answer[key]['endpoint'][key2] == uss.endpoints.state[key].endpoint_data[key2]
 
 
 def test_change_endpoint_nextstate():
@@ -306,7 +280,7 @@ def test_change_endpoint_nextstate():
                           'name': None})
     hash_value = '3da53a95ae5d034ae37b539a24370260a36f8bb2'
     state = 'KNOWN'
-    uss.make_endpoint_dict(hash_value, state, endpoint_data)
+    make_endpoint_dict(uss.endpoints.state, hash_value, state, endpoint_data)
     answer = dict(
         {
             '3da53a95ae5d034ae37b539a24370260a36f8bb2': {
@@ -318,14 +292,14 @@ def test_change_endpoint_nextstate():
                     'segment': 'to-core-router',
                     'tenant': 'EXTERNAL',
                     'name': None}}})
-    uss.change_endpoint_nextstate(
+    uss.endpoints.change_endpoint_nextstate(
         '3da53a95ae5d034ae37b539a24370260a36f8bb2', next_state='TEST_STATE')
     #assert str(answer) == str(dict(uss.endpoint_states))
     for key in answer:
-        assert answer[key]['state'] == uss.endpoint_states[key].state
-        assert answer[key]['next-state'] == uss.endpoint_states[key].next_state
+        assert answer[key]['state'] == uss.endpoints.state[key].state
+        assert answer[key]['next-state'] == uss.endpoints.state[key].next_state
         for key2 in answer[key]['endpoint']:
-            assert answer[key]['endpoint'][key2] == uss.endpoint_states[key].endpoint_data[key2]
+            assert answer[key]['endpoint'][key2] == uss.endpoints.state[key].endpoint_data[key2]
 
 
 def test_get_endpoinit_next():
@@ -338,13 +312,13 @@ def test_get_endpoinit_next():
                           'name': None})
     hash_value = '3da53a95ae5d034ae37b539a24370260a36f8bb2'
     state = 'KNOWN'
-    uss.make_endpoint_dict(hash_value, state, endpoint_data)
-    next_state = uss.get_endpoint_next(
+    make_endpoint_dict(uss.endpoints.state, hash_value, state, endpoint_data)
+    next_state = uss.endpoints.get_endpoint_next(
         '3da53a95ae5d034ae37b539a24370260a36f8bb2')
 
     assert 'NONE' == next_state
 
-    next_state = uss.get_endpoint_next('NOT-A-HASH')
+    next_state = uss.endpoints.get_endpoint_next('NOT-A-HASH')
     assert next_state is None
 
 
@@ -358,8 +332,8 @@ def test_get_endpoinit_state():
                           'name': None})
     hash_value = '3da53a95ae5d034ae37b539a24370260a36f8bb2'
     state = 'TEST_STATE'
-    uss.make_endpoint_dict(hash_value, state, endpoint_data)
-    next_state = uss.get_endpoint_state(
+    make_endpoint_dict(uss.endpoints.state, hash_value, state, endpoint_data)
+    next_state = uss.endpoints.get_endpoint_state(
         '3da53a95ae5d034ae37b539a24370260a36f8bb2')
 
     assert 'TEST_STATE' == next_state
@@ -375,7 +349,7 @@ def test_return_endpoint_state():
                           'name': None})
     hash_value = '3da53a95ae5d034ae37b539a24370260a36f8bb2'
     state = 'TEST_STATE'
-    uss.make_endpoint_dict(hash_value, state, endpoint_data)
+    make_endpoint_dict(uss.endpoints.state, hash_value, state, endpoint_data)
     answer = dict(
         {
             '3da53a95ae5d034ae37b539a24370260a36f8bb2': EndPoint({
@@ -388,12 +362,12 @@ def test_return_endpoint_state():
 
         })
     eps = uss.return_endpoint_state()
-    key ='3da53a95ae5d034ae37b539a24370260a36f8bb2' 
-    assert eps[key].state == answer[key].state
-    assert eps[key].next_state == answer[key].next_state
-    for key2 in eps[key].endpoint_data:
-        assert eps[key].endpoint_data[key2] == answer[key].endpoint_data[key2]
-    
+    key = '3da53a95ae5d034ae37b539a24370260a36f8bb2'
+    assert eps.state[key].state == answer[key].state
+    assert eps.state[key].next_state == answer[key].next_state
+    for key2 in eps.state[key].endpoint_data:
+        assert eps.state[key].endpoint_data[key2] == answer[key].endpoint_data[key2]
+
     #assert str(answer) == str(dict(uss.return_endpoint_state()))
     #assert uss.return_endpoint_state() == uss.endpoint_states
 
@@ -458,7 +432,7 @@ def test_shutdown_endpoint():
 
     uss = Update_Switch_State()
     uss.sdnc = Mockbcf()
-    uss.endpoint_states = dict(
+    stuff = dict(
         {
             'd502caea3609d553ab16a00c554f0602c1419f58': EndPoint({
                 'ip-address': '10.0.0.101',
@@ -476,6 +450,9 @@ def test_shutdown_endpoint():
                 prev_state='NONE', state='KNOWN', next_state='NONE')
 
         })
+    for s in stuff:
+        uss.endpoints.state[s] = stuff[s]
+
     ret_val = uss.shutdown_endpoint('3da53a95ae5d034ae37b539a24370260a36f8bb2')
     assert ret_val
     ret_val = uss.shutdown_endpoint('NOT_A_HASH')
@@ -493,7 +470,7 @@ def test_mirror_endpoint():
 
     uss = Update_Switch_State()
     uss.sdnc = Mockbcf()
-    uss.endpoint_states = dict(
+    stuff = dict(
         {
             'd502caea3609d553ab16a00c554f0602c1419f58': EndPoint({
                 'ip-address': '10.0.0.101',
@@ -511,6 +488,9 @@ def test_mirror_endpoint():
                 prev_state='NONE', state='KNOWN', next_state='NONE'),
 
         })
+    for s in stuff:
+        uss.endpoints.state[s] = stuff[s]
+
     ret_val = uss.mirror_endpoint('3da53a95ae5d034ae37b539a24370260a36f8bb2')
     assert ret_val
     ret_val = uss.mirror_endpoint('NOT_A_HASH')
@@ -527,5 +507,5 @@ def test_print_endpoint_state():
                           'name': None})
     hash_value = '3da53a95ae5d034ae37b539a24370260a36f8bb2'
     state = 'TEST_STATE'
-    uss.make_endpoint_dict(hash_value, state, endpoint_data)
-    uss.print_endpoint_state()
+    make_endpoint_dict(uss.endpoints.state, hash_value, state, endpoint_data)
+    uss.endpoints.print_endpoint_state()

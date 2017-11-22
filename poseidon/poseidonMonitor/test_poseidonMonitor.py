@@ -21,13 +21,16 @@ Created on 28 June 2016
 @author: dgrossman, MShel
 """
 
-from poseidon.baseClasses.Logger_Base import Logger
-from poseidon.poseidonMonitor.poseidonMonitor import Monitor
-from poseidon.poseidonMonitor import poseidonMonitor
-from poseidon.poseidonMonitor.poseidonMonitor import CTRL_C
-from poseidon.poseidonMonitor.poseidonMonitor import schedule_job_kickurl, schedule_thread_worker
-from poseidon.poseidonMonitor.endPoint import EndPoint
 import json
+
+from poseidon.baseClasses.Logger_Base import Logger
+from poseidon.poseidonMonitor import poseidonMonitor
+from poseidon.poseidonMonitor.endPoint import EndPoint
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.UpdateSwitchState import \
+    Endpoint_Wrapper
+from poseidon.poseidonMonitor.poseidonMonitor import (CTRL_C, Monitor,
+                                                      schedule_job_kickurl,
+                                                      schedule_thread_worker)
 
 
 def test_signal_handler():
@@ -102,15 +105,61 @@ def test_start_vent_collector():
     poseidonMonitor.CTRL_C['STOP'] = False
     poseidonMonitor.requests = requests()
 
-    class MockUSS:
+    class Mock_Update_Switch_State():
 
-        @staticmethod
-        def return_endpoint_state():
-            # Really don't care endpoint state here
-            return {}
+        def __init__(self):
+            stuff = dict(
+                {
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': EndPoint({
+                        'ip-address': '10.00.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FLOORPLATE',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='NONE'),
 
-        def get_endpoint_ip(self, hash):
-            return '0.0.0.0'
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='REINVESTIGATING', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='REINVESTIGATING', next_state='NONE')
+                })
+
+            self.endpoints = Endpoint_Wrapper()
+
+            for s in stuff:
+                self.endpoints.state[s] = stuff[s]
+
+            self.logger = None
+
+        def return_endpoint_state(self):
+            return self.endpoints
+
+        def change_endpoint_nextstate(self, my_hash, state):
+            self.endpoints[my_hash].next_state = state
 
     class MockMonitor(Monitor):
 
@@ -123,7 +172,7 @@ def test_start_vent_collector():
                 'vent_port': '8080',
             })
 
-            self.uss = MockUSS()
+            self.uss = Mock_Update_Switch_State()
 
     mock_monitor = MockMonitor()
     mock_monitor.logger = MockLogger()
@@ -257,52 +306,6 @@ def test_schedule_job_reinvestigation():
     poseidonMonitor.schedule_job_reinvestigation(4, end_points, MockLogger())
 
 
-def test_print_endpoint_state():
-
-    class MockLogger:
-        def __init__(self):
-            pass
-
-        def debug(self, msg):
-            pass
-
-    class MockMonitor(Monitor):
-        # no need to init the monitor
-
-        def __init__(self):
-            pass
-
-    mock_monitor = MockMonitor()
-    mock_monitor.logger = MockLogger()
-
-    test_dict_to_return = {
-        'b8d31352453a65036b4343f34c2a93f5d5442b70': {
-            'valid': True,
-            'classification': {
-                'labels': [
-                    'Unknown',
-                    'Smartphone',
-                    'Developer workstation'],
-                'confidences': [
-                    0.9983864533039954,
-                    0.0010041873867962805,
-                    0.00042691313815914093]},
-            'timestamp': 1508366767.45571,
-            'decisions': {
-                'investigate': True,
-                'behavior': 'normal'}}}
-
-    item = ('poseidon.algos.decider', json.dumps(test_dict_to_return))
-    assert test_dict_to_return == mock_monitor.format_rabbit_message(item)
-    end_points = {
-        "hash_0": EndPoint({}, 'NONE', 'REINVESTIGATING', 'UNKNOWN'),
-        "hash_1": EndPoint({}, 'NONE', 'UNKNOWN', 'REINVESTIGATING'),
-        "hash_2": EndPoint({}, 'NONE', 'KNOWN', 'UNKNOWN')}
-    mock_monitor = MockMonitor()
-    mock_monitor.logger = MockLogger()
-    mock_monitor.print_endpoint_state(end_points)
-
-
 def test_update_next_state():
 
     class MockLogger():
@@ -316,7 +319,7 @@ def test_update_next_state():
     class Mock_Update_Switch_State():
 
         def __init__(self):
-            self.endpoints = dict(
+            stuff = dict(
                 {
                     '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': EndPoint({
                         'ip-address': '10.00.0.101',
@@ -355,13 +358,18 @@ def test_update_next_state():
                         'name': None},
                         prev_state='NONE', state='REINVESTIGATING', next_state='NONE')
                 })
+
+            self.endpoints = Endpoint_Wrapper()
+
+            for s in stuff:
+                self.endpoints.state[s] = stuff[s]
             self.logger = None
 
         def return_endpoint_state(self):
             return self.endpoints
 
         def change_endpoint_nextstate(self, my_hash, state):
-            self.endpoints[my_hash].next_state = state
+            self.endpoints.state[my_hash].next_state = state
 
     class MockMonitor(Monitor):
 
@@ -446,7 +454,7 @@ def test_update_next_state():
                     'tenant': 'EXTERNAL',
                     'name': None}}})
 
-    eps = monitor.uss.return_endpoint_state()
+    eps = monitor.uss.return_endpoint_state().state
     for key in correct_answer:
         assert eps[key].next_state == correct_answer[key]['next-state']
 
@@ -630,10 +638,12 @@ def test_process():
         def debug(self, msg):
             pass
 
-    class MockUss():
+    class MockEndpoint(Endpoint_Wrapper):
+        def init(self):
+            super(MockEndpoint, self).__init__()
 
-        def __init__(self):
-            self.endpoint_states = dict(
+        def makedata(self):
+            stuff = dict(
                 {
                     '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': EndPoint({
                         'ip-address': '10.00.0.101',
@@ -672,8 +682,20 @@ def test_process():
                         prev_state='NONE', state='UNKNOWN', next_state='KNOWN')
                 })
 
+            for s in stuff:
+                self.state[s] = stuff[s]
+
+        def get_endpoint_ip(self, hash):
+            return '0.0.0.0'
+
+    class MockUss():
+
+        def __init__(self):
+            self.endpoints = MockEndpoint()
+            self.endpoints.makedata()
+
         def return_endpoint_state(self):
-            return self.endpoint_states
+            return self.endpoints
 
         def mirror_endpoint(self, endpoint_hash):
             pass
@@ -681,16 +703,8 @@ def test_process():
         def unmirror_endpoint(self, endpoint_hash):
             pass
 
-        def change_endpoint_state(self, endpoint_hash):
-            self.endpoint_states[endpoint_hash].state = self.endpoint_states[endpoint_hash].next_state
-            self.endpoint_states[endpoint_hash].next_state = 'NONE'
-
-        def get_endpoint_ip(self, hash):
-            return '0.0.0.0'
-
     class MockMonitor(Monitor):
         # no need to init the monitor
-
         def __init__(self):
             self.mod_configuration = {
                 'collector_interval': 900,
@@ -764,14 +778,14 @@ def test_process():
                     'mac': '20:4c:9e:5f:e3:c3',
                     'segment': 'to-core-router',
                     'tenant': 'EXTERNAL',
-                    'name': None}}})
+                    'name': None}}
+        })
 
-    #assert str(answer) == str(mock_monitor.uss.return_endpoint_state())
-    eps = mock_monitor.uss.return_endpoint_state()
+    eps = mock_monitor.uss.endpoints
 
     for key in answer:
-        assert answer[key]['state'] == eps[key].state
-        #assert answer[key]['next-state'] == eps[key].next_state
+        assert answer[key]['state'] == eps.state[key].state
+        assert answer[key]['next-state'] == eps.state[key].next_state
 
     mock_monitor.get_q_item = mock_monitor.bad_get_q_item
 

@@ -35,6 +35,70 @@ from poseidon.poseidonMonitor.endPoint import EndPoint
 module_logger = Logger
 
 
+class Endpoint_Wrapper():
+    def __init__(self):
+        self.state = defaultdict(EndPoint)
+        self.logger = module_logger.logger 
+
+    def set(self, ep):
+        self.state[ep.make_hash()] = ep
+
+    def get_endpoint_state(self, my_hash):
+        ''' return the state associated with a hash '''
+        if my_hash in self.state:
+            return self.state[my_hash].state
+        return None
+
+    def get_endpoint_next(self, my_hash):
+        ''' return the next_state associated with a hash '''
+        if my_hash in self.state:
+            return self.state[my_hash].next_state
+        return None
+
+    def get_endpoint_ip(self, my_hash):
+        ''' return the ip address associated with a hash '''
+        if my_hash in self.state:
+            return self.state[my_hash].endpoint_data['ip-address']
+        return None
+
+    def change_endpoint_state(self, my_hash, new_state=None):
+        ''' update the state of an endpoint '''
+        self.state[my_hash].state = new_state or self.state[my_hash].next_state
+        self.state[my_hash].next_state = 'NONE'
+
+    def change_endpoint_nextstate(self, my_hash, next_state):
+        ''' updaate the next state of an endpoint '''
+        self.state[my_hash].next_state = next_state
+
+    def print_endpoint_state(self):
+        ''' debug output about what the current state of endpoints is '''
+        def same_old(logger, state, letter, endpoint_states):
+            logger.info('*******{0}*********'.format(state))
+
+            out_flag = False
+            for my_hash in endpoint_states.keys():
+                endpoint = endpoint_states[my_hash]
+                if endpoint.state == state:
+                    out_flag = True
+                    logger.info('{0}:{1}:{2}->{3}:{4}'.format(letter,
+                                                              my_hash,
+                                                              endpoint.state,
+                                                              endpoint.next_state,
+                                                              endpoint.endpoint_data))
+            if not out_flag:
+                logger.info('None')
+
+        states = [('K', 'KNOWN'), ('U', 'UNKNOWN'), ('M', 'MIRRORING'),
+                  ('S', 'SHUTDOWN'), ('R', 'REINVESTIGATING')]
+
+        self.logger.info('====START')
+        for l, s in states:
+            same_old(self.logger, s, l, self.state)
+
+        self.logger.info('****************')
+        self.logger.info('====STOP')
+
+
 class Update_Switch_State(Monitor_Helper_Base):
     ''' handle periodic process, determine if switch state updated '''
 
@@ -52,12 +116,12 @@ class Update_Switch_State(Monitor_Helper_Base):
         self.controller['TYPE'] = None
         self.sdnc = None
         self.first_time = True
-        self.endpoint_states = defaultdict(EndPoint)
+        self.endpoints = Endpoint_Wrapper()
         self.m_queue = Queue.Queue()
 
     def return_endpoint_state(self):
         ''' give access to the endpoint_states '''
-        return self.endpoint_states
+        return self.endpoints
 
     def first_run(self):
         ''' do some pre-run setup/configuration '''
@@ -110,49 +174,13 @@ class Update_Switch_State(Monitor_Helper_Base):
         else:
             pass
 
-    @staticmethod
-    def make_hash(item):
-        ''' hash the metadata in a sane way '''
-        h = hashlib.new('ripemd160')
-        pre_h = str()
-        post_h = None
-        # nodhcp -> dhcp withname makes different hashes
-        # {u'tenant': u'FLOORPLATE', u'mac': u'ac:87:a3:2b:7f:12', u'segment': u'prod', u'name': None, u'ip-address': u'10.179.0.100'}}^
-        # {u'tenant': u'FLOORPLATE', u'mac': u'ac:87:a3:2b:7f:12', u'segment': u'prod', u'name': u'demo-laptop', u'ip-address': u'10.179.0.100'}}
-        # ^^^ make different hashes if name is included
-        # for word in ['tenant', 'mac', 'segment', 'name', 'ip-address']:
-
-        for word in ['tenant', 'mac', 'segment', 'ip-address']:
-            pre_h = pre_h + str(item.get(str(word), 'missing'))
-        h.update(pre_h.encode('utf-8'))
-        post_h = h.hexdigest()
-        return post_h
-
-    def get_endpoint_state(self, my_hash):
-        ''' return the state associated with a hash '''
-        if my_hash in self.endpoint_states:
-            return self.endpoint_states[my_hash].state
-        return None
-
-    def get_endpoint_next(self, my_hash):
-        ''' return the next_state associated with a hash '''
-        if my_hash in self.endpoint_states:
-            return self.endpoint_states[my_hash].next_state
-        return None
-
-    def get_endpoint_ip(self, my_hash):
-        ''' return the ip address associated with a hash '''
-        if my_hash in self.endpoint_states:
-            return self.endpoint_states[my_hash].endpoint_data['ip-address']
-        return None
-
     def shutdown_endpoint(self, my_hash):
         ''' tell the controller to shutdown an endpoint by hash '''
-        if my_hash in self.endpoint_states:
-            my_ip = self.get_endpoint_ip(my_hash)
-            next_state = self.get_endpoint_next(my_hash)
+        if my_hash in self.endpoints.state:
+            my_ip = self.endpoints.get_endpoint_ip(my_hash)
+            next_state = self.endpoints.get_endpoint_next(my_hash)
             self.sdnc.shutdown_ip(my_ip)
-            self.change_endpoint_state(my_hash)
+            self.endpoints.change_endpoint_state(my_hash)
             self.logger.debug(
                 'endpoint:{0}:{1}:{2}'.format(my_hash, my_ip, next_state))
             return True
@@ -160,11 +188,11 @@ class Update_Switch_State(Monitor_Helper_Base):
 
     def mirror_endpoint(self, my_hash):
         ''' tell the controller to begin mirroring traffic '''
-        if my_hash in self.endpoint_states:
-            my_ip = self.get_endpoint_ip(my_hash)
-            next_state = self.get_endpoint_next(my_hash)
+        if my_hash in self.endpoints.state:
+            my_ip = self.endpoints.get_endpoint_ip(my_hash)
+            next_state = self.endpoints.get_endpoint_next(my_hash)
             self.sdnc.mirror_ip(my_ip)
-            self.change_endpoint_state(my_hash)
+            self.endpoints.change_endpoint_state(my_hash)
             self.logger.debug(
                 'endpoint:{0}:{1}:{2}'.format(my_hash, my_ip, next_state))
             return True
@@ -172,30 +200,14 @@ class Update_Switch_State(Monitor_Helper_Base):
 
     def unmirror_endpoint(self, my_hash):
         ''' tell the controller to unmirror traffic '''
-        if my_hash in self.endpoint_states:
-            my_ip = self.get_endpoint_ip(my_hash)
-            next_state = self.get_endpoint_next(my_hash)
+        if my_hash in self.endpoints.state:
+            my_ip = self.endpoints.get_endpoint_ip(my_hash)
+            next_state = self.endpoints.get_endpoint_next(my_hash)
             self.sdnc.unmirror_ip(my_ip)
             self.logger.debug(
                 'endpoint:{0}:{1}:{2}'.format(my_hash, my_ip, next_state))
             return True
         return False
-
-    def make_endpoint_dict(self, my_hash, state, data):
-        ''' make a new endpoint '''
-        self.endpoint_states[my_hash] = EndPoint(data,state=state)
-        #self.endpoint_states[my_hash].state = state
-        #self.endpoint_states[my_hash].next_state = 'NONE'
-        #self.endpoint_states[my_hash].endpoint_data = data
-
-    def change_endpoint_state(self, my_hash, new_state=None):
-        ''' update the state of an endpoint '''
-        self.endpoint_states[my_hash].state = new_state or self.endpoint_states[my_hash].next_state
-        self.endpoint_states[my_hash].next_state = 'NONE'
-
-    def change_endpoint_nextstate(self, my_hash, next_state):
-        ''' updaate the next state of an endpoint '''
-        self.endpoint_states[my_hash].next_state = next_state
 
     def find_new_machines(self, machines):
         '''parse switch structure to find new machines added to network
@@ -204,45 +216,19 @@ class Update_Switch_State(Monitor_Helper_Base):
             self.first_time = False
             # TODO db call to see if really need to run things
             for machine in machines:
-                h = self.make_hash(machine)
+                end_point = EndPoint(machine, state='KNOWN')
                 self.logger.debug(
                     'adding address to known systems {0}'.format(machine))
-                self.make_endpoint_dict(h, 'KNOWN', machine)
+                self.endpoints.set(end_point)
         else:
             for machine in machines:
-                h = self.make_hash(machine)
-                if h not in self.endpoint_states:
+                end_point = EndPoint(machine, state='UNKNOWN')
+                h = end_point.make_hash()
+
+                if h not in self.endpoints.state:
                     self.logger.debug(
                         '***** detected new address {0}'.format(machine))
-                    self.make_endpoint_dict(h, 'UNKNOWN', machine)
-
-    def print_endpoint_state(self):
-        ''' debug output about what the current state of endpoints is '''
-        def same_old(logger, state, letter, endpoint_states):
-            logger.info('*******{0}*********'.format(state))
-
-            out_flag = False
-            for my_hash in endpoint_states.keys():
-                endpoint = endpoint_states[my_hash]
-                if endpoint.state == state:
-                    out_flag = True
-                    logger.info('{0}:{1}:{2}->{3}:{4}'.format(letter,
-                                                              my_hash,
-                                                              endpoint.state,
-                                                              endpoint.next_state,
-                                                              endpoint.endpoint_data))
-            if not out_flag:
-                logger.info('None')
-
-        states = [('K', 'KNOWN'), ('U', 'UNKNOWN'), ('M', 'MIRRORING'),
-                  ('S', 'SHUTDOWN'), ('R', 'REINVESTIGATING')]
-
-        self.logger.info('====START')
-        for l, s in states:
-            same_old(self.logger, s, l, self.endpoint_states)
-
-        self.logger.info('****************')
-        self.logger.info('====STOP')
+                    self.endpoints.set(end_point)
 
     def update_endpoint_state(self):
         '''Handles Get requests'''
@@ -269,7 +255,7 @@ class Update_Switch_State(Monitor_Helper_Base):
         self.logger.debug('MACHINES:{0}'.format(machines))
         self.find_new_machines(machines)
 
-        self.print_endpoint_state()
+        self.endpoints.print_endpoint_state()
 
         self.retval['machines'] = parsed
         self.retval['resp'] = 'ok'
