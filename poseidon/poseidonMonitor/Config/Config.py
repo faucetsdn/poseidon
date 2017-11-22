@@ -44,7 +44,7 @@ class Config(Monitor_Action_Base):
         self.config_section_name = self.mod_name
         self.mod_configuration = dict()
 
-        self.config = ConfigParser.ConfigParser()
+        self.config = ConfigParser.RawConfigParser()
         if os.environ.get('POSEIDON_CONFIG') is not None:
             self.logger.info(
                 'From the Environment')               # pragma: no cover
