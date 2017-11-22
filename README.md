@@ -88,10 +88,14 @@ vent_port = `VENT_PORT`
 controller_uri = https://`CONTROLLER_SERVER`:8443/api/v1/  
 controller_user = `USERNAME`  
 controller_pass = `PASSWORD`  
+controller_type = `CONTROLLER`
 
 `CONTROLLER_SERVER` - BCF controller ip  
 `USERNAME` - username for BCF login  
-`PASSWORD` - password for BCF login  
+`PASSWORD` - password for BCF login
+`CONTROLLER` - either `bcf` or `faucet`
+
+
 
 ## Running Poseidon with Vent
 
