@@ -278,32 +278,125 @@ def test_schedule_job_reinvestigation():
         def debug(self, msg):
             pass
 
-    end_points = {
-        "hash_0": {"state": "REINVESTIGATING", "next-state": "UNKNOWN"},
-        "hash_1": {"state": "UNKNOWN", "next-state": "REINVESTIGATING"},
-        "hash_2": {"state": "KNOWN", "next-state": "UNKNOWN"},
-        "hash_3": {"state": "UNKNOWN", "next-state": "REINVESTIGATING"},
-    }
+    epw = Endpoint_Wrapper()
 
-    poseidonMonitor.schedule_job_reinvestigation(4, end_points, MockLogger())
+    stuff = dict(
+        {
+            '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': EndPoint({
+                'ip-address': '10.00.0.101',
+                'mac': 'f8:b1:56:fe:f2:de',
+                'segment': 'prod',
+                'tenant': 'FLOORPLATE',
+                'name': None},
+                prev_state='NONE', state='REINVESTIGATING', next_state='UNKNOWN'),
+            'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
+                'ip-address': '10.0.0.99',
+                'mac': '20:4c:9e:5f:e3:c3',
+                'segment': 'to-core-router',
+                'tenant': 'EXTERNAL',
+                'name': None},
+                prev_state='NONE', state='UNKNOWN', next_state='REINVESTIGATING'),
 
-    end_points = {
-        "hash_0": {"state": "REINVESTIGATING", "next-state": "UNKNOWN"},
-        "hash_1": {"state": "UNKNOWN", "next-state": "REINVESTIGATING"},
-        "hash_2": {"state": "KNOWN", "next-state": "UNKNOWN"},
-        "hash_3": {"state": "UNKNOWN", "next-state": "REINVESTIGATING"},
-        "hash_4": {"state": "UNKNOWN", "next-state": "REINVESTIGATING"},
-        "hash_5": {"state": "UNKNOWN", "next-state": "REINVESTIGATING"},
-        "hash_6": {"state": "OTHER-STATE", "next-state": "UNKNOWN"}
-    }
+            'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': EndPoint({
+                'ip-address': '10.0.0.99',
+                'mac': '20:4c:9e:5f:e3:c3',
+                'segment': 'to-core-router',
+                'tenant': 'EXTERNAL',
+                'name': None},
+                prev_state='NONE', state='KNOWN', next_state='UNKNOWN'),
+            'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': EndPoint({
+                'ip-address': '10.0.0.99',
+                'mac': '20:4c:9e:5f:e3:c3',
+                'segment': 'to-core-router',
+                'tenant': 'EXTERNAL',
+                'name': None},
+                prev_state='NONE', state='UNKNOWN', next_state='REINVESTIGATING')
+        })
 
-    poseidonMonitor.schedule_job_reinvestigation(4, end_points, MockLogger())
+    for s in stuff:
+        epw.state[s] = stuff[s]
 
-    end_points = {}
-    poseidonMonitor.schedule_job_reinvestigation(4, end_points, MockLogger())
+    assert len(epw.state) == 4
 
-    end_points = {"hash_0": {"MALFORMED": "YES"}}
-    poseidonMonitor.schedule_job_reinvestigation(4, end_points, MockLogger())
+    poseidonMonitor.schedule_job_reinvestigation(4, epw, MockLogger())
+
+    epw = Endpoint_Wrapper()
+
+    stuff = dict(
+        {
+            '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': EndPoint({
+                'ip-address': '10.00.0.101',
+                'mac': 'f8:b1:56:fe:f2:de',
+                'segment': 'prod',
+                'tenant': 'FLOORPLATE',
+                'name': None},
+                prev_state='NONE', state='REINVESTIGATING', next_state='UNKNOWN'),
+            'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
+                'ip-address': '10.0.0.99',
+                'mac': '20:4c:9e:5f:e3:c3',
+                'segment': 'to-core-router',
+                'tenant': 'EXTERNAL',
+                'name': None},
+                prev_state='NONE', state='UNKNOWN', next_state='REINVESTIGATING'),
+            'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': EndPoint({
+                'ip-address': '10.0.0.99',
+                'mac': '20:4c:9e:5f:e3:c3',
+                'segment': 'to-core-router',
+                'tenant': 'EXTERNAL',
+                'name': None},
+                prev_state='NONE', state='KNOWN', next_state='UNKNOWN'),
+            'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': EndPoint({
+                'ip-address': '10.0.0.99',
+                'mac': '20:4c:9e:5f:e3:c3',
+                'segment': 'to-core-router',
+                'tenant': 'EXTERNAL',
+                'name': None},
+                prev_state='NONE', state='UNKNOWN', next_state='REINVESTIGATING'),
+            'c60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
+                'ip-address': '10.0.0.99',
+                'mac': '20:4c:9e:5f:e3:c3',
+                'segment': 'to-core-router',
+                'tenant': 'EXTERNAL',
+                'name': None},
+                prev_state='NONE', state='UNKNOWN', next_state='REINVESTIGATING'),
+            'c60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': EndPoint({
+                'ip-address': '10.0.0.99',
+                'mac': '20:4c:9e:5f:e3:c3',
+                'segment': 'to-core-router',
+                'tenant': 'EXTERNAL',
+                'name': None},
+                prev_state='NONE', state='UNKNOWN', next_state='REINVESTIGATING'),
+            'c60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': EndPoint({
+                'ip-address': '10.0.0.99',
+                'mac': '20:4c:9e:5f:e3:c3',
+                'segment': 'to-core-router',
+                'tenant': 'EXTERNAL',
+                'name': None},
+                prev_state='NONE', state='OTHER-STATE', next_state='UNKNOWN')
+        })
+
+    # end_points = {
+    #    "hash_0": {"state": "REINVESTIGATING", "next-state": "UNKNOWN"},
+    #    "hash_1": {"state": "UNKNOWN", "next-state": "REINVESTIGATING"},
+    #    "hash_2": {"state": "KNOWN", "next-state": "UNKNOWN"},
+    #    "hash_3": {"state": "UNKNOWN", "next-state": "REINVESTIGATING"},
+    #    "hash_4": {"state": "UNKNOWN", "next-state": "REINVESTIGATING"},
+    #    "hash_5": {"state": "UNKNOWN", "next-state": "REINVESTIGATING"},
+    #    "hash_6": {"state": "OTHER-STATE", "next-state": "UNKNOWN"}
+    #}
+
+    for s in stuff:
+        epw.state[s] = stuff[s]
+
+    poseidonMonitor.schedule_job_reinvestigation(4, epw, MockLogger())
+
+    epw = Endpoint_Wrapper()
+    #end_points = {}
+    poseidonMonitor.schedule_job_reinvestigation(4, epw, MockLogger())
+
+    epw.state['4ee39d254db3e4a5264b75ce8ae312d69f9e73a3'] = stuff['4ee39d254db3e4a5264b75ce8ae312d69f9e73a3']
+    #end_points = {"hash_0": {"MALFORMED": "YES"}}
+    poseidonMonitor.schedule_job_reinvestigation(4, epw, MockLogger())
 
 
 def test_update_next_state():

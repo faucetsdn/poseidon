@@ -93,12 +93,10 @@ def schedule_job_reinvestigation(max_investigations, endpoints, logger):
 
     currently_investigating = 0
     for my_hash, my_value in endpoints.state.items():
-        if 'state' in my_value:
-            if my_value['state'] == 'REINVESTIGATING' or my_value[
-                    'next-state'] == 'REINVESTIGATING':
-                currently_investigating += 1
-            elif my_value['state'] == 'KNOWN':
-                candidates.append(my_hash)
+        if my_value.state == 'REINVESTIGATING' or my_value.next_state == 'REINVESTIGATING':
+            currently_investigating += 1
+        elif my_value.state == 'KNOWN':
+            candidates.append(my_hash)
 
     # get random order of things that are known
     random.shuffle(candidates)
@@ -111,7 +109,7 @@ def schedule_job_reinvestigation(max_investigations, endpoints, logger):
                 chosen = candidates.pop()
                 ostr = 'starting investigation {0}:{1}'.format(x, chosen)
                 logger.debug(ostr)
-                endpoints[chosen]['next-state'] = 'REINVESTIGATING'
+                endpoints.state[chosen].next_state = 'REINVESTIGATING'
     else:
         ostr = 'investigators all busy'
         logger.debug(ostr)
