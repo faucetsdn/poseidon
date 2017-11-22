@@ -451,7 +451,7 @@ def main(skip_rabbit=False):  # pragma: no cover
             'poseidon_main',
             pmain.m_queue)
         # def start_channel(self, channel, callback, queue):
-        pmain.schedule_thread.start()
+    pmain.schedule_thread.start()
 
     # loop here until told not to
     pmain.process()
