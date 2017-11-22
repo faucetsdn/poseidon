@@ -119,6 +119,7 @@ docker run -it \
            -e controller_uri=$controller_uri \
            -e controller_user=$controller_user \
            -e controller_pass=$controller_pass \
+           -e controller_type=$controller_type \
            --name vent \
            cyberreboot/vent
 ```
