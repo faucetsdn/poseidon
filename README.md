@@ -75,13 +75,13 @@ config/poseidon.config
 rabbit_server =  `RABBIT_SERVER`  
 rabbit_port = `RABBIT_PORT`  
 collector_nic = `COLLECTOR_NIC`  
-vent_ip = `VENT_IP`  
+vent_ip = `vent_ip`  
 vent_port = `VENT_PORT`  
   
 `RABBIT_SERVER` - ip address of the rabbit-mq server   
 `RABBIT_PORT` - rabbit-mq server server port  
 `COLLECTOR_NIC` - name of the network interface that will be listening for packets  
-`VENT_IP` - ip address of serever running vent  
+`vent_ip` - ip address of serever running vent  
 `VENT_PORT` - vent server port  
 
 ### [NorthBoundControllerAbstraction:Update_Switch_State]
