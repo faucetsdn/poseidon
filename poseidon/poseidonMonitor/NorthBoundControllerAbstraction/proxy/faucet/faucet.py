@@ -124,11 +124,13 @@ class FaucetProxy(Connection, Parser):
 
     def shutdown_ip(self, ip_addr, shutdown=True, mac_addr=None):
         shutdowns = []
+        self.receive_file('config')
         self.config('/tmp/faucet.yaml')
         # TODO
         return shutdowns
 
     def shutdown_endpoint(self):
+        self.receive_file('config')
         self.config('/tmp/faucet.yaml')
 
     def get_highest(self):
@@ -138,10 +140,13 @@ class FaucetProxy(Connection, Parser):
         pass
 
     def mirror_ip(self, ip):
+        self.receive_file('config')
         self.config('/tmp/faucet.yaml')
 
     def unmirror_ip(self, ip):
+        self.receive_file('config')
         self.config('/tmp/faucet.yaml')
 
     def mirror_traffic(self):
+        self.receive_file('config')
         self.config('/tmp/faucet.yaml')

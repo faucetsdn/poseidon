@@ -45,6 +45,7 @@ class Config(Monitor_Action_Base):
         self.mod_configuration = dict()
 
         self.config = ConfigParser.RawConfigParser()
+        self.config.optionxform = str
         if os.environ.get('POSEIDON_CONFIG') is not None:
             self.logger.info(
                 'From the Environment')               # pragma: no cover
