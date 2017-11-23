@@ -11,7 +11,7 @@ poseidon:
         collector_nic: enp7s0f0
         collector_interval: 15
         collector_filter:
-        vent_ip: VENT_IP
+        vent_ip: vent_ip
         vent_port: 8080
 
     NorthBoundControllerAbstraction:Update_Switch_State:
