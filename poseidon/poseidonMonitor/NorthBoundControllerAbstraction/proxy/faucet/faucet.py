@@ -65,7 +65,7 @@ class FaucetProxy(Connection, Parser):
         self.receive_file('log')
         retval = []
 
-        mac_table = self.config('/tmp/faucet.log')
+        mac_table = self.log('/tmp/faucet.log')
         module_logger.debug('get_endpoints found:')
         for mac in mac_table:
             module_logger.debug('{0}:{1}'.format(
