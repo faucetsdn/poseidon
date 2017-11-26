@@ -33,7 +33,7 @@ class Parser:
         self.mirror_ports = mirror_ports
 
     def config(self, config_file, port, switch):
-        self.logger.info(str(self.mirror_ports))
+        self.logger.info("mirroring: " + str(self.mirror_ports))
         stream = open(config_file, 'r')
         document = dump(load(stream), default_flow_style=False)
         self.logger.info(document)

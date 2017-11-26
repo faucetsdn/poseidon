@@ -54,11 +54,11 @@ class EndPoint:
 
     def to_str(self):
         '''make string representation of internals of object'''
-        strep = "'prev_state': '" + self.prev_state
+        strep = "{'prev_state': '" + self.prev_state
         strep += "', 'state': '" + self.state
         strep += "', 'next_state': '" + self.next_state
         strep += "', 'transition_time': '" + str(self.transition_time)
-        strep += "', 'endpoint_data': '" + str(self.endpoint_data)
+        strep += "', 'endpoint_data': " + str(self.endpoint_data) + "}"
         return strep
 
     def to_json(self):
