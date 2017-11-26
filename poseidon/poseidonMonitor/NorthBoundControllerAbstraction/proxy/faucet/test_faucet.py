@@ -57,7 +57,8 @@ def test_FaucetProxy():
     proxy.shutdown_endpoint()
     proxy.get_highest()
     proxy.get_seq_by_ip()
-    proxy.mirror_ip('10.0.0.1')
+    proxy.mirror_ip('192.168.1.40')
+    proxy.mirror_ip('192.168.1.41')
     proxy.unmirror_ip('10.0.0.1')
     proxy.mirror_traffic()
 

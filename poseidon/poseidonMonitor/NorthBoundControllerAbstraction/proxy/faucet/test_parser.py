@@ -27,5 +27,5 @@ def test_Parser():
     Tests Parser
     """
     parser = Parser()
-    parser.config('/tmp/faucet.yaml')
+    parser.config('/tmp/faucet.yaml', None, None)
     parser.log('/tmp/faucet.log')

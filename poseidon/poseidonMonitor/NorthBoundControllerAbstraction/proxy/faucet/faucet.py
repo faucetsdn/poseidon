@@ -47,6 +47,7 @@ class FaucetProxy(Connection, Parser):
                                           mirror_ports,
                                           *args,
                                           **kwargs)
+        self.mirror_ports = mirror_ports
 
     @staticmethod
     def format_endpoints(data):
@@ -106,14 +107,18 @@ class FaucetProxy(Connection, Parser):
 
     def shutdown_ip(self, ip_addr, shutdown=True, mac_addr=None):
         shutdowns = []
+        port = None
+        switch = None
         self.receive_file('config')
-        self.config('/tmp/faucet.yaml')
+        self.config('/tmp/faucet.yaml', port, switch)
         # TODO
         return shutdowns
 
     def shutdown_endpoint(self):
+        port = None
+        switch = None
         self.receive_file('config')
-        self.config('/tmp/faucet.yaml')
+        self.config('/tmp/faucet.yaml', port, switch)
 
     def get_highest(self):
         pass
@@ -122,13 +127,26 @@ class FaucetProxy(Connection, Parser):
         pass
 
     def mirror_ip(self, ip):
-        self.receive_file('config')
-        self.config('/tmp/faucet.yaml')
+        self.receive_file('log')
+        mac_table = self.log('/tmp/faucet.log')
+        port = None
+        switch = None
+        for mac in mac_table:
+            if ip == mac_table[mac][0]['ip-address']:
+                port = mac_table[mac][0]['port']
+                switch = mac_table[mac][0]['segment']
+        if port and switch:
+            self.receive_file('config')
+            self.config('/tmp/faucet.yaml', port, switch)
 
     def unmirror_ip(self, ip):
+        port = None
+        switch = None
         self.receive_file('config')
-        self.config('/tmp/faucet.yaml')
+        self.config('/tmp/faucet.yaml', port, switch)
 
     def mirror_traffic(self):
+        port = None
+        switch = None
         self.receive_file('config')
-        self.config('/tmp/faucet.yaml')
+        self.config('/tmp/faucet.yaml', port, switch)

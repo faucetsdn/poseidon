@@ -28,10 +28,12 @@ module_logger = Logger.logger
 
 class Parser:
 
-    def __init__(self):
+    def __init__(self, mirror_ports=None):
         self.logger = module_logger
+        self.mirror_ports = mirror_ports
 
-    def config(self, config_file):
+    def config(self, config_file, port, switch):
+        self.logger.info(str(self.mirror_ports))
         stream = open(config_file, 'r')
         document = dump(load(stream), default_flow_style=False)
         self.logger.info(document)
@@ -47,6 +49,7 @@ class Parser:
                             'ip-state': 'L2 learned',
                             'mac': learned_mac[10],
                             'segment': learned_mac[7][1:-1],
+                            'port': learned_mac[19],
                             'tenant': learned_mac[21] + learned_mac[22]}
                     if learned_mac[10] in mac_table:
                         dup = False
