@@ -405,6 +405,7 @@ def test_first_run_faucet():
     uss.mod_configuration['controller_user'] = 'self'
     uss.mod_configuration['controller_config_file'] = '/etc/ryu/faucet/faucet.yaml'
     uss.mod_configuration['controller_log_file'] = '/var/log/ryu/faucet/faucet.log'
+    uss.mod_configuration['controller_mirror_ports'] = '{"0xdeadbeef":"port1"}'
 
     uss.configured = True
     uss.first_run()
@@ -414,6 +415,7 @@ def test_first_run_faucet():
     assert uss.controller['PASS'] == 'TEST_PASS'
     assert uss.controller['CONFIG_FILE'] == '/etc/ryu/faucet/faucet.yaml'
     assert uss.controller['LOG_FILE'] == '/var/log/ryu/faucet/faucet.log'
+    assert uss.controller['MIRROR_PORTS'] == {'0xdeadbeef': 'port1'}
 
 
 def test_first_run_unknown():

@@ -17,6 +17,7 @@
 Created on 20 Nov 2017
 @author: dgrossman
 '''
+import ast
 import json
 import queue as Queue
 
@@ -80,23 +81,26 @@ class Update_Switch_State(Monitor_Helper_Base):
                         'BcfProxy could not connect to {0}'.format(
                             self.controller['URI']))
             elif self.controller['TYPE'] == 'faucet':
-                self.controller['URI'] = str(
-                    self.mod_configuration['controller_uri'])
-                # TODO set defaults if these are not set
-                self.controller['USER'] = str(
-                    self.mod_configuration['controller_user'])
-                self.controller['PASS'] = str(
-                    self.mod_configuration['controller_pass'])
-                self.controller['CONFIG_FILE'] = str(
-                    self.mod_configuration['controller_config_file'])
-                self.controller['LOG_FILE'] = str(
-                    self.mod_configuration['controller_log_file'])
                 try:
+                    self.controller['URI'] = str(
+                        self.mod_configuration['controller_uri'])
+                    # TODO set defaults if these are not set
+                    self.controller['USER'] = str(
+                        self.mod_configuration['controller_user'])
+                    self.controller['PASS'] = str(
+                        self.mod_configuration['controller_pass'])
+                    self.controller['CONFIG_FILE'] = str(
+                        self.mod_configuration['controller_config_file'])
+                    self.controller['LOG_FILE'] = str(
+                        self.mod_configuration['controller_log_file'])
+                    self.controller['MIRROR_PORTS'] = ast.literal_eval(
+                    self.mod_configuration['controller_mirror_ports'])
                     self.sdnc = FaucetProxy(host=self.controller['URI'],
                                             user=self.controller['USER'],
                                             pw=self.controller['PASS'],
                                             config_file=self.controller['CONFIG_FILE'],
-                                            log_file=self.controller['LOG_FILE'])
+                                            log_file=self.controller['LOG_FILE'],
+                                            mirror_ports=self.controller['MIRROR_PORTS'])
                 except BaseException as e:  # pragma: no cover
                     self.logger.error(
                         'FaucetProxy could not connect to {0} because {1}'.format(
