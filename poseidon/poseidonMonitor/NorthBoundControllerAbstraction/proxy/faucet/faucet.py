@@ -35,6 +35,7 @@ class FaucetProxy(Connection, Parser):
                  pw=None,
                  config_file=None,
                  log_file=None,
+                 mirror_ports=None,
                  *args,
                  **kwargs):
         '''Initializes Faucet object.'''
@@ -43,6 +44,7 @@ class FaucetProxy(Connection, Parser):
                                           pw,
                                           config_file,
                                           log_file,
+                                          mirror_ports,
                                           *args,
                                           **kwargs)
 
@@ -63,27 +65,7 @@ class FaucetProxy(Connection, Parser):
         self.receive_file('log')
         retval = []
 
-        # NOTE very fragile, prone to errors
-        mac_table = {}
-        with open('/tmp/faucet.log', 'r') as f:
-            for line in f:
-                if 'L2 learned' in line:
-                    learned_mac = line.split()
-                    data = {'ip-address': learned_mac[16][0:-1],
-                            'ip-state': 'L2 learned',
-                            'mac': learned_mac[10],
-                            'segment': learned_mac[7][1:-1],
-                            'tenant': learned_mac[21] + learned_mac[22]}
-                    if learned_mac[10] in mac_table:
-                        dup = False
-                        for d in mac_table[learned_mac[10]]:
-                            if data == d:
-                                dup = True
-                        if dup:
-                            mac_table[learned_mac[10]].remove(data)
-                        mac_table[learned_mac[10]].insert(0, data)
-                    else:
-                        mac_table[learned_mac[10]] = [data]
+        mac_table = self.config('/tmp/faucet.log')
         module_logger.debug('get_endpoints found:')
         for mac in mac_table:
             module_logger.debug('{0}:{1}'.format(
