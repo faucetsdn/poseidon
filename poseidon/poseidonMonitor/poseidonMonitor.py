@@ -293,7 +293,7 @@ class Monitor(object):
             'filter': '\'host {0}\''.format(
                 self.uss.endpoints.get_endpoint_ip(dev_hash)),
             'iters': str(num_captures),
-            'metadata': endpoint.to_json()}
+            'metadata': endpoint.to_str()}
 
         self.logger.debug('vent payload: ' + str(payload))
 
