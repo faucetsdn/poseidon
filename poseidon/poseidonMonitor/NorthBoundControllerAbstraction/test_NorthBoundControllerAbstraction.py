@@ -415,7 +415,7 @@ def test_first_run_faucet():
     assert uss.controller['PASS'] == 'TEST_PASS'
     assert uss.controller['CONFIG_FILE'] == '/etc/ryu/faucet/faucet.yaml'
     assert uss.controller['LOG_FILE'] == '/var/log/ryu/faucet/faucet.log'
-    assert uss.controller['MIRROR_PORTS'] = '{"0xdeadbeef":"port1"}'
+    assert uss.controller['MIRROR_PORTS'] == '{"0xdeadbeef":"port1"}'
 
 
 def test_first_run_unknown():
