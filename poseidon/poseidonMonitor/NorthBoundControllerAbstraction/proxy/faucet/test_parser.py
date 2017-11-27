@@ -26,7 +26,7 @@ def test_Parser():
     """
     Tests Parser
     """
-    parser = Parser(mirror_ports={0x70b3d56cd32e:1, 0x70b3d56cd32e:2,'switch1':3})
+    parser = Parser(mirror_ports={0x70b3d56cd32e:2, 'switch1':3})
     parser.config('/tmp/faucet.yaml', 'mirror', 1, 'switch1')
     parser.config('/tmp/faucet.yaml', 'mirror', 2, 0x70b3d56cd32e)
     parser.config('/tmp/faucet.yaml', 'mirror', 2, 'switch2')

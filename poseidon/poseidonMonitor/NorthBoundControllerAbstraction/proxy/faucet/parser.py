@@ -18,7 +18,7 @@
 Created on 19 November 2017
 @author: cglewis
 """
-from yaml import load, dump
+from yaml import dump, safe_load
 from yaml import CLoader as Loader, CDumper as Dumper
 
 from poseidon.baseClasses.Logger_Base import Logger
@@ -35,7 +35,7 @@ class Parser:
     def config(self, config_file, action, port, switch):
         documents = {}
         stream = open(config_file, 'r')
-        obj_doc = load(stream)
+        obj_doc = safe_load(stream)
         stream.close()
         # TODO check for other files
 
