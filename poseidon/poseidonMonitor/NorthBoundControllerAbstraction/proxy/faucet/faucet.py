@@ -69,9 +69,14 @@ class FaucetProxy(Connection, Parser):
         mac_table = self.log('/tmp/faucet.log')
         module_logger.debug('get_endpoints found:')
         for mac in mac_table:
-            module_logger.debug('{0}:{1}'.format(
-                mac, mac_table[mac]))
-            retval.append(mac_table[mac])
+            if (mac_table[mac][0]['ip-address'] != 'None' and
+                mac_table[mac][0]['ip-address'] != '127.0.0.1' and
+                mac_table[mac][0]['ip-address'] != '0.0.0.0' and
+                mac_table[mac][0]['ip-address'] != '::' and
+                not mac_table[mac][0]['ip-address'].startswith('fe80:')):
+                    module_logger.debug('{0}:{1}'.format(
+                        mac, mac_table[mac]))
+                    retval.append(mac_table[mac])
         return retval
 
     def get_switches(self):
