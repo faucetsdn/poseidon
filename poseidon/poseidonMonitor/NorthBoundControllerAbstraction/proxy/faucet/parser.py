@@ -43,45 +43,45 @@ class Parser:
             if not self.mirror_ports:
                 self.logger.error("Unable to mirror, no mirror ports defined")
                 return False
-            if not switch in self.mirror_ports:
-                self.logger.warning("Unable to mirror " + str(port) + " on " +
-                                    str(switch) +
-                                    ", mirror port not defined on that switch")
+            if not 'dps' in obj_doc:
+                self.logger.warning("Unable to find switch configs in "
+                                    "'/etc/ryu/faucet/faucet.yaml'")
                 ok = False
             else:
-                if not 'dps' in obj_doc:
-                    self.logger.warning("Unable to find switch configs in "
-                                        "'/etc/ryu/faucet/faucet.yaml'")
+                for s in obj_doc['dps']:
+                    if isinstance(switch, str):
+                        if switch == s:
+                            switch_found = s
+                    elif isinstance(switch, int):
+                        if hex(switch) == hex(obj_doc['dps'][s]['dp_id']):
+                            switch_found = s
+            if not switch_found:
+                self.logger.warning("No switch match found to mirror "
+                                    "from in the configs")
+                ok = False
+            else:
+                if not switch_found in self.mirror_ports:
+                    self.logger.warning("Unable to mirror " + str(port) +
+                                        " on " + str(switch_found) +
+                                        ", mirror port not defined on that switch")
                     ok = False
                 else:
-                    for s in obj_doc['dps']:
-                        if isinstance(switch, str):
-                            if switch == s:
-                                switch_found = s
-                        elif isinstance(switch, int):
-                            if hex(switch) == hex(obj_doc['dps'][s]['dp_id']):
-                                switch_found = s
-                    if not switch_found:
-                        self.logger.warning("No switch match found to mirror "
-                                            "from in the configs")
+                    if not port in obj_doc['dps'][switch_found]['interfaces']:
+                        self.logger.warning("No port match found to "
+                                            "mirror from in the configs")
+                        ok = False
+                    if not self.mirror_ports[switch_found] in obj_doc['dps'][switch_found]['interfaces']:
+                        self.logger.warning("No port match found to "
+                                            "mirror to in the configs")
                         ok = False
                     else:
-                        if not port in obj_doc['dps'][switch_found]['interfaces']:
-                            self.logger.warning("No port match found to "
-                                                "mirror from in the configs")
-                            ok = False
-                        if not self.mirror_ports[switch] in obj_doc['dps'][switch_found]['interfaces']:
-                            self.logger.warning("No port match found to "
-                                                "mirror to in the configs")
-                            ok = False
-                        else:
-                            if 'mirror' in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch]]:
-                                self.logger.info("Mirror port already set to "
-                                                 "mirror something, removing "
-                                                 "old mirror setting")
-                                del obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch]]['mirror']
+                        if 'mirror' in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]:
+                            self.logger.info("Mirror port already set to "
+                                             "mirror something, removing "
+                                             "old mirror setting")
+                            del obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']
             if ok:
-                obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch]]['mirror'] = port
+                obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] = port
             else:
                 self.logger.error("Unable to mirror due to warnings")
                 return False
