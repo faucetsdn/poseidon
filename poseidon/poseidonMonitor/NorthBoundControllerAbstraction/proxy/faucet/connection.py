@@ -56,6 +56,7 @@ class Connection:
         pass
 
     def receive_file(self, f_type):
+        # TODO option to receive other files (config can be multiple files)
         self._connect()
         # TODO better logging
         try:
@@ -72,6 +73,7 @@ class Connection:
         self._disconnect()
 
     def send_file(self, f_type):
+        # TODO option to send other files (config can be multiple files)
         self._connect()
         # TODO better logging
         try:

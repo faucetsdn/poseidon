@@ -94,7 +94,7 @@ class Update_Switch_State(Monitor_Helper_Base):
                     self.controller['LOG_FILE'] = str(
                         self.mod_configuration['controller_log_file'])
                     self.controller['MIRROR_PORTS'] = ast.literal_eval(
-                    self.mod_configuration['controller_mirror_ports'])
+                        self.mod_configuration['controller_mirror_ports'])
                     self.sdnc = FaucetProxy(host=self.controller['URI'],
                                             user=self.controller['USER'],
                                             pw=self.controller['PASS'],
