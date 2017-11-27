@@ -50,10 +50,11 @@ class Parser:
             else:
                 for s in obj_doc['dps']:
                     try:
-                        if hex(switch) == hex(obj_doc['dps'][s]['dp_id']):
+                        if hex(int(switch, 16)) == hex(obj_doc['dps'][s]['dp_id']):
                             switch_found = s
                     except Exception as e:  # pragma: no cover
                         self.logger.debug("switch is not a hex value: %s" % switch)
+                        self.logger.debug("error: %s" % e)
             if not switch_found:
                 self.logger.warning("No switch match found to mirror "
                                     "from in the configs. switch: %s" % switch)
