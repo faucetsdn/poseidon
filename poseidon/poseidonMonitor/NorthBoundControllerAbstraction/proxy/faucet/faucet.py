@@ -107,19 +107,19 @@ class FaucetProxy(Connection, Parser):
 
     def shutdown_ip(self, ip_addr, shutdown=True, mac_addr=None):
         shutdowns = []
-        port = None
+        port = 0
         switch = None
         self.receive_file('config')
-        if self.config('/tmp/faucet.yaml', 'shutdown', port, switch):
+        if self.config('/tmp/faucet.yaml', 'shutdown', int(port), switch):
             self.send_file('config')
         # TODO
         return shutdowns
 
     def shutdown_endpoint(self):
-        port = None
+        port = 0
         switch = None
         self.receive_file('config')
-        if self.config('/tmp/faucet.yaml', 'shutdown', port, switch):
+        if self.config('/tmp/faucet.yaml', 'shutdown', int(port), switch):
             self.send_file('config')
 
     def get_highest(self):
@@ -131,7 +131,7 @@ class FaucetProxy(Connection, Parser):
     def mirror_ip(self, ip):
         self.receive_file('log')
         mac_table = self.log('/tmp/faucet.log')
-        port = None
+        port = 0
         switch = None
         for mac in mac_table:
             if ip == mac_table[mac][0]['ip-address']:
@@ -139,19 +139,19 @@ class FaucetProxy(Connection, Parser):
                 switch = mac_table[mac][0]['segment']
         if port and switch:
             self.receive_file('config')
-            if self.config('/tmp/faucet.yaml', 'mirror', port, switch):
+            if self.config('/tmp/faucet.yaml', 'mirror', int(port), switch):
                 self.send_file('config')
 
     def unmirror_ip(self, ip):
-        port = None
+        port = 0
         switch = None
         self.receive_file('config')
-        if self.config('/tmp/faucet.yaml', 'unmirror', port, switch):
+        if self.config('/tmp/faucet.yaml', 'unmirror', int(port), switch):
             self.send_file('config')
 
     def mirror_traffic(self):
-        port = None
+        port = 0
         switch = None
         self.receive_file('config')
-        if self.config('/tmp/faucet.yaml', 'mirror', port, switch):
+        if self.config('/tmp/faucet.yaml', 'mirror', int(port), switch):
             self.send_file('config')
