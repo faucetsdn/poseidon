@@ -18,11 +18,18 @@
 Created on 19 November 2017
 @author: cglewis
 """
-from yaml import dump, safe_load
+import yaml
 
 from poseidon.baseClasses.Logger_Base import Logger
 
 module_logger = Logger.logger
+
+
+class HexInt(int): pass
+
+
+def representer(dumper, data):
+    return dumper.represent_int(hex(data))
 
 
 class Parser:
@@ -34,7 +41,7 @@ class Parser:
     def config(self, config_file, action, port, switch):
         switch_found = None
         stream = open(config_file, 'r')
-        obj_doc = safe_load(stream)
+        obj_doc = yaml.safe_load(stream)
         stream.close()
         # TODO check for other files
 
@@ -97,12 +104,13 @@ class Parser:
         # ensure that dp_id gets written as a hex string
         for sw in obj_doc['dps']:
             try:
-                obj_doc['dps'][sw]['dp_id'] = hex(obj_doc['dps'][sw]['dp_id'])
+                obj_doc['dps'][sw]['dp_id'] = HexInt(obj_doc['dps'][sw]['dp_id'])
             except Exception as e:
                 pass
 
         stream = open(config_file, 'w')
-        dump(obj_doc, stream, default_flow_style=False)
+        yaml.add_representer(HexInt, representer)
+        yaml.dump(obj_doc, stream, default_flow_style=False)
 
         return True
 
