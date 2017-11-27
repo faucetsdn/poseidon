@@ -86,11 +86,20 @@ class Parser:
                 self.logger.error("Unable to mirror due to warnings")
                 return False
         elif action == 'unmirror':
+            # TODO
             pass
         elif action == 'shutdown':
+            # TODO
             pass
         else:
             self.logger.warning("Unknown action: " + action)
+
+        # ensure that dp_id gets written as a hex string
+        for sw in obj_doc['dps']:
+            try:
+                obj_doc['dps'][sw]['dp_id'] = str(hex(obj_doc['dps'][sw]['dp_id']))
+            except Exception as e:
+                pass
 
         stream = open(config_file, 'w')
         dump(obj_doc, stream, default_flow_style=False)
