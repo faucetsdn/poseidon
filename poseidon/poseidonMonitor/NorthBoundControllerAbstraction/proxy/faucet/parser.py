@@ -32,7 +32,7 @@ class Parser:
         self.mirror_ports = mirror_ports
 
     def config(self, config_file, action, port, switch):
-        documents = {}
+        switch_found = None
         stream = open(config_file, 'r')
         obj_doc = safe_load(stream)
         stream.close()
@@ -42,7 +42,7 @@ class Parser:
             ok = True
             if not self.mirror_ports:
                 self.logger.error("Unable to mirror, no mirror ports defined")
-                return None
+                return False
             if not switch in self.mirror_ports:
                 self.logger.warning("Unable to mirror " + str(port) + " on " +
                                     str(switch) +
@@ -54,7 +54,6 @@ class Parser:
                                         "'/etc/ryu/faucet/faucet.yaml'")
                     ok = False
                 else:
-                    switch_found = None
                     for s in obj_doc['dps']:
                         if isinstance(switch, str):
                             if switch == s:
@@ -82,11 +81,10 @@ class Parser:
                                                  "old mirror setting")
                                 del obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch]]['mirror']
             if ok:
-                # add mirror to port
-                pass
+                obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch]]['mirror'] = port
             else:
                 self.logger.error("Unable to mirror due to warnings")
-                return None
+                return False
         elif action == 'unmirror':
             pass
         elif action == 'shutdown':
@@ -94,11 +92,10 @@ class Parser:
         else:
             self.logger.warning("Unknown action: " + action)
 
-        document = dump(obj_doc, default_flow_style=False)
-        documents[config_file] = document
-        self.logger.debug("New configs: " + str(documents))
+        stream = open(config_file, 'w')
+        dump(obj_doc, stream, default_flow_style=False)
 
-        return documents
+        return True
 
     def log(self, log_file):
         mac_table = {}
