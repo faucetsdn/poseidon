@@ -96,7 +96,7 @@ class Parser:
 
         # ensure that dp_id gets written as a hex string
         for sw in obj_doc['dps']:
-            obj_doc['dps'][sw]['dp_id'] = str(hex(int(obj_doc['dps'][sw]['dp_id'], 16))
+            obj_doc['dps'][sw]['dp_id'] = str(hex(int(obj_doc['dps'][sw]['dp_id'], 16)))
 
         stream = open(config_file, 'w')
         dump(obj_doc, stream, default_flow_style=False)
