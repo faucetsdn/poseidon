@@ -97,7 +97,7 @@ class Parser:
         # ensure that dp_id gets written as a hex string
         for sw in obj_doc['dps']:
             try:
-                obj_doc['dps'][sw]['dp_id'] = str(hex(obj_doc['dps'][sw]['dp_id']))
+                obj_doc['dps'][sw]['dp_id'] = hex(obj_doc['dps'][sw]['dp_id'])
             except Exception as e:
                 pass
 
