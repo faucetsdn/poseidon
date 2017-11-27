@@ -19,7 +19,6 @@ Created on 19 November 2017
 @author: cglewis
 """
 from yaml import dump, safe_load
-from yaml import CLoader as Loader, CDumper as Dumper
 
 from poseidon.baseClasses.Logger_Base import Logger
 
