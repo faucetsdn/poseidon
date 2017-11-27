@@ -110,7 +110,7 @@ class FaucetProxy(Connection, Parser):
         port = None
         switch = None
         self.receive_file('config')
-        self.config('/tmp/faucet.yaml', port, switch)
+        self.config('/tmp/faucet.yaml', 'shutdown', port, switch)
         # TODO
         return shutdowns
 
@@ -118,7 +118,7 @@ class FaucetProxy(Connection, Parser):
         port = None
         switch = None
         self.receive_file('config')
-        self.config('/tmp/faucet.yaml', port, switch)
+        self.config('/tmp/faucet.yaml', 'shutdown', port, switch)
 
     def get_highest(self):
         pass
@@ -137,16 +137,16 @@ class FaucetProxy(Connection, Parser):
                 switch = mac_table[mac][0]['segment']
         if port and switch:
             self.receive_file('config')
-            self.config('/tmp/faucet.yaml', port, switch)
+            self.config('/tmp/faucet.yaml', 'mirror', port, switch)
 
     def unmirror_ip(self, ip):
         port = None
         switch = None
         self.receive_file('config')
-        self.config('/tmp/faucet.yaml', port, switch)
+        self.config('/tmp/faucet.yaml', 'unmirror', port, switch)
 
     def mirror_traffic(self):
         port = None
         switch = None
         self.receive_file('config')
-        self.config('/tmp/faucet.yaml', port, switch)
+        self.config('/tmp/faucet.yaml', 'mirror', port, switch)

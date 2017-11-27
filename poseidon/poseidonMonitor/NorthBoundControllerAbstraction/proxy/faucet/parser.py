@@ -18,7 +18,7 @@
 Created on 19 November 2017
 @author: cglewis
 """
-from yaml import load, dump
+from yaml import dump, safe_load
 from yaml import CLoader as Loader, CDumper as Dumper
 
 from poseidon.baseClasses.Logger_Base import Logger
@@ -32,15 +32,78 @@ class Parser:
         self.logger = module_logger
         self.mirror_ports = mirror_ports
 
-    def config(self, config_file, port, switch):
-        self.logger.info("mirroring: " + str(self.mirror_ports))
+    def config(self, config_file, action, port, switch):
+        documents = {}
         stream = open(config_file, 'r')
-        document = dump(load(stream), default_flow_style=False)
-        self.logger.info(document)
+        obj_doc = safe_load(stream)
+        stream.close()
+        # TODO check for other files
+
+        if action == 'mirror':
+            ok = True
+            if not self.mirror_ports:
+                self.logger.error("Unable to mirror, no mirror ports defined")
+                return None
+            if not switch in self.mirror_ports:
+                self.logger.warning("Unable to mirror " + str(port) + " on " +
+                                    str(switch) +
+                                    ", mirror port not defined on that switch")
+                ok = False
+            else:
+                if not 'dps' in obj_doc:
+                    self.logger.warning("Unable to find switch configs in "
+                                        "'/etc/ryu/faucet/faucet.yaml'")
+                    ok = False
+                else:
+                    switch_found = None
+                    for s in obj_doc['dps']:
+                        if isinstance(switch, str):
+                            if switch == s:
+                                switch_found = s
+                        elif isinstance(switch, int):
+                            if hex(switch) == hex(obj_doc['dps'][s]['dp_id']):
+                                switch_found = s
+                    if not switch_found:
+                        self.logger.warning("No switch match found to mirror "
+                                            "from in the configs")
+                        ok = False
+                    else:
+                        if not port in obj_doc['dps'][switch_found]['interfaces']:
+                            self.logger.warning("No port match found to "
+                                                "mirror from in the configs")
+                            ok = False
+                        if not self.mirror_ports[switch] in obj_doc['dps'][switch_found]['interfaces']:
+                            self.logger.warning("No port match found to "
+                                                "mirror to in the configs")
+                            ok = False
+                        else:
+                            if 'mirror' in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch]]:
+                                self.logger.info("Mirror port already set to "
+                                                 "mirror something, removing "
+                                                 "old mirror setting")
+                                del obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch]]['mirror']
+            if ok:
+                # add mirror to port
+                pass
+            else:
+                self.logger.error("Unable to mirror due to warnings")
+                return None
+        elif action == 'unmirror':
+            pass
+        elif action == 'shutdown':
+            pass
+        else:
+            self.logger.warning("Unknown action: " + action)
+
+        document = dump(obj_doc, default_flow_style=False)
+        documents[config_file] = document
+        self.logger.debug("New configs: " + str(documents))
+
+        return documents
 
     def log(self, log_file):
-        # NOTE very fragile, prone to errors
         mac_table = {}
+        # NOTE very fragile, prone to errors
         with open(log_file, 'r') as f:
             for line in f:
                 if 'L2 learned' in line:
