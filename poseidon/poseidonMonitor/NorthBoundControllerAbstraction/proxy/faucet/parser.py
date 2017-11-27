@@ -49,15 +49,14 @@ class Parser:
                 ok = False
             else:
                 for s in obj_doc['dps']:
-                    if isinstance(switch, str):
-                        if switch == s:
-                            switch_found = s
-                    elif isinstance(switch, int):
+                    try:
                         if hex(switch) == hex(obj_doc['dps'][s]['dp_id']):
                             switch_found = s
+                    except Exception as e:  # pragma: no cover
+                        self.logger.debug("switch is not a hex value: %s" % switch)
             if not switch_found:
                 self.logger.warning("No switch match found to mirror "
-                                    "from in the configs")
+                                    "from in the configs. switch: %s" % switch)
                 ok = False
             else:
                 if not switch_found in self.mirror_ports:
