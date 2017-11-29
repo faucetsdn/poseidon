@@ -731,6 +731,9 @@ def test_process():
         def debug(self, msg):
             pass
 
+        def info(self, msg):
+            pass
+
     class MockEndpoint(Endpoint_Wrapper):
         def __init__(self):
             super(MockEndpoint, self).__init__()
