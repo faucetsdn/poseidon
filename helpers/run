@@ -9,7 +9,7 @@ docker run -it \
            -e controller_user=$controller_user \
            -e controller_pass=$controller_pass \
            -e controller_type=$controller_type \
-           -e controller_nic=$controller_nic \
+           -e collector_nic=$collector_nic \
            -e controller_mirror_ports=$controller_mirror_ports \
            -e max_concurrent_reinvestigations=$max_concurrent_reinvestigations \
            --name vent \
