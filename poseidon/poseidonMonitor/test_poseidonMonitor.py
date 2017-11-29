@@ -909,6 +909,9 @@ def test_schedule_thread_worker():
         def debug(self, msg):
             pass
 
+        def info(self, msg):
+            pass
+
     class mockSchedule():
 
         def __init__(self):
