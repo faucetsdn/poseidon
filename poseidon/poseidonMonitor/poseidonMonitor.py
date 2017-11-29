@@ -363,7 +363,7 @@ class Monitor(object):
                 current_state = eps.get_endpoint_state(endpoint_hash)
                 next_state = eps.get_endpoint_next(endpoint_hash)
 
-                self.logger.info("Next state: %s" % next_state)
+                self.logger.info('Next state: {0}'.format(next_state))
 
                 # dont do anything
                 if next_state == 'NONE':
