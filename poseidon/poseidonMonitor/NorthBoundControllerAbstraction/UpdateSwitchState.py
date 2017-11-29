@@ -193,8 +193,6 @@ class Update_Switch_State(Monitor_Helper_Base):
         self.logger.debug('MACHINES:{0}'.format(machines))
         self.find_new_machines(machines)
 
-        self.endpoints.print_endpoint_state()
-
         self.retval['machines'] = parsed
         self.retval['resp'] = 'ok'
 
