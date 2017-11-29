@@ -3,13 +3,13 @@ poseidon:
         config: True
         logging_file: /tmp/poseidonWork/logging.json
         logger_level: INFO
-        reinvestigation_frequency: 60
-        max_concurrent_reinvestigations: 1
-        scan_frequency: 15
+        reinvestigation_frequency: 900
+        max_concurrent_reinvestigations: 2
+        scan_frequency: 5
         rabbit_server: RABBIT_SERVER
         rabbit_port: 5672
         collector_nic: enp7s0f0
-        collector_interval: 60
+        collector_interval: 900
         vent_ip: vent_ip
         vent_port: 8080
 
