@@ -170,6 +170,7 @@ class Monitor(object):
         self.logger.debug('----------------------')
         self.init_logging()
 
+        # TODO better error checking needed here since this is user input
         scan_frequency = int(self.mod_configuration['scan_frequency'])
         self.schedule.every(scan_frequency).seconds.do(
             partial(schedule_job_kickurl, func=self, logger=self.logger))
@@ -355,13 +356,9 @@ class Monitor(object):
                 self.logger.debug("**********************\n\n\n")
 
             eps = self.uss.endpoints
-
             state_transitions = self.update_next_state(ml_returns)
 
-            eps.print_endpoint_state()
-
             # make the transitions
-
             for endpoint_hash in eps.state:
                 current_state = eps.get_endpoint_state(endpoint_hash)
                 next_state = eps.get_endpoint_next(endpoint_hash)
@@ -369,6 +366,8 @@ class Monitor(object):
                 # dont do anything
                 if next_state == 'NONE':
                     continue
+                else:
+                    eps.print_endpoint_state()
 
                 if next_state == 'MIRRORING':
                     self.logger.debug(
