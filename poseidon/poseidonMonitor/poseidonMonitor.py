@@ -363,11 +363,13 @@ class Monitor(object):
                 current_state = eps.get_endpoint_state(endpoint_hash)
                 next_state = eps.get_endpoint_next(endpoint_hash)
 
+                self.logger.info(next_state)
+
                 # dont do anything
                 if next_state == 'NONE':
                     continue
-                else:
-                    eps.print_endpoint_state()
+
+                eps.print_endpoint_state()
 
                 if next_state == 'MIRRORING':
                     self.logger.debug(

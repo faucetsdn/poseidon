@@ -731,6 +731,9 @@ def test_process():
         def debug(self, msg):
             pass
 
+        def info(self, msg):
+            pass
+
     class MockEndpoint(Endpoint_Wrapper):
         def __init__(self):
             super(MockEndpoint, self).__init__()
@@ -907,6 +910,9 @@ def test_schedule_thread_worker():
             pass
 
         def debug(self, msg):
+            pass
+
+        def info(self, msg):
             pass
 
     class mockSchedule():
