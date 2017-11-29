@@ -158,6 +158,9 @@ class Update_Switch_State(Monitor_Helper_Base):
                 self.logger.debug(
                     'adding address to known systems {0}'.format(machine))
                 self.endpoints.set(end_point)
+
+            # print the state of things the first time
+            self.endpoints.print_endpoint_state()
         else:
             for machine in machines:
                 end_point = EndPoint(machine, state='UNKNOWN')
