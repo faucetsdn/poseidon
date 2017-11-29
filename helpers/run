@@ -1,0 +1,16 @@
+#!/bin/sh
+
+docker run -it \
+           -v /var/run/docker.sock:/var/run/docker.sock \
+           -v /opt/vent_files:/opt/vent_files \
+           -v $(pwd)/.plugin_config.yml:/root/.plugin_config.yml \
+           -v $(pwd)/.vent_startup.yml:/root/.vent_startup.yml \
+           -e controller_uri=$controller_uri \
+           -e controller_user=$controller_user \
+           -e controller_pass=$controller_pass \
+           -e controller_type=$controller_type \
+           -e controller_nic=$controller_nic \
+           -e controller_mirror_ports=$controller_mirror_ports \
+           -e max_concurrent_reinvestigations=$max_concurrent_reinvestigations \
+           --name vent \
+           cyberreboot/vent
