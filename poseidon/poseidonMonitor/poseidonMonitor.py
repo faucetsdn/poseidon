@@ -395,6 +395,8 @@ class Monitor(object):
                         self.uss.unmirror_endpoint(endpoint_hash)
                         eps.change_endpoint_state(endpoint_hash)
 
+                eps.print_endpoint_state()
+
     def get_q_item(self):
         ''' attempt to get a workitem from the queue'''
         ''' m_queue -> (routing_key, body)
