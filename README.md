@@ -17,7 +17,9 @@ This challenge is a joint challenge between two IQT Labs: Lab41 and Cyber Reboot
 
 ### Quick Start
 Poseidon currently supports two different SDN controllers, [Big Cloud Fabric](https://www.bigswitch.com/products/big-cloud-fabrictm/switching-fabric-overview) and [FAUCET](https://github.com/faucetsdn/faucet).
-<img src="/docs/img/bcf.png" width="57" height="50"/><img src="/docs/img/faucet.png" width="95" height="50">
+
+<img src="/docs/img/bcf.png" width="114" height="100"/><img src="/docs/img/faucet.png" width="190" height="100">
+
 Before getting started, one of these two controllers needs to running and accessible to where Poseidon will be deployed.  Skip to the controller section that you wish to deploy.
 
 #### Big Cloud Fabric (BCF) Configuration
