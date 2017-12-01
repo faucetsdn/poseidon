@@ -12,127 +12,19 @@ This challenge is a joint challenge between two IQT Labs: Lab41 and Cyber Reboot
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
-
 ### Prerequisites
-[Docker Installed](https://www.docker.com/)
+[Docker](https://www.docker.com/)
 
-### Installing
-```
-git clone https://github.com/CyberReboot/poseidon.git
-cd poseidon
-*editor* config/poseidon.config
-docker build -f ./Dockerfile.poseidon -t poseidon .
-docker run poseidon
-```
+### Quick Start
+Poseidon currently supports two different SDN controllers, Big Cloud Fabric and FAUCET.  Before getting started, one of these two controllers needs to running and accessible to where Poseidon will be deployed.  Skip to the controller section that you wish to deploy.
 
-### Makefile Options
+#### Big Cloud Fabric (BCF) Configuration
+You will need to add support for moving arbitrary endpoint data around your network.  The BigSwitch config will need an admin who will need to add:
 
-You can use `make` to simplify the building process.
-To build the container, simply run:
+- span-fabric
+- interface-group
 
-```
-git clone https://github.com/CyberReboot/poseidon.git
-cd poseidon
-make build_poseidon
-```
-
-To build and run the container, run this command from inside the poseidon directory:
-```
-make run_poseidon
-```
-This first builds poseidon, then runs it. After it finishes running, the container is removed.
-
-To populate the current volume with the contents of the containers' "poseidonWork/" directory, run:
-```
-make run_dev
-```
-
-To run poseidon with sh as entrypoint, run:
-```
-make run_sh
-```
-This also removes the container after it has finished running.
-
-If you want to build the docs, then invoke:
-```
-make build_docs
-```
-
-To build and then open the docs in a container on port 8080:
-```
-make run_docs
-```
-
-To run tests:
-```
-make run_tests
-```
-
-## Configuration
-config/poseidon.config
-### [Monitor]
-rabbit_server =  `RABBIT_SERVER`  
-rabbit_port = `RABBIT_PORT`  
-collector_nic = `COLLECTOR_NIC`  
-vent_ip = `vent_ip`  
-vent_port = `VENT_PORT`  
-  
-`RABBIT_SERVER` - ip address of the rabbit-mq server   
-`RABBIT_PORT` - rabbit-mq server server port  
-`COLLECTOR_NIC` - name of the network interface that will be listening for packets  
-`vent_ip` - ip address of serever running vent  
-`VENT_PORT` - vent server port  
-
-### [NorthBoundControllerAbstraction:Update_Switch_State]
-controller_uri = https://`CONTROLLER_SERVER`:8443/api/v1/  
-controller_user = `USERNAME`  
-controller_pass = `PASSWORD`  
-controller_type = `CONTROLLER`
-
-`CONTROLLER_SERVER` - BCF controller ip  
-`USERNAME` - username for BCF login  
-`PASSWORD` - password for BCF login
-`CONTROLLER` - either `bcf` or `faucet`
-
-
-
-## Running Poseidon with Vent
-
-Export `controller_uri`, `controller_user`, and `controller_pass` environment variables to match your connection details for your BCF controller.
-Also make any additional configuration changes to `.plugin_config.yml`
-
-```
-export controller_uri=https://x.x.x.x:8443/api/v1/
-export controller_user=user
-export controller_pass=pass
-```
-
-```
-git clone https://github.com/CyberReboot/poseidon.git
-cd poseidon
-docker run -it \
-           -v /var/run/docker.sock:/var/run/docker.sock \
-           -v /opt/vent_files:/opt/vent_files \
-           -v $(pwd)/.plugin_config.yml:/root/.plugin_config.yml \
-           -v $(pwd)/.vent_startup.yml:/root/.vent_startup.yml \
-           -e controller_uri=$controller_uri \
-           -e controller_user=$controller_user \
-           -e controller_pass=$controller_pass \
-           -e controller_type=$controller_type \
-           --name vent \
-           cyberreboot/vent
-```
-
-* Note: if use Docker for Mac, you'll need to create a directory `/opt/vent_files` and add it to shared directories in preferences.
-
-## Bigswitch configuration modifications
-you will need to add support for moving arbitrary endpoint data around your network.  The bigswitch config will need an admin will need to add
-1. span-fabric
-1. interface-group
-
-### span-fabric
-
+##### span-fabric
 
 ```
 ! span-fabric
@@ -142,7 +34,8 @@ span-fabric vent
   priority 1
 ```
 
-### interface-group
+##### interface-group
+
 ```
 ! interface-group
 interface-group ig1
@@ -151,22 +44,58 @@ interface-group ig1
   member switch YOUR_LEAF_SWITCH interface YOUR_INTERFACE_WHERE_VENT_WILL_RECORD_TRAFFIC_FROM
 ```
 
-### NOTE:
+##### NOTE:
 
 If the interface-group `ig1` is reserved in your install, you will need to modify dest-interface-group in:
+
 ```
-poseidon/poseidonMonitor/NorthBoundControllerAbstraction/proxy/bcf/bcf.py:            "dest-interface-group": "ig1",
-poseidon/poseidonMonitor/NorthBoundControllerAbstraction/proxy/bcf/sample_state.py:    "dest-interface-group": "ig1",
+poseidon/poseidonMonitor/NorthBoundControllerAbstraction/proxy/bcf/bcf.py:          "dest-interface-group": "ig1",
+poseidon/poseidonMonitor/NorthBoundControllerAbstraction/proxy/bcf/sample_state.py: "dest-interface-group": "ig1",
 ```
 
-if the span-fabrc `vent` is reserved in your install, you will need to modify the span_name, and other variables in:
+If the span-fabrc `vent` is reserved in your install, you will need to modify the span_name, and other variables in:
+
 ```
 /poseidon/poseidonMonitor/NorthBoundControllerAbstraction/proxy/bcf/bcf.py
 /poseidon/poseidonMonitor/NorthBoundControllerAbstraction/proxy/bcf/test_bcf.py
 /poseidon/poseidonMonitor/NorthBoundControllerAbstraction/proxy/bcf/sample_state.py
 ```
 
-To look at the logs:
+Poseidon will connect to BCF using its REST API, so you'll need the API endpoint and credentials to it.  The easiest way to set these values so that Poseidon can use them is in environment variables like so (assuming the controller is running at `192.168.1.10`):
+
+```
+export controller_type=bcf
+export controller_uri=https://192.168.1.10:8443/api/v1/
+export controller_user=user
+export controller_pass=pass
+```
+
+BCF is now configured and ready for use with Poseidon, continue on to the [Starting Poseidon using Vent](#starting-poseidon-using-vent) section.
+
+#### FAUCET Configuration
+Poseidon will connect to FAUCET using SSH, so you'll need to create an account that can SSH to the machine running FAUCET and that has rights to modify the configuration file `faucet.yaml` (currently Poseidon expects it to be in the default `/etc/ryu/faucet/faucet.yaml` location and `dps` must all be defined in this file for Poseidon to update the network posture correctly).  The easiest way to set these values so that Poseidon can use them is in environment variables like so (assuming the controller is running at `192.168.1.10`):
+
+```
+export controller_type=faucet
+export controller_uri=192.168.1.10
+export controller_user=user
+export controller_pass=pass
+export controller_mirror_ports='{"switch1":3}'  # a python dictionary of switch names (from faucet.yaml) and switch port numbers for mirroring to
+```
+
+FAUCET is now configured and ready for use with Poseidon, continue on to the [Starting Poseidon using Vent](#starting-poseidon-using-vent) section.
+
+#### Starting Poseidon using Vent
+[Vent](https://github.com/CyberReboot/vent) is a platform we built to automate network collection and analysis pipelines, such as the ones that Poseidon would need.  Leveraging Vent, we can specify all of the actions we expect Poseidon to be able to do from network event (i.e. new device plugged in), to network capture, to analysis, and closing the loop by feeding back an actionable decision.
+
+In order to run Poseidon in Vent, regardless of the SDN controller chosen, a few additional environment variables need to be set:
+
+```
+export collector_nic=eth0  # set the NIC of the machine that traffic will be mirrored to
+export max_concurrent_reinvestigations=1  # if running FAUCET, this should be set to 1, if BCF, it can be a larger number
+```
+
+Once Vent is finished starting things up, you'll be able to see the logs of everything, including Poseidon by running:
 
 ```
 docker logs -f cyberreboot-vent-syslog-master
@@ -184,15 +113,99 @@ And then attach to the console with:
 docker attach vent
 ```
 
+* Note: if use Docker for Mac, you'll need to create a directory `/opt/vent_files` and add it to shared directories in preferences.
+
+## Installing
+If you prefer to orchestrate all of the pieces for Poseidon yourself without Vent, then follow these directions:
+
+```
+git clone https://github.com/CyberReboot/poseidon.git
+cd poseidon
+*editor* config/poseidon.config
+docker build -f ./Dockerfile.poseidon -t poseidon .
+docker run poseidon
+```
+
+### Configuration
+
+**config/poseidon.config**
+
+```
+[Monitor]
+
+rabbit_server =  RABBIT_SERVER  # ip address of the rabbit-mq server
+rabbit_port = RABBIT_PORT  # rabbit-mq server server port
+collector_nic = COLLECTOR_NIC  # name of the network interface that will be listening for packets 
+vent_ip = vent_ip  # ip address of server running vent 
+vent_port = VENT_PORT  # vent server port
+
+[NorthBoundControllerAbstraction:Update_Switch_State]
+controller_uri = https://CONTROLLER_SERVER:8443/api/v1/  # example for BCF controller ip 
+controller_user = USERNAME  # username for BCF login
+controller_pass = PASSWORD  # password for BCF login
+controller_type = CONTROLLER  # either `bcf` or `faucet`
+```
+
+## Makefile Options
+
+You can use `make` to simplify the building process.  This is primarily useful for development.
+To build the container, simply run:
+
+```
+git clone https://github.com/CyberReboot/poseidon.git
+cd poseidon
+make build_poseidon
+```
+
+To build and run the container, run this command from inside the poseidon directory:
+
+```
+make run_poseidon
+```
+
+This first builds poseidon, then runs it. After it finishes running, the container is removed.
+
+To populate the current volume with the contents of the containers' "poseidonWork/" directory, run:
+
+```
+make run_dev
+```
+
+To run poseidon with sh as entrypoint, run:
+
+```
+make run_sh
+```
+
+This also removes the container after it has finished running.
+
+If you want to build the docs, then invoke:
+
+```
+make build_docs
+```
+
+To build and then open the docs in a container on port 8080:
+
+```
+make run_docs
+```
+
+To run tests:
+
+```
+make run_tests
+```
+
 ## Running the tests
-Tests are currently written in py.test for Python.  The tests are automatically run when building the containers.
+Tests are currently written in py.test for Python.  The tests are automatically run when opening Pull Requests to Poseidon.
 
 ## Contributing
 Want to contribute?  Awesome!  Issue a pull request or see more details [here](https://github.com/CyberReboot/poseidon/blob/master/CONTRIBUTING.md).
 
 ## Authors
 
-* [Lab41 Poseidon Team](https://github.com/CyberReboot/poseidon)
+* [Poseidon Team](https://github.com/CyberReboot/poseidon)
 
 See also the list of [contributors](https://github.com/CyberReboot/poseidon/graphs/contributors) who participated in this project.
 
