@@ -16,7 +16,9 @@ This challenge is a joint challenge between two IQT Labs: Lab41 and Cyber Reboot
 [Docker](https://www.docker.com/)
 
 ### Quick Start
-Poseidon currently supports two different SDN controllers, Big Cloud Fabric and FAUCET.  Before getting started, one of these two controllers needs to running and accessible to where Poseidon will be deployed.  Skip to the controller section that you wish to deploy.
+Poseidon currently supports two different SDN controllers, [Big Cloud Fabric](https://www.bigswitch.com/products/big-cloud-fabrictm/switching-fabric-overview) and [FAUCET](https://github.com/faucetsdn/faucet).
+<img src="/docs/img/bcf.png" width="57" height="50"/><img src="/docs/img/faucet.png" width="95" height="50">
+Before getting started, one of these two controllers needs to running and accessible to where Poseidon will be deployed.  Skip to the controller section that you wish to deploy.
 
 #### Big Cloud Fabric (BCF) Configuration
 You will need to add support for moving arbitrary endpoint data around your network.  The BigSwitch config will need an admin who will need to add:
