@@ -48,10 +48,20 @@ class Connection:
         # ensure directories exist
         self.config_dir = '/etc/ryu/faucet'
         self.log_dir = '/var/log/ryu/faucet'
-        if not os.path.exists(self.config_dir):
-            os.makedirs(self.config_dir)
-        if not os.path.exists(self.log_dir):
-            os.makedirs(self.log_dir)
+        try:
+            if not os.path.exists(self.config_dir):
+                os.makedirs(self.config_dir)
+        except PermissionError:
+            self.config_dir = '/opt/faucet'
+            if not os.path.exists(self.config_dir):
+                os.makedirs(self.config_dir)
+        try:
+            if not os.path.exists(self.log_dir):
+                os.makedirs(self.log_dir)
+        except PermissionError:
+            self.log_dir = '/opt/faucet'
+            if not os.path.exists(self.log_dir):
+                os.makedirs(self.log_dir)
 
     def _connect(self):
         # TODO better logging
