@@ -24,9 +24,9 @@ from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.faucet.fauce
 
 def test_get_endpoints():
     try:
-        f = open('/tmp/faucet.log', 'r')
+        f = open('/var/log/ryu/faucet/faucet.log', 'r')
     except FileNotFoundError:
-        f = open('/tmp/faucet.log', 'w')
+        f = open('/var/log/ryu/faucet/faucet.log', 'w')
         f.write('Nov 19 18:52:31 faucet.valve INFO     DPID 123917682135854 (0x70b3d56cd32e) L2 learned b8:27:eb:ff:39:15 (L2 type 0x0800, L3 src 192.168.1.40) on Port 2 on VLAN 200 (2 hosts total)\n')
         f.write('Nov 19 18:52:31 faucet.valve INFO     DPID 123917682135854 (0x70b3d56cd32e) L2 learned b8:27:eb:ff:39:15 (L2 type 0x0800, L3 src 192.168.1.40) on Port 2 on VLAN 200 (2 hosts total)\n')
         f.write('Nov 19 18:52:31 faucet.valve INFO     DPID 123917682135854 (0x70b3d56cd32e) L2 learned b8:27:eb:ff:39:15 (L2 type 0x0800, L3 src 192.168.1.40) on Port 2 on VLAN 300 (2 hosts total)\n')
@@ -35,9 +35,9 @@ def test_get_endpoints():
         f.write('foo\n')
         f.close()
     try:
-        f = open('/tmp/faucet.yaml', 'r')
+        f = open('/etc/ryu/faucuet/faucet.yaml', 'r')
     except FileNotFoundError:
-        f = open('/tmp/faucet.yaml', 'w')
+        f = open('/etc/ryu/faucet/faucet.yaml', 'w')
         f.write('vlans:\n')
         f.write('    open:\n')
         f.write('        vid: 100\n')

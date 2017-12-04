@@ -18,6 +18,8 @@
 Created on 18 November 2017
 @author: cglewis
 """
+import os
+
 from paramiko import AutoAddPolicy, SSHClient
 from scp import SCPClient
 
@@ -28,7 +30,14 @@ module_logger = Logger.logger
 
 class Connection:
 
-    def __init__(self, host, user=None, pw=None, config_file=None, log_file=None, *args, **kwargs):
+    def __init__(self,
+                 host,
+                 user=None,
+                 pw=None,
+                 config_file=None,
+                 log_file=None,
+                 *args,
+                 **kwargs):
         self.logger = module_logger
         self.host = host
         self.user = user
@@ -36,6 +45,13 @@ class Connection:
         self.config_file = config_file
         self.log_file = log_file
         self.ssh = None
+        # ensure directories exist
+        self.config_dir = '/etc/ryu/faucet'
+        self.log_dir = '/var/log/ryu/faucet'
+        if not os.path.exists(self.config_dir):
+            os.makedirs(self.config_dir)
+        if not os.path.exists(self.log_dir):
+            os.makedirs(self.log_dir)
 
     def _connect(self):
         # TODO better logging
@@ -62,9 +78,12 @@ class Connection:
         try:
             scp = SCPClient(self.ssh.get_transport())
             if f_type == 'config':
-                scp.get(self.config_file, local_path='/tmp/faucet.yaml')
+                scp.get(self.config_file,
+                        local_path=os.path.join(self.config_dir,
+                                                'faucet.yaml'))
             elif f_type == 'log':
-                scp.get(self.log_file, local_path='/tmp/faucet.log')
+                scp.get(self.log_file,
+                        local_path=os.path.join(self.log_dir, 'faucet.log'))
             else:
                 pass
             scp.close()
@@ -79,9 +98,11 @@ class Connection:
         try:
             scp = SCPClient(self.ssh.get_transport())
             if f_type == 'config':
-                scp.put('/tmp/faucet.yaml', self.config_file)
+                scp.put(os.path.join(self.config_dir, 'faucet.yaml'),
+                        self.config_file)
             elif f_type == 'log':
-                scp.put('/tmp/faucet.log', self.log_file)
+                scp.put(os.path.join(self.log_dir, 'faucet.log'),
+                        self.log_file)
             else:
                 pass
             scp.close()
