@@ -19,6 +19,8 @@ Test module for faucet parser.
 
 @author: cglewis
 """
+import os
+
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.faucet.parser import Parser
 
 
@@ -26,13 +28,27 @@ def test_Parser():
     """
     Tests Parser
     """
+    config_dir = '/etc/ryu/faucet'
+    log_dir = '/var/log/ryu/faucet'
+    if not os.path.exists(config_dir):
+        config_dir = os.path.join(os.getcwd(), 'faucet')
+    if not os.path.exists(log_dir):
+        log_dir = os.path.join(os.getcwd(), 'faucet')
     parser = Parser(mirror_ports={'switch1':3})
-    parser.config('/etc/ryu/faucet/faucet.yaml', 'mirror', 1, '0x70b3d56cd32e')
-    parser.config('/etc/ryu/faucet/faucet.yaml', 'mirror', 2, 0x70b3d56cd32e)
-    parser.config('/etc/ryu/faucet/faucet.yaml', 'mirror', 2, '0x70b3d56cd32e')
-    parser.config('/etc/ryu/faucet/faucet.yaml', 'mirror', 5, '0x70b3d56cd32e')
-    parser.config('/etc/ryu/faucet/faucet.yaml', 'mirror', 6, 'bad')
-    parser.config('/etc/ryu/faucet/faucet.yaml', 'unmirror', None, None)
-    parser.config('/etc/ryu/faucet/faucet.yaml', 'shutdown', None, None)
-    parser.config('/etc/ryu/faucet/faucet.yaml', 'unknown', None, None)
-    parser.log('/var/log/ryu/faucet/faucet.log')
+    parser.config(os.path.join(config_dir, 'faucet.yaml'),
+                 'mirror', 1, '0x70b3d56cd32e')
+    parser.config(os.path.join(config_dir, 'faucet.yaml'),
+                  'mirror', 2, 0x70b3d56cd32e)
+    parser.config(os.path.join(config_dir, 'faucet.yaml'),
+                  'mirror', 2, '0x70b3d56cd32e')
+    parser.config(os.path.join(config_dir, 'faucet.yaml'),
+                  'mirror', 5, '0x70b3d56cd32e')
+    parser.config(os.path.join(config_dir, 'faucet.yaml'),
+                  'mirror', 6, 'bad')
+    parser.config(os.path.join(config_dir, 'faucet.yaml'),
+                  'unmirror', None, None)
+    parser.config(os.path.join(config_dir, 'faucet.yaml'),
+                  'shutdown', None, None)
+    parser.config(os.path.join(config_dir, 'faucet.yaml'),
+                  'unknown', None, None)
+    parser.log(os.path.join(log_dir, 'faucet.log'))

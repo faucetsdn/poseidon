@@ -52,14 +52,14 @@ class Connection:
             if not os.path.exists(self.config_dir):
                 os.makedirs(self.config_dir)
         except PermissionError:
-            self.config_dir = '/opt/faucet'
+            self.config_dir = os.path.join(os.getcwd(), 'faucet')
             if not os.path.exists(self.config_dir):
                 os.makedirs(self.config_dir)
         try:
             if not os.path.exists(self.log_dir):
                 os.makedirs(self.log_dir)
         except PermissionError:
-            self.log_dir = '/opt/faucet'
+            self.log_dir = os.path.join(os.getcwd(), 'faucet')
             if not os.path.exists(self.log_dir):
                 os.makedirs(self.log_dir)
 

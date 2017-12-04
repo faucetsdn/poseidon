@@ -19,14 +19,23 @@ Test module for faucet.
 
 @author: cglewis
 """
+import os
+
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.faucet.faucet import FaucetProxy
 
 
 def test_get_endpoints():
+    config_dir = '/etc/ryu/faucet'
+    log_dir = '/var/log/ryu/faucet'
+    if not os.path.exists(config_dir):
+        config_dir = os.path.join(os.getcwd(), 'faucet')
+    if not os.path.exists(log_dir):
+        log_dir = os.path.join(os.getcwd(), 'faucet')
+
     try:
-        f = open('/var/log/ryu/faucet/faucet.log', 'r')
+        f = open(os.path.join(log_dir, 'faucet.log'), 'r')
     except FileNotFoundError:
-        f = open('/var/log/ryu/faucet/faucet.log', 'w')
+        f = open(os.path.join(log_dir, 'faucet.log'), 'w')
         f.write('Nov 19 18:52:31 faucet.valve INFO     DPID 123917682135854 (0x70b3d56cd32e) L2 learned b8:27:eb:ff:39:15 (L2 type 0x0800, L3 src 192.168.1.40) on Port 2 on VLAN 200 (2 hosts total)\n')
         f.write('Nov 19 18:52:31 faucet.valve INFO     DPID 123917682135854 (0x70b3d56cd32e) L2 learned b8:27:eb:ff:39:15 (L2 type 0x0800, L3 src 192.168.1.40) on Port 2 on VLAN 200 (2 hosts total)\n')
         f.write('Nov 19 18:52:31 faucet.valve INFO     DPID 123917682135854 (0x70b3d56cd32e) L2 learned b8:27:eb:ff:39:15 (L2 type 0x0800, L3 src 192.168.1.40) on Port 2 on VLAN 300 (2 hosts total)\n')
@@ -35,9 +44,9 @@ def test_get_endpoints():
         f.write('foo\n')
         f.close()
     try:
-        f = open('/etc/ryu/faucuet/faucet.yaml', 'r')
+        f = open(os.path.join(config_dir, 'faucet.yaml'), 'r')
     except FileNotFoundError:
-        f = open('/etc/ryu/faucet/faucet.yaml', 'w')
+        f = open(os.path.join(config_dir, 'faucet.yaml'), 'w')
         f.write('vlans:\n')
         f.write('    open:\n')
         f.write('        vid: 100\n')
