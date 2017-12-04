@@ -18,6 +18,8 @@
 Created on 17 November 2017
 @author: cglewis
 '''
+import os
+
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.faucet.connection import \
     Connection
@@ -66,7 +68,7 @@ class FaucetProxy(Connection, Parser):
         self.receive_file('log')
         retval = []
 
-        mac_table = self.log('/tmp/faucet.log')
+        mac_table = self.log(os.path.join(self.log_dir, 'faucet.log'))
         module_logger.debug('get_endpoints found:')
         for mac in mac_table:
             if (mac_table[mac][0]['ip-address'] != 'None' and
@@ -115,7 +117,8 @@ class FaucetProxy(Connection, Parser):
         port = 0
         switch = None
         self.receive_file('config')
-        if self.config('/tmp/faucet.yaml', 'shutdown', int(port), switch):
+        if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
+                       'shutdown', int(port), switch):
             self.send_file('config')
         # TODO
         return shutdowns
@@ -124,7 +127,8 @@ class FaucetProxy(Connection, Parser):
         port = 0
         switch = None
         self.receive_file('config')
-        if self.config('/tmp/faucet.yaml', 'shutdown', int(port), switch):
+        if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
+                       'shutdown', int(port), switch):
             self.send_file('config')
 
     def get_highest(self):
@@ -135,7 +139,7 @@ class FaucetProxy(Connection, Parser):
 
     def mirror_ip(self, ip):
         self.receive_file('log')
-        mac_table = self.log('/tmp/faucet.log')
+        mac_table = self.log(os.path.join(self.log_dir, 'faucet.log'))
         port = 0
         switch = None
         for mac in mac_table:
@@ -144,19 +148,22 @@ class FaucetProxy(Connection, Parser):
                 switch = mac_table[mac][0]['segment']
         if port and switch:
             self.receive_file('config')
-            if self.config('/tmp/faucet.yaml', 'mirror', int(port), switch):
+            if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
+                           'mirror', int(port), switch):
                 self.send_file('config')
 
     def unmirror_ip(self, ip):
         port = 0
         switch = None
         self.receive_file('config')
-        if self.config('/tmp/faucet.yaml', 'unmirror', int(port), switch):
+        if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
+                       'unmirror', int(port), switch):
             self.send_file('config')
 
     def mirror_traffic(self):
         port = 0
         switch = None
         self.receive_file('config')
-        if self.config('/tmp/faucet.yaml', 'mirror', int(port), switch):
+        if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
+                       'mirror', int(port), switch):
             self.send_file('config')
