@@ -99,6 +99,12 @@ export collector_nic=eth0  # set the NIC of the machine that traffic will be mir
 export max_concurrent_reinvestigations=1  # if running FAUCET, this should be set to 1, if BCF, it can be a larger number
 ```
 
+Start Vent with:
+
+```
+./helpers/run
+```
+
 Once Vent is finished starting things up, you'll be able to see the logs of everything, including Poseidon by running:
 
 ```
