@@ -32,7 +32,7 @@ module_logger = Logger.logger
 class FaucetProxy(Connection, Parser):
 
     def __init__(self,
-                 host,
+                 host=None,
                  user=None,
                  pw=None,
                  config_file=None,
@@ -65,10 +65,13 @@ class FaucetProxy(Connection, Parser):
         return ret_list
 
     def get_endpoints(self):
-        self.receive_file('log')
         retval = []
 
-        mac_table = self.log(os.path.join(self.log_dir, 'faucet.log'))
+        if self.host:
+            self.receive_file('log')
+            mac_table = self.log(os.path.join(self.log_dir, 'faucet.log'))
+        else:
+            mac_table = self.log(self.log_file)
         module_logger.debug('get_endpoints found:')
         for mac in mac_table:
             if (mac_table[mac][0]['ip-address'] != 'None' and
@@ -116,20 +119,27 @@ class FaucetProxy(Connection, Parser):
         shutdowns = []
         port = 0
         switch = None
-        self.receive_file('config')
-        if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
-                       'shutdown', int(port), switch):
-            self.send_file('config')
-        # TODO
+        if self.host:
+            self.receive_file('config')
+            if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
+                           'shutdown', int(port), switch):
+                self.send_file('config')
+        else:
+            self.config(self.config_file, 'shutdown', int(port), switch)
+        # TODO check if config was successfully updated
         return shutdowns
 
     def shutdown_endpoint(self):
         port = 0
         switch = None
-        self.receive_file('config')
-        if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
-                       'shutdown', int(port), switch):
-            self.send_file('config')
+        if self.host:
+            self.receive_file('config')
+            if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
+                           'shutdown', int(port), switch):
+                self.send_file('config')
+        else:
+            self.config(self.config_file, 'shutdown', int(port), switch)
+        # TODO check if config was successfully updated
 
     def get_highest(self):
         pass
@@ -138,8 +148,11 @@ class FaucetProxy(Connection, Parser):
         pass
 
     def mirror_ip(self, ip):
-        self.receive_file('log')
-        mac_table = self.log(os.path.join(self.log_dir, 'faucet.log'))
+        if self.host:
+            self.receive_file('log')
+            mac_table = self.log(os.path.join(self.log_dir, 'faucet.log'))
+        else:
+            mac_table = self.log(self.log_file)
         port = 0
         switch = None
         for mac in mac_table:
@@ -147,23 +160,35 @@ class FaucetProxy(Connection, Parser):
                 port = mac_table[mac][0]['port']
                 switch = mac_table[mac][0]['segment']
         if port and switch:
-            self.receive_file('config')
-            if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
-                           'mirror', int(port), switch):
-                self.send_file('config')
+            if self.host:
+                self.receive_file('config')
+                if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
+                               'mirror', int(port), switch):
+                    self.send_file('config')
+            else:
+                self.config(self.config_file, 'mirror', int(port), switch)
+        # TODO check if config was successfully updated
 
     def unmirror_ip(self, ip):
         port = 0
         switch = None
-        self.receive_file('config')
-        if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
-                       'unmirror', int(port), switch):
-            self.send_file('config')
+        if self.host:
+            self.receive_file('config')
+            if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
+                           'unmirror', int(port), switch):
+                self.send_file('config')
+        else:
+            self.config(self.config_file, 'unmirror', int(port), switch)
+        # TODO check if config was successfully updated
 
     def mirror_traffic(self):
         port = 0
         switch = None
-        self.receive_file('config')
-        if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
-                       'mirror', int(port), switch):
-            self.send_file('config')
+        if self.host:
+            self.receive_file('config')
+            if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
+                           'mirror', int(port), switch):
+                self.send_file('config')
+        else:
+            self.config(self.config_file, 'mirror', int(port), switch)
+        # TODO check if config was successfully updated

@@ -31,7 +31,7 @@ module_logger = Logger.logger
 class Connection:
 
     def __init__(self,
-                 host,
+                 host=None,
                  user=None,
                  pw=None,
                  config_file=None,
@@ -45,23 +45,24 @@ class Connection:
         self.config_file = config_file
         self.log_file = log_file
         self.ssh = None
-        # ensure directories exist
-        self.config_dir = '/etc/ryu/faucet'
-        self.log_dir = '/var/log/ryu/faucet'
-        try:
-            if not os.path.exists(self.config_dir):
-                os.makedirs(self.config_dir)
-        except PermissionError:
-            self.config_dir = os.path.join(os.getcwd(), 'faucet')
-            if not os.path.exists(self.config_dir):
-                os.makedirs(self.config_dir)
-        try:
-            if not os.path.exists(self.log_dir):
-                os.makedirs(self.log_dir)
-        except PermissionError:
-            self.log_dir = os.path.join(os.getcwd(), 'faucet')
-            if not os.path.exists(self.log_dir):
-                os.makedirs(self.log_dir)
+        if self.host:
+            # ensure directories exist
+            self.config_dir = '/etc/ryu/faucet'
+            self.log_dir = '/var/log/ryu/faucet'
+            try:
+                if not os.path.exists(self.config_dir):
+                    os.makedirs(self.config_dir)
+            except PermissionError:
+                self.config_dir = os.path.join(os.getcwd(), 'faucet')
+                if not os.path.exists(self.config_dir):
+                    os.makedirs(self.config_dir)
+            try:
+                if not os.path.exists(self.log_dir):
+                    os.makedirs(self.log_dir)
+            except PermissionError:
+                self.log_dir = os.path.join(os.getcwd(), 'faucet')
+                if not os.path.exists(self.log_dir):
+                    os.makedirs(self.log_dir)
 
     def _connect(self):
         # TODO better logging
@@ -83,39 +84,47 @@ class Connection:
 
     def receive_file(self, f_type):
         # TODO option to receive other files (config can be multiple files)
-        self._connect()
-        # TODO better logging
-        try:
-            scp = SCPClient(self.ssh.get_transport())
-            if f_type == 'config':
-                scp.get(self.config_file,
-                        local_path=os.path.join(self.config_dir,
-                                                'faucet.yaml'))
-            elif f_type == 'log':
-                scp.get(self.log_file,
-                        local_path=os.path.join(self.log_dir, 'faucet.log'))
-            else:
+        if self.host:
+            self._connect()
+            # TODO better logging
+            try:
+                scp = SCPClient(self.ssh.get_transport())
+                if f_type == 'config':
+                    scp.get(self.config_file,
+                            local_path=os.path.join(self.config_dir,
+                                                    'faucet.yaml'))
+                elif f_type == 'log':
+                    scp.get(self.log_file,
+                            local_path=os.path.join(self.log_dir,
+                                                    'faucet.log'))
+                else:
+                    pass
+                scp.close()
+            except Exception as e:  # pragma: no cover
                 pass
-            scp.close()
-        except Exception as e:  # pragma: no cover
-            pass
-        self._disconnect()
+            self._disconnect()
 
     def send_file(self, f_type):
         # TODO option to send other files (config can be multiple files)
-        self._connect()
-        # TODO better logging
-        try:
-            scp = SCPClient(self.ssh.get_transport())
-            if f_type == 'config':
-                scp.put(os.path.join(self.config_dir, 'faucet.yaml'),
-                        self.config_file)
-            elif f_type == 'log':
-                scp.put(os.path.join(self.log_dir, 'faucet.log'),
-                        self.log_file)
-            else:
+        if self.host:
+            self._connect()
+            # TODO better logging
+            try:
+                scp = SCPClient(self.ssh.get_transport())
+                if f_type == 'config':
+                    scp.put(os.path.join(self.config_dir, 'faucet.yaml'),
+                            self.config_file)
+                elif f_type == 'log':
+                    scp.put(os.path.join(self.log_dir, 'faucet.log'),
+                            self.log_file)
+                else:
+                    pass
+                scp.close()
+            except Exception as e:  # pragma: no cover
                 pass
-            scp.close()
-        except Exception as e:  # pragma: no cover
-            pass
-        self._disconnect()
+            self._disconnect()
+
+    def event_listener(self):
+        # TODO - if using an event adapter from FAUCET, such as rabbbitmq
+        event = None
+        return event

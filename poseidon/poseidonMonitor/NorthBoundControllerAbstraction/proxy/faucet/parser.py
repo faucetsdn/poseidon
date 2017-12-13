@@ -40,10 +40,13 @@ class Parser:
 
     def config(self, config_file, action, port, switch):
         switch_found = None
-        stream = open(config_file, 'r')
-        obj_doc = yaml.safe_load(stream)
-        stream.close()
-        # TODO check for other files
+        if config_file:
+            # TODO check for other files
+            stream = open(config_file, 'r')
+            obj_doc = yaml.safe_load(stream)
+            stream.close()
+        else:
+            return False
 
         if action == 'mirror':
             ok = True
@@ -114,28 +117,33 @@ class Parser:
 
         return True
 
+    def events(self, event):
+        # TODO
+        pass
+
     def log(self, log_file):
         mac_table = {}
         # NOTE very fragile, prone to errors
-        with open(log_file, 'r') as f:
-            for line in f:
-                if 'L2 learned' in line:
-                    learned_mac = line.split()
-                    data = {'ip-address': learned_mac[16][0:-1],
-                            'ip-state': 'L2 learned',
-                            'mac': learned_mac[10],
-                            'segment': learned_mac[7][1:-1],
-                            'port': learned_mac[19],
-                            'tenant': learned_mac[21] + learned_mac[22]}
-                    if learned_mac[10] in mac_table:
-                        dup = False
-                        for d in mac_table[learned_mac[10]]:
-                            if data == d:
-                                dup = True
-                        if dup:
-                            mac_table[learned_mac[10]].remove(data)
-                        mac_table[learned_mac[10]].insert(0, data)
-                    else:
-                        mac_table[learned_mac[10]] = [data]
+        if log_file:
+            with open(log_file, 'r') as f:
+                for line in f:
+                    if 'L2 learned' in line:
+                        learned_mac = line.split()
+                        data = {'ip-address': learned_mac[16][0:-1],
+                                'ip-state': 'L2 learned',
+                                'mac': learned_mac[10],
+                                'segment': learned_mac[7][1:-1],
+                                'port': learned_mac[19],
+                                'tenant': learned_mac[21] + learned_mac[22]}
+                        if learned_mac[10] in mac_table:
+                            dup = False
+                            for d in mac_table[learned_mac[10]]:
+                                if data == d:
+                                    dup = True
+                            if dup:
+                                mac_table[learned_mac[10]].remove(data)
+                            mac_table[learned_mac[10]].insert(0, data)
+                        else:
+                            mac_table[learned_mac[10]] = [data]
         return mac_table
 

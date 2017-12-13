@@ -44,11 +44,19 @@ class Update_Switch_State(Monitor_Helper_Base):
         self.retval = {}
         self.times = 0
         self.owner = None
+
+        # settings for all controllers
         self.controller = {}
         self.controller['URI'] = None
         self.controller['USER'] = None
         self.controller['PASS'] = None
         self.controller['TYPE'] = None
+
+        # settings for FAUCET
+        self.controller['CONFIG_FILE'] = None
+        self.controller['LOG_FILE'] = None
+        self.controller['MIRROR_PORTS'] = None
+
         self.sdnc = None
         self.first_time = True
         self.endpoints = Endpoint_Wrapper()
@@ -82,19 +90,24 @@ class Update_Switch_State(Monitor_Helper_Base):
                             self.controller['URI']))
             elif self.controller['TYPE'] == 'faucet':
                 try:
-                    self.controller['URI'] = str(
-                        self.mod_configuration['controller_uri'])
-                    # TODO set defaults if these are not set
-                    self.controller['USER'] = str(
-                        self.mod_configuration['controller_user'])
-                    self.controller['PASS'] = str(
-                        self.mod_configuration['controller_pass'])
-                    self.controller['CONFIG_FILE'] = str(
-                        self.mod_configuration['controller_config_file'])
-                    self.controller['LOG_FILE'] = str(
-                        self.mod_configuration['controller_log_file'])
-                    self.controller['MIRROR_PORTS'] = ast.literal_eval(
-                        self.mod_configuration['controller_mirror_ports'])
+                    if 'controller_uri' in self.mod_configuration:
+                        self.controller['URI'] = str(
+                            self.mod_configuration['controller_uri'])
+                    if 'controller_user' in self.mod_configuration:
+                        self.controller['USER'] = str(
+                            self.mod_configuration['controller_user'])
+                    if 'controller_pass' in self.mod_configuration:
+                        self.controller['PASS'] = str(
+                            self.mod_configuration['controller_pass'])
+                    if 'controller_config_file' in self.mod_configuration:
+                        self.controller['CONFIG_FILE'] = str(
+                            self.mod_configuration['controller_config_file'])
+                    if 'controller_log_file' in self.mod_configuration:
+                        self.controller['LOG_FILE'] = str(
+                            self.mod_configuration['controller_log_file'])
+                    if 'controller_mirror_ports' in self.mod_configuration:
+                        self.controller['MIRROR_PORTS'] = ast.literal_eval(
+                            self.mod_configuration['controller_mirror_ports'])
                     self.sdnc = FaucetProxy(host=self.controller['URI'],
                                             user=self.controller['USER'],
                                             pw=self.controller['PASS'],

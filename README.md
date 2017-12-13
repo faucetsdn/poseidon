@@ -77,15 +77,19 @@ export controller_pass=pass
 BCF is now configured and ready for use with Poseidon, continue on to the [Starting Poseidon using Vent](#starting-poseidon-using-vent) section.
 
 #### FAUCET Configuration
-Poseidon will connect to FAUCET using SSH, so you'll need to create an account that can SSH to the machine running FAUCET and that has rights to modify the configuration file `faucet.yaml` (currently Poseidon expects it to be in the default `/etc/ryu/faucet/faucet.yaml` location and `dps` must all be defined in this file for Poseidon to update the network posture correctly).  The easiest way to set these values so that Poseidon can use them is in environment variables like so (assuming the controller is running at `192.168.1.10`):
+Unless Poseidon and FAUCET are running on the same host, Poseidon will connect to FAUCET using SSH.  So you'll need to create an account that can SSH to the machine running FAUCET and that has rights to modify the configuration file `faucet.yaml` (currently Poseidon expects it to be in the default `/etc/ryu/faucet/faucet.yaml` location and `dps` must all be defined in this file for Poseidon to update the network posture correctly).  The easiest way to set these values so that Poseidon can use them is in environment variables like so (assuming the controller is running at `192.168.1.10`):
 
 ```
 export controller_type=faucet
 export controller_uri=192.168.1.10
 export controller_user=user
 export controller_pass=pass
+export controller_log_file=/var/log/ryu/faucet/faucet.log
+export controller_config_file=/etc/ryu/faucet/faucet.yaml
 export controller_mirror_ports='{"switch1":3}'  # a python dictionary of switch names (from faucet.yaml) and switch port numbers for mirroring to
 ```
+
+If Poseidon and FAUCET are running on the same host, only the `controller_type` and `controller_mirror_ports` need to be set.
 
 FAUCET is now configured and ready for use with Poseidon, continue on to the [Starting Poseidon using Vent](#starting-poseidon-using-vent) section.
 
