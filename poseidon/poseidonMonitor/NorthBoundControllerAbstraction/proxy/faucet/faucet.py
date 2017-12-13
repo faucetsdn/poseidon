@@ -126,6 +126,7 @@ class FaucetProxy(Connection, Parser):
                 self.send_file('config')
         else:
             self.config(self.config_file, 'shutdown', int(port), switch)
+        # TODO check if config was successfully updated
         return shutdowns
 
     def shutdown_endpoint(self):
@@ -138,6 +139,7 @@ class FaucetProxy(Connection, Parser):
                 self.send_file('config')
         else:
             self.config(self.config_file, 'shutdown', int(port), switch)
+        # TODO check if config was successfully updated
 
     def get_highest(self):
         pass
@@ -165,6 +167,7 @@ class FaucetProxy(Connection, Parser):
                     self.send_file('config')
             else:
                 self.config(self.config_file, 'mirror', int(port), switch)
+        # TODO check if config was successfully updated
 
     def unmirror_ip(self, ip):
         port = 0
@@ -176,6 +179,7 @@ class FaucetProxy(Connection, Parser):
                 self.send_file('config')
         else:
             self.config(self.config_file, 'unmirror', int(port), switch)
+        # TODO check if config was successfully updated
 
     def mirror_traffic(self):
         port = 0
@@ -187,3 +191,4 @@ class FaucetProxy(Connection, Parser):
                 self.send_file('config')
         else:
             self.config(self.config_file, 'mirror', int(port), switch)
+        # TODO check if config was successfully updated
