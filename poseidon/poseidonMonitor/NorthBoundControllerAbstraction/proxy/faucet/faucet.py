@@ -152,7 +152,7 @@ class FaucetProxy(Connection, Parser):
             self.receive_file('log')
             mac_table = self.log(os.path.join(self.log_dir, 'faucet.log'))
         else:
-            mac_table = self.log(self.log_file, 'faucet.log')
+            mac_table = self.log(self.log_file)
         port = 0
         switch = None
         for mac in mac_table:
