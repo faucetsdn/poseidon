@@ -114,6 +114,10 @@ class Parser:
 
         return True
 
+    def events(self, event):
+        # TODO
+        pass
+
     def log(self, log_file):
         mac_table = {}
         # NOTE very fragile, prone to errors
