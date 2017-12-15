@@ -63,7 +63,13 @@ def test_get_endpoints():
         f.write('                mirror: 1\n')
         f.write('            3:\n')
         f.write('                native_vlan: open')
-    proxy = FaucetProxy('foo')
+
+    # with a host
+    proxy = FaucetProxy(host='foo')
+    a = proxy.get_endpoints()
+
+    # without a host
+    proxy = FaucetProxy()
     a = proxy.get_endpoints()
     assert isinstance(a, list)
 
@@ -72,7 +78,25 @@ def test_FaucetProxy():
     """
     Tests Faucet
     """
-    proxy = FaucetProxy('foo')
+    # with a host
+    proxy = FaucetProxy(host='foo')
+    proxy.get_switches()
+    proxy.get_ports()
+    proxy.get_vlans()
+    proxy.get_span_fabric()
+    proxy.get_byip('10.0.0.9')
+    proxy.get_bymac('00:00:00:00:12:00')
+    proxy.shutdown_ip('10.0.0.9')
+    proxy.shutdown_endpoint()
+    proxy.get_highest()
+    proxy.get_seq_by_ip()
+    proxy.mirror_ip('192.168.1.50')
+    proxy.mirror_ip('192.168.1.41')
+    proxy.unmirror_ip('10.0.0.1')
+    proxy.mirror_traffic()
+
+    # without a host
+    proxy = FaucetProxy()
     proxy.get_switches()
     proxy.get_ports()
     proxy.get_vlans()
