@@ -1,3 +1,8 @@
+# v0.1.1 (2017-12-15)
+
+ - New feature if poseidon and faucet on the same host, doesn't require ssh/scp
+ - Various bug fixes
+
 # v0.1.0 (2017-12-04)
 
  - Initial release
