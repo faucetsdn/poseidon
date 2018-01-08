@@ -63,6 +63,12 @@ def test_get_endpoints():
         f.write('                mirror: 1\n')
         f.write('            3:\n')
         f.write('                native_vlan: open')
+        f.write('            4:\n')
+        f.write('                native_vlan: open')
+        f.write('            5:\n')
+        f.write('                native_vlan: open')
+        f.write('            6:\n')
+        f.write('                native_vlan: open')
 
     # with a host
     proxy = FaucetProxy(host='foo')
