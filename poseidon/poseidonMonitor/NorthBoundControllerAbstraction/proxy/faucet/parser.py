@@ -85,7 +85,7 @@ class Parser:
                                             "mirror to in the configs")
                         ok = False
                     else:
-                        if 'mirror' in obj_doc['dps'][switch_found]['interfaces'][port]]:
+                        if 'mirror' in obj_doc['dps'][switch_found]['interfaces'][port]:
                             self.logger.info("Mirror port already set to "
                                              "mirror something, removing "
                                              "old mirror setting")
