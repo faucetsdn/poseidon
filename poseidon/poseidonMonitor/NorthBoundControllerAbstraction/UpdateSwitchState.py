@@ -99,7 +99,6 @@ class Update_Switch_State(Monitor_Helper_Base):
                     if 'controller_pass' in self.mod_configuration:
                         self.controller['PASS'] = str(
                             self.mod_configuration['controller_pass'])
-                        self.logger.info(self.controller['PASS'])
                     if 'controller_config_file' in self.mod_configuration:
                         self.controller['CONFIG_FILE'] = str(
                             self.mod_configuration['controller_config_file'])
