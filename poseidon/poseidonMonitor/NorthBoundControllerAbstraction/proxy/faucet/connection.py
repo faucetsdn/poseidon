@@ -73,7 +73,7 @@ class Connection:
             ssh.connect(self.host, username=self.user, password=self.pw)
             self.ssh = ssh
         except Exception as e:  # pragma: no cover
-            pass
+            self.logger.error("failed to connect because: {0}".format(e))
 
     def _disconnect(self):
         if self.ssh:

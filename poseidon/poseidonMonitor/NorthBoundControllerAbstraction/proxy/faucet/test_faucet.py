@@ -62,6 +62,12 @@ def test_get_endpoints():
         f.write('                native_vlan: open\n')
         f.write('                mirror: 1\n')
         f.write('            3:\n')
+        f.write('                native_vlan: open\n')
+        f.write('            4:\n')
+        f.write('                native_vlan: open\n')
+        f.write('            5:\n')
+        f.write('                native_vlan: open\n')
+        f.write('            6:\n')
         f.write('                native_vlan: open')
 
     # with a host
