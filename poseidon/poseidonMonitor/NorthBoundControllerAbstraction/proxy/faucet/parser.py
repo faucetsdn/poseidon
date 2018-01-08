@@ -89,9 +89,9 @@ class Parser:
                             self.logger.info("Mirror port already set to "
                                              "mirror something, removing "
                                              "old mirror setting")
-                            del obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']
+                            del obj_doc['dps'][switch_found]['interfaces'][port]['mirror']
             if ok:
-                obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] = port
+                obj_doc['dps'][switch_found]['interfaces'][port]['mirror'] = self.mirror_ports[switch_found]
             else:
                 self.logger.error("Unable to mirror due to warnings")
                 return False
