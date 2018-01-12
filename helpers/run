@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 
-docker run -it \
+docker run -dit \
            -v /var/run/docker.sock:/var/run/docker.sock \
            -v /opt/vent_files:/opt/vent_files \
            -v $(pwd)/.plugin_config.yml:/root/.plugin_config.yml \
@@ -16,3 +16,25 @@ docker run -it \
            -e max_concurrent_reinvestigations=$max_concurrent_reinvestigations \
            --name vent \
            cyberreboot/vent
+
+echo -n "waiting for required containers to build and start (this might take a little while)..."
+until [ "$(docker ps -q -f name=cyberreboot-vent-syslog-master)" ] && [ "$(docker container inspect -f {{.State.Running}} cyberreboot-vent-syslog-master)" = "true" ]
+do
+	echo -n "\\"
+	echo -en "\b"
+	sleep 0.3
+	echo -n "|"
+	echo -en "\b"
+	sleep 0.3
+	echo -n "/"
+	echo -en "\b"
+	sleep 0.3
+	echo -n "-"
+	echo -en "\b"
+	sleep 0.3
+done
+
+echo "done."
+
+docker logs -f cyberreboot-vent-syslog-master
+
