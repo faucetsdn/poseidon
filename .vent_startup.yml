@@ -1,7 +1,7 @@
 https://github.com/cyberreboot/vent:
     elasticsearch:
-        build: yes
-        start: yes
+        build: no
+        start: no
     file_drop:
         build: yes
         start: yes
@@ -15,8 +15,8 @@ https://github.com/cyberreboot/vent:
         build: yes
         start: yes
     rmq_es_connector:
-        build: yes
-        start: yes
+        build: no
+        start: no
     rq_dashboard:
         build: yes
         start: yes
