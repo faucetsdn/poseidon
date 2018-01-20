@@ -85,13 +85,13 @@ class Parser:
                                             "mirror to in the configs")
                         ok = False
                     else:
-                        if 'mirror' in obj_doc['dps'][switch_found]['interfaces'][port]:
+                        if 'mirror' in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]:
                             self.logger.info("Mirror port already set to "
                                              "mirror something, removing "
                                              "old mirror setting")
-                            del obj_doc['dps'][switch_found]['interfaces'][port]['mirror']
+                            del obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']
             if ok:
-                obj_doc['dps'][switch_found]['interfaces'][port]['mirror'] = self.mirror_ports[switch_found]
+                obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] = port
             else:
                 self.logger.error("Unable to mirror due to warnings")
                 return False
