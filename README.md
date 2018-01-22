@@ -89,7 +89,7 @@ export controller_config_file=/etc/ryu/faucet/faucet.yaml
 export controller_mirror_ports='{"switch1":3}'  # a python dictionary of switch names (from faucet.yaml) and switch port numbers for mirroring to
 ```
 
-If Poseidon and FAUCET are running on the same host, only the `controller_type` and `controller_mirror_ports` need to be set.
+If Poseidon and FAUCET are running on the same host, the `controller_uri`, `controller_user` and `controller_pass` do not need to be set.
 
 FAUCET is now configured and ready for use with Poseidon, continue on to the [Starting Poseidon using Vent](#starting-poseidon-using-vent) section.
 
