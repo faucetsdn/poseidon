@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 docker run -dit \
            -v /var/run/docker.sock:/var/run/docker.sock \
