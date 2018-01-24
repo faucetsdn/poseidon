@@ -6,4 +6,5 @@ groups = poseidon
 instances = 1
 
 [docker]
+volumes = {'`if [ -z "$controller_log_file" ]; then controller_log_file=/var/log/ryu/faucet/faucet.log; fi; echo $controller_log_file`': {'bind': '`if [ -z "$controller_log_file" ]; then controller_log_file=/var/log/ryu/faucet/faucet.log; fi; echo $controller_log_file`', 'mode': 'rw'}, '`if [ -z "$controller_config_file" ]; then controller_config_file=/etc/ryu/faucet/faucet.yaml; fi; echo $controller_config_file`': {'bind': '`if [ -z "$controller_config_file" ]; then controller_config_file=/etc/ryu/faucet/faucet.yaml; fi; echo $controller_config_file`', 'mode': 'rw'}}
 links = {"RabbitMQ":"RABBIT_SERVER", "NetworkTap":"vent_ip"}
