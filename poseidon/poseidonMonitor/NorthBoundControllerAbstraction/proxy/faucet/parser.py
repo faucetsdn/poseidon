@@ -40,12 +40,15 @@ class Parser:
 
     def config(self, config_file, action, port, switch):
         switch_found = None
-        if config_file:
-            # TODO check for other files
+        # TODO check for other files
+        if not config_file:
+            # default to FAUCET default
+            config_file = '/etc/ryu/faucet/faucet.yaml'
+        try:
             stream = open(config_file, 'r')
             obj_doc = yaml.safe_load(stream)
             stream.close()
-        else:
+        except Exception as e:
             return False
 
         if action == 'mirror':
@@ -123,8 +126,11 @@ class Parser:
 
     def log(self, log_file):
         mac_table = {}
+        if not log_file:
+            # default to FAUCET default
+            log_file = '/var/log/ryu/faucet/faucet.log'
         # NOTE very fragile, prone to errors
-        if log_file:
+        try:
             with open(log_file, 'r') as f:
                 for line in f:
                     if 'L2 learned' in line:
@@ -145,5 +151,7 @@ class Parser:
                             mac_table[learned_mac[10]].insert(0, data)
                         else:
                             mac_table[learned_mac[10]] = [data]
+        except Exception as e:
+            print("%s" % str(e))
         return mac_table
 
