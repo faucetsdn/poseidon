@@ -7,6 +7,6 @@ pytest-cov==2.5.1
 pytest==3.4.0
 pyyaml==3.12
 requests==2.18.4
-schedule==0.4.3
+schedule==0.5.0
 scp==0.10.2
 urllib3==1.22
