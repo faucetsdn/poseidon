@@ -1,3 +1,15 @@
+# v0.1.4 (2018-02-09)
+
+ - Updated versions for dependencies
+
+# v0.1.3 (2018-01-26)
+
+ - Quoted controller_mirror_ports to allow for special characters
+ - Fixed mirroring for FAUCET
+ - Better error checking for the helper script
+ - Clarify some documentation
+ - Set defaults for log and config files for FAUCET
+
 # v0.1.2 (2018-01-12)
 
  - Fixed bug where mirroring was backwards for FAUCET (thanks @alshaboti)
