@@ -14,6 +14,11 @@ docker run -dit \
            -e controller_config_file=$controller_config_file \
            -e collector_nic=$collector_nic \
            -e controller_mirror_ports="$controller_mirror_ports" \
+           -e rabbit_enabled=$rabbit_enabled \
+           -e FA_RABBIT_HOST=$FA_RABBIT_HOST \
+           -e FA_RABBIT_EXCHANGE=$FA_RABBIT_EXCHANGE \
+           -e FA_RABBIT_ROUTING_KEY=$FA_RABBIT_ROUTING_KEY \
+           -e FA_RABBIT_PORT=$FA_RABBIT_PORT \
            -e max_concurrent_reinvestigations=$max_concurrent_reinvestigations \
            --name vent \
            cyberreboot/vent

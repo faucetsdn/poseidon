@@ -38,6 +38,12 @@ class FaucetProxy(Connection, Parser):
                  config_file=None,
                  log_file=None,
                  mirror_ports=None,
+                 rabbit_enabled=None,
+                 rabbit_host=None,
+                 rabbit_exchange=None,
+                 rabbit_exchange_type=None,
+                 rabbit_routing_key=None,
+                 rabbit_port=None,
                  *args,
                  **kwargs):
         '''Initializes Faucet object.'''
@@ -47,9 +53,16 @@ class FaucetProxy(Connection, Parser):
                                           config_file,
                                           log_file,
                                           mirror_ports,
+                                          rabbit_enabled=None,
+                                          rabbit_host=None,
+                                          rabbit_exchange=None,
+                                          rabbit_exchange_type=None,
+                                          rabbit_routing_key=None,
+                                          rabbit_port=None,
                                           *args,
                                           **kwargs)
         self.mirror_ports = mirror_ports
+        self.events()
 
     @staticmethod
     def format_endpoints(data):

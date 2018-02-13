@@ -21,22 +21,40 @@ Created on 19 November 2017
 import yaml
 
 from poseidon.baseClasses.Logger_Base import Logger
+from poseidon.baseClasses.Rabbit_Base import Rabbit_Base
+from poseidon.poseidonMonitor.poseidonMonitor import Monitor
 
 module_logger = Logger.logger
-
-
-class HexInt(int): pass
 
 
 def representer(dumper, data):
     return dumper.represent_int(hex(data))
 
+def rabbit_callback(ch, method, properties, body):
+    ''' callback, places rabbit data into internal queue'''
+    module_logger.logger.debug('got a message: {0}:{1}:{2}'.format(
+        method.routing_key, body, type(body)))
+
+
+class HexInt(int): pass
+
 
 class Parser:
 
-    def __init__(self, mirror_ports=None):
+    def __init__(self,
+                 mirror_ports=None,
+                 rabbit_host=None,
+                 rabbit_exchange=None,
+                 rabbit_exchange_type=None,
+                 rabbit_routing_key=None,
+                 rabbit_port=None):
         self.logger = module_logger
         self.mirror_ports = mirror_ports
+        self.rabbit_host = rabbit_host
+        self.rabbit_exchange = rabbit_exchange
+        self.rabbit_exchange_type = rabbit_exchange_type
+        self.rabbit_routing_key = rabbit_routing_key
+        self.rabbit_port = rabbit_port
 
     def config(self, config_file, action, port, switch):
         switch_found = None
@@ -120,9 +138,22 @@ class Parser:
 
         return True
 
-    def events(self, event):
-        # TODO
-        pass
+    def events(self):
+        pmain = Monitor(skip_rabbit=False)
+        rabbit = Rabbit_Base()
+        host = self.rabbit_host
+        port = self.rabbit_port
+        exchange = self.rabbit_exchange
+        queue_name = 'faucet'
+        binding_key = [self.routing_key+'.#']
+        retval = rabbit.make_rabbit_connection(
+            host, port, exchange, queue_name, binding_key)
+        pmain.rabbit_thread = rabbit.start_channel(
+            retval[1],
+            rabbit_callback,
+            'faucet')
+        pmain.schedule_thread.start()
+        return
 
     def log(self, log_file):
         mac_table = {}

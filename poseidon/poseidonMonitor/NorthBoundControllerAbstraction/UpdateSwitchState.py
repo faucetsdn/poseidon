@@ -56,6 +56,12 @@ class Update_Switch_State(Monitor_Helper_Base):
         self.controller['CONFIG_FILE'] = None
         self.controller['LOG_FILE'] = None
         self.controller['MIRROR_PORTS'] = None
+        self.controller['RABBIT_ENABLED'] = None
+        self.controller['FA_RABBIT_HOST'] = None
+        self.controller['FA_RABBIT_EXCHANGE'] = None
+        self.controller['FA_RABBIT_EXCHANGE_TYPE'] = None
+        self.controller['FA_RABBIT_ROUTING_KEY'] = None
+        self.controller['FA_RABBIT_PORT'] = None
 
         self.sdnc = None
         self.first_time = True
@@ -108,12 +114,36 @@ class Update_Switch_State(Monitor_Helper_Base):
                     if 'controller_mirror_ports' in self.mod_configuration:
                         self.controller['MIRROR_PORTS'] = ast.literal_eval(
                             self.mod_configuration['controller_mirror_ports'])
+                    if 'rabbit_enabled' in self.mod_configuration:
+                        self.controller['RABBIT_ENABLED'] = ast.literal_eval(
+                            self.mod_configuration['rabbit_enabled'])
+                    if 'FA_RABBIT_HOST' in self.mod_configuration:
+                        self.controller['FA_RABBIT_HOST'] = str(
+                            self.mod_configuration['FA_RABBIT_HOST'])
+                    if 'FA_RABBIT_EXCHANGE' in self.mod_configuration:
+                        self.controller['FA_RABBIT_EXCHANGE'] = str(
+                            self.mod_configuration['FA_RABBIT_EXCHANGE'])
+                    if 'FA_RABBIT_EXCHANGE_TYPE' in self.mod_configuration:
+                        self.controller['FA_RABBIT_EXCHANGE_TYPE'] = str(
+                            self.mod_configuration['FA_RABBIT_EXCHANGE_TYPE'])
+                    if 'FA_RABBIT_ROUTING_KEY' in self.mod_configuration:
+                        self.controller['FA_RABBIT_ROUTING_KEY'] = str(
+                            self.mod_configuration['FA_RABBIT_ROUTING_KEY'])
+                    if 'FA_RABBIT_PORT' in self.mod_configuration:
+                        self.controller['FA_RABBIT_PORT'] = int(
+                            self.mod_configuration['FA_RABBIT_PORT'])
                     self.sdnc = FaucetProxy(host=self.controller['URI'],
                                             user=self.controller['USER'],
                                             pw=self.controller['PASS'],
                                             config_file=self.controller['CONFIG_FILE'],
                                             log_file=self.controller['LOG_FILE'],
-                                            mirror_ports=self.controller['MIRROR_PORTS'])
+                                            mirror_ports=self.controller['MIRROR_PORTS'],
+                                            rabbit_enabled=self.controller['RABBIT_ENABLED'],
+                                            rabbit_host=self.controller['FA_RABBIT_HOST'],
+                                            rabbit_exchange=self.controller['FA_RABBIT_EXCHANGE'],
+                                            rabbit_exchange_type=self.controller['FA_RABBIT_EXCHANGE_TYPE'],
+                                            rabbit_routing_key=self.controller['FA_RABBIT_ROUTING_KEY'],
+                                            rabbit_port=self.controller['FA_RABBIT_PORT'])
                 except BaseException as e:  # pragma: no cover
                     self.logger.error(
                         'FaucetProxy could not connect to {0} because {1}'.format(
