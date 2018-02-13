@@ -62,7 +62,6 @@ class FaucetProxy(Connection, Parser):
                                           *args,
                                           **kwargs)
         self.mirror_ports = mirror_ports
-        self.events()
 
     @staticmethod
     def format_endpoints(data):

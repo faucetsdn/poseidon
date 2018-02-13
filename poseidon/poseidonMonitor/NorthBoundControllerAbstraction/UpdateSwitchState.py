@@ -22,8 +22,10 @@ import json
 import queue as Queue
 
 from poseidon.baseClasses.Logger_Base import Logger
+from poseidon.baseClasses.Rabbit_Base import Rabbit_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 from poseidon.poseidonMonitor.endPoint import EndPoint
+from poseidon.poseidonMonitor.poseidonMonitor import Monitor
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.EndpointWrapper import \
     Endpoint_Wrapper
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.bcf import \
@@ -32,6 +34,12 @@ from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.faucet.fauce
     FaucetProxy
 
 module_logger = Logger
+
+
+def rabbit_callback(ch, method, properties, body):
+    ''' callback, places rabbit data into internal queue'''
+    module_logger.logger.debug('got a message: {0}:{1}:{2}'.format(
+        method.routing_key, body, type(body)))
 
 
 class Update_Switch_State(Monitor_Helper_Base):
@@ -67,6 +75,23 @@ class Update_Switch_State(Monitor_Helper_Base):
         self.first_time = True
         self.endpoints = Endpoint_Wrapper()
         self.m_queue = Queue.Queue()
+
+    def events(self):
+        pmain = Monitor(skip_rabbit=False)
+        rabbit = Rabbit_Base()
+        host = self.controller['FA_RABBIT_HOST']
+        port = int(self.controller['FA_RABBIT_PORT'])
+        exchange = self.controller['FA_RABBIT_EXCHANGE']
+        queue_name = 'faucet'
+        binding_key = [self.controller['FA_RABBIT_ROUTING_KEY']+'.#']
+        retval = rabbit.make_rabbit_connection(
+            host, port, exchange, queue_name, binding_key)
+        pmain.rabbit_thread = rabbit.start_channel(
+            retval[1],
+            rabbit_callback,
+            'faucet')
+        pmain.schedule_thread.start()
+        return
 
     def return_endpoint_state(self):
         ''' give access to the endpoint_states '''
@@ -144,6 +169,8 @@ class Update_Switch_State(Monitor_Helper_Base):
                                             rabbit_exchange_type=self.controller['FA_RABBIT_EXCHANGE_TYPE'],
                                             rabbit_routing_key=self.controller['FA_RABBIT_ROUTING_KEY'],
                                             rabbit_port=self.controller['FA_RABBIT_PORT'])
+                    if self.controller['RABBIT_ENABLED']:
+                        self.events()
                 except BaseException as e:  # pragma: no cover
                     self.logger.error(
                         'FaucetProxy could not connect to {0} because {1}'.format(

@@ -21,19 +21,12 @@ Created on 19 November 2017
 import yaml
 
 from poseidon.baseClasses.Logger_Base import Logger
-from poseidon.baseClasses.Rabbit_Base import Rabbit_Base
-from poseidon.poseidonMonitor.poseidonMonitor import Monitor
 
 module_logger = Logger.logger
 
 
 def representer(dumper, data):
     return dumper.represent_int(hex(data))
-
-def rabbit_callback(ch, method, properties, body):
-    ''' callback, places rabbit data into internal queue'''
-    module_logger.logger.debug('got a message: {0}:{1}:{2}'.format(
-        method.routing_key, body, type(body)))
 
 
 class HexInt(int): pass
@@ -137,23 +130,6 @@ class Parser:
         yaml.dump(obj_doc, stream, default_flow_style=False)
 
         return True
-
-    def events(self):
-        pmain = Monitor(skip_rabbit=False)
-        rabbit = Rabbit_Base()
-        host = self.rabbit_host
-        port = self.rabbit_port
-        exchange = self.rabbit_exchange
-        queue_name = 'faucet'
-        binding_key = [self.routing_key+'.#']
-        retval = rabbit.make_rabbit_connection(
-            host, port, exchange, queue_name, binding_key)
-        pmain.rabbit_thread = rabbit.start_channel(
-            retval[1],
-            rabbit_callback,
-            'faucet')
-        pmain.schedule_thread.start()
-        return
 
     def log(self, log_file):
         mac_table = {}
