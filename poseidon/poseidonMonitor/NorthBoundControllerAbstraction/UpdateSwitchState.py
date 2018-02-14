@@ -109,8 +109,8 @@ class Update_Switch_State(Monitor_Helper_Base):
                         self.controller['MIRROR_PORTS'] = ast.literal_eval(
                             self.mod_configuration['controller_mirror_ports'])
                     if 'FA_RABBIT_ENABLED' in self.mod_configuration:
-                        self.controller['FA_RABBIT_ENABLED'] = str(
-                            self.mod_configuration['FA_RABBIT_ENBALED'])
+                        self.controller['FA_RABBIT_ENABLED'] = ast.literal_eval(
+                            self.mod_configuration['FA_RABBIT_ENABLED'])
                     self.sdnc = FaucetProxy(host=self.controller['URI'],
                                             user=self.controller['USER'],
                                             pw=self.controller['PASS'],
