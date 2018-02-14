@@ -14,10 +14,10 @@ poseidon:
         vent_port: 8080
         FA_RABBIT_ENABLED: True
         FA_RABBIT_HOST: RABBIT_SERVER
+        FA_RABBIT_PORT: 5672
         FA_RABBIT_EXCHANGE: 'topic_recs'
         FA_RABBIT_EXCHANGE_TYPE: 'topic'
         FA_RABBIT_ROUTING_KEY: 'FAUCET.Event'
-        FA_RABBIT_PORT: 5672
 
     NorthBoundControllerAbstraction:Update_Switch_State:
         config: True

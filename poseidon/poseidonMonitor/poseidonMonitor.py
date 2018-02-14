@@ -472,7 +472,7 @@ def main(skip_rabbit=False):  # pragma: no cover
         pmain.rabbit_thread = rabbit.start_channel(
             pmain.rabbit_channel_local,
             rabbit_callback,
-            'poseidon_main',
+            queue_name,
             pmain.m_queue)
         # def start_channel(self, channel, callback, queue):
 
@@ -481,7 +481,7 @@ def main(skip_rabbit=False):  # pragma: no cover
         host = pmain.fa_rabbit_host
         port = pmain.fa_rabbit_port
         exchange = pmain.fa_rabbit_exchange
-        queue_name = 'faucet'
+        queue_name = 'poseidon_main'
         binding_key = [pmain.fa_rabbit_routing_key+'.#']
         retval = rabbit.make_rabbit_connection(
             host, port, exchange, queue_name, binding_key)
@@ -490,7 +490,7 @@ def main(skip_rabbit=False):  # pragma: no cover
         pmain.rabbit_thread = rabbit.start_channel(
             pmain.rabbit_channel_local,
             rabbit_callback,
-            'faucet',
+            queue_name,
             pmain.m_queue)
 
     pmain.schedule_thread.start()
