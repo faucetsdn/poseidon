@@ -74,6 +74,7 @@ class FaucetProxy(Connection, Parser):
         if message:
             module_logger.debug('faucet message: {0}'.format(message))
             if 'L2_LEARN' in message:
+                module_logger.info('faucet message: {0}'.format(message))
                 mac_table = self.event(message)
         elif not self.rabbit_enabled:
             if self.host:
