@@ -120,9 +120,25 @@ class Parser:
 
         return True
 
-    def event(self, message):
-        mac_table = {}
+    def event(self, mac_table, message):
         self.logger.info("got faucet message for l2_learn: {0}".format(message))
+        data = {}
+        data['ip-address'] = message['L2_LEARN']['l3_src_ip']
+        data['ip-state'] = 'L2 learned'
+        data['mac'] = message['L2_LEARN']['eth_src']
+        data['segment'] = message['dp_name']
+        data['port'] = str(message['L2_LEARN']['port_no'])
+        data['tenant'] = "VLAN"+str(message['L2_LEARN']['vid'])
+        if message['L2_LEARN']['eth_src'] in mac_table:
+            dub = False
+            for d in mac_table[message['L2_LEARN']['eth_src']]:
+                if data == d:
+                    dup = True
+            if dup:
+                mac_table[message['L2_LEARN']['eth_src']].remove(data)
+            mac_table[message['L2_LEARN']['eth_src']].insert(0, data)
+        else:
+            mac_table[message['eth_src']] = [data]
         return mac_table
 
     def log(self, log_file):
