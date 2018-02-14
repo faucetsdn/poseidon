@@ -138,7 +138,7 @@ class Parser:
                 mac_table[message['L2_LEARN']['eth_src']].remove(data)
             mac_table[message['L2_LEARN']['eth_src']].insert(0, data)
         else:
-            mac_table[message['eth_src']] = [data]
+            mac_table[message['L2_LEARN']['eth_src']] = [data]
         return mac_table
 
     def log(self, log_file):
