@@ -12,6 +12,7 @@ poseidon:
         collector_interval: 900
         vent_ip: vent_ip
         vent_port: 8080
+        FA_RABBIT_ENABLED: True
         FA_RABBIT_HOST: RABBIT_SERVER
         FA_RABBIT_PORT: 5672
         FA_RABBIT_EXCHANGE: 'topic_recs'
@@ -27,4 +28,4 @@ poseidon:
         controller_log_file: /var/log/ryu/faucet/faucet.log
         controller_config_file: /etc/ryu/faucet/faucet.yaml
         controller_mirror_ports: '{}'
-        FA_RABBIT_ENABLED: True
+        rabbit_enabled: True
