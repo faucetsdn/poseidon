@@ -53,12 +53,13 @@ def schedule_job_kickurl(func, logger):
     ''' periodically ask the controller for its state '''
     logger.debug('kick')
     func.NorthBoundControllerAbstraction.get_endpoint(
-        'Update_Switch_State').update_endpoint_state()
+        'Update_Switch_State').update_endpoint_state(message=func.faucet_event)
+    func.faucet_event = None
 
 
 def rabbit_callback(ch, method, properties, body, q=None):
     ''' callback, places rabbit data into internal queue'''
-    module_logger.logger.info('got a message: {0}:{1}:{2}'.format(
+    module_logger.logger.debug('got a message: {0}:{1}:{2}'.format(
         method.routing_key, body, type(body)))
     # TODO more
     if q is not None:
@@ -163,6 +164,7 @@ class Monitor(object):
         self.Config.configure_endpoints()
 
         self.m_queue = Queue.Queue()
+        self.faucet_event = None
 
         # wire up handlers for NorthBoundControllerAbstraction
         self.logger.debug('handler NorthBoundControllerAbstraction')
@@ -181,8 +183,6 @@ class Monitor(object):
 
         # TODO better error checking needed here since this is user input
         scan_frequency = int(self.mod_configuration['scan_frequency'])
-        self.schedule.every(scan_frequency).seconds.do(
-            partial(schedule_job_kickurl, func=self, logger=self.logger))
 
         reinvestigation_frequency = int(
             self.mod_configuration['reinvestigation_frequency'])
@@ -202,6 +202,9 @@ class Monitor(object):
             self.mod_configuration['FA_RABBIT_EXCHANGE_TYPE'])
         self.fa_rabbit_routing_key = str(
             self.mod_configuration['FA_RABBIT_ROUTING_KEY'])
+
+        self.schedule.every(scan_frequency).seconds.do(
+            partial(schedule_job_kickurl, func=self, logger=self.logger))
 
         self.schedule.every(reinvestigation_frequency).seconds.do(
             partial(schedule_job_reinvestigation,
@@ -347,6 +350,10 @@ class Monitor(object):
             # if valid response then send along otherwise nothing
             for key in my_obj:
                 ret_val[key] = my_obj[key]
+        elif routing_key == self.fa_rabbit_routing_key:
+            self.logger.debug('FAUCET Event:{0}'.format(my_obj))
+            for key in my_obj:
+                ret_val[key] = my_obj[key]
         # TODO do something with reccomendation
         return ret_val
 
@@ -371,11 +378,16 @@ class Monitor(object):
             ml_returns = {}
 
             # plan out the transitions
-            if found_work:
+            if found_work and item[0] != self.fa_rabbit_routing_key:
                 # TODO make this read until nothing in q
                 ml_returns = self.format_rabbit_message(item)
                 self.logger.debug("\n\n\n**********************")
                 self.logger.debug('ml_returns:{0}'.format(ml_returns))
+                self.logger.debug("**********************\n\n\n")
+            elif found_work and item[0] == self.fa_rabbit_routing_key:
+                self.faucet_event = self.format_rabbit_message(item)
+                self.logger.debug("\n\n\n**********************")
+                self.logger.debug('faucet_event:{0}'.format(self.faucet_event))
                 self.logger.debug("**********************\n\n\n")
 
             eps = self.uss.endpoints

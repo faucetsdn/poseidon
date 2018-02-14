@@ -64,14 +64,17 @@ class FaucetProxy(Connection, Parser):
             ret_list.append(md)
         return ret_list
 
-    def get_endpoints(self):
+    def get_endpoints(self, message=None):
         retval = []
 
-        if self.host:
-            self.receive_file('log')
-            mac_table = self.log(os.path.join(self.log_dir, 'faucet.log'))
+        if message:
+            module_logger.info('faucet message: {0}'.format(message))
         else:
-            mac_table = self.log(self.log_file)
+            if self.host:
+                self.receive_file('log')
+                mac_table = self.log(os.path.join(self.log_dir, 'faucet.log'))
+            else:
+                mac_table = self.log(self.log_file)
         module_logger.debug('get_endpoints found:')
         for mac in mac_table:
             if (mac_table[mac][0]['ip-address'] != 'None' and

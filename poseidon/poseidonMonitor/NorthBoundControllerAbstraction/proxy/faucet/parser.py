@@ -120,6 +120,10 @@ class Parser:
 
         return True
 
+    def event(self, message):
+        mac_table = {}
+        return mac_table
+
     def log(self, log_file):
         mac_table = {}
         if not log_file:

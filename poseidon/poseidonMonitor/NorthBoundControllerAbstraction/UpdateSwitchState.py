@@ -184,7 +184,7 @@ class Update_Switch_State(Monitor_Helper_Base):
                         '***** detected new address {0}'.format(machine))
                     self.endpoints.set(end_point)
 
-    def update_endpoint_state(self):
+    def update_endpoint_state(self, message=None):
         '''Handles Get requests'''
         self.retval['service'] = self.owner.mod_name + ':' + self.mod_name
         self.retval['times'] = self.times
@@ -196,7 +196,7 @@ class Update_Switch_State(Monitor_Helper_Base):
         machines = {}
 
         try:
-            current = self.sdnc.get_endpoints()
+            current = self.sdnc.get_endpoints(message=message)
             parsed = self.sdnc.format_endpoints(current)
             machines = parsed
         except BaseException as e:  # pragma: no cover

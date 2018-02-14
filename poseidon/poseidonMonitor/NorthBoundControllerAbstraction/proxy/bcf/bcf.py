@@ -68,6 +68,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
 
     def get_endpoints(
             self,
+            message=None,
             endpoints_resource='data/controller/applications/bcf/info/endpoint-manager/endpoint'):
         '''
         GET list of endpoints from the controller.
