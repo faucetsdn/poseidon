@@ -54,7 +54,7 @@ def schedule_job_kickurl(func, logger):
     logger.debug('kick')
     func.NorthBoundControllerAbstraction.get_endpoint(
         'Update_Switch_State').update_endpoint_state(message=func.faucet_event)
-    func.faucet_event = None
+    func.faucet_event = []
 
 
 def rabbit_callback(ch, method, properties, body, q=None):
@@ -164,7 +164,7 @@ class Monitor(object):
         self.Config.configure_endpoints()
 
         self.m_queue = Queue.Queue()
-        self.faucet_event = None
+        self.faucet_event = []
 
         # wire up handlers for NorthBoundControllerAbstraction
         self.logger.debug('handler NorthBoundControllerAbstraction')
@@ -385,7 +385,7 @@ class Monitor(object):
                 self.logger.debug('ml_returns:{0}'.format(ml_returns))
                 self.logger.debug("**********************\n\n\n")
             elif found_work and item[0] == self.fa_rabbit_routing_key:
-                self.faucet_event = self.format_rabbit_message(item)
+                self.faucet_event.append(self.format_rabbit_message(item))
                 self.logger.debug("\n\n\n**********************")
                 self.logger.debug('faucet_event:{0}'.format(self.faucet_event))
                 self.logger.debug("**********************\n\n\n")
