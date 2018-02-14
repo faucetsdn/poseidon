@@ -20,6 +20,7 @@ workflow for the code base.
 Created on 17 May 2016
 @author: Charlie Lewis, dgrossman
 """
+import ast
 import json
 import queue as Queue
 import random
