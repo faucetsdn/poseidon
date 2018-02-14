@@ -57,7 +57,7 @@ def schedule_job_kickurl(func, logger):
 
 def rabbit_callback(ch, method, properties, body, q=None):
     ''' callback, places rabbit data into internal queue'''
-    module_logger.logger.debug('got a message: {0}:{1}:{2}'.format(
+    module_logger.logger.info('got a message: {0}:{1}:{2}'.format(
         method.routing_key, body, type(body)))
     # TODO more
     if q is not None:
@@ -134,6 +134,14 @@ class Monitor(object):
         self.rabbit_chanel_connection_local = None
         self.rabbit_thread = None
 
+        # environment variables
+        self.fa_rabbit_enabled = None
+        self.fa_rabbit_host = None
+        self.fa_rabbit_port = None
+        self.fa_rabbit_exchange = None
+        self.fa_rabbit_exchange_type = None
+        self.fa_rabbit_routing_key = None
+
         self.actions = dict()
         self.Config = config_interface
         self.Config.set_owner(self)
@@ -179,6 +187,20 @@ class Monitor(object):
             self.mod_configuration['reinvestigation_frequency'])
         max_concurrent_reinvestigations = int(
             self.mod_configuration['max_concurrent_reinvestigations'])
+
+
+        self.fa_rabbit_enabled = ast.literal_eval(
+            self.mod_configuration['FA_RABBIT_ENABLED'])
+        self.fa_rabbit_host = str(
+            self.mod_configuration['FA_RABBIT_HOST'])
+        self.fa_rabbit_port = int(
+            self.mod_configuration['FA_RABBIT_PORT'])
+        self.fa_rabbit_exchange = str(
+            self.mod_configuration['FA_RABBIT_EXCHANGE'])
+        self.fa_rabbit_exchange_type = str(
+            self.mod_configuration['FA_RABBIT_EXCHANGE_TYPE'])
+        self.fa_rabbit_routing_key = str(
+            self.mod_configuration['FA_RABBIT_ROUTING_KEY'])
 
         self.schedule.every(reinvestigation_frequency).seconds.do(
             partial(schedule_job_reinvestigation,
@@ -452,6 +474,24 @@ def main(skip_rabbit=False):  # pragma: no cover
             'poseidon_main',
             pmain.m_queue)
         # def start_channel(self, channel, callback, queue):
+
+    if pmain.fa_rabbit_enabled:
+        rabbit = Rabbit_Base()
+        host = pmain.fa_rabbit_host
+        port = pmain.fa_rabbit_port
+        exchange = pmain.fa_rabbit_exchange
+        queue_name = 'faucet'
+        binding_key = [pmain.fa_rabbit_routing_key+'.#']
+        retval = rabbit.make_rabbit_connection(
+            host, port, exchange, queue_name, binding_key)
+        pmain.rabbit_channel_local = retval[0]
+        pmain.rabbit_channel_connection_local = retval[1]
+        pmain.rabbit_thread = rabbit.start_channel(
+            pmain.rabbit_channel_local,
+            rabbit_callback,
+            'faucet',
+            pmain.m_queue)
+
     pmain.schedule_thread.start()
 
     # loop here until told not to
