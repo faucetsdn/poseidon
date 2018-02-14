@@ -38,7 +38,7 @@ class FaucetProxy(Connection, Parser):
                  config_file=None,
                  log_file=None,
                  mirror_ports=None,
-                 fa_rabbit_enabled=None,
+                 rabbit_enabled=None,
                  *args,
                  **kwargs):
         '''Initializes Faucet object.'''
@@ -48,10 +48,11 @@ class FaucetProxy(Connection, Parser):
                                           config_file,
                                           log_file,
                                           mirror_ports,
-                                          fa_rabbit_enabled,
+                                          rabbit_enabled,
                                           *args,
                                           **kwargs)
         self.mirror_ports = mirror_ports
+        self.rabbit_enabled = rabbit_enabled
 
     @staticmethod
     def format_endpoints(data):
@@ -74,7 +75,7 @@ class FaucetProxy(Connection, Parser):
             module_logger.debug('faucet message: {0}'.format(message))
             if 'L2_LEARN' in message:
                 mac_table = self.event(message)
-        elif not fa_rabbit_enabled:
+        elif not self.rabbit_enabled:
             if self.host:
                 self.receive_file('log')
                 mac_table = self.log(os.path.join(self.log_dir, 'faucet.log'))
