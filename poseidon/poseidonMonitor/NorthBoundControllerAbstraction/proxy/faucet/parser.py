@@ -34,20 +34,9 @@ class HexInt(int): pass
 
 class Parser:
 
-    def __init__(self,
-                 mirror_ports=None,
-                 rabbit_host=None,
-                 rabbit_exchange=None,
-                 rabbit_exchange_type=None,
-                 rabbit_routing_key=None,
-                 rabbit_port=None):
+    def __init__(self, mirror_ports=None):
         self.logger = module_logger
         self.mirror_ports = mirror_ports
-        self.rabbit_host = rabbit_host
-        self.rabbit_exchange = rabbit_exchange
-        self.rabbit_exchange_type = rabbit_exchange_type
-        self.rabbit_routing_key = rabbit_routing_key
-        self.rabbit_port = rabbit_port
 
     def config(self, config_file, action, port, switch):
         switch_found = None
