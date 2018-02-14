@@ -67,15 +67,16 @@ class FaucetProxy(Connection, Parser):
             ret_list.append(md)
         return ret_list
 
-    def get_endpoints(self, message=None):
+    def get_endpoints(self, messages=None):
         retval = []
         mac_table = {}
 
-        if message:
-            module_logger.info('faucet message: {0}'.format(message))
-            if 'L2_LEARN' in message:
-                module_logger.info('l2 faucet message: {0}'.format(message))
-                mac_table = self.event(message)
+        if messages:
+            module_logger.info('faucet messages: {0}'.format(messages))
+            for message in messages:
+                if 'L2_LEARN' in message:
+                    module_logger.info('l2 faucet message: {0}'.format(message))
+                    mac_table = self.event(message)
         elif not self.rabbit_enabled:
             if self.host:
                 self.receive_file('log')

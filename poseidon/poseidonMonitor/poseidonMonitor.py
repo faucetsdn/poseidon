@@ -53,7 +53,7 @@ def schedule_job_kickurl(func, logger):
     ''' periodically ask the controller for its state '''
     logger.debug('kick')
     func.NorthBoundControllerAbstraction.get_endpoint(
-        'Update_Switch_State').update_endpoint_state(message=func.faucet_event)
+        'Update_Switch_State').update_endpoint_state(messages=func.faucet_event)
     # check the length didn't change before wiping it out
     func.faucet_event = []
 
