@@ -108,12 +108,16 @@ class Update_Switch_State(Monitor_Helper_Base):
                     if 'controller_mirror_ports' in self.mod_configuration:
                         self.controller['MIRROR_PORTS'] = ast.literal_eval(
                             self.mod_configuration['controller_mirror_ports'])
+                    if 'FA_RABBIT_ENABLED' in self.mod_configuration:
+                        self.controller['FA_RABBIT_ENABLED'] = str(
+                            self.mod_configuration['FA_RABBIT_ENBALED'])
                     self.sdnc = FaucetProxy(host=self.controller['URI'],
                                             user=self.controller['USER'],
                                             pw=self.controller['PASS'],
                                             config_file=self.controller['CONFIG_FILE'],
                                             log_file=self.controller['LOG_FILE'],
-                                            mirror_ports=self.controller['MIRROR_PORTS'])
+                                            mirror_ports=self.controller['MIRROR_PORTS'],
+                                            fa_rabbit_enabled=self.controller['FA_RABBIT_ENABLED'])
                 except BaseException as e:  # pragma: no cover
                     self.logger.error(
                         'FaucetProxy could not connect to {0} because {1}'.format(

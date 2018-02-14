@@ -38,6 +38,7 @@ class FaucetProxy(Connection, Parser):
                  config_file=None,
                  log_file=None,
                  mirror_ports=None,
+                 fa_rabbit_enabled=None,
                  *args,
                  **kwargs):
         '''Initializes Faucet object.'''
@@ -47,6 +48,7 @@ class FaucetProxy(Connection, Parser):
                                           config_file,
                                           log_file,
                                           mirror_ports,
+                                          fa_rabbit_enabled,
                                           *args,
                                           **kwargs)
         self.mirror_ports = mirror_ports
@@ -66,26 +68,28 @@ class FaucetProxy(Connection, Parser):
 
     def get_endpoints(self, message=None):
         retval = []
+        mac_table = {}
 
         if message:
-            module_logger.info('faucet message: {0}'.format(message))
-        else:
-            mac_table = {}
+            module_logger.debug('faucet message: {0}'.format(message))
+            if 'L2_LEARN' in message:
+                mac_table = self.event(message)
+        elif not fa_rabbit_enabled:
             if self.host:
                 self.receive_file('log')
                 mac_table = self.log(os.path.join(self.log_dir, 'faucet.log'))
             else:
                 mac_table = self.log(self.log_file)
-            module_logger.debug('get_endpoints found:')
-            for mac in mac_table:
-                if (mac_table[mac][0]['ip-address'] != 'None' and
-                    mac_table[mac][0]['ip-address'] != '127.0.0.1' and
-                    mac_table[mac][0]['ip-address'] != '0.0.0.0' and
-                    mac_table[mac][0]['ip-address'] != '::' and
-                    not mac_table[mac][0]['ip-address'].startswith('fe80:')):
-                        module_logger.debug('{0}:{1}'.format(
-                            mac, mac_table[mac]))
-                        retval.append(mac_table[mac])
+        module_logger.debug('get_endpoints found:')
+        for mac in mac_table:
+            if (mac_table[mac][0]['ip-address'] != 'None' and
+                mac_table[mac][0]['ip-address'] != '127.0.0.1' and
+                mac_table[mac][0]['ip-address'] != '0.0.0.0' and
+                mac_table[mac][0]['ip-address'] != '::' and
+                not mac_table[mac][0]['ip-address'].startswith('fe80:')):
+                    module_logger.debug('{0}:{1}'.format(
+                        mac, mac_table[mac]))
+                    retval.append(mac_table[mac])
         return retval
 
     def get_switches(self):

@@ -122,6 +122,7 @@ class Parser:
 
     def event(self, message):
         mac_table = {}
+        self.logger.info("got faucet message for l2_learn: {0}".format(message))
         return mac_table
 
     def log(self, log_file):
@@ -152,6 +153,6 @@ class Parser:
                         else:
                             mac_table[learned_mac[10]] = [data]
         except Exception as e:
-            print("%s" % str(e))
+            self.logger.debug("error {0}".format(str(e)))
         return mac_table
 
