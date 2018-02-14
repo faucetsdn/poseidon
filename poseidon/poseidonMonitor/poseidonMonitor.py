@@ -54,6 +54,7 @@ def schedule_job_kickurl(func, logger):
     logger.debug('kick')
     func.NorthBoundControllerAbstraction.get_endpoint(
         'Update_Switch_State').update_endpoint_state(message=func.faucet_event)
+    # check the length didn't change before wiping it out
     func.faucet_event = []
 
 
