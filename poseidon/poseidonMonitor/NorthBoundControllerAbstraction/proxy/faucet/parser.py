@@ -89,12 +89,13 @@ class Parser:
                         ok = False
                     else:
                         if 'mirror' in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]:
-                            self.logger.info("Mirror port already set to "
-                                             "mirror something, removing "
-                                             "old mirror setting")
-                            del obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']
+                            if not isinstance(obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'], list):
+                                obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] = [obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']]
+                        else:
+                            obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] = []
             if ok:
-                obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] = port
+                if not port in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']:
+                    obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'].append(port)
             else:
                 self.logger.error("Unable to mirror due to warnings")
                 return False
