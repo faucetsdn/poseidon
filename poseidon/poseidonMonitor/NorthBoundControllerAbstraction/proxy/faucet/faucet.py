@@ -85,7 +85,8 @@ class FaucetProxy(Connection, Parser):
                 mac_table = self.log(self.log_file)
         module_logger.debug('get_endpoints found:')
         for mac in mac_table:
-            if (mac_table[mac][0]['ip-address'] != 'None' and
+            if (mac_table[mac][0]['ip-address'] != None and
+                mac_table[mac][0]['ip-address'] != 'None' and
                 mac_table[mac][0]['ip-address'] != '127.0.0.1' and
                 mac_table[mac][0]['ip-address'] != '0.0.0.0' and
                 mac_table[mac][0]['ip-address'] != '::' and
