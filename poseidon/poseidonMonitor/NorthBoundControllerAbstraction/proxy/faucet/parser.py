@@ -126,7 +126,7 @@ class Parser:
         data['ip-address'] = message['L2_LEARN']['l3_src_ip']
         data['ip-state'] = 'L2 learned'
         data['mac'] = message['L2_LEARN']['eth_src']
-        data['segment'] = message['dp_name']
+        data['segment'] = str(message['dp_id'])
         data['port'] = str(message['L2_LEARN']['port_no'])
         data['tenant'] = "VLAN"+str(message['L2_LEARN']['vid'])
         if message['L2_LEARN']['eth_src'] in mac_table:
