@@ -20,6 +20,7 @@ workflow for the code base.
 Created on 17 May 2016
 @author: Charlie Lewis, dgrossman
 """
+import ast
 import json
 import queue as Queue
 import random
@@ -52,7 +53,9 @@ def schedule_job_kickurl(func, logger):
     ''' periodically ask the controller for its state '''
     logger.debug('kick')
     func.NorthBoundControllerAbstraction.get_endpoint(
-        'Update_Switch_State').update_endpoint_state()
+        'Update_Switch_State').update_endpoint_state(messages=func.faucet_event)
+    # check the length didn't change before wiping it out
+    func.faucet_event = []
 
 
 def rabbit_callback(ch, method, properties, body, q=None):
@@ -134,6 +137,14 @@ class Monitor(object):
         self.rabbit_chanel_connection_local = None
         self.rabbit_thread = None
 
+        # environment variables
+        self.fa_rabbit_enabled = None
+        self.fa_rabbit_host = None
+        self.fa_rabbit_port = None
+        self.fa_rabbit_exchange = None
+        self.fa_rabbit_exchange_type = None
+        self.fa_rabbit_routing_key = None
+
         self.actions = dict()
         self.Config = config_interface
         self.Config.set_owner(self)
@@ -154,6 +165,7 @@ class Monitor(object):
         self.Config.configure_endpoints()
 
         self.m_queue = Queue.Queue()
+        self.faucet_event = []
 
         # wire up handlers for NorthBoundControllerAbstraction
         self.logger.debug('handler NorthBoundControllerAbstraction')
@@ -172,13 +184,28 @@ class Monitor(object):
 
         # TODO better error checking needed here since this is user input
         scan_frequency = int(self.mod_configuration['scan_frequency'])
-        self.schedule.every(scan_frequency).seconds.do(
-            partial(schedule_job_kickurl, func=self, logger=self.logger))
 
         reinvestigation_frequency = int(
             self.mod_configuration['reinvestigation_frequency'])
         max_concurrent_reinvestigations = int(
             self.mod_configuration['max_concurrent_reinvestigations'])
+
+
+        self.fa_rabbit_enabled = ast.literal_eval(
+            self.mod_configuration['FA_RABBIT_ENABLED'])
+        self.fa_rabbit_host = str(
+            self.mod_configuration['FA_RABBIT_HOST'])
+        self.fa_rabbit_port = int(
+            self.mod_configuration['FA_RABBIT_PORT'])
+        self.fa_rabbit_exchange = str(
+            self.mod_configuration['FA_RABBIT_EXCHANGE'])
+        self.fa_rabbit_exchange_type = str(
+            self.mod_configuration['FA_RABBIT_EXCHANGE_TYPE'])
+        self.fa_rabbit_routing_key = str(
+            self.mod_configuration['FA_RABBIT_ROUTING_KEY'])
+
+        self.schedule.every(scan_frequency).seconds.do(
+            partial(schedule_job_kickurl, func=self, logger=self.logger))
 
         self.schedule.every(reinvestigation_frequency).seconds.do(
             partial(schedule_job_reinvestigation,
@@ -324,6 +351,10 @@ class Monitor(object):
             # if valid response then send along otherwise nothing
             for key in my_obj:
                 ret_val[key] = my_obj[key]
+        elif routing_key == self.fa_rabbit_routing_key:
+            self.logger.debug('FAUCET Event:{0}'.format(my_obj))
+            for key in my_obj:
+                ret_val[key] = my_obj[key]
         # TODO do something with reccomendation
         return ret_val
 
@@ -348,11 +379,16 @@ class Monitor(object):
             ml_returns = {}
 
             # plan out the transitions
-            if found_work:
+            if found_work and item[0] != self.fa_rabbit_routing_key:
                 # TODO make this read until nothing in q
                 ml_returns = self.format_rabbit_message(item)
                 self.logger.debug("\n\n\n**********************")
                 self.logger.debug('ml_returns:{0}'.format(ml_returns))
+                self.logger.debug("**********************\n\n\n")
+            elif found_work and item[0] == self.fa_rabbit_routing_key:
+                self.faucet_event.append(self.format_rabbit_message(item))
+                self.logger.debug("\n\n\n**********************")
+                self.logger.debug('faucet_event:{0}'.format(self.faucet_event))
                 self.logger.debug("**********************\n\n\n")
 
             eps = self.uss.endpoints
@@ -449,9 +485,27 @@ def main(skip_rabbit=False):  # pragma: no cover
         pmain.rabbit_thread = rabbit.start_channel(
             pmain.rabbit_channel_local,
             rabbit_callback,
-            'poseidon_main',
+            queue_name,
             pmain.m_queue)
         # def start_channel(self, channel, callback, queue):
+
+    if pmain.fa_rabbit_enabled:
+        rabbit = Rabbit_Base()
+        host = pmain.fa_rabbit_host
+        port = pmain.fa_rabbit_port
+        exchange = pmain.fa_rabbit_exchange
+        queue_name = 'poseidon_main'
+        binding_key = [pmain.fa_rabbit_routing_key+'.#']
+        retval = rabbit.make_rabbit_connection(
+            host, port, exchange, queue_name, binding_key)
+        pmain.rabbit_channel_local = retval[0]
+        pmain.rabbit_channel_connection_local = retval[1]
+        pmain.rabbit_thread = rabbit.start_channel(
+            pmain.rabbit_channel_local,
+            rabbit_callback,
+            queue_name,
+            pmain.m_queue)
+
     pmain.schedule_thread.start()
 
     # loop here until told not to

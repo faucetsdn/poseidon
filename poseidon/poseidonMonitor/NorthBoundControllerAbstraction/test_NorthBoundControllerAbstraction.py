@@ -56,7 +56,7 @@ def test_update_endpoint_state():
 
             return a
 
-        def get_endpoints(self):
+        def get_endpoints(self, messages=None):
             pass
 
     uss = controller_interface.get_endpoint('Update_Switch_State')

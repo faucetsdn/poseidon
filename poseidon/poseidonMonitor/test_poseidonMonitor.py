@@ -217,7 +217,7 @@ def test_format_rabbit_message():
     class MockMonitor(Monitor):
 
         def __init__(self):
-            pass
+            self.fa_rabbit_routing_key = 'foo'
 
     mockMonitor = MockMonitor()
     mockMonitor.logger = MockLogger()
@@ -688,7 +688,7 @@ def test_schedule_job_kickurl():
         def __init__(self):
             pass
 
-        def update_endpoint_state(self):
+        def update_endpoint_state(self, messages=None):
             pass
 
     class MockNorthBoundControllerAbstraction():
@@ -702,6 +702,7 @@ def test_schedule_job_kickurl():
     class func():
 
         def __init__(self):
+            self.faucet_event = []
             self.NorthBoundControllerAbstraction = MockNorthBoundControllerAbstraction()
 
     schedule_job_kickurl(func(), MockLogger())
@@ -808,12 +809,13 @@ def test_process():
                 'vent_ip': '0.0.0.0',
                 'vent_port': '8080',
             }
+            self.fa_rabbit_routing_key = 'FAUCET.Event'
 
         def get_q_item(self):
-            return (True, {})
+            return (True, ('foo', {}))
 
         def bad_get_q_item(self):
-            return (False, {})
+            return (False, ('bar', {}))
 
         def format_rabbit_message(self, item):
             return {}

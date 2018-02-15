@@ -38,6 +38,7 @@ class FaucetProxy(Connection, Parser):
                  config_file=None,
                  log_file=None,
                  mirror_ports=None,
+                 rabbit_enabled=None,
                  *args,
                  **kwargs):
         '''Initializes Faucet object.'''
@@ -47,9 +48,11 @@ class FaucetProxy(Connection, Parser):
                                           config_file,
                                           log_file,
                                           mirror_ports,
+                                          rabbit_enabled,
                                           *args,
                                           **kwargs)
         self.mirror_ports = mirror_ports
+        self.rabbit_enabled = rabbit_enabled
 
     @staticmethod
     def format_endpoints(data):
@@ -64,17 +67,26 @@ class FaucetProxy(Connection, Parser):
             ret_list.append(md)
         return ret_list
 
-    def get_endpoints(self):
+    def get_endpoints(self, messages=None):
         retval = []
+        mac_table = {}
 
-        if self.host:
-            self.receive_file('log')
-            mac_table = self.log(os.path.join(self.log_dir, 'faucet.log'))
-        else:
-            mac_table = self.log(self.log_file)
+        if messages:
+            module_logger.debug('faucet messages: {0}'.format(messages))
+            for message in messages:
+                if 'L2_LEARN' in message:
+                    module_logger.debug('l2 faucet message: {0}'.format(message))
+                    mac_table = self.event(mac_table, message)
+        elif not self.rabbit_enabled:
+            if self.host:
+                self.receive_file('log')
+                mac_table = self.log(os.path.join(self.log_dir, 'faucet.log'))
+            else:
+                mac_table = self.log(self.log_file)
         module_logger.debug('get_endpoints found:')
         for mac in mac_table:
-            if (mac_table[mac][0]['ip-address'] != 'None' and
+            if (mac_table[mac][0]['ip-address'] != None and
+                mac_table[mac][0]['ip-address'] != 'None' and
                 mac_table[mac][0]['ip-address'] != '127.0.0.1' and
                 mac_table[mac][0]['ip-address'] != '0.0.0.0' and
                 mac_table[mac][0]['ip-address'] != '::' and

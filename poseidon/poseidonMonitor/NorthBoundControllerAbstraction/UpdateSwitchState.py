@@ -56,6 +56,7 @@ class Update_Switch_State(Monitor_Helper_Base):
         self.controller['CONFIG_FILE'] = None
         self.controller['LOG_FILE'] = None
         self.controller['MIRROR_PORTS'] = None
+        self.controller['RABBIT_ENABLED'] = None
 
         self.sdnc = None
         self.first_time = True
@@ -108,12 +109,16 @@ class Update_Switch_State(Monitor_Helper_Base):
                     if 'controller_mirror_ports' in self.mod_configuration:
                         self.controller['MIRROR_PORTS'] = ast.literal_eval(
                             self.mod_configuration['controller_mirror_ports'])
+                    if 'rabbit_enabled' in self.mod_configuration:
+                        self.controller['RABBIT_ENABLED'] = ast.literal_eval(
+                            self.mod_configuration['rabbit_enabled'])
                     self.sdnc = FaucetProxy(host=self.controller['URI'],
                                             user=self.controller['USER'],
                                             pw=self.controller['PASS'],
                                             config_file=self.controller['CONFIG_FILE'],
                                             log_file=self.controller['LOG_FILE'],
-                                            mirror_ports=self.controller['MIRROR_PORTS'])
+                                            mirror_ports=self.controller['MIRROR_PORTS'],
+                                            rabbit_enabled=self.controller['RABBIT_ENABLED'])
                 except BaseException as e:  # pragma: no cover
                     self.logger.error(
                         'FaucetProxy could not connect to {0} because {1}'.format(
@@ -184,7 +189,7 @@ class Update_Switch_State(Monitor_Helper_Base):
                         '***** detected new address {0}'.format(machine))
                     self.endpoints.set(end_point)
 
-    def update_endpoint_state(self):
+    def update_endpoint_state(self, messages=None):
         '''Handles Get requests'''
         self.retval['service'] = self.owner.mod_name + ':' + self.mod_name
         self.retval['times'] = self.times
@@ -196,7 +201,7 @@ class Update_Switch_State(Monitor_Helper_Base):
         machines = {}
 
         try:
-            current = self.sdnc.get_endpoints()
+            current = self.sdnc.get_endpoints(messages=messages)
             parsed = self.sdnc.format_endpoints(current)
             machines = parsed
         except BaseException as e:  # pragma: no cover
