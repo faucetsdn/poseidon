@@ -288,20 +288,20 @@ class Monitor(object):
                     self.logger.debug('ML_DECISION:{0}'.format(ml_decision))
                     if current_state == 'REINVESTIGATING':
                         if ml_decision == 'normal':
-                            endpoint.change_endpoint_nextstate(
+                            self.uss.endpoints.change_endpoint_nextstate(
                                 my_hash, 'KNOWN')
                             self.logger.debug('REINVESTIGATION Making KNOWN')
                         else:
-                            endpoint.change_endpoint_nextstate(
+                            self.uss.endpoints.change_endpoint_nextstate(
                                 my_hash, 'UNKNOWN')
                             self.logger.debug('REINVESTIGATION Making UNKNOWN')
                     if current_state == 'MIRRORING':
                         if ml_decision == 'normal':
-                            endpoint.change_endpoint_nextstate(
+                            self.uss.endpoints.change_endpoint_nextstate(
                                 my_hash, 'KNOWN')
                             self.logger.debug('MIRRORING Making KNOWN')
                         else:
-                            endpoint.change_endpoint_nextstate(
+                            self.uss.endpoints.change_endpoint_nextstate(
                                 my_hash, 'SHUTDOWN')
                             self.logger.debug('MIRRORING Making SHUTDOWN')
 
