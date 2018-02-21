@@ -158,9 +158,6 @@ def test_start_vent_collector():
         def return_endpoint_state(self):
             return self.endpoints
 
-        #def change_endpoint_nextstate(self, my_hash, state):
-        #    self.endpoints[my_hash].next_state = state
-
     class MockMonitor(Monitor):
 
         def __init__(self):
@@ -460,9 +457,6 @@ def test_update_next_state():
 
         def return_endpoint_state(self):
             return self.endpoints
-
-        def change_endpoint_nextstate(self, my_hash, state):
-            self.endpoints.state[my_hash].next_state = state
 
     class MockMonitor(Monitor):
 
