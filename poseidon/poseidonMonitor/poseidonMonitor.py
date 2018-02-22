@@ -191,18 +191,21 @@ class Monitor(object):
             self.mod_configuration['max_concurrent_reinvestigations'])
 
 
-        self.fa_rabbit_enabled = ast.literal_eval(
-            self.mod_configuration['FA_RABBIT_ENABLED'])
-        self.fa_rabbit_host = str(
-            self.mod_configuration['FA_RABBIT_HOST'])
-        self.fa_rabbit_port = int(
-            self.mod_configuration['FA_RABBIT_PORT'])
-        self.fa_rabbit_exchange = str(
-            self.mod_configuration['FA_RABBIT_EXCHANGE'])
-        self.fa_rabbit_exchange_type = str(
-            self.mod_configuration['FA_RABBIT_EXCHANGE_TYPE'])
-        self.fa_rabbit_routing_key = str(
-            self.mod_configuration['FA_RABBIT_ROUTING_KEY'])
+        try:
+            self.fa_rabbit_enabled = ast.literal_eval(
+                self.mod_configuration['FA_RABBIT_ENABLED'])
+            self.fa_rabbit_host = str(
+                self.mod_configuration['FA_RABBIT_HOST'])
+            self.fa_rabbit_port = int(
+                self.mod_configuration['FA_RABBIT_PORT'])
+            self.fa_rabbit_exchange = str(
+                self.mod_configuration['FA_RABBIT_EXCHANGE'])
+            self.fa_rabbit_exchange_type = str(
+                self.mod_configuration['FA_RABBIT_EXCHANGE_TYPE'])
+            self.fa_rabbit_routing_key = str(
+                self.mod_configuration['FA_RABBIT_ROUTING_KEY'])
+        except:
+            pass
 
         self.schedule.every(scan_frequency).seconds.do(
             partial(schedule_job_kickurl, func=self, logger=self.logger))
