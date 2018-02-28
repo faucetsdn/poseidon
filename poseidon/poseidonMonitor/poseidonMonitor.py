@@ -440,6 +440,12 @@ class Monitor(object):
                             '*********** U UN-MIRROR PORT ***********')
                         self.uss.unmirror_endpoint(endpoint_hash)
                         eps.change_endpoint_state(endpoint_hash)
+                if next_state == 'SHUTDOWN':
+                    self.logger.debug(
+                        'updating:{0}:{1}->{2}'.format(endpoint_hash,
+                                                       current_state,
+                                                       next_state))
+                    self.uss.shutdown_endpoint(endpoint_hash)
 
                 eps.print_endpoint_state()
 
