@@ -157,8 +157,8 @@ class Parser:
                                 'ip-state': 'L2 learned',
                                 'mac': learned_mac[10],
                                 'segment': learned_mac[7][1:-1],
-                                'port': learned_mac[19],
-                                'tenant': learned_mac[21] + learned_mac[22]}
+                                'port': learned_mac[22],
+                                'tenant': learned_mac[24] + learned_mac[25]}
                         if learned_mac[10] in mac_table:
                             dup = False
                             for d in mac_table[learned_mac[10]]:
