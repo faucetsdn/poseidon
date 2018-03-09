@@ -1,3 +1,13 @@
+# v0.1.5 (2018-03-09)
+
+ - Adds support for RabbitMQ events from FAUCET
+ - Allows queue to not be exclusive
+ - Improve mirroring ports to allow for multiple mirrors simultaneously
+ - Fixes feedback and gets out of mirroring when appropriate
+ - Includes p0f in the helper script
+ - Fixes a change in the formatting of the FAUCET log file
+ - Slightly better error checking for environment variables
+
 # v0.1.4 (2018-02-09)
 
  - Updated versions for dependencies
