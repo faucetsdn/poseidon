@@ -47,8 +47,8 @@ class Connection:
         self.ssh = None
         if self.host:
             # ensure directories exist
-            self.config_dir = '/etc/ryu/faucet'
-            self.log_dir = '/var/log/ryu/faucet'
+            self.config_dir = '/etc/faucet'
+            self.log_dir = '/var/log/faucet'
             try:
                 if not os.path.exists(self.config_dir):
                     os.makedirs(self.config_dir)
