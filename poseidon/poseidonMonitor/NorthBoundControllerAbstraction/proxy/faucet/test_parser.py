@@ -28,8 +28,8 @@ def test_Parser():
     """
     Tests Parser
     """
-    config_dir = '/etc/ryu/faucet'
-    log_dir = '/var/log/ryu/faucet'
+    config_dir = '/etc/faucet'
+    log_dir = '/var/log/faucet'
     if not os.path.exists(config_dir):
         config_dir = os.path.join(os.getcwd(), 'faucet')
     if not os.path.exists(log_dir):

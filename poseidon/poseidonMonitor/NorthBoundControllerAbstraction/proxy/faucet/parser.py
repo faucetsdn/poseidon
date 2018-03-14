@@ -43,7 +43,7 @@ class Parser:
         # TODO check for other files
         if not config_file:
             # default to FAUCET default
-            config_file = '/etc/ryu/faucet/faucet.yaml'
+            config_file = '/etc/faucet/faucet.yaml'
         try:
             stream = open(config_file, 'r')
             obj_doc = yaml.safe_load(stream)
@@ -58,7 +58,7 @@ class Parser:
                 return False
             if not 'dps' in obj_doc:
                 self.logger.warning("Unable to find switch configs in "
-                                    "'/etc/ryu/faucet/faucet.yaml'")
+                                    "'/etc/faucet/faucet.yaml'")
                 ok = False
             else:
                 for s in obj_doc['dps']:
@@ -146,7 +146,7 @@ class Parser:
         mac_table = {}
         if not log_file:
             # default to FAUCET default
-            log_file = '/var/log/ryu/faucet/faucet.log'
+            log_file = '/var/log/faucet/faucet.log'
         # NOTE very fragile, prone to errors
         try:
             with open(log_file, 'r') as f:

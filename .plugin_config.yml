@@ -25,7 +25,7 @@ poseidon:
         controller_uri: https://CONTROLLER_IP:8443/api/v1/
         controller_user: CONTROLLER_USER
         controller_pass: CONTROLLER_PASS
-        controller_log_file: /var/log/ryu/faucet/faucet.log
-        controller_config_file: /etc/ryu/faucet/faucet.yaml
+        controller_log_file: /var/log/faucet/faucet.log
+        controller_config_file: /etc/faucet/faucet.yaml
         controller_mirror_ports: '{}'
         rabbit_enabled: True
