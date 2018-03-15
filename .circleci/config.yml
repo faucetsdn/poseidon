@@ -27,5 +27,5 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            py.test -v --cov=/tmp/poseidonWork --cov-report term-missing
+            py.test -v --cov=/tmp/poseidonWork/poseidon --cov=/tmp/poseidonWork/api --cov-report term-missing
             bash <(curl -s https://codecov.io/bash) -t 992b90e5-a0b2-45c5-b9d5-3baddc184162
