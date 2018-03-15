@@ -2,5 +2,5 @@ falcon
 falcon-cors==1.1.7
 gevent
 gunicorn
-pytest
+pytest==3.4.2
 redis
