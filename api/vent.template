@@ -2,6 +2,11 @@
 name = Poseidon API
 groups = poseidon,api
 
+[service]
+uri_prefix = http://
+uri_postfix = /v1
+
 [docker]
 environment = ["PYTHONUNBUFFERED=0"]
+publish_all_ports = True
 links = {"Redis":"redis"}
