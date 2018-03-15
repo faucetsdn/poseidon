@@ -1,6 +1,6 @@
-falcon
-falcon-cors
-gevent
-gunicorn
-pytest
-redis
+falcon==1.4.1
+falcon-cors==1.1.7
+gevent==1.2.2
+gunicorn==19.7.1
+pytest==3.4.2
+redis==2.10.6
