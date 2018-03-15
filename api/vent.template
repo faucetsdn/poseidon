@@ -3,8 +3,8 @@ name = Poseidon API
 groups = poseidon,api
 
 [service]
-uri_prefix = http://
-uri_postfix = /v1
+uri_prefix1 = http://
+uri_postfix1 = /v1
 
 [docker]
 environment = ["PYTHONUNBUFFERED=0"]
