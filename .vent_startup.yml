@@ -18,8 +18,8 @@ https://github.com/cyberreboot/vent:
         build: no
         start: no
     rq_dashboard:
-        build: yes
-        start: yes
+        build: no
+        start: no
     rq_worker:
         build: yes
         start: yes
@@ -28,6 +28,9 @@ https://github.com/cyberreboot/vent:
         start: yes
 https://github.com/cyberreboot/poseidon:
     '@poseidon':
+        build: yes
+        start: yes
+    api:
         build: yes
         start: yes
 https://github.com/cyberreboot/vent-plugins:
