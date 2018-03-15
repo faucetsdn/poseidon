@@ -18,6 +18,7 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip install -r requirements.txt
+            pip install -r api/requirements.txt
       - save_cache:
           key: deps1-{{ arch }}-{{ .Branch }}-{{ checksum "requirements.txt" }}
           paths:
