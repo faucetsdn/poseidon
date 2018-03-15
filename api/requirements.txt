@@ -3,4 +3,4 @@ falcon-cors==1.1.7
 gevent
 gunicorn
 pytest
-redis
+redis==2.10.6
