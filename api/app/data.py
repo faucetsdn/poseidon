@@ -72,7 +72,7 @@ class Network(object):
 
                         if 'poseidon_hash' in ip_info:
                             try:
-                                poseidon_info = r.hgetall(ip_info['poseidon_hash']
+                                poseidon_info = r.hgetall(ip_info['poseidon_hash'])
                                 if 'endpoint_data' in poseidon_info:
                                     endpoint_data = poseidon_info['endpoint_data']
                                     node['mac'] = endpoint_data['mac']
