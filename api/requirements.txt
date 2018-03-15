@@ -1,4 +1,4 @@
-falcon
+falcon==1.4.1
 falcon-cors==1.1.7
 gevent==1.2.2
 gunicorn
