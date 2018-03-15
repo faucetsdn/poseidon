@@ -3,4 +3,4 @@ falcon-cors==1.1.7
 gevent==1.2.2
 gunicorn
 pytest==3.4.2
-redis
+redis==2.10.6
