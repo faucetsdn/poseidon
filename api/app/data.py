@@ -35,10 +35,10 @@ class Network(object):
     def connect_redis(self):
         self.r = None
         try:
-            r = redis.StrictRedis(host='redis', port=6379, db=0)
+            self.r = redis.StrictRedis(host='redis', port=6379, db=0)
         except Exception as e:  # pragma: no cover
             try:
-                r = redis.StrictRedis(host='localhost', port=6379, db=0)
+                self.r = redis.StrictRedis(host='localhost', port=6379, db=0)
             except Exception as e:  # pragma: no cover
                 return (False, 'unable to connect to redis because: ' + str(e))
         return
