@@ -1,0 +1,6 @@
+falcon
+falcon-cors
+gevent
+gunicorn
+pytest
+redis
