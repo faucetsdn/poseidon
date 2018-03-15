@@ -48,7 +48,7 @@ class Network(object):
         self.connect_redis()
         if self.r:
             try:
-                ip_addresses = r.smembers('ip_addresses')
+                ip_addresses = self.r.smembers('ip_addresses')
                 for ip_address in ip_addresses:
                     node = {}
                     node['uid'] = str(uuid.uuid4())
@@ -68,11 +68,11 @@ class Network(object):
                         endpoint_data = {}
                         labels = []
                         confidences = []
-                        ip_info = r.hgetall(ip_address)
+                        ip_info = self.r.hgetall(ip_address)
 
                         if 'poseidon_hash' in ip_info:
                             try:
-                                poseidon_info = r.hgetall(ip_info['poseidon_hash'])
+                                poseidon_info = self.r.hgetall(ip_info['poseidon_hash'])
                                 if 'endpoint_data' in poseidon_info:
                                     endpoint_data = poseidon_info['endpoint_data']
                                     node['mac'] = endpoint_data['mac']
@@ -82,7 +82,7 @@ class Network(object):
                             try:
                                 node['record']['source'] = 'poseidon'
                                 node['record']['timestamp'] = str(datetime.fromtimestamp(float(ip_info['timestamps'][-1])))
-                                ml_info = r.hgetall(ip_address+'_'+str(ip_info['timestamps'][-1]))
+                                ml_info = self.r.hgetall(ip_address+'_'+str(ip_info['timestamps'][-1]))
                                 if 'labels' in ml_info:
                                     labels = ml_info['labels']
                                     node['role']['role'] = labels[0]
