@@ -1,0 +1,7 @@
+[info]
+name = Poseidon API
+groups = poseidon,api
+
+[docker]
+environment = ["PYTHONUNBUFFERED=0"]
+links = {"Redis":"redis"}
