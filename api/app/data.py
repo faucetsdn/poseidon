@@ -98,7 +98,7 @@ class Network(object):
                             node['os']['os'] = 'Unknown'
                     except:
                         pass
-                dataset.append(node)
+                    dataset.append(node)
             except:
                 pass
 
