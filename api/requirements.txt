@@ -1,6 +1,6 @@
 falcon
 falcon-cors
 gevent
-gunicorn
+gunicorn==19.7.1
 pytest
 redis
