@@ -62,7 +62,9 @@ class Network(object):
                     node['mac'] = 'Unknown'
                     node['record'] = {}
                     node['role'] = {}
+                    node['role']['role'] = 'Unknown'
                     node['os'] = {}
+                    node['os']['os'] = 'Unknown'
                     try:
                         short_os = None
                         full_os = None
@@ -96,8 +98,6 @@ class Network(object):
                         if 'short_os' in ip_info:
                             short_os = ip_info['short_os']
                             node['os']['os'] = short_os
-                        else:
-                            node['os']['os'] = 'Unknown'
                     except:
                         pass
                     dataset.append(node)
