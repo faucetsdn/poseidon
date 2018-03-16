@@ -1,5 +1,5 @@
 [info]
-name = Poseidon API
+name = PoseidonAPI
 groups = poseidon,api
 
 [service]
