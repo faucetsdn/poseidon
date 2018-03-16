@@ -1,4 +1,5 @@
 import falcon
+import ast
 import io
 import json
 import mimetypes
@@ -35,10 +36,10 @@ class Network(object):
     def connect_redis(self):
         self.r = None
         try:
-            self.r = redis.StrictRedis(host='redis', port=6379, db=0)
+            self.r = redis.StrictRedis(host='redis', port=6379, db=0, decode_responses=True)
         except Exception as e:  # pragma: no cover
             try:
-                self.r = redis.StrictRedis(host='localhost', port=6379, db=0)
+                self.r = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
             except Exception as e:  # pragma: no cover
                 return (False, 'unable to connect to redis because: ' + str(e))
         return
@@ -52,9 +53,9 @@ class Network(object):
                 for ip_address in ip_addresses:
                     node = {}
                     node['uid'] = str(uuid.uuid4())
-                    node['IP'] = ip_address.decode('utf-8')
+                    node['IP'] = ip_address
                     # cheating for now
-                    node['subnet'] = '.'.join(ip_address.decode('utf-8').split('.')[:-1])+".0/24"
+                    node['subnet'] = '.'.join(ip_address.split('.')[:-1])+".0/24"
                     # setting to unknown for now
                     node['rDNS_host'] = 'Unknown'
                     # set as unknown until it's set below
@@ -68,26 +69,27 @@ class Network(object):
                         endpoint_data = {}
                         labels = []
                         confidences = []
-                        ip_info = self.r.hgetall(ip_address.decode('utf-8'))
+                        ip_info = self.r.hgetall(ip_address)
 
                         if 'poseidon_hash' in ip_info:
                             try:
                                 poseidon_info = self.r.hgetall(ip_info['poseidon_hash'])
                                 if 'endpoint_data' in poseidon_info:
-                                    endpoint_data = poseidon_info['endpoint_data']
+                                    endpoint_data = ast.literal_eval(poseidon_info['endpoint_data'])
                                     node['mac'] = endpoint_data['mac']
                             except:
                                 pass
                         if 'timestamps' in ip_info:
                             try:
+                                timestamps = ast.literal_eval(ip_info['timestamps'])
                                 node['record']['source'] = 'poseidon'
-                                node['record']['timestamp'] = str(datetime.fromtimestamp(float(ip_info['timestamps'][-1])))
-                                ml_info = self.r.hgetall(ip_address.decode('utf-8')+'_'+str(ip_info['timestamps'][-1]))
+                                node['record']['timestamp'] = str(datetime.fromtimestamp(float(timestamps[-1])))
+                                ml_info = self.r.hgetall(ip_address+'_'+str(timestamps[-1]))
                                 if 'labels' in ml_info:
-                                    labels = ml_info['labels']
+                                    labels = ast.literal_eval(ml_info['labels'])
                                     node['role']['role'] = labels[0]
                                 if 'confidences' in ml_info:
-                                    confidences = ml_info['confidences']
+                                    confidences = ast.literal_eval(ml_info['confidences'])
                                     node['role']['confidence'] = int(confidences[0]*100)
                             except:
                                 pass
