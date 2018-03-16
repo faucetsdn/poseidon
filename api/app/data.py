@@ -52,9 +52,9 @@ class Network(object):
                 for ip_address in ip_addresses:
                     node = {}
                     node['uid'] = str(uuid.uuid4())
-                    node['IP'] = str(ip_address)
+                    node['IP'] = ip_address.decode('utf-8')
                     # cheating for now
-                    node['subnet'] = '.'.join(str(ip_address).split('.')[:-1])+".0/24"
+                    node['subnet'] = '.'.join(ip_address.decode('utf-8').split('.')[:-1])+".0/24"
                     # setting to unknown for now
                     node['rDNS_host'] = 'Unknown'
                     # set as unknown until it's set below
@@ -68,7 +68,7 @@ class Network(object):
                         endpoint_data = {}
                         labels = []
                         confidences = []
-                        ip_info = self.r.hgetall(str(ip_address))
+                        ip_info = self.r.hgetall(ip_address.decode('utf-8'))
 
                         if 'poseidon_hash' in ip_info:
                             try:
@@ -82,7 +82,7 @@ class Network(object):
                             try:
                                 node['record']['source'] = 'poseidon'
                                 node['record']['timestamp'] = str(datetime.fromtimestamp(float(ip_info['timestamps'][-1])))
-                                ml_info = self.r.hgetall(str(ip_address)+'_'+str(ip_info['timestamps'][-1]))
+                                ml_info = self.r.hgetall(ip_address.decode('utf-8')+'_'+str(ip_info['timestamps'][-1]))
                                 if 'labels' in ml_info:
                                     labels = ml_info['labels']
                                     node['role']['role'] = labels[0]
