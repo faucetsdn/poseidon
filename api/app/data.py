@@ -52,6 +52,7 @@ class Network(object):
                 ip_addresses = self.r.smembers('ip_addresses')
                 for ip_address in ip_addresses:
                     node = {}
+                    # TODO lock in the uid
                     node['uid'] = str(uuid.uuid4())
                     node['IP'] = ip_address
                     # cheating for now
