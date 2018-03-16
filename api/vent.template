@@ -1,10 +1,13 @@
 [info]
-name = Poseidon API
+name = PoseidonAPI
 groups = poseidon,api
 
 [service]
 uri_prefix1 = http://
 uri_postfix1 = /v1
+
+[settings]
+priority = 9
 
 [docker]
 environment = ["PYTHONUNBUFFERED=0"]
