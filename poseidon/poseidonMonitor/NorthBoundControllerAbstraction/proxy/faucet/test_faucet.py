@@ -99,7 +99,6 @@ def test_FaucetProxy():
     proxy.mirror_ip('192.168.1.50')
     proxy.mirror_ip('192.168.1.41')
     proxy.unmirror_ip('10.0.0.1')
-    proxy.mirror_traffic()
 
     # without a host
     proxy = FaucetProxy()
@@ -116,7 +115,6 @@ def test_FaucetProxy():
     proxy.mirror_ip('192.168.1.50')
     proxy.mirror_ip('192.168.1.41')
     proxy.unmirror_ip('10.0.0.1')
-    proxy.mirror_traffic()
 
 
 def test_format_endpoints():

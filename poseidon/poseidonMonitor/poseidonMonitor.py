@@ -416,7 +416,7 @@ class Monitor(object):
                     self.logger.debug('*********** U NOTIFY VENT ***********')
                     self.start_vent_collector(endpoint_hash)
                     self.logger.debug('*********** U MIRROR PORT ***********')
-                    self.uss.mirror_endpoint(endpoint_hash)
+                    self.uss.mirror_endpoint(endpoint_hash, messages=self.faucet_event)
                 if next_state == 'REINVESTIGATING':
                     self.logger.debug(
                         'updating:{0}:{1}->{2}'.format(endpoint_hash,
@@ -425,7 +425,7 @@ class Monitor(object):
                     self.logger.debug('*********** R NOTIFY VENT ***********')
                     self.start_vent_collector(endpoint_hash)
                     self.logger.debug('*********** R MIRROR PORT ***********')
-                    self.uss.mirror_endpoint(endpoint_hash)
+                    self.uss.mirror_endpoint(endpoint_hash, messages=self.faucet_event)
                 if next_state == 'KNOWN':
                     if (current_state == 'REINVESTIGATING' or
                         current_state == 'MIRRORING'):
@@ -433,12 +433,12 @@ class Monitor(object):
                             '*********** ' +
                             current_state[0] +
                             ' UN-MIRROR PORT ***********')
-                        self.uss.unmirror_endpoint(endpoint_hash)
+                        self.uss.unmirror_endpoint(endpoint_hash, messages=self.faucet_event)
                         eps.change_endpoint_state(endpoint_hash)
                     if current_state == 'UNKNOWN':
                         self.logger.debug(
                             '*********** U UN-MIRROR PORT ***********')
-                        self.uss.unmirror_endpoint(endpoint_hash)
+                        self.uss.unmirror_endpoint(endpoint_hash, messages=self.faucet_event)
                         eps.change_endpoint_state(endpoint_hash)
                 if next_state == 'SHUTDOWN':
                     self.logger.debug(
