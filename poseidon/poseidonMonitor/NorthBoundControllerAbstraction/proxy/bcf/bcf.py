@@ -249,7 +249,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
                         retval.append(f.get('seq'))
         return retval
 
-    def mirror_ip(self, ip):
+    def mirror_ip(self, ip, messages=None):
         my_start = self.get_highest(self.get_span_fabric())
         if my_start is not None:
             module_logger.debug('mirroring {0}'.format(my_start))
@@ -260,7 +260,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         else:
             module_logger.error('mirror_ip:None')
 
-    def unmirror_ip(self, ip):
+    def unmirror_ip(self, ip, messages=None):
         kill_list = self.get_seq_by_ip(ip)
         for kill in kill_list:
             module_logger.debug('unmirror:{0}'.format(kill))

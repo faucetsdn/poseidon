@@ -788,10 +788,10 @@ def test_process():
         def return_endpoint_state(self):
             return self.endpoints
 
-        def mirror_endpoint(self, endpoint_hash):
+        def mirror_endpoint(self, endpoint_hash, messages=None):
             pass
 
-        def unmirror_endpoint(self, endpoint_hash):
+        def unmirror_endpoint(self, endpoint_hash, messages=None):
             pass
 
     class MockMonitor(Monitor):
@@ -804,6 +804,7 @@ def test_process():
                 'vent_port': '8080',
             }
             self.fa_rabbit_routing_key = 'FAUCET.Event'
+            self.faucet_event = None
 
         def get_q_item(self):
             return (True, ('foo', {}))

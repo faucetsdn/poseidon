@@ -159,12 +159,20 @@ class FaucetProxy(Connection, Parser):
     def get_seq_by_ip(self):
         pass
 
-    def mirror_ip(self, ip):
-        if self.host:
-            self.receive_file('log')
-            mac_table = self.log(os.path.join(self.log_dir, 'faucet.log'))
-        else:
-            mac_table = self.log(self.log_file)
+    def mirror_ip(self, ip, messages=None):
+        mac_table = {}
+        if messages:
+            module_logger.debug('faucet messages: {0}'.format(messages))
+            for message in messages:
+                if 'L2_LEARN' in message:
+                    module_logger.debug('l2 faucet message: {0}'.format(message))
+                    mac_table = self.event(mac_table, message)
+        elif not self.rabbit_enabled:
+            if self.host:
+                self.receive_file('log')
+                mac_table = self.log(os.path.join(self.log_dir, 'faucet.log'))
+            else:
+                mac_table = self.log(self.log_file)
         port = 0
         switch = None
         for mac in mac_table:
@@ -181,12 +189,20 @@ class FaucetProxy(Connection, Parser):
                 self.config(self.config_file, 'mirror', int(port), switch)
         # TODO check if config was successfully updated
 
-    def unmirror_ip(self, ip):
-        if self.host:
-            self.receive_file('log')
-            mac_table = self.log(os.path.join(self.log_dir, 'faucet.log'))
-        else:
-            mac_table = self.log(self.log_file)
+    def unmirror_ip(self, ip, messages=None):
+        mac_table = {}
+        if messages:
+            module_logger.debug('faucet messages: {0}'.format(messages))
+            for message in messages:
+                if 'L2_LEARN' in message:
+                    module_logger.debug('l2 faucet message: {0}'.format(message))
+                    mac_table = self.event(mac_table, message)
+        elif not self.rabbit_enabled:
+            if self.host:
+                self.receive_file('log')
+                mac_table = self.log(os.path.join(self.log_dir, 'faucet.log'))
+            else:
+                mac_table = self.log(self.log_file)
         port = 0
         switch = None
         for mac in mac_table:
@@ -201,17 +217,4 @@ class FaucetProxy(Connection, Parser):
                     self.send_file('config')
             else:
                 self.config(self.config_file, 'unmirror', int(port), switch)
-        # TODO check if config was successfully updated
-
-    def mirror_traffic(self):
-        # NOT USED
-        port = 0
-        switch = None
-        if self.host:
-            self.receive_file('config')
-            if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
-                           'mirror', int(port), switch):
-                self.send_file('config')
-        else:
-            self.config(self.config_file, 'mirror', int(port), switch)
         # TODO check if config was successfully updated

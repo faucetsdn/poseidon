@@ -157,7 +157,7 @@ def test_unmirror_endpoint():
         def __init__(self):
             pass
 
-        def unmirror_ip(self, my_ip):
+        def unmirror_ip(self, my_ip, messages=None):
             assert my_ip == '10.0.0.99'
 
     uss = Update_Switch_State()
@@ -473,7 +473,7 @@ def test_mirror_endpoint():
         def __init__(self):
             pass
 
-        def mirror_ip(self, ip):
+        def mirror_ip(self, ip, messages=None):
             assert ip == '10.0.0.99'
 
     uss = Update_Switch_State()
