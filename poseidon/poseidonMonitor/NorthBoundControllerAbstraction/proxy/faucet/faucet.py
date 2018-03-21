@@ -182,18 +182,29 @@ class FaucetProxy(Connection, Parser):
         # TODO check if config was successfully updated
 
     def unmirror_ip(self, ip):
+        if self.host:
+            self.receive_file('log')
+            mac_table = self.log(os.path.join(self.log_dir, 'faucet.log'))
+        else:
+            mac_table = self.log(self.log_file)
         port = 0
         switch = None
-        if self.host:
-            self.receive_file('config')
-            if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
-                           'unmirror', int(port), switch):
-                self.send_file('config')
-        else:
-            self.config(self.config_file, 'unmirror', int(port), switch)
+        for mac in mac_table:
+            if ip == mac_table[mac][0]['ip-address']:
+                port = mac_table[mac][0]['port']
+                switch = mac_table[mac][0]['segment']
+        if port and switch:
+            if self.host:
+                self.receive_file('config')
+                if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
+                               'unmirror', int(port), switch):
+                    self.send_file('config')
+            else:
+                self.config(self.config_file, 'unmirror', int(port), switch)
         # TODO check if config was successfully updated
 
     def mirror_traffic(self):
+        # NOT USED
         port = 0
         switch = None
         if self.host:

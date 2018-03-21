@@ -51,7 +51,7 @@ class Parser:
         except Exception as e:
             return False
 
-        if action == 'mirror':
+        if action == 'mirror' or action == 'unmirror':
             ok = True
             if not self.mirror_ports:
                 self.logger.error("Unable to mirror, no mirror ports defined")
@@ -94,14 +94,18 @@ class Parser:
                         else:
                             obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] = []
             if ok:
-                if not port in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']:
-                    obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'].append(port)
+                if action == 'mirror':
+                    if not port in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']:
+                        obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'].append(port)
+                elif action == 'unmirror':
+                    try:
+                        obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'].remove(port)
+                    except ValueError:
+                        self.logger.warning("This port was not already "
+                                            "mirroring on this switch")
             else:
                 self.logger.error("Unable to mirror due to warnings")
                 return False
-        elif action == 'unmirror':
-            # TODO
-            pass
         elif action == 'shutdown':
             # TODO
             pass
