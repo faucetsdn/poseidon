@@ -54,7 +54,6 @@ class Parser:
             return False
 
         if action == 'mirror' or action == 'unmirror':
-            self.logger.warning(str(obj_doc))
             ok = True
             if not self.mirror_ports:
                 self.logger.error("Unable to mirror, no mirror ports defined")
@@ -65,8 +64,6 @@ class Parser:
                 ok = False
             else:
                 for s in obj_doc['dps']:
-                    self.logger.warning(str(switch))
-                    self.logger.warning(str(obj_doc['dps'][s]['dp_id']))
                     try:
                         if ((hex(int(switch, 16)) == hex(obj_doc['dps'][s]['dp_id'])) or
                             (str(switch) == str(obj_doc['dps'][s]['dp_id']))):
