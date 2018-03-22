@@ -75,7 +75,7 @@ class Parser:
                         self.logger.debug("error: %s" % e)
             if not switch_found:
                 self.logger.warning("No switch match found to mirror "
-                                    "from in the configs. switch: %s %s" % (switch, str(obj_doc))
+                                    "from in the configs. switch: %s %s" % (switch, str(obj_doc)))
                 ok = False
             else:
                 if not switch_found in self.mirror_ports:
