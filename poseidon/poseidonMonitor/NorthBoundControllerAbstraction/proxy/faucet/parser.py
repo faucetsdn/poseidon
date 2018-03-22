@@ -49,9 +49,12 @@ class Parser:
             obj_doc = yaml.safe_load(stream)
             stream.close()
         except Exception as e:
+            self.logger.error("failed to load config")
+            self.logger.error(str(e))
             return False
 
         if action == 'mirror' or action == 'unmirror':
+            self.logger.warning(str(obj_doc))
             ok = True
             if not self.mirror_ports:
                 self.logger.error("Unable to mirror, no mirror ports defined")
@@ -62,6 +65,8 @@ class Parser:
                 ok = False
             else:
                 for s in obj_doc['dps']:
+                    self.logger.warning(str(switch))
+                    self.logger.warning(str(obj_doc['dps'][s]['dp_id']))
                     try:
                         if hex(int(switch, 16)) == hex(obj_doc['dps'][s]['dp_id']):
                             switch_found = s
@@ -70,7 +75,7 @@ class Parser:
                         self.logger.debug("error: %s" % e)
             if not switch_found:
                 self.logger.warning("No switch match found to mirror "
-                                    "from in the configs. switch: %s" % switch)
+                                    "from in the configs. switch: %s %s" % (switch, str(obj_doc))
                 ok = False
             else:
                 if not switch_found in self.mirror_ports:
