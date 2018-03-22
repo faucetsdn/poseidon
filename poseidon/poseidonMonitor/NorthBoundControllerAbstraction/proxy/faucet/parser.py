@@ -68,7 +68,8 @@ class Parser:
                     self.logger.warning(str(switch))
                     self.logger.warning(str(obj_doc['dps'][s]['dp_id']))
                     try:
-                        if hex(int(switch, 16)) == hex(obj_doc['dps'][s]['dp_id']):
+                        if ((hex(int(switch, 16)) == hex(obj_doc['dps'][s]['dp_id'])) or
+                            (str(switch) == str(obj_doc['dps'][s]['dp_id']))):
                             switch_found = s
                     except Exception as e:  # pragma: no cover
                         self.logger.debug("switch is not a hex value: %s" % switch)
