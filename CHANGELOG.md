@@ -1,3 +1,14 @@
+# v0.1.6 (2018-03-23)
+
+ - Updates FAUCET paths to conform with 1.7.x
+ - Adds an API for getting endpoints that Poseidon knows about
+ - Updates a number of dependency versions
+ - Adds CRviz for visualizing the network that Poseidon knows about
+ - Fixes some bugs with mirroring
+ - Fixes a bug where null would get written to faucet.yaml
+ - FAUCET mirroring now uses messages from Events rather than logs
+ - FAUCET can now unmirror
+
 # v0.1.5 (2018-03-09)
 
  - Adds support for RabbitMQ events from FAUCET
