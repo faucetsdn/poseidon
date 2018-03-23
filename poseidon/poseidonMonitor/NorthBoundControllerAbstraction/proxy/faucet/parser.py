@@ -28,6 +28,8 @@ module_logger = Logger.logger
 def representer(dumper, data):
     return dumper.represent_int(hex(data))
 
+def represent_none(dumper, _):
+    return dumper.represent_scalar('tag:yaml.org,2002:null', '')
 
 class HexInt(int): pass
 
@@ -37,9 +39,6 @@ class Parser:
     def __init__(self, mirror_ports=None):
         self.logger = module_logger
         self.mirror_ports = mirror_ports
-
-    def represent_none(self, _):
-        return self.represent_scalar('tag:yaml.org,2002:null', '')
 
     def config(self, config_file, action, port, switch):
         switch_found = None
