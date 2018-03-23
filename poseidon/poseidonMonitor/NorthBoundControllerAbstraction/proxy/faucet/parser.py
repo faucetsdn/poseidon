@@ -38,6 +38,9 @@ class Parser:
         self.logger = module_logger
         self.mirror_ports = mirror_ports
 
+    def represent_none(self, _):
+        return self.represent_scalar('tag:yaml.org,2002:null', '')
+
     def config(self, config_file, action, port, switch):
         switch_found = None
         # TODO check for other files
@@ -124,6 +127,7 @@ class Parser:
 
         stream = open(config_file, 'w')
         yaml.add_representer(HexInt, representer)
+        yaml.add_representer(type(None), represent_none)
         yaml.dump(obj_doc, stream, default_flow_style=False)
 
         return True
