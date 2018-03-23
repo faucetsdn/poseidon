@@ -38,7 +38,7 @@ https://github.com/cyberreboot/vent-plugins:
         build: yes
     p0f:
         build: yes
-https://github.com/cyberreboot/visualizer:
+https://github.com/cyberreboot/crviz:
     '@':
         build: yes
         start: yes
