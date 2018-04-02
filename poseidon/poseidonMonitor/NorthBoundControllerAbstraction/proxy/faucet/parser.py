@@ -119,8 +119,14 @@ class Parser:
         try:
             if len(obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']) == 0:
                 obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]].remove('mirror')
+            else:
+                ports = []
+                for p in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']:
+                    if p:
+                        ports.append(p)
+                obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] = ports
         except Exception as e:
-            self.logger.debug("unable to remove empty mirror list because: %s" % str(e))
+            self.logger.warning("Unable to remove empty mirror list because: %s" % str(e))
 
         # ensure that dp_id gets written as a hex string
         for sw in obj_doc['dps']:
