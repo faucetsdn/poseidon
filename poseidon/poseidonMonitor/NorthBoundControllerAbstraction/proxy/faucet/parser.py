@@ -100,7 +100,7 @@ class Parser:
                             obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] = []
             if ok:
                 if action == 'mirror':
-                    if not port in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']:
+                    if not port in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] and port is not None:
                         obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'].append(port)
                 elif action == 'unmirror':
                     try:
@@ -116,6 +116,11 @@ class Parser:
             pass
         else:
             self.logger.warning("Unknown action: " + action)
+        try:
+            if len(obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']) == 0:
+                obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]].remove('mirror')
+        except Exception as e:
+            self.logger.debug("unable to remove empty mirror list because: %s" % str(e))
 
         # ensure that dp_id gets written as a hex string
         for sw in obj_doc['dps']:

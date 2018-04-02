@@ -63,7 +63,8 @@ class FaucetProxy(Connection, Parser):
         ret_list = list()
         for d in data:
             md = d[0]
-            del md['ip-state']
+            if 'ip-state' in md:
+                del md['ip-state']
             md['name'] = None
             ret_list.append(md)
         return ret_list
