@@ -175,6 +175,7 @@ class FaucetProxy(Connection, Parser):
                 mac_table = self.log(self.log_file)
         port = 0
         switch = None
+        status = None
         for mac in mac_table:
             if ip == mac_table[mac][0]['ip-address']:
                 port = mac_table[mac][0]['port']
@@ -186,7 +187,8 @@ class FaucetProxy(Connection, Parser):
                                'mirror', int(port), switch):
                     self.send_file('config')
             else:
-                self.config(self.config_file, 'mirror', int(port), switch)
+                status = self.config(self.config_file, 'mirror', int(port), switch)
+        module_logger.debug("mirror status: " + str(status))
         # TODO check if config was successfully updated
 
     def unmirror_ip(self, ip, messages=None):
@@ -205,6 +207,7 @@ class FaucetProxy(Connection, Parser):
                 mac_table = self.log(self.log_file)
         port = 0
         switch = None
+        status = None
         for mac in mac_table:
             if ip == mac_table[mac][0]['ip-address']:
                 port = mac_table[mac][0]['port']
@@ -216,5 +219,6 @@ class FaucetProxy(Connection, Parser):
                                'unmirror', int(port), switch):
                     self.send_file('config')
             else:
-                self.config(self.config_file, 'unmirror', int(port), switch)
+                status = self.config(self.config_file, 'unmirror', int(port), switch)
+        module_logger.debug("unmirror status: " + str(status))
         # TODO check if config was successfully updated

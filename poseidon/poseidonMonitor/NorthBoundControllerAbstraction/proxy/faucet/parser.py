@@ -62,7 +62,7 @@ class Parser:
                 return False
             if not 'dps' in obj_doc:
                 self.logger.warning("Unable to find switch configs in "
-                                    "'/etc/faucet/faucet.yaml'")
+                                    "'" + config_file + "'")
                 ok = False
             else:
                 for s in obj_doc['dps']:
