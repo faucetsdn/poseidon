@@ -202,7 +202,9 @@ class Update_Switch_State(Monitor_Helper_Base):
 
         try:
             current = self.sdnc.get_endpoints(messages=messages)
+            self.logger.info("got current")
             parsed = self.sdnc.format_endpoints(current)
+            self.logger.info("got parsed")
             machines = parsed
         except BaseException as e:  # pragma: no cover
             self.logger.error(
