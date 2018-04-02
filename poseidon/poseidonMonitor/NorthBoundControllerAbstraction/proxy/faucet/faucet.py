@@ -188,7 +188,7 @@ class FaucetProxy(Connection, Parser):
                     self.send_file('config')
             else:
                 status = self.config(self.config_file, 'mirror', int(port), switch)
-        module_logger.debug("mirror status: " + str(status))
+        module_logger.info("mirror status: " + str(status))
         # TODO check if config was successfully updated
 
     def unmirror_ip(self, ip, messages=None):
@@ -220,5 +220,5 @@ class FaucetProxy(Connection, Parser):
                     self.send_file('config')
             else:
                 status = self.config(self.config_file, 'unmirror', int(port), switch)
-        module_logger.debug("unmirror status: " + str(status))
+        module_logger.info("unmirror status: " + str(status))
         # TODO check if config was successfully updated
