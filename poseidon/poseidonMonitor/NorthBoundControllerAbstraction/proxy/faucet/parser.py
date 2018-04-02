@@ -62,7 +62,7 @@ class Parser:
                 return False
             if not 'dps' in obj_doc:
                 self.logger.warning("Unable to find switch configs in "
-                                    "'/etc/faucet/faucet.yaml'")
+                                    "'" + config_file + "'")
                 ok = False
             else:
                 for s in obj_doc['dps']:
@@ -100,7 +100,7 @@ class Parser:
                             obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] = []
             if ok:
                 if action == 'mirror':
-                    if not port in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']:
+                    if not port in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] and port is not None:
                         obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'].append(port)
                 elif action == 'unmirror':
                     try:
@@ -116,6 +116,17 @@ class Parser:
             pass
         else:
             self.logger.warning("Unknown action: " + action)
+        try:
+            if len(obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']) == 0:
+                obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]].remove('mirror')
+            else:
+                ports = []
+                for p in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']:
+                    if p:
+                        ports.append(p)
+                obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] = ports
+        except Exception as e:
+            self.logger.warning("Unable to remove empty mirror list because: %s" % str(e))
 
         # ensure that dp_id gets written as a hex string
         for sw in obj_doc['dps']:
@@ -131,7 +142,7 @@ class Parser:
 
         return True
 
-    def event(self, mac_table, message):
+    def event(self, message):
         self.logger.info("got faucet message for l2_learn: {0}".format(message))
         data = {}
         data['ip-address'] = message['L2_LEARN']['l3_src_ip']
@@ -140,20 +151,20 @@ class Parser:
         data['segment'] = str(message['dp_id'])
         data['port'] = str(message['L2_LEARN']['port_no'])
         data['tenant'] = "VLAN"+str(message['L2_LEARN']['vid'])
-        if message['L2_LEARN']['eth_src'] in mac_table:
-            dub = False
-            for d in mac_table[message['L2_LEARN']['eth_src']]:
+        if message['L2_LEARN']['eth_src'] in self.mac_table:
+            dup = False
+            for d in self.mac_table[message['L2_LEARN']['eth_src']]:
                 if data == d:
                     dup = True
             if dup:
-                mac_table[message['L2_LEARN']['eth_src']].remove(data)
-            mac_table[message['L2_LEARN']['eth_src']].insert(0, data)
+                self.mac_table[message['L2_LEARN']['eth_src']].remove(data)
+            self.mac_table[message['L2_LEARN']['eth_src']].insert(0, data)
         else:
-            mac_table[message['L2_LEARN']['eth_src']] = [data]
-        return mac_table
+            self.mac_table[message['L2_LEARN']['eth_src']] = [data]
+        return
 
     def log(self, log_file):
-        mac_table = {}
+        self.logger.info("parsing log file")
         if not log_file:
             # default to FAUCET default
             log_file = '/var/log/faucet/faucet.log'
@@ -169,17 +180,17 @@ class Parser:
                                 'segment': learned_mac[7][1:-1],
                                 'port': learned_mac[22],
                                 'tenant': learned_mac[24] + learned_mac[25]}
-                        if learned_mac[10] in mac_table:
+                        if learned_mac[10] in self.mac_table:
                             dup = False
-                            for d in mac_table[learned_mac[10]]:
+                            for d in self.mac_table[learned_mac[10]]:
                                 if data == d:
                                     dup = True
                             if dup:
-                                mac_table[learned_mac[10]].remove(data)
-                            mac_table[learned_mac[10]].insert(0, data)
+                                self.mac_table[learned_mac[10]].remove(data)
+                            self.mac_table[learned_mac[10]].insert(0, data)
                         else:
-                            mac_table[learned_mac[10]] = [data]
+                            self.mac_table[learned_mac[10]] = [data]
         except Exception as e:
             self.logger.debug("error {0}".format(str(e)))
-        return mac_table
+        return
 
