@@ -131,7 +131,7 @@ class Parser:
 
         return True
 
-    def event(self, mac_table, message):
+    def event(self, message):
         self.logger.info("got faucet message for l2_learn: {0}".format(message))
         data = {}
         data['ip-address'] = message['L2_LEARN']['l3_src_ip']
@@ -140,20 +140,19 @@ class Parser:
         data['segment'] = str(message['dp_id'])
         data['port'] = str(message['L2_LEARN']['port_no'])
         data['tenant'] = "VLAN"+str(message['L2_LEARN']['vid'])
-        if message['L2_LEARN']['eth_src'] in mac_table:
+        if message['L2_LEARN']['eth_src'] in self.mac_table:
             dub = False
-            for d in mac_table[message['L2_LEARN']['eth_src']]:
+            for d in self.mac_table[message['L2_LEARN']['eth_src']]:
                 if data == d:
                     dup = True
             if dup:
-                mac_table[message['L2_LEARN']['eth_src']].remove(data)
-            mac_table[message['L2_LEARN']['eth_src']].insert(0, data)
+                self.mac_table[message['L2_LEARN']['eth_src']].remove(data)
+            self.mac_table[message['L2_LEARN']['eth_src']].insert(0, data)
         else:
-            mac_table[message['L2_LEARN']['eth_src']] = [data]
-        return mac_table
+            self.mac_table[message['L2_LEARN']['eth_src']] = [data]
+        return
 
     def log(self, log_file):
-        mac_table = {}
         if not log_file:
             # default to FAUCET default
             log_file = '/var/log/faucet/faucet.log'
@@ -169,17 +168,17 @@ class Parser:
                                 'segment': learned_mac[7][1:-1],
                                 'port': learned_mac[22],
                                 'tenant': learned_mac[24] + learned_mac[25]}
-                        if learned_mac[10] in mac_table:
+                        if learned_mac[10] in self.mac_table:
                             dup = False
-                            for d in mac_table[learned_mac[10]]:
+                            for d in self.mac_table[learned_mac[10]]:
                                 if data == d:
                                     dup = True
                             if dup:
-                                mac_table[learned_mac[10]].remove(data)
-                            mac_table[learned_mac[10]].insert(0, data)
+                                self.mac_table[learned_mac[10]].remove(data)
+                            self.mac_table[learned_mac[10]].insert(0, data)
                         else:
-                            mac_table[learned_mac[10]] = [data]
+                            self.mac_table[learned_mac[10]] = [data]
         except Exception as e:
             self.logger.debug("error {0}".format(str(e)))
-        return mac_table
+        return
 

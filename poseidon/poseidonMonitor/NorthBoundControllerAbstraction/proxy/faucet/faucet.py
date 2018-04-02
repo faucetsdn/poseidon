@@ -53,6 +53,7 @@ class FaucetProxy(Connection, Parser):
                                           **kwargs)
         self.mirror_ports = mirror_ports
         self.rabbit_enabled = rabbit_enabled
+        self.mac_table = {}
 
     @staticmethod
     def format_endpoints(data):
@@ -69,31 +70,30 @@ class FaucetProxy(Connection, Parser):
 
     def get_endpoints(self, messages=None):
         retval = []
-        mac_table = {}
 
         if messages:
             module_logger.debug('faucet messages: {0}'.format(messages))
             for message in messages:
                 if 'L2_LEARN' in message:
                     module_logger.debug('l2 faucet message: {0}'.format(message))
-                    mac_table = self.event(mac_table, message)
+                    self.event(message)
         elif not self.rabbit_enabled:
             if self.host:
                 self.receive_file('log')
-                mac_table = self.log(os.path.join(self.log_dir, 'faucet.log'))
+                self.log(os.path.join(self.log_dir, 'faucet.log'))
             else:
-                mac_table = self.log(self.log_file)
+                self.log(self.log_file)
         module_logger.debug('get_endpoints found:')
-        for mac in mac_table:
-            if (mac_table[mac][0]['ip-address'] != None and
-                mac_table[mac][0]['ip-address'] != 'None' and
-                mac_table[mac][0]['ip-address'] != '127.0.0.1' and
-                mac_table[mac][0]['ip-address'] != '0.0.0.0' and
-                mac_table[mac][0]['ip-address'] != '::' and
-                not mac_table[mac][0]['ip-address'].startswith('fe80:')):
+        for mac in self.mac_table:
+            if (self.mac_table[mac][0]['ip-address'] != None and
+                self.mac_table[mac][0]['ip-address'] != 'None' and
+                self.mac_table[mac][0]['ip-address'] != '127.0.0.1' and
+                self.mac_table[mac][0]['ip-address'] != '0.0.0.0' and
+                self.mac_table[mac][0]['ip-address'] != '::' and
+                not self.mac_table[mac][0]['ip-address'].startswith('fe80:')):
                     module_logger.debug('{0}:{1}'.format(
-                        mac, mac_table[mac]))
-                    retval.append(mac_table[mac])
+                        mac, self.mac_table[mac]))
+                    retval.append(self.mac_table[mac])
         return retval
 
     def get_switches(self):
@@ -160,28 +160,27 @@ class FaucetProxy(Connection, Parser):
         pass
 
     def mirror_ip(self, ip, messages=None):
-        mac_table = {}
         if messages:
             module_logger.debug('faucet messages: {0}'.format(messages))
             for message in messages:
                 if 'L2_LEARN' in message:
                     module_logger.debug('l2 faucet message: {0}'.format(message))
-                    mac_table = self.event(mac_table, message)
+                    self.event(message)
         elif not self.rabbit_enabled:
             if self.host:
                 self.receive_file('log')
-                mac_table = self.log(os.path.join(self.log_dir, 'faucet.log'))
+                self.log(os.path.join(self.log_dir, 'faucet.log'))
             else:
-                mac_table = self.log(self.log_file)
+                self.log(self.log_file)
         port = 0
         switch = None
         status = None
-        for mac in mac_table:
-            module_logger.info("mac table: " + str(mac_table[mac][0]['ip-address']))
+        for mac in self.mac_table:
+            module_logger.info("mac table: " + str(self.mac_table[mac][0]['ip-address']))
             module_logger.info("ip: " + str(ip))
-            if ip == mac_table[mac][0]['ip-address']:
-                port = mac_table[mac][0]['port']
-                switch = mac_table[mac][0]['segment']
+            if ip == self.mac_table[mac][0]['ip-address']:
+                port = self.mac_table[mac][0]['port']
+                switch = self.mac_table[mac][0]['segment']
         module_logger.info(str(port))
         module_logger.info(str(switch))
         if port and switch:
@@ -200,26 +199,25 @@ class FaucetProxy(Connection, Parser):
         # TODO check if config was successfully updated
 
     def unmirror_ip(self, ip, messages=None):
-        mac_table = {}
         if messages:
             module_logger.debug('faucet messages: {0}'.format(messages))
             for message in messages:
                 if 'L2_LEARN' in message:
                     module_logger.debug('l2 faucet message: {0}'.format(message))
-                    mac_table = self.event(mac_table, message)
+                    self.event(self.mac_table, message)
         elif not self.rabbit_enabled:
             if self.host:
                 self.receive_file('log')
-                mac_table = self.log(os.path.join(self.log_dir, 'faucet.log'))
+                self.log(os.path.join(self.log_dir, 'faucet.log'))
             else:
-                mac_table = self.log(self.log_file)
+                self.log(self.log_file)
         port = 0
         switch = None
         status = None
-        for mac in mac_table:
-            if ip == mac_table[mac][0]['ip-address']:
-                port = mac_table[mac][0]['port']
-                switch = mac_table[mac][0]['segment']
+        for mac in self.mac_table:
+            if ip == self.mac_table[mac][0]['ip-address']:
+                port = self.mac_table[mac][0]['port']
+                switch = self.mac_table[mac][0]['segment']
         if port and switch:
             if self.host:
                 self.receive_file('config')
