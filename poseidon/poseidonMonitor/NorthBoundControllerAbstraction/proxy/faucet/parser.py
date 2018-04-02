@@ -141,7 +141,7 @@ class Parser:
         data['port'] = str(message['L2_LEARN']['port_no'])
         data['tenant'] = "VLAN"+str(message['L2_LEARN']['vid'])
         if message['L2_LEARN']['eth_src'] in self.mac_table:
-            dub = False
+            dup = False
             for d in self.mac_table[message['L2_LEARN']['eth_src']]:
                 if data == d:
                     dup = True
@@ -153,6 +153,7 @@ class Parser:
         return
 
     def log(self, log_file):
+        self.logger.info("parsing log file")
         if not log_file:
             # default to FAUCET default
             log_file = '/var/log/faucet/faucet.log'

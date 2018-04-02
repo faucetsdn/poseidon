@@ -176,13 +176,9 @@ class FaucetProxy(Connection, Parser):
         switch = None
         status = None
         for mac in self.mac_table:
-            module_logger.info("mac table: " + str(self.mac_table[mac][0]['ip-address']))
-            module_logger.info("ip: " + str(ip))
             if ip == self.mac_table[mac][0]['ip-address']:
                 port = self.mac_table[mac][0]['port']
                 switch = self.mac_table[mac][0]['segment']
-        module_logger.info(str(port))
-        module_logger.info(str(switch))
         if port and switch:
             if self.host:
                 self.receive_file('config')
