@@ -177,6 +177,8 @@ class FaucetProxy(Connection, Parser):
         switch = None
         status = None
         for mac in mac_table:
+            module_logger.info("mac table: " + str(mac_table[mac][0]['ip-address']))
+            module_logger.info("ip: " + str(ip))
             if ip == mac_table[mac][0]['ip-address']:
                 port = mac_table[mac][0]['port']
                 switch = mac_table[mac][0]['segment']
