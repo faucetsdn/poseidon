@@ -79,7 +79,7 @@ class FaucetProxy(Connection, Parser):
                     module_logger.debug('l2 faucet message: {0}'.format(message))
                     self.event(message)
                 else:
-                    module_logger.info('faucet event: {0}'.format(message))
+                    module_logger.debug('faucet event: {0}'.format(message))
         elif not self.rabbit_enabled:
             if self.host:
                 self.receive_file('log')
