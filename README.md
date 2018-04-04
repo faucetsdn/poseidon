@@ -220,7 +220,7 @@ Want to contribute?  Awesome!  Issue a pull request or see more details [here](h
 
 ## Authors
 
-* [Poseidon Team](https://github.com/CyberReboot/poseidon)
+* [Poseidon Team](https://github.com/CyberReboot/poseidon/blob/master/AUTHORS)
 
 See also the list of [contributors](https://github.com/CyberReboot/poseidon/graphs/contributors) who participated in this project.
 
