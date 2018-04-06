@@ -2,7 +2,7 @@ certifi==2018.1.18
 httmock==1.2.6
 mock==2.0.0
 pika==0.11.2
-pylint==1.8.3
+pylint==1.8.4
 pytest-cov==2.5.1
 pytest==3.5.0
 pyyaml==3.12
