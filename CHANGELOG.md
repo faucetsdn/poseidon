@@ -1,3 +1,10 @@
+# v0.1.7 (2018-04-06)
+
+ - Improved mac learning
+ - Improved logging
+ - Log additional FAUCET Events
+ - Fix mirroring and unmirroring for FAUCET
+
 # v0.1.6 (2018-03-23)
 
  - Updates FAUCET paths to conform with 1.7.x
