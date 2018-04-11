@@ -85,8 +85,9 @@ class Parser:
                     ok = False
                 else:
                     if not port in obj_doc['dps'][switch_found]['interfaces']:
-                        self.logger.warning("No port match found to "
-                                            "mirror from in the configs")
+                        self.logger.warning("No port match found for port %s "
+                                            " to mirror from the switch %s in "
+                                            " the configs" % (str(port), obj_doc['dps'][switch_found]['interfaces']))
                         ok = False
                     if not self.mirror_ports[switch_found] in obj_doc['dps'][switch_found]['interfaces']:
                         self.logger.warning("No port match found to "
