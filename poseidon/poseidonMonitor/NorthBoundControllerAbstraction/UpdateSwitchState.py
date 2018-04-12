@@ -20,8 +20,10 @@ Created on 20 Nov 2017
 import ast
 import json
 import queue as Queue
+import requests
 
 from prometheus_client import start_http_server, Counter
+
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 from poseidon.poseidonMonitor.endPoint import EndPoint
@@ -219,5 +221,10 @@ class Update_Switch_State(Monitor_Helper_Base):
         self.retval['resp'] = 'ok'
 
         self.times = self.times + 1
+
+        # get current state
+        r = requests.get('http://poseidon-api:8000/v1/network')
+        self.logger.info(r.json())
+        # send results to prometheus
 
         return json.dumps(self.retval)
