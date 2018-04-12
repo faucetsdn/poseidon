@@ -58,6 +58,14 @@ def schedule_job_kickurl(func, logger):
     # check the length didn't change before wiping it out
     func.faucet_event = []
 
+    # get current state
+    r = requests.get('http://poseidon-api:8000/v1/network')
+    func.logger.info(r.json())
+
+    # send results to prometheus
+    func.prom_c.labels(foo='0x12345', bar='unknown').inc()
+    func.prom_c.labels(foo='0x54321', bar='bad').inc()
+
 
 def rabbit_callback(ch, method, properties, body, q=None):
     ''' callback, places rabbit data into internal queue'''
@@ -129,6 +137,9 @@ class Monitor(object):
 
         self.mod_name = self.__class__.__name__
         self.skip_rabbit = skip_rabbit
+
+        # prometheus
+        self.prom_c = None
 
         # timer class to call things periodically in own thread
         self.schedule = schedule
@@ -487,10 +498,12 @@ class Monitor(object):
 
 def main(skip_rabbit=False):  # pragma: no cover
     ''' main function '''
+    pmain = Monitor(skip_rabbit=skip_rabbit)
+
     # start prometheus
+    pmain.prom_c = Counter('poseidon_endpoints', 'Endpoints', ['foo', 'bar'])
     start_http_server(9304)
 
-    pmain = Monitor(skip_rabbit=skip_rabbit)
     if not skip_rabbit:
         rabbit = Rabbit_Base()
         host = pmain.mod_configuration['rabbit_server']

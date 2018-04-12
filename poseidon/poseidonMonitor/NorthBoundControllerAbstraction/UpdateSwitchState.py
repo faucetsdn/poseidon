@@ -20,9 +20,6 @@ Created on 20 Nov 2017
 import ast
 import json
 import queue as Queue
-import requests
-
-from prometheus_client import Counter
 
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
@@ -221,17 +218,5 @@ class Update_Switch_State(Monitor_Helper_Base):
         self.retval['resp'] = 'ok'
 
         self.times = self.times + 1
-
-        # get current state
-        r = requests.get('http://poseidon-api:8000/v1/network')
-        self.logger.info(r.json())
-
-        # send results to prometheus
-        c = Counter('poseidon_endpoints', 'Endpoints', ['foo', 'bar'])
-        if self.times % 2 == 0:
-            c.labels(foo='0x12345', bar='unknown').inc()
-        else:
-            c.labels(foo='0x12345', bar='good').inc()
-        c.labels(foo='0x54321', bar='bad').inc()
 
         return json.dumps(self.retval)
