@@ -227,4 +227,7 @@ class Update_Switch_State(Monitor_Helper_Base):
         self.logger.info(r.json())
         # send results to prometheus
 
+        # start prometheus server
+        start_http_server(9304)
+
         return json.dumps(self.retval)
