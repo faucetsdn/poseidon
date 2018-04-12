@@ -33,7 +33,7 @@ import time
 
 from functools import partial
 from os import getenv
-from prometheus import start_http_server
+from prometheus_client import start_http_server
 
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.baseClasses.Rabbit_Base import Rabbit_Base
