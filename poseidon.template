@@ -6,4 +6,4 @@ groups = poseidon
 instances = 1
 
 [docker]
-links = {"RabbitMQ":"RABBIT_SERVER", "NetworkTap":"vent_ip"}
+links = {"RabbitMQ":"RABBIT_SERVER", "NetworkTap":"vent_ip", "PoseidonAPI":"poseidon-api"}
