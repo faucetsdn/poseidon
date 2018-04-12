@@ -227,7 +227,7 @@ class Update_Switch_State(Monitor_Helper_Base):
         self.logger.info(r.json())
 
         # send results to prometheus
-        c = Counter('my_requests_total', 'Endpoints', ['foo', 'bar'])
+        c = Counter('poseidon_endpoints', 'Endpoints', ['foo', 'bar'])
         if self.times % 2 == 0:
             c.labels(foo='0x12345', bar='unknown').inc()
         else:
