@@ -225,6 +225,13 @@ class Update_Switch_State(Monitor_Helper_Base):
         # get current state
         r = requests.get('http://poseidon-api:8000/v1/network')
         self.logger.info(r.json())
+
         # send results to prometheus
+        c = Counter('my_requests_total', 'Endpoints', ['foo', 'bar'])
+        if self.times % 2 == 0:
+            c.labels(foo='0x12345', bar='unknown').inc()
+        else:
+            c.labels(foo='0x12345', bar='good').inc()
+        c.labels(foo='0x54321', bar='bad').inc()
 
         return json.dumps(self.retval)
