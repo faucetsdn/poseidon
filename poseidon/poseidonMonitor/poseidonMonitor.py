@@ -24,15 +24,16 @@ import ast
 import json
 import queue as Queue
 import random
+import requests
+import schedule
 import signal
 import sys
 import threading
 import time
+
 from functools import partial
 from os import getenv
-
-import requests
-import schedule
+from prometheus import start_http_server
 
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.baseClasses.Rabbit_Base import Rabbit_Base
@@ -486,6 +487,9 @@ class Monitor(object):
 
 def main(skip_rabbit=False):  # pragma: no cover
     ''' main function '''
+    # start prometheus
+    start_http_server(9304)
+
     pmain = Monitor(skip_rabbit=skip_rabbit)
     if not skip_rabbit:
         rabbit = Rabbit_Base()

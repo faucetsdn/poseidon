@@ -22,7 +22,7 @@ import json
 import queue as Queue
 import requests
 
-from prometheus_client import start_http_server, Counter
+from prometheus_client import Counter
 
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
@@ -226,8 +226,5 @@ class Update_Switch_State(Monitor_Helper_Base):
         r = requests.get('http://poseidon-api:8000/v1/network')
         self.logger.info(r.json())
         # send results to prometheus
-
-        # start prometheus server
-        start_http_server(9304)
 
         return json.dumps(self.retval)
