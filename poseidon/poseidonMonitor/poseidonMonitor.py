@@ -60,7 +60,7 @@ def schedule_job_kickurl(func, logger):
 
     # get current state
     r = requests.get('http://poseidon-api:8000/v1/network')
-    func.logger.info(r.json())
+    #func.logger.info(r.json())
 
     # send results to prometheus
     func.prom_c.labels(foo='0x12345', bar='unknown').inc()
