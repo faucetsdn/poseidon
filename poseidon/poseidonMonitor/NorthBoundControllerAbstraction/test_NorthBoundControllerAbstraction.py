@@ -380,6 +380,7 @@ def test_first_run_bcf():
     uss.mod_configuration['controller_user'] = 'TEST_USER'
     uss.mod_configuration['controller_pass'] = 'TEST_PASS'
     uss.mod_configuration['controller_type'] = 'bcf'
+    uss.mod_configuration['controller_span_fabric_name'] = 'TEST_SPAN'
 
     uss.configured = True
     uss.first_run()
@@ -387,12 +388,13 @@ def test_first_run_bcf():
     assert uss.controller['USER'] == 'TEST_USER'
     assert uss.controller['PASS'] == 'TEST_PASS'
     assert uss.controller['TYPE'] == 'bcf'
+    assert uss.controller['SPAN_FABRIC_NAME'] == 'TEST_SPAN'
 
     uss = Update_Switch_State()
     uss.configured = False
     uss.first_run()
 
- 
+
 
 
 def test_first_run_faucet():

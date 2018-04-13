@@ -52,6 +52,7 @@ class Update_Switch_State(Monitor_Helper_Base):
         self.controller['USER'] = None
         self.controller['PASS'] = None
         self.controller['TYPE'] = None
+        self.controller['SPAN_FABRIC_NAME'] = 'vent'
 
         # settings for FAUCET
         self.controller['CONFIG_FILE'] = None
@@ -81,11 +82,17 @@ class Update_Switch_State(Monitor_Helper_Base):
                 self.controller['PASS'] = str(
                     self.mod_configuration['controller_pass'])
 
+                if 'controller_span_fabric_name' in self.mod_configuration:
+                    self.controller['SPAN_FABRIC_NAME'] = str(
+                        self.mod_configuration['controller_span_fabric_name']
+                    )
+
+
                 myauth = {}
                 myauth['password'] = self.controller['PASS']
                 myauth['user'] = self.controller['USER']
                 try:
-                    self.sdnc = BcfProxy(self.controller['URI'], auth=myauth)
+                    self.sdnc = BcfProxy(self.controller['URI'], auth=myauth, span_fabric_name = self.controller['SPAN_FABRIC_NAME'])
                 except BaseException:
                     self.logger.error(
                         'BcfProxy could not connect to {0}'.format(
