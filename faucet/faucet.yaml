@@ -1,0 +1,25 @@
+dps:
+  switch1:
+    dp_id: 0x70b3d56cd32e
+    hardware: ZodiacFX
+    interfaces:
+      1:
+        native_vlan: open
+      2:
+        native_vlan: open
+      3:
+        mirror:
+        - 1
+        - 2
+        - 5
+        native_vlan: open
+      4:
+        native_vlan: open
+      5:
+        native_vlan: open
+      6:
+        native_vlan: open
+    proactive_learn: true
+vlans:
+  open:
+    vid: 100

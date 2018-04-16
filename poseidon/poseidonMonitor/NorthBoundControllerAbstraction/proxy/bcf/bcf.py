@@ -333,7 +333,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
           }
 
         '''
-        resource = fabric_span_endpoint % span_name
+        resource = fabric_span_endpoint % self.span_fabric_name
         uri = urljoin(self.base_uri, resource)
         data = self.get_span_fabric()[0]  # first element is vent span rule
         module_logger.debug('{0}'.format(data))
