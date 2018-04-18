@@ -37,6 +37,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             base_uri,
             login_resource='auth/login',
             auth=None,
+            span_fabric_name = 'vent',
             *args,
             **kwargs):
         '''
@@ -46,11 +47,12 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         bcf = BcfProxy("https://127.0.0.1:8443/api/v1/", auth={"user": "USER", "password": "PASSWORD"})
         '''
         default_auth = {'user': None, 'password': None},
-
         auth = auth or default_auth
 
         super(BcfProxy, self).__init__(
             base_uri, login_resource, auth, *args, **kwargs)
+
+        self.span_fabric_name = span_fabric_name
 
     @staticmethod
     def format_endpoints(data):
@@ -119,8 +121,12 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
 
     def get_span_fabric(
             self,
-            span_name=None,
+            span_name = 'vent',
             span_fabric_resource='data/controller/applications/bcf/span-fabric'):
+
+        if self.span_fabric_name:
+            span_name = self.span_fabric_name
+
         '''
         GET list of span fabric configuration.
 
@@ -327,7 +333,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
           }
 
         '''
-        resource = fabric_span_endpoint % span_name
+        resource = fabric_span_endpoint % self.span_fabric_name
         uri = urljoin(self.base_uri, resource)
         data = self.get_span_fabric()[0]  # first element is vent span rule
         module_logger.debug('{0}'.format(data))

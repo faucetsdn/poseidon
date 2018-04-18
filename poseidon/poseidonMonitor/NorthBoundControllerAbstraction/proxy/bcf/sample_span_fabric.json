@@ -10,6 +10,6 @@
     "seq" : 2,
     "tenant" : "port5"
   } ],
-  "name" : "vent",
+  "name" : "SPAN_FABRIC",
   "priority" : 1
 } ]

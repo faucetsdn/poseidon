@@ -6,6 +6,6 @@ span_fabric_state = [{
         "seq": 1,
         "tenant": "port2"
     }],
-    "name": "vent",
+    "name": "SPAN_FABRIC",
     "priority": 1
 }]
