@@ -81,7 +81,7 @@ def mock_factory2(regex):
                 data[0]["state"] = "Active"
             data = json.dumps(data)
             r = response(content=data, request=request)
-        elif url.path == "/data/controller/applications/bcf/span-fabric[name=%22vent%22]" and request.method == "GET":
+        elif url.path == "/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22]" and request.method == "GET":
             data = json.dumps(span_fabric_state)
             r = response(content=data, request=request)
         elif url.path == "/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22]" and request.method == "PUT":
