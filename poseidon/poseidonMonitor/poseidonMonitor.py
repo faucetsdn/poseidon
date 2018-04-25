@@ -65,14 +65,26 @@ def schedule_job_kickurl(func, logger):
     # send results to prometheus
     hosts = r.json()['dataset']
     for host in hosts:
-        func.prom_c.labels(uid=host['uid'],
-                           ip=host['IP'],
-                           subnet=host['subnet'],
-                           rdns_host=host['rDNS_host'],
-                           mac=host['mac'],
-                           record='',
-                           role=host['role']['role'],
-                           os=host['os']['os']).inc()
+        try:
+            record_source = ''
+            record_timestamp = ''
+            role_confidence = 0
+            if len(host['record']) > 0:
+                record_source = host['record']['source']
+                record_timestamp = host['record']['timestamp']
+                role_confidence = host['role']['confidence']
+            func.prom_c.labels(uid=host['uid'],
+                               ip=host['IP'],
+                               subnet=host['subnet'],
+                               rdns_host=host['rDNS_host'],
+                               mac=host['mac'],
+                               record_source=record_source,
+                               record_timestamp=record_timestamp,
+                               role=host['role']['role'],
+                               role_confidence=role_confidence,
+                               os=host['os']['os']).inc()
+        except Exception as e:
+            func.logger.debug('unable to send {0} results to prometheus because {1}'.format(host, str(e)))
 
 
 def rabbit_callback(ch, method, properties, body, q=None):
@@ -514,8 +526,10 @@ def main(skip_rabbit=False):  # pragma: no cover
                                                                'subnet',
                                                                'rdns_host',
                                                                'mac',
-                                                               'record',
+                                                               'record_source',
+                                                               'record_timestamp',
                                                                'role',
+                                                               'role_confidence',
                                                                'os'])
     start_http_server(9304)
 
