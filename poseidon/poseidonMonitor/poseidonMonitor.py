@@ -73,8 +73,7 @@ def schedule_job_kickurl(func, logger):
                 record_source = host['record']['source']
                 record_timestamp = host['record']['timestamp']
                 role_confidence = host['role']['confidence']
-            func.prom_c.labels(uid=host['uid'],
-                               ip=host['IP'],
+            func.prom_c.labels(ip=host['IP'],
                                subnet=host['subnet'],
                                rdns_host=host['rDNS_host'],
                                mac=host['mac'],
@@ -521,8 +520,7 @@ def main(skip_rabbit=False):  # pragma: no cover
     pmain = Monitor(skip_rabbit=skip_rabbit)
 
     # start prometheus
-    pmain.prom_c = Counter('poseidon_endpoints', 'Endpoints', ['uid',
-                                                               'ip',
+    pmain.prom_c = Counter('poseidon_endpoints', 'Endpoints', ['ip',
                                                                'subnet',
                                                                'rdns_host',
                                                                'mac',
