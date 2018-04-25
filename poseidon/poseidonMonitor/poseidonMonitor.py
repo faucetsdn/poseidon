@@ -63,8 +63,16 @@ def schedule_job_kickurl(func, logger):
     #func.logger.info(r.json())
 
     # send results to prometheus
-    func.prom_c.labels(foo='0x12345', bar='unknown').inc()
-    func.prom_c.labels(foo='0x54321', bar='bad').inc()
+    hosts = r.json()['dataset']
+    for host in hosts:
+        func.prom_c.labels(uid=host['uid'],
+                           ip=host['IP'],
+                           subnet=host['subnet'],
+                           rdns_host=host['rDNS_host'],
+                           mac=host['mac'],
+                           record='',
+                           role=host['role']['role'],
+                           os=host['os']['os']).inc()
 
 
 def rabbit_callback(ch, method, properties, body, q=None):
@@ -501,7 +509,14 @@ def main(skip_rabbit=False):  # pragma: no cover
     pmain = Monitor(skip_rabbit=skip_rabbit)
 
     # start prometheus
-    pmain.prom_c = Counter('poseidon_endpoints', 'Endpoints', ['foo', 'bar'])
+    pmain.prom_c = Counter('poseidon_endpoints', 'Endpoints', ['uid',
+                                                               'ip',
+                                                               'subnet',
+                                                               'rdns_host',
+                                                               'mac',
+                                                               'record',
+                                                               'role',
+                                                               'os'])
     start_http_server(9304)
 
     if not skip_rabbit:
