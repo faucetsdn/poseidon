@@ -3,9 +3,8 @@ LABEL maintainer="clewis@iqt.org"
 
 RUN apk upgrade --no-cache && \
     apk add --no-cache \
-    bash \
     build-base \
-    curl \
+    git \
     python3 \
     python3-dev \
     py3-paramiko \
