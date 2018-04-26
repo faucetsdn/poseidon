@@ -93,6 +93,20 @@ def test_start_vent_collector():
         def __init__(self):
             pass
 
+        def get(self, uri):
+            def mock_response():
+                def mock_json(): return {'dataset':[]}
+                mock_response.json = mock_json
+                return None
+            mock_response.text = "success"
+            # cover object
+            a = mock_response()
+            b = mock_response.json()
+            assert a is None
+            assert mock_response.text == "success"
+            assert isinstance(b, dict)
+            return mock_response
+
         def post(uri, json, data):
             def mock_response(): return None
             mock_response.text = "success"
