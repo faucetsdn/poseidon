@@ -22,6 +22,7 @@ run_tests: build_poseidon
 	docker build -f ./Dockerfile.test -t $(TAG)-test .
 	docker run --rm -d --name $(TAG)-redis redis:latest
 	docker run --rm -v $(shell pwd):/tmp/poseidonWork --link $(TAG)-redis:redis -it $(TAG)-test
+	cat $(shell pwd)/.coverage
 	docker kill $(TAG)-redis
 
 .PHONY:  build_poseidon run_poseidon run_sh build_docs run_docs run_tests
