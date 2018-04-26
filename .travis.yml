@@ -10,7 +10,7 @@ python:
   - "3.6"
 script:
   - make run_tests
-  - bash <(curl -s https://codecov.io/bash)
+  - bash <(curl -s https://codecov.io/bash) -t 992b90e5-a0b2-45c5-b9d5-3baddc184162
 before_install:
   - sudo apt-get update
   - sudo apt-get install docker-ce
