@@ -3,7 +3,6 @@ dist: trusty
 group: edge
 
 services:
-  - docker
   - redis
 language: python
 python:
@@ -11,7 +10,7 @@ python:
 install:
   - pip install codecov
 env:
-  - PYTHONPATH=/home/travis/build/CyberReboot/poseidon/poseidon:$PYTHONPATH POSEIDON_CONFIG=/home/travis/build/CyberReboot/poseidon/config/poseidon.config POSEIDON_LOGGER=/home/travis/build/CyberReboot/poseidon/logging.json
+  - PYTHONPATH=/home/travis/build/CyberReboot/poseidon/poseidon:$PYTHONPATH POSEIDON_CONFIG=/home/travis/build/CyberReboot/poseidon/config/poseidon.config POSEIDON_LOGGER=/home/travis/build/CyberReboot/poseidon/logging.json POSEIDON_TRAVIS=true
 script:
   - find . -name requirements.txt -type f -exec pip3 install -r {} \;
   - py.test -v -vv --cov-report term-missing --cov=./poseidon --cov=./api -c .coveragerc
