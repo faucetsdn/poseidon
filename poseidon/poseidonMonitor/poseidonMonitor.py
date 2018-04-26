@@ -33,7 +33,7 @@ import time
 
 from functools import partial
 from os import getenv
-from prometheus_client import start_http_server, Counter
+from prometheus_client import start_http_server, Gauge
 
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.baseClasses.Rabbit_Base import Rabbit_Base
@@ -73,15 +73,15 @@ def schedule_job_kickurl(func, logger):
                 record_source = host['record']['source']
                 record_timestamp = host['record']['timestamp']
                 role_confidence = host['role']['confidence']
-            func.prom_c.labels(ip=host['IP'],
-                               subnet=host['subnet'],
-                               rdns_host=host['rDNS_host'],
-                               mac=host['mac'],
-                               record_source=record_source,
-                               record_timestamp=record_timestamp,
-                               role=host['role']['role'],
-                               role_confidence=role_confidence,
-                               os=host['os']['os']).inc()
+            #func.prom_c.labels(ip=host['IP'],
+            #                   subnet=host['subnet'],
+            #                   rdns_host=host['rDNS_host'],
+            #                   mac=host['mac'],
+            #                   record_source=record_source,
+            #                   record_timestamp=record_timestamp,
+            #                   role=host['role']['role'],
+            #                   role_confidence=role_confidence,
+            #                   os=host['os']['os']).inc()
         except Exception as e:
             func.logger.debug('unable to send {0} results to prometheus because {1}'.format(host, str(e)))
 
@@ -158,7 +158,7 @@ class Monitor(object):
         self.skip_rabbit = skip_rabbit
 
         # prometheus
-        self.prom_c = None
+        self.prom_metrics = {}
 
         # timer class to call things periodically in own thread
         self.schedule = schedule
@@ -519,16 +519,21 @@ def main(skip_rabbit=False):  # pragma: no cover
     ''' main function '''
     pmain = Monitor(skip_rabbit=skip_rabbit)
 
+    # declare prometheus variables
+    pmain.prom_metrics['behavior'] = Gauge('poseidon_endpoint_behavior',
+                                           'Behavior of an endpoint, 0 is normal, 1 is abnormal',
+                                           ['ip',
+                                            'mac',
+                                            'tenant',
+                                            'segment',
+                                            'port',
+                                            'role',
+                                            'record_source'])
+    pmain.prom_metrics['roles'] = Gauge('poseidon_endpoint_roles',
+                                        'Number of endpoints by role',
+                                        ['record_source',
+                                         'role'])
     # start prometheus
-    pmain.prom_c = Counter('poseidon_endpoints', 'Endpoints', ['ip',
-                                                               'subnet',
-                                                               'rdns_host',
-                                                               'mac',
-                                                               'record_source',
-                                                               'record_timestamp',
-                                                               'role',
-                                                               'role_confidence',
-                                                               'os'])
     start_http_server(9304)
 
     if not skip_rabbit:

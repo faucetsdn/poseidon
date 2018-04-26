@@ -106,6 +106,7 @@ class Parser:
                         obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'].append(port)
                 elif action == 'unmirror':
                     try:
+                        # TODO check for still running captures on this port
                         obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'].remove(port)
                     except ValueError:
                         self.logger.warning("This port was not already "

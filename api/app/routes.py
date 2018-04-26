@@ -1,14 +1,15 @@
 def routes():
-    from .data import Endpoints, Info, Network
+    from .data import Endpoints, Info, Network, NetworkFull
     endpoints = Endpoints()
     p = paths()
     info = Info()
     network = Network()
-    funcs = [endpoints, info, network]
+    network_full = NetworkFull()
+    funcs = [endpoints, info, network, network_full]
     return dict(zip(p, funcs))
 
 def paths():
-    return ['', '/info', '/network']
+    return ['', '/info', '/network', '/network_full']
 
 def version():
     return '/v1'
