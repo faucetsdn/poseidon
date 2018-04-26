@@ -24,15 +24,16 @@ import ast
 import json
 import queue as Queue
 import random
+import requests
+import schedule
 import signal
 import sys
 import threading
 import time
+
 from functools import partial
 from os import getenv
-
-import requests
-import schedule
+from prometheus_client import start_http_server, Gauge
 
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.baseClasses.Rabbit_Base import Rabbit_Base
@@ -56,6 +57,33 @@ def schedule_job_kickurl(func, logger):
         'Update_Switch_State').update_endpoint_state(messages=func.faucet_event)
     # check the length didn't change before wiping it out
     func.faucet_event = []
+
+    # get current state
+    r = requests.get('http://poseidon-api:8000/v1/network')
+    #func.logger.info(r.json())
+
+    # send results to prometheus
+    hosts = r.json()['dataset']
+    for host in hosts:
+        try:
+            record_source = ''
+            record_timestamp = ''
+            role_confidence = 0
+            if len(host['record']) > 0:
+                record_source = host['record']['source']
+                record_timestamp = host['record']['timestamp']
+                role_confidence = host['role']['confidence']
+            #func.prom_c.labels(ip=host['IP'],
+            #                   subnet=host['subnet'],
+            #                   rdns_host=host['rDNS_host'],
+            #                   mac=host['mac'],
+            #                   record_source=record_source,
+            #                   record_timestamp=record_timestamp,
+            #                   role=host['role']['role'],
+            #                   role_confidence=role_confidence,
+            #                   os=host['os']['os']).inc()
+        except Exception as e:
+            func.logger.debug('unable to send {0} results to prometheus because {1}'.format(host, str(e)))
 
 
 def rabbit_callback(ch, method, properties, body, q=None):
@@ -128,6 +156,9 @@ class Monitor(object):
 
         self.mod_name = self.__class__.__name__
         self.skip_rabbit = skip_rabbit
+
+        # prometheus
+        self.prom_metrics = {}
 
         # timer class to call things periodically in own thread
         self.schedule = schedule
@@ -487,6 +518,24 @@ class Monitor(object):
 def main(skip_rabbit=False):  # pragma: no cover
     ''' main function '''
     pmain = Monitor(skip_rabbit=skip_rabbit)
+
+    # declare prometheus variables
+    pmain.prom_metrics['behavior'] = Gauge('poseidon_endpoint_behavior',
+                                           'Behavior of an endpoint, 0 is normal, 1 is abnormal',
+                                           ['ip',
+                                            'mac',
+                                            'tenant',
+                                            'segment',
+                                            'port',
+                                            'role',
+                                            'record_source'])
+    pmain.prom_metrics['roles'] = Gauge('poseidon_endpoint_roles',
+                                        'Number of endpoints by role',
+                                        ['record_source',
+                                         'role'])
+    # start prometheus
+    start_http_server(9304)
+
     if not skip_rabbit:
         rabbit = Rabbit_Base()
         host = pmain.mod_configuration['rabbit_server']

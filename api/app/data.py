@@ -31,6 +31,64 @@ class Info(object):
         resp.status = falcon.HTTP_200
 
 
+class NetworkFull(object):
+
+    def connect_redis(self):
+        self.r = None
+        try:
+            self.r = redis.StrictRedis(host='redis', port=6379, db=0, decode_responses=True)
+        except Exception as e:  # pragma: no cover
+            try:
+                self.r = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
+            except Exception as e:  # pragma: no cover
+                return (False, 'unable to connect to redis because: ' + str(e))
+        return
+
+    def get_dataset(self):
+        dataset = []
+        self.connect_redis()
+        if self.r:
+            try:
+                ip_addresses = self.r.smembers('ip_addresses')
+                for ip_address in ip_addresses:
+                    node = {}
+                    node['ip'] = ip_address
+                    node['mac'] = 0
+                    node['segment'] = 0
+                    node['port'] = 0
+                    node['tenant'] = 0
+                    node['record_source'] = 'Poseidon'
+                    node['role'] = 'Unknown'
+                    node['os'] = 'Unknown'
+                    try:
+                        ip_info = self.r.hgetall(ip_address)
+                        if 'poseidon_hash' in ip_info:
+                            try:
+                                poseidon_info = self.r.hgetall(ip_info['poseidon_hash'])
+                                if 'endpoint_data' in poseidon_info:
+                                    endpoint_data = ast.literal_eval(poseidon_info['endpoint_data'])
+                                    node['mac'] = endpoint_data['mac']
+                                    node['segment'] = endpoint_data['segment']
+                                    node['port'] = endpoint_data['port']
+                                    node['tenant'] = endpoint_data['tenant']
+                            except Exception as e:
+                                pass
+                    except Exception as e:
+                        pass
+                    dataset.append(node)
+            except Exception as e:
+                pass
+        return dataset
+
+    def on_get(self, req, resp):
+        network = {}
+        dataset = self.get_dataset()
+        network['dataset'] = dataset
+
+        resp.body = json.dumps(network, indent=2)
+        resp.content_type = falcon.MEDIA_JSON
+        resp.status = falcon.HTTP_200
+
 class Network(object):
 
     def connect_redis(self):

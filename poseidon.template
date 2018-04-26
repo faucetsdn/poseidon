@@ -6,4 +6,5 @@ groups = poseidon
 instances = 1
 
 [docker]
+publish_all_ports = True
 links = {"RabbitMQ":"RABBIT_SERVER", "NetworkTap":"vent_ip", "PoseidonAPI":"poseidon-api"}

@@ -26,5 +26,7 @@ ENV PYTHONUNBUFFERED 0
 ENV SYS_LOG_HOST NOT_CONFIGURED
 ENV SYS_LOG_PORT 514
 
+EXPOSE 9304
+
 ENTRYPOINT ["tini", "--"]
 CMD ["/usr/bin/python3", "/tmp/poseidonWork/poseidon/poseidonMonitor/poseidonMonitor.py"]

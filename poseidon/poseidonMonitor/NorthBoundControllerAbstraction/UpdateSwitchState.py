@@ -21,7 +21,6 @@ import ast
 import json
 import queue as Queue
 
-from prometheus_client import start_http_server, Counter
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 from poseidon.poseidonMonitor.endPoint import EndPoint
