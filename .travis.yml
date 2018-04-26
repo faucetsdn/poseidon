@@ -3,14 +3,19 @@ dist: trusty
 group: edge
 
 services:
-  - docker
   - redis
 language: python
 python:
   - "3.6"
+install:
+  - pip install codecov
+env:
+  - PYTHONPATH=/home/travis/build/CyberReboot/poseidon/poseidon:$PYTHONPATH POSEIDON_CONFIG=/home/travis/build/CyberReboot/poseidon/config/poseidon.config POSEIDON_LOGGER=/home/travis/build/CyberReboot/poseidon/logging.json POSEIDON_TRAVIS=true
 script:
-  - make run_tests
-  - bash <(curl -s https://codecov.io/bash) -t 992b90e5-a0b2-45c5-b9d5-3baddc184162
+  - find . -name requirements.txt -type f -exec pip3 install -r {} \;
+  - py.test -v -vv --cov-report term-missing --cov=./poseidon --cov=./api -c .coveragerc
 before_install:
   - sudo apt-get update
   - sudo apt-get install docker-ce
+after_success:
+  - codecov
