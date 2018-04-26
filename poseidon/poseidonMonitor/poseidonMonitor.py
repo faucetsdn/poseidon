@@ -62,8 +62,8 @@ def schedule_job_kickurl(func, logger):
     r = requests.get('http://poseidon-api:8000/v1/network_full')
 
     # clear gauges
-    func.prom_metrics['behavior'].set(0)
-    func.prom_metrics['roles'].set(0)
+    #func.prom_metrics['behavior'].set(0)
+    #func.prom_metrics['roles'].set(0)
 
     # send results to prometheus
     hosts = r.json()['dataset']

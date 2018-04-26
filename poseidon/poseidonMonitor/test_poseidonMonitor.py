@@ -711,6 +711,7 @@ def test_schedule_job_kickurl():
 
         def __init__(self):
             self.faucet_event = []
+            self.prom_metrics = {}
             self.NorthBoundControllerAbstraction = MockNorthBoundControllerAbstraction()
 
     schedule_job_kickurl(func(), MockLogger())
