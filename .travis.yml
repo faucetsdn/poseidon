@@ -8,8 +8,12 @@ services:
 language: python
 python:
   - "3.6"
+install:
+  - pip install codecov
 script:
   - make run_tests
 before_install:
   - sudo apt-get update
   - sudo apt-get install docker-ce
+after_success:
+  - codecov
