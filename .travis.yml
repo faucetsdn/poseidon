@@ -10,6 +10,10 @@ python:
   - "3.6"
 install:
   - pip install codecov
+env:
+  - ENV PYTHONPATH /home/travis/build/CyberReboot/poseidon/poseidon:$PYTHONPATH
+  - ENV POSEIDON_CONFIG /home/travis/build/CyberReboot/poseidon/config/poseidon.config
+  - ENV POSEIDON_LOGGER /home/travis/build/CyberReboot/poseidon/logging.json
 script:
   - find . -name requirements.txt -type f -exec pip3 install -r {} \;
   - py.test -v -vv --cov-report term-missing --cov=./poseidon --cov=./api -c .coveragerc
