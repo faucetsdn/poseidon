@@ -11,7 +11,8 @@ python:
 install:
   - pip install codecov
 script:
-  - make run_tests
+  - find . -name requirements.txt -type f -exec pip3 install -r {} \;
+  - py.test -v -vv --cov-report term-missing --cov=./poseidon --cov=./api -c .coveragerc
 before_install:
   - sudo apt-get update
   - sudo apt-get install docker-ce
