@@ -6,6 +6,7 @@ jobs:
         environment:
           POSEIDON_CONFIG: /tmp/poseidonWork/config/poseidon.config
           POSEIDON_LOGGER: /tmp/poseidonWork/logging.json
+      - image: redis
 
     working_directory: /tmp/poseidonWork
     steps:
