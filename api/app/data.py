@@ -37,10 +37,10 @@ class NetworkFull(object):
         self.r = None
         try:
             self.r = redis.StrictRedis(host='redis', port=6379, db=0, decode_responses=True)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             try:
                 self.r = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
-            except Exception as e:
+            except Exception as e:  # pragma: no cover
                 return (False, 'unable to connect to redis because: ' + str(e))
         return
 
