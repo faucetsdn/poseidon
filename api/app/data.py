@@ -60,6 +60,7 @@ class NetworkFull(object):
                     node['record_source'] = 'Poseidon'
                     node['role'] = 'Unknown'
                     node['os'] = 'Unknown'
+                    node['behavior'] = 0
                     try:
                         ip_info = self.r.hgetall(ip_address)
                         if 'poseidon_hash' in ip_info:
@@ -73,6 +74,18 @@ class NetworkFull(object):
                                     node['tenant'] = endpoint_data['tenant']
                             except Exception as e:
                                 pass
+                        if 'timestamps' in ip_info:
+                            try:
+                                timestamps = ast.literal_eval(ip_info['timestamps'])
+                                ml_info = self.r.hgetall(ip_address+'_'+str(timestamps[-1]))
+                                if 'labels' in ml_info:
+                                    labels = ast.literal_eval(ml_info['labels'])
+                                    node['role'] = labels[0]
+                            except:
+                                pass
+                        if 'short_os' in ip_info:
+                            short_os = ip_info['short_os']
+                            node['os'] = short_os
                     except Exception as e:
                         pass
                     dataset.append(node)
