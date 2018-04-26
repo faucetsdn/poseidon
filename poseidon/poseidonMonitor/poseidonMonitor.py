@@ -59,29 +59,18 @@ def schedule_job_kickurl(func, logger):
     func.faucet_event = []
 
     # get current state
-    r = requests.get('http://poseidon-api:8000/v1/network')
-    #func.logger.info(r.json())
+    r = requests.get('http://poseidon-api:8000/v1/network_full')
+
+    # clear gauges
+    func.prom_metrics['behavior'].set(0)
+    func.prom_metrics['roles'].set(0)
 
     # send results to prometheus
     hosts = r.json()['dataset']
     for host in hosts:
         try:
-            record_source = ''
-            record_timestamp = ''
-            role_confidence = 0
-            if len(host['record']) > 0:
-                record_source = host['record']['source']
-                record_timestamp = host['record']['timestamp']
-                role_confidence = host['role']['confidence']
-            #func.prom_c.labels(ip=host['IP'],
-            #                   subnet=host['subnet'],
-            #                   rdns_host=host['rDNS_host'],
-            #                   mac=host['mac'],
-            #                   record_source=record_source,
-            #                   record_timestamp=record_timestamp,
-            #                   role=host['role']['role'],
-            #                   role_confidence=role_confidence,
-            #                   os=host['os']['os']).inc()
+            func.prom_metrics['behavior'].labels(ip=host['ip'], mac=host['mac'], tenant=host['tenant'], segment=host['segment'], port=host['port'], role=host['role'], record_source=host['record_source']).set(host['behavior'])
+            func.prom_metrics['roles'].labels(record_source=host['record_source'], role=host['role']).inc()
         except Exception as e:
             func.logger.debug('unable to send {0} results to prometheus because {1}'.format(host, str(e)))
 
