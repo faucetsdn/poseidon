@@ -171,7 +171,7 @@ class Parser:
                 del self.mac_table[message['L2_EXPIRE']['eth_src']]
         elif 'PORT_CHANGE' in message:
             if not message['PORT_CHANGE']['status']:
-                m_table = self.mac_table
+                m_table = self.mac_table.copy()
                 for mac in m_table:
                     for data in m_table[mac]:
                         if (str(message['PORT_CHANGE']['port_no']) == data['port'] and
@@ -219,7 +219,7 @@ class Parser:
                         dpid = port_change[0].split()[-2]
                         port_change = port_change[1].split()
                         if port_change[1] == 'down':
-                            m_table = self.mac_table
+                            m_table = self.mac_table.copy()
                             for mac in m_table:
                                 for data in m_table[mac]:
                                     if (port_change[0] == data['port'] and
