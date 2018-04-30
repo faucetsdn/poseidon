@@ -222,9 +222,9 @@ class Parser:
                             m_table = self.mac_table
                             for mac in m_table:
                                 for data in m_table[mac]:
-                                if (port_change[0] == data['port'] and
-                                    dpid == data['segment']):
-                                    del self.mac_table[mac]
+                                    if (port_change[0] == data['port'] and
+                                        dpid == data['segment']):
+                                        del self.mac_table[mac]
         except Exception as e:
             self.logger.debug("error {0}".format(str(e)))
         return
