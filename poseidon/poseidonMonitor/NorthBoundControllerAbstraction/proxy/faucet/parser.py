@@ -212,6 +212,7 @@ class Parser:
                             del self.mac_table[expired_mac]
                     elif ' Port ' in line:
                         # try and see if it was a port down event
+                        # this will break if more than one port expires at the same time TODO
                         port_change = line.split(' Port ')
                         dpid = port_change[0].split()[-2]
                         port_change = port_change[1].split()
