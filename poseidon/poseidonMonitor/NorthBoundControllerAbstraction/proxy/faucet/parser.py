@@ -173,9 +173,10 @@ class Parser:
             if not message['PORT_CHANGE']['status']:
                 m_table = self.mac_table
                 for mac in m_table:
-                    if (str(message['PORT_CHANGE']['port_no']) == self.mac_table[mac][port] and
-                        str(message['dp_id']) == self.mac_table[mac][segment]):
-                        del self.mac_table[mac]
+                    if (str(message['PORT_CHANGE']['port_no']) == self.mac_table[mac]['port'] and
+                        str(message['dp_id']) == self.mac_table[mac]['segment']):
+                        if mac in self.mac_table:
+                            del self.mac_table[mac]
         return
 
     def log(self, log_file):
@@ -219,8 +220,8 @@ class Parser:
                         if port_change[1] == 'down':
                             m_table = self.mac_table
                             for mac in m_table:
-                                if (port_change[0] == self.mac_table[mac][port] and
-                                    dpid == self.mac_table[mac][segment]):
+                                if (port_change[0] == self.mac_table[mac]['port'] and
+                                    dpid == self.mac_table[mac]['segment']):
                                     del self.mac_table[mac]
         except Exception as e:
             self.logger.debug("error {0}".format(str(e)))
