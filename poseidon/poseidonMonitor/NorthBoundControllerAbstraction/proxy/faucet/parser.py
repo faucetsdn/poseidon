@@ -147,6 +147,7 @@ class Parser:
 
     def event(self, message):
         data = {}
+        self.logger.info("current mac table {0}".format(self.mac_table))
         if 'L2_LEARN' in message:
             self.logger.info("got faucet message for l2_learn: {0}".format(message))
             data['ip-address'] = message['L2_LEARN']['l3_src_ip']
@@ -170,6 +171,7 @@ class Parser:
             if message['L2_EXPIRE']['eth_src'] in self.mac_table:
                 del self.mac_table[message['L2_EXPIRE']['eth_src']]
         elif 'PORT_CHANGE' in message:
+            self.logger.info("got faucet message for port_change: {0}".format(message))
             if not message['PORT_CHANGE']['status']:
                 m_table = self.mac_table.copy()
                 for mac in m_table:
@@ -178,6 +180,7 @@ class Parser:
                             str(message['dp_id']) == data['segment']):
                             if mac in self.mac_table:
                                 del self.mac_table[mac]
+        self.logger.info("post mac table {0}".format(self.mac_table))
         return
 
     def log(self, log_file):
