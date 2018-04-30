@@ -146,24 +146,36 @@ class Parser:
         return True
 
     def event(self, message):
-        self.logger.info("got faucet message for l2_learn: {0}".format(message))
         data = {}
-        data['ip-address'] = message['L2_LEARN']['l3_src_ip']
-        data['ip-state'] = 'L2 learned'
-        data['mac'] = message['L2_LEARN']['eth_src']
-        data['segment'] = str(message['dp_id'])
-        data['port'] = str(message['L2_LEARN']['port_no'])
-        data['tenant'] = "VLAN"+str(message['L2_LEARN']['vid'])
-        if message['L2_LEARN']['eth_src'] in self.mac_table:
-            dup = False
-            for d in self.mac_table[message['L2_LEARN']['eth_src']]:
-                if data == d:
-                    dup = True
-            if dup:
-                self.mac_table[message['L2_LEARN']['eth_src']].remove(data)
-            self.mac_table[message['L2_LEARN']['eth_src']].insert(0, data)
-        else:
-            self.mac_table[message['L2_LEARN']['eth_src']] = [data]
+        if 'L2_LEARN' in message:
+            self.logger.info("got faucet message for l2_learn: {0}".format(message))
+            data['ip-address'] = message['L2_LEARN']['l3_src_ip']
+            data['ip-state'] = 'L2 learned'
+            data['mac'] = message['L2_LEARN']['eth_src']
+            data['segment'] = str(message['dp_id'])
+            data['port'] = str(message['L2_LEARN']['port_no'])
+            data['tenant'] = "VLAN"+str(message['L2_LEARN']['vid'])
+            if message['L2_LEARN']['eth_src'] in self.mac_table:
+                dup = False
+                for d in self.mac_table[message['L2_LEARN']['eth_src']]:
+                    if data == d:
+                        dup = True
+                if dup:
+                    self.mac_table[message['L2_LEARN']['eth_src']].remove(data)
+                self.mac_table[message['L2_LEARN']['eth_src']].insert(0, data)
+            else:
+                self.mac_table[message['L2_LEARN']['eth_src']] = [data]
+        elif 'L2_EXPIRE' in message:
+            self.logger.info("got faucet message for l2_expire: {0}".format(message))
+            if message['L2_EXPIRE']['eth_src'] in self.mac_table:
+                del self.mac_table[message['L2_EXPIRE']['eth_src']]
+        elif 'PORT_CHANGE' in message:
+            if not message['PORT_CHANGE']['status']:
+                m_table = self.mac_table
+                for mac in m_table:
+                    if (str(message['PORT_CHANGE']['port_no']) == self.mac_table[mac][port] and
+                        str(message['dp_id']) == self.mac_table[mac][segment]):
+                        del self.mac_table[mac]
         return
 
     def log(self, log_file):
@@ -193,6 +205,22 @@ class Parser:
                             self.mac_table[learned_mac[10]].insert(0, data)
                         else:
                             self.mac_table[learned_mac[10]] = [data]
+                    elif ', expired [' in line:
+                        expired_mac = line.split(', expired [')
+                        expired_mac = expired_mac[1].split()[0]
+                        if expired_mac in self.mac_table:
+                            del self.mac_table[expired_mac]
+                    elif ' Port ' in line:
+                        # try and see if it was a port down event
+                        port_change = line.split(' Port ')
+                        dpid = port_change[0].split()[-2]
+                        port_change = port_change[1].split()
+                        if port_change[1] == 'down':
+                            m_table = self.mac_table
+                            for mac in m_table:
+                                if (port_change[0] == self.mac_table[mac][port] and
+                                    dpid == self.mac_table[mac][segment]):
+                                    del self.mac_table[mac]
         except Exception as e:
             self.logger.debug("error {0}".format(str(e)))
         return
