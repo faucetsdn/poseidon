@@ -61,9 +61,12 @@ class NetworkFull(object):
                     node['role'] = 'Unknown'
                     node['os'] = 'Unknown'
                     node['behavior'] = 0
+                    node['hash'] = '0'
+                    node['state'] = 'UNDEFINED'
                     try:
                         ip_info = self.r.hgetall(ip_address)
                         if 'poseidon_hash' in ip_info:
+                            node['hash'] = ip_info['poseidon_hash']
                             try:
                                 poseidon_info = self.r.hgetall(ip_info['poseidon_hash'])
                                 if 'endpoint_data' in poseidon_info:
@@ -72,6 +75,8 @@ class NetworkFull(object):
                                     node['segment'] = endpoint_data['segment']
                                     node['port'] = endpoint_data['port']
                                     node['tenant'] = endpoint_data['tenant']
+                                if 'state' in poseidon_info:
+                                    node['state'] = poseidon_info['state']
                             except Exception as e:
                                 pass
                         if 'timestamps' in ip_info:
