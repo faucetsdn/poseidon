@@ -147,7 +147,6 @@ class Parser:
 
     def event(self, message):
         data = {}
-        self.logger.info("current mac table {0}".format(self.mac_table))
         if 'L2_LEARN' in message:
             self.logger.info("got faucet message for l2_learn: {0}".format(message))
             data['ip-address'] = message['L2_LEARN']['l3_src_ip']
@@ -180,7 +179,6 @@ class Parser:
                             str(message['dp_id']) == data['segment']):
                             if mac in self.mac_table:
                                 del self.mac_table[mac]
-        self.logger.info("post mac table {0}".format(self.mac_table))
         return
 
     def log(self, log_file):
