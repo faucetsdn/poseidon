@@ -555,15 +555,15 @@ def main(skip_rabbit=False):  # pragma: no cover
                                         ['record_source',
                                          'tenant'])
     pmain.prom_metrics['record_sources'] = Gauge('poseidon_endpoint_record_sources',
-                                        'Number of endpoints by record source',
-                                        ['record_source'])
+                                                 'Number of endpoints by record source',
+                                                 ['record_source'])
     pmain.prom_metrics['port_tenants'] = Gauge('poseidon_endpoint_port_tenants',
-                                        'Number of tenants by port',
-                                        ['port',
-                                         'tenant'])
+                                               'Number of tenants by port',
+                                               ['port',
+                                                'tenant'])
     pmain.prom_metrics['port_hosts'] = Gauge('poseidon_endpoint_port_hosts',
-                                        'Number of hosts by port',
-                                        ['port'])
+                                             'Number of hosts by port',
+                                             ['port'])
     # start prometheus
     start_http_server(9304)
 
