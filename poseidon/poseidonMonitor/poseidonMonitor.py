@@ -52,6 +52,13 @@ CTRL_C['STOP'] = False
 
 def schedule_job_kickurl(func, logger):
     ''' periodically ask the controller for its state '''
+
+    def ip2int(ip):
+        ''' convert ip quad octet string to an int '''
+        o = map(int, ip.split('.'))
+        res = (16777216 * o[0]) + (65536 *o[1]) + (256*0[2]) + o[3]
+        return res
+
     logger.debug('kick')
     func.NorthBoundControllerAbstraction.get_endpoint(
         'Update_Switch_State').update_endpoint_state(messages=func.faucet_event)
@@ -70,8 +77,7 @@ def schedule_job_kickurl(func, logger):
     for host in hosts:
         try:
             func.prom_metrics['behavior'].labels(ip=host['ip'], mac=host['mac'], tenant=host['tenant'], segment=host['segment'], state=host['state'], port=host['port'], role=host['role'], os=host['os'], record_source=host['record_source']).set(host['behavior'])
-
-            func.prom_metrics['ip_table'].labels(mac=host['mac'], tenant=host['tenant'], segment=host['segment'], state=host['state'], port=host['port'], role=host['role'], os=host['os'], hash_id=host['hash'], record_source=host['record_source']).set(host['ip'])
+            func.prom_metrics['ip_table'].labels(mac=host['mac'], tenant=host['tenant'], segment=host['segment'], state=host['state'], port=host['port'], role=host['role'], os=host['os'], hash_id=host['hash'], record_source=host['record_source']).set(ip2int(host['ip']))
             func.prom_metrics['roles'].labels(record_source=host['record_source'], role=host['role']).inc()
             func.prom_metrics['oses'].labels(record_source=host['record_source'], os=host['os']).inc()
             func.prom_metrics['current_states'].labels(record_source=host['record_source'], current_state=host['state']).inc()
