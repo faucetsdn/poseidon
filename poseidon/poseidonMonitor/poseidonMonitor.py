@@ -80,7 +80,7 @@ def schedule_job_kickurl(func, logger):
             func.prom_metrics['port_tenants'].labels(port=host['port'], tenant=host['tenant']).inc()
             func.prom_metrics['port_hosts'].labels(port=host['port']).inc()
         except Exception as e:
-            func.logger.debug('unable to send {0} results to prometheus because {1}'.format(host, str(e)))
+            func.logger.info('unable to send {0} results to prometheus because {1}'.format(host, str(e)))
 
 
 def rabbit_callback(ch, method, properties, body, q=None):
