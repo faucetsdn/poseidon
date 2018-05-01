@@ -70,6 +70,7 @@ def schedule_job_kickurl(func, logger):
     for host in hosts:
         try:
             func.prom_metrics['behavior'].labels(ip=host['ip'], mac=host['mac'], tenant=host['tenant'], segment=host['segment'], state=host['state'], port=host['port'], role=host['role'], os=host['os'], record_source=host['record_source']).set(host['behavior'])
+
             func.prom_metrics['ip_table'].labels(mac=host['mac'], tenant=host['tenant'], segment=host['segment'], state=host['state'], port=host['port'], role=host['role'], os=host['os'], hash_id=host['hash'], record_source=host['record_source']).set(host['ip'])
             func.prom_metrics['roles'].labels(record_source=host['record_source'], role=host['role']).inc()
             func.prom_metrics['oses'].labels(record_source=host['record_source'], os=host['os']).inc()
@@ -536,7 +537,7 @@ def main(skip_rabbit=False):  # pragma: no cover
                                             'port',
                                             'role',
                                             'os',
-                                            'hash',
+                                            'hash_id',
                                             'record_source'])
     pmain.prom_metrics['roles'] = Gauge('poseidon_endpoint_roles',
                                         'Number of endpoints by role',
