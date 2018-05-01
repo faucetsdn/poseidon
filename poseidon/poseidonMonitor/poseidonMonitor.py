@@ -55,7 +55,7 @@ def schedule_job_kickurl(func, logger):
 
     def ip2int(ip):
         ''' convert ip quad octet string to an int '''
-        o = map(int, ip.split('.'))
+        o = list(map(int, ip.split('.')))
         res = (16777216 * o[0]) + (65536 *o[1]) + (256*0[2]) + o[3]
         return res
 
