@@ -75,7 +75,7 @@ class FaucetProxy(Connection, Parser):
         if messages:
             module_logger.debug('faucet messages: {0}'.format(messages))
             for message in messages:
-                if 'L2_LEARN' in message:
+                if 'L2_LEARN' in message or 'L2_EXPIRE' in message or 'PORT_CHANGE' in message:
                     module_logger.debug('l2 faucet message: {0}'.format(message))
                     self.event(message)
                 else:
