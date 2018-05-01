@@ -175,7 +175,7 @@ class Update_Switch_State(Monitor_Helper_Base):
     def find_new_machines(self, machines):
         '''parse switch structure to find new machines added to network
         since last call'''
-        self.logger.info("what")
+        changed = False
         if self.first_time:
             self.first_time = False
             # TODO db call to see if really need to run things
@@ -184,6 +184,7 @@ class Update_Switch_State(Monitor_Helper_Base):
                 self.logger.debug(
                     'adding address to known systems {0}'.format(machine))
                 self.endpoints.set(end_point)
+            changed = True
         else:
             machine_hashes = []
             for machine in machines:
@@ -195,13 +196,16 @@ class Update_Switch_State(Monitor_Helper_Base):
                     self.logger.debug(
                         '***** detected new address {0}'.format(machine))
                     self.endpoints.set(end_point)
+                    changed = True
             endpoint_hashes = self.endpoints.state.copy()
             self.logger.info("endpoint hashes {0}".format(endpoint_hashes))
             self.logger.info("machine hashes {0}".format(machine_hashes))
             for endpoint in endpoint_hashes:
                 if endpoint not in machine_hashes:
                     del self.endpoints.state[endpoint]
-        self.endpoints.print_endpoint_state()
+                    changed = True
+        if changed:
+            self.endpoints.print_endpoint_state()
 
     def update_endpoint_state(self, messages=None):
         '''Handles Get requests'''
