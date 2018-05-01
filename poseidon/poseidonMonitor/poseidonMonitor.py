@@ -52,6 +52,13 @@ CTRL_C['STOP'] = False
 
 def schedule_job_kickurl(func, logger):
     ''' periodically ask the controller for its state '''
+
+    def ip2int(ip):
+        ''' convert ip quad octet string to an int '''
+        o = list(map(int, ip.split('.')))
+        res = (16777216 * o[0]) + (65536 * o[1]) + (256 * o[2]) + o[3]
+        return res
+
     logger.debug('kick')
     func.NorthBoundControllerAbstraction.get_endpoint(
         'Update_Switch_State').update_endpoint_state(messages=func.faucet_event)
@@ -69,10 +76,17 @@ def schedule_job_kickurl(func, logger):
     hosts = r.json()['dataset']
     for host in hosts:
         try:
-            func.prom_metrics['behavior'].labels(ip=host['ip'], mac=host['mac'], tenant=host['tenant'], segment=host['segment'], port=host['port'], role=host['role'], record_source=host['record_source']).set(host['behavior'])
+            func.prom_metrics['behavior'].labels(ip=host['ip'], mac=host['mac'], tenant=host['tenant'], segment=host['segment'], state=host['state'], port=host['port'], role=host['role'], os=host['os'], record_source=host['record_source']).set(host['behavior'])
+            func.prom_metrics['ip_table'].labels(mac=host['mac'], tenant=host['tenant'], segment=host['segment'], state=host['state'], port=host['port'], role=host['role'], os=host['os'], hash_id=host['hash'], record_source=host['record_source']).set(ip2int(host['ip']))
             func.prom_metrics['roles'].labels(record_source=host['record_source'], role=host['role']).inc()
+            func.prom_metrics['oses'].labels(record_source=host['record_source'], os=host['os']).inc()
+            func.prom_metrics['current_states'].labels(record_source=host['record_source'], current_state=host['state']).inc()
+            func.prom_metrics['vlans'].labels(record_source=host['record_source'], tenant=host['tenant']).inc()
+            func.prom_metrics['record_sources'].labels(record_source=host['record_source']).inc()
+            func.prom_metrics['port_tenants'].labels(port=host['port'], tenant=host['tenant']).inc()
+            func.prom_metrics['port_hosts'].labels(port=host['port']).inc()
         except Exception as e:
-            func.logger.debug('unable to send {0} results to prometheus because {1}'.format(host, str(e)))
+            func.logger.error('unable to send {0} results to prometheus because {1}'.format(host, str(e)))
 
 
 def rabbit_callback(ch, method, properties, body, q=None):
@@ -515,13 +529,48 @@ def main(skip_rabbit=False):  # pragma: no cover
                                             'mac',
                                             'tenant',
                                             'segment',
+                                            'state',
                                             'port',
                                             'role',
+                                            'os',
+                                            'record_source'])
+    pmain.prom_metrics['ip_table'] = Gauge('poseidon_endpoint_ip_table',
+                                           'IP Table',
+                                           ['mac',
+                                            'tenant',
+                                            'segment',
+                                            'state',
+                                            'port',
+                                            'role',
+                                            'os',
+                                            'hash_id',
                                             'record_source'])
     pmain.prom_metrics['roles'] = Gauge('poseidon_endpoint_roles',
                                         'Number of endpoints by role',
                                         ['record_source',
                                          'role'])
+    pmain.prom_metrics['oses'] = Gauge('poseidon_endpoint_oses',
+                                        'Number of endpoints by OS',
+                                        ['record_source',
+                                         'os'])
+    pmain.prom_metrics['current_states'] = Gauge('poseidon_endpoint_current_states',
+                                        'Number of endpoints by current state',
+                                        ['record_source',
+                                         'current_state'])
+    pmain.prom_metrics['vlans'] = Gauge('poseidon_endpoint_vlans',
+                                        'Number of endpoints by VLAN',
+                                        ['record_source',
+                                         'tenant'])
+    pmain.prom_metrics['record_sources'] = Gauge('poseidon_endpoint_record_sources',
+                                                 'Number of endpoints by record source',
+                                                 ['record_source'])
+    pmain.prom_metrics['port_tenants'] = Gauge('poseidon_endpoint_port_tenants',
+                                               'Number of tenants by port',
+                                               ['port',
+                                                'tenant'])
+    pmain.prom_metrics['port_hosts'] = Gauge('poseidon_endpoint_port_hosts',
+                                             'Number of hosts by port',
+                                             ['port'])
     # start prometheus
     start_http_server(9304)
 
