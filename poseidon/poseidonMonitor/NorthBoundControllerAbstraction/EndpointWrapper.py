@@ -23,6 +23,7 @@ from collections import defaultdict
 
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.endPoint import EndPoint
+from poseidon.poseidonMonitor.Config.Config import config_interface
 
 module_logger = Logger
 
@@ -32,8 +33,22 @@ class Endpoint_Wrapper():
         super(Endpoint_Wrapper, self).__init__()
         self.state = defaultdict(EndPoint)
         self.logger = module_logger.logger
+        self.mod_configuration = dict()
         self.mod_name = self.__class__.__name__
         self.config_section_name = self.mod_name
+
+        self.Config = config_interface
+        self.Config.set_owner(self)
+        self.configSelf()
+
+    def configSelf(self):
+        ''' get configuraiton for this module '''
+        conf = self.Config.get_endpoint('Handle_SectionConfig')
+        for item in conf.direct_get(self.mod_name):
+            k, v = item
+            self.mod_configuration[k] = v
+        ostr = '{0}:config:{1}'.format(self.mod_name, self.mod_configuration)
+        self.logger.debug(ostr)
 
     def set(self, ep):
         self.state[ep.make_hash()] = ep
