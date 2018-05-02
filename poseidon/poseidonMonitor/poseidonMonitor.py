@@ -68,16 +68,25 @@ def schedule_job_kickurl(func, logger):
     # get current state
     r = requests.get('http://poseidon-api:8000/v1/network_full')
 
-    # clear gauges
-    #func.prom_metrics['behavior'].set(0)
-    #func.prom_metrics['roles'].set(0)
-
     # send results to prometheus
     hosts = r.json()['dataset']
+    metrics = {'roles':{},
+               'oses':{},
+               'current_states':{},
+               'vlans':{},
+               'record_sources':{},
+               'port_tenants':{},
+               'port_hosts':{}}
     for host in hosts:
+        if (host['record_source'], host['role']) in metrics['roles']:
+            metrics['roles'][(host['record_source'], host['role'])] += 1
+        else:
+            metrics['roles'][(host['record_source'], host['role'])] = 1
+
         try:
             func.prom_metrics['behavior'].labels(ip=host['ip'], mac=host['mac'], tenant=host['tenant'], segment=host['segment'], state=host['state'], port=host['port'], role=host['role'], os=host['os'], record_source=host['record_source']).set(host['behavior'])
             func.prom_metrics['ip_table'].labels(mac=host['mac'], tenant=host['tenant'], segment=host['segment'], state=host['state'], port=host['port'], role=host['role'], os=host['os'], hash_id=host['hash'], record_source=host['record_source']).set(ip2int(host['ip']))
+
             func.prom_metrics['roles'].labels(record_source=host['record_source'], role=host['role']).inc()
             func.prom_metrics['oses'].labels(record_source=host['record_source'], os=host['os']).inc()
             func.prom_metrics['current_states'].labels(record_source=host['record_source'], current_state=host['state']).inc()
@@ -87,6 +96,7 @@ def schedule_job_kickurl(func, logger):
             func.prom_metrics['port_hosts'].labels(port=host['port']).inc()
         except Exception as e:
             func.logger.error('unable to send {0} results to prometheus because {1}'.format(host, str(e)))
+    func.logger.info("roles {0}".format(metrics))
 
 
 def rabbit_callback(ch, method, properties, body, q=None):
