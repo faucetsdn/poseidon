@@ -444,6 +444,59 @@ class Monitor(object):
         except Exception as e:  # pragma: no cover
             self.logger.debug('failed to start vent collector' + str(e))
 
+    ## returns a dictionary of existing collectors keyed on dev_hash
+    def get_vent_collectors(self):
+
+        vent_addr = self.mod_configuration['vent_ip'] + \
+            ':' + self.mod_configuration['vent_port']
+        uri = 'http://' + vent_addr + '/list'
+        statuses = None
+        try:
+            resp = requests.get(uri)
+            text = resp.text
+            if text.index("True") != -1:
+                items =  ast.literal_eval(text[text.find(",")+2:text.rfind(")")])
+                collectors = {}
+                for item in items:
+                    host = item['args'][4][5:]
+                    coll = Collector(item['id'], item['args'][0], item['args'][1], item['args'][2], item['args'][3], host, item['status'])
+                    collectors.update({ coll.hash:coll })
+                statuses = collectors
+
+            self.logger.debug('collector list response: ' + resp.text)
+        except Exception as e:  # pragma: no cover
+            statuses = e
+            self.logger.debug('failed to get vent collector statuses' + str(e))
+
+        return statuses
+
+    def host_has_active_collectors(self, dev_hash):
+        active_collectors_exist = False
+
+        collectors = self.get_vent_collectors()
+
+        if dev_hash in collectors :
+            hash_coll = collectors[dev_hash]
+        else :
+            self.logger.info(
+                'Key: {0} not found in collector dictionary. '
+                'Treating this as the existence of multiple active'
+                'collectors'.format(dev_hash)
+                )
+            return True
+
+        for c in collectors:
+            self.logger.debug(c)
+            if (
+                collectors[c].hash != dev_hash and
+                collectors[c].host == hash_coll.host and
+                collectors[c].status != 'exited'
+               ):
+                active_collectors_exist = True
+                break
+
+        return active_collectors_exist
+
     def format_rabbit_message(self, item):
         ''' read a message off the rabbit_q
         the message should be item = (routing_key,msg)
@@ -535,16 +588,26 @@ class Monitor(object):
                 if next_state == 'KNOWN':
                     if (current_state == 'REINVESTIGATING' or
                         current_state == 'MIRRORING'):
-                        self.logger.debug(
-                            '*********** ' +
-                            current_state[0] +
-                            ' UN-MIRROR PORT ***********')
-                        self.uss.unmirror_endpoint(endpoint_hash, messages=self.faucet_event)
+                        if not self.host_has_active_collectors(endpoint_hash) :
+                            self.logger.debug(
+                                '*********** ' +
+                                current_state[0] +
+                                ' UN-MIRROR PORT ***********')
+                            self.uss.unmirror_endpoint(endpoint_hash, messages=self.faucet_event)
+                        else :
+                            self.logger.debug(
+                                '*********** ' +
+                                current_state[0] +
+                                ' CAN NOT UN-MIRROR PORT BECAUSE OF ACTIVE COLLECTOR ***********')
                         eps.change_endpoint_state(endpoint_hash)
                     if current_state == 'UNKNOWN':
-                        self.logger.debug(
-                            '*********** U UN-MIRROR PORT ***********')
-                        self.uss.unmirror_endpoint(endpoint_hash, messages=self.faucet_event)
+                        if not self.host_has_active_collectors(endpoint_hash) :
+                            self.logger.debug(
+                                '*********** U UN-MIRROR PORT ***********')
+                            self.uss.unmirror_endpoint(endpoint_hash, messages=self.faucet_event)
+                        else :
+                            self.logger.debug(
+                                '*********** U UN-MIRROR PORT ***********')
                         eps.change_endpoint_state(endpoint_hash)
                 if next_state == 'SHUTDOWN':
                     self.logger.debug(
@@ -589,6 +652,15 @@ class Monitor(object):
         except BaseException:  # pragma: no cover
             pass
 
+class Collector(object):
+    def __init__(self, id, nic, interval, hash, iterations, host, status):
+        self.id = id
+        self.nic = nic
+        self.interval = interval
+        self.hash = hash
+        self.iterations = iterations
+        self.host = host
+        self.status = status
 
 def main(skip_rabbit=False):  # pragma: no cover
     ''' main function '''
