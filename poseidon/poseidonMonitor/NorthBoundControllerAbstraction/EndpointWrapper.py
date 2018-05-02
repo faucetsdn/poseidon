@@ -22,8 +22,8 @@ Created on 21 Nov 2017
 from collections import defaultdict
 
 from poseidon.baseClasses.Logger_Base import Logger
-from poseidon.poseidonMonitor.endPoint import EndPoint
 from poseidon.poseidonMonitor.Config.Config import config_interface
+from poseidon.poseidonMonitor.endPoint import EndPoint
 
 module_logger = Logger
 
@@ -35,10 +35,7 @@ class Endpoint_Wrapper():
         self.logger = module_logger.logger
         self.mod_configuration = dict()
         self.mod_name = self.__class__.__name__
-        self.config_section_name = self.mod_name
-
         self.Config = config_interface
-        self.Config.set_owner(self)
         self.configSelf()
 
     def configSelf(self):
