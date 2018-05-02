@@ -29,8 +29,11 @@ module_logger = Logger
 
 class Endpoint_Wrapper():
     def __init__(self):
+        super(Endpoint_Wrapper, self).__init__()
         self.state = defaultdict(EndPoint)
         self.logger = module_logger.logger
+        self.mod_name = self.__class__.__name__
+        self.config_section_name = self.mod_name
 
     def set(self, ep):
         self.state[ep.make_hash()] = ep
@@ -62,6 +65,23 @@ class Endpoint_Wrapper():
         ''' updaate the next state of an endpoint '''
         self.state[my_hash].next_state = next_state
 
+    def update_vent_collector(self, my_hash, endpoint):
+        ''' update the metadata on the endpoint's vent collector '''
+        payload = {'id': my_hash,
+                   'metadata': endpoint.to_str()}
+
+        self.logger.debug('vent update payload: ' + str(payload))
+
+        vent_addr = self.mod_configuration['vent_ip'] + \
+            ':' + self.mod_configuration['vent_port']
+        uri = 'http://' + vent_addr + '/update'
+
+        try:
+            resp = requests.post(uri, data=json.dumps(payload))
+            self.logger.debug('collector update response: ' + resp.text)
+        except Exception as e:  # pragma: no cover
+            self.logger.debug('failed to update vent collector' + str(e))
+
     def print_endpoint_state(self):
         ''' debug output about what the current state of endpoints is '''
         def same_old(logger, state, letter, endpoint_states):
@@ -72,6 +92,8 @@ class Endpoint_Wrapper():
                 endpoint = endpoint_states[my_hash]
                 if endpoint.state == state:
                     out_flag = True
+                    # update metadata on vent collectors
+                    self.update_vent_collector(my_hash, endpoint)
                     logger.info('{0}:{1}:{2}->{3}:{4}'.format(letter,
                                                               my_hash,
                                                               endpoint.state,
