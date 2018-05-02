@@ -388,9 +388,19 @@ class Monitor(object):
         active_collectors_exist = False
 
         collectors = self.get_vent_collectors()
-        hash_coll = collectors[dev_hash]
+
+        if dev_hash in collectors :
+            hash_coll = collectors[dev_hash]
+        else :
+            self.logger.info(
+                'Key: {0} not found in collector dictionary. '
+                'Treating this as the existence of multiple active'
+                'collectors'.format(dev_hash)
+                )
+            return True
 
         for c in collectors:
+            self.logger.debug(c)
             if (
                 collectors[c].hash != dev_hash and
                 collectors[c].host == hash_coll.host and
@@ -492,16 +502,26 @@ class Monitor(object):
                 if next_state == 'KNOWN':
                     if (current_state == 'REINVESTIGATING' or
                         current_state == 'MIRRORING'):
-                        self.logger.debug(
-                            '*********** ' +
-                            current_state[0] +
-                            ' UN-MIRROR PORT ***********')
-                        self.uss.unmirror_endpoint(endpoint_hash, messages=self.faucet_event)
+                        if not self.host_has_active_collectors(endpoint_hash) :
+                            self.logger.debug(
+                                '*********** ' +
+                                current_state[0] +
+                                ' UN-MIRROR PORT ***********')
+                            self.uss.unmirror_endpoint(endpoint_hash, messages=self.faucet_event)
+                        else :
+                            self.logger.debug(
+                                '*********** ' +
+                                current_state[0] +
+                                ' CAN NOT UN-MIRROR PORT BECAUSE OF ACTIVE COLLECTOR ***********')
                         eps.change_endpoint_state(endpoint_hash)
                     if current_state == 'UNKNOWN':
-                        self.logger.debug(
-                            '*********** U UN-MIRROR PORT ***********')
-                        self.uss.unmirror_endpoint(endpoint_hash, messages=self.faucet_event)
+                        if not self.host_has_active_collectors(endpoint_hash) :
+                            self.logger.debug(
+                                '*********** U UN-MIRROR PORT ***********')
+                            self.uss.unmirror_endpoint(endpoint_hash, messages=self.faucet_event)
+                        else :
+                            self.logger.debug(
+                                '*********** U UN-MIRROR PORT ***********')
                         eps.change_endpoint_state(endpoint_hash)
                 if next_state == 'SHUTDOWN':
                     self.logger.debug(

@@ -29,6 +29,7 @@ from poseidon.poseidonMonitor.endPoint import EndPoint
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.EndpointWrapper import Endpoint_Wrapper
 
 from poseidon.poseidonMonitor.poseidonMonitor import (CTRL_C, Monitor,
+                                                      Collector,
                                                       schedule_job_kickurl,
                                                       schedule_thread_worker)
 
@@ -1177,6 +1178,18 @@ def test_process():
 
         def format_rabbit_message(self, item):
             return {}
+
+        def get_vent_collectors(self):
+            return {
+                '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {
+                    Collector('test0',2,900,'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3',
+                        1,'10.00.0.101','exited')
+                },
+                'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {
+                    Collector('test1',2,900,'d60c5fa5c980b1cd791208eaf62aba9fb46d3aaa',
+                        1,'10.00.0.99','exited')
+                }
+            }
 
     mock_monitor = MockMonitor()
     mock_monitor.uss = MockUss()
