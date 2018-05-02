@@ -358,7 +358,8 @@ class Monitor(object):
         except Exception as e:  # pragma: no cover
             self.logger.debug('failed to start vent collector' + str(e))
 
-    def get_vent_collector_statuses(self):
+    ## returns a dictionary of existing collectors keyed on dev_hash
+    def get_vent_collectors(self):
 
         vent_addr = self.mod_configuration['vent_ip'] + \
             ':' + self.mod_configuration['vent_port']
@@ -369,11 +370,11 @@ class Monitor(object):
             text = resp.text
             if text.index("True") != -1:
                 items =  ast.literal_eval(text[text.find(",")+2:text.rfind(")")])
-                collectors = []
+                collectors = {}
                 for item in items:
                     host = item['args'][4][5:]
                     coll = Collector(item['id'], item['args'][0], item['args'][1], item['args'][2], item['args'][3], host, item['status'])
-                    collectors.append(coll)
+                    collectors.update({ coll.hash:coll })
                 statuses = collectors
 
             self.logger.debug('collector list response: ' + resp.text)
@@ -382,6 +383,23 @@ class Monitor(object):
             self.logger.debug('failed to get vent collector statuses' + str(e))
 
         return statuses
+
+    def host_has_active_collectors(self, dev_hash):
+        active_collectors_exist = False
+
+        collectors = self.get_vent_collectors()
+        hash_coll = collectors[dev_hash]
+
+        for c in collectors:
+            if (
+                collectors[c].hash != dev_hash and
+                collectors[c].host == hash_coll.host and
+                collectors[c].status != 'exited'
+               ):
+                active_collectors_exist = True
+                break
+
+        return active_collectors_exist
 
     def format_rabbit_message(self, item):
         ''' read a message off the rabbit_q
