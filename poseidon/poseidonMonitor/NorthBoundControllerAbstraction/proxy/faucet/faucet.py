@@ -92,8 +92,8 @@ class FaucetProxy(Connection, Parser):
                 self.mac_table[mac][0]['ip-address'] != 'None' and
                 self.mac_table[mac][0]['ip-address'] != '127.0.0.1' and
                 self.mac_table[mac][0]['ip-address'] != '0.0.0.0' and
-                self.mac_table[mac][0]['ip-address'] != '169.254.39.154' and
                 self.mac_table[mac][0]['ip-address'] != '::' and
+                not self.mac_table[mac][0]['ip-address'].startswith('169.254.') and
                 not self.mac_table[mac][0]['ip-address'].startswith('fe80:')):
                     module_logger.debug('{0}:{1}'.format(
                         mac, self.mac_table[mac]))
