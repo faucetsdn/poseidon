@@ -358,6 +358,31 @@ class Monitor(object):
         except Exception as e:  # pragma: no cover
             self.logger.debug('failed to start vent collector' + str(e))
 
+    def get_vent_collector_statuses(self):
+
+        vent_addr = self.mod_configuration['vent_ip'] + \
+            ':' + self.mod_configuration['vent_port']
+        uri = 'http://' + vent_addr + '/list'
+        statuses = None
+        try:
+            resp = requests.get(uri)
+            text = resp.text
+            if text.index("True") != -1:
+                items =  ast.literal_eval(text[text.find(",")+2:text.rfind(")")])
+                collectors = []
+                for item in items:
+                    host = item['args'][4][5:]
+                    coll = Collector(item['id'], item['args'][0], item['args'][1], item['args'][2], item['args'][3], host, item['status'])
+                    collectors.append(coll)
+                statuses = collectors
+
+            self.logger.debug('collector list response: ' + resp.text)
+        except Exception as e:  # pragma: no cover
+            statuses = e
+            self.logger.debug('failed to get vent collector statuses' + str(e))
+
+        return statuses
+
     def format_rabbit_message(self, item):
         ''' read a message off the rabbit_q
         the message should be item = (routing_key,msg)
@@ -503,6 +528,15 @@ class Monitor(object):
         except BaseException:  # pragma: no cover
             pass
 
+class Collector(object):
+    def __init__(self, id, nic, interval, hash, iterations, host, status):
+        self.id = id
+        self.nic = nic
+        self.interval = interval
+        self.hash = hash
+        self.iterations = iterations
+        self.host = host
+        self.status = status
 
 def main(skip_rabbit=False):  # pragma: no cover
     ''' main function '''
