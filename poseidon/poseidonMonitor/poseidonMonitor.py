@@ -151,12 +151,12 @@ def schedule_job_kickurl(func, logger):
             func.prom_metrics['vlans'].labels(record_source=vlan[0],
                                               tenant=vlan[1]).set(metrics['vlans'][vlan])
         for record_source in metrics['record_sources']:
-            func.prom_metrics['record_sources'].labels(record_source=record_source[0]).set(metrics['record_sources'][record_source])
+            func.prom_metrics['record_sources'].labels(record_source=record_source).set(metrics['record_sources'][record_source])
         for port_tenant in metrics['port_tenants']:
             func.prom_metrics['port_tenants'].labels(port=port_tenant[0],
                                                      tenant=port_tenant[1]).set(metrics['port_tenants'][port_tenant])
         for port_host in metrics['port_hosts']:
-            func.prom_metrics['port_hosts'].labels(port=port_host[0]).set(metrics['port_hosts'][port_host])
+            func.prom_metrics['port_hosts'].labels(port=port_host).set(metrics['port_hosts'][port_host])
     except Exception as e:
         func.logger.error('unable to send {0} results to prometheus because {1}'.format(host, str(e)))
 
