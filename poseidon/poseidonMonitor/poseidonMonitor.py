@@ -146,7 +146,7 @@ def schedule_job_kickurl(func, logger):
                                              os=os_t[1]).set(metrics['oses'][os_t])
         for current_state in metrics['current_states']:
             func.prom_metrics['current_states'].labels(record_source=current_state[0],
-                                                       current_state=current_state[1]).set(metrics['current_state'][current_state])
+                                                       current_state=current_state[1]).set(metrics['current_states'][current_state])
         for vlan in metrics['vlans']:
             func.prom_metrics['vlans'].labels(record_source=vlan[0],
                                               tenant=vlan[1]).set(metrics['vlans'][vlan])
