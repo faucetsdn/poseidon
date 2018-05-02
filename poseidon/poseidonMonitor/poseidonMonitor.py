@@ -68,25 +68,97 @@ def schedule_job_kickurl(func, logger):
     # get current state
     r = requests.get('http://poseidon-api:8000/v1/network_full')
 
-    # clear gauges
-    #func.prom_metrics['behavior'].set(0)
-    #func.prom_metrics['roles'].set(0)
-
     # send results to prometheus
     hosts = r.json()['dataset']
+    metrics = {'roles':{},
+               'oses':{},
+               'current_states':{},
+               'vlans':{},
+               'record_sources':{},
+               'port_tenants':{},
+               'port_hosts':{}}
     for host in hosts:
+        if (host['record_source'], host['role']) in metrics['roles']:
+            metrics['roles'][(host['record_source'], host['role'])] += 1
+        else:
+            metrics['roles'][(host['record_source'], host['role'])] = 1
+
+        if (host['record_source'], host['os']) in metrics['oses']:
+            metrics['oses'][(host['record_source'], host['os'])] += 1
+        else:
+            metrics['oses'][(host['record_source'], host['os'])] = 1
+
+        if (host['record_source'], host['state']) in metrics['current_states']:
+            metrics['current_states'][(host['record_source'],
+                                       host['state'])] += 1
+        else:
+            metrics['current_states'][(host['record_source'],
+                                       host['state'])] = 1
+
+        if (host['record_source'], host['tenant']) in metrics['vlans']:
+            metrics['vlans'][(host['record_source'], host['tenant'])] += 1
+        else:
+            metrics['vlans'][(host['record_source'], host['tenant'])] = 1
+
+        if (host['record_source']) in metrics['record_sources']:
+            metrics['record_sources'][(host['record_source'])] += 1
+        else:
+            metrics['record_sources'][(host['record_source'])] = 1
+
+        if (host['port'], host['tenant']) in metrics['port_tenants']:
+            metrics['port_tenants'][(host['port'], host['tenant'])] += 1
+        else:
+            metrics['port_tenants'][(host['port'], host['tenant'])] = 1
+
+        if (host['port']) in metrics['port_hosts']:
+            metrics['port_hosts'][(host['port'])] += 1
+        else:
+            metrics['port_hosts'][(host['port'])] = 1
+
         try:
-            func.prom_metrics['behavior'].labels(ip=host['ip'], mac=host['mac'], tenant=host['tenant'], segment=host['segment'], state=host['state'], port=host['port'], role=host['role'], os=host['os'], record_source=host['record_source']).set(host['behavior'])
-            func.prom_metrics['ip_table'].labels(mac=host['mac'], tenant=host['tenant'], segment=host['segment'], state=host['state'], port=host['port'], role=host['role'], os=host['os'], hash_id=host['hash'], record_source=host['record_source']).set(ip2int(host['ip']))
-            func.prom_metrics['roles'].labels(record_source=host['record_source'], role=host['role']).inc()
-            func.prom_metrics['oses'].labels(record_source=host['record_source'], os=host['os']).inc()
-            func.prom_metrics['current_states'].labels(record_source=host['record_source'], current_state=host['state']).inc()
-            func.prom_metrics['vlans'].labels(record_source=host['record_source'], tenant=host['tenant']).inc()
-            func.prom_metrics['record_sources'].labels(record_source=host['record_source']).inc()
-            func.prom_metrics['port_tenants'].labels(port=host['port'], tenant=host['tenant']).inc()
-            func.prom_metrics['port_hosts'].labels(port=host['port']).inc()
+            func.prom_metrics['behavior'].labels(ip=host['ip'],
+                                                 mac=host['mac'],
+                                                 tenant=host['tenant'],
+                                                 segment=host['segment'],
+                                                 state=host['state'],
+                                                 port=host['port'],
+                                                 role=host['role'],
+                                                 os=host['os'],
+                                                 record_source=host['record_source']).set(host['behavior'])
+            func.prom_metrics['ip_table'].labels(mac=host['mac'],
+                                                 tenant=host['tenant'],
+                                                 segment=host['segment'],
+                                                 state=host['state'],
+                                                 port=host['port'],
+                                                 role=host['role'],
+                                                 os=host['os'],
+                                                 hash_id=host['hash'],
+                                                 record_source=host['record_source']).set(ip2int(host['ip']))
         except Exception as e:
             func.logger.error('unable to send {0} results to prometheus because {1}'.format(host, str(e)))
+
+    try:
+        for role in metrics['roles']:
+            func.prom_metrics['roles'].labels(record_source=role[0],
+                                              role=role[1]).set(metrics['roles'][role])
+        for os_t in metrics['oses']:
+            func.prom_metrics['oses'].labels(record_source=os_t[0],
+                                             os=os_t[1]).set(metrics['oses'][os_t])
+        for current_state in metrics['current_states']:
+            func.prom_metrics['current_states'].labels(record_source=current_state[0],
+                                                       current_state=current_state[1]).set(metrics['current_states'][current_state])
+        for vlan in metrics['vlans']:
+            func.prom_metrics['vlans'].labels(record_source=vlan[0],
+                                              tenant=vlan[1]).set(metrics['vlans'][vlan])
+        for record_source in metrics['record_sources']:
+            func.prom_metrics['record_sources'].labels(record_source=record_source[0]).set(metrics['record_sources'][record_source])
+        for port_tenant in metrics['port_tenants']:
+            func.prom_metrics['port_tenants'].labels(port=port_tenant[0],
+                                                     tenant=port_tenant[1]).set(metrics['port_tenants'][port_tenant])
+        for port_host in metrics['port_hosts']:
+            func.prom_metrics['port_hosts'].labels(port=port_host[0]).set(metrics['port_hosts'][port_host])
+    except Exception as e:
+        func.logger.error('unable to send {0} results to prometheus because {1}'.format(host, str(e)))
 
 
 def rabbit_callback(ch, method, properties, body, q=None):
