@@ -137,7 +137,7 @@ def schedule_job_kickurl(func, logger):
                                                  hash_id=host['hash'],
                                                  record_source=host['record_source']).set(ip2int(host['ip']))
         except Exception as e:
-            func.logger.error('unable to send {0} results to prometheus because {1}'.format(host, str(e)))
+            logger.error('unable to send {0} results to prometheus because {1}'.format(host, str(e)))
 
     try:
         for role in metrics['roles']:
@@ -160,7 +160,7 @@ def schedule_job_kickurl(func, logger):
         for port_host in metrics['port_hosts']:
             func.prom_metrics['port_hosts'].labels(port=port_host).set(metrics['port_hosts'][port_host])
     except Exception as e:
-        func.logger.error('unable to send {0} results to prometheus because {1}'.format(host, str(e)))
+        logger.error('unable to send results to prometheus because {0}'.format(str(e)))
 
 
 def rabbit_callback(ch, method, properties, body, q=None):

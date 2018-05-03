@@ -102,6 +102,8 @@ class Endpoint_Wrapper():
         def same_old(logger, state, letter, endpoint_states):
             logger.info('*******{0}*********'.format(state))
 
+            # TODO if no endpoints, update prometheus
+
             out_flag = False
             for my_hash in endpoint_states.keys():
                 endpoint = endpoint_states[my_hash]
