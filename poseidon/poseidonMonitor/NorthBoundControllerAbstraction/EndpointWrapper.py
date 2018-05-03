@@ -19,6 +19,8 @@ Created on 21 Nov 2017
 '''
 
 
+import requests
+
 from collections import defaultdict
 
 from poseidon.baseClasses.Logger_Base import Logger
