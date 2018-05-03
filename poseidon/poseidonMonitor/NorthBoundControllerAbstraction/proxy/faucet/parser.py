@@ -199,8 +199,8 @@ class Parser:
                                 'mac': learned_mac[10],
                                 'segment': learned_mac[7][1:-1],
                                 'port': learned_mac[22],
-                                'tenant': learned_mac[24] + learned_mac[25]},
-                                'active': 1
+                                'tenant': learned_mac[24] + learned_mac[25],
+                                'active': 1}
                         if learned_mac[10] in self.mac_table:
                             dup = False
                             for d in self.mac_table[learned_mac[10]]:
