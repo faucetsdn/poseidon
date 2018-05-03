@@ -83,59 +83,89 @@ def schedule_job_kickurl(func, logger):
                'port_hosts':{}}
     for host in hosts:
         if (host['record_source'], host['role']) in metrics['roles']:
-            metrics['roles'][(host['record_source'], host['role'])] += 1
+            if host['active'] == 1:
+                metrics['roles'][(host['record_source'], host['role'])] += 1
         else:
-            metrics['roles'][(host['record_source'], host['role'])] = 1
+            if host['active'] == 1:
+                metrics['roles'][(host['record_source'], host['role'])] = 1
+            else:
+                metrics['roles'][(host['record_source'], host['role'])] = 0
 
         if (host['record_source'], host['os']) in metrics['oses']:
-            metrics['oses'][(host['record_source'], host['os'])] += 1
+            if host['active'] == 1:
+                metrics['oses'][(host['record_source'], host['os'])] += 1
         else:
-            metrics['oses'][(host['record_source'], host['os'])] = 1
+            if host['active'] == 1:
+                metrics['oses'][(host['record_source'], host['os'])] = 1
+            else:
+                metrics['oses'][(host['record_source'], host['os'])] = 0
 
         if (host['record_source'], host['state']) in metrics['current_states']:
-            metrics['current_states'][(host['record_source'],
-                                       host['state'])] += 1
+            if host['active'] == 1:
+                metrics['current_states'][(host['record_source'],
+                                           host['state'])] += 1
         else:
-            metrics['current_states'][(host['record_source'],
-                                       host['state'])] = 1
+            if host['active'] == 1:
+                metrics['current_states'][(host['record_source'],
+                                           host['state'])] = 1
+            else:
+                metrics['current_states'][(host['record_source'],
+                                           host['state'])] = 0
 
         if (host['record_source'], host['tenant']) in metrics['vlans']:
-            metrics['vlans'][(host['record_source'], host['tenant'])] += 1
+            if host['active'] == 1:
+                metrics['vlans'][(host['record_source'], host['tenant'])] += 1
         else:
-            metrics['vlans'][(host['record_source'], host['tenant'])] = 1
+            if host['active'] == 1:
+                metrics['vlans'][(host['record_source'], host['tenant'])] = 1
+            else:
+                metrics['vlans'][(host['record_source'], host['tenant'])] = 0
 
         if (host['record_source']) in metrics['record_sources']:
-            metrics['record_sources'][(host['record_source'])] += 1
+            if host['active'] == 1:
+                metrics['record_sources'][(host['record_source'])] += 1
         else:
-            metrics['record_sources'][(host['record_source'])] = 1
+            if host['active'] == 1:
+                metrics['record_sources'][(host['record_source'])] = 1
+            else:
+                metrics['record_sources'][(host['record_source'])] = 0
 
         if (host['port'], host['tenant']) in metrics['port_tenants']:
-            metrics['port_tenants'][(host['port'], host['tenant'])] += 1
+            if host['active'] == 1:
+                metrics['port_tenants'][(host['port'], host['tenant'])] += 1
         else:
-            metrics['port_tenants'][(host['port'], host['tenant'])] = 1
+            if host['active'] == 1:
+                metrics['port_tenants'][(host['port'], host['tenant'])] = 1
+            else:
+                metrics['port_tenants'][(host['port'], host['tenant'])] = 0
 
         if (host['port']) in metrics['port_hosts']:
-            metrics['port_hosts'][(host['port'])] += 1
+            if host['active'] == 1:
+                metrics['port_hosts'][(host['port'])] += 1
         else:
-            metrics['port_hosts'][(host['port'])] = 1
+            if host['active'] == 1:
+                metrics['port_hosts'][(host['port'])] = 1
+            else:
+                metrics['port_hosts'][(host['port'])] = 0
 
         try:
-            func.prom_metrics['behavior'].labels(ip=host['ip'],
-                                                 mac=host['mac'],
-                                                 tenant=host['tenant'],
-                                                 segment=host['segment'],
-                                                 port=host['port'],
-                                                 role=host['role'],
-                                                 os=host['os'],
-                                                 record_source=host['record_source']).set(host['behavior'])
-            func.prom_metrics['ip_table'].labels(mac=host['mac'],
-                                                 tenant=host['tenant'],
-                                                 segment=host['segment'],
-                                                 port=host['port'],
-                                                 role=host['role'],
-                                                 os=host['os'],
-                                                 hash_id=host['hash'],
-                                                 record_source=host['record_source']).set(ip2int(host['ip']))
+            if host['active'] == 1:
+                func.prom_metrics['behavior'].labels(ip=host['ip'],
+                                                     mac=host['mac'],
+                                                     tenant=host['tenant'],
+                                                     segment=host['segment'],
+                                                     port=host['port'],
+                                                     role=host['role'],
+                                                     os=host['os'],
+                                                     record_source=host['record_source']).set(host['behavior'])
+                func.prom_metrics['ip_table'].labels(mac=host['mac'],
+                                                     tenant=host['tenant'],
+                                                     segment=host['segment'],
+                                                     port=host['port'],
+                                                     role=host['role'],
+                                                     os=host['os'],
+                                                     hash_id=host['hash'],
+                                                     record_source=host['record_source']).set(ip2int(host['ip']))
         except Exception as e:
             logger.error('unable to send {0} results to prometheus because {1}'.format(host, str(e)))
 
