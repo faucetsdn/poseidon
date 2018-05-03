@@ -108,14 +108,17 @@ class Endpoint_Wrapper():
             for my_hash in endpoint_states.keys():
                 endpoint = endpoint_states[my_hash]
                 if endpoint.state == state:
-                    out_flag = True
                     # update metadata on vent collectors
                     self.update_vent_collector(my_hash, endpoint)
-                    logger.info('{0}:{1}:{2}->{3}:{4}'.format(letter,
-                                                              my_hash,
-                                                              endpoint.state,
-                                                              endpoint.next_state,
-                                                              endpoint.endpoint_data))
+                    if 'active' in endpoint.endpoint_data and endpoint.endpoint_data['active'] == 0:
+                        break
+                    else:
+                        out_flag = True
+                        logger.info('{0}:{1}:{2}->{3}:{4}'.format(letter,
+                                                                  my_hash,
+                                                                  endpoint.state,
+                                                                  endpoint.next_state,
+                                                                  endpoint.endpoint_data))
             if not out_flag:
                 logger.info('None')
 
@@ -128,3 +131,8 @@ class Endpoint_Wrapper():
 
         self.logger.info('****************')
         self.logger.info('====STOP')
+
+        # cleanup endpoints that are no longer active
+        for my_hash in self.state.keys():
+            if self.state[my_hash].endpoint_data['active'] == 0:
+                del self.state[my_hash]
