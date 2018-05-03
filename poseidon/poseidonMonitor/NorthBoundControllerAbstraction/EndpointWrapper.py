@@ -91,12 +91,11 @@ class Endpoint_Wrapper():
             ':' + self.mod_configuration['vent_port']
         uri = 'http://' + vent_addr + '/update'
 
-        self.logger.info(uri)
         try:
             resp = requests.post(uri, data=json.dumps(payload))
-            self.logger.info('collector update response: ' + resp.text)
+            self.logger.debug('collector update response: ' + resp.text)
         except Exception as e:  # pragma: no cover
-            self.logger.info('failed to update vent collector' + str(e))
+            self.logger.debug('failed to update vent collector' + str(e))
 
     def print_endpoint_state(self):
         ''' debug output about what the current state of endpoints is '''
