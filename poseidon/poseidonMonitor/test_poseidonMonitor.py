@@ -1040,6 +1040,9 @@ def test_schedule_job_kickurl():
         def debug(self, msg):
             pass
 
+        def error(self, msg):
+            pass
+
     class helper():
 
         def __init__(self):
@@ -1096,6 +1099,12 @@ def test_process():
     class MockEndpoint(Endpoint_Wrapper):
         def __init__(self):
             super(MockEndpoint, self).__init__()
+
+        def configSelf(self):
+            self.mod_configuration = {
+                'vent_ip': '0.0.0.0',
+                'vent_port': '8080'
+            }
 
         def makedata(self):
             stuff = dict(
@@ -1165,7 +1174,7 @@ def test_process():
                 'collector_interval': 900,
                 'collector_nic': 2,
                 'vent_ip': '0.0.0.0',
-                'vent_port': '8080',
+                'vent_port': '8080'
             }
             self.fa_rabbit_routing_key = 'FAUCET.Event'
             self.faucet_event = None

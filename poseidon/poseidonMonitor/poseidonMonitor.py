@@ -72,7 +72,11 @@ def schedule_job_kickurl(func, logger):
     hosts = r.json()['dataset']
     metrics = {'roles':{},
                'oses':{},
-               'current_states':{},
+               'current_states':{('Poseidon', 'KNOWN'):0,
+                                 ('Poseidon', 'UNKNOWN'):0,
+                                 ('Poseidon', 'MIRRORING'):0,
+                                 ('Poseidon', 'SHUTDOWN'):0,
+                                 ('Poseidon', 'REINVESTIGATING'):0},
                'vlans':{},
                'record_sources':{},
                'port_tenants':{},
@@ -120,7 +124,6 @@ def schedule_job_kickurl(func, logger):
                                                  mac=host['mac'],
                                                  tenant=host['tenant'],
                                                  segment=host['segment'],
-                                                 state=host['state'],
                                                  port=host['port'],
                                                  role=host['role'],
                                                  os=host['os'],
@@ -128,14 +131,13 @@ def schedule_job_kickurl(func, logger):
             func.prom_metrics['ip_table'].labels(mac=host['mac'],
                                                  tenant=host['tenant'],
                                                  segment=host['segment'],
-                                                 state=host['state'],
                                                  port=host['port'],
                                                  role=host['role'],
                                                  os=host['os'],
                                                  hash_id=host['hash'],
                                                  record_source=host['record_source']).set(ip2int(host['ip']))
         except Exception as e:
-            func.logger.error('unable to send {0} results to prometheus because {1}'.format(host, str(e)))
+            logger.error('unable to send {0} results to prometheus because {1}'.format(host, str(e)))
 
     try:
         for role in metrics['roles']:
@@ -158,7 +160,7 @@ def schedule_job_kickurl(func, logger):
         for port_host in metrics['port_hosts']:
             func.prom_metrics['port_hosts'].labels(port=port_host).set(metrics['port_hosts'][port_host])
     except Exception as e:
-        func.logger.error('unable to send {0} results to prometheus because {1}'.format(host, str(e)))
+        logger.error('unable to send results to prometheus because {0}'.format(str(e)))
 
 
 def rabbit_callback(ch, method, properties, body, q=None):
@@ -517,7 +519,7 @@ class Monitor(object):
             self.logger.debug('FAUCET Event:{0}'.format(my_obj))
             for key in my_obj:
                 ret_val[key] = my_obj[key]
-        # TODO do something with reccomendation
+        # TODO do something with recomendation
         return ret_val
 
     def process(self):
@@ -673,7 +675,6 @@ def main(skip_rabbit=False):  # pragma: no cover
                                             'mac',
                                             'tenant',
                                             'segment',
-                                            'state',
                                             'port',
                                             'role',
                                             'os',
@@ -683,7 +684,6 @@ def main(skip_rabbit=False):  # pragma: no cover
                                            ['mac',
                                             'tenant',
                                             'segment',
-                                            'state',
                                             'port',
                                             'role',
                                             'os',
