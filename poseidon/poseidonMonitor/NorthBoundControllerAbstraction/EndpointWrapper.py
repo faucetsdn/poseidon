@@ -41,7 +41,9 @@ class Endpoint_Wrapper():
     def configSelf(self):
         ''' get configuraiton for this module '''
         conf = self.Config.get_endpoint('Handle_SectionConfig')
+        self.logger.info(self.mod_name)
         for item in conf.direct_get(self.mod_name):
+            self.logger.info(item)
             k, v = item
             self.mod_configuration[k] = v
         ostr = '{0}:config:{1}'.format(self.mod_name, self.mod_configuration)
