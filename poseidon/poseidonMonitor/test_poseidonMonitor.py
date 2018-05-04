@@ -1114,6 +1114,7 @@ def test_process():
                         'mac': 'f8:b1:56:fe:f2:de',
                         'segment': 'prod',
                         'tenant': 'FLOORPLATE',
+                        'active': 1,
                         'name': None},
                         prev_state='NONE', state='UNKNOWN', next_state='MIRRORING'),
                     'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
@@ -1121,6 +1122,7 @@ def test_process():
                         'mac': '20:4c:9e:5f:e3:c3',
                         'segment': 'to-core-router',
                         'tenant': 'EXTERNAL',
+                        'active': 1,
                         'name': None},
                         prev_state='NONE', state='KNOWN', next_state='REINVESTIGATING'),
                     'd60c5fa5c980b1cd791208eaf62aba9fb46d3aab': EndPoint({
@@ -1128,6 +1130,7 @@ def test_process():
                         'mac': '20:4c:9e:5f:e3:c3',
                         'segment': 'to-core-router',
                         'tenant': 'EXTERNAL',
+                        'active': 1,
                         'name': None},
                         prev_state='NONE', state='KNOWN', next_state='NONE'),
                     'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': EndPoint({
@@ -1135,6 +1138,7 @@ def test_process():
                         'mac': '20:4c:9e:5f:e3:c3',
                         'segment': 'to-core-router',
                         'tenant': 'EXTERNAL',
+                        'active': 1,
                         'name': None},
                         prev_state='NONE', state='REINVESTIGATING', next_state='KNOWN'),
                     'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': EndPoint({
@@ -1142,6 +1146,7 @@ def test_process():
                         'mac': '20:4c:9e:5f:e3:c3',
                         'segment': 'to-core-router',
                         'tenant': 'EXTERNAL',
+                        'active': 1,
                         'name': None},
                         prev_state='NONE', state='UNKNOWN', next_state='KNOWN')
                 })
@@ -1220,6 +1225,7 @@ def test_process():
                     'mac': 'f8:b1:56:fe:f2:de',
                     'segment': 'prod',
                     'tenant': 'FLOORPLATE',
+                    'active': 1,
                     'name': None}},
             'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {
                 'state': 'KNOWN',
@@ -1229,6 +1235,7 @@ def test_process():
                     'mac': '20:4c:9e:5f:e3:c3',
                     'segment': 'to-core-router',
                     'tenant': 'EXTERNAL',
+                    'active': 1,
                     'name': None}},
             'd60c5fa5c980b1cd791208eaf62aba9fb46d3aab': {
                 'state': 'KNOWN',
@@ -1238,24 +1245,27 @@ def test_process():
                     'mac': '20:4c:9e:5f:e3:c3',
                     'segment': 'to-core-router',
                     'tenant': 'EXTERNAL',
+                    'active': 1,
                     'name': None}},
             'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': {
-                'state': 'KNOWN',
-                'next-state': 'NONE',
+                'state': 'REINVESTIGATING',
+                'next-state': 'KNOWN',
                 'endpoint': {
                     'ip-address': '10.0.0.99',
                     'mac': '20:4c:9e:5f:e3:c3',
                     'segment': 'to-core-router',
                     'tenant': 'EXTERNAL',
+                    'active': 1,
                     'name': None}},
             'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': {
-                'state': 'KNOWN',
-                'next-state': 'NONE',
+                'state': 'UNKNOWN',
+                'next-state': 'KNOWN',
                 'endpoint': {
                     'ip-address': '10.0.0.99',
                     'mac': '20:4c:9e:5f:e3:c3',
                     'segment': 'to-core-router',
                     'tenant': 'EXTERNAL',
+                    'active': 1,
                     'name': None}}
         })
 
