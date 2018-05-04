@@ -201,6 +201,8 @@ class Update_Switch_State(Monitor_Helper_Base):
                      (end_point.endpoint_data['active'] == 1 and self.endpoints.state[h].endpoint_data['active'] != 1)):
                     self.endpoints.set(end_point)
                     changed = True
+        for h in self.endpoints.state:
+            self.logger.info("endpoint: {0}".format(self.endpoints.state[h].endpoint_data))
         if changed:
             self.endpoints.print_endpoint_state()
 
