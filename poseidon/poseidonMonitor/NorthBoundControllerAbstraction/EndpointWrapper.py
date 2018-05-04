@@ -112,7 +112,7 @@ class Endpoint_Wrapper():
                         endpoint.next_state = 'REINVESTIGATING'
                     else:
                         out_flag = True
-                        pp_endpoint_data = endpoint.endpoint_data
+                        pp_endpoint_data = endpoint.endpoint_data.copy()
                         self.logger.info("pp_endpoint_data: {0}".format(pp_endpoint_data))
                         del pp_endpoint_data['active']
                         del pp_endpoint_data['name']
@@ -146,6 +146,5 @@ class Endpoint_Wrapper():
 
         # cleanup endpoints that are no longer active
         for my_hash in self.state.keys():
-            self.logger.info("endpoint data: {0}".format(self.state[my_hash].endpoint_data))
-            if 'active' in self.state[my_hash].endpoint_data and self.state[my_hash].endpoint_data['active'] == 0:
+            if self.state[my_hash].endpoint_data['active'] == 0:
                 del self.state[my_hash]
