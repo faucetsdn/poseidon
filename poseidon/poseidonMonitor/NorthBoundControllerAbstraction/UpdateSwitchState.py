@@ -189,8 +189,8 @@ class Update_Switch_State(Monitor_Helper_Base):
             machine_hashes = []
             for machine in machines:
                 end_point = EndPoint(machine, state='UNKNOWN')
+                h = end_point.make_hash()
                 if end_point.endpoint_data['active'] == 1:
-                    h = end_point.make_hash()
                     machine_hashes.append(h)
 
                     if h not in self.endpoints.state:
