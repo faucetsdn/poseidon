@@ -203,7 +203,7 @@ class Update_Switch_State(Monitor_Helper_Base):
                     del self.endpoints.state[endpoint]
                     changed = True
             for my_hash in self.endpoints.state:
-                if self.endpoints.state[my_hash]['endpoint_data']['active'] == 0:
+                if self.endpoints.state[my_hash].endpoint_data['active'] == 0:
                     changed = True
         if changed:
             self.endpoints.print_endpoint_state()
