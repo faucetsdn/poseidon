@@ -175,6 +175,7 @@ class Update_Switch_State(Monitor_Helper_Base):
     def find_new_machines(self, machines):
         '''parse switch structure to find new machines added to network
         since last call'''
+        self.logger.info("find new machine start: {0}".format(machines))
         changed = False
         if self.first_time:
             self.first_time = False
@@ -193,11 +194,14 @@ class Update_Switch_State(Monitor_Helper_Base):
                 machine_hashes.append(h)
 
                 if h not in self.endpoints.state:
-                    self.logger.debug(
+                    self.logger.info(
                         '***** detected new address {0}'.format(machine))
                     self.endpoints.set(end_point)
                     changed = True
             endpoint_hashes = self.endpoints.state.copy()
+            self.logger.info("endpoint hashes {0}".format(endpoint_hashes)
+            self.logger.info("machine hashes {0}".format(machine_hashes)
+            self.logger.info("endpoints {0}".format(self.endpoints.state)
             for endpoint in endpoint_hashes:
                 if endpoint not in machine_hashes:
                     del self.endpoints.state[endpoint]
@@ -227,7 +231,7 @@ class Update_Switch_State(Monitor_Helper_Base):
             self.retval['controller'] = 'Could not establish connection to {0}.'.format(
                 self.controller['URI'])
 
-        self.logger.debug('MACHINES:{0}'.format(machines))
+        self.logger.info('MACHINES:{0}'.format(machines))
         self.find_new_machines(machines)
 
         self.retval['machines'] = parsed
