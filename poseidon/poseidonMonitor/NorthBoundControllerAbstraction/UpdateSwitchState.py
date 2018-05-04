@@ -210,7 +210,7 @@ class Update_Switch_State(Monitor_Helper_Base):
 
         endpoint_hashes = self.endpoints.state.copy()
         for endpoint in endpoint_hashes:
-            if endpoint.endpoint_data['active'] == 0:
+            if endpoint_hashes[endpoint].endpoint_data['active'] == 0:
                 del self.endpoints.state[endpoint]
 
     def update_endpoint_state(self, messages=None):
