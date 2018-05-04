@@ -106,10 +106,10 @@ class Endpoint_Wrapper():
             for my_hash in endpoint_states.keys():
                 endpoint = endpoint_states[my_hash]
                 if endpoint.state == state:
-                    # update metadata on vent collectors
-                    self.update_vent_collector(my_hash, endpoint)
                     if 'active' in endpoint.endpoint_data and endpoint.endpoint_data['active'] == 0:
-                        break
+                        endpoint.endpoint_data.previous_state = endpoint.endpoint_data.current_state
+                        endpoint.endpoint_data.current_state = 'UNKNOWN'
+                        endpoint.endpoint_data.next_state = 'REINVESTIGATING'
                     else:
                         out_flag = True
                         logger.info('{0}:{1}:{2}->{3}:{4}'.format(letter,
@@ -117,6 +117,8 @@ class Endpoint_Wrapper():
                                                                   endpoint.state,
                                                                   endpoint.next_state,
                                                                   endpoint.endpoint_data))
+                    # update metadata on vent collectors
+                    self.update_vent_collector(my_hash, endpoint)
             if not out_flag:
                 logger.info('None')
 

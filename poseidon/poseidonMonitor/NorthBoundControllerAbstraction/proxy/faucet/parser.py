@@ -180,7 +180,6 @@ class Parser:
                             str(message['dp_id']) == data['segment']):
                             if mac in self.mac_table:
                                 self.mac_table[mac][0]['active'] = 0
-        # TODO update the endpoint state if it was removed from the mac_table
         return
 
     def log(self, log_file):
@@ -231,6 +230,5 @@ class Parser:
                                         self.mac_table[mac][0]['active'] = 0
         except Exception as e:
             self.logger.debug("error {0}".format(str(e)))
-        # TODO update the endpoint state if it was removed from the mac_table
         return
 
