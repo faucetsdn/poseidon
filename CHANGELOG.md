@@ -1,3 +1,17 @@
+# v0.1.8 (2018-05-04)
+
+ - Add metrics to Prometheus
+ - Allow span-fabric name to be configured
+ - Update pytest version
+ - Update gunicorn version
+ - Update API version of Alpine Linux
+ - Add additional metadata for active or inactive (expired hosts)
+ - Stores state changes to external systems (Vent)
+ - Includes an additional endpoint to the API for extra details of the network (/network_full)
+ - When unmirroring, it ensures that all captures on that port are finished first
+ - Listens to FAUCET PORT_CHANGE and L2_EXPIRE events now
+ - Updates known endpoints when they go away
+
 # v0.1.7 (2018-04-06)
 
  - Improved mac learning
