@@ -103,8 +103,9 @@ class Endpoint_Wrapper():
             logger.info('*******{0}*********'.format(state))
 
             out_flag = False
-            for my_hash in endpoint_states.keys():
-                endpoint = endpoint_states[my_hash]
+            e_states = endpoint_states.copy()
+            for my_hash in e_states.keys():
+                endpoint = e_states[my_hash]
                 if endpoint.state == state:
                     if 'active' in endpoint.endpoint_data and endpoint.endpoint_data['active'] == 0:
                         endpoint.prev_state = endpoint.state
