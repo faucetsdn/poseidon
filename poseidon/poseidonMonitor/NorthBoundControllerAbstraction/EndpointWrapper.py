@@ -145,5 +145,6 @@ class Endpoint_Wrapper():
 
         # cleanup endpoints that are no longer active
         for my_hash in self.state.keys():
-            if self.state[my_hash].endpoint_data['active'] == 0:
+            self.logger.info("endpoint data: {0}".format(self.state[my_hash]))
+            if 'active' in self.state[my_hash].endpoint_data and self.state[my_hash].endpoint_data['active'] == 0:
                 del self.state[my_hash]
