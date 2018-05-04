@@ -113,7 +113,6 @@ class Endpoint_Wrapper():
                     else:
                         out_flag = True
                         pp_endpoint_data = endpoint.endpoint_data.copy()
-                        self.logger.info("pp_endpoint_data: {0}".format(pp_endpoint_data))
                         del pp_endpoint_data['active']
                         del pp_endpoint_data['name']
                         pp_endpoint_data['ip'] = pp_endpoint_data['ip-address']
@@ -145,6 +144,7 @@ class Endpoint_Wrapper():
         self.logger.info('====STOP')
 
         # cleanup endpoints that are no longer active
-        for my_hash in self.state.keys():
+        hashes = self.state.copy()
+        for my_hash in hashes:
             if self.state[my_hash].endpoint_data['active'] == 0:
                 del self.state[my_hash]
