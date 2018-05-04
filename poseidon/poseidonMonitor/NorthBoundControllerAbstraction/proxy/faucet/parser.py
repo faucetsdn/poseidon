@@ -148,13 +148,14 @@ class Parser:
     def event(self, message):
         data = {}
         if 'L2_LEARN' in message:
-            self.logger.info("got faucet message for l2_learn: {0}".format(message))
+            self.logger.debug("got faucet message for l2_learn: {0}".format(message))
             data['ip-address'] = message['L2_LEARN']['l3_src_ip']
             data['ip-state'] = 'L2 learned'
             data['mac'] = message['L2_LEARN']['eth_src']
             data['segment'] = str(message['dp_id'])
             data['port'] = str(message['L2_LEARN']['port_no'])
             data['tenant'] = "VLAN"+str(message['L2_LEARN']['vid'])
+            data['active'] = 1
             if message['L2_LEARN']['eth_src'] in self.mac_table:
                 dup = False
                 for d in self.mac_table[message['L2_LEARN']['eth_src']]:
@@ -166,11 +167,11 @@ class Parser:
             else:
                 self.mac_table[message['L2_LEARN']['eth_src']] = [data]
         elif 'L2_EXPIRE' in message:
-            self.logger.info("got faucet message for l2_expire: {0}".format(message))
+            self.logger.debug("got faucet message for l2_expire: {0}".format(message))
             if message['L2_EXPIRE']['eth_src'] in self.mac_table:
-                del self.mac_table[message['L2_EXPIRE']['eth_src']]
+                self.mac_table[message['L2_EXPIRE']['eth_src']][0]['active'] = 0
         elif 'PORT_CHANGE' in message:
-            self.logger.info("got faucet message for port_change: {0}".format(message))
+            self.logger.debug("got faucet message for port_change: {0}".format(message))
             if not message['PORT_CHANGE']['status']:
                 m_table = self.mac_table.copy()
                 for mac in m_table:
@@ -178,12 +179,11 @@ class Parser:
                         if (str(message['PORT_CHANGE']['port_no']) == data['port'] and
                             str(message['dp_id']) == data['segment']):
                             if mac in self.mac_table:
-                                del self.mac_table[mac]
-        # TODO update the endpoint state if it was removed from the mac_table
+                                self.mac_table[mac][0]['active'] = 0
         return
 
     def log(self, log_file):
-        self.logger.info("parsing log file")
+        self.logger.debug("parsing log file")
         if not log_file:
             # default to FAUCET default
             log_file = '/var/log/faucet/faucet.log'
@@ -198,7 +198,8 @@ class Parser:
                                 'mac': learned_mac[10],
                                 'segment': learned_mac[7][1:-1],
                                 'port': learned_mac[22],
-                                'tenant': learned_mac[24] + learned_mac[25]}
+                                'tenant': learned_mac[24] + learned_mac[25],
+                                'active': 1}
                         if learned_mac[10] in self.mac_table:
                             dup = False
                             for d in self.mac_table[learned_mac[10]]:
@@ -213,7 +214,7 @@ class Parser:
                         expired_mac = line.split(', expired [')
                         expired_mac = expired_mac[1].split()[0]
                         if expired_mac in self.mac_table:
-                            del self.mac_table[expired_mac]
+                            self.mac_table[expired_mac][0]['active'] = 0
                     elif ' Port ' in line:
                         # try and see if it was a port down event
                         # this will break if more than one port expires at the same time TODO
@@ -226,9 +227,8 @@ class Parser:
                                 for data in m_table[mac]:
                                     if (port_change[0] == data['port'] and
                                         dpid == data['segment']):
-                                        del self.mac_table[mac]
+                                        self.mac_table[mac][0]['active'] = 0
         except Exception as e:
             self.logger.debug("error {0}".format(str(e)))
-        # TODO update the endpoint state if it was removed from the mac_table
         return
 

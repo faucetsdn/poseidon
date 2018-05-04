@@ -190,17 +190,19 @@ class Update_Switch_State(Monitor_Helper_Base):
             for machine in machines:
                 end_point = EndPoint(machine, state='UNKNOWN')
                 h = end_point.make_hash()
-                machine_hashes.append(h)
+                ep = None
+                if h in self.endpoints.state:
+                    ep = self.endpoints.state[h]
+                if end_point.endpoint_data['active'] == 1:
+                    machine_hashes.append(h)
 
-                if h not in self.endpoints.state:
-                    self.logger.debug(
-                        '***** detected new address {0}'.format(machine))
+                    if h not in self.endpoints.state:
+                        self.logger.debug(
+                            '***** detected new address {0}'.format(machine))
+                        self.endpoints.set(end_point)
+                        changed = True
+                elif ep is not None and end_point.endpoint_data['active'] != ep.endpoint_data['active']:
                     self.endpoints.set(end_point)
-                    changed = True
-            endpoint_hashes = self.endpoints.state.copy()
-            for endpoint in endpoint_hashes:
-                if endpoint not in machine_hashes:
-                    del self.endpoints.state[endpoint]
                     changed = True
         if changed:
             self.endpoints.print_endpoint_state()

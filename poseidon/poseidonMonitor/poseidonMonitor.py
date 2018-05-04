@@ -80,62 +80,98 @@ def schedule_job_kickurl(func, logger):
                'vlans':{},
                'record_sources':{},
                'port_tenants':{},
-               'port_hosts':{}}
+               'port_hosts':{},
+               'inactives':0,
+               'actives':0}
     for host in hosts:
+        if host['active'] == 0:
+            metrics['inactives'] += 1
+        if host['active'] == 1:
+            metrics['actives'] += 1
         if (host['record_source'], host['role']) in metrics['roles']:
-            metrics['roles'][(host['record_source'], host['role'])] += 1
+            if host['active'] == 1:
+                metrics['roles'][(host['record_source'], host['role'])] += 1
         else:
-            metrics['roles'][(host['record_source'], host['role'])] = 1
+            if host['active'] == 1:
+                metrics['roles'][(host['record_source'], host['role'])] = 1
+            else:
+                metrics['roles'][(host['record_source'], host['role'])] = 0
 
         if (host['record_source'], host['os']) in metrics['oses']:
-            metrics['oses'][(host['record_source'], host['os'])] += 1
+            if host['active'] == 1:
+                metrics['oses'][(host['record_source'], host['os'])] += 1
         else:
-            metrics['oses'][(host['record_source'], host['os'])] = 1
+            if host['active'] == 1:
+                metrics['oses'][(host['record_source'], host['os'])] = 1
+            else:
+                metrics['oses'][(host['record_source'], host['os'])] = 0
 
         if (host['record_source'], host['state']) in metrics['current_states']:
-            metrics['current_states'][(host['record_source'],
-                                       host['state'])] += 1
+            if host['active'] == 1:
+                metrics['current_states'][(host['record_source'],
+                                           host['state'])] += 1
         else:
-            metrics['current_states'][(host['record_source'],
-                                       host['state'])] = 1
+            if host['active'] == 1:
+                metrics['current_states'][(host['record_source'],
+                                           host['state'])] = 1
+            else:
+                metrics['current_states'][(host['record_source'],
+                                           host['state'])] = 0
 
         if (host['record_source'], host['tenant']) in metrics['vlans']:
-            metrics['vlans'][(host['record_source'], host['tenant'])] += 1
+            if host['active'] == 1:
+                metrics['vlans'][(host['record_source'], host['tenant'])] += 1
         else:
-            metrics['vlans'][(host['record_source'], host['tenant'])] = 1
+            if host['active'] == 1:
+                metrics['vlans'][(host['record_source'], host['tenant'])] = 1
+            else:
+                metrics['vlans'][(host['record_source'], host['tenant'])] = 0
 
         if (host['record_source']) in metrics['record_sources']:
-            metrics['record_sources'][(host['record_source'])] += 1
+            if host['active'] == 1:
+                metrics['record_sources'][(host['record_source'])] += 1
         else:
-            metrics['record_sources'][(host['record_source'])] = 1
+            if host['active'] == 1:
+                metrics['record_sources'][(host['record_source'])] = 1
+            else:
+                metrics['record_sources'][(host['record_source'])] = 0
 
         if (host['port'], host['tenant']) in metrics['port_tenants']:
-            metrics['port_tenants'][(host['port'], host['tenant'])] += 1
+            if host['active'] == 1:
+                metrics['port_tenants'][(host['port'], host['tenant'])] += 1
         else:
-            metrics['port_tenants'][(host['port'], host['tenant'])] = 1
+            if host['active'] == 1:
+                metrics['port_tenants'][(host['port'], host['tenant'])] = 1
+            else:
+                metrics['port_tenants'][(host['port'], host['tenant'])] = 0
 
         if (host['port']) in metrics['port_hosts']:
-            metrics['port_hosts'][(host['port'])] += 1
+            if host['active'] == 1:
+                metrics['port_hosts'][(host['port'])] += 1
         else:
-            metrics['port_hosts'][(host['port'])] = 1
+            if host['active'] == 1:
+                metrics['port_hosts'][(host['port'])] = 1
+            else:
+                metrics['port_hosts'][(host['port'])] = 0
 
         try:
-            func.prom_metrics['behavior'].labels(ip=host['ip'],
-                                                 mac=host['mac'],
-                                                 tenant=host['tenant'],
-                                                 segment=host['segment'],
-                                                 port=host['port'],
-                                                 role=host['role'],
-                                                 os=host['os'],
-                                                 record_source=host['record_source']).set(host['behavior'])
-            func.prom_metrics['ip_table'].labels(mac=host['mac'],
-                                                 tenant=host['tenant'],
-                                                 segment=host['segment'],
-                                                 port=host['port'],
-                                                 role=host['role'],
-                                                 os=host['os'],
-                                                 hash_id=host['hash'],
-                                                 record_source=host['record_source']).set(ip2int(host['ip']))
+            if host['active'] == 1:
+                func.prom_metrics['behavior'].labels(ip=host['ip'],
+                                                     mac=host['mac'],
+                                                     tenant=host['tenant'],
+                                                     segment=host['segment'],
+                                                     port=host['port'],
+                                                     role=host['role'],
+                                                     os=host['os'],
+                                                     record_source=host['record_source']).set(host['behavior'])
+                func.prom_metrics['ip_table'].labels(mac=host['mac'],
+                                                     tenant=host['tenant'],
+                                                     segment=host['segment'],
+                                                     port=host['port'],
+                                                     role=host['role'],
+                                                     os=host['os'],
+                                                     hash_id=host['hash'],
+                                                     record_source=host['record_source']).set(ip2int(host['ip']))
         except Exception as e:
             logger.error('unable to send {0} results to prometheus because {1}'.format(host, str(e)))
 
@@ -159,6 +195,8 @@ def schedule_job_kickurl(func, logger):
                                                      tenant=port_tenant[1]).set(metrics['port_tenants'][port_tenant])
         for port_host in metrics['port_hosts']:
             func.prom_metrics['port_hosts'].labels(port=port_host).set(metrics['port_hosts'][port_host])
+        func.prom_metrics['inactive'].set(metrics['inactives'])
+        func.prom_metrics['active'].set(metrics['actives'])
     except Exception as e:
         logger.error('unable to send results to prometheus because {0}'.format(str(e)))
 
@@ -536,89 +574,92 @@ class Monitor(object):
         global CTRL_C
         signal.signal(signal.SIGINT, partial(self.signal_handler))
         while not CTRL_C['STOP']:
-            self.logger.debug('***************CTRL_C:{0}'.format(CTRL_C))
-            time.sleep(1)
-            self.logger.debug('woke from sleeping')
-            found_work, item = self.get_q_item()
-            ml_returns = {}
+            try:
+                self.logger.debug('***************CTRL_C:{0}'.format(CTRL_C))
+                time.sleep(1)
+                self.logger.debug('woke from sleeping')
+                found_work, item = self.get_q_item()
+                ml_returns = {}
 
-            # plan out the transitions
-            if found_work and item[0] != self.fa_rabbit_routing_key:
-                # TODO make this read until nothing in q
-                ml_returns = self.format_rabbit_message(item)
-                self.logger.debug("\n\n\n**********************")
-                self.logger.debug('ml_returns:{0}'.format(ml_returns))
-                self.logger.debug("**********************\n\n\n")
-            elif found_work and item[0] == self.fa_rabbit_routing_key:
-                self.faucet_event.append(self.format_rabbit_message(item))
-                self.logger.debug("\n\n\n**********************")
-                self.logger.debug('faucet_event:{0}'.format(self.faucet_event))
-                self.logger.debug("**********************\n\n\n")
+                # plan out the transitions
+                if found_work and item[0] != self.fa_rabbit_routing_key:
+                    # TODO make this read until nothing in q
+                    ml_returns = self.format_rabbit_message(item)
+                    self.logger.debug("\n\n\n**********************")
+                    self.logger.debug('ml_returns:{0}'.format(ml_returns))
+                    self.logger.debug("**********************\n\n\n")
+                elif found_work and item[0] == self.fa_rabbit_routing_key:
+                    self.faucet_event.append(self.format_rabbit_message(item))
+                    self.logger.debug("\n\n\n**********************")
+                    self.logger.debug('faucet_event:{0}'.format(self.faucet_event))
+                    self.logger.debug("**********************\n\n\n")
 
-            eps = self.uss.endpoints
-            state_transitions = self.update_next_state(ml_returns)
+                eps = self.uss.endpoints
+                state_transitions = self.update_next_state(ml_returns)
 
-            # make the transitions
-            for endpoint_hash in eps.state:
-                current_state = eps.get_endpoint_state(endpoint_hash)
-                next_state = eps.get_endpoint_next(endpoint_hash)
+                # make the transitions
+                for endpoint_hash in eps.state:
+                    current_state = eps.get_endpoint_state(endpoint_hash)
+                    next_state = eps.get_endpoint_next(endpoint_hash)
 
-                # dont do anything
-                if next_state == 'NONE':
-                    continue
+                    # dont do anything
+                    if next_state == 'NONE':
+                        continue
 
-                eps.print_endpoint_state()
+                    eps.print_endpoint_state()
 
-                if next_state == 'MIRRORING':
-                    self.logger.debug(
-                        'updating:{0}:{1}->{2}'.format(endpoint_hash,
-                                                       current_state,
-                                                       next_state))
-                    self.logger.debug('*********** U NOTIFY VENT ***********')
-                    self.start_vent_collector(endpoint_hash)
-                    self.logger.debug('*********** U MIRROR PORT ***********')
-                    self.uss.mirror_endpoint(endpoint_hash, messages=self.faucet_event)
-                if next_state == 'REINVESTIGATING':
-                    self.logger.debug(
-                        'updating:{0}:{1}->{2}'.format(endpoint_hash,
-                                                       current_state,
-                                                       next_state))
-                    self.logger.debug('*********** R NOTIFY VENT ***********')
-                    self.start_vent_collector(endpoint_hash)
-                    self.logger.debug('*********** R MIRROR PORT ***********')
-                    self.uss.mirror_endpoint(endpoint_hash, messages=self.faucet_event)
-                if next_state == 'KNOWN':
-                    if (current_state == 'REINVESTIGATING' or
-                        current_state == 'MIRRORING'):
-                        if not self.host_has_active_collectors(endpoint_hash) :
-                            self.logger.debug(
-                                '*********** ' +
-                                current_state[0] +
-                                ' UN-MIRROR PORT ***********')
-                            self.uss.unmirror_endpoint(endpoint_hash, messages=self.faucet_event)
-                        else :
-                            self.logger.debug(
-                                '*********** ' +
-                                current_state[0] +
-                                ' CAN NOT UN-MIRROR PORT BECAUSE OF ACTIVE COLLECTOR ***********')
-                        eps.change_endpoint_state(endpoint_hash)
-                    if current_state == 'UNKNOWN':
-                        if not self.host_has_active_collectors(endpoint_hash) :
-                            self.logger.debug(
-                                '*********** U UN-MIRROR PORT ***********')
-                            self.uss.unmirror_endpoint(endpoint_hash, messages=self.faucet_event)
-                        else :
-                            self.logger.debug(
-                                '*********** U UN-MIRROR PORT ***********')
-                        eps.change_endpoint_state(endpoint_hash)
-                if next_state == 'SHUTDOWN':
-                    self.logger.debug(
-                        'updating:{0}:{1}->{2}'.format(endpoint_hash,
-                                                       current_state,
-                                                       next_state))
-                    self.uss.shutdown_endpoint(endpoint_hash)
+                    if next_state == 'MIRRORING':
+                        self.logger.debug(
+                            'updating:{0}:{1}->{2}'.format(endpoint_hash,
+                                                           current_state,
+                                                           next_state))
+                        self.logger.debug('*********** U NOTIFY VENT ***********')
+                        self.start_vent_collector(endpoint_hash)
+                        self.logger.debug('*********** U MIRROR PORT ***********')
+                        self.uss.mirror_endpoint(endpoint_hash, messages=self.faucet_event)
+                    if next_state == 'REINVESTIGATING':
+                        self.logger.debug(
+                            'updating:{0}:{1}->{2}'.format(endpoint_hash,
+                                                           current_state,
+                                                           next_state))
+                        self.logger.debug('*********** R NOTIFY VENT ***********')
+                        self.start_vent_collector(endpoint_hash)
+                        self.logger.debug('*********** R MIRROR PORT ***********')
+                        self.uss.mirror_endpoint(endpoint_hash, messages=self.faucet_event)
+                    if next_state == 'KNOWN':
+                        if (current_state == 'REINVESTIGATING' or
+                            current_state == 'MIRRORING'):
+                            if not self.host_has_active_collectors(endpoint_hash) :
+                                self.logger.debug(
+                                    '*********** ' +
+                                    current_state[0] +
+                                    ' UN-MIRROR PORT ***********')
+                                self.uss.unmirror_endpoint(endpoint_hash, messages=self.faucet_event)
+                            else :
+                                self.logger.debug(
+                                    '*********** ' +
+                                    current_state[0] +
+                                    ' CAN NOT UN-MIRROR PORT BECAUSE OF ACTIVE COLLECTOR ***********')
+                            eps.change_endpoint_state(endpoint_hash)
+                        if current_state == 'UNKNOWN':
+                            if not self.host_has_active_collectors(endpoint_hash) :
+                                self.logger.debug(
+                                    '*********** U UN-MIRROR PORT ***********')
+                                self.uss.unmirror_endpoint(endpoint_hash, messages=self.faucet_event)
+                            else :
+                                self.logger.debug(
+                                    '*********** U UN-MIRROR PORT ***********')
+                            eps.change_endpoint_state(endpoint_hash)
+                    if next_state == 'SHUTDOWN':
+                        self.logger.debug(
+                            'updating:{0}:{1}->{2}'.format(endpoint_hash,
+                                                           current_state,
+                                                           next_state))
+                        self.uss.shutdown_endpoint(endpoint_hash)
 
-                eps.print_endpoint_state()
+                    eps.print_endpoint_state()
+            except Exception as e:
+                self.logger.debug("iteration failed because: {0}".format(str(e)))
 
     def get_q_item(self):
         ''' attempt to get a workitem from the queue'''
@@ -669,6 +710,10 @@ def main(skip_rabbit=False):  # pragma: no cover
     pmain = Monitor(skip_rabbit=skip_rabbit)
 
     # declare prometheus variables
+    pmain.prom_metrics['inactive'] = Gauge('poseidon_endpoint_inactive',
+                                           'Number of endpoints that are inactive')
+    pmain.prom_metrics['active'] = Gauge('poseidon_endpoint_active',
+                                         'Number of endpoints that are active')
     pmain.prom_metrics['behavior'] = Gauge('poseidon_endpoint_behavior',
                                            'Behavior of an endpoint, 0 is normal, 1 is abnormal',
                                            ['ip',

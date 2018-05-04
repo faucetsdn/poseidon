@@ -102,20 +102,35 @@ class Endpoint_Wrapper():
         def same_old(logger, state, letter, endpoint_states):
             logger.info('*******{0}*********'.format(state))
 
-            # TODO if no endpoints, update prometheus
-
             out_flag = False
-            for my_hash in endpoint_states.keys():
-                endpoint = endpoint_states[my_hash]
+            e_states = endpoint_states.copy()
+            for my_hash in e_states.keys():
+                endpoint = e_states[my_hash]
                 if endpoint.state == state:
-                    out_flag = True
+                    if 'active' in endpoint.endpoint_data and endpoint.endpoint_data['active'] == 0:
+                        endpoint.prev_state = endpoint.state
+                        endpoint.state = 'UNKNOWN'
+                        endpoint.next_state = 'REINVESTIGATING'
+                    else:
+                        out_flag = True
+                        pp_endpoint_data = endpoint.endpoint_data.copy()
+                        del pp_endpoint_data['active']
+                        del pp_endpoint_data['name']
+                        pp_endpoint_data['ip'] = pp_endpoint_data['ip-address']
+                        del pp_endpoint_data['ip-address']
+                        pp_endpoint_data['s'] = pp_endpoint_data['segment']
+                        del pp_endpoint_data['segment']
+                        pp_endpoint_data['p'] = pp_endpoint_data['port']
+                        del pp_endpoint_data['port']
+                        pp_endpoint_data['v'] = pp_endpoint_data['tenant']
+                        del pp_endpoint_data['tenant']
+                        logger.info('{0}:{1}:{2}->{3}:{4}'.format(letter,
+                                                                  my_hash,
+                                                                  endpoint.state,
+                                                                  endpoint.next_state,
+                                                                  pp_endpoint_data))
                     # update metadata on vent collectors
                     self.update_vent_collector(my_hash, endpoint)
-                    logger.info('{0}:{1}:{2}->{3}:{4}'.format(letter,
-                                                              my_hash,
-                                                              endpoint.state,
-                                                              endpoint.next_state,
-                                                              endpoint.endpoint_data))
             if not out_flag:
                 logger.info('None')
 
@@ -128,3 +143,9 @@ class Endpoint_Wrapper():
 
         self.logger.info('****************')
         self.logger.info('====STOP')
+
+        # cleanup endpoints that are no longer active
+        hashes = self.state.copy()
+        for my_hash in hashes:
+            if self.state[my_hash].endpoint_data['active'] == 0:
+                del self.state[my_hash]

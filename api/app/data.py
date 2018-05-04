@@ -63,6 +63,7 @@ class NetworkFull(object):
                     node['behavior'] = 0
                     node['hash'] = '0'
                     node['state'] = 'UNDEFINED'
+                    node['active'] = 0
                     try:
                         ip_info = self.r.hgetall(ip_address)
                         if 'poseidon_hash' in ip_info:
@@ -75,6 +76,7 @@ class NetworkFull(object):
                                     node['segment'] = endpoint_data['segment']
                                     node['port'] = endpoint_data['port']
                                     node['tenant'] = endpoint_data['tenant']
+                                    node['active'] = endpoint_data['active']
                                 if 'state' in poseidon_info:
                                     node['state'] = poseidon_info['state']
                             except Exception as e:
