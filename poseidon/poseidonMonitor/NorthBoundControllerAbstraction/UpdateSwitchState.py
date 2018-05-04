@@ -197,8 +197,8 @@ class Update_Switch_State(Monitor_Helper_Base):
                         '***** detected new address {0}'.format(machine))
                     self.endpoints.set(end_point)
                     changed = True
-                elif (end_point.endpoint_data['active'] == 0 and self.endpoints.state[h].endpoint_data['active'] != 0) or
-                     (end_point.endpoint_data['active'] == 1 and self.endpoints.state[h].endpoint_data['active'] != 1):
+                elif ((end_point.endpoint_data['active'] == 0 and self.endpoints.state[h].endpoint_data['active'] != 0) or
+                     (end_point.endpoint_data['active'] == 1 and self.endpoints.state[h].endpoint_data['active'] != 1)):
                     self.endpoints.set(end_point)
                     changed = True
         if changed:
