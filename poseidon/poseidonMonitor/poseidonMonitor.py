@@ -80,8 +80,11 @@ def schedule_job_kickurl(func, logger):
                'vlans':{},
                'record_sources':{},
                'port_tenants':{},
-               'port_hosts':{}}
+               'port_hosts':{},
+               'inactives':0}
     for host in hosts:
+        if host['active'] == 0:
+            metrics['inactives'] += 1
         if (host['record_source'], host['role']) in metrics['roles']:
             if host['active'] == 1:
                 metrics['roles'][(host['record_source'], host['role'])] += 1
@@ -189,6 +192,7 @@ def schedule_job_kickurl(func, logger):
                                                      tenant=port_tenant[1]).set(metrics['port_tenants'][port_tenant])
         for port_host in metrics['port_hosts']:
             func.prom_metrics['port_hosts'].labels(port=port_host).set(metrics['port_hosts'][port_host])
+        func.prom_metrics['inactive'].set(metrics['inactives'])
     except Exception as e:
         logger.error('unable to send results to prometheus because {0}'.format(str(e)))
 
@@ -699,6 +703,8 @@ def main(skip_rabbit=False):  # pragma: no cover
     pmain = Monitor(skip_rabbit=skip_rabbit)
 
     # declare prometheus variables
+    pmain.prom_metrics['inactive'] = Gauge('poseidon_endpoint_inactive',
+                                           'Number of endpoints that are inactive')
     pmain.prom_metrics['behavior'] = Gauge('poseidon_endpoint_behavior',
                                            'Behavior of an endpoint, 0 is normal, 1 is abnormal',
                                            ['ip',
