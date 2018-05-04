@@ -208,6 +208,11 @@ class Update_Switch_State(Monitor_Helper_Base):
         if changed:
             self.endpoints.print_endpoint_state()
 
+        endpoint_hashes = self.endpoints.state.copy()
+        for endpoint in endpoint_hashes:
+            if endpoint.endpoint_data['active'] == 0:
+                del self.endpoints.state[endpoint]
+
     def update_endpoint_state(self, messages=None):
         '''Handles Get requests'''
         self.retval['service'] = self.owner.mod_name + ':' + self.mod_name
