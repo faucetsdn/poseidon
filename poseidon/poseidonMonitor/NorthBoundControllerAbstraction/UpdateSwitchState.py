@@ -199,9 +199,9 @@ class Update_Switch_State(Monitor_Helper_Base):
                     self.endpoints.set(end_point)
                     changed = True
             endpoint_hashes = self.endpoints.state.copy()
-            self.logger.info("endpoint hashes {0}".format(endpoint_hashes)
-            self.logger.info("machine hashes {0}".format(machine_hashes)
-            self.logger.info("endpoints {0}".format(self.endpoints.state)
+            self.logger.info("endpoint hashes {0}".format(endpoint_hashes))
+            self.logger.info("machine hashes {0}".format(machine_hashes))
+            self.logger.info("endpoints {0}".format(self.endpoints.state))
             for endpoint in endpoint_hashes:
                 if endpoint not in machine_hashes:
                     del self.endpoints.state[endpoint]
