@@ -175,8 +175,6 @@ class Update_Switch_State(Monitor_Helper_Base):
     def find_new_machines(self, machines):
         '''parse switch structure to find new machines added to network
         since last call'''
-        for h in self.endpoints.state:
-            self.logger.info("endpoint {0}: {1}".format(h, self.endpoints.state[h].endpoint_data))
         changed = False
         if self.first_time:
             self.first_time = False
@@ -191,8 +189,9 @@ class Update_Switch_State(Monitor_Helper_Base):
             machine_hashes = []
             for machine in machines:
                 end_point = EndPoint(machine, state='UNKNOWN')
-                h = end_point.make_hash()
-                machine_hashes.append(h)
+                if end_point.endpoint_data['active'] == 1:
+                    h = end_point.make_hash()
+                    machine_hashes.append(h)
 
                 if h not in self.endpoints.state:
                     self.logger.debug(
@@ -202,8 +201,6 @@ class Update_Switch_State(Monitor_Helper_Base):
                 elif end_point.endpoint_data['active'] != self.endpoints.state[h].endpoint_data['active']:
                     self.endpoints.set(end_point)
                     changed = True
-        for h in self.endpoints.state:
-            self.logger.info("endpoint {0}: {1}".format(h, self.endpoints.state[h].endpoint_data))
         if changed:
             self.endpoints.print_endpoint_state()
 
