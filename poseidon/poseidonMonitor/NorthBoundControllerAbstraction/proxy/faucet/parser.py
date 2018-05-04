@@ -148,7 +148,7 @@ class Parser:
     def event(self, message):
         data = {}
         if 'L2_LEARN' in message:
-            self.logger.info("got faucet message for l2_learn: {0}".format(message))
+            self.logger.debug("got faucet message for l2_learn: {0}".format(message))
             data['ip-address'] = message['L2_LEARN']['l3_src_ip']
             data['ip-state'] = 'L2 learned'
             data['mac'] = message['L2_LEARN']['eth_src']
@@ -167,11 +167,11 @@ class Parser:
             else:
                 self.mac_table[message['L2_LEARN']['eth_src']] = [data]
         elif 'L2_EXPIRE' in message:
-            self.logger.info("got faucet message for l2_expire: {0}".format(message))
+            self.logger.debug("got faucet message for l2_expire: {0}".format(message))
             if message['L2_EXPIRE']['eth_src'] in self.mac_table:
                 self.mac_table[message['L2_EXPIRE']['eth_src']][0]['active'] = 0
         elif 'PORT_CHANGE' in message:
-            self.logger.info("got faucet message for port_change: {0}".format(message))
+            self.logger.debug("got faucet message for port_change: {0}".format(message))
             if not message['PORT_CHANGE']['status']:
                 m_table = self.mac_table.copy()
                 for mac in m_table:
@@ -183,7 +183,7 @@ class Parser:
         return
 
     def log(self, log_file):
-        self.logger.info("parsing log file")
+        self.logger.debug("parsing log file")
         if not log_file:
             # default to FAUCET default
             log_file = '/var/log/faucet/faucet.log'

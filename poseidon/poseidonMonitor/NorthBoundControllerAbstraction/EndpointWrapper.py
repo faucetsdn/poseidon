@@ -107,16 +107,27 @@ class Endpoint_Wrapper():
                 endpoint = endpoint_states[my_hash]
                 if endpoint.state == state:
                     if 'active' in endpoint.endpoint_data and endpoint.endpoint_data['active'] == 0:
-                        endpoint.endpoint_data.previous_state = endpoint.endpoint_data.current_state
-                        endpoint.endpoint_data.current_state = 'UNKNOWN'
-                        endpoint.endpoint_data.next_state = 'REINVESTIGATING'
+                        endpoint.prev_state = endpoint.state
+                        endpoint.state = 'UNKNOWN'
+                        endpoint.next_state = 'REINVESTIGATING'
                     else:
                         out_flag = True
+                        pp_endpoint_data = endpoint.endpoint_data
+                        del pp_endpoint_data['active']
+                        del pp_endpoint_data['name']
+                        pp_endpoint_data['ip'] = pp_endpoint_data['ip-address']
+                        del pp_endpoint_data['ip-address']
+                        pp_endpoint_data['s'] = pp_endpoint_data['segment']
+                        del pp_endpoint_data['segment']
+                        pp_endpoint_data['p'] = pp_endpoint_data['port']
+                        del pp_endpoint_data['port']
+                        pp_endpoint_data['v'] = pp_endpoint_data['tenant']
+                        del pp_endpoint_data['tenant']
                         logger.info('{0}:{1}:{2}->{3}:{4}'.format(letter,
                                                                   my_hash,
                                                                   endpoint.state,
                                                                   endpoint.next_state,
-                                                                  endpoint.endpoint_data))
+                                                                  pp_endpoint_data))
                     # update metadata on vent collectors
                     self.update_vent_collector(my_hash, endpoint)
             if not out_flag:
