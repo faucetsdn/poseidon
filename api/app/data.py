@@ -134,7 +134,10 @@ class Network(object):
                     node['uid'] = str(uuid.uuid4())
                     node['IP'] = ip_address
                     # cheating for now
-                    node['subnet'] = '.'.join(ip_address.split('.')[:-1])+".0/24"
+                    if ':' in ip_address:
+                        node['subnet'] = ':'.join(ip_address.split(':')[:-1])+"::0/112"
+                    else:
+                        node['subnet'] = '.'.join(ip_address.split('.')[:-1])+".0/24"
                     # setting to unknown for now
                     node['rDNS_host'] = 'Unknown'
                     # set as unknown until it's set below
