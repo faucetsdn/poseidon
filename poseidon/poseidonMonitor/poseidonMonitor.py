@@ -27,10 +27,13 @@ import random
 import requests
 import schedule
 import signal
+import socket
 import sys
 import threading
 import time
 
+
+from binascii import hexlify
 from functools import partial
 from os import getenv
 from prometheus_client import start_http_server, Gauge
@@ -55,8 +58,11 @@ def schedule_job_kickurl(func, logger):
 
     def ip2int(ip):
         ''' convert ip quad octet string to an int '''
-        o = list(map(int, ip.split('.')))
-        res = (16777216 * o[0]) + (65536 * o[1]) + (256 * o[2]) + o[3]
+        if ':' in ip:
+            res = int(hexlify(socket.inet_pton(socket.AF_INET6, ip)), 16)
+        else:
+            o = list(map(int, ip.split('.')))
+            res = (16777216 * o[0]) + (65536 * o[1]) + (256 * o[2]) + o[3]
         return res
 
     logger.debug('kick')
