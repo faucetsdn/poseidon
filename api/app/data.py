@@ -135,7 +135,7 @@ class Network(object):
                     node['IP'] = ip_address
                     # cheating for now
                     if ':' in ip_address:
-                        node['subnet'] = ':'.join(ip_address.split(':')[:-1])+"::0/112"
+                        node['subnet'] = ':'.join(ip_address.split(':')[0:4])+"::0/64"
                     else:
                         node['subnet'] = '.'.join(ip_address.split('.')[:-1])+".0/24"
                     # setting to unknown for now
