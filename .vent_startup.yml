@@ -38,6 +38,8 @@ https://github.com/cyberreboot/vent-plugins:
         build: yes
     p0f:
         build: yes
+    tcprewrite_dot1q:
+        build: yes
 https://github.com/cyberreboot/crviz:
     '@':
         build: yes
