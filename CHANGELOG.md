@@ -1,3 +1,13 @@
+# v0.1.9 (2018-05-18)
+
+ - Includes tcprewrite_dot1q in vent startup
+ - Fixes subnets for IPv6
+ - Updated version of gevent
+ - Publishes specific port for Prometheus
+ - Properly converts IPv6 to an int for Prometheus
+ - Updated version of scp
+ - Updated version of pylint
+
 # v0.1.8 (2018-05-04)
 
  - Add metrics to Prometheus
