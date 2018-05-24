@@ -1,8 +1,6 @@
 import ast
 import falcon
-import io
 import json
-import mimetypes
 import os
 import redis
 import uuid
@@ -85,7 +83,7 @@ class NetworkFull(object):
                                     node['active'] = endpoint_data['active']
                                 if 'state' in poseidon_info:
                                     node['state'] = poseidon_info['state']
-                            except Exception as e:
+                            except Exception as e:  # pragma: no cover
                                 pass
                         if 'timestamps' in ip_info:
                             try:
@@ -94,15 +92,15 @@ class NetworkFull(object):
                                 if 'labels' in ml_info:
                                     labels = ast.literal_eval(ml_info['labels'])
                                     node['role'] = labels[0]
-                            except:
+                            except Exception as e:  # pragma: no cover
                                 pass
                         if 'short_os' in ip_info:
                             short_os = ip_info['short_os']
                             node['os'] = short_os
-                    except Exception as e:
+                    except Exception as e:  # pragma: no cover
                         pass
                     dataset.append(node)
-            except Exception as e:
+            except Exception as e:  # pragma: no cover
                 pass
         return dataset
 
@@ -121,14 +119,14 @@ class Network(object):
         self.r = None
         try:
             if 'POSEIDON_TRAVIS' in os.environ:
-                self.r = redis.StrictRedis(host='localhost', 
-                                           port=6379, 
-                                           db=0, 
+                self.r = redis.StrictRedis(host='localhost',
+                                           port=6379,
+                                           db=0,
                                            decode_responses=True)
             else:
-                self.r = redis.StrictRedis(host='redis', 
-                                           port=6379, 
-                                           db=0, 
+                self.r = redis.StrictRedis(host='redis',
+                                           port=6379,
+                                           db=0,
                                            decode_responses=True)
         except Exception as e:  # pragma: no cover
             return (False, 'unable to connect to redis because: ' + str(e))
@@ -161,7 +159,6 @@ class Network(object):
                     node['os']['os'] = 'Unknown'
                     try:
                         short_os = None
-                        full_os = None
                         endpoint_data = {}
                         labels = []
                         confidences = []
@@ -173,7 +170,7 @@ class Network(object):
                                 if 'endpoint_data' in poseidon_info:
                                     endpoint_data = ast.literal_eval(poseidon_info['endpoint_data'])
                                     node['mac'] = endpoint_data['mac']
-                            except:
+                            except Exception as e:  # pragma: no cover
                                 pass
                         if 'timestamps' in ip_info:
                             try:
@@ -187,15 +184,15 @@ class Network(object):
                                 if 'confidences' in ml_info:
                                     confidences = ast.literal_eval(ml_info['confidences'])
                                     node['role']['confidence'] = int(confidences[0]*100)
-                            except:
+                            except Exception as e:  # pragma: no cover
                                 pass
                         if 'short_os' in ip_info:
                             short_os = ip_info['short_os']
                             node['os']['os'] = short_os
-                    except:
+                    except Exception as e:  # pragma: no cover
                         pass
                     dataset.append(node)
-            except:
+            except Exception as e:  # pragma: no cover
                 pass
 
         return dataset
