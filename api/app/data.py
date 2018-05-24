@@ -36,18 +36,24 @@ class NetworkFull(object):
     def connect_redis(self):
         self.r = None
         try:
-            self.r = redis.StrictRedis(host='redis', port=6379, db=0, decode_responses=True)
+            if 'POSEIDON_TRAVIS' in os.environ:
+                self.r = redis.StrictRedis(host='localhost',
+                                           port=6379,
+                                           db=0,
+                                           decode_responses=True)
+            else:
+                self.r = redis.StrictRedis(host='redis',
+                                           port=6379,
+                                           db=0,
+                                           decode_responses=True)
         except Exception as e:  # pragma: no cover
-            try:
-                self.r = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
-            except Exception as e:  # pragma: no cover
-                return (False, 'unable to connect to redis because: ' + str(e))
-        return
+            return (False, 'unable to connect to redis because: ' + str(e))
+        return (True, 'connected')
 
     def get_dataset(self):
         dataset = []
-        self.connect_redis()
-        if self.r:
+        status = self.connect_redis()
+        if status[0] and self.r:
             try:
                 ip_addresses = self.r.smembers('ip_addresses')
                 for ip_address in ip_addresses:
@@ -114,18 +120,24 @@ class Network(object):
     def connect_redis(self):
         self.r = None
         try:
-            self.r = redis.StrictRedis(host='redis', port=6379, db=0, decode_responses=True)
+            if 'POSEIDON_TRAVIS' in os.environ:
+                self.r = redis.StrictRedis(host='localhost', 
+                                           port=6379, 
+                                           db=0, 
+                                           decode_responses=True)
+            else:
+                self.r = redis.StrictRedis(host='redis', 
+                                           port=6379, 
+                                           db=0, 
+                                           decode_responses=True)
         except Exception as e:  # pragma: no cover
-            try:
-                self.r = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
-            except Exception as e:  # pragma: no cover
-                return (False, 'unable to connect to redis because: ' + str(e))
-        return
+            return (False, 'unable to connect to redis because: ' + str(e))
+        return (True, 'connected')
 
     def get_dataset(self):
         dataset = []
-        self.connect_redis()
-        if self.r:
+        status = self.connect_redis()
+        if status[0] and self.r:
             try:
                 ip_addresses = self.r.smembers('ip_addresses')
                 for ip_address in ip_addresses:
