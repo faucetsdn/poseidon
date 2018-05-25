@@ -324,7 +324,13 @@ class Monitor(object):
 
         # check
         self.NorthBoundControllerAbstraction.configure()
-        self.NorthBoundControllerAbstraction.first_run()
+        status = self.NorthBoundControllerAbstraction.first_run()
+
+        # wasn't able to connect to a controller, so keep trying
+        while not status:
+            time.sleep(10)
+            status = self.NorthBoundControllerAbstraction.first_run()
+
         self.NorthBoundControllerAbstraction.configure_endpoints()
 
         # make a shortcut
