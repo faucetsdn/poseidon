@@ -70,7 +70,6 @@ class Update_Switch_State(Monitor_Helper_Base):
 
     def first_run(self):
         ''' do some pre-run setup/configuration '''
-        self.logger.info("running setup and config")
         if self.configured:
             self.controller['TYPE'] = str(
                 self.mod_configuration['controller_type'])
@@ -97,7 +96,6 @@ class Update_Switch_State(Monitor_Helper_Base):
                     self.logger.error(
                         'BcfProxy could not connect to {0}'.format(
                             self.controller['URI']))
-                    return False
             elif self.controller['TYPE'] == 'faucet':
                 try:
                     self.logger.error("0")
@@ -141,14 +139,10 @@ class Update_Switch_State(Monitor_Helper_Base):
                     self.logger.error(
                         'FaucetProxy could not connect to {0} because {1}'.format(
                             self.controller['URI'], e))
-                    return False
             else:
                 self.logger.error(
                     'Unknown SDN controller type {0}'.format(
                         self.controller['TYPE']))
-                return False
-        self.logger.info("Setup successful")
-        return True
 
     def shutdown_endpoint(self, my_hash):
         ''' tell the controller to shutdown an endpoint by hash '''
