@@ -70,6 +70,7 @@ class Update_Switch_State(Monitor_Helper_Base):
 
     def first_run(self):
         ''' do some pre-run setup/configuration '''
+        self.logger.info("running setup and config")
         if self.configured:
             self.controller['TYPE'] = str(
                 self.mod_configuration['controller_type'])
@@ -146,8 +147,7 @@ class Update_Switch_State(Monitor_Helper_Base):
                     'Unknown SDN controller type {0}'.format(
                         self.controller['TYPE']))
                 return False
-        else:
-            pass
+        self.logger.info("Setup successful")
         return True
 
     def shutdown_endpoint(self, my_hash):
