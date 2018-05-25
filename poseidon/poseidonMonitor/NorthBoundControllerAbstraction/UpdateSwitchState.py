@@ -97,6 +97,7 @@ class Update_Switch_State(Monitor_Helper_Base):
                         'BcfProxy could not connect to {0}'.format(
                             self.controller['URI']))
             elif self.controller['TYPE'] == 'faucet':
+                self.logger.error(str(self.mod_configuration))
                 try:
                     self.logger.error("0")
                     if 'controller_uri' in self.mod_configuration:
