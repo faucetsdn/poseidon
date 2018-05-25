@@ -97,38 +97,28 @@ class Update_Switch_State(Monitor_Helper_Base):
                         'BcfProxy could not connect to {0}'.format(
                             self.controller['URI']))
             elif self.controller['TYPE'] == 'faucet':
-                self.logger.error(str(self.mod_configuration))
                 try:
-                    self.logger.error("0")
                     if 'controller_uri' in self.mod_configuration:
                         self.controller['URI'] = str(
                             self.mod_configuration['controller_uri'])
-                    self.logger.error("1")
                     if 'controller_user' in self.mod_configuration:
                         self.controller['USER'] = str(
                             self.mod_configuration['controller_user'])
-                    self.logger.error("2")
                     if 'controller_pass' in self.mod_configuration:
                         self.controller['PASS'] = str(
                             self.mod_configuration['controller_pass'])
-                    self.logger.error("3")
                     if 'controller_config_file' in self.mod_configuration:
                         self.controller['CONFIG_FILE'] = str(
                             self.mod_configuration['controller_config_file'])
-                    self.logger.error("4")
                     if 'controller_log_file' in self.mod_configuration:
                         self.controller['LOG_FILE'] = str(
                             self.mod_configuration['controller_log_file'])
-                    self.logger.error("5")
                     if 'controller_mirror_ports' in self.mod_configuration:
                         self.controller['MIRROR_PORTS'] = ast.literal_eval(
                             self.mod_configuration['controller_mirror_ports'])
-                    self.logger.error("6")
                     if 'rabbit_enabled' in self.mod_configuration:
-                        self.logger.error(str(self.mod_configuration['rabbit_enabled']))
                         self.controller['RABBIT_ENABLED'] = ast.literal_eval(
                             self.mod_configuration['rabbit_enabled'])
-                    self.logger.error("7")
                     self.sdnc = FaucetProxy(host=self.controller['URI'],
                                             user=self.controller['USER'],
                                             pw=self.controller['PASS'],
@@ -136,7 +126,6 @@ class Update_Switch_State(Monitor_Helper_Base):
                                             log_file=self.controller['LOG_FILE'],
                                             mirror_ports=self.controller['MIRROR_PORTS'],
                                             rabbit_enabled=self.controller['RABBIT_ENABLED'])
-                    self.logger.error("8")
                 except BaseException as e:  # pragma: no cover
                     self.logger.error(
                         'FaucetProxy could not connect to {0} because {1}'.format(
