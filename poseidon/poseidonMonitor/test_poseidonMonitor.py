@@ -93,20 +93,6 @@ def test_start_vent_collector():
         def __init__(self):
             pass
 
-        def get(self, uri):
-            def mock_response():
-                def mock_json(): return {'dataset':[]}
-                mock_response.json = mock_json
-                return None
-            mock_response.text = "success"
-            # cover object
-            a = mock_response()
-            b = mock_response.json()
-            assert a is None
-            assert mock_response.text == "success"
-            assert isinstance(b, dict)
-            return mock_response
-
         def post(uri, json, data):
             def mock_response(): return None
             mock_response.text = "success"
@@ -224,15 +210,6 @@ def test_get_vent_collectors():
             assert isinstance(b, dict)
             return mock_response
 
-        def post(uri, json, data):
-            def mock_response(): return None
-            mock_response.text = "success"
-            # cover object
-            a = mock_response()
-            assert a is None
-            assert mock_response.text == "success"
-            return mock_response
-
     poseidonMonitor.CTRL_C['STOP'] = False
     poseidonMonitor.requests = requests()
 
@@ -285,9 +262,6 @@ def test_get_vent_collectors():
                 self.endpoints.state[s] = stuff[s]
 
             self.logger = None
-
-        def return_endpoint_state(self):
-            return self.endpoints
 
     class MockMonitor(Monitor):
 
@@ -340,15 +314,6 @@ def test_host_has_active_collectors_false():
             assert isinstance(b, dict)
             return mock_response
 
-        def post(uri, json, data):
-            def mock_response(): return None
-            mock_response.text = "success"
-            # cover object
-            a = mock_response()
-            assert a is None
-            assert mock_response.text == "success"
-            return mock_response
-
     poseidonMonitor.CTRL_C['STOP'] = False
     poseidonMonitor.requests = requests()
 
@@ -401,9 +366,6 @@ def test_host_has_active_collectors_false():
                 self.endpoints.state[s] = stuff[s]
 
             self.logger = None
-
-        def return_endpoint_state(self):
-            return self.endpoints
 
     class MockMonitor(Monitor):
 
@@ -457,15 +419,6 @@ def test_host_has_active_collectors_true():
             assert isinstance(b, dict)
             return mock_response
 
-        def post(uri, json, data):
-            def mock_response(): return None
-            mock_response.text = "success"
-            # cover object
-            a = mock_response()
-            assert a is None
-            assert mock_response.text == "success"
-            return mock_response
-
     poseidonMonitor.CTRL_C['STOP'] = False
     poseidonMonitor.requests = requests()
 
@@ -518,9 +471,6 @@ def test_host_has_active_collectors_true():
                 self.endpoints.state[s] = stuff[s]
 
             self.logger = None
-
-        def return_endpoint_state(self):
-            return self.endpoints
 
     class MockMonitor(Monitor):
 
@@ -1093,9 +1043,6 @@ def test_process():
         def debug(self, msg):
             pass
 
-        def info(self, msg):
-            pass
-
     class MockEndpoint(Endpoint_Wrapper):
         def __init__(self):
             super(MockEndpoint, self).__init__()
@@ -1154,9 +1101,6 @@ def test_process():
             for s in stuff:
                 self.state[s] = stuff[s]
 
-        def get_endpoint_ip(self, hash):
-            return '0.0.0.0'
-
     class MockUss():
 
         def __init__(self):
@@ -1165,12 +1109,6 @@ def test_process():
 
         def return_endpoint_state(self):
             return self.endpoints
-
-        def mirror_endpoint(self, endpoint_hash, messages=None):
-            pass
-
-        def unmirror_endpoint(self, endpoint_hash, messages=None):
-            pass
 
     class MockMonitor(Monitor):
         # no need to init the monitor
@@ -1192,18 +1130,6 @@ def test_process():
 
         def format_rabbit_message(self, item):
             return {}
-
-        def get_vent_collectors(self):
-            return {
-                '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {
-                    Collector('test0',2,900,'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3',
-                        1,'10.00.0.101','exited')
-                },
-                'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {
-                    Collector('test1',2,900,'d60c5fa5c980b1cd791208eaf62aba9fb46d3aaa',
-                        1,'10.00.0.99','exited')
-                }
-            }
 
     mock_monitor = MockMonitor()
     mock_monitor.uss = MockUss()
@@ -1302,9 +1228,6 @@ def test_schedule_thread_worker():
             pass
 
         def debug(self, msg):
-            pass
-
-        def info(self, msg):
             pass
 
     class mockSchedule():
