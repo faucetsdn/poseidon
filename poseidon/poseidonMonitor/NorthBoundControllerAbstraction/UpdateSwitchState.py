@@ -57,7 +57,7 @@ class Update_Switch_State(Monitor_Helper_Base):
         self.controller['CONFIG_FILE'] = None
         self.controller['LOG_FILE'] = None
         self.controller['MIRROR_PORTS'] = None
-        self.controller['RABBIT_ENABLED'] = None
+        self.controller['RABBIT_ENABLED'] = False
 
         self.sdnc = None
         self.first_time = True
