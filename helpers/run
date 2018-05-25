@@ -1,28 +1,54 @@
 #!/bin/bash
 set -e
 
-docker run -dit \
-           -v /var/run/docker.sock:/var/run/docker.sock \
-           -v /opt/vent_files:/opt/vent_files \
-           -v $(pwd)/.plugin_config.yml:/root/.plugin_config.yml \
-           -v $(pwd)/.vent_startup.yml:/root/.vent_startup.yml \
-           -e controller_uri=$controller_uri \
-           -e controller_user=$controller_user \
-           -e controller_pass=$controller_pass \
-           -e controller_type=$controller_type \
-           -e controller_log_file=$controller_log_file \
-           -e controller_config_file=$controller_config_file \
-           -e collector_nic=$collector_nic \
-           -e controller_mirror_ports="$controller_mirror_ports" \
-           -e rabbit_enabled=$rabbit_enabled \
-           -e FA_RABBIT_ENABLED=$FA_RABBIT_ENABLED \
-           -e FA_RABBIT_HOST=$FA_RABBIT_HOST \
-           -e FA_RABBIT_EXCHANGE=$FA_RABBIT_EXCHANGE \
-           -e FA_RABBIT_ROUTING_KEY=$FA_RABBIT_ROUTING_KEY \
-           -e FA_RABBIT_PORT=$FA_RABBIT_PORT \
-           -e max_concurrent_reinvestigations=$max_concurrent_reinvestigations \
-           --name vent \
-           cyberreboot/vent
+d_comm="docker run -dit -v /var/run/docker.sock:/var/run/docker.sock -v /opt/vent_files:/opt/vent_files -v $(pwd)/.plugin_config.yml:/root/.plugin_config.yml -v $(pwd)/.vent_startup.yml:/root/.vent_startup.yml "
+if [[ ! -z "${controller_uri}" ]]; then
+	d_comm+="-e controller_uri=$controller_uri "
+fi
+if [[ ! -z "${controller_user}" ]]; then
+	d_comm+="-e controller_user=$controller_user "
+fi
+if [[ ! -z "${controller_pass}" ]]; then
+	d_comm+="-e controller_pass=$controller_pass "
+fi
+if [[ ! -z "${controller_type}" ]]; then
+	d_comm+="-e controller_type=$controller_type "
+fi
+if [[ ! -z "${controller_nic}" ]]; then
+	d_comm+="-e controller_nic=$controller_nic "
+fi
+if [[ ! -z "${controller_log_file}" ]]; then
+	d_comm+="-e controller_log_file=$controller_log_file "
+fi
+if [[ ! -z "${controller_config_file}" ]]; then
+	d_comm+="-e controller_config_file=$controller_config_file "
+fi
+if [[ ! -z "${controller_mirror_ports}" ]]; then
+	d_comm+="-e controller_mirror_ports=$controller_mirror_ports "
+fi
+if [[ ! -z "${rabbit_enabled}" ]]; then
+	d_comm+="-e rabbit_enabled=$rabbit_enabled "
+fi
+if [[ ! -z "${FA_RABBIT_ENABLED}" ]]; then
+	d_comm+="-e FA_RABBIT_ENABLED=$FA_RABBIT_ENABLED "
+fi
+if [[ ! -z "${FA_RABBIT_HOST}" ]]; then
+	d_comm+="-e FA_RABBIT_HOST=$FA_RABBIT_HOST "
+fi
+if [[ ! -z "${FA_RABBIT_EXCHANGE}" ]]; then
+	d_comm+="-e FA_RABBIT_EXCHANGE=$FA_RABBIT_EXCHANGE "
+fi
+if [[ ! -z "${FA_RABBIT_ROUTING_KEY}" ]]; then
+	d_comm+="-e FA_RABBIT_ROUTING_KEY=$FA_RABBIT_ROUTING_KEY "
+fi
+if [[ ! -z "${FA_RABBIT_PORT}" ]]; then
+	d_comm+="-e FA_RABBIT_PORT=$FA_RABBIT_PORT "
+fi
+if [[ ! -z "${max_concurrent_reinvestigations}" ]]; then
+	d_comm+="-e max_concurrent_reinvestigations=$max_concurrent_reinvestigations "
+fi
+d_comm+="--name vent cyberreboot/vent"
+$(echo "$d_comm")
 
 echo -n "waiting for required containers to build and start (this might take a little while)..."
 until [ "$(docker ps -q -f name=cyberreboot-vent-syslog-master)" ] && [ "$(docker container inspect -f {{.State.Running}} cyberreboot-vent-syslog-master)" = "true" ]

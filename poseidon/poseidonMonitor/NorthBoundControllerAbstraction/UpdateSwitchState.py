@@ -134,8 +134,6 @@ class Update_Switch_State(Monitor_Helper_Base):
                 self.logger.error(
                     'Unknown SDN controller type {0}'.format(
                         self.controller['TYPE']))
-        else:
-            pass
 
     def shutdown_endpoint(self, my_hash):
         ''' tell the controller to shutdown an endpoint by hash '''
