@@ -66,7 +66,7 @@ def test_setup_redis():
                                 'segment': '1', \
                                 'port': '1', \
                                 'tenant': 'VLAN100', \
-                                'state': 'KNOWN'}",
+                                'active': '0'}",
              "next_state": "REINVESTIGATING",
              "state": "KNOWN"})
     r.hmset('6cd09124a66ef1bbc72c1aff4e333766d3533f82',
@@ -78,7 +78,7 @@ def test_setup_redis():
                                 'segment': '1', \
                                 'port': '1', \
                                 'tenant': 'VLAN100', \
-                                'state': 'KNOWN'}",
+                                'active': '1'}",
              "next_state": "REINVESTIGATING",
              "state": "KNOWN"})
     r.hmset('6cd09124a66ef1bbc72c1aff4e333766d3533f83',
@@ -90,7 +90,7 @@ def test_setup_redis():
                                 'segment': '1', \
                                 'port': '1', \
                                 'tenant': 'VLAN100', \
-                                'state': 'KNOWN'}",
+                                'active': '1'}",
              "next_state": "REINVESTIGATING",
              "state": "KNOWN"})
 
