@@ -124,6 +124,7 @@ class Update_Switch_State(Monitor_Helper_Base):
                             self.mod_configuration['controller_mirror_ports'])
                     self.logger.error("6")
                     if 'rabbit_enabled' in self.mod_configuration:
+                        self.logger.error(str(self.mod_configuration['rabbit_enabled']))
                         self.controller['RABBIT_ENABLED'] = ast.literal_eval(
                             self.mod_configuration['rabbit_enabled'])
                     self.logger.error("7")
