@@ -29,3 +29,4 @@ poseidon:
         controller_config_file: /etc/faucet/faucet.yaml
         controller_mirror_ports: '{}'
         rabbit_enabled: True
+        learn_public_addresses: False
