@@ -58,6 +58,7 @@ class Update_Switch_State(Monitor_Helper_Base):
         self.controller['LOG_FILE'] = None
         self.controller['MIRROR_PORTS'] = None
         self.controller['RABBIT_ENABLED'] = False
+        self.controller['LEARN_PUBLIC_ADDRESSES'] = False
 
         self.sdnc = None
         self.first_time = True
@@ -98,6 +99,9 @@ class Update_Switch_State(Monitor_Helper_Base):
                             self.controller['URI']))
             elif self.controller['TYPE'] == 'faucet':
                 try:
+                    if 'learn_public_addresses' in self.mod_configuration:
+                        self.controller['LEARN_PUBLIC_ADDRESSES'] = ast.literal_eval(
+                            self.mod_configuration['learn_public_addresses'])
                     if 'controller_uri' in self.mod_configuration:
                         self.controller['URI'] = str(
                             self.mod_configuration['controller_uri'])
@@ -125,7 +129,8 @@ class Update_Switch_State(Monitor_Helper_Base):
                                             config_file=self.controller['CONFIG_FILE'],
                                             log_file=self.controller['LOG_FILE'],
                                             mirror_ports=self.controller['MIRROR_PORTS'],
-                                            rabbit_enabled=self.controller['RABBIT_ENABLED'])
+                                            rabbit_enabled=self.controller['RABBIT_ENABLED'],
+                                            learn_pub_adds=self.controller['LEARN_PUBLIC_ADDRESSES'])
                 except BaseException as e:  # pragma: no cover
                     self.logger.error(
                         'FaucetProxy could not connect to {0} because {1}'.format(

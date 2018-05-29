@@ -29,6 +29,9 @@ fi
 if [[ ! -z "${rabbit_enabled}" ]]; then
 	d_comm+="-e rabbit_enabled=$rabbit_enabled "
 fi
+if [[ ! -z "${learn_public_addresses}" ]]; then
+	d_comm+="-e learn_public_addresses=$learn_public_addresses "
+fi
 if [[ ! -z "${FA_RABBIT_ENABLED}" ]]; then
 	d_comm+="-e FA_RABBIT_ENABLED=$FA_RABBIT_ENABLED "
 fi

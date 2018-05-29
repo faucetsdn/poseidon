@@ -39,6 +39,7 @@ class FaucetProxy(Connection, Parser):
                  log_file=None,
                  mirror_ports=None,
                  rabbit_enabled=None,
+                 learn_pub_adds=None,
                  *args,
                  **kwargs):
         '''Initializes Faucet object.'''
@@ -49,10 +50,12 @@ class FaucetProxy(Connection, Parser):
                                           log_file,
                                           mirror_ports,
                                           rabbit_enabled,
+                                          learn_pub_adds,
                                           *args,
                                           **kwargs)
         self.mirror_ports = mirror_ports
         self.rabbit_enabled = rabbit_enabled
+        self.learn_pub_adds = learn_pub_adds
         self.mac_table = {}
 
     @staticmethod
@@ -95,9 +98,23 @@ class FaucetProxy(Connection, Parser):
                 self.mac_table[mac][0]['ip-address'] != '::' and
                 not self.mac_table[mac][0]['ip-address'].startswith('169.254.') and
                 not self.mac_table[mac][0]['ip-address'].startswith('fe80:')):
-                    module_logger.debug('{0}:{1}'.format(
-                        mac, self.mac_table[mac]))
-                    retval.append(self.mac_table[mac])
+                    if not self.learn_pub_adds:
+                        # only allow RFC 1918 ipv4 addresses and fd* ipv6 address
+                        check_sec_octet = self.mac_table[mac][0]['ip-address'].split('.')
+                        if len(check_sec_octet) > 1:
+                            check_sec_octet = int(check_sec_octet[1])
+                        if (self.mac_table[mac][0]['ip-address'].startswith('fd') or
+                            self.mac_table[mac][0]['ip-address'].startswith('10.') or
+                            self.mac_table[mac][0]['ip-address'].startswith('192.168.') or
+                            (self.mac_table[mac][0]['ip-address'].startswith('172.') and
+                             isinstance(check_sec_octet, int) and check_sec_octet > 15 and check_sec_octet < 32)):
+                            module_logger.debug('{0}:{1}'.format(
+                                mac, self.mac_table[mac]))
+                            retval.append(self.mac_table[mac])
+                    else:
+                        module_logger.debug('{0}:{1}'.format(
+                            mac, self.mac_table[mac]))
+                        retval.append(self.mac_table[mac])
         return retval
 
     def get_switches(self):
