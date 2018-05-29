@@ -14,8 +14,8 @@ fi
 if [[ ! -z "${controller_type}" ]]; then
 	d_comm+="-e controller_type=$controller_type "
 fi
-if [[ ! -z "${controller_nic}" ]]; then
-	d_comm+="-e controller_nic=$controller_nic "
+if [[ ! -z "${collector_nic}" ]]; then
+	d_comm+="-e collector_nic=$collector_nic "
 fi
 if [[ ! -z "${controller_log_file}" ]]; then
 	d_comm+="-e controller_log_file=$controller_log_file "
