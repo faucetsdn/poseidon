@@ -18,11 +18,13 @@ https://github.com/cyberreboot/vent:
         build: no
         start: no
     rq_dashboard:
-        build: no
-        start: no
+        build: yes
+        start: yes
     rq_worker:
         build: yes
         start: yes
+        settings:
+            instances: 4
     syslog:
         build: yes
         start: yes
@@ -40,10 +42,10 @@ https://github.com/cyberreboot/vent-plugins:
         build: yes
     tcprewrite_dot1q:
         build: yes
-https://github.com/cyberreboot/crviz:
-    '@':
-        build: yes
-        start: yes
+#https://github.com/cyberreboot/crviz:
+#    '@':
+#        build: yes
+#        start: yes
 https://github.com/lab41/poseidonml:
     nodeclassifier@eval:
         build: yes
