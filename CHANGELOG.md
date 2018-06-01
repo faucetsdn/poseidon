@@ -1,3 +1,11 @@
+# v0.2.0 (2017-06-01)
+
+ - Updated version of pytest
+ - Improved test coverage
+ - Improve handling environment variables with the helper script
+ - Update version of gevent
+ - Adds option to ignore learning public ip addresses
+
 # v0.1.9 (2018-05-18)
 
  - Includes tcprewrite_dot1q in vent startup
