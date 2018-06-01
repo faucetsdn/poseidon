@@ -18,11 +18,13 @@ https://github.com/cyberreboot/vent:
         build: no
         start: no
     rq_dashboard:
-        build: no
-        start: no
+        build: yes
+        start: yes
     rq_worker:
         build: yes
         start: yes
+        settings:
+            instances: 4
     syslog:
         build: yes
         start: yes
