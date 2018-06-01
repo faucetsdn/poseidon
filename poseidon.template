@@ -6,5 +6,6 @@ groups = poseidon
 instances = 1
 
 [docker]
+environment = ["PYTHONUNBUFFERED=0"]
 ports = {'9304/tcp': ('0.0.0.0', 9304)}
 links = {"RabbitMQ":"RABBIT_SERVER", "NetworkTap":"vent_ip", "PoseidonAPI":"poseidon-api"}
