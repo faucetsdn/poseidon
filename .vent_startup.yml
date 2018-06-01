@@ -42,10 +42,10 @@ https://github.com/cyberreboot/vent-plugins:
         build: yes
     tcprewrite_dot1q:
         build: yes
-#https://github.com/cyberreboot/crviz:
-#    '@':
-#        build: yes
-#        start: yes
+https://github.com/cyberreboot/crviz:
+    '@':
+        build: yes
+        start: yes
 https://github.com/lab41/poseidonml:
     nodeclassifier@eval:
         build: yes
