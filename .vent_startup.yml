@@ -46,6 +46,6 @@ https://github.com/cyberreboot/crviz:
     '@':
         build: yes
         start: yes
-https://github.com/lab41/poseidonml:
+https://github.com/cyberreboot/poseidonml:
     nodeclassifier@eval:
         build: yes
