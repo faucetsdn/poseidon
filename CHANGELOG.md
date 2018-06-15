@@ -1,4 +1,8 @@
-# v0.2.0 (2017-06-01)
+# v0.2.1 (2018-06-15)
+
+ - PoseidonML moved to the CyberReboot org
+ - Updated version of gevent, pytest, pylint, and requests
+# v0.2.0 (2018-06-01)
 
  - Updated version of pytest
  - Improved test coverage
