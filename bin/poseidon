@@ -1,5 +1,10 @@
 #!/bin/bash
 
+while true; do
+	echo "poseidon is running."
+	sleep 10
+done
+
 # status
 # start
 # stop

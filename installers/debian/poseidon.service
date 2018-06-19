@@ -1,0 +1,9 @@
+[Unit]
+Description = Poseidon
+After = docker.service
+
+[Service]
+ExecStart = /usr/bin/poseidon
+
+[Install]
+WantedBy = multi-user.target

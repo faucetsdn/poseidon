@@ -34,6 +34,8 @@ build_debian:
 	cp installers/debian/templates installers/debian/$(TAG)-$(VERSION)/DEBIAN/
 	mkdir -p installers/debian/$(TAG)-$(VERSION)/opt/poseidon
 	mkdir -p installers/debian/$(TAG)-$(VERSION)/usr/bin
+	mkdir -p installers/debian/$(TAG)-$(VERSION)/etc/systemd/system
+	cp installers/debian/poseidon.service installers/debian/$(TAG)-$(VERSION)/etc/systemd/system/
 	cp -R !(installers) installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
 	cp -R bin/* installers/debian/$(TAG)-$(VERSION)/usr/bin/
 	mkdir -p dist

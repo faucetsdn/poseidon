@@ -6,3 +6,6 @@ set -e
 
 db_input high poseidon/question1 || true
 db_go
+
+systemctl enable poseidon
+systemctl start poseidon
