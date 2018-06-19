@@ -1,7 +1,7 @@
 certifi==2018.4.16
 httmock==1.2.6
 mock==2.0.0
-pika==0.11.2
+pika==0.12.0
 prometheus_client==0.2.0
 pylint==1.9.2
 pytest-cov==2.5.1
