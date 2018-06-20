@@ -31,6 +31,7 @@ build_debian:
 	cp installers/debian/control installers/debian/$(TAG)-$(VERSION)/DEBIAN/
 	cp installers/debian/postinst installers/debian/$(TAG)-$(VERSION)/DEBIAN/
 	cp installers/debian/preinst installers/debian/$(TAG)-$(VERSION)/DEBIAN/
+	cp installers/debian/prerm installers/debian/$(TAG)-$(VERSION)/DEBIAN/
 	cp installers/debian/templates installers/debian/$(TAG)-$(VERSION)/DEBIAN/
 	mkdir -p installers/debian/$(TAG)-$(VERSION)/opt/poseidon
 	mkdir -p installers/debian/$(TAG)-$(VERSION)/usr/bin

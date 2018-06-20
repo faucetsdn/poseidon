@@ -1,4 +1,13 @@
-Template: poseidon/question1
+Template: poseidon/controller_type
+Type: select
+Choices: BigSwitch Cloud Fabric, Faucet
+Description: Select which SDN controller to use:
+ Poseidon currently works with either a Faucet controller or a BigSwitch Cloud Fabric controller.  Please choose which controller will be used in this environment.
+
+Template: poseidon/foo
 Type: string
-Description: Set something
- Yeah, for real.
+Description: foo
+
+Template: poseidon/bar
+Type: string
+Description: bar

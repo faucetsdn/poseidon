@@ -4,8 +4,8 @@ set -e
 
 . /usr/share/debconf/confmodule
 
-db_input high poseidon/question1 || true
-db_go
+#db_input high poseidon/question1 || true
+#db_go
 
 systemctl enable poseidon
 systemctl start poseidon

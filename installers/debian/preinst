@@ -9,6 +9,35 @@ command -v docker >/dev/null 2>&1 || { echo >&2 -e "${red}Docker not installed, 
 
 
 . /usr/share/debconf/confmodule
+db_version 2.0
 
-db_input critical poseidon/question1 || true
-db_go || true
+db_capb backup
+
+STATE=1
+while [ "$STATE" != 0 -a "$STATE" != 3 ]; do
+    case "$STATE" in
+    1)
+        db_input critical poseidon/controller_type || true
+    ;;
+
+    2)
+        db_get poseidon/controller_type
+        if [ "$RET" == "Faucet" ]; then
+            db_input high poseidon/foo || true
+        else
+            db_input high poseidon/bar || true
+        fi
+    ;;
+    esac
+
+    if db_go; then
+        STATE=$(($STATE + 1))
+    else
+        STATE=$(($STATE - 1))
+    fi
+done
+if db_go; then
+    exit 0
+else
+    exit 1
+fi
