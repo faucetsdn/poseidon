@@ -14,12 +14,12 @@ install:
   - shellcheck() { "shellcheck-stable/shellcheck" "$@"; }
   - shellcheck --version
 env:
-  - PYTHONPATH=$(pwd)/poseidon:$PYTHONPATH POSEIDON_CONFIG=$(pwd)/config/poseidon.config POSEIDON_LOGGER=$(pwd)/logging.json POSEIDON_TRAVIS=true
+  - PYTHONPATH=/home/travis/build/CyberReboot/poseidon/poseidon:$PYTHONPATH POSEIDON_CONFIG=/home/travis/build/CyberReboot/poseidon/config/poseidon.config POSEIDON_LOGGER=/home/travis/build/CyberReboot/poseidon/logging.json POSEIDON_TRAVIS=true
 jobs:
   include:
   - stage: test
     script: /bin/bash --version && /bin/bash -n installers/debian/postinst installers/debian/preinst installers/debian/prerm bin/poseidon && shellcheck -x -e SC2119 installers/debian/postinst installers/debian/preinst installers/debian/prerm bin/poseidon && printf "tests passed.\n"
-  - script: find . -name requirements.txt -type f -exec pip3 install -r {} \ && py.test -v -vv --cov-report term-missing --cov=./poseidon --cov=./api -c .coveragerc
+  - script: find . -name requirements.txt -type f -exec pip3 install -r {} \; && py.test -v -vv --cov-report term-missing --cov=./poseidon --cov=./api -c .coveragerc
 before_install:
   - sudo apt-get update
   - sudo apt-get install docker-ce
