@@ -49,3 +49,6 @@ https://github.com/cyberreboot/crviz:
 https://github.com/cyberreboot/poseidonml:
     nodeclassifier@eval:
         build: yes
+vent.cfg:
+    build-options:
+        use_existing_images: yes
