@@ -18,7 +18,7 @@ env:
 jobs:
   include:
   - stage: test
-    script: /bin/bash --version && /bin/bash -n installers/debian/postinst installers/debian/preinst installers/debian/prerm bin/poseidon && shellcheck -f json installers/debian/postinst installers/debian/preinst installers/debian/prerm bin/poseidon && printf "tests passed.\n"
+    script: /bin/bash --version && /bin/bash -n installers/debian/postinst installers/debian/preinst installers/debian/prerm bin/poseidon && shellcheck disable=SC1091 -f json installers/debian/postinst installers/debian/preinst installers/debian/prerm bin/poseidon && printf "tests passed.\n"
   - script: find . -name requirements.txt -type f -exec pip3 install -r {} \ && py.test -v -vv --cov-report term-missing --cov=./poseidon --cov=./api -c .coveragerc
 before_install:
   - sudo apt-get update
