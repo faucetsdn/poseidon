@@ -10,4 +10,5 @@ done
 # stop
 # restart
 # logs
-
+# configure
+# show current configuration
