@@ -9,11 +9,9 @@ python:
   - "3.6"
 install:
   - pip install codecov
-  - scversion="stable"
-  - wget "https://storage.googleapis.com/shellcheck/shellcheck-$scve
-rsion.linux.x86_64.tar.xz"
-  - tar --xz -xvf "shellcheck-$scversion.linux.x86_64.tar.xz"
-  - shellcheck() { "shellcheck-$scversion/shellcheck" "$@"; }
+  - wget "https://storage.googleapis.com/shellcheck/shellcheck-stable.linux.x86_64.tar.xz"
+  - tar --xz -xvf "shellcheck-stable.linux.x86_64.tar.xz"
+  - shellcheck() { "shellcheck-stable/shellcheck" "$@"; }
   - shellcheck --version
 env:
   - PYTHONPATH=/home/travis/build/CyberReboot/poseidon/poseidon:$PYTHONPATH POSEIDON_CONFIG=/home/travis/build/CyberReboot/poseidon/config/poseidon.config POSEIDON_LOGGER=/home/travis/build/CyberReboot/poseidon/logging.json POSEIDON_TRAVIS=true
