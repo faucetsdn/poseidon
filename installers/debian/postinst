@@ -64,13 +64,15 @@ while [ "$STATE" != 0 -a "$STATE" != 8 ]; do
     esac
 
     if db_go; then
-        STATE=$(($STATE + 1))
+        STATE=$((STATE + 1))
     else
-        STATE=$(($STATE - 1))
+        STATE=$((STATE - 1))
     fi
 done
 
 if db_go; then
+    echo "# Generated from debconf - do not edit by hand, to change configation options run: poseidon configure" > /etc/poseidon/default.conf
+    # read from db to set variables in default.conf
     systemctl stop poseidon || true
     systemctl enable poseidon
     systemctl start poseidon
