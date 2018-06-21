@@ -8,7 +8,7 @@ db_version 2.0
 db_capb backup
 
 STATE=1
-while [ "$STATE" != 0 -a "$STATE" != 8 ]; do
+while [ "$STATE" != 0 ] && [ "$STATE" != 8 ]; do
     case "$STATE" in
     1)
         db_input critical poseidon/controller_type || true
