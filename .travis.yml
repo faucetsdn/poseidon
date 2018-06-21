@@ -10,11 +10,12 @@ python:
 install:
   - pip install codecov
 env:
-  - /bin/bash --version && /bin/bash -n installers/debian/postinst installers/debian/preinst installers/debian/prerm bin/poseidon && shellcheck -f json installers/debian/postinst installers/debian/preinst installers/debian/prerm bin/poseidon && printf "tests passed.\n"
   - PYTHONPATH=/home/travis/build/CyberReboot/poseidon/poseidon:$PYTHONPATH POSEIDON_CONFIG=/home/travis/build/CyberReboot/poseidon/config/poseidon.config POSEIDON_LOGGER=/home/travis/build/CyberReboot/poseidon/logging.json POSEIDON_TRAVIS=true
-script:
-  - find . -name requirements.txt -type f -exec pip3 install -r {} \;
-  - py.test -v -vv --cov-report term-missing --cov=./poseidon --cov=./api -c .coveragerc
+jobs:
+  include:
+  - stage: test
+    script: /bin/bash --version && /bin/bash -n installers/debian/postinst installers/debian/preinst installers/debian/prerm bin/poseidon && shellcheck -f json installers/debian/postinst installers/debian/preinst installers/debian/prerm bin/poseidon && printf "tests passed.\n"
+  - script: find . -name requirements.txt -type f -exec pip3 install -r {} \ && py.test -v -vv --cov-report term-missing --cov=./poseidon --cov=./api -c .coveragerc
 before_install:
   - sudo apt-get update
   - sudo apt-get install docker-ce shellcheck
