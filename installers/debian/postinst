@@ -76,9 +76,7 @@ done
 failed=false
 if db_go; then
     echo "# Generated from debconf - do not edit by hand, to change configation options run: poseidon configure" > /etc/poseidon/default.conf
-    echo "#" >> /etc/poseidon/default.conf
-    echo "#" >> /etc/poseidon/default.conf
-    echo "" >> /etc/poseidon/default.conf
+    { echo "#"; echo "#"; echo ""; } >> /etc/poseidon/default.conf
     # read from db to set variables in default.conf
     db_get poseidon/controller_type
     if [[ ! -z "$RET" ]]; then
