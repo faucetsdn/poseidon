@@ -31,9 +31,10 @@ You will need to add support for moving arbitrary endpoint data around your netw
 
 ##### span-fabric
 
+Replace `<name>` with the name of your span-fabric
 ```
 ! span-fabric
-span-fabric vent
+span-fabric <name>
   active
   destination interface-group ig1
   priority 1
@@ -58,14 +59,6 @@ poseidon/poseidonMonitor/NorthBoundControllerAbstraction/proxy/bcf/bcf.py:      
 poseidon/poseidonMonitor/NorthBoundControllerAbstraction/proxy/bcf/sample_state.py: "dest-interface-group": "ig1",
 ```
 
-If the span-fabrc `vent` is reserved in your install, you will need to modify the span_name, and other variables in:
-
-```
-/poseidon/poseidonMonitor/NorthBoundControllerAbstraction/proxy/bcf/bcf.py
-/poseidon/poseidonMonitor/NorthBoundControllerAbstraction/proxy/bcf/test_bcf.py
-/poseidon/poseidonMonitor/NorthBoundControllerAbstraction/proxy/bcf/sample_state.py
-```
-
 Poseidon will connect to BCF using its REST API, so you'll need the API endpoint and credentials to it.  The easiest way to set these values so that Poseidon can use them is in environment variables like so (assuming the controller is running at `192.168.1.10`):
 
 ```
@@ -73,6 +66,7 @@ export controller_type=bcf
 export controller_uri=https://192.168.1.10:8443/api/v1/
 export controller_user=user
 export controller_pass=pass
+export controller_span_fabric_name=name
 ```
 
 BCF is now configured and ready for use with Poseidon, continue on to the [Starting Poseidon using Vent](#starting-poseidon-using-vent) section.

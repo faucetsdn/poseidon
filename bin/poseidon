@@ -17,6 +17,8 @@ while true; do
     sleep 10
 done
 
+# reset configuration (db_purge)
+# version
 # status
 # start
 # stop
