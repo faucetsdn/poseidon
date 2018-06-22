@@ -26,6 +26,9 @@ fi
 if [[ ! -z "${controller_mirror_ports}" ]]; then
 	d_comm+="-e controller_mirror_ports=$controller_mirror_ports "
 fi
+if [[ ! -z "${controller_span_fabric_name}" ]]; then
+	d_comm+="-e controller_span_fabric_name=$controller_span_fabric_name "
+fi
 if [[ ! -z "${rabbit_enabled}" ]]; then
 	d_comm+="-e rabbit_enabled=$rabbit_enabled "
 fi

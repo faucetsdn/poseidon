@@ -9,11 +9,17 @@ python:
   - "3.6"
 install:
   - pip install codecov
+  - wget "https://storage.googleapis.com/shellcheck/shellcheck-stable.linux.x86_64.tar.xz"
+  - tar --xz -xvf "shellcheck-stable.linux.x86_64.tar.xz"
+  - shellcheck() { "shellcheck-stable/shellcheck" "$@"; }
+  - shellcheck --version
 env:
   - PYTHONPATH=/home/travis/build/CyberReboot/poseidon/poseidon:$PYTHONPATH POSEIDON_CONFIG=/home/travis/build/CyberReboot/poseidon/config/poseidon.config POSEIDON_LOGGER=/home/travis/build/CyberReboot/poseidon/logging.json POSEIDON_TRAVIS=true
-script:
-  - find . -name requirements.txt -type f -exec pip3 install -r {} \;
-  - py.test -v -vv --cov-report term-missing --cov=./poseidon --cov=./api -c .coveragerc
+jobs:
+  include:
+  - stage: test
+    script: /bin/bash --version && /bin/bash -n installers/debian/postinst installers/debian/preinst installers/debian/prerm installers/debian/postrm bin/poseidon && shellcheck -x -e SC2119 installers/debian/postinst installers/debian/preinst installers/debian/prerm installers/debian/postrm bin/poseidon
+  - script: find . -name requirements.txt -type f -exec pip3 install -r {} \; && py.test -v -vv --cov-report term-missing --cov=./poseidon --cov=./api -c .coveragerc
 before_install:
   - sudo apt-get update
   - sudo apt-get install docker-ce

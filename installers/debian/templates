@@ -1,0 +1,52 @@
+Template: poseidon/controller_type
+Type: select
+Choices: BigSwitch Cloud Fabric, Faucet
+Description: Select which SDN controller to use:
+ Poseidon currently works with either a Faucet controller or a BigSwitch Cloud Fabric controller.  Please choose which controller will be used in this environment.
+
+Template: poseidon/bcf_controller_uri
+Type: string
+Default: 192.168.0.10:8443
+Description: IP or hostname and port of the BigSwitch Cloud Fabric controller:
+ Poseidon will use the HTTPS API endpoint of BigSwitch Cloud Fabric to interact with the SDN network.  This endpoint will typically look like https://192.168.0.10:8443/api/v1/.  Supply the IP and port that the BCF API is running on and Poseidon will figure out the URL.
+
+Template: poseidon/faucet_same_host
+Type: select
+Choices: Yes, No
+Description: Will Poseidon be running on the same host as the Faucet controller?
+ Poseidon needs to connect to the Faucet controller, if it's on the same host it will just connect directly, otherwise if they're on different host Poseidon will need to connect to the Faucet host over SSH.
+
+Template: poseidon/faucet_controller_uri
+Type: string
+Default: 192.168.0.10
+Description: IP or hostname of the Faucet controller:
+ Poseidon will use SSH to connect to the Faucet controller if 
+
+Template: poseidon/faucet_controller_user
+Type: string
+Description: SSH username to connect to Faucet:
+
+Template: poseidon/faucet_controller_pass
+Type: string
+Description: SSH password to connect to Faucet:
+
+Template: poseidon/faucet_controller_mirror_ports
+Type: string
+Description: controller_mirror_ports
+
+Template: poseidon/bcf_controller_user
+Type: string
+Description: Username to connect to BigSwitch Cloud Fabric:
+
+Template: poseidon/bcf_controller_pass
+Type: password
+Description: Password to connect to BigSwitch Cloud Fabric:
+
+Template: poseidon/collector_nic
+Type: string
+Description: collector_nic
+
+Template: poseidon/max_concurrent_reinvestigations
+Type: string
+Default: 2
+Description: max_concurrent_reinvestigations

@@ -1,0 +1,28 @@
+#!/bin/bash
+
+help()
+{
+    version=$(dpkg -s poseidon | grep '^Version:' | cut -d' ' -f2-)
+    echo "Poseidon $version"
+}
+
+if [ $# -gt 1 ]; then
+    echo "$1"
+else # print help
+    help
+fi
+
+while true; do
+    echo "poseidon is running."
+    sleep 10
+done
+
+# reset configuration (db_purge)
+# version
+# status
+# start
+# stop
+# restart
+# logs
+# configure
+# show current configuration
