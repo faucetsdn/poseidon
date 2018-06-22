@@ -4,7 +4,7 @@ Requires = docker.service
 After = docker.service
 
 [Service]
-EnvironmentFile=/etc/poseidon/default.conf
+EnvironmentFile = /etc/poseidon/default.conf
 ExecStart = /usr/bin/poseidon
 
 [Install]
