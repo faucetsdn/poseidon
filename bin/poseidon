@@ -1,28 +1,116 @@
 #!/bin/bash
 
-help()
-{
-    version=$(dpkg -s poseidon | grep '^Version:' | cut -d' ' -f2-)
-    echo "Poseidon $version"
-}
-
-if [ $# -gt 1 ]; then
-    echo "$1"
-else # print help
-    help
-fi
-
-while true; do
-    echo "poseidon is running."
-    sleep 10
-done
-
 # reset configuration (db_purge)
 # version
+# configure
+# logs
+# restart
 # status
 # start
 # stop
-# restart
-# logs
-# configure
 # show current configuration
+
+function show_help()
+{
+    local version
+    version=$(dpkg -s poseidon | grep '^Version:' | cut -d' ' -f2-)
+    echo "Poseidon $version, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of machine learning techniques. For more info visit: https://github.com/CyberReboot/poseidon
+
+Usage: poseidon [option]
+Options:
+    -c,  config   configure settings (uses sudo)
+    -h,  help     print this help
+    -i,  info     display current configuration info
+    -l,  logs     display the logs
+    -R,  reset    reset the configuration
+    -r,  restart  restart the Poseidon processes (uses sudo)
+    -S,  start    start the Poseidon processes (uses sudo)
+    -s,  status   display current status
+         stop     stop the Poseidon processes (uses sudo)
+    -V,  version  display the version of Poseidon and exit"
+}
+
+function die() {
+    printf '%s\n' "$1" >&2
+    exit 1
+}
+
+function check_args()
+{
+    local version
+    version=
+
+    while :; do
+        case $1 in
+            -c|config)
+                # TODO this needs serious improvement
+                # print out the existing config first
+                sudo dpkg-reconfigure poseidon
+                exit
+                ;;
+            -h|\?|help)
+                show_help
+                exit
+                ;;
+            -i|info)
+                cat /etc/poseidon/default.conf
+                exit
+                ;;
+            -l|logs)
+                journalctl -r -u poseidon
+                exit
+                ;;
+            -R|reset)
+                # TODO make sure the user is sure (save to .bkp first)
+                # this will break poseidon, run config after this?
+                echo PURGE | sudo debconf-communicate poseidon > /dev/null
+                echo "# Generated from debconf - do not edit by hand, to change configation options run: poseidon configure" | sudo tee /etc/poseidon/default.conf > /dev/null
+                echo "#" | sudo tee -a /etc/poseidon/default.conf > /dev/null
+                echo "#" | sudo tee -a /etc/poseidon/default.conf > /dev/null
+                echo "" | sudo tee -a /etc/poseidon/default.conf > /dev/null
+                exit
+                ;;
+            -r|restart)
+                # TODO add some verbosity
+                sudo systemctl restart poseidon
+                exit
+                ;;
+            -S|start)
+                # TODO
+                echo "started"
+                while true; do
+                    echo "poseidon is running."
+                    sleep 10
+                done
+                exit
+                ;;
+            -s|status)
+                sudo systemctl status poseidon
+                exit
+                ;;
+            stop)
+                # TODO
+                echo "stopped"
+                exit
+                ;;
+            -V|version)
+                version=$(dpkg -s poseidon | grep '^Version:' | cut -d' ' -f2-)
+                echo "Poseidon $version"
+                exit
+                ;;
+            ?*)
+                printf 'WARN: Unknown option (ignored): %s\n' "$1" >&2
+                ;;
+            *)
+                break
+        esac
+        shift
+    done
+}
+
+# entry point
+if [ $# -eq 1 ]; then
+    check_args "$@"
+else # print help
+    show_help
+fi
