@@ -18,15 +18,15 @@ function show_help()
 
 Usage: poseidon [option]
 Options:
-    -c,  config   configure settings (uses sudo)
+    -c,  config   configure settings (uses sudo, will restart the Poseidon service)
     -h,  help     print this help
     -i,  info     display current configuration info
     -l,  logs     display the logs
     -R,  reset    reset the configuration
-    -r,  restart  restart the Poseidon processes (uses sudo)
-    -S,  start    start the Poseidon processes (uses sudo)
-    -s,  status   display current status
-         stop     stop the Poseidon processes (uses sudo)
+    -r,  restart  restart the Poseidon service (uses sudo)
+    -S,  start    start the Poseidon service (uses sudo)
+    -s,  status   display current status of the Poseidon service
+         stop     stop the Poseidon service (uses sudo)
     -V,  version  display the version of Poseidon and exit"
 }
 
