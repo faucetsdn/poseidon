@@ -13,6 +13,13 @@ RUN apk upgrade --no-cache && \
     rm -rf /var/cache/* && \
     rm -rf /root/.cache/*
 
+# healthcheck
+COPY healthcheck /healthcheck
+RUN pip3 install -r /healthcheck/requirements.txt
+ENV FLASK_APP /healthcheck/hc.py
+HEALTHCHECK --interval=15s --timeout=15s \
+ CMD curl --silent --fail http://localhost:5000/healthcheck || exit 1
+
 COPY . /tmp/poseidonWork
 WORKDIR /tmp/poseidonWork
 ENV PYTHONPATH /tmp/poseidonWork/poseidon:$PYTHONPATH
@@ -28,5 +35,4 @@ ENV SYS_LOG_PORT 514
 
 EXPOSE 9304
 
-ENTRYPOINT ["tini", "--"]
-CMD ["/usr/bin/python3", "/tmp/poseidonWork/poseidon/poseidonMonitor/poseidonMonitor.py"]
+CMD (flask run > /dev/null 2>&1) & (tini -- /usr/bin/python3 /tmp/poseidonWork/poseidon/poseidonMonitor/poseidonMonitor.py)
