@@ -131,7 +131,7 @@ If you prefer to orchestrate all of the pieces for Poseidon yourself without Ven
 git clone https://github.com/CyberReboot/poseidon.git
 cd poseidon
 *editor* config/poseidon.config
-docker build -f ./Dockerfile.poseidon -t poseidon .
+docker build -t poseidon .
 docker run poseidon
 ```
 

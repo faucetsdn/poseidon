@@ -3,7 +3,7 @@ TAG=poseidon
 VERSION=$(shell cat VERSION)
 
 build_poseidon:
-	docker build -f ./Dockerfile.poseidon -t $(TAG) .
+	docker build -t $(TAG) .
 
 run_poseidon: build_poseidon
 	docker run --rm -it $(TAG)
