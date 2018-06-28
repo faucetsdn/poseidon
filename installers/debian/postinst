@@ -5,74 +5,8 @@ set -e
 . /usr/share/debconf/confmodule
 db_version 2.0
 
-db_capb backup
-
 red='\e[0;31m'
 endColor='\e[0m'
-
-STATE=1
-while [ "$STATE" != 0 ] && [ "$STATE" != 8 ]; do
-    case "$STATE" in
-    1)
-        db_input critical poseidon/controller_type || true
-    ;;
-
-    2)
-        db_get poseidon/controller_type
-        if [ "$RET" == "Faucet" ]; then
-            db_input critical poseidon/faucet_same_host || true
-        else # BCF
-            db_input critical poseidon/bcf_controller_uri || true
-        fi
-    ;;
-
-    3)
-        db_get poseidon/controller_type
-        if [ "$RET" == "Faucet" ]; then
-            db_get poseidon/faucet_same_host
-            if [ "$RET" == "No" ]; then
-                db_input critical poseidon/faucet_controller_uri || true
-            fi
-        else # BCF
-            db_input critical poseidon/bcf_controller_user || true
-            db_input critical poseidon/bcf_controller_pass || true
-        fi
-    ;;
-
-    4)
-        db_get poseidon/controller_type
-        if [ "$RET" == "Faucet" ]; then
-            db_get poseidon/faucet_same_host
-            if [ "$RET" == "No" ]; then
-                db_input critical poseidon/faucet_controller_user || true
-                db_input critical poseidon/faucet_controller_pass || true
-            fi
-        fi
-    ;;
-
-    5)
-        db_get poseidon/controller_type
-        if [ "$RET" == "Faucet" ]; then
-            db_input critical poseidon/faucet_controller_mirror_ports || true
-        fi
-    ;;
-
-    6)
-        db_input critical poseidon/collector_nic || true
-    ;;
-
-    7)
-        db_input high poseidon/max_concurrent_reinvestigations || true
-    ;;
-    esac
-
-    if db_go; then
-        STATE=$((STATE + 1))
-    else
-        STATE=$((STATE - 1))
-    fi
-done
-
 failed=false
 if db_go; then
     echo "# Generated from debconf - do not edit by hand, to change configation options run: poseidon configure" > /etc/poseidon/default.conf
@@ -160,11 +94,27 @@ if db_go; then
     fi
 
     # TODO install git repos and docker images
+    docker load -i /opt/poseidon/cyberreboot-vent.tar
+    docker load -i /opt/poseidon/cyberreboot-vent-file-drop.tar
+    docker load -i /opt/poseidon/cyberreboot-vent-network-tap.tar
+    docker load -i /opt/poseidon/cyberreboot-vent-rabbitmq.tar
+    docker load -i /opt/poseidon/cyberreboot-vent-redis.tar
+    docker load -i /opt/poseidon/cyberreboot-vent-rq-dashboard.tar
+    docker load -i /opt/poseidon/cyberreboot-vent-rq-worker.tar
+    docker load -i /opt/poseidon/cyberreboot-vent-syslog.tar
+    docker load -i /opt/poseidon/cyberreboot-poseidon.tar
+    docker load -i /opt/poseidon/cyberreboot-poseidon-api.tar
+    docker load -i /opt/poseidon/cyberreboot-vent-plugins-pcap-to-node-pcap.tar
+    docker load -i /opt/poseidon/cyberreboot-vent-plugins-p0f.tar
+    docker load -i /opt/poseidon/cyberreboot-vent-plugins-tcprewrite-dot1q.tar
+    docker load -i /opt/poseidon/cyberreboot-crviz.tar
+    docker load -i /opt/poseidon/cyberreboot-poseidonml.tar
 
     # start poseidon service
     systemctl stop poseidon || true
     systemctl enable poseidon
     systemctl start poseidon
+
     exit 0
 else
     exit 1

@@ -3,7 +3,7 @@ TAG=poseidon
 VERSION=$(shell cat VERSION)
 
 build_poseidon:
-	docker build -f ./Dockerfile.poseidon -t $(TAG) .
+	docker build -t $(TAG) .
 
 run_poseidon: build_poseidon
 	docker run --rm -it $(TAG)
@@ -28,6 +28,7 @@ run_tests: build_poseidon
 
 build_debian:
 	sudo mkdir -p installers/debian/$(TAG)-$(VERSION)/DEBIAN
+	sudo cp installers/debian/config installers/debian/$(TAG)-$(VERSION)/DEBIAN/
 	sudo cp installers/debian/control installers/debian/$(TAG)-$(VERSION)/DEBIAN/
 	sudo cp installers/debian/postinst installers/debian/$(TAG)-$(VERSION)/DEBIAN/
 	sudo cp installers/debian/preinst installers/debian/$(TAG)-$(VERSION)/DEBIAN/
@@ -42,6 +43,36 @@ build_debian:
 	sudo cp installers/debian/default.conf installers/debian/$(TAG)-$(VERSION)/etc/poseidon/
 	sudo cp -R !(installers) installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
 	sudo cp -R bin/* installers/debian/$(TAG)-$(VERSION)/usr/bin/
+	docker pull cyberreboot/vent:latest
+	sudo docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/cyberreboot-vent.tar cyberreboot/vent:latest
+	docker pull cyberreboot/vent-file-drop:master
+	sudo docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/cyberreboot-vent-file-drop.tar cyberreboot/vent-file-drop:master
+	docker pull cyberreboot/vent-network-tap:master
+	sudo docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/cyberreboot-vent-network-tap.tar cyberreboot/vent-network-tap:master
+	docker pull cyberreboot/vent-rabbitmq:master
+	sudo docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/cyberreboot-vent-rabbitmq.tar cyberreboot/vent-rabbitmq:master
+	docker pull cyberreboot/vent-redis:master
+	sudo docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/cyberreboot-vent-redis.tar cyberreboot/vent-redis:master
+	docker pull cyberreboot/vent-rq-dashboard:master
+	sudo docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/cyberreboot-vent-rq-dashboard.tar cyberreboot/vent-rq-dashboard:master
+	docker pull cyberreboot/vent-rq-worker:master
+	sudo docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/cyberreboot-vent-rq-worker.tar cyberreboot/vent-rq-worker:master
+	docker pull cyberreboot/vent-syslog:master
+	sudo docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/cyberreboot-vent-syslog.tar cyberreboot/vent-syslog:master
+	docker pull cyberreboot/poseidon:master
+	sudo docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/cyberreboot-poseidon.tar cyberreboot/poseidon:master
+	docker pull cyberreboot/poseidon-api:master
+	sudo docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/cyberreboot-poseidon-api.tar cyberreboot/poseidon-api:master
+	docker pull cyberreboot/vent-plugins-pcap-to-node-pcap:master
+	sudo docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/cyberreboot-vent-plugins-pcap-to-node-pcap.tar cyberreboot/vent-plugins-pcap-to-node-pcap:master
+	docker pull cyberreboot/vent-plugins-p0f:master
+	sudo docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/cyberreboot-vent-plugins-p0f.tar cyberreboot/vent-plugins-p0f:master
+	docker pull cyberreboot/vent-plugins-tcprewrite-dot1q:master
+	sudo docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/cyberreboot-vent-plugins-tcprewrite-dot1q.tar cyberreboot/vent-plugins-tcprewrite-dot1q:master
+	docker pull cyberreboot/crviz:master
+	sudo docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/cyberreboot-crviz.tar cyberreboot/crviz:master
+	docker pull cyberreboot/poseidonml:latest
+	sudo docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/cyberreboot-poseidonml.tar cyberreboot/poseidonml:latest
 	sudo mkdir -p dist
 	sudo dpkg-deb --build installers/debian/$(TAG)-$(VERSION)
 	sudo mv installers/debian/*.deb dist/

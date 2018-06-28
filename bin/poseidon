@@ -18,16 +18,16 @@ function show_help()
 
 Usage: poseidon [option]
 Options:
-    -c,  config   configure settings (uses sudo, will restart the Poseidon service)
-    -h,  help     print this help
-    -i,  info     display current configuration info
-    -l,  logs     display the logs
-    -R,  reset    reset the configuration
-    -r,  restart  restart the Poseidon service (uses sudo)
-    -S,  start    start the Poseidon service (uses sudo)
-    -s,  status   display current status of the Poseidon service
-         stop     stop the Poseidon service (uses sudo)
-    -V,  version  display the version of Poseidon and exit"
+    -c,  config      display current configuration info
+    -h,  help        print this help
+    -i,  info/status display current status of the Poseidon service
+    -l,  logs        display the logs
+    -R,  reconfig    reconfigures all settings (uses sudo, will restart the Poseidon service)
+    -r,  restart     restart the Poseidon service (uses sudo)
+    -s,  start       start the Poseidon service (uses sudo)
+    -S,  stop        stop the Poseidon service (uses sudo)
+    -V,  version     display the version of Poseidon and exit
+    -Z,  reset       reset the configuration (uses sudo)"
 }
 
 function die() {
@@ -43,40 +43,35 @@ function check_args()
     while :; do
         case $1 in
             -c|config)
-                # TODO this needs serious improvement
-                # print out the existing config first
-                sudo dpkg-reconfigure poseidon
+                cat /etc/poseidon/default.conf
                 exit
                 ;;
             -h|\?|help)
                 show_help
                 exit
                 ;;
-            -i|info)
-                cat /etc/poseidon/default.conf
+            -i|info|status)
+                sudo systemctl status poseidon
                 exit
                 ;;
             -l|logs)
                 journalctl -r -u poseidon
                 exit
                 ;;
-            -R|reset)
-                # TODO make sure the user is sure (save to .bkp first)
-                # this will break poseidon, run config after this?
-                echo PURGE | sudo debconf-communicate poseidon > /dev/null
-                echo "# Generated from debconf - do not edit by hand, to change configation options run: poseidon configure" | sudo tee /etc/poseidon/default.conf > /dev/null
-                echo "#" | sudo tee -a /etc/poseidon/default.conf > /dev/null
-                echo "#" | sudo tee -a /etc/poseidon/default.conf > /dev/null
-                echo "" | sudo tee -a /etc/poseidon/default.conf > /dev/null
+            -R|reconfig)
+                sudo dpkg-reconfigure poseidon
                 exit
                 ;;
             -r|restart)
                 # TODO add some verbosity
+                echo "Restarting Poseidon..."
                 sudo systemctl restart poseidon
+                echo "done."
                 exit
                 ;;
-            -S|start)
+            -s|start)
                 # TODO
+                # check if it's started
                 echo "started"
                 while true; do
                     echo "poseidon is running."
@@ -84,11 +79,7 @@ function check_args()
                 done
                 exit
                 ;;
-            -s|status)
-                sudo systemctl status poseidon
-                exit
-                ;;
-            stop)
+            -S|stop)
                 # TODO
                 echo "stopped"
                 exit
@@ -96,6 +87,16 @@ function check_args()
             -V|version)
                 version=$(dpkg -s poseidon | grep '^Version:' | cut -d' ' -f2-)
                 echo "Poseidon $version"
+                exit
+                ;;
+            -Z|reset)
+                sudo cp /etc/poseidon/default.conf /etc/poseidon/default.conf.bkp
+                echo PURGE | sudo debconf-communicate poseidon > /dev/null
+                echo "# Generated from debconf - do not edit by hand, to change configation options run: poseidon configure" | sudo tee /etc/poseidon/default.conf > /dev/null
+                echo "#" | sudo tee -a /etc/poseidon/default.conf > /dev/null
+                echo "#" | sudo tee -a /etc/poseidon/default.conf > /dev/null
+                echo "" | sudo tee -a /etc/poseidon/default.conf > /dev/null
+                sudo dpkg-reconfigure poseidon
                 exit
                 ;;
             ?*)

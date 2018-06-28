@@ -6,7 +6,8 @@ CHANGELOG.md
 CODE_OF_CONDUCT.md
 CONTRIBUTING.md
 Dockerfile.docs
-Dockerfile.poseidon
+Dockerfile.test
+Dockerfile
 LICENSE
 MAINTAINERS.md
 Makefile

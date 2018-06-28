@@ -1,6 +1,24 @@
 #!/bin/bash
 set -e
 
+declare controller_uri
+declare controller_user
+declare controller_pass
+declare controller_type
+declare collector_nic
+declare controller_log_file
+declare controller_config_file
+declare controller_mirror_ports
+declare controller_span_fabric_name
+declare rabbit_enabled
+declare learn_public_addresses
+declare FA_RABBIT_ENABLED
+declare FA_RABBIT_HOST
+declare FA_RABBIT_EXCHANGE
+declare FA_RABBIT_ROUTING_KEY
+declare FA_RABBIT_PORT
+declare max_concurrent_reinvestigations
+
 d_comm="docker run -dit -v /var/run/docker.sock:/var/run/docker.sock -v /opt/vent_files:/opt/vent_files -v $(pwd)/.plugin_config.yml:/root/.plugin_config.yml -v $(pwd)/.vent_startup.yml:/root/.vent_startup.yml "
 if [[ ! -z "${controller_uri}" ]]; then
 	d_comm+="-e controller_uri=$controller_uri "
@@ -54,22 +72,22 @@ if [[ ! -z "${max_concurrent_reinvestigations}" ]]; then
 	d_comm+="-e max_concurrent_reinvestigations=$max_concurrent_reinvestigations "
 fi
 d_comm+="--name vent cyberreboot/vent"
-$(echo "$d_comm")
+$d_comm
 
 echo -n "waiting for required containers to build and start (this might take a little while)..."
-until [ "$(docker ps -q -f name=cyberreboot-vent-syslog-master)" ] && [ "$(docker container inspect -f {{.State.Running}} cyberreboot-vent-syslog-master)" = "true" ]
+until [ "$(docker ps -q -f name=cyberreboot-vent-syslog-master)" ] && [ "$(docker container inspect -f \{\{.State.Running\}\} cyberreboot-vent-syslog-master)" = "true" ]
 do
 	echo -n "\\"
-	echo -en "\b"
+	echo -en "\\b"
 	sleep 0.3
 	echo -n "|"
-	echo -en "\b"
+	echo -en "\\b"
 	sleep 0.3
 	echo -n "/"
-	echo -en "\b"
+	echo -en "\\b"
 	sleep 0.3
 	echo -n "-"
-	echo -en "\b"
+	echo -en "\\b"
 	sleep 0.3
 done
 
