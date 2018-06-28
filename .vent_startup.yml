@@ -29,7 +29,7 @@ https://github.com/cyberreboot/vent:
         build: yes
         start: yes
 https://github.com/cyberreboot/poseidon:
-    '@poseidon':
+    '@':
         build: yes
         start: yes
     api:
