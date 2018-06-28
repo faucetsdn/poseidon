@@ -52,6 +52,7 @@ class Update_Switch_State(Monitor_Helper_Base):
         self.controller['PASS'] = None
         self.controller['TYPE'] = None
         self.controller['SPAN_FABRIC_NAME'] = 'vent'
+        self.controller['INTERFACE_GROUP'] = 'ig1'
 
         # settings for FAUCET
         self.controller['CONFIG_FILE'] = None
@@ -87,6 +88,10 @@ class Update_Switch_State(Monitor_Helper_Base):
                         self.mod_configuration['controller_span_fabric_name']
                     )
 
+                if 'controller_interface_group' in self.mod_configuration:
+                    self.controller['INTERFACE_GROUP'] = str(
+                        self.mod_configuration['controller_interface_group']
+                    )
 
                 myauth = {}
                 myauth['password'] = self.controller['PASS']

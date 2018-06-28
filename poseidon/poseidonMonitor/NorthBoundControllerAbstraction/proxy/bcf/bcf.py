@@ -38,6 +38,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             login_resource='auth/login',
             auth=None,
             span_fabric_name = 'vent',
+            interface_group = 'ig1',
             *args,
             **kwargs):
         '''
@@ -53,6 +54,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             base_uri, login_resource, auth, *args, **kwargs)
 
         self.span_fabric_name = span_fabric_name
+        self.interface_group = interface_group
 
     @staticmethod
     def format_endpoints(data):
@@ -337,6 +339,8 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         uri = urljoin(self.base_uri, resource)
         data = self.get_span_fabric()[0]  # first element is vent span rule
         module_logger.debug('{0}'.format(data))
+
+        data['dest-interface-group'] = self.interface_group
 
         if mirror:
             new_filter = {}
