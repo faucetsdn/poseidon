@@ -84,26 +84,33 @@ class Parser:
                                         ", mirror port not defined on that switch")
                     ok = False
                 else:
+                    self.logger.info("we got this")
                     if not port in obj_doc['dps'][switch_found]['interfaces']:
                         self.logger.warning("No port match found for port %s "
                                             " to mirror from the switch %s in "
                                             " the configs" % (str(port), obj_doc['dps'][switch_found]['interfaces']))
                         ok = False
+                    self.logger.info("we got this2")
                     if not self.mirror_ports[switch_found] in obj_doc['dps'][switch_found]['interfaces']:
                         self.logger.warning("No port match found for port %s "
                                             " to mirror from the switch %s in "
                                             " the configs" % (str(self.mirror_ports[switch_found]), obj_doc['dps'][switch_found]['interfaces']))
                         ok = False
                     else:
+                        self.logger.info("we got this3")
                         if 'mirror' in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]:
                             if not isinstance(obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'], list):
                                 obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] = [obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']]
                         else:
                             obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] = []
+                    self.logger.info("we got this4")
             if ok:
+                self.logger.info("we got this5")
                 if action == 'mirror':
                     if not port in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] and port is not None:
+                        self.logger.info("we got this6")
                         obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'].append(port)
+                        self.logger.info("we got this7")
                 elif action == 'unmirror':
                     try:
                         # TODO check for still running captures on this port
