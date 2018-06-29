@@ -55,6 +55,7 @@ class Parser:
             self.logger.error(str(e))
             return False
 
+        self.logger.info("yaml: {0}".format(str(obj_doc)))
         if action == 'mirror' or action == 'unmirror':
             ok = True
             if not self.mirror_ports:
