@@ -14,7 +14,7 @@ install:
   - shellcheck() { "shellcheck-stable/shellcheck" "$@"; }
   - shellcheck --version
 env:
-  - PYTHONPATH=/home/travis/build/CyberReboot/poseidon/poseidon:$PYTHONPATH POSEIDON_CONFIG=/home/travis/build/CyberReboot/poseidon/config/poseidon.config POSEIDON_LOGGER=/home/travis/build/CyberReboot/poseidon/logging.json POSEIDON_TRAVIS=true
+  - PYTHONPATH=/home/travis/build/$TRAVIS_REPO_SLUG/poseidon:$PYTHONPATH POSEIDON_CONFIG=/home/travis/build/$TRAVIS_REPO_SLUG/config/poseidon.config POSEIDON_LOGGER=/home/travis/build/$TRAVIS_REPO_SLUG/logging.json POSEIDON_TRAVIS=true
 jobs:
   include:
   - stage: test
