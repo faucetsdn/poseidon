@@ -91,7 +91,7 @@ class Parser:
                                             " the configs" % (str(port), obj_doc['dps'][switch_found]['interfaces']))
                         ok = False
                     self.logger.info("we got this2")
-                    if not self.mirror_ports[switch_found] in obj_doc['dps'][switch_found]['interfaces']:
+                    if not int(self.mirror_ports[switch_found]) in obj_doc['dps'][switch_found]['interfaces']:
                         self.logger.warning("No port match found for port %s "
                                             " to mirror from the switch %s in "
                                             " the configs" % (str(self.mirror_ports[switch_found]), obj_doc['dps'][switch_found]['interfaces']))
