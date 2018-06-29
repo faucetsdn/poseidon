@@ -622,6 +622,7 @@ class Monitor(object):
                         self.logger.debug('*********** U NOTIFY VENT ***********')
                         self.start_vent_collector(endpoint_hash)
                         self.logger.debug('*********** U MIRROR PORT ***********')
+                        self.logger.debug("messages are: {0}".format(str(self.faucet_event)))
                         self.uss.mirror_endpoint(endpoint_hash, messages=self.faucet_event)
                     if next_state == 'REINVESTIGATING':
                         self.logger.debug(
@@ -665,6 +666,8 @@ class Monitor(object):
 
                     eps.print_endpoint_state()
             except Exception as e:
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                self.logger.debug("wtf {0} {1}".format(str(exc_type), str(exc_tb.tb_lineno)))
                 self.logger.debug("iteration failed because: {0}".format(str(e)))
 
     def get_q_item(self):

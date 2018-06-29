@@ -160,10 +160,15 @@ class Update_Switch_State(Monitor_Helper_Base):
     def mirror_endpoint(self, my_hash, messages=None):
         ''' tell the controller to begin mirroring traffic '''
         if my_hash in self.endpoints.state:
+            self.logger.info("here")
             my_ip = self.endpoints.get_endpoint_ip(my_hash)
+            self.logger.info("here1")
             next_state = self.endpoints.get_endpoint_next(my_hash)
+            self.logger.info("here2")
             self.sdnc.mirror_ip(my_ip, messages=messages)
+            self.logger.info("here3")
             self.endpoints.change_endpoint_state(my_hash)
+            self.logger.info("here4")
             self.logger.debug(
                 'endpoint:{0}:{1}:{2}'.format(my_hash, my_ip, next_state))
             return True
