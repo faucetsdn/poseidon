@@ -421,6 +421,7 @@ def test_first_run_bcf():
     uss.mod_configuration['controller_pass'] = 'TEST_PASS'
     uss.mod_configuration['controller_type'] = 'bcf'
     uss.mod_configuration['controller_span_fabric_name'] = 'TEST_SPAN'
+    uss.mod_configuration['controller_interface_group'] = 'TEST_GROUP'
 
     uss.configured = True
     uss.first_run()
@@ -429,6 +430,7 @@ def test_first_run_bcf():
     assert uss.controller['PASS'] == 'TEST_PASS'
     assert uss.controller['TYPE'] == 'bcf'
     assert uss.controller['SPAN_FABRIC_NAME'] == 'TEST_SPAN'
+    assert uss.controller['INTERFACE_GROUP'] == 'TEST_GROUP'
 
     uss = Update_Switch_State()
     uss.configured = False
