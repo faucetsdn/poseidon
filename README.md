@@ -58,7 +58,7 @@ export controller_uri=https://192.168.1.10:8443/api/v1/
 export controller_user=user
 export controller_pass=pass
 export controller_span_fabric_name=name
-export controller_interface_group = interface-group
+export controller_interface_group=interface-group
 ```
 
 BCF is now configured and ready for use with Poseidon, continue on to the [Starting Poseidon using Vent](#starting-poseidon-using-vent) section.
