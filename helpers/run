@@ -10,6 +10,7 @@ declare controller_log_file
 declare controller_config_file
 declare controller_mirror_ports
 declare controller_span_fabric_name
+declare controller_interface_group
 declare rabbit_enabled
 declare learn_public_addresses
 declare FA_RABBIT_ENABLED
@@ -46,6 +47,9 @@ if [[ ! -z "${controller_mirror_ports}" ]]; then
 fi
 if [[ ! -z "${controller_span_fabric_name}" ]]; then
 	d_comm+="-e controller_span_fabric_name=$controller_span_fabric_name "
+fi
+if [[ ! -z "${controller_interface_group}" ]]; then
+	d_comm+="-e controller_interface_group=$controller_interface_group "
 fi
 if [[ ! -z "${rabbit_enabled}" ]]; then
 	d_comm+="-e rabbit_enabled=$rabbit_enabled "
