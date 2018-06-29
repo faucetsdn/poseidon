@@ -136,7 +136,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             span_fabric_resource = ''.join(
                 [span_fabric_resource, '[name="%s"]' % span_name])
         r = self.get_resource(span_fabric_resource)
-        retval = BcfProxy.parse_json(r)
+        retval = BcfProxy.parse_json(r)[0]
         sout = 'get_span_fabric return:{0}'.format(retval)
         module_logger.debug(sout)
         return retval
@@ -229,7 +229,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         '''
         get the max number, should be all clear after it
         '''
-        my_filter = span_fabric[0].get('filter')
+        my_filter = span_fabric.get('filter')
         if my_filter is not None:
             my_max = -1
             for f in my_filter:
@@ -242,7 +242,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             return 1
 
     def get_seq_by_ip(self, ip):
-        my_filter = self.get_span_fabric()[0].get('filter')
+        my_filter = self.get_span_fabric().get('filter')
         retval = []
         if my_filter is not None:
             for f in my_filter:
@@ -335,7 +335,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         '''
         resource = fabric_span_endpoint % self.span_fabric_name
         uri = urljoin(self.base_uri, resource)
-        data = self.get_span_fabric()[0]  # first element is vent span rule
+        data = self.get_span_fabric()  # first element is vent span rule
         module_logger.debug('{0}'.format(data))
 
         if mirror:
