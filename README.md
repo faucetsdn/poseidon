@@ -44,19 +44,10 @@ span-fabric <name>
 
 ```
 ! interface-group
-interface-group ig1
+interface-group <interface-group>
   description 'packets get mirrored here to be processed'
   mode span-fabric
   member switch YOUR_LEAF_SWITCH interface YOUR_INTERFACE_WHERE_VENT_WILL_RECORD_TRAFFIC_FROM
-```
-
-##### NOTE:
-
-If the interface-group `ig1` is reserved in your install, you will need to modify dest-interface-group in:
-
-```
-poseidon/poseidonMonitor/NorthBoundControllerAbstraction/proxy/bcf/bcf.py:          "dest-interface-group": "ig1",
-poseidon/poseidonMonitor/NorthBoundControllerAbstraction/proxy/bcf/sample_state.py: "dest-interface-group": "ig1",
 ```
 
 Poseidon will connect to BCF using its REST API, so you'll need the API endpoint and credentials to it.  The easiest way to set these values so that Poseidon can use them is in environment variables like so (assuming the controller is running at `192.168.1.10`):
@@ -67,6 +58,7 @@ export controller_uri=https://192.168.1.10:8443/api/v1/
 export controller_user=user
 export controller_pass=pass
 export controller_span_fabric_name=name
+export controller_interface_group=interface-group
 ```
 
 BCF is now configured and ready for use with Poseidon, continue on to the [Starting Poseidon using Vent](#starting-poseidon-using-vent) section.
