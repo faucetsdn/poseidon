@@ -18,6 +18,7 @@
 Created on 17 November 2017
 @author: cglewis
 '''
+import json
 import os
 
 from poseidon.baseClasses.Logger_Base import Logger
@@ -53,7 +54,10 @@ class FaucetProxy(Connection, Parser):
                                           learn_pub_adds,
                                           *args,
                                           **kwargs)
-        self.mirror_ports = mirror_ports
+        if isinstance(mirror_ports, str):
+            self.mirror_ports = json.loads(mirror_ports)
+        else:
+            self.mirror_ports = mirror_ports
         self.rabbit_enabled = rabbit_enabled
         self.learn_pub_adds = learn_pub_adds
         self.mac_table = {}
