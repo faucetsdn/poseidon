@@ -55,7 +55,6 @@ class Parser:
             self.logger.error(str(e))
             return False
 
-        self.logger.info("yaml: {0}".format(str(obj_doc)))
         if action == 'mirror' or action == 'unmirror':
             ok = True
             if not self.mirror_ports:
@@ -67,12 +66,8 @@ class Parser:
                 ok = False
             else:
                 for s in obj_doc['dps']:
-                    try:
-                        if switch == s:
-                            switch_found = s
-                    except Exception as e:  # pragma: no cover
-                        self.logger.debug("switch is not a hex value: %s" % switch)
-                        self.logger.debug("error: %s" % e)
+                    if switch == s:
+                        switch_found = s
             if not switch_found:
                 self.logger.warning("No switch match found to mirror "
                                     "from in the configs. switch: %s %s" % (switch, str(obj_doc)))
@@ -84,34 +79,26 @@ class Parser:
                                         ", mirror port not defined on that switch")
                     ok = False
                 else:
-                    self.logger.info("we got this")
                     if not port in obj_doc['dps'][switch_found]['interfaces']:
                         self.logger.warning("No port match found for port %s "
                                             " to mirror from the switch %s in "
                                             " the configs" % (str(port), obj_doc['dps'][switch_found]['interfaces']))
                         ok = False
-                    self.logger.info("we got this2")
-                    self.logger.info("so... {0} {1}".format(str(self.mirror_ports), str(obj_doc['dps'][switch_found]['interfaces'])))
                     if not self.mirror_ports[switch_found] in obj_doc['dps'][switch_found]['interfaces']:
                         self.logger.warning("No port match found for port %s "
                                             " to mirror from the switch %s in "
                                             " the configs" % (str(self.mirror_ports[switch_found]), obj_doc['dps'][switch_found]['interfaces']))
                         ok = False
                     else:
-                        self.logger.info("we got this3")
                         if 'mirror' in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]:
                             if not isinstance(obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'], list):
                                 obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] = [obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']]
                         else:
                             obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] = []
-                    self.logger.info("we got this4")
             if ok:
-                self.logger.info("we got this5")
                 if action == 'mirror':
                     if not port in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] and port is not None:
-                        self.logger.info("we got this6")
                         obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'].append(port)
-                        self.logger.info("we got this7")
                 elif action == 'unmirror':
                     try:
                         # TODO check for still running captures on this port
@@ -138,13 +125,6 @@ class Parser:
                 obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] = ports
         except Exception as e:
             self.logger.warning("Unable to remove empty mirror list because: %s" % str(e))
-
-        # ensure that dp_id gets written as a hex string
-        #for sw in obj_doc['dps']:
-        #    try:
-        #        obj_doc['dps'][sw]['dp_id'] = HexInt(obj_doc['dps'][sw]['dp_id'])
-        #    except Exception as e:
-        #        pass
 
         stream = open(config_file, 'w')
         #yaml.add_representer(HexInt, representer)

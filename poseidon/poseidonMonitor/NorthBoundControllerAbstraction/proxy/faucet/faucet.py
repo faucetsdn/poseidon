@@ -200,26 +200,20 @@ class FaucetProxy(Connection, Parser):
         port = None
         switch = None
         status = None
-        module_logger.info('mac_table: {0}'.format(str(self.mac_table)))
         for mac in self.mac_table:
             if ip == self.mac_table[mac][0]['ip-address']:
                 port = self.mac_table[mac][0]['port']
                 switch = self.mac_table[mac][0]['segment']
-        module_logger.info("huh")
         if port and switch:
             if self.host:
-                module_logger.info("ok1")
                 self.receive_file('config')
-                module_logger.info("ok2")
                 if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
                                'mirror', int(port), switch):
                     self.send_file('config')
                     # TODO check if this is actually True
                     status = True
             else:
-                module_logger.info("ok3")
                 status = self.config(self.config_file, 'mirror', int(port), switch)
-                module_logger.info("ok4")
         else:
             status = False
         module_logger.debug("mirror status: " + str(status))

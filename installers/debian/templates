@@ -14,13 +14,13 @@ Template: poseidon/faucet_same_host
 Type: select
 Choices: Yes, No
 Description: Will Poseidon be running on the same host as the Faucet controller?
- Poseidon needs to connect to the Faucet controller, if it's on the same host it will just connect directly, otherwise if they're on different host Poseidon will need to connect to the Faucet host over SSH.
+ Poseidon needs to connect to the Faucet controller, if it's on the same host it will just connect directly, otherwise if they're on different hosts Poseidon will need to connect to the Faucet host over SSH.
 
 Template: poseidon/faucet_controller_uri
 Type: string
 Default: 192.168.0.10
 Description: IP or hostname of the Faucet controller:
- Poseidon will use SSH to connect to the Faucet controller if 
+ Poseidon will use SSH to connect to the Faucet controller if Faucet is running on a different host than Poseidon.
 
 Template: poseidon/faucet_controller_user
 Type: string
@@ -29,10 +29,6 @@ Description: SSH username to connect to Faucet:
 Template: poseidon/faucet_controller_pass
 Type: string
 Description: SSH password to connect to Faucet:
-
-Template: poseidon/faucet_controller_mirror_ports
-Type: string
-Description: controller_mirror_ports
 
 Template: poseidon/bcf_controller_user
 Type: string
@@ -50,3 +46,49 @@ Template: poseidon/max_concurrent_reinvestigations
 Type: string
 Default: 2
 Description: max_concurrent_reinvestigations
+
+Template: poseidon/faucet_controller_mirror_ports
+Type: string
+Description: controller_mirror_ports
+
+Template: poseidon/bcf_controller_span_fabric_name
+Type: string
+Description: controller_span_fabric_name
+
+Template: poseidon/bcf_controller_interface_group
+Type: string
+Description: controller_interface_group
+
+Template: poseidon/faucet_rabbit_enabled
+Type: string
+Description: rabbit_enabled
+
+Template: poseidon/learn_public_addresses
+Type: select
+Choices: Yes, No
+Description: learn_public_addresses
+
+Template: poseidon/faucet_fa_rabbit_enabled
+Type: string
+Description: fa_rabbit_enabled
+
+Template: poseidon/faucet_fa_rabbit_host
+Type: string
+Description: fa_rabbit_host
+
+Template: poseidon/faucet_fa_rabbit_exchange
+Type: string
+Description: fa_rabbit_exchange
+
+Template: poseidon/faucet_fa_rabbit_routing_key
+Type: string
+Description: fa_rabbit_routing_key
+
+Template: poseidon/faucet_fa_rabbit_port
+Type: string
+Description: fa_rabbit_port
+
+Template: poseidon/logging_level
+Type: select
+Choices: INFO, DEBUG, WARNING, ERROR, CRITICAL
+Description: logging_level

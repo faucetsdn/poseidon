@@ -31,17 +31,18 @@ You will need to add support for moving arbitrary endpoint data around your netw
 
 ##### span-fabric
 
-Replace `<name>` with the name of your span-fabric
+Replace `<name>` with the name of your span-fabric and <interface-group> with the name of your interface-group.
 ```
 ! span-fabric
 span-fabric <name>
   active
-  destination interface-group ig1
+  destination interface-group <interface-group>
   priority 1
 ```
 
 ##### interface-group
 
+Replace <interface-group> with the name of your interface-group. Additionally fill in the `YOUR_LEAF_SWITCH` and `YOUR_INTERFACE_WHERE_VENT_WILL_RECORD_TRAFFIC_FROM`.
 ```
 ! interface-group
 interface-group <interface-group>
@@ -64,6 +65,8 @@ export controller_interface_group=interface-group
 BCF is now configured and ready for use with Poseidon, continue on to the [Starting Poseidon using Vent](#starting-poseidon-using-vent) section.
 
 #### FAUCET Configuration
+Poseidon requires at least FAUCET version 1.8.6 or higher.
+
 Unless Poseidon and FAUCET are running on the same host, Poseidon will connect to FAUCET using SSH.  So you'll need to create an account that can SSH to the machine running FAUCET and that has rights to modify the configuration file `faucet.yaml` (currently Poseidon expects it to be in the default `/etc/faucet/faucet.yaml` location and `dps` must all be defined in this file for Poseidon to update the network posture correctly).  The easiest way to set these values so that Poseidon can use them is in environment variables like so (assuming the controller is running at `192.168.1.10`):
 
 ```
@@ -76,7 +79,10 @@ export controller_config_file=/etc/faucet/faucet.yaml
 export controller_mirror_ports='{"switch1":3}'  # a python dictionary of switch names (from faucet.yaml) and switch port numbers for mirroring to
 ```
 
-If Poseidon and FAUCET are running on the same host, the `controller_uri`, `controller_user` and `controller_pass` do not need to be set.
+If Poseidon and FAUCET are running on the same host, `controller_user` and `controller_pass` do not need to be set. `controller_uri` should be exported like so:
+```
+export controller_uri=
+```
 
 FAUCET is now configured and ready for use with Poseidon, continue on to the [Starting Poseidon using Vent](#starting-poseidon-using-vent) section.
 
@@ -87,7 +93,7 @@ In order to run Poseidon in Vent, regardless of the SDN controller chosen, a few
 
 ```
 export collector_nic=eth0  # set the NIC of the machine that traffic will be mirrored to
-export max_concurrent_reinvestigations=1  # if running FAUCET, this should be set to 1, if BCF, it can be a larger number
+export max_concurrent_reinvestigations=1  # number of active simultaneous mirror operations you want to support
 ```
 
 Start Vent with:
