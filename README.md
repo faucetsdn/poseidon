@@ -31,7 +31,7 @@ You will need to add support for moving arbitrary endpoint data around your netw
 
 ##### span-fabric
 
-Replace `<name>` with the name of your span-fabric and <interface-group> with the name of your interface-group.
+Replace `<name>` with the name of your span-fabric and `<interface-group>` with the name of your interface-group.
 ```
 ! span-fabric
 span-fabric <name>
@@ -42,7 +42,7 @@ span-fabric <name>
 
 ##### interface-group
 
-Replace <interface-group> with the name of your interface-group. Additionally fill in the `YOUR_LEAF_SWITCH` and `YOUR_INTERFACE_WHERE_VENT_WILL_RECORD_TRAFFIC_FROM`.
+Replace `<interface-group>` with the name of your interface-group. Additionally fill in the `YOUR_LEAF_SWITCH` and `YOUR_INTERFACE_WHERE_VENT_WILL_RECORD_TRAFFIC_FROM`.
 ```
 ! interface-group
 interface-group <interface-group>
