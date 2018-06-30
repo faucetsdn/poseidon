@@ -39,10 +39,10 @@ class Parser:
 
     def __init__(self, mirror_ports=None):
         self.logger = module_logger
-        if isinstance(mirror_ports, dict):
-            self.mirror_ports = mirror_ports
-        else:
+        if isinstance(mirror_ports, str):
             self.mirror_ports = json.loads(mirror_ports)
+        else:
+            self.mirror_ports = mirror_ports
 
     def config(self, config_file, action, port, switch):
         switch_found = None
