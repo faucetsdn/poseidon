@@ -31,8 +31,6 @@ def representer(dumper, data):
 def represent_none(dumper, _):
     return dumper.represent_scalar('tag:yaml.org,2002:null', '')
 
-class HexInt(int): pass
-
 
 class Parser:
 
@@ -66,13 +64,8 @@ class Parser:
                 ok = False
             else:
                 for s in obj_doc['dps']:
-                    try:
-                        if ((hex(int(switch, 16)) == hex(obj_doc['dps'][s]['dp_id'])) or
-                            (str(switch) == str(obj_doc['dps'][s]['dp_id']))):
-                            switch_found = s
-                    except Exception as e:  # pragma: no cover
-                        self.logger.debug("switch is not a hex value: %s" % switch)
-                        self.logger.debug("error: %s" % e)
+                    if switch == s:
+                        switch_found = s
             if not switch_found:
                 self.logger.warning("No switch match found to mirror "
                                     "from in the configs. switch: %s %s" % (switch, str(obj_doc)))
@@ -131,15 +124,7 @@ class Parser:
         except Exception as e:
             self.logger.warning("Unable to remove empty mirror list because: %s" % str(e))
 
-        # ensure that dp_id gets written as a hex string
-        for sw in obj_doc['dps']:
-            try:
-                obj_doc['dps'][sw]['dp_id'] = HexInt(obj_doc['dps'][sw]['dp_id'])
-            except Exception as e:
-                pass
-
         stream = open(config_file, 'w')
-        yaml.add_representer(HexInt, representer)
         yaml.add_representer(type(None), represent_none)
         yaml.dump(obj_doc, stream, default_flow_style=False)
 
@@ -152,7 +137,7 @@ class Parser:
             data['ip-address'] = message['L2_LEARN']['l3_src_ip']
             data['ip-state'] = 'L2 learned'
             data['mac'] = message['L2_LEARN']['eth_src']
-            data['segment'] = str(message['dp_id'])
+            data['segment'] = str(message['dp_name'])
             data['port'] = str(message['L2_LEARN']['port_no'])
             data['tenant'] = "VLAN"+str(message['L2_LEARN']['vid'])
             data['active'] = 1
@@ -177,7 +162,7 @@ class Parser:
                 for mac in m_table:
                     for data in m_table[mac]:
                         if (str(message['PORT_CHANGE']['port_no']) == data['port'] and
-                            str(message['dp_id']) == data['segment']):
+                            str(message['dp_name']) == data['segment']):
                             if mac in self.mac_table:
                                 self.mac_table[mac][0]['active'] = 0
         return

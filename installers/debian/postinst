@@ -43,6 +43,8 @@ if db_go; then
                     db_unregister poseidon/faucet_controller_pass
                     failed=true
                 fi
+            elif [ "$RET" == "Yes" ]; then
+                echo "controller_uri=" >> /etc/poseidon/default.conf
             fi
             db_get poseidon/faucet_controller_mirror_ports
             if [[ ! -z "$RET" ]]; then
@@ -94,21 +96,20 @@ if db_go; then
     fi
 
     # TODO install git repos and docker images
-    docker load -i /opt/poseidon/cyberreboot-vent.tar
-    docker load -i /opt/poseidon/cyberreboot-vent-file-drop.tar
-    docker load -i /opt/poseidon/cyberreboot-vent-network-tap.tar
-    docker load -i /opt/poseidon/cyberreboot-vent-rabbitmq.tar
-    docker load -i /opt/poseidon/cyberreboot-vent-redis.tar
-    docker load -i /opt/poseidon/cyberreboot-vent-rq-dashboard.tar
-    docker load -i /opt/poseidon/cyberreboot-vent-rq-worker.tar
-    docker load -i /opt/poseidon/cyberreboot-vent-syslog.tar
-    docker load -i /opt/poseidon/cyberreboot-poseidon.tar
-    docker load -i /opt/poseidon/cyberreboot-poseidon-api.tar
-    docker load -i /opt/poseidon/cyberreboot-vent-plugins-pcap-to-node-pcap.tar
-    docker load -i /opt/poseidon/cyberreboot-vent-plugins-p0f.tar
-    docker load -i /opt/poseidon/cyberreboot-vent-plugins-tcprewrite-dot1q.tar
-    docker load -i /opt/poseidon/cyberreboot-crviz.tar
-    docker load -i /opt/poseidon/cyberreboot-poseidonml.tar
+    docker load -i /opt/poseidon/dist/cyberreboot-vent.tar
+    docker load -i /opt/poseidon/dist/cyberreboot-vent-file-drop.tar
+    docker load -i /opt/poseidon/dist/cyberreboot-vent-network-tap.tar
+    docker load -i /opt/poseidon/dist/cyberreboot-vent-rabbitmq.tar
+    docker load -i /opt/poseidon/dist/cyberreboot-vent-redis.tar
+    docker load -i /opt/poseidon/dist/cyberreboot-vent-rq-dashboard.tar
+    docker load -i /opt/poseidon/dist/cyberreboot-vent-rq-worker.tar
+    docker load -i /opt/poseidon/dist/cyberreboot-vent-syslog.tar
+    docker load -i /opt/poseidon/dist/cyberreboot-poseidon-api.tar
+    docker load -i /opt/poseidon/dist/cyberreboot-vent-plugins-pcap-to-node-pcap.tar
+    docker load -i /opt/poseidon/dist/cyberreboot-vent-plugins-p0f.tar
+    docker load -i /opt/poseidon/dist/cyberreboot-vent-plugins-tcprewrite-dot1q.tar
+    docker load -i /opt/poseidon/dist/cyberreboot-crviz.tar
+    #docker load -i /opt/poseidon/dist/cyberreboot-poseidonml.tar
 
     # start poseidon service
     systemctl stop poseidon || true

@@ -55,7 +55,7 @@ function check_args()
                 exit
                 ;;
             -l|logs)
-                journalctl -r -u poseidon
+                journalctl -n 100 -f -u poseidon
                 exit
                 ;;
             -R|reconfig)
@@ -70,13 +70,18 @@ function check_args()
                 exit
                 ;;
             -s|start)
-                # TODO
-                # check if it's started
-                echo "started"
-                while true; do
-                    echo "poseidon is running."
-                    sleep 10
+                # TODO check if it's started
+                # set working dir to the repo
+                echo "Starting Poseidon..."
+                docker run -dit -v /var/run/docker.sock:/var/run/docker.sock -v /opt/vent_files:/opt/vent_files -v /opt/poseidon/.plugin_config.yml:/root/.plugin_config.yml -v /opt/poseidon/.vent_startup.yml:/root/.vent_startup.yml --env-file /etc/poseidon/default.conf --name vent cyberreboot/vent
+                until [ "$(docker ps -q -f name=cyberreboot-poseidon-master)" ] && [ "$(docker container inspect -f \{\{.State.Health.Status\}\} cyberreboot-poseidon-master)" = "healthy" ]
+                do
+                    # TODO do more check and be verbose in here
+                    echo "Waiting for Poseidon containers to become healthy..."
+                    sleep 15
                 done
+                echo "Poseidon has successfully started."
+                docker logs -f cyberreboot-vent-syslog-master
                 exit
                 ;;
             -S|stop)
