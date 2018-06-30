@@ -1,3 +1,15 @@
+# v0.2.2 (2018-06-29)
+
+ - Update version of pia, gevent, and pytest
+ - Progress on debian package installer and systemd unit
+ - Improvements to Travis tests
+ - Add healthcheck
+ - Cleanup Dockerfile names
+ - Fix issues with Poseidon configuring Faucet locally not over SSH
+ - Update fixes for Faucet yaml changes
+ - Make interface-group configurable for BCF
+ - Fix some environment variable issues
+
 # v0.2.1 (2018-06-15)
 
  - PoseidonML moved to the CyberReboot org
