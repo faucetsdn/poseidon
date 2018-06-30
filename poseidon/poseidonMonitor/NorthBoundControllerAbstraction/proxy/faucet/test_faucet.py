@@ -136,7 +136,7 @@ def test_FaucetProxy():
     proxy.get_seq_by_ip()
     proxy.mirror_ip('192.168.1.50', messages=[{'dp_name':'switch', 'L2_LEARN':{'l3_src_ip':'10.0.0.1', 'eth_src':'00:00:00:00:00:00', 'port_no':1, 'vid':'100'}},{'version': 1, 'time': 1525205350.0357792, 'dp_id': 1, 'dp_name': 'switch-1', 'event_id': 5, 'PORT_CHANGE': {'port_no': 1, 'reason': 'MODIFY', 'status': False}},{}])
     proxy.mirror_ip('192.168.1.41')
-    proxy.unmirror_ip('10.0.0.1', messages=[{'dp_id':'switch', 'L2_LEARN':{'l3_src_ip':'10.0.0.1', 'eth_src':'00:00:00:00:00:00', 'port_no':1, 'vid':'100'}},{'version': 1, 'time': 1525205350.0357792, 'dp_id': 1, 'dp_name': 'switch-1', 'event_id': 5, 'PORT_CHANGE': {'port_no': 1, 'reason': 'MODIFY', 'status': False}},{}])
+    proxy.unmirror_ip('10.0.0.1', messages=[{'dp_name':'switch', 'L2_LEARN':{'l3_src_ip':'10.0.0.1', 'eth_src':'00:00:00:00:00:00', 'port_no':1, 'vid':'100'}},{'version': 1, 'time': 1525205350.0357792, 'dp_id': 1, 'dp_name': 'switch-1', 'event_id': 5, 'PORT_CHANGE': {'port_no': 1, 'reason': 'MODIFY', 'status': False}},{}])
 
 def test_format_endpoints():
     data = [[{'ip-state': 'foo'},{'ip-state': 'bar'}],[{'ip-state': 'foo'},{'ip-state': 'bar'}]]
