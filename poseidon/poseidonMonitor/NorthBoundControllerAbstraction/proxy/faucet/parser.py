@@ -31,8 +31,6 @@ def representer(dumper, data):
 def represent_none(dumper, _):
     return dumper.represent_scalar('tag:yaml.org,2002:null', '')
 
-#class HexInt(int): pass
-
 
 class Parser:
 
@@ -127,7 +125,6 @@ class Parser:
             self.logger.warning("Unable to remove empty mirror list because: %s" % str(e))
 
         stream = open(config_file, 'w')
-        #yaml.add_representer(HexInt, representer)
         yaml.add_representer(type(None), represent_none)
         yaml.dump(obj_doc, stream, default_flow_style=False)
 
