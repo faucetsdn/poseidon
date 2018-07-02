@@ -13,3 +13,4 @@ MAINTAINERS.md
 Makefile
 README.md
 VERSION
+dist/*
