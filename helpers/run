@@ -32,6 +32,14 @@ if [[ ! -z "${controller_pass}" ]]; then
 fi
 if [[ ! -z "${controller_type}" ]]; then
 	d_comm+="-e controller_type=$controller_type "
+	if [ "$controller_type" == "faucet" ]; then
+		if [ ! -f /etc/faucet/faucet.yaml ]; then
+			sudo mkdir -p /etc/faucet && sudo touch /etc/faucet/faucet.yaml
+		fi
+		if [ ! -f /var/log/faucet/faucet.log ]; then
+			sudo mkdir -p /var/log/faucet && sudo touch /var/log/faucet/faucet.log
+		fi
+	fi
 fi
 if [[ ! -z "${collector_nic}" ]]; then
 	d_comm+="-e collector_nic=$collector_nic "

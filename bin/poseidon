@@ -95,7 +95,7 @@ function check_args()
             -S|stop)
                 echo "Stopping Poseidon..."
                 docker ps -q --filter "label=vent" | (xargs docker rm -f > /dev/null 2>&1) || echo "Poseidon not running."
-                docker rm -f vent > /dev/null 2>&1 || echo "Vent not running."
+                docker rm -f vent > /dev/null 2>&1
                 echo "Poseidon successfully stopped."
                 exit
                 ;;
