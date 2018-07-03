@@ -21,6 +21,7 @@ Test module for bcf.
 """
 import json
 import os
+import pytest
 
 from httmock import HTTMock
 from httmock import response
@@ -107,6 +108,7 @@ def test_BcfProxy():
         '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22]': 'sample_span_fabric.json',
         # %22 = url-encoded double quotes
         '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22][dest-interface-group=%22INTERFACE_GROUP%22]': 'sample_span_fabric.json',
+        '/data/controller/applications/bcf/span-fabric[name=%22empty%22][dest-interface-group=%22empty%22]': 'sample_span_fabric_empty.json',
     }
     proxy = None
     with HTTMock(mock_factory(r'.*', filemap)):
@@ -125,6 +127,9 @@ def test_BcfProxy():
         assert span_fabric
         span_fabric = proxy.get_span_fabric(span_name="SPAN_FABRIC")
         assert span_fabric
+        with pytest.raises(EnvironmentError):
+            span_fabric = proxy.get_span_fabric(span_name="empty", interface_group="empty")
+            print(span_fabric)
 
     with HTTMock(mock_factory2(r'.*')):
         # Normally shutdown_endpoint does not return a value.

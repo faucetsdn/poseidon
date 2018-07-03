@@ -97,7 +97,7 @@ class Update_Switch_State(Monitor_Helper_Base):
                 myauth['password'] = self.controller['PASS']
                 myauth['user'] = self.controller['USER']
                 try:
-                    self.sdnc = BcfProxy(self.controller['URI'], auth=myauth, span_fabric_name = self.controller['SPAN_FABRIC_NAME'])
+                    self.sdnc = BcfProxy(self.controller['URI'], auth=myauth, span_fabric_name = self.controller['SPAN_FABRIC_NAME'], interface_group = self.controller['INTERFACE_GROUP'])
                 except BaseException:
                     self.logger.error(
                         'BcfProxy could not connect to {0}'.format(
