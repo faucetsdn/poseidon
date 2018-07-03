@@ -66,6 +66,10 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             ipa = d.get('ip-address')
             if ipa is not None and ipa[0] is not None:
                 ipa[0]['name'] = d.get('name')
+                # TODO this should grab 'state': 'Active'
+                ipa[0]['active'] = 1
+                # TODO this should grab interface
+                ipa[0]['port'] = None
                 ipa[0].pop('ip-state', None)
                 ret_list.append(ipa[0])
         return ret_list
