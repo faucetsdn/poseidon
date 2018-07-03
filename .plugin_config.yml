@@ -29,5 +29,6 @@ poseidon:
         controller_config_file: /etc/faucet/faucet.yaml
         controller_mirror_ports: '{}'
         controller_span_fabric_name: vent
+        controller_interface_group: ig1
         rabbit_enabled: True
         learn_public_addresses: False
