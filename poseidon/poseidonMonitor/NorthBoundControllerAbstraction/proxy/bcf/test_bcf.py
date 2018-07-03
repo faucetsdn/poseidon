@@ -129,7 +129,6 @@ def test_BcfProxy():
         assert span_fabric
         with pytest.raises(EnvironmentError):
             span_fabric = proxy.get_span_fabric(span_name="empty", interface_group="empty")
-            print(span_fabric)
 
     with HTTMock(mock_factory2(r'.*')):
         # Normally shutdown_endpoint does not return a value.
