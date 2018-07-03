@@ -215,7 +215,7 @@ def test_format_endpoints():
 
     output = BcfProxy.format_endpoints(input_data)
     answer = list([{'ip-address': '10.0.0.101', 'mac': 'f8:b1:56:fe:f2:de',
-                    'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None}])
+                    'segment': 'prod', 'tenant': 'FLOORPLATE', 'name': None, 'active': 1, 'port': None}])
     assert str(answer) == str(output)
 
 
