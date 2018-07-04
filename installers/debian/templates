@@ -39,8 +39,18 @@ Type: password
 Description: Password to connect to BigSwitch Cloud Fabric:
 
 Template: poseidon/collector_nic
-Type: string
+Type: select
+Choices: List available network interfaces, Specify your own
 Description: collector_nic
+
+Template: poseidon/available_nics
+Type: select
+Choices: ${choices}
+Description: pick a nic
+
+Template: poseidon/specify_nic
+Type: string
+Description: Enter the name of the NIC on this host that the SDN controller will be mirroring traffic to.
 
 Template: poseidon/max_concurrent_reinvestigations
 Type: string
