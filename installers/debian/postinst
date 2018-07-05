@@ -77,6 +77,10 @@ if db_go; then
                 failed=true
             fi
         fi
+    else
+        echo >&2 -e "${red}You need to specify the controller type.${endColor}"
+        db_unregister poseidon/controller_type
+        failed=true
     fi
 
     db_get poseidon/collector_nic
@@ -91,11 +95,11 @@ if db_go; then
     if [[ ! -z "$RET" ]]; then
         echo "max_concurrent_reinvestigations=$RET" >> /etc/poseidon/default.conf
     fi
+
     if [ "$failed" == true ]; then
         exit 1
     fi
 
-    # TODO install git repos and docker images
     docker load -i /opt/poseidon/dist/cyberreboot-vent.tar
     docker load -i /opt/poseidon/dist/cyberreboot-vent-file-drop.tar
     docker load -i /opt/poseidon/dist/cyberreboot-vent-network-tap.tar
