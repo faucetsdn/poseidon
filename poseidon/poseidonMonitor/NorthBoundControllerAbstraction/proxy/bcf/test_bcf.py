@@ -21,7 +21,6 @@ Test module for bcf.
 """
 import json
 import os
-import pytest
 
 from httmock import HTTMock
 from httmock import response
@@ -127,8 +126,8 @@ def test_BcfProxy():
         assert span_fabric
         span_fabric = proxy.get_span_fabric(span_name="SPAN_FABRIC")
         assert span_fabric
-        with pytest.raises(EnvironmentError):
-            span_fabric = proxy.get_span_fabric(span_name="empty", interface_group="empty")
+        span_fabric = proxy.get_span_fabric(span_name="empty", interface_group="empty")
+        assert not span_fabric
 
     with HTTMock(mock_factory2(r'.*')):
         # Normally shutdown_endpoint does not return a value.
