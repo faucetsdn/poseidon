@@ -12,12 +12,12 @@ declare -a OPTIONS
 COUNT=0
 for interface in $(docker run --net=host cyberreboot/gonet);
 do
-    if [ $interface != "lo" ] && [ $interface != "" ] && [[ ! $interface =~ ^veth ]]; then
+    if [ "$interface" != "lo" ] && [ "$interface" != "" ] && [[ ! "$interface" =~ ^veth ]]; then
         OPTIONS[$COUNT]=$interface;
         COUNT=$((COUNT+1));
     fi
 done
-db_subst poseidon/available_nics choices $(echo "${OPTIONS[@]}" | sed 's/ /, /g')
+db_subst poseidon/available_nics choices "$(echo "${OPTIONS[@]}" | sed 's/ /, /g')"
 
 STATE=1
 while [ "$STATE" != 0 ] && [ "$STATE" != 9 ]; do
