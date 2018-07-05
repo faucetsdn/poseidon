@@ -27,7 +27,7 @@ Type: string
 Description: SSH username to connect to Faucet:
 
 Template: poseidon/faucet_controller_pass
-Type: string
+Type: password
 Description: SSH password to connect to Faucet:
 
 Template: poseidon/bcf_controller_user
