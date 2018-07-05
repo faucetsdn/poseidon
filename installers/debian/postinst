@@ -49,6 +49,38 @@ if db_go; then
             db_get poseidon/faucet_controller_mirror_ports
             if [[ ! -z "$RET" ]]; then
                 echo "controller_mirror_ports=$RET" >> /etc/poseidon/default.conf
+            else
+                echo >&2 -e "${red}You need to specify at least one mirror port.${endColor}"
+                db_unregister poseidon/faucet_controller_mirror_ports
+                failed=true
+            fi
+            db_get poseidon/faucet_fa_rabbit_enabled
+            if [[ ! -z "$RET" ]]; then
+                if [ "$RET" == "Yes" ]; then
+                    echo "FA_RABBIT_ENABLED=True" >> /etc/poseidon/default.conf
+                    db_get poseidon/faucet_fa_rabbit_host
+                    if [[ ! -z "$RET" ]]; then
+                        echo "FA_RABBIT_HOST=$RET" >> /etc/poseidon/default.conf
+                    fi
+                    db_get poseidon/faucet_fa_rabbit_port
+                    if [[ ! -z "$RET" ]]; then
+                        echo "FA_RABBIT_PORT=$RET" >> /etc/poseidon/default.conf
+                    fi
+                    db_get poseidon/faucet_fa_rabbit_exchange
+                    if [[ ! -z "$RET" ]]; then
+                        echo "FA_RABBIT_EXCHANGE=$RET" >> /etc/poseidon/default.conf
+                    fi
+                    db_get poseidon/faucet_fa_rabbit_exchange_type
+                    if [[ ! -z "$RET" ]]; then
+                        echo "FA_RABBIT_EXCHANGE_TYPE=$RET" >> /etc/poseidon/default.conf
+                    fi
+                    db_get poseidon/faucet_fa_rabbit_routing_key
+                    if [[ ! -z "$RET" ]]; then
+                        echo "FA_RABBIT_ROUTING_KEY=$RET" >> /etc/poseidon/default.conf
+                    fi
+                else
+                    echo "FA_RABBIT_ENABLED=False" >> /etc/poseidon/default.conf
+                fi
             fi
         else # BCF
             echo "controller_type=bcf" >> /etc/poseidon/default.conf
@@ -76,6 +108,14 @@ if db_go; then
                 db_unregister poseidon/bcf_controller_pass
                 failed=true
             fi
+            db_get poseidon/bcf_controller_interface_group
+            if [[ ! -z "$RET" ]]; then
+                echo "controller_interface_group=$RET" >> /etc/poseidon/default.conf
+            fi
+            db_get poseidon/bcf_controller_span_fabric_name
+            if [[ ! -z "$RET" ]]; then
+                echo "controller_span_fabric_name=$RET" >> /etc/poseidon/default.conf
+            fi
         fi
     else
         echo >&2 -e "${red}You need to specify the controller type.${endColor}"
@@ -85,15 +125,46 @@ if db_go; then
 
     db_get poseidon/collector_nic
     if [[ ! -z "$RET" ]]; then
-        echo "collector_nic=$RET" >> /etc/poseidon/default.conf
+        if [ "$RET" == "Specify your own" ]; then
+            db_get poseidon/specify_nic
+            if [[ ! -z "$RET" ]]; then
+                echo "collector_nic=$RET" >> /etc/poseidon/default.conf
+            else
+                echo >&2 -e "${red}You need to specify a collector NIC.${endColor}"
+                db_unregister poseidon/collector_nic
+                db_unregister poseidon/specify_nic
+                failed=true
+            fi
+        else
+            db_get poseidon/available_nics
+            if [[ ! -z "$RET" ]]; then
+                echo "collector_nic=$RET" >> /etc/poseidon/default.conf
+            else
+                echo >&2 -e "${red}You need to specify a collector NIC.${endColor}"
+                db_unregister poseidon/collector_nic
+                db_unregister poseidon/available_nics
+                failed=true
+            fi
+        fi
     else
         echo >&2 -e "${red}You need to specify the collector NIC.${endColor}"
         db_unregister poseidon/collector_nic
         failed=true
     fi
+
     db_get poseidon/max_concurrent_reinvestigations
     if [[ ! -z "$RET" ]]; then
         echo "max_concurrent_reinvestigations=$RET" >> /etc/poseidon/default.conf
+    fi
+
+    db_get poseidon/learn_public_addresses
+    if [[ ! -z "$RET" ]]; then
+        echo "learn_public_addresses=$RET" >> /etc/poseidon/default.conf
+    fi
+
+    db_get poseidon/logging_level
+    if [[ ! -z "$RET" ]]; then
+        echo "logger_level=$RET" >> /etc/poseidon/default.conf
     fi
 
     if [ "$failed" == true ]; then
