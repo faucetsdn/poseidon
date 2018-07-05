@@ -7,8 +7,20 @@ db_version 2.0
 
 db_capb backup
 
+docker pull cyberreboot/gonet > /dev/null 2>&1
+declare -a OPTIONS
+COUNT=0
+for interface in $(docker run --net=host cyberreboot/gonet);
+do
+    if [ "$interface" != "lo" ] && [ "$interface" != "" ] && [[ ! "$interface" =~ ^veth ]]; then
+        OPTIONS[$COUNT]=$interface;
+        COUNT=$((COUNT+1));
+    fi
+done
+db_subst poseidon/available_nics choices "$(echo "${OPTIONS[@]}" | sed 's/ /, /g')"
+
 STATE=1
-while [ "$STATE" != 0 ] && [ "$STATE" != 8 ]; do
+while [ "$STATE" != 0 ] && [ "$STATE" != 9 ]; do
     case "$STATE" in
     1)
         db_input critical poseidon/controller_type || true
@@ -59,6 +71,15 @@ while [ "$STATE" != 0 ] && [ "$STATE" != 8 ]; do
     ;;
 
     7)
+        db_get poseidon/collector_nic
+        if [ "$RET" == "Specify your own" ]; then
+            db_input critical poseidon/specify_nic || true
+        else
+            db_input critical poseidon/available_nics || true
+	fi
+    ;;
+
+    8)
         db_input high poseidon/max_concurrent_reinvestigations || true
     ;;
     esac
