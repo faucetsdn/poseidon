@@ -1,5 +1,4 @@
 # Poseidon
-<img src="/docs/img/poseidon-logo.png" width="50" height="75"/><a href="https://www.blackducksoftware.com/open-source-rookies-2016" ><img src="/docs/img/Rookies16Badge_1.png" width="100" alt="POSEIDON is now BlackDuck 2016 OpenSource Rookie of the year"></a>
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Build Status](https://travis-ci.org/CyberReboot/poseidon.svg?branch=master)](https://travis-ci.org/CyberReboot/poseidon)
@@ -7,14 +6,50 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/e31df16fa65447bf8527e366c6271bf3)](https://www.codacy.com/app/CyberReboot/poseidon?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=CyberReboot/poseidon&amp;utm_campaign=Badge_Grade)
 [![Docker Hub Downloads](https://img.shields.io/docker/pulls/cyberreboot/poseidon.svg)](https://hub.docker.com/u/cyberreboot)
 
-Software Defined Network Situational Awareness
+> Software Defined Network Situational Awareness
 
-This challenge is a joint challenge between two IQT Labs: Lab41 and Cyber Reboot. Current software defined network offerings lack tangible security emphasis much less methods to enhance operational security. Without situational awareness and context, defending a network remains a difficult proposition. This challenge will utilize SDN and machine learning to determine what is on the network, and what is it doing. This goal will help sponsors leverage SDN to provide situational awareness and better defend their networks.
+<img src="/docs/img/poseidon-logo.png" width="50" height="75"/><a href="https://www.blackducksoftware.com/open-source-rookies-2016" ><img src="/docs/img/Rookies16Badge_1.png" width="100" alt="POSEIDON is now BlackDuck 2016 OpenSource Rookie of the year"></a>
 
-## Getting Started
+This project is a joint challenge between two IQT Labs: [Cyber Reboot](https://www.cyberreboot.org/) and [Lab41](http://www.lab41.org/). Current software defined network offerings lack tangible security emphasis much less methods to enhance operational security. Without situational awareness and context, defending a network remains a difficult proposition. This project will utilize SDN and machine learning to determine what is on the network, and what is it doing. This goal is to leverage SDN to provide situational awareness and better defend networks.
+
+## Table of Contents
+
+- [Background](#background)
+- [Install](#install)
+  - [Prerequisites](#prerequisites)
+- [Usage](#usage)
+- [Examples](#examples)
+- [Related Components](#related-components)
+- [Additional Info](#additional-info)
+
+## Background
+
+## Install
 
 ### Prerequisites
-[Docker](https://www.docker.com/)
+
+- Bash
+- [Docker](https://www.docker.com/)
+- Make
+
+## Usage
+
+## Examples
+
+## Related Components
+
+## Additional Info
+
+- [Authors](AUTHORS)
+- See the latest changes [here](CHANGELOG.md).
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- Want to contribute? Awesome! Issue a pull request or see more details [here](CONTRIBUTING.md).
+- Developer Guide
+- [License](LICENSE)
+- [Maintainers](MAINTAINERS)
+- Tests
+- [Version](VERSION)
+
 
 ### Quick Start
 Poseidon currently supports two different SDN controllers, [Big Cloud Fabric](https://www.bigswitch.com/products/big-cloud-fabrictm/switching-fabric-overview) and [FAUCET](https://github.com/faucetsdn/faucet).
