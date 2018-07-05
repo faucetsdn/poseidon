@@ -7,6 +7,7 @@ db_version 2.0
 
 db_capb backup
 
+# get list of interfaces available on the install system
 docker pull cyberreboot/gonet > /dev/null 2>&1
 declare -a OPTIONS
 COUNT=0
@@ -20,7 +21,7 @@ done
 db_subst poseidon/available_nics choices "$(echo "${OPTIONS[@]}" | sed 's/ /, /g')"
 
 STATE=1
-while [ "$STATE" != 0 ] && [ "$STATE" != 9 ]; do
+while [ "$STATE" != 0 ] && [ "$STATE" != 13 ]; do
     case "$STATE" in
     1)
         db_input critical poseidon/controller_type || true
@@ -63,24 +64,57 @@ while [ "$STATE" != 0 ] && [ "$STATE" != 9 ]; do
         db_get poseidon/controller_type
         if [ "$RET" == "Faucet" ]; then
             db_input critical poseidon/faucet_controller_mirror_ports || true
+        else # BCF
+            db_input critical poseidon/bcf_controller_interface_group || true
         fi
     ;;
 
     6)
-        db_input critical poseidon/collector_nic || true
+        db_get poseidon/controller_type
+        if [ "$RET" == "Faucet" ]; then
+            db_input low poseidon/faucet_fa_rabbit_enabled || true
+        else # BCF
+            db_input critical poseidon/bcf_controller_span_fabric_name || true
+        fi
     ;;
 
     7)
+        db_get poseidon/controller_type
+        if [ "$RET" == "Faucet" ]; then
+            db_get poseidon/faucet_fa_rabbit_enabled
+            if [ "$RET" == "Yes" ]; then
+                db_input low poseidon/faucet_fa_rabbit_host || true
+                db_input low poseidon/faucet_fa_rabbit_port || true
+                db_input low poseidon/faucet_fa_rabbit_exchange || true
+                db_input low poseidon/faucet_fa_rabbit_exchange_type || true
+                db_input low poseidon/faucet_fa_rabbit_routing_key || true
+	    fi
+        fi
+    ;;
+
+    8)
+        db_input critical poseidon/collector_nic || true
+    ;;
+
+    9)
         db_get poseidon/collector_nic
         if [ "$RET" == "Specify your own" ]; then
             db_input critical poseidon/specify_nic || true
-        else
+        else # list ones available on the install system
             db_input critical poseidon/available_nics || true
 	fi
     ;;
 
-    8)
+    10)
         db_input high poseidon/max_concurrent_reinvestigations || true
+    ;;
+
+    11)
+        db_input high poseidon/learn_public_addresses || true
+    ;;
+
+    12)
+        db_input low poseidon/logging_level || true
     ;;
     esac
 
