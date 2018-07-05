@@ -39,8 +39,18 @@ Type: password
 Description: Password to connect to BigSwitch Cloud Fabric:
 
 Template: poseidon/collector_nic
-Type: string
+Type: select
+Choices: List available network interfaces, Specify your own
 Description: collector_nic
+
+Template: poseidon/available_nics
+Type: select
+Choices: ${choices}
+Description: pick a nic
+
+Template: poseidon/specify_nic
+Type: string
+Description: Enter the name of the NIC on this host that the SDN controller will be mirroring traffic to.
 
 Template: poseidon/max_concurrent_reinvestigations
 Type: string
@@ -53,42 +63,53 @@ Description: controller_mirror_ports
 
 Template: poseidon/bcf_controller_span_fabric_name
 Type: string
+Default: vent
 Description: controller_span_fabric_name
 
 Template: poseidon/bcf_controller_interface_group
 Type: string
+Default: ig1
 Description: controller_interface_group
-
-Template: poseidon/faucet_rabbit_enabled
-Type: string
-Description: rabbit_enabled
 
 Template: poseidon/learn_public_addresses
 Type: select
 Choices: Yes, No
+Default: No
 Description: learn_public_addresses
 
 Template: poseidon/faucet_fa_rabbit_enabled
-Type: string
+Type: select
+Choices: Yes, No
+Default: Yes
 Description: fa_rabbit_enabled
 
 Template: poseidon/faucet_fa_rabbit_host
 Type: string
+Default: RABBIT_SERVER
 Description: fa_rabbit_host
 
 Template: poseidon/faucet_fa_rabbit_exchange
 Type: string
+Default: 'topic_recs'
 Description: fa_rabbit_exchange
+
+Template: poseidon/faucet_fa_rabbit_exchange_type
+Type: string
+Default: 'topic'
+Description: fa_rabbit_exchange_type
 
 Template: poseidon/faucet_fa_rabbit_routing_key
 Type: string
+Default: 'FAUCET.Event'
 Description: fa_rabbit_routing_key
 
 Template: poseidon/faucet_fa_rabbit_port
 Type: string
+Default: 5672
 Description: fa_rabbit_port
 
 Template: poseidon/logging_level
 Type: select
 Choices: INFO, DEBUG, WARNING, ERROR, CRITICAL
+Default: INFO
 Description: logging_level
