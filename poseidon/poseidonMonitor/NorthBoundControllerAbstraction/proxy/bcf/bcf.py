@@ -154,7 +154,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             " found on the designated controller".format(span_name, interface_group))
             retval = {}
         else :
-            retval = spanArray[0]         
+            retval = spanArray[0]
         sout = 'get_span_fabric return:{0}'.format(retval)
         module_logger.debug(sout)
         return retval
