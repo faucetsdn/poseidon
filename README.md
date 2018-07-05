@@ -10,7 +10,7 @@
 
 <img src="/docs/img/poseidon-logo.png" width="50" height="75"/><a href="https://www.blackducksoftware.com/open-source-rookies-2016" ><img src="/docs/img/Rookies16Badge_1.png" width="100" alt="POSEIDON is now BlackDuck 2016 OpenSource Rookie of the year"></a>
 
-This project is a joint challenge between two IQT Labs: [Cyber Reboot](https://www.cyberreboot.org/) and [Lab41](http://www.lab41.org/). Current software defined network offerings lack tangible security emphasis much less methods to enhance operational security. Without situational awareness and context, defending a network remains a difficult proposition. This project will utilize SDN and machine learning to determine what is on the network, and what is it doing. This goal is to leverage SDN to provide situational awareness and better defend networks.
+This project is a joint challenge between two IQT Labs: [Cyber Reboot](https://www.cyberreboot.org/) and [Lab41](http://www.lab41.org/). Current software defined network offerings lack tangible security emphasis much less methods to enhance operational security. Without situational awareness and context, defending a network remains a difficult proposition. This project will utilize SDN and machine learning to determine what is on the network, and what is it doing. The goal is to leverage SDN to provide situational awareness and better defend networks.
 
 ## Table of Contents
 

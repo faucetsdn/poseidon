@@ -88,7 +88,7 @@ while [ "$STATE" != 0 ] && [ "$STATE" != 13 ]; do
                 db_input low poseidon/faucet_fa_rabbit_exchange || true
                 db_input low poseidon/faucet_fa_rabbit_exchange_type || true
                 db_input low poseidon/faucet_fa_rabbit_routing_key || true
-	    fi
+            fi
         fi
     ;;
 
@@ -102,7 +102,7 @@ while [ "$STATE" != 0 ] && [ "$STATE" != 13 ]; do
             db_input critical poseidon/specify_nic || true
         else # list ones available on the install system
             db_input critical poseidon/available_nics || true
-	fi
+    fi
     ;;
 
     10)

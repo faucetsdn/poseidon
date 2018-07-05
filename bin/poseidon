@@ -107,7 +107,7 @@ function check_args()
             -Z|reset)
                 sudo cp /etc/poseidon/default.conf /etc/poseidon/default.conf.bkp
                 echo PURGE | sudo debconf-communicate poseidon > /dev/null
-                echo "# Generated from debconf - do not edit by hand, to change configation options run: poseidon configure" | sudo tee /etc/poseidon/default.conf > /dev/null
+                echo "# Generated from debconf - do not edit by hand, to change configuration options run: poseidon configure" | sudo tee /etc/poseidon/default.conf > /dev/null
                 echo "#" | sudo tee -a /etc/poseidon/default.conf > /dev/null
                 echo "#" | sudo tee -a /etc/poseidon/default.conf > /dev/null
                 echo "" | sudo tee -a /etc/poseidon/default.conf > /dev/null
