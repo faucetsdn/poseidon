@@ -37,7 +37,7 @@ This project is a joint challenge between two IQT Labs: [Cyber Reboot](https://w
 - Bash
 - [Docker](https://www.docker.com/) (Poseidon and related components run on top of Docker, so understanding the fundamentals will be useful for troubleshooting as well)
 - Make
-- An SDN Contrller, specifically [BigSwitch Cloud Fabric](https://www.bigswitch.com/products/big-cloud-fabric) or [Faucet](https://faucet.nz/)
+- An SDN Controller, specifically [BigSwitch Cloud Fabric](https://www.bigswitch.com/products/big-cloud-fabric) or [Faucet](https://faucet.nz/)
 - Debian Linux (if installing with the `DEB` which is the recommended install choice)
   - Currently supported versions are:
     - Ubuntu 14.04
