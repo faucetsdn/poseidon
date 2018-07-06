@@ -46,7 +46,7 @@ This project is a joint challenge between two IQT Labs: [Cyber Reboot](https://w
     - Ubuntu 18.04
     - Uubntu 18.10
 
-### SDN Controller Configurtion
+### SDN Controller Configuration
 Before getting started, one of the two supported controllers (*BigSwitch Cloud Fabric* or *Faucet*) needs to running and accessible to where Poseidon will be deployed.
 
 #### Big Cloud Fabric Configuration
