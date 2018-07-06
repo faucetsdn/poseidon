@@ -17,6 +17,7 @@ This project is a joint challenge between two IQT Labs: [Cyber Reboot](https://w
 - [Background](#background)
 - [Install](#install)
   - [Prerequisites](#prerequisites)
+  - [Installing](#installing)
 - [Usage](#usage)
 - [Examples](#examples)
 - [Related Components](#related-components)
@@ -31,6 +32,23 @@ This project is a joint challenge between two IQT Labs: [Cyber Reboot](https://w
 - Bash
 - [Docker](https://www.docker.com/)
 - Make
+- Debian Linux (if installing with the `DEB` which is the recommended install choice)
+  - Currently supported versions are:
+    - Ubuntu 14.04
+    - Ubuntu 16.04
+    - Ubuntu 17.10
+    - Ubuntu 18.04
+    - Uubntu 18.10
+
+### Installing
+
+```
+sudo apt-get install -y apt-transport-https
+curl -sLf "https://dl.cloudsmith.io/public/cyberreboot/poseidon/cfg/gpg/gpg.F9E23875C98A1F72.key" | sudo apt-key add -
+sudo curl -sLf "https://dl.cloudsmith.io/public/cyberreboot/poseidon/cfg/install/config.deb.txt?os=ubuntu&version=$(lsb_release -rs)&dist=$(lsb_release -cs)" > /etc/apt/sources.list.d/cyberreboot-poseidon.list
+sudo apt-get update
+sudo apt-get install poseidon
+```
 
 ## Usage
 
