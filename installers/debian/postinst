@@ -150,6 +150,7 @@ if db_go; then
             git clone https://github.com/faucetsdn/faucet
             mn -c
             pushd faucet && FAUCET_CONFIG_STAT_RELOAD=1 FAUCET_EVENT_SOCK=1 FA_RABBIT_HOST=$default_ip docker-compose -f docker-compose.yaml -f adapters/vendors/rabbitmq/docker-compose.yaml up --build -d && popd
+            db_unregister poseidon/controller_type
             echo "Wait for Poseidon to fully start, you can check the status with 'poseidon status'"
             echo "Once the service shows Active as 'active' start watching Poseidon logs with 'poseidon logs'"
             echo "In another terminal you can start mininet with the following:"
