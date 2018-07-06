@@ -45,7 +45,7 @@ This project is a joint challenge between two IQT Labs: [Cyber Reboot](https://w
 ```
 sudo apt-get install -y apt-transport-https
 curl -sLf "https://dl.cloudsmith.io/public/cyberreboot/poseidon/cfg/gpg/gpg.F9E23875C98A1F72.key" | sudo apt-key add -
-sudo curl -sLf "https://dl.cloudsmith.io/public/cyberreboot/poseidon/cfg/install/config.deb.txt?os=ubuntu&version=$(lsb_release -rs)&dist=$(lsb_release -cs)" > /etc/apt/sources.list.d/cyberreboot-poseidon.list
+sudo curl -o /etc/apt/sources.list.d/cyberreboot-poseidon.list -sLf "https://dl.cloudsmith.io/public/cyberreboot/poseidon/cfg/install/config.deb.txt?os=ubuntu&version=$(lsb_release -rs)&dist=$(lsb_release -cs)"
 sudo apt-get update
 sudo apt-get install poseidon
 ```
