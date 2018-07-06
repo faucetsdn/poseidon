@@ -132,7 +132,7 @@ if db_go; then
             echo "dps:" > /etc/faucet/faucet.yaml
             echo "  switch-1:" >> /etc/faucet/faucet.yaml
             echo "    dp_id: 1" >> /etc/faucet/faucet.yaml
-            echo "    hardware: OPen vSwitch" >> /etc/faucet/faucet.yaml
+            echo "    hardware: Open vSwitch" >> /etc/faucet/faucet.yaml
             echo "    interfaces:" >> /etc/faucet/faucet.yaml
             echo "      1:" >> /etc/faucet/faucet.yaml
             echo "        native_vlan: 8" >> /etc/faucet/faucet.yaml
@@ -152,7 +152,7 @@ if db_go; then
             pushd faucet && FAUCET_CONFIG_STAT_RELOAD=1 FAUCET_EVENT_SOCK=1 FA_RABBIT_HOST=$default_ip docker-compose -f docker-compose.yaml -f adapters/vendors/rabbitmq/docker-compose.yaml up --build -d && popd
             db_unregister poseidon/controller_type
             echo "Wait for Poseidon to fully start, you can check the status with 'poseidon status'"
-            echo "Once the service shows Active as 'active' start watching Poseidon logs with 'poseidon logs'"
+            echo "Once the service shows Active as 'active' and the logs show it's no longer waiting for Poseidon containers to become healthy (this can take several minutes) start watching Poseidon logs with 'poseidon logs'"
             echo "In another terminal you can start mininet with the following:"
             echo ""
             echo "sudo mn --topo single,3 --mac --switch ovsk --controller=remote,ip=127.0.0.1:6653"
@@ -229,6 +229,8 @@ if db_go; then
             if [ "$failed" == true ]; then
                 exit 1
             fi
+        else # demo
+            db_purge
         fi
     fi
 
@@ -245,7 +247,7 @@ if db_go; then
     docker load -i /opt/poseidon/dist/cyberreboot-vent-plugins-p0f.tar
     docker load -i /opt/poseidon/dist/cyberreboot-vent-plugins-tcprewrite-dot1q.tar
     docker load -i /opt/poseidon/dist/cyberreboot-crviz.tar
-    #docker load -i /opt/poseidon/dist/cyberreboot-poseidonml.tar
+    docker load -i /opt/poseidon/dist/cyberreboot-poseidonml.tar
 
     # start poseidon service
     systemctl stop poseidon || true
