@@ -5,15 +5,6 @@ VERSION=$(shell cat VERSION)
 build_poseidon:
 	docker build -t $(TAG) .
 
-run_poseidon: build_poseidon
-	docker run --rm -it $(TAG)
-
-run_dev:
-	docker run --rm -v "$(shell pwd):/poseidonWork" -it $(TAG)
-
-run_sh: build_poseidon
-	docker run --rm -it --entrypoint sh $(TAG)
-
 build_docs:
 	docker build -f ./Dockerfile.docs -t $(TAG)-docs .
 
@@ -83,4 +74,4 @@ build_debian:
 
 build_installers: build_debian
 
-.PHONY:  build_debian build_installers build_poseidon run_poseidon run_sh build_docs run_docs run_tests
+.PHONY:  build_debian build_installers build_poseidon build_docs run_docs run_tests
