@@ -31,7 +31,7 @@ while [ "$STATE" != 0 ] && [ "$STATE" != 13 ]; do
         db_get poseidon/controller_type
         if [ "$RET" == "Faucet" ]; then
             db_input critical poseidon/faucet_same_host || true
-        else # BCF
+        elif [ "$RET" == "BigSwitch Cloud Fabric" ]; then
             db_input critical poseidon/bcf_controller_uri || true
         fi
     ;;
@@ -43,7 +43,7 @@ while [ "$STATE" != 0 ] && [ "$STATE" != 13 ]; do
             if [ "$RET" == "No" ]; then
                 db_input critical poseidon/faucet_controller_uri || true
             fi
-        else # BCF
+        elif [ "$RET" == "BigSwitch Cloud Fabric" ]; then
             db_input critical poseidon/bcf_controller_user || true
             db_input critical poseidon/bcf_controller_pass || true
         fi
@@ -64,7 +64,7 @@ while [ "$STATE" != 0 ] && [ "$STATE" != 13 ]; do
         db_get poseidon/controller_type
         if [ "$RET" == "Faucet" ]; then
             db_input critical poseidon/faucet_controller_mirror_ports || true
-        else # BCF
+        elif [ "$RET" == "BigSwitch Cloud Fabric" ]; then
             db_input critical poseidon/bcf_controller_interface_group || true
         fi
     ;;
@@ -73,7 +73,7 @@ while [ "$STATE" != 0 ] && [ "$STATE" != 13 ]; do
         db_get poseidon/controller_type
         if [ "$RET" == "Faucet" ]; then
             db_input low poseidon/faucet_fa_rabbit_enabled || true
-        else # BCF
+        elif [ "$RET" == "BigSwitch Cloud Fabric" ]; then
             db_input critical poseidon/bcf_controller_span_fabric_name || true
         fi
     ;;
@@ -93,28 +93,43 @@ while [ "$STATE" != 0 ] && [ "$STATE" != 13 ]; do
     ;;
 
     8)
-        db_input critical poseidon/collector_nic || true
+        db_get poseidon/controller_type
+        if [ "$RET" != "Demo" ]; then
+            db_input critical poseidon/collector_nic || true
+        fi
     ;;
 
     9)
-        db_get poseidon/collector_nic
-        if [ "$RET" == "Specify your own" ]; then
-            db_input critical poseidon/specify_nic || true
-        else # list ones available on the install system
-            db_input critical poseidon/available_nics || true
+        db_get poseidon/controller_type
+        if [ "$RET" != "Demo" ]; then
+            db_get poseidon/collector_nic
+            if [ "$RET" == "Specify your own" ]; then
+                db_input critical poseidon/specify_nic || true
+            else # list ones available on the install system
+                db_input critical poseidon/available_nics || true
+        fi
     fi
     ;;
 
     10)
-        db_input high poseidon/max_concurrent_reinvestigations || true
+        db_get poseidon/controller_type
+        if [ "$RET" != "Demo" ]; then
+            db_input high poseidon/max_concurrent_reinvestigations || true
+        fi
     ;;
 
     11)
-        db_input high poseidon/learn_public_addresses || true
+        db_get poseidon/controller_type
+        if [ "$RET" != "Demo" ]; then
+            db_input high poseidon/learn_public_addresses || true
+        fi
     ;;
 
     12)
-        db_input low poseidon/logging_level || true
+        db_get poseidon/controller_type
+        if [ "$RET" != "Demo" ]; then
+            db_input low poseidon/logging_level || true
+        fi
     ;;
     esac
 

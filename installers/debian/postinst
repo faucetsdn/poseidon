@@ -82,7 +82,7 @@ if db_go; then
                     echo "FA_RABBIT_ENABLED=False" >> /etc/poseidon/default.conf
                 fi
             fi
-        else # BCF
+        elif [ "$RET" == "BigSwitch Cloud Fabric" ]; then
             echo "controller_type=bcf" >> /etc/poseidon/default.conf
             db_get poseidon/bcf_controller_uri
             if [[ ! -z "$RET" ]]; then
@@ -116,6 +116,61 @@ if db_go; then
             if [[ ! -z "$RET" ]]; then
                 echo "controller_span_fabric_name=$RET" >> /etc/poseidon/default.conf
             fi
+        else # demo
+            default_iface=$(awk '$2 == 00000000 { print $1 }' /proc/net/route)
+            default_ip=$(ip addr show dev "$default_iface" | awk '$1 ~ /^inet/ { sub("/.*", "", $2); print $2 }')
+
+            # settings in /etc/poseidon/default.conf
+            echo "controller_type=faucet" >> /etc/poseidon/default.conf
+            echo "controller_uri=" >> /etc/poseidon/default.conf
+            echo "controller_mirror_ports='{\"switch-1\":3}'" >> /etc/poseidon/default.conf
+            echo "collector_nic=s1-eth3" >> /etc/poseidon/default.conf
+
+            # settings for Faucet
+            mkdir -p /etc/faucet
+            mkdir -p /var/log/faucet
+            echo "dps:" > /etc/faucet/faucet.yaml
+            echo "  switch-1:" >> /etc/faucet/faucet.yaml
+            echo "    dp_id: 1" >> /etc/faucet/faucet.yaml
+            echo "    hardware: OPen vSwitch" >> /etc/faucet/faucet.yaml
+            echo "    interfaces:" >> /etc/faucet/faucet.yaml
+            echo "      1:" >> /etc/faucet/faucet.yaml
+            echo "        native_vlan: 8" >> /etc/faucet/faucet.yaml
+            echo "      2:" >> /etc/faucet/faucet.yaml
+            echo "        native_vlan: 8" >> /etc/faucet/faucet.yaml
+            echo "      3:" >> /etc/faucet/faucet.yaml
+            echo "        description: mirror" >> /etc/faucet/faucet.yaml
+            echo "        output_only: true" >> /etc/faucet/faucet.yaml
+            echo "vlans:" >> /etc/faucet/faucet.yaml
+            echo "  8:" >> /etc/faucet/faucet.yaml
+
+            command -v python >/dev/null 2>&1 || { echo >&2 -e "${red}Python not installed, please install it first: sudo apt-get install python${endColor}"; db_unregister poseidon/controller_type; exit 1; }
+            command -v mn >/dev/null 2>&1 || { echo >&2 -e "${red}Mininet not installed, please install it first: sudo apt-get install mininet${endColor}"; db_unregister poseidon/controller_type; exit 1; }
+            command -v docker-compose >/dev/null 2>&1 || { sudo curl -L https://github.com/docker/compose/releases/download/1.21.2/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose }
+            git clone https://github.com/faucetsdn/faucet
+            mn -c
+            pushd faucet && FAUCET_CONFIG_STAT_RELOAD=1 FAUCET_EVENT_SOCK=1 FA_RABBIT_HOST=$default_ip docker-compose -f docker-compose.yaml -f adapters/vendors/rabbitmq/docker-compose.yaml up --build -d && popd
+            echo "Wait for Poseidon to fully start, you can check the status with 'poseidon status'"
+            echo "Once the service shows Active as 'active' start watching Poseidon logs with 'poseidon logs'"
+            echo "In another terminal you can start mininet with the following:"
+            echo ""
+            echo "sudo mn --topo single,3 --mac --switch ovsk --controller=remote,ip=127.0.0.1:6653"
+            echo ""
+            echo "At the prompt type 'xterm h1 h2'"
+            echo "That will have opened up 2 new terminal, one is h1, the other is h2. These are going to be the two hosts on our little virtual switch that has 3 interfaces.  The third interface will be used as our mirror port.  See '/etc/faucet/faucet.yaml' for the configuration."
+            echo ""
+            echo "In one of the new terminals do 'ifconfig' to figure out if it is 10.0.0.1 or 10.0.0.2. On the terminal that is 10.0.0.1 start a simple webserver with:"
+            echo ""
+            echo "cd / && python -m SimpleHTTPServer"
+            echo ""
+            echo "Now from the other host (h2) terminal let's browse to files on h1 with the simple webserver we just started with:"
+            echo ""
+            echo "w3m http://10.0.0.1:8000/"
+            echo ""
+            echo "The Poseidon logs should start picking up the 2 hosts and begin capturing traffic. Once the hosts are moved into the mirroring section the Poseidon logs you can look at the faucet.yaml file again and see that it got updated to start mirroring traffic. Additionally if you do 'docker ps' you still start to see ncapture containers running which are creating the PCAP files of the mirrored traffic.  You can find those PCAP files in '/opt/vent_files'. Eventually after the captures have been processed and analzyed by the machine learning portion of Poseidon, you'll see results of the machine learning classification in the poseidon logs."
+            echo ""
+            echo "Finally, you can visualize the network that Poseidon sees using CRviz, which can be accessed with 'poseidon visualize'"
+            echo ""
         fi
     else
         echo >&2 -e "${red}You need to specify the controller type.${endColor}"
@@ -123,52 +178,57 @@ if db_go; then
         failed=true
     fi
 
-    db_get poseidon/collector_nic
+    db_get poseidon/controller_type
     if [[ ! -z "$RET" ]]; then
-        if [ "$RET" == "Specify your own" ]; then
-            db_get poseidon/specify_nic
+        if [ "$RET" != "Demo" ]; then
+            db_get poseidon/collector_nic
             if [[ ! -z "$RET" ]]; then
-                echo "collector_nic=$RET" >> /etc/poseidon/default.conf
+                if [ "$RET" == "Specify your own" ]; then
+                    db_get poseidon/specify_nic
+                    if [[ ! -z "$RET" ]]; then
+                        echo "collector_nic=$RET" >> /etc/poseidon/default.conf
+                    else
+                        echo >&2 -e "${red}You need to specify a collector NIC.${endColor}"
+                        db_unregister poseidon/collector_nic
+                        db_unregister poseidon/specify_nic
+                        failed=true
+                    fi
+                else
+                    db_get poseidon/available_nics
+                    if [[ ! -z "$RET" ]]; then
+                        echo "collector_nic=$RET" >> /etc/poseidon/default.conf
+                    else
+                        echo >&2 -e "${red}You need to specify a collector NIC.${endColor}"
+                        db_unregister poseidon/collector_nic
+                        db_unregister poseidon/available_nics
+                        failed=true
+                    fi
+                fi
             else
-                echo >&2 -e "${red}You need to specify a collector NIC.${endColor}"
+                echo >&2 -e "${red}You need to specify the collector NIC.${endColor}"
                 db_unregister poseidon/collector_nic
-                db_unregister poseidon/specify_nic
                 failed=true
             fi
-        else
-            db_get poseidon/available_nics
+
+            db_get poseidon/max_concurrent_reinvestigations
             if [[ ! -z "$RET" ]]; then
-                echo "collector_nic=$RET" >> /etc/poseidon/default.conf
-            else
-                echo >&2 -e "${red}You need to specify a collector NIC.${endColor}"
-                db_unregister poseidon/collector_nic
-                db_unregister poseidon/available_nics
-                failed=true
+                echo "max_concurrent_reinvestigations=$RET" >> /etc/poseidon/default.conf
+            fi
+
+            db_get poseidon/learn_public_addresses
+            if [[ ! -z "$RET" ]]; then
+                echo "learn_public_addresses=$RET" >> /etc/poseidon/default.conf
+            fi
+
+            db_get poseidon/logging_level
+            if [[ ! -z "$RET" ]]; then
+                echo "logger_level=$RET" >> /etc/poseidon/default.conf
+            fi
+
+            if [ "$failed" == true ]; then
+                exit 1
             fi
         fi
-    else
-        echo >&2 -e "${red}You need to specify the collector NIC.${endColor}"
-        db_unregister poseidon/collector_nic
-        failed=true
-    fi
-
-    db_get poseidon/max_concurrent_reinvestigations
-    if [[ ! -z "$RET" ]]; then
-        echo "max_concurrent_reinvestigations=$RET" >> /etc/poseidon/default.conf
-    fi
-
-    db_get poseidon/learn_public_addresses
-    if [[ ! -z "$RET" ]]; then
-        echo "learn_public_addresses=$RET" >> /etc/poseidon/default.conf
-    fi
-
-    db_get poseidon/logging_level
-    if [[ ! -z "$RET" ]]; then
-        echo "logger_level=$RET" >> /etc/poseidon/default.conf
-    fi
-
-    if [ "$failed" == true ]; then
-        exit 1
     fi
 
     docker load -i /opt/poseidon/dist/cyberreboot-vent.tar

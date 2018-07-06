@@ -1,8 +1,8 @@
 Template: poseidon/controller_type
 Type: select
-Choices: BigSwitch Cloud Fabric, Faucet
+Choices: BigSwitch Cloud Fabric, Faucet, Demo
 Description: Select which SDN controller to use:
- Poseidon currently works with either a Faucet controller or a BigSwitch Cloud Fabric controller.  Please choose which controller will be used in this environment.
+ Poseidon currently works with either a Faucet controller or a BigSwitch Cloud Fabric controller.  Please choose which controller will be used in this environment. Alternatively, you can choose Demo and it will setup Faucet, OVS, and Mininet to demonstrate Poseidon working with a virtual switch.
 
 Template: poseidon/bcf_controller_uri
 Type: string

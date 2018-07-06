@@ -30,6 +30,8 @@ This project is a joint challenge between two IQT Labs: [Cyber Reboot](https://w
 
 ## Background
 
+TODO
+
 ## Install
 
 ### Prerequisites
