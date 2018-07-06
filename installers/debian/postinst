@@ -147,7 +147,7 @@ if db_go; then
             command -v python >/dev/null 2>&1 || { echo >&2 -e "${red}Python not installed, please install it first: sudo apt-get install python${endColor}"; db_unregister poseidon/controller_type; exit 1; }
             command -v mn >/dev/null 2>&1 || { echo >&2 -e "${red}Mininet not installed, please install it first: sudo apt-get install mininet${endColor}"; db_unregister poseidon/controller_type; exit 1; }
             command -v docker-compose >/dev/null 2>&1 || { sudo curl -L https://github.com/docker/compose/releases/download/1.21.2/docker-compose-"$(uname -s)"-"$(uname -m)" -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose; }
-            pushd /tmp && git clone https://github.com/faucetsdn/faucet && popd || true
+            pushd /tmp; (git clone https://github.com/faucetsdn/faucet || true); popd
             mn -c || true
             pushd /tmp/faucet && FAUCET_CONFIG_STAT_RELOAD=1 FAUCET_EVENT_SOCK=1 FA_RABBIT_HOST=$default_ip docker-compose -f docker-compose.yaml -f adapters/vendors/rabbitmq/docker-compose.yaml up --build -d && popd
             db_unregister poseidon/controller_type
