@@ -17,6 +17,11 @@ This project is a joint challenge between two IQT Labs: [Cyber Reboot](https://w
 - [Background](#background)
 - [Install](#install)
   - [Prerequisites](#prerequisites)
+  - [SDN Controller Configuration](#sdn-controller-configuration)
+    - [Big Cloud Fabric Configuration](#big-cloud-fabric-configuration)
+      - [Span Fabric](#span-fabric)
+      - [Interface Group](#interface-group)
+    - [Faucet Configuration](#faucet-configuration)
   - [Installing](#installing)
 - [Usage](#usage)
 - [Examples](#examples)
@@ -30,8 +35,9 @@ This project is a joint challenge between two IQT Labs: [Cyber Reboot](https://w
 ### Prerequisites
 
 - Bash
-- [Docker](https://www.docker.com/)
+- [Docker](https://www.docker.com/) (Poseidon and related components run on top of Docker, so understanding the fundamentals will be useful for troubleshooting as well)
 - Make
+- An SDN Contrller, specifically [BigSwitch Cloud Fabric](https://www.bigswitch.com/products/big-cloud-fabric) or [Faucet](https://faucet.nz/)
 - Debian Linux (if installing with the `DEB` which is the recommended install choice)
   - Currently supported versions are:
     - Ubuntu 14.04
@@ -39,6 +45,59 @@ This project is a joint challenge between two IQT Labs: [Cyber Reboot](https://w
     - Ubuntu 17.10
     - Ubuntu 18.04
     - Uubntu 18.10
+
+### SDN Controller Configurtion
+Before getting started, one of the two supported controllers (*BigSwitch Cloud Fabric* or *Faucet*) needs to running and accessible to where Poseidon will be deployed.
+
+#### Big Cloud Fabric Configuration
+<img src="/docs/img/bcf.png" width="114" height="100"/>
+You will need to add support for moving arbitrary endpoint data around your network.  The BigSwitch config will need an admin who will need to add:
+
+- span-fabric
+- interface-group
+
+##### Span Fabric
+
+Replace `<name>` with the name of your span-fabric and `<interface-group>` with the name of your interface-group.
+```
+! span-fabric
+span-fabric <name>
+  active
+  destination interface-group <interface-group>
+  priority 1
+```
+
+##### Interface Group
+
+Replace `<interface-group>` with the name of your interface-group. Additionally fill in the `YOUR_LEAF_SWITCH` and `YOUR_INTERFACE_WHERE_VENT_WILL_RECORD_TRAFFIC_FROM`.
+```
+! interface-group
+interface-group <interface-group>
+  description 'packets get mirrored here to be processed'
+  mode span-fabric
+  member switch YOUR_LEAF_SWITCH interface YOUR_INTERFACE_WHERE_VENT_WILL_RECORD_TRAFFIC_FROM
+```
+
+Poseidon will connect to BCF using its REST API, so you'll need the API endpoint and credentials to it.
+
+BCF is now configured and ready for use with Poseidon.
+
+#### Faucet Configuration
+<img src="/docs/img/faucet.png" width="190" height="100">
+Poseidon requires at least Faucet version 1.8.6 or higher.
+
+Unless Poseidon and Faucet are running on the same host, Poseidon will connect to Faucet using SSH.  So you'll need to create an account that can SSH to the machine running Faucet and that has rights to modify the configuration file `faucet.yaml` (currently Poseidon expects it to be in the default `/etc/faucet/faucet.yaml` location and `dps` must all be defined in this file for Poseidon to update the network posture correctly).
+
+Faucet needs to be started with the following environment variables set:
+```
+export FAUCET_EVENT_SOCK=1
+export FAUCET_CONFIG_STAT_RELOAD=1
+```
+
+If using the [RabbitMQ adapter for Faucet](https://github.com/faucetsdn/faucet/tree/master/adapters/vendors/rabbitmq) (recommended) make sure to also export `FA_RABBIT_HOST` to the IP address of where Poseidon will be running.
+
+Faucet is now configured and ready for use with Poseidon.
+
 
 ### Installing
 
@@ -52,9 +111,23 @@ sudo apt-get install poseidon
 
 ## Usage
 
+After installation you'll have a new command `poseidon` available for looking at the status, logs, changing the configuration or stopping and starting the service.
+```
+poseidon help
+```
+
+Results of Poseidon are printed out in the logs.
+
 ## Examples
 
+TODO
+
 ## Related Components
+
+- [CRviz](https://github.com/CyberReboot/CRviz)
+- [PoseidonML](https://github.com/CyberReboot/poseidonml)
+- [Vent](https://github.com/CyberReboot/vent)
+- [Vent-Plugins](https://github.com/CyberReboot/vent-plugins)
 
 ## Additional Info
 
@@ -67,195 +140,3 @@ sudo apt-get install poseidon
 - [Maintainers](MAINTAINERS)
 - Tests
 - [Version](VERSION)
-
-
-### Quick Start
-Poseidon currently supports two different SDN controllers, [Big Cloud Fabric](https://www.bigswitch.com/products/big-cloud-fabrictm/switching-fabric-overview) and [FAUCET](https://github.com/faucetsdn/faucet).
-
-<img src="/docs/img/bcf.png" width="114" height="100"/><img src="/docs/img/faucet.png" width="190" height="100">
-
-Before getting started, one of these two controllers needs to running and accessible to where Poseidon will be deployed.  Skip to the controller section that you wish to deploy.
-
-#### Big Cloud Fabric (BCF) Configuration
-You will need to add support for moving arbitrary endpoint data around your network.  The BigSwitch config will need an admin who will need to add:
-
-- span-fabric
-- interface-group
-
-##### span-fabric
-
-Replace `<name>` with the name of your span-fabric and `<interface-group>` with the name of your interface-group.
-```
-! span-fabric
-span-fabric <name>
-  active
-  destination interface-group <interface-group>
-  priority 1
-```
-
-##### interface-group
-
-Replace `<interface-group>` with the name of your interface-group. Additionally fill in the `YOUR_LEAF_SWITCH` and `YOUR_INTERFACE_WHERE_VENT_WILL_RECORD_TRAFFIC_FROM`.
-```
-! interface-group
-interface-group <interface-group>
-  description 'packets get mirrored here to be processed'
-  mode span-fabric
-  member switch YOUR_LEAF_SWITCH interface YOUR_INTERFACE_WHERE_VENT_WILL_RECORD_TRAFFIC_FROM
-```
-
-Poseidon will connect to BCF using its REST API, so you'll need the API endpoint and credentials to it.  The easiest way to set these values so that Poseidon can use them is in environment variables like so (assuming the controller is running at `192.168.1.10`):
-
-```
-export controller_type=bcf
-export controller_uri=https://192.168.1.10:8443/api/v1/
-export controller_user=user
-export controller_pass=pass
-export controller_span_fabric_name=name
-export controller_interface_group=interface-group
-```
-
-BCF is now configured and ready for use with Poseidon, continue on to the [Starting Poseidon using Vent](#starting-poseidon-using-vent) section.
-
-#### FAUCET Configuration
-Poseidon requires at least FAUCET version 1.8.6 or higher.
-
-Unless Poseidon and FAUCET are running on the same host, Poseidon will connect to FAUCET using SSH.  So you'll need to create an account that can SSH to the machine running FAUCET and that has rights to modify the configuration file `faucet.yaml` (currently Poseidon expects it to be in the default `/etc/faucet/faucet.yaml` location and `dps` must all be defined in this file for Poseidon to update the network posture correctly).  The easiest way to set these values so that Poseidon can use them is in environment variables like so (assuming the controller is running at `192.168.1.10`):
-
-```
-export controller_type=faucet
-export controller_uri=192.168.1.10
-export controller_user=user
-export controller_pass=pass
-export controller_log_file=/var/log/faucet/faucet.log
-export controller_config_file=/etc/faucet/faucet.yaml
-export controller_mirror_ports='{"switch1":3}'  # a python dictionary of switch names (from faucet.yaml) and switch port numbers for mirroring to
-```
-
-If Poseidon and FAUCET are running on the same host, `controller_user` and `controller_pass` do not need to be set. `controller_uri` should be exported like so:
-```
-export controller_uri=
-```
-
-FAUCET is now configured and ready for use with Poseidon, continue on to the [Starting Poseidon using Vent](#starting-poseidon-using-vent) section.
-
-#### Starting Poseidon using Vent
-[Vent](https://github.com/CyberReboot/vent) is a platform we built to automate network collection and analysis pipelines, such as the ones that Poseidon would need.  Leveraging Vent, we can specify all of the actions we expect Poseidon to be able to do from network event (i.e. new device plugged in), to network capture, to analysis, and closing the loop by feeding back an actionable decision.
-
-In order to run Poseidon in Vent, regardless of the SDN controller chosen, a few additional environment variables need to be set:
-
-```
-export collector_nic=eth0  # set the NIC of the machine that traffic will be mirrored to
-export max_concurrent_reinvestigations=1  # number of active simultaneous mirror operations you want to support
-```
-
-Start Vent with:
-
-```
-./helpers/run
-```
-
-Once Vent is finished starting things up, you'll be able to see the logs of everything, including Poseidon by running:
-
-```
-docker logs -f cyberreboot-vent-syslog-master
-```
-
-If you quit out of the vent container, you can start it again with:
-
-```
-docker start vent
-```
-
-And then attach to the console with:
-
-```
-docker attach vent
-```
-
-* Note: if use Docker for Mac, you'll need to create a directory `/opt/vent_files` and add it to shared directories in preferences.
-
-## Installing
-If you prefer to orchestrate all of the pieces for Poseidon yourself without Vent, then follow these directions:
-
-```
-git clone https://github.com/CyberReboot/poseidon.git
-cd poseidon
-*editor* config/poseidon.config
-docker build -t poseidon .
-docker run poseidon
-```
-
-### Configuration
-
-**config/poseidon.config**
-
-```
-[Monitor]
-
-rabbit_server =  RABBIT_SERVER  # ip address of the rabbit-mq server
-rabbit_port = RABBIT_PORT  # rabbit-mq server server port
-collector_nic = COLLECTOR_NIC  # name of the network interface that will be listening for packets 
-vent_ip = vent_ip  # ip address of server running vent 
-vent_port = VENT_PORT  # vent server port
-
-[NorthBoundControllerAbstraction:Update_Switch_State]
-controller_uri = https://CONTROLLER_SERVER:8443/api/v1/  # example for BCF controller ip 
-controller_user = USERNAME  # username for BCF login
-controller_pass = PASSWORD  # password for BCF login
-controller_type = CONTROLLER  # either `bcf` or `faucet`
-```
-
-## Makefile Options
-
-You can use `make` to simplify the building process.  This is primarily useful for development.
-To build the container, simply run:
-
-```
-git clone https://github.com/CyberReboot/poseidon.git
-cd poseidon
-make build_poseidon
-```
-
-To build and run the container, run this command from inside the poseidon directory:
-
-```
-make run_poseidon
-```
-
-This first builds poseidon, then runs it. After it finishes running, the container is removed.
-
-To populate the current volume with the contents of the containers' "poseidonWork/" directory, run:
-
-```
-make run_dev
-```
-
-To run poseidon with sh as entrypoint, run:
-
-```
-make run_sh
-```
-
-This also removes the container after it has finished running.
-
-If you want to build the docs, then invoke:
-
-```
-make build_docs
-```
-
-To build and then open the docs in a container on port 8080:
-
-```
-make run_docs
-```
-
-To run tests:
-
-```
-make run_tests
-```
-
-## Running the tests
-Tests are currently written in py.test for Python.  The tests are automatically run when opening Pull Requests to Poseidon.
