@@ -52,7 +52,7 @@ function check_args()
                 exit
                 ;;
             -i|info|status)
-                sudo systemctl status poseidon
+                systemctl status poseidon
                 exit
                 ;;
             -l|logs)
