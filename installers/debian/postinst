@@ -170,10 +170,10 @@ if db_go; then
                 echo "logger_level=$RET" >> /etc/poseidon/default.conf
             fi
 
-            if [ "$failed" == true ]; then
-                exit 1
-            fi
         fi
+    fi
+    if [ "$failed" == true ]; then
+        exit 1
     fi
 
     docker load -i /opt/poseidon/dist/cyberreboot-vent.tar
