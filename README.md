@@ -150,5 +150,6 @@ Results of Poseidon are printed out in the logs.
 - Developer Guide
 - [License](LICENSE)
 - [Maintainers](MAINTAINERS)
+- [Releases](https://github.com/CyberReboot/poseidon/releases)
 - Tests
 - [Version](VERSION)
