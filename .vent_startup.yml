@@ -47,7 +47,7 @@ https://github.com/cyberreboot/crviz:
         build: yes
         start: yes
 https://github.com/cyberreboot/poseidonml:
-    nodeclassifier@eval:
+    onelayer:
         build: yes
 vent.cfg:
     build-options:
