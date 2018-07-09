@@ -20,8 +20,8 @@ ENV POSEIDON_CONFIG /poseidonWork/config/poseidon.config
 
 # install dependencies of poseidon modules for poseidon
 RUN find . -name requirements.txt -type f -exec pip3 install -r {} \;
-RUN sphinx-apidoc -o docs poseidon -F --follow-links && cd docs && make html && make man
+RUN sphinx-apidoc -o docs/source poseidon -F --follow-links && cd docs/source && make html && make man
 
-WORKDIR /poseidonWork/docs/_build/html
+WORKDIR /poseidonWork/docs/source/_build/html
 
 CMD ["/usr/bin/python3","-m","http.server","8080"]
