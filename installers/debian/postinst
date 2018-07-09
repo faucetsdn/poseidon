@@ -267,7 +267,7 @@ if db_go; then
             echo ""
             echo "Finally, you can visualize the network that Poseidon sees using CRviz, which can be accessed with 'poseidon visualize'"
             echo ""
-            echo "When you're done with the demo, you can use 'poseidon reset'"
+            echo "When you're done with the demo, you can use 'poseidon reset' (note: Faucet will still be running in Docker containers)"
             echo ""
             echo "###############################################################################"
             echo "# If you're reading this you've successfully completed the demo instructions! #"
