@@ -104,10 +104,11 @@ Faucet is now configured and ready for use with Poseidon.
 
 ### Installing
 
+On Ubuntu, this will download and install our `.deb` package from Cloudsmith.
 ```
 sudo apt-get install -y apt-transport-https
 curl -sLf "https://dl.cloudsmith.io/public/cyberreboot/poseidon/cfg/gpg/gpg.F9E23875C98A1F72.key" | sudo apt-key add -
-sudo curl -o /etc/apt/sources.list.d/cyberreboot-poseidon.list -sLf "https://dl.cloudsmith.io/public/cyberreboot/poseidon/cfg/install/config.deb.txt?os=ubuntu&version=$(lsb_release -rs)&dist=$(lsb_release -cs)"
+sudo add-apt-repository "deb [arch=amd64] https://dl.cloudsmith.io/public/cyberreboot/poseidon/deb/ubuntu $(lsb_release -cs) main"
 sudo apt-get update
 sudo apt-get install poseidon
 ```
