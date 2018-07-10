@@ -258,7 +258,7 @@ if db_go; then
             echo ""
             echo "Now from the other host (h2) terminal let's browse to files on h1 with the simple webserver we just started with:"
             echo ""
-            echo "w3m http://10.0.0.1:8000/ (you can 'apt-get install w3m' if your system doesn't already have it)"
+            echo "w3m http://10.0.0.1:8000/"
             echo ""
             echo "At this point it is worth watching the Faucet logs, which can be tailed from '/var/log/faucet/faucet.log'"
             echo "If the Faucet logs show L2 learned records that don't have valid IP addresses for L3 (most likely) then you'll have to wait for the expiration timeout of Faucet, which by default is 5 minutes. Once Faucet has 0 recently active hosts (you'll see messages in the logs), then trying browsing to files using 'w3m' again on h2. That should trigger a relearn with valid L3 IP addresses on Faucet, at which point Poseidon will pick them up."
