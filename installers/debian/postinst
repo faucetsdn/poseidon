@@ -244,7 +244,7 @@ if db_go; then
             echo ""
             echo "Poseidon has been installed along with all of the dependencies needed for this demo, at this point Poseidon is in the process of starting. Wait for Poseidon to fully start, you can check the status with 'poseidon status'"
             echo "Once the service shows Active as 'active' and the logs show it's no longer waiting for Poseidon containers to become healthy (this can take several minutes) start watching Poseidon logs with 'poseidon logs'"
-            echo "In another terminal you can start mininet with the following:"
+            echo "In another terminal (if SSH'ing be sure and connect with '-X' so that you can use xterm) you can start mininet with the following:"
             echo ""
             echo "sudo mn --topo single,3 --mac --switch ovsk --controller=remote,ip=127.0.0.1:6653"
             echo ""
