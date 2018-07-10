@@ -55,6 +55,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
 
         self.span_fabric_name = span_fabric_name
         self.interface_group = interface_group
+        data = self.get_span_fabric()
 
     @staticmethod
     def format_endpoints(data):
