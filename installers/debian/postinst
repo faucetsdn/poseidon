@@ -211,6 +211,8 @@ if db_go; then
             # settings for Faucet
             mkdir -p /etc/faucet
             mkdir -p /var/log/faucet
+            touch /var/log/faucet/faucet.log
+            touch /var/log/faucet/faucet_exception.log
             echo "dps:" > /etc/faucet/faucet.yaml
             echo "  switch-1:" >> /etc/faucet/faucet.yaml
             echo "    dp_id: 1" >> /etc/faucet/faucet.yaml
