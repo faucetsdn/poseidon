@@ -272,7 +272,7 @@ if db_go; then
             echo ""
             echo "###############################################################################"
             echo "# If you're reading this you've successfully completed the demo instructions! #"
-            echo "# Otherwise, scroll up to the 'INSTRUCTIONS header and start there.           #"
+            echo "# Otherwise, scroll up to the INSTRUCTIONS header and start there.           #"
             echo "###############################################################################"
             echo ""
         fi
