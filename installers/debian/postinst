@@ -235,6 +235,12 @@ if db_go; then
             pushd /tmp/faucet && FAUCET_CONFIG_STAT_RELOAD=1 FAUCET_EVENT_SOCK=1 FA_RABBIT_HOST=$default_ip docker-compose -f docker-compose.yaml -f adapters/vendors/rabbitmq/docker-compose.yaml up --build -d && popd
             db_purge
             less /opt/poseidon/docs/demo.txt
+            echo ""
+            echo "To get the instructions again:"
+            echo ""
+            echo "less /opt/poseidon/docs/demo.txt"
+            echo ""
+            echo ""
         fi
     fi
     exit 0
