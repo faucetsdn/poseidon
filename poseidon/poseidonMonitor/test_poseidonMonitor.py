@@ -27,6 +27,10 @@ from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor import poseidonMonitor
 from poseidon.poseidonMonitor.endPoint import EndPoint
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.EndpointWrapper import Endpoint_Wrapper
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.bcf import \
+    BcfProxy
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.faucet.faucet import \
+    FaucetProxy
 
 from poseidon.poseidonMonitor.poseidonMonitor import (CTRL_C, Monitor,
                                                       Collector,
@@ -154,6 +158,8 @@ def test_start_vent_collector():
                 self.endpoints.state[s] = stuff[s]
 
             self.logger = None
+
+            self.sdnc = FaucetProxy()
 
         def return_endpoint_state(self):
             return self.endpoints

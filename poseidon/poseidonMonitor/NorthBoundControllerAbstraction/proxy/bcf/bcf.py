@@ -153,7 +153,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         if len(spanArray) == 0:
             module_logger.error("A span fabric with the configured combination of name: {0} and interface group: {1} could not be"
             " found on the designated controller".format(span_name, interface_group))
-            retval = None
+            retval = {}
         else :
             retval = spanArray[0]
         sout = 'get_span_fabric return:{0}'.format(retval)
@@ -356,31 +356,26 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         uri = urljoin(self.base_uri, resource)
         data = self.get_span_fabric()  # first element is vent span rule
         module_logger.debug('{0}'.format(data))
-        if data:
-            if mirror:
-                new_filter = {}
-                if s_dict is not None:
-                    # cant go having things with hyphens as variable names.. sooo..
-                    new_filter.update(s_dict)
-                else:
-                    new_filter.update(target_kwargs)
-                new_filter['seq'] = seq
-                # update?
-                # print(type(data))
-                # empty capture list
-                if 'filter' not in data:
-                    data['filter'] = []
-                data['filter'].append(new_filter)
-            else:  # mirror=False
-                data['filter'] = [filter for filter in data[
-                    'filter'] if filter['seq'] != seq]
-            r = self.request_resource(method='PUT', url=uri, data=json.dumps(data))
-            retval = BcfProxy.parse_json(r)
-            sout = 'mirror_traffic return:{0}'.format(retval)
-            module_logger.debug(sout)
-        else:
-            retval = None
-            module_logger.debug("Configured combination of span fabric and interface group"
-            " does not exist.  Traffic will not be mirrored")
+        if mirror:
+            new_filter = {}
+            if s_dict is not None:
+                # cant go having things with hyphens as variable names.. sooo..
+                new_filter.update(s_dict)
+            else:
+                new_filter.update(target_kwargs)
+            new_filter['seq'] = seq
+            # update?
+            # print(type(data))
+            # empty capture list
+            if 'filter' not in data:
+                data['filter'] = []
+            data['filter'].append(new_filter)
+        else:  # mirror=False
+            data['filter'] = [filter for filter in data[
+                'filter'] if filter['seq'] != seq]
+        r = self.request_resource(method='PUT', url=uri, data=json.dumps(data))
+        retval = BcfProxy.parse_json(r)
+        sout = 'mirror_traffic return:{0}'.format(retval)
+        module_logger.debug(sout)
 
         return retval
