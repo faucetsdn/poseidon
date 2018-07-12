@@ -153,7 +153,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         if len(spanArray) == 0:
             module_logger.error("A span fabric with the configured combination of name: {0} and interface group: {1} could not be"
             " found on the designated controller".format(span_name, interface_group))
-            retval = {}
+            retval = None
         else :
             retval = spanArray[0]
         sout = 'get_span_fabric return:{0}'.format(retval)
