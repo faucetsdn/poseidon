@@ -33,7 +33,7 @@ For more background on why we started this project and how it's evolved, please 
 
 ## Install
 
-If you'd like to skip ahead and just get a demo up and running without first setting up your own SDN controller, skip to [Installing](#installing) and choose `Demo` in the installation wizard.
+If you'd like to skip ahead and just get a demo up and running (about 30 minutes) without first setting up your own SDN controller, skip to [Installing](#installing) and choose `Demo` in the installation wizard.
 
 ### Prerequisites
 
@@ -41,6 +41,7 @@ If you'd like to skip ahead and just get a demo up and running without first set
 - [Docker](https://www.docker.com/) (Poseidon and related components run on top of Docker, so understanding the fundamentals will be useful for troubleshooting as well)
 - Make
 - An SDN Controller, specifically [BigSwitch Cloud Fabric](https://www.bigswitch.com/products/big-cloud-fabric) or [Faucet](https://faucet.nz/)
+- ~10Gb of free disk space
 - Debian Linux (if installing with the `DEB` which is the recommended install choice)
   - Currently supported versions are:
     - Ubuntu 14.04
