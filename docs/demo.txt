@@ -1,6 +1,3 @@
-
-
-
 ################
 # INSTRUCTIONS #
 ################
@@ -46,4 +43,3 @@ When you're done with the demo, you can use 'poseidon reset' (note: Faucet will 
 # These instructions can also be retrieved here:                              #
 # https://raw.githubusercontent.com/CyberReboot/poseidon/master/docs/demo.txt #
 ###############################################################################
-
