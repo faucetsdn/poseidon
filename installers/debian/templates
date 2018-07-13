@@ -1,8 +1,8 @@
 Template: poseidon/controller_type
 Type: select
-Choices: BigSwitch Cloud Fabric, Faucet
+Choices: BigSwitch Cloud Fabric, Faucet, Demo
 Description: Select which SDN controller to use:
- Poseidon currently works with either a Faucet controller or a BigSwitch Cloud Fabric controller.  Please choose which controller will be used in this environment.
+ Poseidon currently works with either a Faucet controller or a BigSwitch Cloud Fabric controller.  Please choose which controller will be used in this environment. Alternatively, you can choose Demo and it will setup Faucet, OVS, and Mininet to demonstrate Poseidon working with a virtual switch.
 
 Template: poseidon/bcf_controller_uri
 Type: string
@@ -27,7 +27,7 @@ Type: string
 Description: SSH username to connect to Faucet:
 
 Template: poseidon/faucet_controller_pass
-Type: string
+Type: password
 Description: SSH password to connect to Faucet:
 
 Template: poseidon/bcf_controller_user
@@ -41,75 +41,80 @@ Description: Password to connect to BigSwitch Cloud Fabric:
 Template: poseidon/collector_nic
 Type: select
 Choices: List available network interfaces, Specify your own
-Description: collector_nic
+Description: Pick how you want to specify the NIC for mirroring:
+ Poseidon needs to attach to a NIC that the SDN controller will be mirroring traffic to. This should be a port that will be connected to the switch that the controller is managing.
 
 Template: poseidon/available_nics
 Type: select
 Choices: ${choices}
-Description: pick a nic
+Description: Select an available NIC on this host that the SDN controller will be mirroring traffic to:
 
 Template: poseidon/specify_nic
 Type: string
-Description: Enter the name of the NIC on this host that the SDN controller will be mirroring traffic to.
+Description: Enter the name of the NIC on this host that the SDN controller will be mirroring traffic to:
 
 Template: poseidon/max_concurrent_reinvestigations
 Type: string
 Default: 2
-Description: max_concurrent_reinvestigations
+Description: Set the maximum number of endpoint investigations to run at the same time:
 
 Template: poseidon/faucet_controller_mirror_ports
 Type: string
-Description: controller_mirror_ports
+Description: Set the controller mirror ports:
+ Poseidonn needs to know which switches and ports on Faucet will be used for mirroring. Should be in the form of '{"switch-name":3}' where 3 is the interface number on switch-name that should be getting traffic mirrored to from the other ports.
 
 Template: poseidon/bcf_controller_span_fabric_name
 Type: string
 Default: vent
-Description: controller_span_fabric_name
+Description: Specify the name of the Span Fabric to use:
 
 Template: poseidon/bcf_controller_interface_group
 Type: string
 Default: ig1
-Description: controller_interface_group
+Description: Specify the name of the Interface Group to use:
 
 Template: poseidon/learn_public_addresses
 Type: select
 Choices: Yes, No
 Default: No
-Description: learn_public_addresses
+Description: Should Poseidon learn public address?
+ If Yes is selected, Poseidon will learn about public addresses, otherwise if No, it will only learn RFC 1918 addresses and ignore any public traffic.
 
 Template: poseidon/faucet_fa_rabbit_enabled
 Type: select
 Choices: Yes, No
 Default: Yes
-Description: fa_rabbit_enabled
+Description: Is Faucet using the RabbitMQ adapter?
+ If Yes, Poseidon will get events from RabbitMQ if Faucet is using the RabbitMQ adapter (recommended), otherwise if No it will parse the logs and not use RabbitMQ.
 
 Template: poseidon/faucet_fa_rabbit_host
 Type: string
 Default: RABBIT_SERVER
-Description: fa_rabbit_host
+Description: Set the RabbitMQ host IP address:
+ If unsure what this should be, leave it with the default RABBIT_SERVER and Poseidon will handle it.
 
 Template: poseidon/faucet_fa_rabbit_exchange
 Type: string
 Default: 'topic_recs'
-Description: fa_rabbit_exchange
+Description: Set the name of the RabbitMQ exchange:
 
 Template: poseidon/faucet_fa_rabbit_exchange_type
 Type: string
 Default: 'topic'
-Description: fa_rabbit_exchange_type
+Description: Set the RabbitMQ exchange type:
 
 Template: poseidon/faucet_fa_rabbit_routing_key
 Type: string
 Default: 'FAUCET.Event'
-Description: fa_rabbit_routing_key
+Description: Set the RabbitMQ routing key:
 
 Template: poseidon/faucet_fa_rabbit_port
 Type: string
 Default: 5672
-Description: fa_rabbit_port
+Description: Set the RabbitMQ port:
 
 Template: poseidon/logging_level
 Type: select
 Choices: INFO, DEBUG, WARNING, ERROR, CRITICAL
 Default: INFO
-Description: logging_level
+Description: Set the logging level:

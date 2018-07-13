@@ -1,6 +1,6 @@
 # v0.2.2 (2018-06-29)
 
- - Update version of pia, gevent, and pytest
+ - Update version of pika, gevent, and pytest
  - Progress on debian package installer and systemd unit
  - Improvements to Travis tests
  - Add healthcheck
