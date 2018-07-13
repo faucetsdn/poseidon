@@ -1,3 +1,15 @@
+# v0.3.0 (2018-07-13)
+
+ - Deployment now uses a .deb package
+ - Fixed the docs builder
+ - Fixed issues for missing Faucet files
+ - Fix missing keys in metadata for BCF
+ - Ensure configured span_fabric and interface_group options exist in BCF
+ - Update version of pytest, pyyaml, and prometheus_client
+ - Lock Python at 3.6 for gevent
+ - Cleaned up and removed old scripts, code, and docs
+ - Improved documentation in the README
+
 # v0.2.2 (2018-06-29)
 
  - Update version of pika, gevent, and pytest
