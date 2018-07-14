@@ -472,7 +472,7 @@ class Monitor(object):
         endpoint = endpoints.state.get(dev_hash, EndPoint(None))
 
         should_start = True
-        should_start = (type(self.uss.sdnc) is BcfProxy and self.uss.sdnc.get_span_fabric()) or (type(self.uss.sdnc) is not BcfProxy)
+        should_start = (isinstance(self.uss.sdnc, BcfProxy) and self.uss.sdnc.get_span_fabric()) or (type(self.uss.sdnc) is not BcfProxy)
 
         payload = {
             'nic': self.mod_configuration['collector_nic'],
