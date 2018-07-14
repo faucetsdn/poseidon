@@ -48,7 +48,6 @@ If you'd like to skip ahead and just get a demo up and running (about 30 minutes
     - Ubuntu 16.04
     - Ubuntu 17.10
     - Ubuntu 18.04
-    - Uubntu 18.10
 
 ### SDN Controller Configuration
 Before getting started, one of the two supported controllers (*BigSwitch Cloud Fabric* or *Faucet*) needs to running and accessible to where Poseidon will be deployed.
