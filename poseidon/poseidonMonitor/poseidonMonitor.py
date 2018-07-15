@@ -44,6 +44,8 @@ from poseidon.poseidonMonitor.Config.Config import config_interface
 from poseidon.poseidonMonitor.endPoint import EndPoint
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import \
     controller_interface
+from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.bcf import \
+    BcfProxy
 
 
 module_logger = Logger
@@ -469,6 +471,9 @@ class Monitor(object):
         endpoints = self.uss.return_endpoint_state()
         endpoint = endpoints.state.get(dev_hash, EndPoint(None))
 
+        should_start = True
+        should_start = (isinstance(self.uss.sdnc, BcfProxy) and self.uss.sdnc.get_span_fabric()) or ( not isinstance(self.uss.sdnc, BcfProxy))
+
         payload = {
             'nic': self.mod_configuration['collector_nic'],
             'id': dev_hash,
@@ -485,8 +490,12 @@ class Monitor(object):
         uri = 'http://' + vent_addr + '/create'
 
         try:
-            resp = requests.post(uri, data=json.dumps(payload))
-            self.logger.debug('collector response: ' + resp.text)
+            if should_start :
+                resp = requests.post(uri, data=json.dumps(payload))
+                self.logger.debug('collector response: ' + resp.text)
+            else:
+                self.logger.debug('collector not started due to invalid span fabric configuration.')
+
         except Exception as e:  # pragma: no cover
             self.logger.debug('failed to start vent collector' + str(e))
 

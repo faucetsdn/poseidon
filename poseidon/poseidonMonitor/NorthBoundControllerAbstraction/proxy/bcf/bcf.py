@@ -356,7 +356,6 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         uri = urljoin(self.base_uri, resource)
         data = self.get_span_fabric()  # first element is vent span rule
         module_logger.debug('{0}'.format(data))
-
         if mirror:
             new_filter = {}
             if s_dict is not None:
@@ -378,4 +377,5 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         retval = BcfProxy.parse_json(r)
         sout = 'mirror_traffic return:{0}'.format(retval)
         module_logger.debug(sout)
+
         return retval
