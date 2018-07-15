@@ -79,7 +79,7 @@ def test_signal_handler():
             'job3 cancelled'] == mock_monitor.schedule.call_log
     assert True == mock_monitor.rabbit_channel_connection_local.connection_closed
 
-def test_start_vent_collector():
+def test_start_vent_collector_faucet():
 
     class MockLogger:
         def __init__(self):
@@ -101,6 +101,14 @@ def test_start_vent_collector():
             assert a is None
             assert mock_response.text == "success"
             return mock_response
+
+    class FaucetProxy():
+
+        def __init__(self):
+            pass
+
+        def get_span_fabric(uri, json, data):
+            pass
 
     poseidonMonitor.CTRL_C['STOP'] = False
     poseidonMonitor.requests = requests()
@@ -154,6 +162,224 @@ def test_start_vent_collector():
                 self.endpoints.state[s] = stuff[s]
 
             self.logger = None
+
+            self.sdnc = FaucetProxy()
+
+        def return_endpoint_state(self):
+            return self.endpoints
+
+    class MockMonitor(Monitor):
+
+        def __init__(self):
+
+            self.mod_configuration = dict({
+                'collector_interval': 900,
+                'collector_nic': 2,
+                'vent_ip': '0.0.0.0',
+                'vent_port': '8080',
+            })
+
+            self.uss = Mock_Update_Switch_State()
+
+    mock_monitor = MockMonitor()
+    mock_monitor.logger = MockLogger()
+    dev_hash = 'test'
+    num_cuptures = 3
+    mock_monitor.start_vent_collector(dev_hash, num_cuptures)
+
+def test_start_vent_collector_bcf():
+
+    class MockLogger:
+        def __init__(self):
+            pass
+
+        def debug(self, msg):
+            pass
+
+    class requests():
+
+        def __init__(self):
+            pass
+
+        def post(uri, json, data):
+            def mock_response(): return None
+            mock_response.text = "success"
+            # cover object
+            a = mock_response()
+            assert a is None
+            assert mock_response.text == "success"
+            return mock_response
+
+    class BCFProxy():
+
+        def __init__(self):
+            pass
+
+        def get_span_fabric(uri, json, data):
+            return { 'item': 'test' }
+
+    poseidonMonitor.CTRL_C['STOP'] = False
+    poseidonMonitor.requests = requests()
+
+    class Mock_Update_Switch_State():
+
+        def __init__(self):
+            stuff = dict(
+                {
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': EndPoint({
+                        'ip-address': '10.00.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FLOORPLATE',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='NONE'),
+
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='REINVESTIGATING', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='REINVESTIGATING', next_state='NONE')
+                })
+
+            self.endpoints = Endpoint_Wrapper()
+
+            for s in stuff:
+                self.endpoints.state[s] = stuff[s]
+
+            self.logger = None
+
+            self.sdnc = BCFProxy()
+
+        def return_endpoint_state(self):
+            return self.endpoints
+
+    class MockMonitor(Monitor):
+
+        def __init__(self):
+
+            self.mod_configuration = dict({
+                'collector_interval': 900,
+                'collector_nic': 2,
+                'vent_ip': '0.0.0.0',
+                'vent_port': '8080',
+            })
+
+            self.uss = Mock_Update_Switch_State()
+
+    mock_monitor = MockMonitor()
+    mock_monitor.logger = MockLogger()
+    dev_hash = 'test'
+    num_cuptures = 3
+    mock_monitor.start_vent_collector(dev_hash, num_cuptures)
+
+def test_not_start_vent_collector_bcf():
+
+    class MockLogger:
+        def __init__(self):
+            pass
+
+        def debug(self, msg):
+            pass
+
+    class requests():
+
+        def __init__(self):
+            pass
+
+        def post(uri, json, data):
+            def mock_response(): return None
+            mock_response.text = "success"
+            # cover object
+            a = mock_response()
+            assert a is None
+            assert mock_response.text == "success"
+            return mock_response
+
+    class BCFProxy():
+
+        def __init__(self):
+            pass
+
+        def get_span_fabric(uri, json, data):
+            return {}
+
+    poseidonMonitor.CTRL_C['STOP'] = False
+    poseidonMonitor.requests = requests()
+
+    class Mock_Update_Switch_State():
+
+        def __init__(self):
+            stuff = dict(
+                {
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': EndPoint({
+                        'ip-address': '10.00.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FLOORPLATE',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='NONE'),
+
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='REINVESTIGATING', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='REINVESTIGATING', next_state='NONE')
+                })
+
+            self.endpoints = Endpoint_Wrapper()
+
+            for s in stuff:
+                self.endpoints.state[s] = stuff[s]
+
+            self.logger = None
+
+            self.sdnc = BCFProxy()
 
         def return_endpoint_state(self):
             return self.endpoints
