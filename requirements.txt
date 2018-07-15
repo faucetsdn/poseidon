@@ -3,7 +3,7 @@ httmock==1.2.6
 mock==2.0.0
 pika==0.12.0
 prometheus_client==0.3.0
-pylint==1.9.2
+pylint==2.0.0
 pytest-cov==2.5.1
 pytest==3.6.3
 pyyaml==3.13
