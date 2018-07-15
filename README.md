@@ -104,7 +104,7 @@ Faucet is now configured and ready for use with Poseidon.
 
 ### Installing
 
-On Ubuntu, this will download and install our `.deb` package from Cloudsmith.
+On Ubuntu, this will download and install our `.deb` package from [Cloudsmith](https://cloudsmith.io/package/ns/cyberreboot/repos/poseidon/packages/).
 ```
 sudo usermod -aG docker $USER
 sudo apt-get install -y apt-transport-https curl
