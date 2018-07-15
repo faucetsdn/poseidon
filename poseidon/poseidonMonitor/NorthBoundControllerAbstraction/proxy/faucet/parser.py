@@ -25,9 +25,6 @@ from poseidon.baseClasses.Logger_Base import Logger
 module_logger = Logger.logger
 
 
-def representer(dumper, data):
-    return dumper.represent_int(hex(data))
-
 def represent_none(dumper, _):
     return dumper.represent_scalar('tag:yaml.org,2002:null', '')
 
