@@ -1750,6 +1750,9 @@ def test_process():
                 'vent_port': '8080'
             }
 
+        def print_endpoint_state(self):
+            return ""
+
         def makedata(self):
             stuff = dict(
                 {
@@ -1839,6 +1842,18 @@ def test_process():
             self.endpoints = MockEndpoint()
             self.endpoints.makedata()
 
+        def mirror_endpoint(self, endpoint_hash):
+            return None
+
+        def unmirror_endpoint(self, endpoint_hash):
+            return None
+
+        def shutdown_endpoint(self, endpoint_hash):
+            return None
+
+        def change_endpoint_state(self, endpoint_hash):
+            return None
+
         def return_endpoint_state(self):
             return self.endpoints
 
@@ -1862,6 +1877,12 @@ def test_process():
 
         def format_rabbit_message(self, item):
             return {}
+
+        def start_vent_collector(self, endpoint_hash):
+            return None
+
+        def host_has_active_collect(self, endpoint_hash):
+            return False
 
     mock_monitor = MockMonitor()
     mock_monitor.uss = MockUss()
