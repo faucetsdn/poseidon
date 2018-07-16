@@ -1842,13 +1842,13 @@ def test_process():
             self.endpoints = MockEndpoint()
             self.endpoints.makedata()
 
-        def mirror_endpoint(self, endpoint_hash):
+        def mirror_endpoint(self, endpoint_hash, messages=None):
             return None
 
-        def unmirror_endpoint(self, endpoint_hash):
+        def unmirror_endpoint(self, endpoint_hash, messages=None):
             return None
 
-        def shutdown_endpoint(self, endpoint_hash):
+        def shutdown_endpoint(self, endpoint_hash, messages=None):
             return None
 
         def change_endpoint_state(self, endpoint_hash):
@@ -1881,7 +1881,7 @@ def test_process():
         def start_vent_collector(self, endpoint_hash):
             return None
 
-        def host_has_active_collect(self, endpoint_hash):
+        def host_has_active_collectors(self, endpoint_hash):
             return False
 
     mock_monitor = MockMonitor()
