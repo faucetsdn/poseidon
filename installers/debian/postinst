@@ -86,7 +86,7 @@ if db_go; then
             echo "controller_type=bcf" >> /etc/poseidon/default.conf
             db_get poseidon/bcf_controller_uri
             if [[ ! -z "$RET" ]]; then
-                echo "controller_uri=https://$RET:8443/api/v1/" >> /etc/poseidon/default.conf
+                echo "controller_uri=https://$RET/api/v1/" >> /etc/poseidon/default.conf
             else
                 echo >&2 -e "${red}You need to specify the IP or hostname of the BigSwitch Cloud Fabric controller.${endColor}"
                 db_unregister poseidon/bcf_controller_uri
