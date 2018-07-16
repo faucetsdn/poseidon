@@ -49,6 +49,8 @@ If you'd like to skip ahead and just get a demo up and running (about 30 minutes
     - Ubuntu 17.10
     - Ubuntu 18.04
 
+> Note: Installation on `OS X` is possible but not supported, see `./helpers/run` as a starting point.
+
 ### SDN Controller Configuration
 Before getting started, one of the two supported controllers (*BigSwitch Cloud Fabric* or *Faucet*) needs to running and accessible to where Poseidon will be deployed.
 
