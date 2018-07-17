@@ -180,7 +180,7 @@ def schedule_job_kickurl(func, logger):
                                                      os=host['os'],
                                                      hash_id=host['hash'],
                                                      record_source=host['record_source']).set(ip2int(host['ip']))
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.error('unable to send {0} results to prometheus because {1}'.format(host, str(e)))
 
     try:
@@ -205,7 +205,7 @@ def schedule_job_kickurl(func, logger):
             func.prom_metrics['port_hosts'].labels(port=port_host).set(metrics['port_hosts'][port_host])
         func.prom_metrics['inactive'].set(metrics['inactives'])
         func.prom_metrics['active'].set(metrics['actives'])
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         logger.error('unable to send results to prometheus because {0}'.format(str(e)))
 
 
@@ -358,8 +358,8 @@ class Monitor(object):
                 self.mod_configuration['FA_RABBIT_EXCHANGE_TYPE'])
             self.fa_rabbit_routing_key = str(
                 self.mod_configuration['FA_RABBIT_ROUTING_KEY'])
-        except:
-            pass
+        except Exception as e:  # pragma: no cover
+            self.logger.debug("unable to see Faucet Rabbit configuration because: " + str(e))
 
         self.schedule.every(scan_frequency).seconds.do(
             partial(schedule_job_kickurl, func=self, logger=self.logger))
@@ -490,7 +490,7 @@ class Monitor(object):
         uri = 'http://' + vent_addr + '/create'
 
         try:
-            if should_start :
+            if should_start:
                 resp = requests.post(uri, data=json.dumps(payload))
                 self.logger.debug('collector response: ' + resp.text)
             else:
@@ -501,7 +501,6 @@ class Monitor(object):
 
     ## returns a dictionary of existing collectors keyed on dev_hash
     def get_vent_collectors(self):
-
         vent_addr = self.mod_configuration['vent_ip'] + \
             ':' + self.mod_configuration['vent_port']
         uri = 'http://' + vent_addr + '/list'
@@ -530,9 +529,9 @@ class Monitor(object):
 
         collectors = self.get_vent_collectors()
 
-        if dev_hash in collectors :
+        if dev_hash in collectors:
             hash_coll = collectors[dev_hash]
-        else :
+        else:
             self.logger.info(
                 'Key: {0} not found in collector dictionary. '
                 'Treating this as the existence of multiple active'
@@ -673,7 +672,7 @@ class Monitor(object):
                         self.uss.shutdown_endpoint(endpoint_hash)
 
                     eps.print_endpoint_state()
-            except Exception as e:
+            except Exception as e:  # pragma: no cover
                 self.logger.debug("iteration failed because: {0}".format(str(e)))
 
     def get_q_item(self):
