@@ -18,20 +18,22 @@
 Test module for poseidonMonitor.py
 
 Created on 28 June 2016
-@author: dgrossman, MShel
+@author: cglewis, dgrossman, MShel
 """
 
 import json
+
+from prometheus_client import Gauge
 
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor import poseidonMonitor
 from poseidon.poseidonMonitor.endPoint import EndPoint
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.EndpointWrapper import Endpoint_Wrapper
-
 from poseidon.poseidonMonitor.poseidonMonitor import (CTRL_C, Monitor,
                                                       Collector,
                                                       schedule_job_kickurl,
                                                       schedule_thread_worker)
+
 
 
 def test_signal_handler():
@@ -540,7 +542,7 @@ def test_get_vent_collectors():
                         "behavior": 0, \
                         "hash": "b8d31352453a65036b4343f34c2a93f5d5442b70", \
                         "state": "KNOWN", \
-                        "active": 1 \
+                        "active": 0 \
                       }, \
                       { \
                         "ip": "10.176.143.1", \
@@ -551,7 +553,7 @@ def test_get_vent_collectors():
                         "record_source": "Poseidon", \
                         "role": "Unknown", \
                         "os": "Unknown", \
-                        "behavior": 0, \
+                        "behavior": 1, \
                         "hash": "bc3e82c8672ab19e5c3959d8135b873297209ff4", \
                         "state": "KNOWN", \
                         "active": 1 \
@@ -720,7 +722,7 @@ def test_host_has_active_collectors_false():
                         "behavior": 0, \
                         "hash": "b8d31352453a65036b4343f34c2a93f5d5442b70", \
                         "state": "KNOWN", \
-                        "active": 1 \
+                        "active": 0 \
                       }, \
                       { \
                         "ip": "10.176.143.1", \
@@ -731,7 +733,7 @@ def test_host_has_active_collectors_false():
                         "record_source": "Poseidon", \
                         "role": "Unknown", \
                         "os": "Unknown", \
-                        "behavior": 0, \
+                        "behavior": 1, \
                         "hash": "bc3e82c8672ab19e5c3959d8135b873297209ff4", \
                         "state": "KNOWN", \
                         "active": 1 \
@@ -902,7 +904,7 @@ def test_host_has_active_collectors_true():
                         "behavior": 0, \
                         "hash": "b8d31352453a65036b4343f34c2a93f5d5442b70", \
                         "state": "KNOWN", \
-                        "active": 1 \
+                        "active": 0 \
                       }, \
                       { \
                         "ip": "10.176.143.1", \
@@ -913,7 +915,7 @@ def test_host_has_active_collectors_true():
                         "record_source": "Poseidon", \
                         "role": "Unknown", \
                         "os": "Unknown", \
-                        "behavior": 0, \
+                        "behavior": 1, \
                         "hash": "bc3e82c8672ab19e5c3959d8135b873297209ff4", \
                         "state": "KNOWN", \
                         "active": 1 \
@@ -1711,6 +1713,56 @@ def test_schedule_job_kickurl():
         def __init__(self):
             self.faucet_event = []
             self.prom_metrics = {}
+            self.prom_metrics['inactive'] = Gauge('poseidon_endpoint_inactive',
+                                                  'Number of endpoints that are inactive')
+            self.prom_metrics['active'] = Gauge('poseidon_endpoint_active',
+                                                'Number of endpoints that are active')
+            self.prom_metrics['behavior'] = Gauge('poseidon_endpoint_behavior',
+                                                  'Behavior of an endpoint, 0 is normal, 1 is abnormal',
+                                                  ['ip',
+                                                   'mac',
+                                                   'tenant',
+                                                   'segment',
+                                                   'port',
+                                                   'role',
+                                                   'os',
+                                                   'record_source'])
+            self.prom_metrics['ip_table'] = Gauge('poseidon_endpoint_ip_table',
+                                                  'IP Table',
+                                                  ['mac',
+                                                   'tenant',
+                                                   'segment',
+                                                   'port',
+                                                   'role',
+                                                   'os',
+                                                   'hash_id',
+                                                   'record_source'])
+            self.prom_metrics['roles'] = Gauge('poseidon_endpoint_roles',
+                                               'Number of endpoints by role',
+                                               ['record_source',
+                                                'role'])
+            self.prom_metrics['oses'] = Gauge('poseidon_endpoint_oses',
+                                              'Number of endpoints by OS',
+                                              ['record_source',
+                                               'os'])
+            self.prom_metrics['current_states'] = Gauge('poseidon_endpoint_current_states',
+                                                        'Number of endpoints by current state',
+                                                        ['record_source',
+                                                         'current_state'])
+            self.prom_metrics['vlans'] = Gauge('poseidon_endpoint_vlans',
+                                               'Number of endpoints by VLAN',
+                                               ['record_source',
+                                                'tenant'])
+            self.prom_metrics['record_sources'] = Gauge('poseidon_endpoint_record_sources',
+                                                        'Number of endpoints by record source',
+                                                        ['record_source'])
+            self.prom_metrics['port_tenants'] = Gauge('poseidon_endpoint_port_tenants',
+                                                      'Number of tenants by port',
+                                                      ['port',
+                                                       'tenant'])
+            self.prom_metrics['port_hosts'] = Gauge('poseidon_endpoint_port_hosts',
+                                                    'Number of hosts by port',
+                                                    ['port'])
             self.NorthBoundControllerAbstraction = MockNorthBoundControllerAbstraction()
 
     schedule_job_kickurl(func(), MockLogger())
@@ -1769,6 +1821,7 @@ def test_process():
                      'mac': 'f8:b1:56:fe:f2:de',
                      'segment': 'prod',
                      'tenant': 'FOO',
+                     'active': 1,
                      'name': None},
                      prev_state='NONE', state='UNKNOWN', next_state='MIRRORING'),
                  '4ee39d254db3e4a5264b75ce8ae312d69f9e73a5': EndPoint({
@@ -1776,6 +1829,7 @@ def test_process():
                      'mac': 'f8:b1:56:fe:f2:de',
                      'segment': 'prod',
                      'tenant': 'FOO',
+                     'active': 0,
                      'name': None},
                      prev_state='NONE', state='UNKNOWN', next_state='NONE'),
                  '4ee39d254db3e4a5264b75ce8ae312d69f9e73a6': EndPoint({
@@ -1783,6 +1837,7 @@ def test_process():
                      'mac': 'f8:b1:56:fe:f2:de',
                      'segment': 'prod',
                      'tenant': 'FOO',
+                     'active': 1,
                      'name': None},
                      prev_state='NONE', state='MIRRORING', next_state='KNOWN'),
                  '4ee39d254db3e4a5264b75ce8ae312d69f9e73a7': EndPoint({
@@ -1790,6 +1845,7 @@ def test_process():
                      'mac': 'f8:b1:56:fe:f2:de',
                      'segment': 'prod',
                      'tenant': 'FOO',
+                     'active': 1,
                      'name': None},
                      prev_state='NONE', state='KNOWN', next_state='REINVESTIGATING'),
                  '4ee39d254db3e4a5264b75ce8ae312d69f9e73a8': EndPoint({
@@ -1797,6 +1853,7 @@ def test_process():
                      'mac': 'f8:b1:56:fe:f2:de',
                      'segment': 'prod',
                      'tenant': 'FOO',
+                     'active': 1,
                      'name': None},
                      prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
                  'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
@@ -1914,6 +1971,7 @@ def test_process():
                     'mac': 'f8:b1:56:fe:f2:de',
                     'segment': 'prod',
                     'tenant': 'FOO',
+                    'active': 1,
                     'name': None}},
             '4ee39d254db3e4a5264b75ce8ae312d69f9e73a5': {
                 'state': 'UNKNOWN',
@@ -1923,6 +1981,7 @@ def test_process():
                     'mac': 'f8:b1:56:fe:f2:de',
                     'segment': 'prod',
                     'tenant': 'FOO',
+                    'active': 0,
                     'name': None}},
             '4ee39d254db3e4a5264b75ce8ae312d69f9e73a6': {
                 'state': 'KNOWN',
@@ -1932,6 +1991,7 @@ def test_process():
                     'mac': 'f8:b1:56:fe:f2:de',
                     'segment': 'prod',
                     'tenant': 'FOO',
+                    'active': 1,
                     'name': None}},
             '4ee39d254db3e4a5264b75ce8ae312d69f9e73a7': {
                 'state': 'KNOWN',
@@ -1941,6 +2001,7 @@ def test_process():
                     'mac': 'f8:b1:56:fe:f2:de',
                     'segment': 'prod',
                     'tenant': 'FOO',
+                    'active': 1,
                     'name': None}},
             '4ee39d254db3e4a5264b75ce8ae312d69f9e73a8': {
                 'state': 'UNKNOWN',
@@ -1950,6 +2011,7 @@ def test_process():
                     'mac': 'f8:b1:56:fe:f2:de',
                     'segment': 'prod',
                     'tenant': 'FOO',
+                    'active': 1,
                     'name': None}},
             'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {
                 'state': 'KNOWN',
