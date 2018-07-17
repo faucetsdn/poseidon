@@ -12,6 +12,7 @@ run_docs: build_docs
 	docker run --rm -it -p 8080 $(TAG)-docs
 
 run_tests: build_poseidon
+	docker kill $(TAG)-redis || true
 	docker build -f ./Dockerfile.test -t $(TAG)-test .
 	docker run --rm -d --name $(TAG)-redis redis:latest
 	docker run --rm --link $(TAG)-redis:redis -it $(TAG)-test
