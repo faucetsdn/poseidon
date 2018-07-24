@@ -137,6 +137,7 @@ class Endpoint_Wrapper():
         states = [('K', 'KNOWN'), ('U', 'UNKNOWN'), ('M', 'MIRRORING'),
                   ('S', 'SHUTDOWN'), ('R', 'REINVESTIGATING')]
 
+        self.logger.info('Running Forked Poseidon from https://github.com/scottkelso/poseidon')
         self.logger.info('====START')
         for l, s in states:
             same_old(self.logger, s, l, self.state)
