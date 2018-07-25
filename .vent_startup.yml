@@ -28,7 +28,7 @@ https://github.com/cyberreboot/vent:
     syslog:
         build: yes
         start: yes
-https://github.com/scottkelso/poseidon:
+https://github.com/cyberreboot/poseidon:
     '@':
         build: yes
         start: yes
@@ -46,7 +46,7 @@ https://github.com/cyberreboot/crviz:
     '@':
         build: yes
         start: yes
-https://github.com/scottkelso/poseidonml:
+https://github.com/cyberreboot/poseidonml:
     onelayer:
         build: yes
 vent.cfg:
