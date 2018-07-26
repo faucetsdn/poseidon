@@ -46,7 +46,6 @@ from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.NorthBoundControll
     controller_interface
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.bcf import \
     BcfProxy
-from poseidon.poseidonMonitor.Config import Rule_Ops
 
 
 module_logger = Logger
@@ -586,31 +585,10 @@ class Monitor(object):
         }
         '''
 
-        deviceList = []
-
         global CTRL_C
         signal.signal(signal.SIGINT, partial(self.signal_handler))
         while not CTRL_C['STOP']:
             try:
-
-                deviceDir = Path("/tmp/poseidon/deviceList.txt")
-                # Check if deviceList has been created yet
-                if deviceDir.is_file():
-                    self.logger.info('deviceList found')
-                    # Read deviceList
-                    text_file = open("/tmp/poseidon/deviceList.txt", "r")
-                    newDeviceList = text_file.read().split(',')
-
-                    # Check deviceList for new entries
-                    if deviceList != newDeviceList:
-                        self.logger.info('deviceList isnt empty')
-                        deviceList = newDeviceList
-
-                        # Write rules according to deviceList
-                        ruleConfig = Rule_Ops(deviceList)
-                        ruleConfig.writeRules()
-                        self.logger.info('Rules written')
-
                 self.logger.debug('***************CTRL_C:{0}'.format(CTRL_C))
                 time.sleep(1)
                 self.logger.debug('woke from sleeping')
