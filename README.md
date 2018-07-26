@@ -125,6 +125,9 @@ poseidon help
 
 Results of Poseidon are printed out in the logs.
 
+## Developing
+If installed as described above, poseidon's codebase will be at `/opt/poseidon`.  At this location, a `.vent_startup.yml` file can be edited to point to a fork of the original repository.  Develop and commit changes on the poseidon fork and use `poseidon -r` to reload and see your changes.
+
 ## Related Components
 
 - [CRviz](https://github.com/CyberReboot/CRviz)
