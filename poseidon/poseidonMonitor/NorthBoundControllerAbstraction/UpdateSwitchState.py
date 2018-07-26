@@ -108,8 +108,11 @@ class Update_Switch_State(Monitor_Helper_Base):
                         self.controller['LEARN_PUBLIC_ADDRESSES'] = ast.literal_eval(
                             self.mod_configuration['learn_public_addresses'])
                     if 'controller_uri' in self.mod_configuration:
-                        self.controller['URI'] = str(
-                            self.mod_configuration['controller_uri'])
+                        if self.mod_configuration['controller_uri']:
+                            self.controller['URI'] = str(
+                                self.mod_configuration['controller_uri'])
+                        else:
+                            self.controller['URI'] = ''
                     else:
                         self.controller['URI'] = ''
                     if 'controller_user' in self.mod_configuration:
