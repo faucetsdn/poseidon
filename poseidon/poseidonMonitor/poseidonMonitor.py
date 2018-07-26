@@ -589,7 +589,6 @@ class Monitor(object):
         signal.signal(signal.SIGINT, partial(self.signal_handler))
         while not CTRL_C['STOP']:
             try:
-                self.logger.info('Running Forked Poseidon from https://github.com/scottkelso/poseidon')
                 self.logger.debug('***************CTRL_C:{0}'.format(CTRL_C))
                 time.sleep(1)
                 self.logger.debug('woke from sleeping')
