@@ -9,7 +9,7 @@ red='\e[0;31m'
 endColor='\e[0m'
 failed=false
 if db_go; then
-    echo "# Generated from debconf - do not edit by hand, to change configuration options run: poseidon configure" > /etc/poseidon/default.conf
+    echo "# Generated from debconf - do not edit by hand, to change configuration options run: poseidon reconfig" > /etc/poseidon/default.conf
     { echo "#"; echo "#"; echo ""; } >> /etc/poseidon/default.conf
 
     # read from db to set variables in default.conf
