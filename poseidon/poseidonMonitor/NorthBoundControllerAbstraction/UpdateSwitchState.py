@@ -105,16 +105,13 @@ class Update_Switch_State(Monitor_Helper_Base):
             elif self.controller['TYPE'] == 'faucet':
                 try:
                     if 'learn_public_addresses' in self.mod_configuration:
-                        self.controller['LEARN_PUBLIC_ADDRESSES'] = ast.literal_eval(
-                            self.mod_configuration['learn_public_addresses'])
-                    if 'controller_uri' in self.mod_configuration:
-                        if self.mod_configuration['controller_uri']:
-                            self.controller['URI'] = str(
-                                self.mod_configuration['controller_uri'])
+                        if self.mod_configuration['learn_public_addresses'] == 'Yes' or self.mod_configuration['learn_public_addresses']) == 'True':
+                            self.controller['LEARN_PUBLIC_ADDRESSES'] = True
                         else:
-                            self.controller['URI'] = ''
-                    else:
-                        self.controller['URI'] = ''
+                            self.controller['LEARN_PUBLIC_ADDRESSES'] = False
+                    if 'controller_uri' in self.mod_configuration:
+                        self.controller['URI'] = str(
+                            self.mod_configuration['controller_uri'])
                     if 'controller_user' in self.mod_configuration:
                         self.controller['USER'] = str(
                             self.mod_configuration['controller_user'])
