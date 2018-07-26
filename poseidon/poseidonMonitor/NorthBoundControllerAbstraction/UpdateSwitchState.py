@@ -110,6 +110,8 @@ class Update_Switch_State(Monitor_Helper_Base):
                     if 'controller_uri' in self.mod_configuration:
                         self.controller['URI'] = str(
                             self.mod_configuration['controller_uri'])
+                    else:
+                        self.controller['URI'] = ''
                     if 'controller_user' in self.mod_configuration:
                         self.controller['USER'] = str(
                             self.mod_configuration['controller_user'])
