@@ -105,7 +105,7 @@ class Update_Switch_State(Monitor_Helper_Base):
             elif self.controller['TYPE'] == 'faucet':
                 try:
                     if 'learn_public_addresses' in self.mod_configuration:
-                        if self.mod_configuration['learn_public_addresses'] == 'Yes' or self.mod_configuration['learn_public_addresses']) == 'True':
+                        if self.mod_configuration['learn_public_addresses'] == 'Yes':
                             self.controller['LEARN_PUBLIC_ADDRESSES'] = True
                         else:
                             self.controller['LEARN_PUBLIC_ADDRESSES'] = False
