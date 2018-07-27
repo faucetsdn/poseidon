@@ -100,7 +100,7 @@ BCF is now configured and ready for use with Poseidon.
 <img src="/docs/img/faucet.png" width="190" height="100">
 Poseidon requires at least Faucet version 1.8.6 or higher.
 
-Unless Poseidon and Faucet are running on the same host, Poseidon will connect to Faucet using SSH.  So you'll need to create an account that can SSH to the machine running Faucet and that has rights to modify the configuration file `faucet.yaml` (currently Poseidon expects it to be in the default `/etc/faucet/faucet.yaml` location and `dps` must all be defined in 'faucet.yaml' for Poseidon to update the network posture correctly).
+Unless Poseidon and Faucet are running on the same host, Poseidon will connect to Faucet using SSH.  So you'll need to create an account that can SSH to the machine running Faucet and that has rights to modify the configuration file `faucet.yaml` (currently Poseidon expects it to be in the default `/etc/faucet/faucet.yaml` location and `dps` must all be defined in `faucet.yaml` for Poseidon to update the network posture correctly).
 
 Faucet needs to be started with the following environment variables set:
 ```
@@ -118,7 +118,7 @@ NEW: If you have used the .DEB installer Poseidon is now packaged as a standard 
 
 After installation you'll have a new command `poseidon` available for looking at the status, logs, changing the configuration, or stopping and starting the service.
 ```
-neo@Poseidon01:~# poseidon help
+$ poseidon help
 Poseidon 0.3.0, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of machine learning techniques. For more info visit: https://github.com/CyberReboot/poseidon
 
 Usage: poseidon [option]
@@ -141,7 +141,7 @@ Poseidon makes heavy use of a sister project, [vent](https://vent.readthedocs.io
 
 1. The following 14 containers with a "(healthy)" STATUS listed (NOTE: this is truncated output):
 ```
-neo@Poseidon01:~# docker ps
+# docker ps
 CONTAINER ID        IMAGE                                  COMMAND                  STATUS                  
 8c07adf421fb        cyberreboot/poseidon:master            "/bin/sh -c '(flask …"   Up 2 hours (healthy) 
 0a4f947f299b        cyberreboot/vent-file-drop:master      "/bin/sh -c '(flask …"   Up 2 hours (healthy) 
@@ -172,11 +172,11 @@ c0652a6ccd44        influxdb:1.6-alpine                    "/entrypoint.sh infl�
 
 2. You should see "Poseidon successfully started, capturing logs..." in your syslog output:
 ```
-neo@Poseidon01:/opt/poseidon/docs# journalctl -u poseidon | grep capturing
-Jul 25 15:42:20 greg-Poseidon01 poseidon[4273]: Poseidon successfully started, capturing logs...
+# journalctl -u poseidon | grep capturing
+Jul 25 15:42:20 PoseidonHost poseidon[4273]: Poseidon successfully started, capturing logs...
 ```
 
-To continue to test (assuming demo installation), please see '/opt/poseidon/docs/demo.txt'
+To continue to test (assuming demo installation), please see `/opt/poseidon/docs/demo.txt`
 
 
 ## Developing
