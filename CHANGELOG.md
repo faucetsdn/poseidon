@@ -1,3 +1,15 @@
+# v0.3.1 (2018-07-27)
+
+ - If span fabric or interface group doesn't exist, don't mirror
+ - Updated version of pylint and gevent
+ - Improved test coverage
+ - Fixed URI for BCF in installer
+ - Improved `poseidon start` when forking poseidon
+ - Clarity around reconfig rather than configure
+ - Fixed learn_public_addresses being set to the wrong type
+ - Logged errors with Faucet Connections
+ - Improved README
+
 # v0.3.0 (2018-07-13)
 
  - Deployment now uses a .deb package
