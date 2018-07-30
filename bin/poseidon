@@ -80,13 +80,13 @@ function check_args()
                     docker run -dit --rm -v /var/run/docker.sock:/var/run/docker.sock -v /opt/vent_files:/opt/vent_files -v /opt/poseidon/.plugin_config.yml:/root/.plugin_config.yml -v /opt/poseidon/.vent_startup.yml:/root/.vent_startup.yml --env-file /etc/poseidon/default.conf --name vent cyberreboot/vent
                     until [ "$(docker ps -q -f name=-poseidon-)" ] && [ "$(docker ps -q -f name=-poseidon- | head -1 | xargs docker container inspect -f \{\{.State.Health.Status\}\})" = "healthy" ]
                     do
-                        # TODO do more check and be verbose in here
+                        # TODO do more checks and be verbose in here
                         count=$(docker ps -q --filter "label=vent" | wc -l)
                         echo "Waiting for Poseidon containers to become healthy...$count/13"
                         sleep 15
                     done
                     echo "Poseidon successfully started, capturing logs..."
-                    docker logs -f cyberreboot-vent-syslog-master  | awk '{$1=$2=""; print $0}'
+                    docker logs -f cyberreboot-vent-syslog-master | awk '{$1=$2=""; print $0}' | sed -e 's/^[ \t]*//'
                 else
                     sudo systemctl start poseidon
                     poseidon info
