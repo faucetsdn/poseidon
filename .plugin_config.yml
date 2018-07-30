@@ -1,7 +1,6 @@
 poseidon:
     Monitor:
         config: True
-        logging_file: logging.json
         logger_level: INFO
         reinvestigation_frequency: 900
         max_concurrent_reinvestigations: 2

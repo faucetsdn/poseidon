@@ -40,7 +40,7 @@ class Logger:
     logger.propagate = False
 
     # timestamp - logger_level - class:line number - message
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - '
+    formatter = logging.Formatter('%(levelname)s - '
                                   '%(module)s:%(lineno)-3d - %(message)s')
 
     # set the logger to log to stderr
