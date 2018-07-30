@@ -86,7 +86,7 @@ function check_args()
                         sleep 15
                     done
                     echo "Poseidon successfully started, capturing logs..."
-                    docker logs -f cyberreboot-vent-syslog-master
+                    docker logs -f cyberreboot-vent-syslog-master  | awk '{$1=$2=""; print $0}'
                 else
                     sudo systemctl start poseidon
                     poseidon info
