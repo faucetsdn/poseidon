@@ -101,7 +101,7 @@ class Connection:
                     pass
                 scp.close()
             except Exception as e:  # pragma: no cover
-                pass
+                self.logger.error("failed to receive file {0} because: {1}".format(f_type, e))
             self._disconnect()
 
     def send_file(self, f_type):
@@ -121,7 +121,7 @@ class Connection:
                     pass
                 scp.close()
             except Exception as e:  # pragma: no cover
-                pass
+                self.logger.error("failed to send file {0} because: {1}".format(f_type, e))
             self._disconnect()
 
     def event_listener(self):
