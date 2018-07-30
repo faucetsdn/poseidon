@@ -25,7 +25,6 @@ COPY . /tmp/poseidonWork
 WORKDIR /tmp/poseidonWork
 ENV PYTHONPATH /tmp/poseidonWork/poseidon:$PYTHONPATH
 ENV POSEIDON_CONFIG /tmp/poseidonWork/config/poseidon.config
-ENV POSEIDON_LOGGER /tmp/poseidonWork/logging.json
 
 # install dependencies of poseidon modules for poseidon
 RUN find . -name requirements.txt -type f -exec pip3 install -r {} \;

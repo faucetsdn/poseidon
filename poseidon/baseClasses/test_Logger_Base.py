@@ -21,27 +21,13 @@ Created on 25 Oct 2017
 @author: dgrossman
 """
 
-import json
-from os import getenv
-
 from poseidon.baseClasses.Logger_Base import Logger
-
-#import logging
-#import logging.handlers
-#import os
-#import socket
 
 
 def test_logger_base():
     class MockLogger(Logger):
         def __init__(self):
             pass
-    path = getenv('POSEIDON_LOGGER')
 
     logger = MockLogger()
-    config = ''
-    with open(path, 'rt') as f:
-        config = json.load(f)
-
     logger.logger_config(None)
-    logger.logger_config(config)

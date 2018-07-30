@@ -333,9 +333,6 @@ class Monitor(object):
         self.uss = self.NorthBoundControllerAbstraction.get_endpoint(
             'Update_Switch_State')
 
-        self.logger.debug('----------------------')
-        #self.init_logging()
-
         # TODO better error checking needed here since this is user input
         scan_frequency = int(self.mod_configuration['scan_frequency'])
 
@@ -377,20 +374,6 @@ class Monitor(object):
                 schedule=self.schedule,
                 logger=self.logger),
             name='st_worker')
-
-    def init_logging(self):
-        ''' setup logging  '''
-        config = None
-
-        path = getenv('logging_file')
-
-        if path is None:  # pragma: no cover
-            path = self.mod_configuration.get('logging_file')
-
-        if path is not None:  # pragma: no cover
-            with open(path, 'rt') as f:
-                config = json.load(f)
-        module_logger.logger_config(config)
 
     def configSelf(self):
         ''' get configuraiton for this module '''
