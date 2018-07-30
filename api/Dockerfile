@@ -1,4 +1,4 @@
-FROM python:3.7-alpine3.8
+FROM alpine:3.8
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
 
 RUN apk add --update \
