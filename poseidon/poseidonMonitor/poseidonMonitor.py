@@ -334,7 +334,7 @@ class Monitor(object):
             'Update_Switch_State')
 
         self.logger.debug('----------------------')
-        self.init_logging()
+        #self.init_logging()
 
         # TODO better error checking needed here since this is user input
         scan_frequency = int(self.mod_configuration['scan_frequency'])
