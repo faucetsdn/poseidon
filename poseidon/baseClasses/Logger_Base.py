@@ -54,9 +54,12 @@ class Logger:
     poseidon_logger.propagate = False
 
     # set the poseidon logger to log to file
-    fh = logging.handlers.RotatingFileHandler('/var/log/poseidon.log', backupCount=5, maxBytes=(10*1024*1024))
-    fh.setFormatter(formatter)
-    poseidon_logger.addHandler(fh)
+    try:
+        fh = logging.handlers.RotatingFileHandler('/var/log/poseidon.log', backupCount=5, maxBytes=(10*1024*1024))
+        fh.setFormatter(formatter)
+        poseidon_logger.addHandler(fh)
+    except Exception as e:
+        logger.warning("Unable to setup Poseidon logger because: {0}".format(str(e)))
 
     # don't try to connect to a syslog address if one was not supplied
     if host != 'NOT_CONFIGURED':  # pragma: no cover
