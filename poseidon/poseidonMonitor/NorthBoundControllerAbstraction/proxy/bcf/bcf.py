@@ -359,13 +359,10 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         if mirror:
             new_filter = {}
             if s_dict is not None:
-                # cant go having things with hyphens as variable names.. sooo..
                 new_filter.update(s_dict)
             else:
                 new_filter.update(target_kwargs)
             new_filter['seq'] = seq
-            # update?
-            # print(type(data))
             # empty capture list
             if 'filter' not in data:
                 data['filter'] = []

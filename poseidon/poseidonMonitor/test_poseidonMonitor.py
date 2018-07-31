@@ -1779,10 +1779,8 @@ def test_process():
     def thread1():
         global CTRL_C
         CTRL_C['STOP'] = False
-        print('about to go to sleep', CTRL_C)
         time.sleep(5)
         CTRL_C['STOP'] = True
-        print('wokefrom sleep', CTRL_C)
 
     class MockLogger():
 
@@ -2077,10 +2075,8 @@ def test_schedule_thread_worker():
     def thread1():
         global CTRL_C
         CTRL_C['STOP'] = False
-        print('about to go to sleep', CTRL_C)
         time.sleep(5)
         CTRL_C['STOP'] = True
-        print('wokefrom sleep', CTRL_C)
 
     class MockLogger():
 
