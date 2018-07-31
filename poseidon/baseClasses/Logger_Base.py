@@ -26,35 +26,49 @@ import socket
 
 class Logger:
     """
-    Base logger class that handles logging. Outputs to both stderr and a user
-    specified syslog. To log, use the class's variable 'logger'
+    Base logger class that handles logging. Outputs to both console, a poseidon
+    specific log file and a user specified syslog. To log, use the class's
+    variable 'logger'
     """
-    host = os.getenv('SYS_LOG_HOST', 'NOT_CONFIGURED')
-    port = int(os.getenv('SYS_LOG_PORT', 514))
+    host = os.getenv('SYSLOG_HOST', 'NOT_CONFIGURED')
+    port = int(os.getenv('SYSLOG_PORT', 514))
 
     level_int = {'CRITICAL': 50, 'ERROR': 40, 'WARNING': 30,
                  'INFO': 20, 'DEBUG': 10}
 
     logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
     logger.propagate = False
 
     # timestamp - logger_level - class:line number - message
     formatter = logging.Formatter('%(levelname)s - '
                                   '%(module)s:%(lineno)-3d - %(message)s')
 
-    # set the logger to log to stderr
-    sys_err = logging.StreamHandler()
-    sys_err.setFormatter(formatter)
-    logger.addHandler(sys_err)
+    # set the logger to log to console
+    ch = logging.StreamHandler()
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
+
+    poseidon_logger = logging.getLogger(__name__)
+    poseidon_logger.setLevel(logging.INFO)
+    poseidon_logger.propagate = False
+
+    # set the poseidon logger to log to file
+    try:
+        fh = logging.handlers.RotatingFileHandler('/var/log/poseidon.log', backupCount=5, maxBytes=(10*1024*1024))
+        fh.setFormatter(formatter)
+        poseidon_logger.addHandler(fh)
+    except Exception as e:
+        logger.warning("Unable to setup Poseidon logger because: {0}".format(str(e)))
 
     # don't try to connect to a syslog address if one was not supplied
     if host != 'NOT_CONFIGURED':  # pragma: no cover
         # if a syslog address was supplied, log to it
-        sys_log = logging.handlers.SysLogHandler(
+        syslog = logging.handlers.SysLogHandler(
             address=(host, port), socktype=socket.SOCK_STREAM)
-        sys_log.setFormatter(formatter)
-        logger.addHandler(sys_log)
+        syslog.setFormatter(formatter)
+        logger.addHandler(syslog)
+        poseidon_logger.addHandler(syslog)
 
     @staticmethod
     def set_level(level):

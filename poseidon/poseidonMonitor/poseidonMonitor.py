@@ -32,7 +32,6 @@ import sys
 import threading
 import time
 
-
 from binascii import hexlify
 from functools import partial
 from os import getenv
@@ -48,7 +47,9 @@ from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.bcf impo
     BcfProxy
 
 
+# TODO clean up loggers
 module_logger = Logger
+
 requests.packages.urllib3.disable_warnings()
 
 CTRL_C = dict()
@@ -273,6 +274,7 @@ class Monitor(object):
     def __init__(self, skip_rabbit):
         # get the logger setup
         self.logger = module_logger.logger
+        self.poseidon_logger = module_logger.poseidon_logger
         self.mod_configuration = dict()
         module_logger.logger_config(None)
 

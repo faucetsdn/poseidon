@@ -33,13 +33,12 @@ from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.sample_s
 
 class MockLogger:
     def __init__(self):
-        pass
-
-    def debug(self, msg):
-        pass
+        self.logger = Logger.logger
+        self.poseidon_logger = Logger.poseidon_logger
 
 
 module_logger = MockLogger()
+module_logger = module_logger.logger
 module_logger.debug('cover this')
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
@@ -228,6 +227,7 @@ def test_get_byip():
 
         def __init__(self):
             self.endpoints = None
+            self.logger = module_logger
 
         def get_endpoints(self):
             return self.endpoints
@@ -267,6 +267,7 @@ def test_get_bymac():
 
         def __init__(self):
             self.endpoints = None
+            self.logger = module_logger
 
         def get_endpoints(self):
             return self.endpoints
@@ -302,6 +303,7 @@ def test_shutdown_ip():
 
         def __init__(self):
             self.endpoints = None
+            self.logger = module_logger
 
         def get_endpoints(self):
             return self.endpoints
@@ -355,15 +357,7 @@ def test_get_highest():
         def __init__(self):
             self.endpoints = None
             self.span_fabric = None
-
-       # def get_endpoints(self):
-       #     return self.endpoints
-
-       # def get_span_fabric(self):
-       #     return self.span_fabric
-
-       # def shutdown_endpoint(self, tenant, segment, name, mac, shutdown):
-       #     pass
+            self.logger = module_logger
 
     bcf = MockBcfProxy()
 
@@ -401,15 +395,10 @@ def test_get_seq_by_ip():
         def __init__(self):
             self.endpoints = None
             self.span_fabric = None
-
-        # def get_endpoints(self):
-        #    return self.endpoints
+            self.logger = module_logger
 
         def get_span_fabric(self):
             return self.span_fabric
-
-        # def shutdown_endpoint(self, tenant, segment, name, mac, shutdown):
-        #    pass
 
     bcf = MockBcfProxy()
 
@@ -446,9 +435,7 @@ def test_mirror_ip():
         def __init__(self):
             self.endpoints = None
             self.span_fabric = None
-
-        # def get_endpoints(self):
-        #    return self.endpoints
+            self.logger = module_logger
 
         def mirror_traffic(
                 self,
@@ -465,9 +452,6 @@ def test_mirror_ip():
 
         def bad_get_highest(self, spanFabric):
             return None
-
-        # def shutdown_endpoint(self, tenant, segment, name, mac, shutdown):
-        #    pass
 
     bcf = MockBcfProxy()
 
@@ -506,18 +490,10 @@ def test_unmirror_ip():
         def __init__(self):
             self.endpoints = None
             self.span_fabric = None
-
-        # def get_endpoints(self):
-        #    return self.endpoints
-
-        # def mirror_traffic(self, seq, mirror=True, span_name='vent', s_dict=None, fabric_span_endpoint='', **target_kwargs):
-        #    pass
+            self.logger = module_logger
 
         def get_span_fabric(self):
             return self.span_fabric
-
-        # def shutdown_endpoint(self, tenant, segment, name, mac, shutdown):
-        #    pass
 
     bcf = MockBcfProxy()
 

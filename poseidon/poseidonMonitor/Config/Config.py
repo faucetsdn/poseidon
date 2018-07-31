@@ -39,6 +39,7 @@ class Config(Monitor_Action_Base):
     def __init__(self):
         super(Config, self).__init__()
         self.logger = module_logger.logger
+        self.poseidon_logger = module_logger.poseidon_logger
         self.CONFIG = None
         self.mod_name = self.__class__.__name__
         self.config_section_name = self.mod_name
@@ -83,6 +84,7 @@ class Handle_FullConfig(Monitor_Helper_Base):
         super(Handle_FullConfig, self).__init__()
         self.mod_name = self.__class__.__name__
         self.logger = module_logger.logger
+        self.poseidon_logger = module_logger.poseidon_logger
 
     def direct_get(self):
         ''' get the config from the owner '''
@@ -122,12 +124,6 @@ class Handle_SectionConfig(Monitor_Helper_Base):
             retval = 'Failed to find section: {0}'.format(section)
         return retval
 
-    # rest way
-    # def on_get(self, req, resp, section):
-    #    ''' use the rest interface to return  '''
-    #    ret_sec = self.direct_get(section)
-    #    resp.body = json.dumps(ret_sec)
-
 
 class Handle_FieldConfig(Monitor_Helper_Base):
     """
@@ -138,6 +134,7 @@ class Handle_FieldConfig(Monitor_Helper_Base):
     def __init__(self):
         super(Handle_FieldConfig, self).__init__()
         self.logger = module_logger.logger
+        self.poseidon_logger = module_logger.poseidon_logger
         self.mod_name = self.__class__.__name__
 
     def direct_get(self, field, section):
@@ -151,15 +148,6 @@ class Handle_FieldConfig(Monitor_Helper_Base):
             retval = 'Can\'t find field: {0} in section: {1}'.format(
                 field, section)
         return retval
-
-    # def on_get(self, req, resp, section, field):
-    #    """
-    #    Requests should have a section of the config
-    #    file and variable/field in that section to be
-    #    returned in the response body.
-    #    """
-    #    resp.content_type = 'text/text'
-    #    resp.body = self.direct_get(field, section)
 
 
 config_interface = Config()

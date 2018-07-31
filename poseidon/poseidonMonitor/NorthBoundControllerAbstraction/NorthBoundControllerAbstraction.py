@@ -31,6 +31,7 @@ class NorthBoundControllerAbstraction(Monitor_Action_Base):
     def __init__(self):
         super(NorthBoundControllerAbstraction, self).__init__()
         self.logger = module_logger.logger
+        self.poseidon_logger = module_logger.poseidon_logger
         self.mod_name = self.__class__.__name__
         self.config_section_name = self.mod_name
 

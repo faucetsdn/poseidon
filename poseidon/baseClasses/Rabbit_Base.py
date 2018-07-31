@@ -28,7 +28,7 @@ from .Logger_Base import Logger
 module_logger = Logger
 
 
-class Rabbit_Base(object):          # pragma: no cover
+class Rabbit_Base(object):
     '''
     Base Class for RabbitMQ
     '''

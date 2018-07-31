@@ -25,15 +25,14 @@ from urllib.parse import urljoin
 from poseidon.baseClasses.Logger_Base import Logger
 
 module_logger = Logger
-module_logger = module_logger.logger
-
 requests.packages.urllib3.disable_warnings()
 
 
 class ControllerProxy(object):
 
     def __init__(self, base_uri, *args, **kwargs):
-        self.logger = module_logger
+        self.logger = module_logger.logger
+        self.poseidon_logger = module_logger.poseidon_logger
         self.base_uri = base_uri
         self.session = requests.Session()
 

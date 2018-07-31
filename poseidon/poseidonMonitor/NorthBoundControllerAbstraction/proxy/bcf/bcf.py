@@ -24,10 +24,8 @@ from urllib.parse import urljoin
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.auth.cookie.cookieauth import CookieAuthControllerProxy
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.mixins.jsonmixin import JsonMixin
-#from poseidon.poseidonMonitor.endPoint import EndPoint
 
 module_logger = Logger
-module_logger = module_logger.logger
 
 
 class BcfProxy(JsonMixin, CookieAuthControllerProxy):
@@ -56,6 +54,8 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         self.span_fabric_name = span_fabric_name
         self.interface_group = interface_group
         self.get_span_fabric()
+        self.logger = module_logger.logger
+        self.poseidon_logger = module_logger.poseidon_logger
 
     @staticmethod
     def format_endpoints(data):
@@ -84,10 +84,10 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         '''
         r = self.get_resource(endpoints_resource)
         retval = JsonMixin.parse_json(r)
-        module_logger.debug('get_endpoints found:')
+        self.logger.debug('get_endpoints found:')
         items = retval
         for item in items:
-            module_logger.debug('{0}:{1}'.format(
+            self.logger.debug('{0}:{1}'.format(
                 dict(item).get('mac'), dict(item).get('ip-address')))
         return retval
 
@@ -99,7 +99,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         '''
         r = self.get_resource(switches_resource)
         retval = BcfProxy.parse_json(r)
-        module_logger.debug('get_switches return:{0}'.format(retval))
+        self.logger.debug('get_switches return:{0}'.format(retval))
         return retval
 
     def get_tenants(
@@ -111,7 +111,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         r = self.get_resource(tenant_resource)
         retval = BcfProxy.parse_json(r)
         sout = 'get_tenants return:{0}'.format(retval)
-        module_logger.debug(sout)
+        self.logger.debug(sout)
         return retval
 
     def get_segments(
@@ -123,7 +123,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         r = self.get_resource(segment_resource)
         retval = BcfProxy.parse_json(r)
         sout = 'get_segments return:{0}'.format(retval)
-        module_logger.debug(sout)
+        self.logger.debug(sout)
         return retval
 
     def get_span_fabric(
@@ -151,13 +151,13 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         r = self.get_resource(span_fabric_resource)
         spanArray = BcfProxy.parse_json(r)
         if len(spanArray) == 0:
-            module_logger.error("A span fabric with the configured combination of name: {0} and interface group: {1} could not be"
+            self.logger.error("A span fabric with the configured combination of name: {0} and interface group: {1} could not be"
             " found on the designated controller".format(span_name, interface_group))
             retval = {}
         else :
             retval = spanArray[0]
         sout = 'get_span_fabric return:{0}'.format(retval)
-        module_logger.debug(sout)
+        self.logger.debug(sout)
         return retval
 
     def get_byip(self, ip_addr):
@@ -205,8 +205,8 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             name = '{0}{1}{2}'.format(tenant, segment, mac).replace(':', '')
             if record.get('name') is not None:
                 name = record['name']
-            module_logger.debug('bcf shutting down: {0}'.format(record))
-            module_logger.debug('t:{0} s:{1} n:{2} m{3} shut:{4}'.format(
+            self.logger.debug('bcf shutting down: {0}'.format(record))
+            self.logger.debug('t:{0} s:{1} n:{2} m{3} shut:{4}'.format(
                 tenant, segment, name, mac, shutdown))
             self.shutdown_endpoint(tenant, segment, name, mac, shutdown)
             shutdowns.append(record)
@@ -240,7 +240,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         r = self.request_resource(method='PUT', url=uri, data=json.dumps(data))
         retval = BcfProxy.parse_json(r)
         sout = 'shutdown_endpoint return:{0}'.format(retval)
-        module_logger.debug(sout)
+        self.logger.debug(sout)
         return retval
 
     @staticmethod
@@ -257,7 +257,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
                     my_max = seq
             return (my_max + 1)
         else:
-            module_logger.debug('noFilters online')
+            self.logger.debug('noFilters online')
             return 1
 
     def get_seq_by_ip(self, ip):
@@ -277,18 +277,18 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
     def mirror_ip(self, ip, messages=None):
         my_start = self.get_highest(self.get_span_fabric())
         if my_start is not None:
-            module_logger.debug('mirroring {0}'.format(my_start))
+            self.logger.debug('mirroring {0}'.format(my_start))
             src = {'match-specification': {'src-ip-cidr': '{0}/32'.format(ip)}}
             dst = {'match-specification': {'dst-ip-cidr': '{0}/32'.format(ip)}}
             self.mirror_traffic(my_start, mirror=True, s_dict=src)
             self.mirror_traffic(my_start + 1, mirror=True, s_dict=dst)
         else:
-            module_logger.error('mirror_ip:None')
+            self.logger.error('mirror_ip:None')
 
     def unmirror_ip(self, ip, messages=None):
         kill_list = self.get_seq_by_ip(ip)
         for kill in kill_list:
-            module_logger.debug('unmirror:{0}'.format(kill))
+            self.logger.debug('unmirror:{0}'.format(kill))
             self.mirror_traffic(kill, mirror=False)
 
     def mirror_traffic(
@@ -355,7 +355,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         resource = fabric_span_endpoint.format(self.span_fabric_name)
         uri = urljoin(self.base_uri, resource)
         data = self.get_span_fabric()  # first element is vent span rule
-        module_logger.debug('{0}'.format(data))
+        self.logger.debug('{0}'.format(data))
         if mirror:
             new_filter = {}
             if s_dict is not None:
@@ -373,6 +373,6 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         r = self.request_resource(method='PUT', url=uri, data=json.dumps(data))
         retval = BcfProxy.parse_json(r)
         sout = 'mirror_traffic return:{0}'.format(retval)
-        module_logger.debug(sout)
+        self.logger.debug(sout)
 
         return retval
