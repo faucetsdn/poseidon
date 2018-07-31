@@ -24,7 +24,7 @@ from poseidon.baseClasses.Rock_Bottom import Rock_Bottom
 module_logger = Logger
 
 
-class Monitor_Helper_Base(Rock_Bottom):  # pragma: no cover
+class Monitor_Helper_Base(Rock_Bottom):
     '''base class for the helper objets'''
 
     def __init__(self):
@@ -41,6 +41,9 @@ class Monitor_Helper_Base(Rock_Bottom):  # pragma: no cover
             self.logger = owner.logger
         else:
             self.logger = module_logger.logger
+
+        # add poseidon logger
+        self.poseidon_logger = module_logger.poseidon_logger
 
         self.logger.debug('set_owner = {0}'.format(owner.mod_name))
         self.owner = owner
@@ -65,17 +68,10 @@ class Monitor_Helper_Base(Rock_Bottom):  # pragma: no cover
             return
         self.mod_configuration = dict()
         conf = self.owner.owner.Config.get_endpoint('Handle_SectionConfig')
-        #ostr = '********** conf:{0}'.format(conf)
-        #print(ostr)
         if conf is not None:
             for item in conf.direct_get(self.config_section_name):
-                #ostr = '********** item:{0}'.format(item)
-                #self.logger.debug(ostr)
                 k, v = item
                 self.mod_configuration[k] = v
-                #ostr = 'config:{0}:{1}'.format(
-                #    self.config_section_name, self.mod_configuration)
-                #self.logger.debug(ostr)
             self.configured = True
 
     def first_run(self):

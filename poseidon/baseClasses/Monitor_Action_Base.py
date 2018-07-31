@@ -26,7 +26,7 @@ from poseidon.baseClasses.Rock_Bottom import Rock_Bottom
 module_logger = Logger
 
 
-class Monitor_Action_Base(Rock_Bottom):  # pragma: no cover
+class Monitor_Action_Base(Rock_Bottom):
 
     """
     Base call stubs
@@ -52,6 +52,7 @@ class Monitor_Action_Base(Rock_Bottom):  # pragma: no cover
 
         self.owner = owner
         self.logger = module_logger.logger
+        self.poseidon_logger = module_logger.poseidon_logger
         if self.owner.mod_name is not None:
             self.config_section_name = self.owner.mod_name + ':' + self.mod_name
         else:

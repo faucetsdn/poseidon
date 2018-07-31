@@ -40,6 +40,7 @@ class Update_Switch_State(Monitor_Helper_Base):
     def __init__(self):
         super(Update_Switch_State, self).__init__()
         self.logger = module_logger.logger
+        self.poseidon_logger = module_logger.poseidon_logger
         self.mod_name = self.__class__.__name__
         self.retval = {}
         self.times = 0

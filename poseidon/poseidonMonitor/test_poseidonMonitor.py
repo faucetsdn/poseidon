@@ -40,10 +40,9 @@ def test_signal_handler():
 
     class MockLogger:
         def __init__(self):
-            pass
-
-        def debug(self, msg):
-            pass
+            module_logger = Logger
+            self.logger = module_logger.logger
+            self.poseidon_logger = module_logger.poseidon_logger
 
     class MockRabbitConnection:
         connection_closed = False
@@ -71,7 +70,7 @@ def test_signal_handler():
     mock_monitor = MockMonitor()
     mock_monitor.schedule = MockScheduele()
     mock_monitor.rabbit_channel_connection_local = MockRabbitConnection()
-    mock_monitor.logger = MockLogger()
+    mock_monitor.logger = MockLogger().logger
 
     # signal handler seem to simply exit and kill all the jobs no matter what
     # we pass
@@ -85,10 +84,10 @@ def test_start_vent_collector_faucet():
 
     class MockLogger:
         def __init__(self):
-            pass
+            module_logger = Logger
+            self.logger = module_logger.logger
+            self.poseidon_logger = module_logger.poseidon_logger
 
-        def debug(self, msg):
-            pass
 
     class requests():
 
@@ -215,7 +214,7 @@ def test_start_vent_collector_faucet():
             self.uss = Mock_Update_Switch_State()
 
     mock_monitor = MockMonitor()
-    mock_monitor.logger = MockLogger()
+    mock_monitor.logger = MockLogger().logger
     dev_hash = 'test'
     num_cuptures = 3
     mock_monitor.start_vent_collector(dev_hash, num_cuptures)
@@ -224,10 +223,9 @@ def test_start_vent_collector_bcf():
 
     class MockLogger:
         def __init__(self):
-            pass
-
-        def debug(self, msg):
-            pass
+            module_logger = Logger
+            self.logger = module_logger.logger
+            self.poseidon_logger = module_logger.poseidon_logger
 
     class requests():
 
@@ -355,7 +353,7 @@ def test_start_vent_collector_bcf():
             self.uss = Mock_Update_Switch_State()
 
     mock_monitor = MockMonitor()
-    mock_monitor.logger = MockLogger()
+    mock_monitor.logger = MockLogger().logger
     dev_hash = 'test'
     num_cuptures = 3
     mock_monitor.start_vent_collector(dev_hash, num_cuptures)
@@ -364,10 +362,9 @@ def test_not_start_vent_collector_bcf():
 
     class MockLogger:
         def __init__(self):
-            pass
-
-        def debug(self, msg):
-            pass
+            module_logger = Logger
+            self.logger = module_logger.logger
+            self.poseidon_logger = module_logger.poseidon_logger
 
     class requests():
 
@@ -494,7 +491,7 @@ def test_not_start_vent_collector_bcf():
             self.uss = Mock_Update_Switch_State()
 
     mock_monitor = MockMonitor()
-    mock_monitor.logger = MockLogger()
+    mock_monitor.logger = MockLogger().logger
     dev_hash = 'test'
     num_cuptures = 3
     mock_monitor.start_vent_collector(dev_hash, num_cuptures)
@@ -503,10 +500,9 @@ def test_get_vent_collectors():
 
     class MockLogger:
         def __init__(self):
-            pass
-
-        def debug(self, msg):
-            pass
+            module_logger = Logger
+            self.logger = module_logger.logger
+            self.poseidon_logger = module_logger.poseidon_logger
 
     class requests():
 
@@ -675,7 +671,7 @@ def test_get_vent_collectors():
             self.uss = Mock_Update_Switch_State()
 
     mock_monitor = MockMonitor()
-    mock_monitor.logger = MockLogger()
+    mock_monitor.logger = MockLogger().logger
     result = mock_monitor.get_vent_collectors()
     assert isinstance(result, dict)
 
@@ -683,10 +679,9 @@ def test_host_has_active_collectors_false():
 
     class MockLogger:
         def __init__(self):
-            pass
-
-        def debug(self, msg):
-            pass
+            module_logger = Logger
+            self.logger = module_logger.logger
+            self.poseidon_logger = module_logger.poseidon_logger
 
     class requests():
 
@@ -856,7 +851,7 @@ def test_host_has_active_collectors_false():
             self.uss = Mock_Update_Switch_State()
 
     mock_monitor = MockMonitor()
-    mock_monitor.logger = MockLogger()
+    mock_monitor.logger = MockLogger().logger
     dev_hash = 'test0'
     result = mock_monitor.host_has_active_collectors(dev_hash)
     assert result == False
@@ -865,10 +860,9 @@ def test_host_has_active_collectors_true():
 
     class MockLogger:
         def __init__(self):
-            pass
-
-        def debug(self, msg):
-            pass
+            module_logger = Logger
+            self.logger = module_logger.logger
+            self.poseidon_logger = module_logger.poseidon_logger
 
     class requests():
 
@@ -1037,7 +1031,7 @@ def test_host_has_active_collectors_true():
             self.uss = Mock_Update_Switch_State()
 
     mock_monitor = MockMonitor()
-    mock_monitor.logger = MockLogger()
+    mock_monitor.logger = MockLogger().logger
     dev_hash = 'test0'
     result = mock_monitor.host_has_active_collectors(dev_hash)
     assert result == True
@@ -1070,10 +1064,9 @@ def test_format_rabbit_message():
 
     class MockLogger:
         def __init__(self):
-            pass
-
-        def debug(self, msg):
-            pass
+            module_logger = Logger
+            self.logger = module_logger.logger
+            self.poseidon_logger = module_logger.poseidon_logger
 
     class MockMonitor(Monitor):
 
@@ -1081,7 +1074,7 @@ def test_format_rabbit_message():
             self.fa_rabbit_routing_key = 'foo'
 
     mockMonitor = MockMonitor()
-    mockMonitor.logger = MockLogger()
+    mockMonitor.logger = MockLogger().logger
 
     data = dict({'Key1': 'Val1'})
     message = ('poseidon.algos.decider', json.dumps(data))
@@ -1134,10 +1127,9 @@ def test_schedule_job_reinvestigation():
 
     class MockLogger:
         def __init__(self):
-            pass
-
-        def debug(self, msg):
-            pass
+            module_logger = Logger
+            self.logger = module_logger.logger
+            self.poseidon_logger = module_logger.poseidon_logger
 
     epw = Endpoint_Wrapper()
 
@@ -1213,7 +1205,7 @@ def test_schedule_job_reinvestigation():
 
     assert len(epw.state) == 9
 
-    poseidonMonitor.schedule_job_reinvestigation(9, epw, MockLogger())
+    poseidonMonitor.schedule_job_reinvestigation(9, epw, MockLogger().logger)
 
     epw = Endpoint_Wrapper()
 
@@ -1318,15 +1310,15 @@ def test_schedule_job_reinvestigation():
     for s in stuff:
         epw.state[s] = stuff[s]
 
-    poseidonMonitor.schedule_job_reinvestigation(4, epw, MockLogger())
+    poseidonMonitor.schedule_job_reinvestigation(4, epw, MockLogger().logger)
 
     epw = Endpoint_Wrapper()
     #end_points = {}
-    poseidonMonitor.schedule_job_reinvestigation(4, epw, MockLogger())
+    poseidonMonitor.schedule_job_reinvestigation(4, epw, MockLogger().logger)
 
     epw.state['4ee39d254db3e4a5264b75ce8ae312d69f9e73a3'] = stuff['4ee39d254db3e4a5264b75ce8ae312d69f9e73a3']
     #end_points = {"hash_0": {"MALFORMED": "YES"}}
-    poseidonMonitor.schedule_job_reinvestigation(4, epw, MockLogger())
+    poseidonMonitor.schedule_job_reinvestigation(4, epw, MockLogger().logger)
 
 
 def test_update_next_state():
@@ -1334,10 +1326,9 @@ def test_update_next_state():
     class MockLogger():
 
         def __init__(self):
-            pass
-
-        def debug(self, msg):
-            pass
+            module_logger = Logger
+            self.logger = module_logger.logger
+            self.poseidon_logger = module_logger.poseidon_logger
 
     class Mock_Update_Switch_State():
 
@@ -1432,7 +1423,7 @@ def test_update_next_state():
 
     monitor = MockMonitor()
     monitor.uss = Mock_Update_Switch_State()
-    monitor.logger = MockLogger()
+    monitor.logger = MockLogger().logger
     ml_return = {
         'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': {
             'valid': True, 'classification': {
@@ -1621,13 +1612,12 @@ def test_configSelf():
     class MockLogger():
 
         def __init__(self):
-            pass
-
-        def debug(self, msg):
-            pass
+            module_logger = Logger
+            self.logger = module_logger.logger
+            self.poseidon_logger = module_logger.poseidon_logger
 
     monitor = MockMonitor()
-    monitor.logger = MockLogger()
+    monitor.logger = MockLogger().logger
     monitor.Config = MockConfig()
 
     monitor.configSelf()
@@ -1656,10 +1646,9 @@ def test_configSelf2():
 
     class MockLogger:
         def __init__(self):
-            pass
-
-        def debug(self, msg):
-            pass
+            module_logger = Logger
+            self.logger = module_logger.logger
+            self.poseidon_logger = module_logger.poseidon_logger
 
     class MockConfig():
 
@@ -1673,7 +1662,7 @@ def test_configSelf2():
 
     mock_monitor = MockMonitor()
     mock_monitor.Config = MockConfig()
-    mock_monitor.logger = MockLogger()
+    mock_monitor.logger = MockLogger().logger
     mock_monitor.configSelf()
 
     assert mock_monitor.mod_configuration[1] == "YOYO"
@@ -1684,10 +1673,9 @@ def test_schedule_job_kickurl():
     class MockLogger():
 
         def __init__(self):
-            pass
-
-        def debug(self, msg):
-            pass
+            module_logger = Logger
+            self.logger = module_logger.logger
+            self.poseidon_logger = module_logger.poseidon_logger
 
         def error(self, msg):
             pass
@@ -1765,7 +1753,7 @@ def test_schedule_job_kickurl():
                                                     ['port'])
             self.NorthBoundControllerAbstraction = MockNorthBoundControllerAbstraction()
 
-    schedule_job_kickurl(func(), MockLogger())
+    schedule_job_kickurl(func(), MockLogger().logger)
 
 
 def test_Monitor_init():
@@ -1785,10 +1773,9 @@ def test_process():
     class MockLogger():
 
         def __init__(self):
-            pass
-
-        def debug(self, msg):
-            pass
+            module_logger = Logger
+            self.logger = module_logger.logger
+            self.poseidon_logger = module_logger.poseidon_logger
 
     class MockEndpoint(Endpoint_Wrapper):
         def __init__(self):
@@ -1941,7 +1928,7 @@ def test_process():
 
     mock_monitor = MockMonitor()
     mock_monitor.uss = MockUss()
-    mock_monitor.logger = MockLogger()
+    mock_monitor.logger = MockLogger().logger
 
     t1 = Thread(target=thread1)
     t1.start()
@@ -2081,10 +2068,9 @@ def test_schedule_thread_worker():
     class MockLogger():
 
         def __init__(self):
-            pass
-
-        def debug(self, msg):
-            pass
+            module_logger = Logger
+            self.logger = module_logger.logger
+            self.poseidon_logger = module_logger.poseidon_logger
 
     class mockSchedule():
 
@@ -2106,7 +2092,7 @@ def test_schedule_thread_worker():
     t1 = Thread(target=thread1)
     t1.start()
     try:
-        schedule_thread_worker(mockSchedule(), MockLogger())
+        schedule_thread_worker(mockSchedule(), MockLogger().logger)
     except SystemExit:
         pass
 

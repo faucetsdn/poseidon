@@ -17,9 +17,6 @@
 """ Created on  18 July 2016
 @author: dgrossman
 """
-from .Logger_Base import Logger
-
-module_logger = Logger.logger
 
 
 class Rock_Bottom(object):

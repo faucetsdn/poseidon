@@ -17,8 +17,6 @@
 Created on 21 Nov 2017
 @author: dgrossman
 '''
-
-
 import json
 import requests
 
@@ -36,6 +34,7 @@ class Endpoint_Wrapper():
         super(Endpoint_Wrapper, self).__init__()
         self.state = defaultdict(EndPoint)
         self.logger = module_logger.logger
+        self.poseidon_logger = module_logger.poseidon_logger
         self.mod_configuration = dict()
         self.mod_name = self.__class__.__name__
         self.Config = config_interface
