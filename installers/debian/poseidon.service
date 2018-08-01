@@ -6,7 +6,7 @@ After = docker.service
 [Service]
 EnvironmentFile = /etc/poseidon/default.conf
 ExecStart = /usr/bin/poseidon start -D
-ExecStop = /usr/bin/poseidon stop
+ExecStop = /usr/bin/poseidon kill
 
 [Install]
 WantedBy = multi-user.target
