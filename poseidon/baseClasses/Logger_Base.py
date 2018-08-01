@@ -50,7 +50,6 @@ class Logger:
     logger.addHandler(ch)
 
     poseidon_logger = logging.getLogger(__name__)
-    poseidon_logger.basicConfig(filename='/var/log/poseidon.log')
     poseidon_logger.setLevel(logging.INFO)
     poseidon_logger.propagate = False
 

@@ -281,7 +281,7 @@ class Monitor(object):
         self.logger = module_logger.logger
         self.poseidon_logger = module_logger.poseidon_logger
         self.mod_configuration = dict()
-        module_logger.logger_config(None)
+        #module_logger.logger_config(None)
 
         self.mod_name = self.__class__.__name__
         self.skip_rabbit = skip_rabbit
