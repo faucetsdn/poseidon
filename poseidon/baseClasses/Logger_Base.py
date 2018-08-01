@@ -78,6 +78,7 @@ class Logger:
         Set the logger level. That level and above gets logged.
         """
         Logger.logger.setLevel(Logger.level_int[level.upper()])
+        Logger.poseidon_logger.setLevel(Logger.level_int[level.upper()])
 
     @staticmethod
     def logger_config(config):
@@ -86,5 +87,7 @@ class Logger:
         """
         if config:
             logging.config.dictConfigClass(config)
+            poseidon_logging.config.dictConfigClass(config)
         else:
             logging.basicConfig()
+            poseidon_logging.basicConfig(filename='/var/log/poseidon.log')
