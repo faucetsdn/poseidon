@@ -59,6 +59,8 @@ class Logger:
             '/var/log/poseidon.log', backupCount=5, maxBytes=(10*1024*1024))
         fh.setFormatter(formatter)
         poseidon_logger.addHandler(fh)
+        # remove the default console handler
+        poseidon_logger.removeHandler(poseidon_logger.handlers[0])
     except Exception as e:
         logger.warning(
             'Unable to setup Poseidon logger because: {0}'.format(str(e)))
