@@ -46,8 +46,7 @@ class Parser:
             obj_doc = yaml.safe_load(stream)
             stream.close()
         except Exception as e:
-            self.logger.error("failed to load config")
-            self.logger.error(str(e))
+            self.logger.error("Failed to load config because: {0}".format(str(e)))
             return False
 
         if action == 'mirror' or action == 'unmirror':
@@ -56,8 +55,7 @@ class Parser:
                 self.logger.error("Unable to mirror, no mirror ports defined")
                 return False
             if not 'dps' in obj_doc:
-                self.logger.warning("Unable to find switch configs in "
-                                    "'" + config_file + "'")
+                self.logger.warning("Unable to find switch configs in {0}".format(config_file))
                 ok = False
             else:
                 for s in obj_doc['dps']:
@@ -65,24 +63,22 @@ class Parser:
                         switch_found = s
             if not switch_found:
                 self.logger.warning("No switch match found to mirror "
-                                    "from in the configs. switch: %s %s" % (switch, str(obj_doc)))
+                                    "from in the configs. switch: {0} {1}".format(switch, str(obj_doc)))
                 ok = False
             else:
                 if not switch_found in self.mirror_ports:
-                    self.logger.warning("Unable to mirror " + str(port) +
-                                        " on " + str(switch_found) +
-                                        ", mirror port not defined on that switch")
+                    self.logger.warning("Unable to mirror {0} on {1}, mirror port not defined on that switch".format(str(port), str(switch_found)))
                     ok = False
                 else:
                     if not port in obj_doc['dps'][switch_found]['interfaces']:
-                        self.logger.warning("No port match found for port %s "
-                                            " to mirror from the switch %s in "
-                                            " the configs" % (str(port), obj_doc['dps'][switch_found]['interfaces']))
+                        self.logger.warning("No port match found for port {0} "
+                                            " to mirror from the switch {1} in "
+                                            " the configs".format(str(port), obj_doc['dps'][switch_found]['interfaces']))
                         ok = False
                     if not self.mirror_ports[switch_found] in obj_doc['dps'][switch_found]['interfaces']:
-                        self.logger.warning("No port match found for port %s "
-                                            " to mirror from the switch %s in "
-                                            " the configs" % (str(self.mirror_ports[switch_found]), obj_doc['dps'][switch_found]['interfaces']))
+                        self.logger.warning("No port match found for port {0} "
+                                            "to mirror from the switch {1} in "
+                                            "the configs".format(str(self.mirror_ports[switch_found]), obj_doc['dps'][switch_found]['interfaces']))
                         ok = False
                     else:
                         if 'mirror' in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]:
@@ -99,8 +95,8 @@ class Parser:
                         # TODO check for still running captures on this port
                         obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'].remove(port)
                     except ValueError:
-                        self.logger.warning("This port was not already "
-                                            "mirroring on this switch")
+                        self.logger.warning("This port: {0} was not already "
+                                            "mirroring on this switch: {1}".format(str(port), str(switch_found)))
             else:
                 self.logger.error("Unable to mirror due to warnings")
                 return False
@@ -108,7 +104,7 @@ class Parser:
             # TODO
             pass
         else:
-            self.logger.warning("Unknown action: " + action)
+            self.logger.warning("Unknown action: {0}".format(action))
         try:
             if len(obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']) == 0:
                 obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]].remove('mirror')
@@ -119,7 +115,7 @@ class Parser:
                         ports.append(p)
                 obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] = ports
         except Exception as e:
-            self.logger.warning("Unable to remove empty mirror list because: %s" % str(e))
+            self.logger.warning("Unable to remove empty mirror list because: {0}".format(str(e)))
 
         stream = open(config_file, 'w')
         yaml.add_representer(type(None), represent_none)
@@ -211,6 +207,5 @@ class Parser:
                                         dpid == data['segment']):
                                         self.mac_table[mac][0]['active'] = 0
         except Exception as e:
-            self.logger.debug("error {0}".format(str(e)))
+            self.logger.error("Error parsing Faucet log file {0}".format(str(e)))
         return
-

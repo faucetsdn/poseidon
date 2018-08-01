@@ -48,18 +48,14 @@ class Config(Monitor_Action_Base):
         self.config = ConfigParser.RawConfigParser()
         self.config.optionxform = str
         if os.environ.get('POSEIDON_CONFIG') is not None:
-            self.logger.info(
-                'From the Environment')               # pragma: no cover
-            self.config_path = os.environ.get(
-                'POSEIDON_CONFIG')               # pragma: no cover
+            self.config_path = os.environ.get('POSEIDON_CONFIG')
         else:
-            raise Exception(
-                'Could not find poseidon config. Make sure to set the POSEIDON_CONFIG environment variable')
+            raise Exception('Could not find poseidon config. Make sure to set the POSEIDON_CONFIG environment variable')
         self.config.readfp(open(self.config_path, 'r'))
 
     def configure(self):
         ostr = '{0}:configure'.format(self.mod_name)
-        self.logger.info(ostr)
+        self.poseidon_logger.debug(ostr)
         if 'Handle_SectionConfig' in self.actions:
             ostr = '{0}:configure found'.format(self.mod_name)
             self.CONFIG = self.actions['Handle_SectionConfig']
@@ -67,10 +63,9 @@ class Config(Monitor_Action_Base):
             for item in self.CONFIG.direct_get(self.config_section_name):
                 k, v = item
                 self.mod_configuration[k] = v
-            # self.mod_config = self.CONFIG.direct_get(self.config_section_name)
             ostr = 'mod_name:{0} |mod_configuration: {1}'.format(
                 self.mod_name, self.mod_configuration)
-            self.logger.debug(ostr)
+            self.poseidon_logger.debug(ostr)
             self.configured = True
 
 
@@ -94,13 +89,10 @@ class Handle_FullConfig(Monitor_Helper_Base):
             for sec in self.owner.config.sections():
                 ret[sec] = self.owner.config.items(sec)
             retval = json.dumps(ret)
-        except BaseException:
-            self.logger.error('Failed to open config file.')
+        except BaseException as e:
+            self.logger.error('Failed to open config file because: {0}'.format(str(e)))
             retval = json.dumps('Failed to open config file.')
         return retval
-
-    # def on_get(self, req, resp):
-    #    resp.body = self.direct_get()
 
 
 class Handle_SectionConfig(Monitor_Helper_Base):
@@ -145,7 +137,7 @@ class Handle_FieldConfig(Monitor_Helper_Base):
         try:
             retval = self.owner.config.get(section, field)
         except BaseException:
-            retval = 'Can\'t find field: {0} in section: {1}'.format(
+            retval = "Can't find field: {0} in section: {1}".format(
                 field, section)
         return retval
 
