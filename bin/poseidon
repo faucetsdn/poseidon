@@ -55,6 +55,14 @@ function check_args()
                 systemctl status poseidon
                 exit
                 ;;
+            -k|kill)
+                # don't call this directly - intended for systemd
+                echo "Stopping Poseidon..."
+                docker ps -q --filter "label=vent" | (xargs docker rm -f > /dev/null 2>&1) || echo "Poseidon not running."
+                docker rm -f vent > /dev/null 2>&1
+                echo "Poseidon successfully stopped."
+                exit
+                ;;
             -l|logs)
                 journalctl -n 100 -f -u poseidon
                 exit
@@ -94,10 +102,7 @@ function check_args()
                 exit
                 ;;
             -S|stop)
-                echo "Stopping Poseidon..."
-                docker ps -q --filter "label=vent" | (xargs docker rm -f > /dev/null 2>&1) || echo "Poseidon not running."
-                docker rm -f vent > /dev/null 2>&1
-                echo "Poseidon successfully stopped."
+                sudo systemctl stop poseidon
                 exit
                 ;;
             -v|viz|visualize)
