@@ -20,7 +20,6 @@ Test module for poseidonMonitor.py
 Created on 25 Oct 2017
 @author: dgrossman
 """
-
 from poseidon.baseClasses.Logger_Base import Logger
 
 

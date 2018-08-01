@@ -19,8 +19,9 @@ Created on 25 July 2016
 
 @author: kylez
 """
-import requests
 from urllib.parse import urljoin
+
+import requests
 
 from poseidon.baseClasses.Logger_Base import Logger
 

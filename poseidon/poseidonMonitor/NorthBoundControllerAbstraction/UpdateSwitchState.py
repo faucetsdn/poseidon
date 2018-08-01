@@ -19,6 +19,7 @@ Created on 20 Nov 2017
 '''
 import ast
 import json
+
 import queue as Queue
 
 from poseidon.baseClasses.Logger_Base import Logger
@@ -98,8 +99,9 @@ class Update_Switch_State(Monitor_Helper_Base):
                 myauth['password'] = self.controller['PASS']
                 myauth['user'] = self.controller['USER']
                 try:
-                    self.sdnc = BcfProxy(self.controller['URI'], auth=myauth, span_fabric_name = self.controller['SPAN_FABRIC_NAME'], interface_group = self.controller['INTERFACE_GROUP'])
-                except BaseException as e: # pragma: no cover
+                    self.sdnc = BcfProxy(self.controller['URI'], auth=myauth, span_fabric_name=self.controller[
+                                         'SPAN_FABRIC_NAME'], interface_group=self.controller['INTERFACE_GROUP'])
+                except BaseException as e:  # pragma: no cover
                     self.logger.error(
                         'BcfProxy could not connect to {0} because {1}'.format(
                             self.controller['URI'], e))

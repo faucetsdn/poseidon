@@ -22,9 +22,10 @@ file.
 Created on 17 May 2016
 @author: dgrossman, lanhamt
 """
-import configparser as ConfigParser
 import json
 import os
+
+import configparser as ConfigParser
 
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
@@ -50,7 +51,8 @@ class Config(Monitor_Action_Base):
         if os.environ.get('POSEIDON_CONFIG') is not None:
             self.config_path = os.environ.get('POSEIDON_CONFIG')
         else:
-            raise Exception('Could not find poseidon config. Make sure to set the POSEIDON_CONFIG environment variable')
+            raise Exception(
+                'Could not find poseidon config. Make sure to set the POSEIDON_CONFIG environment variable')
         self.config.readfp(open(self.config_path, 'r'))
 
     def configure(self):
@@ -90,7 +92,8 @@ class Handle_FullConfig(Monitor_Helper_Base):
                 ret[sec] = self.owner.config.items(sec)
             retval = json.dumps(ret)
         except BaseException as e:
-            self.logger.error('Failed to open config file because: {0}'.format(str(e)))
+            self.logger.error(
+                'Failed to open config file because: {0}'.format(str(e)))
             retval = json.dumps('Failed to open config file.')
         return retval
 

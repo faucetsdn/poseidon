@@ -1,52 +1,56 @@
-[ {
-  "asic" : "unknown",
-  "connected" : false,
-  "dpid" : "00:00:00:00:00:00:00:00",
-  "fabric-connection-state" : "not_connected",
-  "fabric-role" : "leaf",
-  "lacp-interface-offset" : 0,
-  "lacp-system-mac" : "00:00:00:00:00:00",
-  "leaf-group" : "00:00:00:00:00:00:00:00",
-  "name" : "Leaf1",
-  "shutdown" : false
-}, {
-  "asic" : "asic1",
-  "connected" : true,
-  "connected-since" : "2016-07-19T20:50:18.540Z",
-  "dpid" : "00:00:00:00:00:00:00:00",
-  "fabric-connection-state" : "connected",
-  "fabric-last-seen-time" : "2016-07-19T20:50:21.608Z",
-  "fabric-role" : "leaf",
-  "handshake-state" : "master-state",
-  "inet-address" : {
-    "inet-port" : 11111,
-    "ip" : "fe00:0:0:0:0000:0000:0000:0000%2"
+[
+  {
+    "asic": "unknown",
+    "connected": false,
+    "dpid": "00:00:00:00:00:00:00:00",
+    "fabric-connection-state": "not_connected",
+    "fabric-role": "leaf",
+    "lacp-interface-offset": 0,
+    "lacp-system-mac": "00:00:00:00:00:00",
+    "leaf-group": "00:00:00:00:00:00:00:00",
+    "name": "Leaf1",
+    "shutdown": false
   },
-  "lacp-interface-offset" : 0,
-  "lacp-system-mac" : "00:00:00:00:00:00",
-  "leaf-group" : "00:00:00:00:00:00:00:00",
-  "model-number-description" : "model1",
-  "name" : "Leaf2",
-  "serial-number-description" : "ABCDEF",
-  "shutdown" : false,
-  "software-description" : "Switch OS"
-}, {
-  "asic" : "asic2",
-  "connected" : true,
-  "connected-since" : "2016-07-20T18:46:19.234Z",
-  "dpid" : "00:00:00:00:00:00:00:00",
-  "fabric-connection-state" : "connected",
-  "fabric-last-seen-time" : "2016-07-20T18:46:22.296Z",
-  "fabric-role" : "spine",
-  "handshake-state" : "master-state",
-  "inet-address" : {
-    "inet-port" : 22222,
-    "ip" : "fe00:0:0:0:0000:0000:0000:0000%2"
+  {
+    "asic": "asic1",
+    "connected": true,
+    "connected-since": "2016-07-19T20:50:18.540Z",
+    "dpid": "00:00:00:00:00:00:00:00",
+    "fabric-connection-state": "connected",
+    "fabric-last-seen-time": "2016-07-19T20:50:21.608Z",
+    "fabric-role": "leaf",
+    "handshake-state": "master-state",
+    "inet-address": {
+      "inet-port": 11111,
+      "ip": "fe00:0:0:0:0000:0000:0000:0000%2"
+    },
+    "lacp-interface-offset": 0,
+    "lacp-system-mac": "00:00:00:00:00:00",
+    "leaf-group": "00:00:00:00:00:00:00:00",
+    "model-number-description": "model1",
+    "name": "Leaf2",
+    "serial-number-description": "ABCDEF",
+    "shutdown": false,
+    "software-description": "Switch OS"
   },
-  "leaf-group" : "00:00:00:00:00:00:00:00",
-  "model-number-description" : "model2",
-  "name" : "Spine1",
-  "serial-number-description" : "ABCDEFGH",
-  "shutdown" : false,
-  "software-description" : "Switch OS 2"
-} ]
+  {
+    "asic": "asic2",
+    "connected": true,
+    "connected-since": "2016-07-20T18:46:19.234Z",
+    "dpid": "00:00:00:00:00:00:00:00",
+    "fabric-connection-state": "connected",
+    "fabric-last-seen-time": "2016-07-20T18:46:22.296Z",
+    "fabric-role": "spine",
+    "handshake-state": "master-state",
+    "inet-address": {
+      "inet-port": 22222,
+      "ip": "fe00:0:0:0:0000:0000:0000:0000%2"
+    },
+    "leaf-group": "00:00:00:00:00:00:00:00",
+    "model-number-description": "model2",
+    "name": "Spine1",
+    "serial-number-description": "ABCDEFGH",
+    "shutdown": false,
+    "software-description": "Switch OS 2"
+  }
+]

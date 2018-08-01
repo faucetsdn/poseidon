@@ -46,76 +46,86 @@ class Parser:
             obj_doc = yaml.safe_load(stream)
             stream.close()
         except Exception as e:
-            self.logger.error("Failed to load config because: {0}".format(str(e)))
+            self.logger.error(
+                'Failed to load config because: {0}'.format(str(e)))
             return False
 
         if action == 'mirror' or action == 'unmirror':
             ok = True
             if not self.mirror_ports:
-                self.logger.error("Unable to mirror, no mirror ports defined")
+                self.logger.error('Unable to mirror, no mirror ports defined')
                 return False
             if not 'dps' in obj_doc:
-                self.logger.warning("Unable to find switch configs in {0}".format(config_file))
+                self.logger.warning(
+                    'Unable to find switch configs in {0}'.format(config_file))
                 ok = False
             else:
                 for s in obj_doc['dps']:
                     if switch == s:
                         switch_found = s
             if not switch_found:
-                self.logger.warning("No switch match found to mirror "
-                                    "from in the configs. switch: {0} {1}".format(switch, str(obj_doc)))
+                self.logger.warning('No switch match found to mirror '
+                                    'from in the configs. switch: {0} {1}'.format(switch, str(obj_doc)))
                 ok = False
             else:
                 if not switch_found in self.mirror_ports:
-                    self.logger.warning("Unable to mirror {0} on {1}, mirror port not defined on that switch".format(str(port), str(switch_found)))
+                    self.logger.warning('Unable to mirror {0} on {1}, mirror port not defined on that switch'.format(
+                        str(port), str(switch_found)))
                     ok = False
                 else:
                     if not port in obj_doc['dps'][switch_found]['interfaces']:
-                        self.logger.warning("No port match found for port {0} "
-                                            " to mirror from the switch {1} in "
-                                            " the configs".format(str(port), obj_doc['dps'][switch_found]['interfaces']))
+                        self.logger.warning('No port match found for port {0} '
+                                            ' to mirror from the switch {1} in '
+                                            ' the configs'.format(str(port), obj_doc['dps'][switch_found]['interfaces']))
                         ok = False
                     if not self.mirror_ports[switch_found] in obj_doc['dps'][switch_found]['interfaces']:
-                        self.logger.warning("No port match found for port {0} "
-                                            "to mirror from the switch {1} in "
-                                            "the configs".format(str(self.mirror_ports[switch_found]), obj_doc['dps'][switch_found]['interfaces']))
+                        self.logger.warning('No port match found for port {0} '
+                                            'to mirror from the switch {1} in '
+                                            'the configs'.format(str(self.mirror_ports[switch_found]), obj_doc['dps'][switch_found]['interfaces']))
                         ok = False
                     else:
                         if 'mirror' in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]:
                             if not isinstance(obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'], list):
-                                obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] = [obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']]
+                                obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] = [
+                                    obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']]
                         else:
-                            obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] = []
+                            obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] = [
+                            ]
             if ok:
                 if action == 'mirror':
                     if not port in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] and port is not None:
-                        obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'].append(port)
+                        obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'].append(
+                            port)
                 elif action == 'unmirror':
                     try:
                         # TODO check for still running captures on this port
-                        obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'].remove(port)
+                        obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'].remove(
+                            port)
                     except ValueError:
-                        self.logger.warning("This port: {0} was not already "
-                                            "mirroring on this switch: {1}".format(str(port), str(switch_found)))
+                        self.logger.warning('This port: {0} was not already '
+                                            'mirroring on this switch: {1}'.format(str(port), str(switch_found)))
             else:
-                self.logger.error("Unable to mirror due to warnings")
+                self.logger.error('Unable to mirror due to warnings')
                 return False
         elif action == 'shutdown':
             # TODO
             pass
         else:
-            self.logger.warning("Unknown action: {0}".format(action))
+            self.logger.warning('Unknown action: {0}'.format(action))
         try:
             if len(obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']) == 0:
-                obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]].remove('mirror')
+                obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]].remove(
+                    'mirror')
             else:
                 ports = []
                 for p in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']:
                     if p:
                         ports.append(p)
-                obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] = ports
+                obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]
+                                                           ]['mirror'] = ports
         except Exception as e:
-            self.logger.warning("Unable to remove empty mirror list because: {0}".format(str(e)))
+            self.logger.warning(
+                'Unable to remove empty mirror list because: {0}'.format(str(e)))
 
         stream = open(config_file, 'w')
         yaml.add_representer(type(None), represent_none)
@@ -126,13 +136,14 @@ class Parser:
     def event(self, message):
         data = {}
         if 'L2_LEARN' in message:
-            self.logger.debug("got faucet message for l2_learn: {0}".format(message))
+            self.logger.debug(
+                'got faucet message for l2_learn: {0}'.format(message))
             data['ip-address'] = message['L2_LEARN']['l3_src_ip']
             data['ip-state'] = 'L2 learned'
             data['mac'] = message['L2_LEARN']['eth_src']
             data['segment'] = str(message['dp_name'])
             data['port'] = str(message['L2_LEARN']['port_no'])
-            data['tenant'] = "VLAN"+str(message['L2_LEARN']['vid'])
+            data['tenant'] = 'VLAN'+str(message['L2_LEARN']['vid'])
             data['active'] = 1
             if message['L2_LEARN']['eth_src'] in self.mac_table:
                 dup = False
@@ -145,23 +156,26 @@ class Parser:
             else:
                 self.mac_table[message['L2_LEARN']['eth_src']] = [data]
         elif 'L2_EXPIRE' in message:
-            self.logger.debug("got faucet message for l2_expire: {0}".format(message))
+            self.logger.debug(
+                'got faucet message for l2_expire: {0}'.format(message))
             if message['L2_EXPIRE']['eth_src'] in self.mac_table:
-                self.mac_table[message['L2_EXPIRE']['eth_src']][0]['active'] = 0
+                self.mac_table[message['L2_EXPIRE']
+                               ['eth_src']][0]['active'] = 0
         elif 'PORT_CHANGE' in message:
-            self.logger.debug("got faucet message for port_change: {0}".format(message))
+            self.logger.debug(
+                'got faucet message for port_change: {0}'.format(message))
             if not message['PORT_CHANGE']['status']:
                 m_table = self.mac_table.copy()
                 for mac in m_table:
                     for data in m_table[mac]:
                         if (str(message['PORT_CHANGE']['port_no']) == data['port'] and
-                            str(message['dp_name']) == data['segment']):
+                                str(message['dp_name']) == data['segment']):
                             if mac in self.mac_table:
                                 self.mac_table[mac][0]['active'] = 0
         return
 
     def log(self, log_file):
-        self.logger.debug("parsing log file")
+        self.logger.debug('parsing log file')
         if not log_file:
             # default to FAUCET default
             log_file = '/var/log/faucet/faucet.log'
@@ -204,8 +218,9 @@ class Parser:
                             for mac in m_table:
                                 for data in m_table[mac]:
                                     if (port_change[0] == data['port'] and
-                                        dpid == data['segment']):
+                                            dpid == data['segment']):
                                         self.mac_table[mac][0]['active'] = 0
         except Exception as e:
-            self.logger.error("Error parsing Faucet log file {0}".format(str(e)))
+            self.logger.error(
+                'Error parsing Faucet log file {0}'.format(str(e)))
         return

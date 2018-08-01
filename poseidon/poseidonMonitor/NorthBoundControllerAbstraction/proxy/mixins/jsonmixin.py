@@ -32,5 +32,5 @@ class JsonMixin:
         Parse JSON from the `text` field of a response.
         """
         if not response.text:
-            return json.loads("{}")
+            return json.loads('{}')
         return response.json()

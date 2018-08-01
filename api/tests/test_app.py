@@ -1,10 +1,10 @@
-import falcon
 import os
-import redis
-from falcon import testing
-import pytest
 
+import falcon
+import pytest
+import redis
 from app.app import api
+from falcon import testing
 
 
 @pytest.fixture
@@ -39,60 +39,60 @@ def test_setup_redis():
             {'poseidon_hash': '6cd09124a66ef1bbc72c1aff4e333766d3533f83',
              'timestamps': "['1527208220', '1527208228']",
              'short_os': 'Linux'})
-    r.hmset('10.0.0.1_1527208227', {'labels': ["Developer workstation",
-                                               "Unknown",
-                                               "Smartphone"],
+    r.hmset('10.0.0.1_1527208227', {'labels': ['Developer workstation',
+                                               'Unknown',
+                                               'Smartphone'],
                                     'confidences': [0.6065386838895384,
                                                     0.3487681867266965,
                                                     0.015645883198622094]})
-    r.hmset('10.0.0.2_1527208227', {'labels': ["Developer workstation",
-                                               "Unknown",
-                                               "Smartphone"],
+    r.hmset('10.0.0.2_1527208227', {'labels': ['Developer workstation',
+                                               'Unknown',
+                                               'Smartphone'],
                                     'confidences': [0.6065386838895384,
                                                     0.3487681867266965,
                                                     0.015645883198622094]})
-    r.hmset('10.0.0.3_1527208228', {'labels': ["Developer workstation",
-                                               "Unknown",
-                                               "Smartphone"],
+    r.hmset('10.0.0.3_1527208228', {'labels': ['Developer workstation',
+                                               'Unknown',
+                                               'Smartphone'],
                                     'confidences': [0.6065386838895384,
                                                     0.3487681867266965,
                                                     0.015645883198622094]})
     r.hmset('6cd09124a66ef1bbc72c1aff4e333766d3533f81',
-            {"transition_time": "1524623228.1019075",
-             "prev_state": "None",
-             "endpoint_data": "{'name': None, \
+            {'transition_time': '1524623228.1019075',
+             'prev_state': 'None',
+             'endpoint_data': "{'name': None, \
                                 'mac': '00:00:00:00:00:01', \
                                 'ip-address': '10.0.0.1', \
                                 'segment': '1', \
                                 'port': '1', \
                                 'tenant': 'VLAN100', \
                                 'active': '0'}",
-             "next_state": "REINVESTIGATING",
-             "state": "KNOWN"})
+             'next_state': 'REINVESTIGATING',
+             'state': 'KNOWN'})
     r.hmset('6cd09124a66ef1bbc72c1aff4e333766d3533f82',
-            {"transition_time": "1524623228.1019075",
-             "prev_state": "None",
-             "endpoint_data": "{'name': None, \
+            {'transition_time': '1524623228.1019075',
+             'prev_state': 'None',
+             'endpoint_data': "{'name': None, \
                                 'mac': '00:00:00:00:00:02', \
                                 'ip-address': '10.0.0.2', \
                                 'segment': '1', \
                                 'port': '1', \
                                 'tenant': 'VLAN100', \
                                 'active': '1'}",
-             "next_state": "REINVESTIGATING",
-             "state": "KNOWN"})
+             'next_state': 'REINVESTIGATING',
+             'state': 'KNOWN'})
     r.hmset('6cd09124a66ef1bbc72c1aff4e333766d3533f83',
-            {"transition_time": "1524623228.1019075",
-             "prev_state": "None",
-             "endpoint_data": "{'name': None, \
+            {'transition_time': '1524623228.1019075',
+             'prev_state': 'None',
+             'endpoint_data': "{'name': None, \
                                 'mac': '00:00:00:00:00:03', \
                                 'ip-address': '10.0.0.3', \
                                 'segment': '1', \
                                 'port': '1', \
                                 'tenant': 'VLAN100', \
                                 'active': '1'}",
-             "next_state": "REINVESTIGATING",
-             "state": "KNOWN"})
+             'next_state': 'REINVESTIGATING',
+             'state': 'KNOWN'})
 
 
 def test_v1(client):

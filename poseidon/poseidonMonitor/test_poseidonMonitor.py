@@ -20,7 +20,6 @@ Test module for poseidonMonitor.py
 Created on 28 June 2016
 @author: cglewis, dgrossman, MShel
 """
-
 import json
 
 from prometheus_client import Gauge
@@ -29,11 +28,11 @@ from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor import poseidonMonitor
 from poseidon.poseidonMonitor.endPoint import EndPoint
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.EndpointWrapper import Endpoint_Wrapper
-from poseidon.poseidonMonitor.poseidonMonitor import (CTRL_C, Monitor,
-                                                      Collector,
-                                                      schedule_job_kickurl,
-                                                      schedule_thread_worker)
-
+from poseidon.poseidonMonitor.poseidonMonitor import Collector
+from poseidon.poseidonMonitor.poseidonMonitor import CTRL_C
+from poseidon.poseidonMonitor.poseidonMonitor import Monitor
+from poseidon.poseidonMonitor.poseidonMonitor import schedule_job_kickurl
+from poseidon.poseidonMonitor.poseidonMonitor import schedule_thread_worker
 
 
 def test_signal_handler():
@@ -80,6 +79,7 @@ def test_signal_handler():
             'job3 cancelled'] == mock_monitor.schedule.call_log
     assert True == mock_monitor.rabbit_channel_connection_local.connection_closed
 
+
 def test_start_vent_collector_faucet():
 
     class MockLogger:
@@ -88,7 +88,6 @@ def test_start_vent_collector_faucet():
             self.logger = module_logger.logger
             self.poseidon_logger = module_logger.poseidon_logger
 
-
     class requests():
 
         def __init__(self):
@@ -96,11 +95,11 @@ def test_start_vent_collector_faucet():
 
         def post(uri, json, data):
             def mock_response(): return None
-            mock_response.text = "success"
+            mock_response.text = 'success'
             # cover object
             a = mock_response()
             assert a is None
-            assert mock_response.text == "success"
+            assert mock_response.text == 'success'
             return mock_response
 
     class FaucetProxy():
@@ -116,76 +115,76 @@ def test_start_vent_collector_faucet():
         def __init__(self):
             stuff = dict(
                 {
-                  '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='NONE'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a4': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='MIRRORING'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a5': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='KNOWN'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a6': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='MIRRORING', next_state='KNOWN'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a7': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='KNOWN', next_state='REINVESTIGATING'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a8': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='MIRRORING', next_state='NONE'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='MIRRORING', next_state='NONE'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='REINVESTIGATING', next_state='NONE'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='REINVESTIGATING', next_state='NONE')
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='NONE'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a4': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='MIRRORING'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a5': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='KNOWN'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a6': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='KNOWN'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a7': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='KNOWN', next_state='REINVESTIGATING'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a8': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='REINVESTIGATING', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='REINVESTIGATING', next_state='NONE')
                 })
 
             self.endpoints = Endpoint_Wrapper()
@@ -219,6 +218,7 @@ def test_start_vent_collector_faucet():
     num_cuptures = 3
     mock_monitor.start_vent_collector(dev_hash, num_cuptures)
 
+
 def test_start_vent_collector_bcf():
 
     class MockLogger:
@@ -234,11 +234,11 @@ def test_start_vent_collector_bcf():
 
         def post(uri, json, data):
             def mock_response(): return None
-            mock_response.text = "success"
+            mock_response.text = 'success'
             # cover object
             a = mock_response()
             assert a is None
-            assert mock_response.text == "success"
+            assert mock_response.text == 'success'
             return mock_response
 
     class BCFProxy():
@@ -254,77 +254,77 @@ def test_start_vent_collector_bcf():
         def __init__(self):
             stuff = dict(
                 {
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='NONE'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a4': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='MIRRORING'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a5': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='KNOWN'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a6': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='MIRRORING', next_state='KNOWN'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a7': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='KNOWN', next_state='REINVESTIGATING'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a8': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='MIRRORING', next_state='NONE'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='NONE'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a4': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='MIRRORING'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a5': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='KNOWN'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a6': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='KNOWN'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a7': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='KNOWN', next_state='REINVESTIGATING'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a8': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='NONE'),
 
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='MIRRORING', next_state='NONE'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='REINVESTIGATING', next_state='NONE'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='REINVESTIGATING', next_state='NONE')
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='REINVESTIGATING', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='REINVESTIGATING', next_state='NONE')
                 })
 
             self.endpoints = Endpoint_Wrapper()
@@ -357,6 +357,7 @@ def test_start_vent_collector_bcf():
     dev_hash = 'test'
     num_cuptures = 3
     mock_monitor.start_vent_collector(dev_hash, num_cuptures)
+
 
 def test_not_start_vent_collector_bcf():
 
@@ -373,11 +374,11 @@ def test_not_start_vent_collector_bcf():
 
         def post(uri, json, data):
             def mock_response(): return None
-            mock_response.text = "success"
+            mock_response.text = 'success'
             # cover object
             a = mock_response()
             assert a is None
-            assert mock_response.text == "success"
+            assert mock_response.text == 'success'
             return mock_response
 
     class BCFProxy():
@@ -393,76 +394,76 @@ def test_not_start_vent_collector_bcf():
         def __init__(self):
             stuff = dict(
                 {
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='NONE'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a4': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='MIRRORING'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a5': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='KNOWN'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a6': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='MIRRORING', next_state='KNOWN'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a7': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='KNOWN', next_state='REINVESTIGATING'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a8': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='MIRRORING', next_state='NONE'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='MIRRORING', next_state='NONE'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='REINVESTIGATING', next_state='NONE'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='REINVESTIGATING', next_state='NONE')
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='NONE'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a4': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='MIRRORING'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a5': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='KNOWN'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a6': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='KNOWN'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a7': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='KNOWN', next_state='REINVESTIGATING'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a8': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='REINVESTIGATING', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='REINVESTIGATING', next_state='NONE')
                 })
 
             self.endpoints = Endpoint_Wrapper()
@@ -495,6 +496,7 @@ def test_not_start_vent_collector_bcf():
     dev_hash = 'test'
     num_cuptures = 3
     mock_monitor.start_vent_collector(dev_hash, num_cuptures)
+
 
 def test_get_vent_collectors():
 
@@ -557,12 +559,12 @@ def test_get_vent_collectors():
                 mock_response.json = mock_json
                 return None
             mock_response.text = ("(True, [{'status': u'exited', 'args': [u'enp3s0',"
-            " u'900', u'd525bec2b05a12af95021337eaa0b20e02b70f3a', u'1', "
-            "u'host 192.168.0.30'], 'id': u'0bce1351109e'}, {'status': u'exited', "
-            "'args': [u'enp3s0', u'900', u'97b7edfa648a994467ff0d2f87858a5ea22adaaa', "
-            "u'1', u'host 192.168.0.20'], 'id': u'c1a662efea1c'}, {'status': u'exited', "
-            "'args': [u'enp3s0', u'900', u'5a348c8a714c1092c7401decc74dbca5f5749195', "
-            "u'1', u'host 192.168.0.50'], 'id': u'2602280bb9da'}])")
+                                  " u'900', u'd525bec2b05a12af95021337eaa0b20e02b70f3a', u'1', "
+                                  "u'host 192.168.0.30'], 'id': u'0bce1351109e'}, {'status': u'exited', "
+                                  "'args': [u'enp3s0', u'900', u'97b7edfa648a994467ff0d2f87858a5ea22adaaa', "
+                                  "u'1', u'host 192.168.0.20'], 'id': u'c1a662efea1c'}, {'status': u'exited', "
+                                  "'args': [u'enp3s0', u'900', u'5a348c8a714c1092c7401decc74dbca5f5749195', "
+                                  "u'1', u'host 192.168.0.50'], 'id': u'2602280bb9da'}])")
             # cover object
             a = mock_response()
             b = mock_response.json()
@@ -578,76 +580,76 @@ def test_get_vent_collectors():
         def __init__(self):
             stuff = dict(
                 {
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='NONE'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a4': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='MIRRORING'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a5': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='KNOWN'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a6': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='MIRRORING', next_state='KNOWN'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a7': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='KNOWN', next_state='REINVESTIGATING'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a8': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='MIRRORING', next_state='NONE'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='MIRRORING', next_state='NONE'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='REINVESTIGATING', next_state='NONE'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='REINVESTIGATING', next_state='NONE')
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='NONE'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a4': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='MIRRORING'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a5': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='KNOWN'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a6': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='KNOWN'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a7': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='KNOWN', next_state='REINVESTIGATING'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a8': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='REINVESTIGATING', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='REINVESTIGATING', next_state='NONE')
                 })
 
             self.endpoints = Endpoint_Wrapper()
@@ -674,6 +676,7 @@ def test_get_vent_collectors():
     mock_monitor.logger = MockLogger().logger
     result = mock_monitor.get_vent_collectors()
     assert isinstance(result, dict)
+
 
 def test_host_has_active_collectors_false():
 
@@ -736,12 +739,12 @@ def test_host_has_active_collectors_false():
                 mock_response.json = mock_json
                 return None
             mock_response.text = ("(True, [{'status': u'exited', 'args': [u'enp3s0',"
-            " u'900', u'test0', u'1', "
-            "u'host 192.168.0.30'], 'id': u'0bce1351109e'}, {'status': u'exited', "
-            "'args': [u'enp3s0', u'900', u'test1', "
-            "u'1', u'host 192.168.0.20'], 'id': u'c1a662efea1c'}, {'status': u'exited', "
-            "'args': [u'enp3s0', u'900', u'test2', "
-            "u'1', u'host 192.168.0.50'], 'id': u'2602280bb9da'}])")
+                                  " u'900', u'test0', u'1', "
+                                  "u'host 192.168.0.30'], 'id': u'0bce1351109e'}, {'status': u'exited', "
+                                  "'args': [u'enp3s0', u'900', u'test1', "
+                                  "u'1', u'host 192.168.0.20'], 'id': u'c1a662efea1c'}, {'status': u'exited', "
+                                  "'args': [u'enp3s0', u'900', u'test2', "
+                                  "u'1', u'host 192.168.0.50'], 'id': u'2602280bb9da'}])")
             # cover object
             a = mock_response()
             b = mock_response.json()
@@ -757,77 +760,77 @@ def test_host_has_active_collectors_false():
         def __init__(self):
             stuff = dict(
                 {
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='NONE'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a4': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='MIRRORING'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a5': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='KNOWN'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a6': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='MIRRORING', next_state='KNOWN'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a7': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='KNOWN', next_state='REINVESTIGATING'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a8': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='MIRRORING', next_state='NONE'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='NONE'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a4': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='MIRRORING'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a5': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='KNOWN'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a6': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='KNOWN'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a7': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='KNOWN', next_state='REINVESTIGATING'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a8': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='NONE'),
 
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='MIRRORING', next_state='NONE'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='REINVESTIGATING', next_state='NONE'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='REINVESTIGATING', next_state='NONE')
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='REINVESTIGATING', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='REINVESTIGATING', next_state='NONE')
                 })
 
             self.endpoints = Endpoint_Wrapper()
@@ -855,6 +858,7 @@ def test_host_has_active_collectors_false():
     dev_hash = 'test0'
     result = mock_monitor.host_has_active_collectors(dev_hash)
     assert result == False
+
 
 def test_host_has_active_collectors_true():
 
@@ -917,12 +921,12 @@ def test_host_has_active_collectors_true():
                 mock_response.json = mock_json
                 return None
             mock_response.text = ("(True, [{'status': u'exited', 'args': [u'enp3s0',"
-            " u'900', u'test0', u'1', "
-            "u'host 192.168.0.30'], 'id': u'0bce1351109e'}, {'status': u'exited', "
-            "'args': [u'enp3s0', u'900', u'test1', "
-            "u'1', u'host 192.168.0.30'], 'id': u'c1a662efea1c'}, {'status': u'running', "
-            "'args': [u'enp3s0', u'900', u'test2', "
-            "u'1', u'host 192.168.0.30'], 'id': u'2602280bb9da'}])")
+                                  " u'900', u'test0', u'1', "
+                                  "u'host 192.168.0.30'], 'id': u'0bce1351109e'}, {'status': u'exited', "
+                                  "'args': [u'enp3s0', u'900', u'test1', "
+                                  "u'1', u'host 192.168.0.30'], 'id': u'c1a662efea1c'}, {'status': u'running', "
+                                  "'args': [u'enp3s0', u'900', u'test2', "
+                                  "u'1', u'host 192.168.0.30'], 'id': u'2602280bb9da'}])")
             # cover object
             a = mock_response()
             b = mock_response.json()
@@ -938,76 +942,76 @@ def test_host_has_active_collectors_true():
         def __init__(self):
             stuff = dict(
                 {
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='NONE'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a4': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='MIRRORING'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a5': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='KNOWN'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a6': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='MIRRORING', next_state='KNOWN'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a7': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='KNOWN', next_state='REINVESTIGATING'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a8': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='MIRRORING', next_state='NONE'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='MIRRORING', next_state='NONE'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='REINVESTIGATING', next_state='NONE'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                      prev_state='NONE', state='REINVESTIGATING', next_state='NONE')
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='NONE'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a4': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='MIRRORING'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a5': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='KNOWN'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a6': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='KNOWN'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a7': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='KNOWN', next_state='REINVESTIGATING'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a8': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='REINVESTIGATING', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='REINVESTIGATING', next_state='NONE')
                 })
 
             self.endpoints = Endpoint_Wrapper()
@@ -1036,11 +1040,12 @@ def test_host_has_active_collectors_true():
     result = mock_monitor.host_has_active_collectors(dev_hash)
     assert result == True
 
+
 def test_get_q_item():
     class MockMQueue:
 
         def get(self, block):
-            return "Item"
+            return 'Item'
 
     poseidonMonitor.CTRL_C['STOP'] = False
 
@@ -1052,7 +1057,7 @@ def test_get_q_item():
 
     mock_monitor = MockMonitor()
     mock_monitor.m_queue = MockMQueue()
-    assert (True, "Item") == mock_monitor.get_q_item()
+    assert (True, 'Item') == mock_monitor.get_q_item()
 
     poseidonMonitor.CTRL_C['STOP'] = True
     mock_monitor.m_queue = MockMQueue()
@@ -1090,7 +1095,7 @@ def test_format_rabbit_message():
 
 def test_rabbit_callback():
     def mock_method(): return True
-    mock_method.routing_key = "test_routing_key"
+    mock_method.routing_key = 'test_routing_key'
 
     # force mock_method coverage
     assert mock_method()
@@ -1108,18 +1113,18 @@ def test_rabbit_callback():
 
     mock_queue = MockQueue()
     poseidonMonitor.rabbit_callback(
-        "Channel",
+        'Channel',
         mock_method,
-        "properties",
-        "body",
+        'properties',
+        'body',
         mock_queue)
-    assert mock_queue.get_item() == (mock_method.routing_key, "body")
+    assert mock_queue.get_item() == (mock_method.routing_key, 'body')
 
     poseidonMonitor.rabbit_callback(
-        "Channel",
+        'Channel',
         mock_method,
-        "properties",
-        "body",
+        'properties',
+        'body',
         None)
 
 
@@ -1305,7 +1310,7 @@ def test_schedule_job_reinvestigation():
     #    "hash_4": {"state": "UNKNOWN", "next-state": "REINVESTIGATING"},
     #    "hash_5": {"state": "UNKNOWN", "next-state": "REINVESTIGATING"},
     #    "hash_6": {"state": "OTHER-STATE", "next-state": "UNKNOWN"}
-    #}
+    # }
 
     for s in stuff:
         epw.state[s] = stuff[s]
@@ -1335,76 +1340,76 @@ def test_update_next_state():
         def __init__(self):
             stuff = dict(
                 {
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='NONE'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a4': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='MIRRORING'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a5': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='KNOWN'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a6': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='MIRRORING', next_state='KNOWN'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a7': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='KNOWN', next_state='REINVESTIGATING'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a8': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='MIRRORING', next_state='NONE'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='MIRRORING', next_state='NONE'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='REINVESTIGATING', next_state='NONE'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'name': None},
-                     prev_state='NONE', state='REINVESTIGATING', next_state='NONE')
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='NONE'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a4': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='MIRRORING'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a5': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='KNOWN'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a6': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='KNOWN'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a7': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='KNOWN', next_state='REINVESTIGATING'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a8': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='REINVESTIGATING', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'name': None},
+                        prev_state='NONE', state='REINVESTIGATING', next_state='NONE')
                 })
 
             self.endpoints = Endpoint_Wrapper()
@@ -1493,11 +1498,11 @@ def test_update_next_state():
                 'state': 'KNOWN',
                 'next-state': 'REINVESTIGATING',
                 'endpoint': {
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'name': None}},
+                    'ip-address': '10.0.0.101',
+                    'mac': 'f8:b1:56:fe:f2:de',
+                    'segment': 'prod',
+                    'tenant': 'FOO',
+                    'name': None}},
             '4ee39d254db3e4a5264b75ce8ae312d69f9e73a8': {
                 'state': 'UNKNOWN',
                 'next-state': 'MIRRORING',
@@ -1641,8 +1646,8 @@ def test_configSelf2():
             pass
 
         def direct_get(self, mod_name):
-            assert "testingConfigSelf" == mod_name
-            return [(1, "YOYO")]
+            assert 'testingConfigSelf' == mod_name
+            return [(1, 'YOYO')]
 
     class MockLogger:
         def __init__(self):
@@ -1656,7 +1661,7 @@ def test_configSelf2():
             pass
 
         def get_endpoint(self, endpoint_type):
-            assert "Handle_SectionConfig" == endpoint_type
+            assert 'Handle_SectionConfig' == endpoint_type
             section_conf = MockSectionConfig()
             return section_conf
 
@@ -1665,7 +1670,7 @@ def test_configSelf2():
     mock_monitor.logger = MockLogger().logger
     mock_monitor.configSelf()
 
-    assert mock_monitor.mod_configuration[1] == "YOYO"
+    assert mock_monitor.mod_configuration[1] == 'YOYO'
 
 
 def test_schedule_job_kickurl():
@@ -1788,91 +1793,91 @@ def test_process():
             }
 
         def print_endpoint_state(self):
-            return ""
+            return ''
 
         def makedata(self):
             stuff = dict(
                 {
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'active': 1,
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='MIRRORING'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a4': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'active': 1,
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='MIRRORING'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a5': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'active': 0,
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='NONE'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a6': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'active': 1,
-                     'name': None},
-                     prev_state='NONE', state='MIRRORING', next_state='KNOWN'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a7': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'active': 1,
-                     'name': None},
-                     prev_state='NONE', state='KNOWN', next_state='REINVESTIGATING'),
-                 '4ee39d254db3e4a5264b75ce8ae312d69f9e73a8': EndPoint({
-                     'ip-address': '10.0.0.101',
-                     'mac': 'f8:b1:56:fe:f2:de',
-                     'segment': 'prod',
-                     'tenant': 'FOO',
-                     'active': 1,
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'active': 1,
-                     'name': None},
-                     prev_state='NONE', state='KNOWN', next_state='REINVESTIGATING'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aab': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'active': 1,
-                     'name': None},
-                     prev_state='NONE', state='KNOWN', next_state='NONE'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'active': 1,
-                     'name': None},
-                     prev_state='NONE', state='REINVESTIGATING', next_state='KNOWN'),
-                 'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': EndPoint({
-                     'ip-address': '10.0.0.99',
-                     'mac': '20:4c:9e:5f:e3:c3',
-                     'segment': 'to-core-router',
-                     'tenant': 'EXTERNAL',
-                     'active': 1,
-                     'name': None},
-                     prev_state='NONE', state='UNKNOWN', next_state='NONE')
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'active': 1,
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='MIRRORING'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a4': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'active': 1,
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='MIRRORING'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a5': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'active': 0,
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='NONE'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a6': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'active': 1,
+                        'name': None},
+                        prev_state='NONE', state='MIRRORING', next_state='KNOWN'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a7': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'active': 1,
+                        'name': None},
+                        prev_state='NONE', state='KNOWN', next_state='REINVESTIGATING'),
+                    '4ee39d254db3e4a5264b75ce8ae312d69f9e73a8': EndPoint({
+                        'ip-address': '10.0.0.101',
+                        'mac': 'f8:b1:56:fe:f2:de',
+                        'segment': 'prod',
+                        'tenant': 'FOO',
+                        'active': 1,
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'active': 1,
+                        'name': None},
+                        prev_state='NONE', state='KNOWN', next_state='REINVESTIGATING'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aab': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'active': 1,
+                        'name': None},
+                        prev_state='NONE', state='KNOWN', next_state='NONE'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'active': 1,
+                        'name': None},
+                        prev_state='NONE', state='REINVESTIGATING', next_state='KNOWN'),
+                    'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa2': EndPoint({
+                        'ip-address': '10.0.0.99',
+                        'mac': '20:4c:9e:5f:e3:c3',
+                        'segment': 'to-core-router',
+                        'tenant': 'EXTERNAL',
+                        'active': 1,
+                        'name': None},
+                        prev_state='NONE', state='UNKNOWN', next_state='NONE')
                 })
 
             for s in stuff:

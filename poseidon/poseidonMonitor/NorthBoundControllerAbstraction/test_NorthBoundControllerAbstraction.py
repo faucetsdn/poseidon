@@ -20,12 +20,12 @@ Test module for NorthBoundControllerAbstraction.py
 Created on 28 June 2016
 @author: dgrossman
 """
+import json
 
 from poseidon.baseClasses.Logger_Base import Logger
+from poseidon.poseidonMonitor.endPoint import EndPoint
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import controller_interface
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import Update_Switch_State
-from poseidon.poseidonMonitor.endPoint import EndPoint
-import json
 
 module_logger = Logger.logger
 
@@ -47,15 +47,15 @@ def test_update_endpoint_state():
                   'mac': 'f8:b1:56:fe:f2:de',
                   'segment': 'prod',
                   'tenant': 'FLOORPLATE',
-                  'active':1,
-                  'port':1,
+                  'active': 1,
+                  'port': 1,
                   'name': None},
                  {'ip-address': '10.0.0.2',
                   'mac': '20:4c:9e:5f:e3:c3',
                   'segment': 'to-core-router',
                   'tenant': 'EXTERNAL',
-                  'active':1,
-                  'port':1,
+                  'active': 1,
+                  'port': 1,
                   'name': None}]
 
             return a
@@ -78,41 +78,41 @@ def test_find_new_machines_first_time():
                  'mac': 'f8:b1:56:fe:f2:de',
                  'segment': 'prod',
                  'tenant': 'FLOORPLATE',
-                 'active':1,
-                 'port':1,
+                 'active': 1,
+                 'port': 1,
                  'name': None},
                 {'ip-address': '10.0.0.99',
                  'mac': '20:4c:9e:5f:e3:c3',
                  'segment': 'to-core-router',
                  'tenant': 'EXTERNAL',
-                 'active':1,
-                 'port':1,
+                 'active': 1,
+                 'port': 1,
                  'name': None}]
     uss.find_new_machines(machines)
     answer = dict(
         {
-            "d502caea3609d553ab16a00c554f0602c1419f58": {
-                "state": "KNOWN",
-                "next-state": "NONE",
-                "endpoint": {
-                    "ip-address": "10.0.0.101",
-                    "mac": "f8:b1:56:fe:f2:de",
-                    "segment": "prod",
-                    "tenant": "FLOORPLATE",
-                    "active":1,
-                    "port":1,
-                    "name": None}},
-            "3da53a95ae5d034ae37b539a24370260a36f8bb2": {
-                "state": "KNOWN",
-                "next-state": "NONE",
-                "endpoint": {
-                    "ip-address": "10.0.0.99",
-                    "mac": "20:4c:9e:5f:e3:c3",
-                    "segment": "to-core-router",
-                    "tenant": "EXTERNAL",
-                    "active":1,
-                    "port":1,
-                    "name": None}}})
+            'd502caea3609d553ab16a00c554f0602c1419f58': {
+                'state': 'KNOWN',
+                'next-state': 'NONE',
+                'endpoint': {
+                    'ip-address': '10.0.0.101',
+                    'mac': 'f8:b1:56:fe:f2:de',
+                    'segment': 'prod',
+                    'tenant': 'FLOORPLATE',
+                    'active': 1,
+                    'port': 1,
+                    'name': None}},
+            '3da53a95ae5d034ae37b539a24370260a36f8bb2': {
+                'state': 'KNOWN',
+                'next-state': 'NONE',
+                'endpoint': {
+                    'ip-address': '10.0.0.99',
+                    'mac': '20:4c:9e:5f:e3:c3',
+                    'segment': 'to-core-router',
+                    'tenant': 'EXTERNAL',
+                    'active': 1,
+                    'port': 1,
+                    'name': None}}})
     #assert str(answer) == str(dict(uss.endpoint_states))
     for key in answer:
         assert answer[key]['state'] == uss.endpoints.state[key].state
@@ -127,15 +127,15 @@ def test_file_new_machines_later():
                  'mac': 'f8:b1:56:fe:f2:de',
                  'segment': 'prod',
                  'tenant': 'FLOORPLATE',
-                 'active':1,
-                 'port':1,
+                 'active': 1,
+                 'port': 1,
                  'name': None},
                 {'ip-address': '10.0.0.99',
                  'mac': '20:4c:9e:5f:e3:c3',
                  'segment': 'to-core-router',
                  'tenant': 'EXTERNAL',
-                 'active':1,
-                 'port':1,
+                 'active': 1,
+                 'port': 1,
                  'name': None}]
     answer = dict(
         {
@@ -147,8 +147,8 @@ def test_file_new_machines_later():
                     'mac': 'f8:b1:56:fe:f2:de',
                     'segment': 'prod',
                     'tenant': 'FLOORPLATE',
-                    'active':1,
-                    'port':1,
+                    'active': 1,
+                    'port': 1,
                     'name': None}},
             '3da53a95ae5d034ae37b539a24370260a36f8bb2': {
                 'state': 'UNKNOWN',
@@ -158,8 +158,8 @@ def test_file_new_machines_later():
                     'mac': '20:4c:9e:5f:e3:c3',
                     'segment': 'to-core-router',
                     'tenant': 'EXTERNAL',
-                    'active':1,
-                    'port':1,
+                    'active': 1,
+                    'port': 1,
                     'name': None}}})
     uss.find_new_machines(machines)
 
@@ -187,15 +187,15 @@ def test_unmirror_endpoint():
                  'mac': 'f8:b1:56:fe:f2:de',
                  'segment': 'prod',
                  'tenant': 'FLOORPLATE',
-                 'active':1,
-                 'port':1,
+                 'active': 1,
+                 'port': 1,
                  'name': None},
                 {'ip-address': '10.0.0.99',
                  'mac': '20:4c:9e:5f:e3:c3',
                  'segment': 'to-core-router',
                  'tenant': 'EXTERNAL',
-                 'active':1,
-                 'port':1,
+                 'active': 1,
+                 'port': 1,
                  'name': None}]
     uss.find_new_machines(machines)
 
@@ -217,18 +217,19 @@ def test_get_endpoint_state():
                  'mac': 'f8:b1:56:fe:f2:de',
                  'segment': 'prod',
                  'tenant': 'FLOORPLATE',
-                 'active':1,
-                 'port':1,
+                 'active': 1,
+                 'port': 1,
                  'name': None},
                 {'ip-address': '10.0.0.99',
                  'mac': '20:4c:9e:5f:e3:c3',
                  'segment': 'to-core-router',
                  'tenant': 'EXTERNAL',
-                 'active':1,
-                 'port':1,
+                 'active': 1,
+                 'port': 1,
                  'name': None}]
     uss.find_new_machines(machines)
-    retval = uss.endpoints.get_endpoint_state('3da53a95ae5d034ae37b539a24370260a36f8bb2')
+    retval = uss.endpoints.get_endpoint_state(
+        '3da53a95ae5d034ae37b539a24370260a36f8bb2')
     answer = 'UNKNOWN'
     assert retval == answer
 
@@ -250,18 +251,19 @@ def test_get_endpoint_ip():
                  'mac': 'f8:b1:56:fe:f2:de',
                  'segment': 'prod',
                  'tenant': 'FLOORPLATE',
-                 'active':1,
-                 'port':1,
+                 'active': 1,
+                 'port': 1,
                  'name': None},
                 {'ip-address': '10.0.0.99',
                  'mac': '20:4c:9e:5f:e3:c3',
                  'segment': 'to-core-router',
                  'tenant': 'EXTERNAL',
-                 'active':1,
-                 'port':1,
+                 'active': 1,
+                 'port': 1,
                  'name': None}]
     uss.find_new_machines(machines)
-    retval = uss.endpoints.get_endpoint_ip('3da53a95ae5d034ae37b539a24370260a36f8bb2')
+    retval = uss.endpoints.get_endpoint_ip(
+        '3da53a95ae5d034ae37b539a24370260a36f8bb2')
     answer = '10.0.0.99'
     assert retval == answer
 
@@ -277,7 +279,7 @@ def test_change_endpoint_state():
                           'mac': '20:4c:9e:5f:e3:c3',
                           'segment': 'to-core-router',
                           'tenant': 'EXTERNAL',
-                          'active':1,
+                          'active': 1,
                           'name': None})
     hash_value = '3da53a95ae5d034ae37b539a24370260a36f8bb2'
     state = 'KNOWN'
@@ -292,7 +294,7 @@ def test_change_endpoint_state():
                     'mac': '20:4c:9e:5f:e3:c3',
                     'segment': 'to-core-router',
                     'tenant': 'EXTERNAL',
-                    'active':1,
+                    'active': 1,
                     'name': None}}})
     uss.endpoints.change_endpoint_state(
         '3da53a95ae5d034ae37b539a24370260a36f8bb2', new_state='TEST_STATE')
@@ -311,7 +313,7 @@ def test_change_endpoint_nextstate():
                           'mac': '20:4c:9e:5f:e3:c3',
                           'segment': 'to-core-router',
                           'tenant': 'EXTERNAL',
-                          'active':1,
+                          'active': 1,
                           'name': None})
     hash_value = '3da53a95ae5d034ae37b539a24370260a36f8bb2'
     state = 'KNOWN'
@@ -326,7 +328,7 @@ def test_change_endpoint_nextstate():
                     'mac': '20:4c:9e:5f:e3:c3',
                     'segment': 'to-core-router',
                     'tenant': 'EXTERNAL',
-                    'active':1,
+                    'active': 1,
                     'name': None}}})
     uss.endpoints.change_endpoint_nextstate(
         '3da53a95ae5d034ae37b539a24370260a36f8bb2', next_state='TEST_STATE')
@@ -345,7 +347,7 @@ def test_get_endpoinit_next():
                           'mac': '20:4c:9e:5f:e3:c3',
                           'segment': 'to-core-router',
                           'tenant': 'EXTERNAL',
-                          'active':1,
+                          'active': 1,
                           'name': None})
     hash_value = '3da53a95ae5d034ae37b539a24370260a36f8bb2'
     state = 'KNOWN'
@@ -366,7 +368,7 @@ def test_get_endpoinit_state():
                           'mac': '20:4c:9e:5f:e3:c3',
                           'segment': 'to-core-router',
                           'tenant': 'EXTERNAL',
-                          'active':1,
+                          'active': 1,
                           'name': None})
     hash_value = '3da53a95ae5d034ae37b539a24370260a36f8bb2'
     state = 'TEST_STATE'
@@ -384,7 +386,7 @@ def test_return_endpoint_state():
                           'mac': '20:4c:9e:5f:e3:c3',
                           'segment': 'to-core-router',
                           'tenant': 'EXTERNAL',
-                          'active':1,
+                          'active': 1,
                           'name': None})
     hash_value = '3da53a95ae5d034ae37b539a24370260a36f8bb2'
     state = 'TEST_STATE'
@@ -396,7 +398,7 @@ def test_return_endpoint_state():
                 'mac': '20:4c:9e:5f:e3:c3',
                 'segment': 'to-core-router',
                 'tenant': 'EXTERNAL',
-                'active':1,
+                'active': 1,
                 'name': None},
                 prev_state='NONE', state='TEST_STATE', next_state='NONE')
 
@@ -435,8 +437,6 @@ def test_first_run_bcf():
     uss = Update_Switch_State()
     uss.configured = False
     uss.first_run()
-
-
 
 
 def test_first_run_faucet():
@@ -491,7 +491,7 @@ def test_shutdown_endpoint():
                 'mac': 'f8:b1:56:fe:f2:de',
                 'segment': 'prod',
                 'tenant': 'FLOORPLATE',
-                'active':1,
+                'active': 1,
                 'name': None},
                 prev_state='NONE', state='UNKNOWN', next_state='NONE'),
             '3da53a95ae5d034ae37b539a24370260a36f8bb2': EndPoint({
@@ -499,7 +499,7 @@ def test_shutdown_endpoint():
                 'mac': '20:4c:9e:5f:e3:c3',
                 'segment': 'to-core-router',
                 'tenant': 'EXTERNAL',
-                'active':1,
+                'active': 1,
                 'name': None},
                 prev_state='NONE', state='KNOWN', next_state='NONE')
 
@@ -531,7 +531,7 @@ def test_mirror_endpoint():
                 'mac': 'f8:b1:56:fe:f2:de',
                 'segment': 'prod',
                 'tenant': 'FLOORPLATE',
-                'active':1,
+                'active': 1,
                 'name': None},
                 prev_state='NONE', state='UNKNOWN', next_state='NONE'),
             '3da53a95ae5d034ae37b539a24370260a36f8bb2': EndPoint({
@@ -539,7 +539,7 @@ def test_mirror_endpoint():
                 'mac': '20:4c:9e:5f:e3:c3',
                 'segment': 'to-core-router',
                 'tenant': 'EXTERNAL',
-                'active':1,
+                'active': 1,
                 'name': None},
                 prev_state='NONE', state='KNOWN', next_state='NONE'),
 
@@ -560,7 +560,7 @@ def test_print_endpoint_state():
                           'mac': '20:4c:9e:5f:e3:c3',
                           'segment': 'to-core-router',
                           'tenant': 'EXTERNAL',
-                          'active':1,
+                          'active': 1,
                           'name': None})
     hash_value = '3da53a95ae5d034ae37b539a24370260a36f8bb2'
     state = 'TEST_STATE'

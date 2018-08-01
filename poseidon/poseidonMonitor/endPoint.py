@@ -17,7 +17,6 @@
 Created on 2 October 2017
 @author: Jorissss
 """
-
 import hashlib
 import json
 import time
@@ -58,7 +57,7 @@ class EndPoint:
         strep += "', 'state': '" + self.state
         strep += "', 'next_state': '" + self.next_state
         strep += "', 'transition_time': '" + str(self.transition_time)
-        strep += "', 'endpoint_data': " + str(self.endpoint_data) + "}"
+        strep += "', 'endpoint_data': " + str(self.endpoint_data) + '}'
         return strep
 
     def to_json(self):

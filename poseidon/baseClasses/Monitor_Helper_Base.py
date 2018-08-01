@@ -58,11 +58,13 @@ class Monitor_Helper_Base(Rock_Bottom):
         self.poseidon_logger.info(ostr)
         # local valid
         if not self.owner:
-            self.logger.error('Configuration failed because: {0} {1}'.format(self.mod_name, 'ownerNull'))
+            self.logger.error('Configuration failed because: {0} {1}'.format(
+                self.mod_name, 'ownerNull'))
             return
         # monitor valid
         if not self.owner.owner:
-            self.logger.error('Configuration failed because: {0} {1}'.format(self.mod_name, 'monitorNull'))
+            self.logger.error('Configuration failed because: {0} {1}'.format(
+                self.mod_name, 'monitorNull'))
             return
         self.mod_configuration = dict()
         conf = self.owner.owner.Config.get_endpoint('Handle_SectionConfig')

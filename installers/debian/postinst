@@ -247,4 +247,3 @@ if db_go; then
 else
     exit 1
 fi
-

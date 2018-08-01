@@ -13,16 +13,17 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
 """
 Test module for endPoint.py
 
 Created on 2 October 2017
 @author: Jorissss
 """
+import time  # so we can override time.time
+from datetime import datetime
+from datetime import timedelta
+
 from mock import *
-from datetime import datetime, timedelta
-import time # so we can override time.time
 
 from poseidon.poseidonMonitor import endPoint
 

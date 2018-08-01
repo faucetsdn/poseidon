@@ -35,8 +35,8 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             base_uri,
             login_resource='auth/login',
             auth=None,
-            span_fabric_name = 'vent',
-            interface_group = 'ig1',
+            span_fabric_name='vent',
+            interface_group='ig1',
             *args,
             **kwargs):
         '''
@@ -128,7 +128,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
 
     def get_span_fabric(
             self,
-            span_name = '',
+            span_name='',
             interface_group='',
             span_fabric_resource='data/controller/applications/bcf/span-fabric'):
 
@@ -151,10 +151,10 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         r = self.get_resource(span_fabric_resource)
         spanArray = BcfProxy.parse_json(r)
         if len(spanArray) == 0:
-            self.logger.error("A span fabric with the configured combination of name: {0} and interface group: {1} could not be"
-            " found on the designated controller".format(span_name, interface_group))
+            self.logger.error('A span fabric with the configured combination of name: {0} and interface group: {1} could not be'
+                              ' found on the designated controller'.format(span_name, interface_group))
             retval = {}
-        else :
+        else:
             retval = spanArray[0]
         sout = 'get_span_fabric return:{0}'.format(retval)
         self.logger.debug(sout)

@@ -1,12 +1,14 @@
 import ast
-import falcon
 import json
 import os
-import redis
 import uuid
-
 from datetime import datetime
-from .routes import paths, version
+
+import falcon
+import redis
+
+from .routes import paths
+from .routes import version
 
 
 class Endpoints(object):
@@ -73,9 +75,11 @@ class NetworkFull(object):
                         if 'poseidon_hash' in ip_info:
                             node['hash'] = ip_info['poseidon_hash']
                             try:
-                                poseidon_info = self.r.hgetall(ip_info['poseidon_hash'])
+                                poseidon_info = self.r.hgetall(
+                                    ip_info['poseidon_hash'])
                                 if 'endpoint_data' in poseidon_info:
-                                    endpoint_data = ast.literal_eval(poseidon_info['endpoint_data'])
+                                    endpoint_data = ast.literal_eval(
+                                        poseidon_info['endpoint_data'])
                                     node['mac'] = endpoint_data['mac']
                                     node['segment'] = endpoint_data['segment']
                                     node['port'] = endpoint_data['port']
@@ -87,10 +91,13 @@ class NetworkFull(object):
                                 pass
                         if 'timestamps' in ip_info:
                             try:
-                                timestamps = ast.literal_eval(ip_info['timestamps'])
-                                ml_info = self.r.hgetall(ip_address+'_'+str(timestamps[-1]))
+                                timestamps = ast.literal_eval(
+                                    ip_info['timestamps'])
+                                ml_info = self.r.hgetall(
+                                    ip_address+'_'+str(timestamps[-1]))
                                 if 'labels' in ml_info:
-                                    labels = ast.literal_eval(ml_info['labels'])
+                                    labels = ast.literal_eval(
+                                        ml_info['labels'])
                                     node['role'] = labels[0]
                             except Exception as e:  # pragma: no cover
                                 pass
@@ -112,6 +119,7 @@ class NetworkFull(object):
         resp.body = json.dumps(network, indent=2)
         resp.content_type = falcon.MEDIA_JSON
         resp.status = falcon.HTTP_200
+
 
 class Network(object):
 
@@ -145,9 +153,11 @@ class Network(object):
                     node['IP'] = ip_address
                     # cheating for now
                     if ':' in ip_address:
-                        node['subnet'] = ':'.join(ip_address.split(':')[0:4])+"::0/64"
+                        node['subnet'] = ':'.join(
+                            ip_address.split(':')[0:4])+'::0/64'
                     else:
-                        node['subnet'] = '.'.join(ip_address.split('.')[:-1])+".0/24"
+                        node['subnet'] = '.'.join(
+                            ip_address.split('.')[:-1])+'.0/24'
                     # setting to unknown for now
                     node['rDNS_host'] = 'Unknown'
                     # set as unknown until it's set below
@@ -166,24 +176,32 @@ class Network(object):
 
                         if 'poseidon_hash' in ip_info:
                             try:
-                                poseidon_info = self.r.hgetall(ip_info['poseidon_hash'])
+                                poseidon_info = self.r.hgetall(
+                                    ip_info['poseidon_hash'])
                                 if 'endpoint_data' in poseidon_info:
-                                    endpoint_data = ast.literal_eval(poseidon_info['endpoint_data'])
+                                    endpoint_data = ast.literal_eval(
+                                        poseidon_info['endpoint_data'])
                                     node['mac'] = endpoint_data['mac']
                             except Exception as e:  # pragma: no cover
                                 pass
                         if 'timestamps' in ip_info:
                             try:
-                                timestamps = ast.literal_eval(ip_info['timestamps'])
+                                timestamps = ast.literal_eval(
+                                    ip_info['timestamps'])
                                 node['record']['source'] = 'poseidon'
-                                node['record']['timestamp'] = str(datetime.fromtimestamp(float(timestamps[-1])))
-                                ml_info = self.r.hgetall(ip_address+'_'+str(timestamps[-1]))
+                                node['record']['timestamp'] = str(
+                                    datetime.fromtimestamp(float(timestamps[-1])))
+                                ml_info = self.r.hgetall(
+                                    ip_address+'_'+str(timestamps[-1]))
                                 if 'labels' in ml_info:
-                                    labels = ast.literal_eval(ml_info['labels'])
+                                    labels = ast.literal_eval(
+                                        ml_info['labels'])
                                     node['role']['role'] = labels[0]
                                 if 'confidences' in ml_info:
-                                    confidences = ast.literal_eval(ml_info['confidences'])
-                                    node['role']['confidence'] = int(confidences[0]*100)
+                                    confidences = ast.literal_eval(
+                                        ml_info['confidences'])
+                                    node['role']['confidence'] = int(
+                                        confidences[0]*100)
                             except Exception as e:  # pragma: no cover
                                 pass
                         if 'short_os' in ip_info:
@@ -206,8 +224,8 @@ class Network(object):
         dataset = self.get_dataset()
         configuration = self.get_configuration()
 
-        network["dataset"] = dataset
-        network["configuration"] = configuration
+        network['dataset'] = dataset
+        network['configuration'] = configuration
         resp.body = json.dumps(network, indent=2)
         resp.content_type = falcon.MEDIA_JSON
         resp.status = falcon.HTTP_200
