@@ -13,7 +13,7 @@
 function logging()
 {
     docker logs -f cyberreboot-vent-syslog-master | \
-    while read line ; do
+    while read -r line ; do
         echo "$line" | grep -v 'poseidon-api' | grep -i 'poseidon' | awk '{$1=$2=$3=""; print $0}' | sed -e 's/^[ \t]*//'
     done
 
