@@ -69,23 +69,23 @@ def mock_factory(regex, filemap):
 def mock_factory2(regex):
     @urlmatch(netloc=regex)
     def mock_fn(url, request):
-        if url.path == "/data/controller/applications/bcf/tenant[name=%22TENANT%22]/segment[name=%22SEGMENT%22]/endpoint":
-            with open(os.path.join(cur_dir, "sample_endpoints2.json")) as f:
+        if url.path == '/data/controller/applications/bcf/tenant[name=%22TENANT%22]/segment[name=%22SEGMENT%22]/endpoint':
+            with open(os.path.join(cur_dir, 'sample_endpoints2.json')) as f:
                 data = f.read().replace('\n', '')
                 data = json.loads(data)
             request_body = json.loads(request.body)
-            if request_body["shutdown"]:
-                data[0]["state"] = "Shut Down"
+            if request_body['shutdown']:
+                data[0]['state'] = 'Shut Down'
             else:
-                data[0]["state"] = "Active"
+                data[0]['state'] = 'Active'
             data = json.dumps(data)
             r = response(content=data, request=request)
-        elif url.path == "/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22][dest-interface-group=%22INTERFACE_GROUP%22]" and request.method == "GET":
+        elif url.path == '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22][dest-interface-group=%22INTERFACE_GROUP%22]' and request.method == 'GET':
             data = json.dumps(span_fabric_state)
             r = response(content=data, request=request)
-        elif url.path == "/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22]" and request.method == "PUT":
+        elif url.path == '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22]' and request.method == 'PUT':
             request_body = json.loads(request.body)
-            span_fabric_state[0]["filter"] = request_body["filter"]
+            span_fabric_state[0]['filter'] = request_body['filter']
             data = json.dumps(span_fabric_state)
             r = response(content=data, request=request)
         else:  # pragma: no cover
@@ -123,9 +123,10 @@ def test_BcfProxy():
         assert segments
         span_fabric = proxy.get_span_fabric()
         assert span_fabric
-        span_fabric = proxy.get_span_fabric(span_name="SPAN_FABRIC")
+        span_fabric = proxy.get_span_fabric(span_name='SPAN_FABRIC')
         assert span_fabric
-        span_fabric = proxy.get_span_fabric(span_name="empty", interface_group="empty")
+        span_fabric = proxy.get_span_fabric(
+            span_name='empty', interface_group='empty')
         assert not span_fabric
 
     with HTTMock(mock_factory2(r'.*')):
@@ -134,31 +135,31 @@ def test_BcfProxy():
         # In addition, the mock endpoint generated does not check for duplicates.
         # TODO: ***This code below is temporary.***
         r = proxy.shutdown_endpoint(
-            tenant="TENANT",
-            segment="SEGMENT",
-            endpoint_name="test",
-            mac="00:00:00:00:00:00",
+            tenant='TENANT',
+            segment='SEGMENT',
+            endpoint_name='test',
+            mac='00:00:00:00:00:00',
             shutdown=True)
         assert r
         r = proxy.shutdown_endpoint(
-            tenant="TENANT",
-            segment="SEGMENT",
-            endpoint_name="test",
-            mac="00:00:00:00:00:00",
+            tenant='TENANT',
+            segment='SEGMENT',
+            endpoint_name='test',
+            mac='00:00:00:00:00:00',
             shutdown=False)
         assert r
 
         r = proxy.mirror_traffic(
             seq=2,
             mirror=True,
-            tenant="TENANT",
-            segment="SEGMENT")
+            tenant='TENANT',
+            segment='SEGMENT')
         assert r
         r = proxy.mirror_traffic(seq=2, mirror=False)
         assert r
 
     def r(): return True
-    r.text = ""
+    r.text = ''
 
     # cover object
     assert r()
@@ -167,12 +168,12 @@ def test_BcfProxy():
 
     proxy.session.cookies.clear_session_cookies()
 
-    proxy.base_uri = "http://jsonplaceholder.typicode.com"
+    proxy.base_uri = 'http://jsonplaceholder.typicode.com'
     r = proxy.post_resource('posts')
     r.raise_for_status()
     r = proxy.request_resource(
-        method="PUT",
-        url="http://jsonplaceholder.typicode.com/posts/1")
+        method='PUT',
+        url='http://jsonplaceholder.typicode.com/posts/1')
     r.raise_for_status()
 
 

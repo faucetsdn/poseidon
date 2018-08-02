@@ -50,7 +50,7 @@ def test_JsonMixin():
 def test_empty():
     # Verify that blank text fields are parsed properly.
     def obj(): return True  # Just a proxy object for attaching text field.
-    obj.text = ""
+    obj.text = ''
 
     # see if this forces coverge of obj
     assert obj()

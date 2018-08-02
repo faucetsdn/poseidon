@@ -20,7 +20,8 @@ Created on 18 November 2017
 """
 import os
 
-from paramiko import AutoAddPolicy, SSHClient
+from paramiko import AutoAddPolicy
+from paramiko import SSHClient
 from scp import SCPClient
 
 from poseidon.baseClasses.Logger_Base import Logger
@@ -73,7 +74,7 @@ class Connection:
             ssh.connect(self.host, username=self.user, password=self.pw)
             self.ssh = ssh
         except Exception as e:  # pragma: no cover
-            self.logger.error("failed to connect because: {0}".format(e))
+            self.logger.error('failed to connect because: {0}'.format(e))
 
     def _disconnect(self):
         if self.ssh:
@@ -101,7 +102,8 @@ class Connection:
                     pass
                 scp.close()
             except Exception as e:  # pragma: no cover
-                self.logger.error("failed to receive file {0} because: {1}".format(f_type, e))
+                self.logger.error(
+                    'failed to receive file {0} because: {1}'.format(f_type, e))
             self._disconnect()
 
     def send_file(self, f_type):
@@ -121,7 +123,8 @@ class Connection:
                     pass
                 scp.close()
             except Exception as e:  # pragma: no cover
-                self.logger.error("failed to send file {0} because: {1}".format(f_type, e))
+                self.logger.error(
+                    'failed to send file {0} because: {1}'.format(f_type, e))
             self._disconnect()
 
     def event_listener(self):

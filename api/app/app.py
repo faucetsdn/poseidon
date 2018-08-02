@@ -1,7 +1,8 @@
 import falcon
-
 from falcon_cors import CORS
-from .routes import routes, version
+
+from .routes import routes
+from .routes import version
 
 
 cors = CORS(allow_all_origins=True)

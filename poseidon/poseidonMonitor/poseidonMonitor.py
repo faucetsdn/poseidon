@@ -22,20 +22,21 @@ Created on 17 May 2016
 """
 import ast
 import json
-import queue as Queue
 import random
-import requests
-import schedule
 import signal
 import socket
 import sys
 import threading
 import time
-
 from binascii import hexlify
 from functools import partial
 from os import getenv
-from prometheus_client import start_http_server, Gauge
+
+import queue as Queue
+import requests
+import schedule
+from prometheus_client import Gauge
+from prometheus_client import start_http_server
 
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.baseClasses.Rabbit_Base import Rabbit_Base
@@ -79,19 +80,19 @@ def schedule_job_kickurl(func, logger):
 
     # send results to prometheus
     hosts = r.json()['dataset']
-    metrics = {'roles':{},
-               'oses':{},
-               'current_states':{('Poseidon', 'KNOWN'):0,
-                                 ('Poseidon', 'UNKNOWN'):0,
-                                 ('Poseidon', 'MIRRORING'):0,
-                                 ('Poseidon', 'SHUTDOWN'):0,
-                                 ('Poseidon', 'REINVESTIGATING'):0},
-               'vlans':{},
-               'record_sources':{},
-               'port_tenants':{},
-               'port_hosts':{},
-               'inactives':0,
-               'actives':0}
+    metrics = {'roles': {},
+               'oses': {},
+               'current_states': {('Poseidon', 'KNOWN'): 0,
+                                  ('Poseidon', 'UNKNOWN'): 0,
+                                  ('Poseidon', 'MIRRORING'): 0,
+                                  ('Poseidon', 'SHUTDOWN'): 0,
+                                  ('Poseidon', 'REINVESTIGATING'): 0},
+               'vlans': {},
+               'record_sources': {},
+               'port_tenants': {},
+               'port_hosts': {},
+               'inactives': 0,
+               'actives': 0}
     for host in hosts:
         if host['active'] == 0:
             metrics['inactives'] += 1
@@ -182,7 +183,8 @@ def schedule_job_kickurl(func, logger):
                                                      hash_id=host['hash'],
                                                      record_source=host['record_source']).set(ip2int(host['ip']))
         except Exception as e:  # pragma: no cover
-            logger.error('unable to send {0} results to prometheus because {1}'.format(host, str(e)))
+            logger.error(
+                'unable to send {0} results to prometheus because {1}'.format(host, str(e)))
 
     try:
         for role in metrics['roles']:
@@ -198,16 +200,19 @@ def schedule_job_kickurl(func, logger):
             func.prom_metrics['vlans'].labels(record_source=vlan[0],
                                               tenant=vlan[1]).set(metrics['vlans'][vlan])
         for record_source in metrics['record_sources']:
-            func.prom_metrics['record_sources'].labels(record_source=record_source).set(metrics['record_sources'][record_source])
+            func.prom_metrics['record_sources'].labels(record_source=record_source).set(
+                metrics['record_sources'][record_source])
         for port_tenant in metrics['port_tenants']:
             func.prom_metrics['port_tenants'].labels(port=port_tenant[0],
                                                      tenant=port_tenant[1]).set(metrics['port_tenants'][port_tenant])
         for port_host in metrics['port_hosts']:
-            func.prom_metrics['port_hosts'].labels(port=port_host).set(metrics['port_hosts'][port_host])
+            func.prom_metrics['port_hosts'].labels(
+                port=port_host).set(metrics['port_hosts'][port_host])
         func.prom_metrics['inactive'].set(metrics['inactives'])
         func.prom_metrics['active'].set(metrics['actives'])
     except Exception as e:  # pragma: no cover
-        logger.error('unable to send results to prometheus because {0}'.format(str(e)))
+        logger.error(
+            'unable to send results to prometheus because {0}'.format(str(e)))
 
 
 def rabbit_callback(ch, method, properties, body, q=None):
@@ -342,7 +347,6 @@ class Monitor(object):
         max_concurrent_reinvestigations = int(
             self.mod_configuration['max_concurrent_reinvestigations'])
 
-
         try:
             self.fa_rabbit_enabled = ast.literal_eval(
                 self.mod_configuration['FA_RABBIT_ENABLED'])
@@ -357,7 +361,8 @@ class Monitor(object):
             self.fa_rabbit_routing_key = str(
                 self.mod_configuration['FA_RABBIT_ROUTING_KEY'])
         except Exception as e:  # pragma: no cover
-            self.logger.debug("unable to see Faucet Rabbit configuration because: " + str(e))
+            self.logger.debug(
+                'unable to see Faucet Rabbit configuration because: ' + str(e))
 
         self.schedule.every(scan_frequency).seconds.do(
             partial(schedule_job_kickurl, func=self, logger=self.logger))
@@ -456,7 +461,8 @@ class Monitor(object):
         endpoint = endpoints.state.get(dev_hash, EndPoint(None))
 
         should_start = True
-        should_start = (isinstance(self.uss.sdnc, BcfProxy) and self.uss.sdnc.get_span_fabric()) or ( not isinstance(self.uss.sdnc, BcfProxy))
+        should_start = (isinstance(self.uss.sdnc, BcfProxy) and self.uss.sdnc.get_span_fabric()) or (
+            not isinstance(self.uss.sdnc, BcfProxy))
 
         payload = {
             'nic': self.mod_configuration['collector_nic'],
@@ -478,12 +484,13 @@ class Monitor(object):
                 resp = requests.post(uri, data=json.dumps(payload))
                 self.logger.debug('collector response: ' + resp.text)
             else:
-                self.logger.debug('collector not started due to invalid span fabric configuration.')
+                self.logger.debug(
+                    'collector not started due to invalid span fabric configuration.')
 
         except Exception as e:  # pragma: no cover
             self.logger.debug('failed to start vent collector' + str(e))
 
-    ## returns a dictionary of existing collectors keyed on dev_hash
+    # returns a dictionary of existing collectors keyed on dev_hash
     def get_vent_collectors(self):
         vent_addr = self.mod_configuration['vent_ip'] + \
             ':' + self.mod_configuration['vent_port']
@@ -492,13 +499,15 @@ class Monitor(object):
         try:
             resp = requests.get(uri)
             text = resp.text
-            if text.index("True") != -1:
-                items =  ast.literal_eval(text[text.find(",")+2:text.rfind(")")])
+            if text.index('True') != -1:
+                items = ast.literal_eval(
+                    text[text.find(',')+2:text.rfind(')')])
                 collectors = {}
                 for item in items:
                     host = item['args'][4][5:]
-                    coll = Collector(item['id'], item['args'][0], item['args'][1], item['args'][2], item['args'][3], host, item['status'])
-                    collectors.update({ coll.hash:coll })
+                    coll = Collector(item['id'], item['args'][0], item['args'][1],
+                                     item['args'][2], item['args'][3], host, item['status'])
+                    collectors.update({coll.hash: coll})
                 statuses = collectors
 
             self.logger.debug('collector list response: ' + resp.text)
@@ -520,7 +529,7 @@ class Monitor(object):
                 'Key: {0} not found in collector dictionary. '
                 'Treating this as the existence of multiple active'
                 'collectors'.format(dev_hash)
-                )
+            )
             return True
 
         for c in collectors:
@@ -529,7 +538,7 @@ class Monitor(object):
                 collectors[c].hash != dev_hash and
                 collectors[c].host == hash_coll.host and
                 collectors[c].status != 'exited'
-               ):
+            ):
                 active_collectors_exist = True
                 break
 
@@ -583,14 +592,15 @@ class Monitor(object):
                 if found_work and item[0] != self.fa_rabbit_routing_key:
                     # TODO make this read until nothing in q
                     ml_returns = self.format_rabbit_message(item)
-                    self.logger.debug("\n\n\n**********************")
+                    self.logger.debug('\n\n\n**********************')
                     self.logger.debug('ml_returns:{0}'.format(ml_returns))
-                    self.logger.debug("**********************\n\n\n")
+                    self.logger.debug('**********************\n\n\n')
                 elif found_work and item[0] == self.fa_rabbit_routing_key:
                     self.faucet_event.append(self.format_rabbit_message(item))
-                    self.logger.debug("\n\n\n**********************")
-                    self.logger.debug('faucet_event:{0}'.format(self.faucet_event))
-                    self.logger.debug("**********************\n\n\n")
+                    self.logger.debug('\n\n\n**********************')
+                    self.logger.debug(
+                        'faucet_event:{0}'.format(self.faucet_event))
+                    self.logger.debug('**********************\n\n\n')
 
                 eps = self.uss.endpoints
                 state_transitions = self.update_next_state(ml_returns)
@@ -611,40 +621,48 @@ class Monitor(object):
                             'updating:{0}:{1}->{2}'.format(endpoint_hash,
                                                            current_state,
                                                            next_state))
-                        self.logger.debug('*********** U NOTIFY VENT ***********')
+                        self.logger.debug(
+                            '*********** U NOTIFY VENT ***********')
                         self.start_vent_collector(endpoint_hash)
-                        self.logger.debug('*********** U MIRROR PORT ***********')
-                        self.uss.mirror_endpoint(endpoint_hash, messages=self.faucet_event)
+                        self.logger.debug(
+                            '*********** U MIRROR PORT ***********')
+                        self.uss.mirror_endpoint(
+                            endpoint_hash, messages=self.faucet_event)
                     if next_state == 'REINVESTIGATING':
                         self.logger.debug(
                             'updating:{0}:{1}->{2}'.format(endpoint_hash,
                                                            current_state,
                                                            next_state))
-                        self.logger.debug('*********** R NOTIFY VENT ***********')
+                        self.logger.debug(
+                            '*********** R NOTIFY VENT ***********')
                         self.start_vent_collector(endpoint_hash)
-                        self.logger.debug('*********** R MIRROR PORT ***********')
-                        self.uss.mirror_endpoint(endpoint_hash, messages=self.faucet_event)
+                        self.logger.debug(
+                            '*********** R MIRROR PORT ***********')
+                        self.uss.mirror_endpoint(
+                            endpoint_hash, messages=self.faucet_event)
                     if next_state == 'KNOWN':
                         if (current_state == 'REINVESTIGATING' or
-                            current_state == 'MIRRORING'):
-                            if not self.host_has_active_collectors(endpoint_hash) :
+                                current_state == 'MIRRORING'):
+                            if not self.host_has_active_collectors(endpoint_hash):
                                 self.logger.debug(
                                     '*********** ' +
                                     current_state[0] +
                                     ' UN-MIRROR PORT ***********')
-                                self.uss.unmirror_endpoint(endpoint_hash, messages=self.faucet_event)
-                            else :
+                                self.uss.unmirror_endpoint(
+                                    endpoint_hash, messages=self.faucet_event)
+                            else:
                                 self.logger.debug(
                                     '*********** ' +
                                     current_state[0] +
                                     ' CAN NOT UN-MIRROR PORT BECAUSE OF ACTIVE COLLECTOR ***********')
                             eps.change_endpoint_state(endpoint_hash)
                         if current_state == 'UNKNOWN':
-                            if not self.host_has_active_collectors(endpoint_hash) :
+                            if not self.host_has_active_collectors(endpoint_hash):
                                 self.logger.debug(
                                     '*********** U UN-MIRROR PORT ***********')
-                                self.uss.unmirror_endpoint(endpoint_hash, messages=self.faucet_event)
-                            else :
+                                self.uss.unmirror_endpoint(
+                                    endpoint_hash, messages=self.faucet_event)
+                            else:
                                 self.logger.debug(
                                     '*********** U UN-MIRROR PORT ***********')
                             eps.change_endpoint_state(endpoint_hash)
@@ -657,7 +675,8 @@ class Monitor(object):
 
                     eps.print_endpoint_state()
             except Exception as e:  # pragma: no cover
-                self.logger.debug("iteration failed because: {0}".format(str(e)))
+                self.logger.debug(
+                    'iteration failed because: {0}'.format(str(e)))
 
     def get_q_item(self):
         ''' attempt to get a workitem from the queue'''
@@ -693,6 +712,7 @@ class Monitor(object):
         except BaseException:  # pragma: no cover
             pass
 
+
 class Collector(object):
     def __init__(self, id, nic, interval, hash, iterations, host, status):
         self.id = id
@@ -702,6 +722,7 @@ class Collector(object):
         self.iterations = iterations
         self.host = host
         self.status = status
+
 
 def main(skip_rabbit=False):  # pragma: no cover
     ''' main function '''
@@ -737,13 +758,13 @@ def main(skip_rabbit=False):  # pragma: no cover
                                         ['record_source',
                                          'role'])
     pmain.prom_metrics['oses'] = Gauge('poseidon_endpoint_oses',
-                                        'Number of endpoints by OS',
-                                        ['record_source',
-                                         'os'])
+                                       'Number of endpoints by OS',
+                                       ['record_source',
+                                        'os'])
     pmain.prom_metrics['current_states'] = Gauge('poseidon_endpoint_current_states',
-                                        'Number of endpoints by current state',
-                                        ['record_source',
-                                         'current_state'])
+                                                 'Number of endpoints by current state',
+                                                 ['record_source',
+                                                  'current_state'])
     pmain.prom_metrics['vlans'] = Gauge('poseidon_endpoint_vlans',
                                         'Number of endpoints by VLAN',
                                         ['record_source',

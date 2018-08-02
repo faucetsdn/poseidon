@@ -14,12 +14,10 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
 """
 Created on 14 Jul 2016
 @author: dgrossman
 """
-
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.baseClasses.Rock_Bottom import Rock_Bottom
 

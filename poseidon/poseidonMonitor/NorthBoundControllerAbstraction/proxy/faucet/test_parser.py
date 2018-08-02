@@ -34,9 +34,9 @@ def test_Parser():
         config_dir = os.path.join(os.getcwd(), 'faucet')
     if not os.path.exists(log_dir):
         log_dir = os.path.join(os.getcwd(), 'faucet')
-    parser = Parser(mirror_ports={'switch1':3})
+    parser = Parser(mirror_ports={'switch1': 3})
     parser.config(os.path.join(config_dir, 'faucet.yaml'),
-                 'mirror', 1, 'switch1')
+                  'mirror', 1, 'switch1')
     parser.config(os.path.join(config_dir, 'faucet.yaml'),
                   'mirror', 2, 0x70b3d56cd32e)
     parser.config(os.path.join(config_dir, 'faucet.yaml'),

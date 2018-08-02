@@ -45,7 +45,7 @@ class Monitor_Helper_Base(Rock_Bottom):
         # add poseidon logger
         self.poseidon_logger = module_logger.poseidon_logger
 
-        self.logger.debug('set_owner = {0}'.format(owner.mod_name))
+        self.poseidon_logger.debug('set_owner = {0}'.format(owner.mod_name))
         self.owner = owner
         if self.owner.mod_name is not None:
             self.config_section_name = self.owner .mod_name + ':' + self.mod_name
@@ -55,16 +55,16 @@ class Monitor_Helper_Base(Rock_Bottom):
     def configure(self):
         '''get, parse, store configuration internally as dict'''
         ostr = '{0} {1}'.format(self.mod_name, 'configure()')
-        self.logger.info(ostr)
+        self.poseidon_logger.info(ostr)
         # local valid
         if not self.owner:
-            ostr = '{0} {1}'.format(self.mod_name, 'ownerNull')
-            self.logger.error(ostr)
+            self.logger.error('Configuration failed because: {0} {1}'.format(
+                self.mod_name, 'ownerNull'))
             return
         # monitor valid
         if not self.owner.owner:
-            ostr = '{0} {1}'.format(self.mod_name, 'monitorNull')
-            self.logger.error(ostr)
+            self.logger.error('Configuration failed because: {0} {1}'.format(
+                self.mod_name, 'monitorNull'))
             return
         self.mod_configuration = dict()
         conf = self.owner.owner.Config.get_endpoint('Handle_SectionConfig')

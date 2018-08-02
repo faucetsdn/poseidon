@@ -41,7 +41,7 @@ class Logger:
     logger.propagate = False
 
     # timestamp - logger_level - class:line number - message
-    formatter = logging.Formatter('%(levelname)s - '
+    formatter = logging.Formatter('%(levelname)s:'
                                   '%(module)s:%(lineno)-3d - %(message)s')
 
     # set the logger to log to console
@@ -49,17 +49,19 @@ class Logger:
     ch.setFormatter(formatter)
     logger.addHandler(ch)
 
-    poseidon_logger = logging.getLogger(__name__)
+    poseidon_logger = logging.getLogger("poseidon")
     poseidon_logger.setLevel(logging.INFO)
     poseidon_logger.propagate = False
 
     # set the poseidon logger to log to file
     try:
-        fh = logging.handlers.RotatingFileHandler('/var/log/poseidon.log', backupCount=5, maxBytes=(10*1024*1024))
+        fh = logging.handlers.RotatingFileHandler(
+            '/var/log/poseidon.log', backupCount=5, maxBytes=(10*1024*1024))
         fh.setFormatter(formatter)
         poseidon_logger.addHandler(fh)
     except Exception as e:
-        logger.warning("Unable to setup Poseidon logger because: {0}".format(str(e)))
+        logger.warning(
+            'Unable to setup Poseidon logger because: {0}'.format(str(e)))
 
     # don't try to connect to a syslog address if one was not supplied
     if host != 'NOT_CONFIGURED':  # pragma: no cover
@@ -76,6 +78,7 @@ class Logger:
         Set the logger level. That level and above gets logged.
         """
         Logger.logger.setLevel(Logger.level_int[level.upper()])
+        Logger.poseidon_logger.setLevel(Logger.level_int[level.upper()])
 
     @staticmethod
     def logger_config(config):

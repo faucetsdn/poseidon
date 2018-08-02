@@ -17,10 +17,11 @@
 ''' Created on 21 August 2017
 @author: dgrossman
 '''
-import pika
 import threading
 import time
 from functools import partial
+
+import pika
 
 from .Logger_Base import Logger
 

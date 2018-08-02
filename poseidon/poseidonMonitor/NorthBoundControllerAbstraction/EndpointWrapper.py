@@ -18,9 +18,9 @@ Created on 21 Nov 2017
 @author: dgrossman
 '''
 import json
-import requests
-
 from collections import defaultdict
+
+import requests
 
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.Config.Config import config_interface
