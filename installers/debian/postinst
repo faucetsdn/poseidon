@@ -228,6 +228,8 @@ if db_go; then
             echo "vlans:" >> /etc/faucet/faucet.yaml
             echo "  8:" >> /etc/faucet/faucet.yaml
 
+            touch /var/log/poseidon.log
+
             command -v python >/dev/null 2>&1 || { echo >&2 -e "${red}Python not installed, please install it first: sudo apt-get install python${endColor}"; db_unregister poseidon/controller_type; exit 1; }
             command -v mn >/dev/null 2>&1 || { echo >&2 -e "${red}Mininet not installed, please install it first: sudo apt-get install mininet${endColor}"; db_unregister poseidon/controller_type; exit 1; }
             command -v docker-compose >/dev/null 2>&1 || { sudo curl -L https://github.com/docker/compose/releases/download/1.21.2/docker-compose-"$(uname -s)"-"$(uname -m)" -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose; }

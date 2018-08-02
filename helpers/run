@@ -20,6 +20,8 @@ declare FA_RABBIT_ROUTING_KEY
 declare FA_RABBIT_PORT
 declare max_concurrent_reinvestigations
 
+sudo touch /var/log/poseidon.log
+
 d_comm="docker run -dit -v /var/run/docker.sock:/var/run/docker.sock -v /opt/vent_files:/opt/vent_files -v $(pwd)/.plugin_config.yml:/root/.plugin_config.yml -v $(pwd)/.vent_startup.yml:/root/.vent_startup.yml "
 if [[ ! -z "${controller_uri}" ]]; then
 	d_comm+="-e controller_uri=$controller_uri "
