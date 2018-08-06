@@ -1,6 +1,0 @@
-#!/bin/sh
-
-set -e
-
-systemctl stop poseidon.service
-systemctl disable poseidon.service

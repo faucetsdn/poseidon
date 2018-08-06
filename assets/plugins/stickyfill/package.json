@@ -1,0 +1,32 @@
+{
+  "author": {
+    "name": "Oleg Korsunsky",
+    "url": "https://github.com/wilddeer"
+  },
+  "dependencies": {},
+  "description": "Polyfill for CSS `position: sticky`",
+  "devDependencies": {
+    "babel-preset-es2015": "^6.22.0",
+    "grunt": "^1.0.1",
+    "grunt-babel": "^6.0.0",
+    "grunt-bump": "^0.8.0",
+    "grunt-contrib-uglify": "^2.0.0",
+    "grunt-contrib-watch": "^1.0.0",
+    "grunt-shell": "^2.1.0",
+    "grunt-wrap": "^0.3.1"
+  },
+  "homepage": "https://github.com/wilddeer/stickyfill",
+  "keywords": [
+    "sticky",
+    "polyfill"
+  ],
+  "license": "MIT",
+  "main": "dist/stickyfill.js",
+  "name": "stickyfilljs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wilddeer/stickyfill.git"
+  },
+  "types": "types/index.d.ts",
+  "version": "2.0.5"
+}
