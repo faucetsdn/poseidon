@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "ashleydw <hello@ashleyd.ws>"
+  ],
+  "dependencies": {
+    "bootstrap": ">= 4.0.0-alpha.3"
+  },
+  "description": "A lightbox gallery plugin for Bootstrap based on the modal plugin",
+  "homepage": "https://github.com/ashleydw/lightbox",
+  "ignore": [
+    "**/.*",
+    "examples",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "keywords": [
+    "lightbox",
+    "gallery",
+    "bootstrap",
+    "jquery",
+    "modal"
+  ],
+  "license": "MIT",
+  "main": "./dist/ekko-lightbox.min.js",
+  "name": "ekko-lightbox",
+  "version": "5.3.0"
+}

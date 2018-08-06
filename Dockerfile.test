@@ -1,3 +1,0 @@
-FROM redis:latest
-FROM poseidon:latest
-CMD py.test -v -vv --cov-report term-missing --cov=./poseidon --cov=./api -c .coveragerc
