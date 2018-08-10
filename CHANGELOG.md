@@ -1,3 +1,11 @@
+# v0.3.2 (2018-08-10)
+
+ - Updated README
+ - Demo now uses cat instead of less
+ - Updated version of pytest, prometheus_client, and pylint
+ - Improved logging, created a poseidon.log
+ - Updated to alpine 3.8
+
 # v0.3.1 (2018-07-27)
 
  - If span fabric or interface group doesn't exist, don't mirror
