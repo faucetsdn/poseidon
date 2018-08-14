@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Poseidon Documentation</title>
+    <!-- Meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+    <!-- FontAwesome JS -->
+    <script defer src="https://use.fontawesome.com/releases/v5.1.1/js/all.js" integrity="sha384-BtvRZcyfv4r0x/phJt9Y9HhnN5ur1Z+kZbKVgzVBAlQZX4jvAuImlIz+bG7TS00a" crossorigin="anonymous"></script>
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="assets/plugins/bootstrap/css/bootstrap.min.css">
+    <!-- Plugins CSS -->
+    <link rel="stylesheet" href="assets/plugins/prism/prism.css">
+    <link rel="stylesheet" href="assets/plugins/lightbox/dist/ekko-lightbox.css">
+    <link rel="stylesheet" href="assets/plugins/elegant_font/css/style.css">
+
+    <!-- Theme CSS -->
+    <link id="theme-style" rel="stylesheet" href="assets/css/styles.css">
+
+</head>
+
+<body class="body-pink">
+    <div class="page-wrapper">
+        <!-- ******Header****** -->
+        <header id="header" class="header">
+            <div class="container">
+                <div class="branding">
+                    <h1 class="logo">
+                        <a href="index.html">
+                            <span aria-hidden="true" class="icon_documents_alt icon"></span>
+                            <span class="text-highlight">Poseidon</span><span class="text-bold">Docs</span>
+                        </a>
+                    </h1>
+                </div><!--//branding-->
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                    <li class="breadcrumb-item active">Setup &amp; Install</li>
+                </ol>
+            </div><!--//container-->
+        </header><!--//header-->
+        <div class="doc-wrapper">
+            <div class="container">
+                <div id="doc-header" class="doc-header text-center">
+                    <h1 class="doc-title"><span aria-hidden="true" class="icon icon_puzzle_alt"></span> Setup &amp; Install</h1>
+                    <div class="meta"><i class="far fa-clock"></i> Last updated: August 7th, 2018</div>
+                </div><!--//doc-header-->
+                <div class="doc-body row" >
+                    <div class="doc-content col-md-9 col-12 order-1">
+                        <div class="content-inner">
+                            <section id="prerequisites" class="doc-section">
+                                <h2 class="section-title">Prerequisites</h2>
+                                <div class="section-block">
+                                    <p>Poseidon runs inside of Docker containers so it can be run anywhere that Docker containers can run, however the recommended installation path has the following prerequisites to ensure consistent, stable results.</p>
+                                    <p><ul>
+                                        <li>A dedicated Linux System or Virtual Machine (A Debian-based distribution is preferred - Ubuntu 16.x is ideal)
+                                            <ul><li>Currently supported versions for the Debian package install are:
+                                                <ul><li>Ubuntu 14.04</li>
+                                                <li>Ubuntu 16.04</li>
+                                                <li>Ubuntu 17.10</li>
+                                                <li>Ubuntu 18.04</li></ul>
+                                            </li></ul>
+                                        </li>
+                                        <li><a href="https://www.docker.com">Docker</a> - Poseidon and related components run on top of Docker, so understanding the fundamentals will be useful for troubleshooting as well. Here's a good <a href="https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04">Ubuntu Docker Quick-Start</a>.</li>
+                                        <li>~10GB of free disk space</a>
+                                        <li>An SDN Controller - specifically <a href="https://www.bigswitch.com/community-edition">BigSwitch Cloud Fabric</a> or <a href="https://faucet.nz/">Faucet</a> - if you want full functionality.</li></ul></p>
+                                </div><!--//section-block-->
+                            </section><!--//doc-section-->
+
+                            <section id="install" class="doc-section">
+                                <h2 class="section-title">Install</h2>
+                                <p>Since Poseidon runs inside of a Docker container, there are number of different ways to install and run Poseidon, however we highly recommend using the Debian package, as it ensures you have all of the configuration settings required.</p>
+                                <div id="debian-package" class="section-block">
+                                    <h3 class="block-title">Debian Package</h3>
+                                    <div class="callout-block callout-info">
+                                        <div class="icon-holder">
+                                            <i class="fas fa-bullhorn"></i>
+                                        </div><!--//icon-holder-->
+                                        <div class="content">
+                                            <h4 class="callout-title">Note:</h4>
+                                            <p>The installer has a <i><b>Demo</b></i> option in the installation wizard that will deploy and configure the full Poseidon package, the Faucet SDN contoller (and related components like <a href="https://grafana.com/">Grafana</a> and <a href="https://prometheus.io/">Prometheus</a>), <a href="http://mininet.org/">mininet</a>, and <a href="https://www.openvswitch.org/">openvswitch</a>. We suggest the demo install as a starting point if much of this is new to you.</p>
+                                        </div><!--//content-->
+                                    </div><!--//callout-->
+                                    <p>On Ubuntu, this will download and install our <code>.deb</code> package from <a href="https://cloudsmith.io/package/ns/cyberreboot/repos/poseidon/packages/">Cloudsmith</a>.</p>
+</p>
+                                    <div class="code-block">
+                                        <pre><code class="language-git">sudo usermod -aG docker $USER
+sudo apt-get install -y apt-transport-https curl
+curl -sLf "https://dl.cloudsmith.io/public/cyberreboot/poseidon/cfg/gpg/gpg.F9E23875C98A1F72.key" | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://dl.cloudsmith.io/public/cyberreboot/poseidon/deb/ubuntu $(lsb_release -cs) main"
+sudo apt-get update
+sudo apt-get install poseidon</code></pre>
+                                    </div>
+                                    <p>During the install in the last command, the installer will walk you through a configuration wizard, see the <a href="#poseidon-conf">Poseidon configuration section</a> for walking through that.
+                                </div><!--//section-block-->
+                                <div id="building-from-source" class="section-block">
+                                    <h3 class="block-title">Building from Source</h3>
+                                    <p>If you prefer to build your own Debian package from source, you can use the <code>make</code> directive we provide:</p>
+                                    <pre><code class="language-git">git clone https://github.com/CyberReboot/poseidon
+cd poseidon
+make build_installers
+sudo dpkg -i dist/poseidon-*.deb</code></pre>
+                                </div><!--//section-block-->
+                                <div id="osx-linux-variants" class="section-block">
+                                    <h3 class="block-title">OS X and Linux Variants</h3>
+                                    <div class="callout-block callout-warning">
+                                        <div class="icon-holder">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </div><!--//icon-holder-->
+                                        <div class="content">
+                                            <h4 class="callout-title">Note:</h4>
+                                                <p>While it is possible to run Poseidon on OS X and other Linux variants that can run Docker, it is not recommended or supported.</p>
+                                        </div><!--//content-->
+                                    </div><!--//callout-->
+                                    <div class="callout-block callout-info">
+                                        <div class="icon-holder">
+                                            <i class="fas fa-info-circle"></i>
+                                        </div><!--//icon-holder-->
+                                        <div class="content">
+                                            <h4 class="callout-title">Note:</h4>
+                                            <p>If using OS X, you'll need to go into your Docker preferences and add the path <code>/opt/vent_files</code> to File Sharing for bind mounting.</p>
+                                        </div><!--//content-->
+                                    </div><!--//callout-block-->
+                                    <p>Poseidon provides a helper script to get up and going. That script relies on a number of environment variables being set so that the proper configuration is passed into Poseidon at runtime. The list of possible variables that can be set (some of which will be required for a functioning setup) are declared at the beginning of the <code>run</code> script located <a href="https://raw.githubusercontent.com/CyberReboot/poseidon/master/helpers/run">here</a>. Here's a list of them:</p>
+                                    <pre><code class="language-git">declare controller_uri
+declare controller_user
+declare controller_pass
+declare controller_type
+declare collector_nic
+declare controller_log_file
+declare controller_config_file
+declare controller_mirror_ports
+declare controller_span_fabric_name
+declare controller_interface_group
+declare rabbit_enabled
+declare learn_public_addresses
+declare FA_RABBIT_ENABLED
+declare FA_RABBIT_HOST
+declare FA_RABBIT_EXCHANGE
+declare FA_RABBIT_ROUTING_KEY
+declare FA_RABBIT_PORT
+declare max_concurrent_reinvestigations</code></pre>
+                                    <p>You can find what the default values look like <a href="https://raw.githubusercontent.com/CyberReboot/poseidon/master/.plugin_config.yml">here</a>. The most important ones that have to be set are the <code>controller_uri</code>, <code>controller_user</code>, and <code>controller_pass</code>. Note the default <code>controller_type</code> is <b>BCF</b>. Once you have the environment variables exported that you want (i.e. <code>export controller_uri=192.168.0.10</code>), you can run the helper script and you'll be up and running like this:</p>
+                                    <pre><code class="language-git">git clone https://github.com/CyberReboot/poseidon
+cd poseidon
+./helpers/run</code></pre>
+                                </div><!--//section-block-->
+                            </section><!--//doc-section-->
+
+                            <section id="configuration" class="doc-section">
+                                <h2 class="section-title">Configuration</h2>
+                                <div class="section-block">
+                                    <p>Poseidon requires a few minimal configuration settings to help it connect to either a BCF SDN controller or a Faucet SDN controller. It optionally has a number of other configuration options to make it more flexible for the environment it is being deployed and used in.</p>
+                                </div><!--//section-block-->
+                                <div id="poseidon-conf" class="section-block">
+                                    <h3 class="block-title">Poseidon</h3>
+                                        <p>The Debian package will walk you through a wizard of configuration options, these options will then get saved into <code>/etc/poseidon/default.conf</code>. Poseidon will overwrite this file, so do not edit it by hand, instead use <code>poseidon reconfig</code>. You can additionally see what the current configuration settings are by using <code>poseidon config</code>.</p>
+                                        <p>The first decision point is whether you're going to be using BCF or Faucet as your controller type, based on that you'll need to set your configuration differently. TODO</p>
+                                </div><!--//section-block-->
+                                <div id="bcf-conf" class="section-block">
+                                    <h3 class="block-title">BigSwitch Cloud Fabric</h3>
+                                        <p>You will need to add support for moving arbitrary endpoint network data around your network.  The BigSwitch config will need an admin to add:
+                                            <ul><li>a span-fabric</li>
+                                            <li>an interface-group</li>
+                                            <li>and supply access to the API endpoint and credentials to that API endpoint.</li></ul>
+                                        </p>
+                                        <h6>Span Fabric</h6>
+                                        <p>Replace <code>&lt;name&gt;</code> with the name of your span-fabric and <code>&lt;interface-group&gt;</code> with the name of your interface-group.
+                                            <pre><code class="language-git">! span-fabric
+span-fabric &lt;name&gt;
+  active
+  destination interface-group &lt;interface-group&gt;
+  priority 1</code></pre>
+                                        </p>
+                                        <h6>Interface Group</h6>
+                                        <p>Replace <code>&lt;interface-group&gt;</code> with the name of your interface-group. Additionally fill in the <code>&lt;leaf_switch&gt;</code> and <code>&lt;poseidon_mirror_interface&gt;</code> of where the Poseidon system is physically wired to.
+                                            <pre><code class="language-git">! interface-group
+interface-group &lt;interface-group&gt;
+  description 'packets get mirrored here to be processed'
+  mode span-fabric
+  member switch &lt;leaf_switch&gt; interface &lt;poseidon_mirror_interface&gt;</code></pre>
+                                        </p>
+                                        <h6>BigSwitch Cloud Fabric API</h6>
+                                        <p>Poseidon will connect to the BCF controller using its REST API, so you'll need the BCF API IP address or DNS record and credentials to it. These will need to be supplied during the installation wizard. BCF is now configured and ready for use with Poseidon.</p>
+                                </div><!--//section-block-->
+                                <div id="faucet-conf" class="section-block">
+                                    <h3 class="block-title">Faucet</h3>
+                                    <div class="callout-block callout-warning">
+                                        <div class="icon-holder">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </div><!--//icon-holder-->
+                                        <div class="content">
+                                            <h4 class="callout-title">Important:</h4>
+                                                <p>Poseidon requires at least Faucet version 1.8.6 or higher.</p>
+                                        </div><!--//content-->
+                                    </div><!--//callout-->
+                                    <div class="callout-block callout-danger">
+                                        <div class="icon-holder">
+                                            <i class="fas fa-bug"></i>
+                                        </div><!--//icon-holder-->
+                                        <div class="content">
+                                            <h4 class="callout-title">Warning:</h4>
+                                                <p>Poseidon currently only supports changing configuration options that are in <code>faucet.yaml</code>, additional YAML files included by <code>faucet.yaml</code> will be ignored.</p>
+                                        </div><!--//content-->
+                                    </div><!--//callout-->
+                                    <p>Unless Poseidon and Faucet are running on the same host, Poseidon will connect to Faucet using SSH. So you'll need to create an account that can SSH to the machine running Faucet and that has rights to modify the configuration file <code>faucet.yaml</code> (currently Poseidon expects it to be in the default <code>/etc/faucet/faucet.yaml</code> location and <code>dps</code> must all be defined in <code>faucet.yaml</code> for Poseidon to update the network posture correctly). See <a href="https://docs.faucet.nz/en/latest/configuration.html">Faucet's documentation</a> for more information on writing a Faucet configuration file.</p>
+                                    <p>Faucet needs to be started with the following environment variables set:
+                                        <pre><code class="language-git">export FAUCET_EVENT_SOCK=1
+export FAUCET_CONFIG_STAT_RELOAD=1</code></pre>
+                                    </p>
+                                    <p>If using the <a href="https://github.com/faucetsdn/faucet/tree/master/adapters/vendors/rabbitmq">RabbitMQ adapter for Faucet</a> (recommended) make sure to also export <code>FA_RABBIT_HOST</code> to the IP address of the host where Poseidon is running. Faucet is now configured and ready for use with Poseidon.</p>
+                                </div><!--//section-block-->
+                            </section><!--//doc-section-->
+
+                            <section id="usage" class="doc-section">
+                                <h2 class="section-title">Usage</h2>
+                                <div class="section-block">
+                                    <p>If you have used the Debian installer, Poseidon is now packaged as a standard Linux service, and ties in nicely to both <code>systemctl</code> and <code>journalctl</code>.</p>
+                                    <p>After installation you'll have a new command <code>poseidon</code> available for looking at the status, logs, changing the configuration, or stopping and starting the service.
+                                        <pre><code class="language-git">$ poseidon help
+Poseidon 0.3.0, an application that leverages software defined networks (SDN) to acquire and then feed
+network traffic to a number of machine learning techniques.
+For more info visit: https://github.com/CyberReboot/poseidon
+
+Usage: poseidon [option]
+Options:
+    -c,  config        display current configuration info
+    -h,  help          print this help
+    -i,  info/status   display current status of the Poseidon service
+    -l,  logs          display the logs
+    -R,  reconfig      reconfigures all settings (uses sudo, will restart the Poseidon service)
+    -r,  restart       restart the Poseidon service (uses sudo)
+    -s,  start         start the Poseidon service (uses sudo)
+    -S,  stop          stop the Poseidon service (uses sudo)
+    -v,  viz/visualize get url to visualize Poseidon with CRviz
+    -V,  version       display the version of Poseidon and exit
+    -Z,  reset         reset the configuration (uses sudo)</code></pre>
+
+Poseidon makes heavy use of a sister project, <a href="https://vent.readthedocs.io/en/latest">vent</a>. With a succesful installation you should minimally see a combination of Poseidon and Vent components, to include:
+<ul>
+<li>The following 14 containers with a <code>(healthy)</code> <b>STATUS</b> listed (NOTE: this is truncated output):</li>
+</ul>
+<pre><code class="language-git">$ docker ps
+CONTAINER ID        IMAGE                                  COMMAND                  STATUS
+8c07adf421fb        cyberreboot/poseidon:master            "/bin/sh -c '(flask …"   Up 2 hours (healthy)
+0a4f947f299b        cyberreboot/vent-file-drop:master      "/bin/sh -c '(flask …"   Up 2 hours (healthy)
+511f90c6ddd3        cyberreboot/crviz:master               "serve -s build -l 5…"   Up 2 hours (healthy)
+fb250044ff17        cyberreboot/poseidon-api:master        "/bin/sh -c '(flask …"   Up 2 hours (healthy)
+8e898fd68c08        cyberreboot/vent-network-tap:master    "/bin/sh -c '(flask …"   Up 2 hours (healthy)
+552f65d7a982        cyberreboot/vent-rq-worker:master      "/bin/sh -c '(flask …"   Up 2 hours (healthy)
+8dbabe78d1b9        cyberreboot/vent-rq-worker:master      "/bin/sh -c '(flask …"   Up 2 hours (healthy)
+e076452c1515        cyberreboot/vent-rq-worker:master      "/bin/sh -c '(flask …"   Up 2 hours (healthy)
+d0f406f240b1        cyberreboot/vent-rq-worker:master      "/bin/sh -c '(flask …"   Up 2 hours (healthy)
+6229e46723a9        cyberreboot/vent-rq-dashboard:master   "/bin/sh -c '(flask …"   Up 2 hours (healthy)
+5c695040603b        cyberreboot/vent-redis:master          "docker-entrypoint.s…"   Up 2 hours (healthy)
+004e5fdde96e        cyberreboot/vent-syslog:master         "/usr/sbin/syslog-ng…"   Up 2 hours (healthy)
+c0cd7c1f881c        cyberreboot/vent-rabbitmq:master       "docker-entrypoint.s…"   Up 2 hours (healthy)
+d81f5509628c        cyberreboot/vent                       "/bin/sh -c '(flask …"   Up 2 hours (healthy)
+</code></pre>
+<ul>
+<li>You should see "Poseidon successfully started, capturing logs..." in your syslog output:</li>
+</ul></p>
+<p><pre><code class="language-git">$ journalctl -u poseidon | grep capturing
+Jul 25 15:42:20 PoseidonHost poseidon[4273]: Poseidon successfully started, capturing logs...</code></pre>
+If you performed the demo installation, you should also see the following Faucet-related containers running:</p>
+                                    <div class="callout-block callout-info">
+                                        <div class="icon-holder">
+                                            <i class="fas fa-info-circle"></i>
+                                        </div><!--//icon-holder-->
+                                        <div class="content">
+                                            <h4 class="callout-title">Note:</h4>
+                                            <p>Faucet has not yet implemented docker-friendly health checks, so the <code>(healthy)</code> reference will not be shown below.</p>
+                                        </div><!--//content-->
+                                    </div><!--//callout-block-->
+<p><pre><code class="language-git">196f53632485        grafana/grafana:5.2.1                  "/run.sh"                Up 2 hours
+cfb7d68b66e0        prom/prometheus:v2.3.1                 "/bin/prometheus --c…"   Up 2 hours
+86f4188d67f6        faucet/gauge:latest                    "/usr/local/bin/entr…"   Up 2 hours
+2e186573532e        faucet/event-adapter-rabbitmq          "/usr/local/bin/entr…"   Up 2 hours
+c0652a6ccd44        influxdb:1.6-alpine                    "/entrypoint.sh infl…"   Up 2 hours
+2a949b5b1687        faucet/faucet:latest                   "/usr/local/bin/entr…"   Up 2 hours</code></pre>
+To continue to test (assuming demo installation), please see <code>/opt/poseidon/docs/demo.txt</code>, also available <a href="https://raw.githubusercontent.com/CyberReboot/poseidon/master/docs/demo.txt">here</a>. When you are done with the demo, <code>poseidon reconfig</code> will take you back to the install wizard to change settings for a deployment using either BCF or Faucet.</p>
+                                </div><!--//section-block-->
+                            </section><!--//doc-section-->
+                        </div><!--//content-inner-->
+                    </div><!--//doc-content-->
+                    <div class="doc-sidebar col-md-3 col-12 order-0 d-none d-md-flex">
+                        <div id="doc-nav" class="doc-nav">
+                            <nav id="doc-menu" class="nav doc-menu flex-column sticky">
+                                <a class="nav-link scrollto" href="#prerequisites">Prerequisites</a>
+                                <a class="nav-link scrollto" href="#install">Install</a>
+                                    <nav class="doc-sub-menu nav flex-column">
+                                        <a class="nav-link scrollto" href="#debian-package">Debian Package</a>
+                                        <a class="nav-link scrollto" href="#building-from-source">Building from Source</a>
+                                        <a class="nav-link scrollto" href="#osx-linux-variants">OS X and Linux Variants</a>
+                                    </nav><!--//nav-->
+                                <a class="nav-link scrollto" href="#configuration">Configuration</a>
+                                    <nav class="doc-sub-menu nav flex-column">
+                                        <a class="nav-link scrollto" href="#poseidon-conf">Poseidon</a>
+                                        <a class="nav-link scrollto" href="#bcf-conf">BigSwitch Cloud Fabric</a>
+                                        <a class="nav-link scrollto" href="#faucet-conf">Faucet</a>
+                                    </nav><!--//nav-->
+                                <a class="nav-link scrollto" href="#usage">Usage</a>
+                            </nav><!--//doc-menu-->
+                        </div><!--//doc-nav-->
+                    </div><!--//doc-sidebar-->
+                </div><!--//doc-body-->
+            </div><!--//container-->
+        </div><!--//doc-wrapper-->
+    </div><!--//page-wrapper-->
+
+    <footer id="footer" class="footer text-center">
+        <div class="container">
+            <!--/* This template is released under the Creative Commons Attribution 3.0 License. Please keep the attribution link below when using for your own project. Thank you for your support. :) If you'd like to use the template without the attribution, you can buy the commercial license via our website: themes.3rdwavemedia.com */-->
+            <small class="copyright">Designed with <i class="fa fa-heart"></i> by <a href="https://themes.3rdwavemedia.com/" target="_blank">Xiaoying Riley</a> for developers</small>
+
+        </div><!--//container-->
+    </footer><!--//footer-->
+
+    <!-- Main Javascript -->
+    <script type="text/javascript" src="assets/plugins/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="assets/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="assets/plugins/prism/prism.js"></script>
+    <script type="text/javascript" src="assets/plugins/jquery-scrollTo/jquery.scrollTo.min.js"></script>
+    <script type="text/javascript" src="assets/plugins/lightbox/dist/ekko-lightbox.min.js"></script>
+    <script type="text/javascript" src="assets/plugins/stickyfill/dist/stickyfill.min.js"></script>
+    <script type="text/javascript" src="assets/js/main.js"></script>
+
+</body>
+</html>
