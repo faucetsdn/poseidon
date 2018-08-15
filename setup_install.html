@@ -144,7 +144,7 @@ declare FA_RABBIT_EXCHANGE
 declare FA_RABBIT_ROUTING_KEY
 declare FA_RABBIT_PORT
 declare max_concurrent_reinvestigations</code></pre>
-                                    <p>You can find what the default values look like <a href="https://raw.githubusercontent.com/CyberReboot/poseidon/master/.plugin_config.yml">here</a>. The most important ones that have to be set are the <code>controller_uri</code>, <code>controller_user</code>, and <code>controller_pass</code>. Note the default <code>controller_type</code> is <b>BCF</b>. Once you have the environment variables exported that you want (i.e. <code>export controller_uri=192.168.0.10</code>), you can run the helper script and you'll be up and running like this:</p>
+                                    <p>You can find what the default values look like <a href="https://raw.githubusercontent.com/CyberReboot/poseidon/master/.plugin_config.yml">here</a>. The most important ones that have to be set are the <code>controller_uri</code>, <code>controller_user</code>, and <code>controller_pass</code>. Note the default <code>controller_type</code> is <b>BCF</b>. Once you have the environment variables exported that you want (i.e. <code>export controller_uri=192.168.0.10</code>), you can run the helper script (note, it must be run from the poseidon directory like below) and you'll be up and running like this:</p>
                                     <pre><code class="language-git">git clone https://github.com/CyberReboot/poseidon
 cd poseidon
 ./helpers/run</code></pre>
