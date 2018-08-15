@@ -54,7 +54,7 @@ class Monitor_Helper_Base(Rock_Bottom):
 
     def configure(self):
         '''get, parse, store configuration internally as dict'''
-        ostr = '{0} {1}'.format(self.mod_name, 'configure()')
+        ostr = 'configuring: {0}'.format(self.mod_name)
         self.poseidon_logger.info(ostr)
         # local valid
         if not self.owner:

@@ -59,10 +59,10 @@ class Monitor_Action_Base(Rock_Bottom):
     def configure(self):
         """get, parse, store configuration internally as dict """
         ostr = '{0} {1}'.format(self.__class__.__name__, 'Base:configure')
-        self.logger.debug(ostr)
+        self.poseidon_logger.debug(ostr)
         if self.owner:
             ostr = '{0} {1}'.format(self.__class__.__name__, 'configure:owner')
-            self.logger.debug(ostr)
+            self.poseidon_logger.debug(ostr)
             self.mod_configuration = dict()
             conf = self.owner.Config.get_endpoint('Handle_SectionConfig')
             if conf is not None:
@@ -72,7 +72,7 @@ class Monitor_Action_Base(Rock_Bottom):
                 ostr = '{0},{1}:{2}' .format(self.__class__.__name__,
                                              self.mod_name,
                                              self.mod_configuration)
-                self.logger.debug(ostr)
+                self.poseidon_logger.debug(ostr)
                 self.configured = True
 
     def first_run(self):
@@ -83,7 +83,7 @@ class Monitor_Action_Base(Rock_Bottom):
         if self.owner and self.configured:
             for k, v in self.actions.items():
                 ostr = 'about to configure {0}'.format(k)
-                self.logger.debug(ostr)
+                self.poseidon_logger.debug(ostr)
                 v.configure()
                 v.first_run()
 

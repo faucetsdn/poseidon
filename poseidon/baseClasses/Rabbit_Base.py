@@ -36,6 +36,7 @@ class Rabbit_Base(object):
 
     def __init__(self):
         self.logger = module_logger.logger
+        self.poseidon_logger = module_logger.poseidon_logger
 
     def make_rabbit_connection(self, host, port, exchange, queue_name, keys,
                                total_sleep=float('inf')):  # pragma: no cover
@@ -58,12 +59,13 @@ class Rabbit_Base(object):
                 rabbit_channel.exchange_declare(exchange=exchange,
                                                 exchange_type='topic')
                 rabbit_channel.queue_declare(queue=queue_name, exclusive=False)
-                self.logger.debug('connected to {0} rabbitmq...'.format(host))
+                self.poseidon_logger.debug(
+                    'connected to {0} rabbitmq...'.format(host))
                 wait = False
             except Exception as e:
-                self.logger.debug(
+                self.poseidon_logger.debug(
                     'waiting for connection to {0} rabbitmq...'.format(host))
-                self.logger.debug(str(e))
+                self.poseidon_logger.debug(str(e))
                 time.sleep(2)
                 total_sleep -= 2
                 wait = True
@@ -73,14 +75,14 @@ class Rabbit_Base(object):
 
         if isinstance(keys, list) and not wait:
             for key in keys:
-                self.logger.debug(
+                self.poseidon_logger.debug(
                     'array adding key:{0} to rabbitmq channel'.format(key))
                 rabbit_channel.queue_bind(exchange=exchange,
                                           queue=queue_name,
                                           routing_key=key)
 
         if isinstance(keys, str) and not wait:
-            self.logger.debug(
+            self.poseidon_logger.debug(
                 'string adding key:{0} to rabbitmq channel'.format(keys))
             rabbit_channel.queue_bind(exchange=exchange,
                                       queue=queue_name,
@@ -90,7 +92,8 @@ class Rabbit_Base(object):
 
     def start_channel(self, channel, mycallback, queue, m_queue):
         ''' handle threading for messagetype '''
-        self.logger.debug('about to start channel {0}'.format(channel))
+        self.poseidon_logger.debug(
+            'about to start channel {0}'.format(channel))
         channel.basic_consume(partial(mycallback, q=m_queue), queue=queue,
                               no_ack=True)
         mq_recv_thread = threading.Thread(target=channel.start_consuming)
