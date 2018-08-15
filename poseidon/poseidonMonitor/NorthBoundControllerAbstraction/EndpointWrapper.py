@@ -26,15 +26,13 @@ from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.Config.Config import config_interface
 from poseidon.poseidonMonitor.endPoint import EndPoint
 
-module_logger = Logger
-
 
 class Endpoint_Wrapper():
     def __init__(self):
         super(Endpoint_Wrapper, self).__init__()
         self.state = defaultdict(EndPoint)
-        self.logger = module_logger.logger
-        self.poseidon_logger = module_logger.poseidon_logger
+        self.logger = Logger.logger
+        self.poseidon_logger = Logger.poseidon_logger
         self.mod_configuration = dict()
         self.mod_name = self.__class__.__name__
         self.Config = config_interface
@@ -84,7 +82,7 @@ class Endpoint_Wrapper():
         payload = {'id': my_hash,
                    'metadata': endpoint.to_str()}
 
-        self.logger.debug('vent update payload: ' + str(payload))
+        self.poseidon_logger.debug('vent update payload: ' + str(payload))
 
         vent_addr = self.mod_configuration['vent_ip'] + \
             ':' + self.mod_configuration['vent_port']

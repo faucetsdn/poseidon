@@ -26,8 +26,6 @@ from scp import SCPClient
 
 from poseidon.baseClasses.Logger_Base import Logger
 
-module_logger = Logger.logger
-
 
 class Connection:
 
@@ -39,7 +37,7 @@ class Connection:
                  log_file=None,
                  *args,
                  **kwargs):
-        self.logger = module_logger
+        self.logger = Logger.logger
         self.host = host
         self.user = user
         self.pw = pw

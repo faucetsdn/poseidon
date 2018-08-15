@@ -27,8 +27,6 @@ from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.faucet.conne
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.faucet.parser import \
     Parser
 
-module_logger = Logger.logger
-
 
 class FaucetProxy(Connection, Parser):
 
@@ -60,6 +58,8 @@ class FaucetProxy(Connection, Parser):
             self.mirror_ports = mirror_ports
         self.rabbit_enabled = rabbit_enabled
         self.learn_pub_adds = learn_pub_adds
+        self.logger = Logger.logger
+        self.poseidon_logger = Logger.poseidon_logger
         self.mac_table = {}
 
     @staticmethod
@@ -80,21 +80,22 @@ class FaucetProxy(Connection, Parser):
         retval = []
 
         if messages:
-            module_logger.debug('faucet messages: {0}'.format(messages))
+            self.poseidon_logger.debug('faucet messages: {0}'.format(messages))
             for message in messages:
                 if 'L2_LEARN' in message or 'L2_EXPIRE' in message or 'PORT_CHANGE' in message:
-                    module_logger.debug(
+                    self.poseidon_logger.debug(
                         'l2 faucet message: {0}'.format(message))
                     self.event(message)
                 else:
-                    module_logger.debug('faucet event: {0}'.format(message))
+                    self.poseidon_logger.debug(
+                        'faucet event: {0}'.format(message))
         elif not self.rabbit_enabled:
             if self.host:
                 self.receive_file('log')
                 self.log(os.path.join(self.log_dir, 'faucet.log'))
             else:
                 self.log(self.log_file)
-        module_logger.debug('get_endpoints found:')
+        self.poseidon_logger.debug('get_endpoints found:')
         for mac in self.mac_table:
             if (self.mac_table[mac][0]['ip-address'] != None and
                 self.mac_table[mac][0]['ip-address'] != 'None' and
@@ -114,11 +115,11 @@ class FaucetProxy(Connection, Parser):
                         self.mac_table[mac][0]['ip-address'].startswith('192.168.') or
                         (self.mac_table[mac][0]['ip-address'].startswith('172.') and
                          isinstance(check_sec_octet, int) and check_sec_octet > 15 and check_sec_octet < 32)):
-                        module_logger.debug('{0}:{1}'.format(
+                        self.poseidon_logger.debug('{0}:{1}'.format(
                             mac, self.mac_table[mac]))
                         retval.append(self.mac_table[mac])
                 else:
-                    module_logger.debug('{0}:{1}'.format(
+                    self.poseidon_logger.debug('{0}:{1}'.format(
                         mac, self.mac_table[mac]))
                     retval.append(self.mac_table[mac])
         return retval
@@ -188,10 +189,10 @@ class FaucetProxy(Connection, Parser):
 
     def mirror_ip(self, ip, messages=None):
         if messages:
-            module_logger.debug('faucet messages: {0}'.format(messages))
+            self.poseidon_logger.debug('faucet messages: {0}'.format(messages))
             for message in messages:
                 if 'L2_LEARN' in message:
-                    module_logger.debug(
+                    self.poseidon_logger.debug(
                         'l2 faucet message: {0}'.format(message))
                     self.event(message)
         elif not self.rabbit_enabled:
@@ -220,15 +221,15 @@ class FaucetProxy(Connection, Parser):
                     self.config_file, 'mirror', int(port), switch)
         else:
             status = False
-        module_logger.debug('mirror status: ' + str(status))
+        self.poseidon_logger.debug('mirror status: ' + str(status))
         # TODO check if config was successfully updated
 
     def unmirror_ip(self, ip, messages=None):
         if messages:
-            module_logger.debug('faucet messages: {0}'.format(messages))
+            self.poseidon_logger.debug('faucet messages: {0}'.format(messages))
             for message in messages:
                 if 'L2_LEARN' in message:
-                    module_logger.debug(
+                    self.poseidon_logger.debug(
                         'l2 faucet message: {0}'.format(message))
                     self.event(message)
         elif not self.rabbit_enabled:
@@ -253,5 +254,5 @@ class FaucetProxy(Connection, Parser):
             else:
                 status = self.config(
                     self.config_file, 'unmirror', int(port), switch)
-        module_logger.debug('unmirror status: ' + str(status))
+        self.poseidon_logger.debug('unmirror status: ' + str(status))
         # TODO check if config was successfully updated

@@ -22,16 +22,14 @@ from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.UpdateSwitchState import \
     Update_Switch_State
 
-module_logger = Logger
-
 
 class NorthBoundControllerAbstraction(Monitor_Action_Base):
     ''' handle abstracting poseidon from the controllers '''
 
     def __init__(self):
         super(NorthBoundControllerAbstraction, self).__init__()
-        self.logger = module_logger.logger
-        self.poseidon_logger = module_logger.poseidon_logger
+        self.logger = Logger.logger
+        self.poseidon_logger = Logger.poseidon_logger
         self.mod_name = self.__class__.__name__
         self.config_section_name = self.mod_name
 

@@ -24,9 +24,6 @@ from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.controllerproxy import ControllerProxy
 
 
-module_logger = Logger.logger
-
-
 class CookieAuthControllerProxy(ControllerProxy):
 
     def __init__(self, base_uri, login_resource, auth, *args, **kwargs):

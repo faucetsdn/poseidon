@@ -26,8 +26,6 @@ import json
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.Config.Config import config_interface
 
-module_logger = Logger.logger
-
 
 # exposes the application for testing
 

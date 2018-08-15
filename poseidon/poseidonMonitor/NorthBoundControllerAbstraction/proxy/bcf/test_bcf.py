@@ -37,10 +37,6 @@ class MockLogger:
         self.poseidon_logger = Logger.poseidon_logger
 
 
-module_logger = MockLogger()
-module_logger = module_logger.logger
-module_logger.debug('cover this')
-
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 username = 'user'
 password = 'pass'
@@ -228,7 +224,8 @@ def test_get_byip():
 
         def __init__(self):
             self.endpoints = None
-            self.logger = module_logger
+            self.logger = MockLogger().logger
+            self.poseidon_logger = MockLogger().poseidon_logger
 
         def get_endpoints(self):
             return self.endpoints
@@ -268,7 +265,8 @@ def test_get_bymac():
 
         def __init__(self):
             self.endpoints = None
-            self.logger = module_logger
+            self.logger = MockLogger().logger
+            self.poseidon_logger = MockLogger().poseidon_logger
 
         def get_endpoints(self):
             return self.endpoints
@@ -304,7 +302,8 @@ def test_shutdown_ip():
 
         def __init__(self):
             self.endpoints = None
-            self.logger = module_logger
+            self.logger = MockLogger().logger
+            self.poseidon_logger = MockLogger().poseidon_logger
 
         def get_endpoints(self):
             return self.endpoints
@@ -358,7 +357,8 @@ def test_get_highest():
         def __init__(self):
             self.endpoints = None
             self.span_fabric = None
-            self.logger = module_logger
+            self.logger = MockLogger().logger
+            self.poseidon_logger = MockLogger().poseidon_logger
 
     bcf = MockBcfProxy()
 
@@ -396,7 +396,8 @@ def test_get_seq_by_ip():
         def __init__(self):
             self.endpoints = None
             self.span_fabric = None
-            self.logger = module_logger
+            self.logger = MockLogger().logger
+            self.poseidon_logger = MockLogger().poseidon_logger
 
         def get_span_fabric(self):
             return self.span_fabric
@@ -436,7 +437,8 @@ def test_mirror_ip():
         def __init__(self):
             self.endpoints = None
             self.span_fabric = None
-            self.logger = module_logger
+            self.logger = MockLogger().logger
+            self.poseidon_logger = MockLogger().poseidon_logger
 
         def mirror_traffic(
                 self,
@@ -491,7 +493,8 @@ def test_unmirror_ip():
         def __init__(self):
             self.endpoints = None
             self.span_fabric = None
-            self.logger = module_logger
+            self.logger = MockLogger().logger
+            self.poseidon_logger = MockLogger().poseidon_logger
 
         def get_span_fabric(self):
             return self.span_fabric

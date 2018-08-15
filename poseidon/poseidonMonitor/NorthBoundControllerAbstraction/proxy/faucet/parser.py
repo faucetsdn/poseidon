@@ -22,8 +22,6 @@ import yaml
 
 from poseidon.baseClasses.Logger_Base import Logger
 
-module_logger = Logger.logger
-
 
 def represent_none(dumper, _):
     return dumper.represent_scalar('tag:yaml.org,2002:null', '')
@@ -32,7 +30,8 @@ def represent_none(dumper, _):
 class Parser:
 
     def __init__(self, mirror_ports=None):
-        self.logger = module_logger
+        self.logger = Logger.logger
+        self.poseidon_logger = Logger.poseidon_logger
         self.mirror_ports = mirror_ports
 
     def config(self, config_file, action, port, switch):
@@ -136,7 +135,7 @@ class Parser:
     def event(self, message):
         data = {}
         if 'L2_LEARN' in message:
-            self.logger.debug(
+            self.poseidon_logger.debug(
                 'got faucet message for l2_learn: {0}'.format(message))
             data['ip-address'] = message['L2_LEARN']['l3_src_ip']
             data['ip-state'] = 'L2 learned'
@@ -156,13 +155,13 @@ class Parser:
             else:
                 self.mac_table[message['L2_LEARN']['eth_src']] = [data]
         elif 'L2_EXPIRE' in message:
-            self.logger.debug(
+            self.poseidon_logger.debug(
                 'got faucet message for l2_expire: {0}'.format(message))
             if message['L2_EXPIRE']['eth_src'] in self.mac_table:
                 self.mac_table[message['L2_EXPIRE']
                                ['eth_src']][0]['active'] = 0
         elif 'PORT_CHANGE' in message:
-            self.logger.debug(
+            self.poseidon_logger.debug(
                 'got faucet message for port_change: {0}'.format(message))
             if not message['PORT_CHANGE']['status']:
                 m_table = self.mac_table.copy()
@@ -175,7 +174,7 @@ class Parser:
         return
 
     def log(self, log_file):
-        self.logger.debug('parsing log file')
+        self.poseidon_logger.debug('parsing log file')
         if not log_file:
             # default to FAUCET default
             log_file = '/var/log/faucet/faucet.log'

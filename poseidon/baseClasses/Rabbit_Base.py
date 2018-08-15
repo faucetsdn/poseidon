@@ -26,17 +26,14 @@ import pika
 from .Logger_Base import Logger
 
 
-module_logger = Logger
-
-
 class Rabbit_Base(object):
     '''
     Base Class for RabbitMQ
     '''
 
     def __init__(self):
-        self.logger = module_logger.logger
-        self.poseidon_logger = module_logger.poseidon_logger
+        self.logger = Logger.logger
+        self.poseidon_logger = Logger.poseidon_logger
 
     def make_rabbit_connection(self, host, port, exchange, queue_name, keys,
                                total_sleep=float('inf')):  # pragma: no cover

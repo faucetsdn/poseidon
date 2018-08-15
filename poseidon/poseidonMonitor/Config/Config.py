@@ -32,15 +32,12 @@ from poseidon.baseClasses.Monitor_Action_Base import Monitor_Action_Base
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
 
 
-module_logger = Logger
-
-
 class Config(Monitor_Action_Base):
 
     def __init__(self):
         super(Config, self).__init__()
-        self.logger = module_logger.logger
-        self.poseidon_logger = module_logger.poseidon_logger
+        self.logger = Logger.logger
+        self.poseidon_logger = Logger.poseidon_logger
         self.CONFIG = None
         self.mod_name = self.__class__.__name__
         self.config_section_name = self.mod_name
@@ -80,8 +77,8 @@ class Handle_FullConfig(Monitor_Helper_Base):
     def __init__(self):
         super(Handle_FullConfig, self).__init__()
         self.mod_name = self.__class__.__name__
-        self.logger = module_logger.logger
-        self.poseidon_logger = module_logger.poseidon_logger
+        self.logger = Logger.logger
+        self.poseidon_logger = Logger.poseidon_logger
 
     def direct_get(self):
         ''' get the config from the owner '''
@@ -128,8 +125,8 @@ class Handle_FieldConfig(Monitor_Helper_Base):
 
     def __init__(self):
         super(Handle_FieldConfig, self).__init__()
-        self.logger = module_logger.logger
-        self.poseidon_logger = module_logger.poseidon_logger
+        self.logger = Logger.logger
+        self.poseidon_logger = Logger.poseidon_logger
         self.mod_name = self.__class__.__name__
 
     def direct_get(self, field, section):

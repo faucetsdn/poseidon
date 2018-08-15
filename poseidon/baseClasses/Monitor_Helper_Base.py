@@ -21,8 +21,6 @@ Created on 14 July 2016
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.baseClasses.Rock_Bottom import Rock_Bottom
 
-module_logger = Logger
-
 
 class Monitor_Helper_Base(Rock_Bottom):
     '''base class for the helper objets'''
@@ -40,10 +38,10 @@ class Monitor_Helper_Base(Rock_Bottom):
         if owner.logger is not None:
             self.logger = owner.logger
         else:
-            self.logger = module_logger.logger
+            self.logger = Logger.logger
 
         # add poseidon logger
-        self.poseidon_logger = module_logger.poseidon_logger
+        self.poseidon_logger = Logger.poseidon_logger
 
         self.poseidon_logger.debug('set_owner = {0}'.format(owner.mod_name))
         self.owner = owner
