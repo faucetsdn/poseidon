@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Poseidon Documentation</title>
+    <!-- Meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+    <!-- FontAwesome JS -->
+    <script defer src="https://use.fontawesome.com/releases/v5.1.1/js/all.js" integrity="sha384-BtvRZcyfv4r0x/phJt9Y9HhnN5ur1Z+kZbKVgzVBAlQZX4jvAuImlIz+bG7TS00a" crossorigin="anonymous"></script>
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="assets/plugins/bootstrap/css/bootstrap.min.css">
+    <!-- Plugins CSS -->
+    <link rel="stylesheet" href="assets/plugins/prism/prism.css">
+    <link rel="stylesheet" href="assets/plugins/elegant_font/css/style.css">
+
+    <!-- Theme CSS -->
+    <link id="theme-style" rel="stylesheet" href="assets/css/styles.css">
+
+</head>
+
+<body class="body-green">
+    <div class="page-wrapper">
+        <!-- ******Header****** -->
+        <header id="header" class="header">
+            <div class="container">
+                <div class="branding">
+                    <h1 class="logo">
+                        <a href="index.html">
+                            <span aria-hidden="true" class="icon_documents_alt icon"></span>
+                            <span class="text-highlight">Poseidon</span><span class="text-bold">Docs</span>
+                        </a>
+                    </h1>
+                </div><!--//branding-->
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                    <li class="breadcrumb-item active">Concepts</li>
+                </ol>
+            </div><!--//container-->
+        </header><!--//header-->
+        <div class="doc-wrapper">
+            <div class="container">
+                <div id="doc-header" class="doc-header text-center">
+                    <h1 class="doc-title"><i class="icon fa fa-paper-plane"></i> Concepts</h1>
+                    <div class="meta"><i class="far fa-clock"></i> Last updated: August 6th, 2018</div>
+                </div><!--//doc-header-->
+                <div class="doc-body row">
+                    <div class="doc-content col-md-9 col-12 order-1">
+                        <div class="content-inner">
+                            <section id="what-section" class="doc-section">
+                                <h2 class="section-title">What is Poseidon?</h2>
+                                <div class="section-block">
+                                    <p>Poseidon is a joint effort between two of the IQT Labs: Cyber Reboot and Lab41. The project's goal is to explore approaches to better identify what nodes are on a given (computer) network and understand what they are doing. The project utilizes Software Defined Networking (SDN) and machine learning (ML) to automatically capture network traffic, extract relevant features from that traffic, perform classifications through trained models, convey results, and provide mechanisms to take further action. While the project works best leveraging modern SDNs, parts of it can still be used with little more than packet capture (pcap) files.
+                                    </p>
+                                    <p>The Poseidon project originally began as an experiment to test the merits of leveraging SDN and machine learning techniques to detect abnormal network behavior. While that long-term goal remains, the unfortunate reality is that the state of rich, labelled, public, and MODERN network data sets for ML training is pretty poor. Our lab is working on improving the availability of network training sets, but in the near term the project remains focused on 1) improving the accuracy of identifying what a node <b>is</b> (based on captured IP header data) and 2) developing Poseidon into a "harness" of sorts to house machine learning techniques for additional use cases. (Read: Not just ours!)
+                                    </p>
+                                </div>
+                            </section><!--//doc-section-->
+                            <section id="why-section" class="doc-section">
+                                <h2 class="section-title">Why use Poseidon?</h2>
+                                <div class="section-block">
+                                    <p>Poseidon strives to make it easy to achieve near-time situational awareness of devices on a network. By leveraging SDNs, Poseidon provides centralized visibility of devices across the entire network and enables automated action that aims to go above and beyond the industry-standard of simply: "detect and block". Poseidon's goals include knowing what is on your network, what those devices are doing, and whether or not you should care enough to perform further action-verbs such as: "degrade", "throttle", "restrict", or "deceive". You can read more about this concept <a href="https://blog.cyberreboot.org/sdn-and-the-need-for-more-security-verbs-a6315935fca4">here</a>.
+                                    </p>
+                            </section><!--//doc-section-->
+                            <section id="core-features" class="doc-section">
+                                <h2 class="section-title">Core Features</h2>
+                                <div class="section-block">
+                                    <p>Poseidon aims to provide the following key capabilities, which are in varying levels of maturity:
+                                    </p>
+                                </div>
+                                <div id="collection" class="section-block">
+                                    <h3 class="block-title">Traffic Collection</h3>
+                                    <div class="callout-block callout-info">
+                                        <div class="icon-holder">
+                                            <i class="fas fa-info-circle"></i>
+                                        </div><!--//icon-holder-->
+                                        <div class="content">
+                                            <h4 class="callout-title">Important Note:</h4>
+                                            <p>Poseidon has not been tested with collection rates above 100Mbps, but we hope to achieve minimally 1Gbps, and ideally up to 10Gbps.</p>
+                                        </div><!--//content-->
+                                    </div><!--//callout-block-->
+                                    <p>Poseidon's internals use <a href="http://www.tcpdump.org/">tcpdump</a>, a popular command-line packet analyzer and network traffic capture tool, for traffic collection and storing that traffic as PCAP files. Poseidon only uses the headers of packets in the PCAP files, however there's not a great way currently in tcpdump to collect only the headers so we have submitted a pull request to the tcpdump project that adds additional flags for zeroing out payloads, removing payloads altogether, and masking IP addresses.  You can read more about our pull request <a href="https://github.com/the-tcpdump-group/tcpdump/pull/615">here</a>. Since it's not merged yet, we still have to compile tcpdump ourselves against the fork with the modifications to be able to do collection without including payloads, but we hope to get it merged upstream so that the additional flags come pre-packaged when anyone installs the official tcpdump tool.
+                                    </p>
+                                </div><!--//section-block-->
+                                <div id="analysis" class="section-block">
+                                    <h3 class="block-title">Traffic Analysis</h3>
+                                    <div class="callout-block callout-success">
+                                        <div class="icon-holder">
+                                            <i class="fas fa-thumbs-up"></i>
+                                        </div><!--//icon-holder-->
+                                        <div class="content">
+                                            <h4 class="callout-title">Useful Tip:</h4>
+                                            <p>You can use Poseidon to analyze pre-collected captures from both SDN and traditional networks. Head over to the <a href="operations_guide">operations guide</a> for more details.</p>
+                                        </div><!--//content-->
+                                    </div>
+                                    <p>Poseidon's traffic analysis is done via a number of plugins that are orchestrated by <a href="https://github.com/CyberReboot/vent">Vent</a>. These plugins can be enabled or disabled by modifying the <code>.vent_startup.yml</code> file at the root of the Poseidon project (for more information check out our <a href="operations_guide.html">operations guide</a>). By default there are four different plugins enabled that do traffic manipulation and analysis:
+                                    </p>
+                                    <ul class="list list-unstyled">
+                                        <li><a href="https://github.com/CyberReboot/PoseidonML"><b>PoseidonML</b></a>: Poseidon uses PoseidonML's OneLayer implementation of machine learning that uses network traffic as a way to do device classification, read the <a href="#poseidonml-arch">PoseidonML section</a> below for more details.</li>
+                                        <li><a href="https://github.com/CyberReboot/vent-plugins/tree/master/p0f"><b>p0f</b></a>: Poseidon uses <a href="http://lcamtuf.coredump.cx/p0f3/#">p0f for operating system (OS) fingerprinting.</li>
+                                        <li><a href="https://github.com/CyberReboot/vent-plugins/tree/master/pcap_to_node_pcap"><b>PCAP Splitter</b></a>: Poseidon uses <a href="http://seladb.github.io/PcapPlusPlus-Doc/">PcapPlusPlus</a>'s tool called <a href="http://seladb.github.io/PcapPlusPlus-Doc/examples.html">PcapSplitter</a> which takes a network traffic capture file (PCAP in this case) and splits it up into smaller PCAP files that are sessions per client IP address. These smaller PCAP files get handed off to PoseidonML and p0f.</li>
+                                        <li><a href="https://github.com/CyberReboot/vent-plugins/tree/master/tcprewrite_dot1q"><b>Tcprewrite</b></a>: Poseidon uses <a href="http://tcpreplay.synfin.net/wiki/tcprewrite">tcprewrite</a> to remove the VLAN on any tagged traffic in the capture to keep the packets consistent across collections. The output is then passed on to the PCAP Splitter.</li>
+                                    </ul>
+                                </div><!--//section-block-->
+                                <div id="classification" class="section-block">
+                                    <h3 class="block-title">Device Classification</h3>
+                                    <div class="callout-block callout-info">
+                                        <div class="icon-holder">
+                                            <i class="fas fa-info-circle"></i>
+                                        </div><!--//icon-holder-->
+                                        <div class="content">
+                                            <h4 class="callout-title">Important Note:</h4>
+                                            <p>Poseidon's training set for device classification is limited and currently is only able to classify into six classes, we need a better corpus of network traffic to improve this.</p>
+                                        </div><!--//content-->
+                                    </div><!--//callout-block-->
+                                    <p>Poseidon uses PoseidonML's OneLayer machine learning model by default for doing device classification. The OneLayer model is a neural network with one hidden layer:</p>
+                                    <div class="text-center"><p><img class="img-fluid" src="assets/images/neural_network.png" alt="neural network" /></p></div>
+                                    <p>The OneLayer model takes a PCAP file and determines the host it is trying to classify based on hosts found in the sessions (this is why we use PCAP Splitter mentioned above, to ensure that the PCAP is only sessions from the perspective of the host we want to classify). The headers of the packets for each TCP or UDP session are then run through the neural network and classified with confidences, outputting a message that will look something like this:
+                                    <pre><code class="language-git">Message: {
+	&quot;98:01:xx:xx:xx:xx&quot;: {
+		&quot;classification&quot;: {
+			&quot;confidences&quot;: [0.6856065894902689, 0.2727088338248893, 0.022470232107183397],
+			&quot;labels&quot;: [&quot;Developer workstation&quot;, &quot;Unknown&quot;, &quot;Active Directory controller&quot;]
+		},
+		&quot;timestamp&quot;: 1498669414.355485,
+		&quot;valid&quot;: false,
+		&quot;decisions&quot;: {
+			&quot;behavior&quot;: &quot;normal&quot;,
+			&quot;investigate&quot;: false
+		}
+	}
+}</code></pre>
+                                    That message then gets sent back to Poseidon via the message bus RabbitMQ. The <code>classification</code> field indicates the labels that the classification model has assigned to the device and the confidence field is the associated coonfidences for those labels. The top 3 device types are returned, which may include an <code>Unknown</code> label. For more information on how to use this model and how it works, please read our blog post about it <a href="https://blog.cyberreboot.org/using-machine-learning-to-classify-devices-on-your-network-e9bb98cbfdb6">here</a>.
+                                    </p>
+                                </div><!--//section-block-->
+                                <div id="abnormal" class="section-block">
+                                    <h3 class="block-title">Abnormal Device Detection</h3>
+                                    <div class="callout-block callout-danger">
+                                        <div class="icon-holder">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </div><!--//icon-holder-->
+                                        <div class="content">
+                                            <h4 class="callout-title">Warning!</h4>
+                                            <p>Poseidon's ability to detect abnormal using PoseidonML's machine learning models results in an unacceptable rate of false positives due to a lack of good training data, so it is not enabled by default.</p>
+                                        </div><!--//content-->
+                                    </div><!--//callout-block-->
+                                    <p>Poseidon's ability to detect abnormal devices is the least mature of Poseidon's core features. Currently, due to the high false positive rate with our current models, all traffic is set to <code>normal</code>. Until better data can be collected and used for training, we are not optimistic about being able to turn this feature back on without a high false positive hit rate.
+                                    </p>
+                                </div><!--//section-block-->
+                                <div id="state" class="section-block">
+                                    <h3 class="block-title">State</h3>
+                                    <div class="callout-block callout-success">
+                                        <div class="icon-holder">
+                                            <i class="fas fa-thumbs-up"></i>
+                                        </div><!--//icon-holder-->
+                                        <div class="content">
+                                            <h4 class="callout-title">Useful Tip:</h4>
+                                            <p>You can use Poseidon to just have better situational awareness of the current state of your network, even if you don't want to use the other features Poseidon has to offer. See the <a href="operations_guide.html">operations guide</a> for more details.</p>
+                                        </div><!--//content-->
+                                    </div>
+                                    <p>Poseidon keeps track of devices seen on the network from the perspective of the SDN controller. This network state is available through the <a href="https://github.com/CyberReboot/poseidon/tree/master/api">Poseidon API</a> which is also what <a href="#crviz-arch">CRviz</a> uses to visualize Poseidon networks. As additional metadata about the devices is learned, the state of those devices are updated.
+                                    </p>
+                                </div><!--//section-block-->
+                                <div id="policy" class="section-block">
+                                    <h3 class="block-title">Policy Automation</h3>
+                                    <p>One of the nice things about SDN is the ability to easily push down changes to the network across any switch in the fabric via the SDN controller. Poseidon hooks into the controller to not only get notifications of what is happening on the network, such as a new device was just plugged in, but it also pushes down changes such as mirroring traffic from one port to another for a period of time and turning it off. While currently the actions Poseidon knows how to do automatically are limited to mirroring traffic and shutting down ports, we envision more complex and sophisticated actions that could allow for a more granular and dynamic policy to be pushed out automatically as the network changes.
+                                    </p>
+                                </div><!--//section-block-->
+                            </section><!--//doc-section-->
+
+                            <section id="architecture-section" class="doc-section">
+                                <h2 class="section-title">Architecture</h2>
+                                <div class="section-block">
+                                    <p>Poseidon has a lot of moving parts and can be used in a variety of ways. Below are the major pieces and how they fit into the bigger picture of Poseidon's goals.
+                                    </p>
+                                </div><!--//section-block-->
+                                <div id="poseidon-arch" class="section-block">
+                                    <h3 class="block-title">Poseidon</h3>
+                                    <p>Poseidon itself runs in a Docker container and is responsible for interacting with an SDN controller. Here is a high level view of the big picture:
+                                    </p>
+                                    <img src="assets/images/poseidon_arch.svg" alt="Poseidon Architecture">
+                                </div><!--//section-block-->
+                                <div id="bigswitch-arch" class="section-block">
+                                    <h3 class="block-title">BigSwitch Cloud Fabric</h3>
+                                    <div class="callout-block callout-warning">
+                                        <div class="icon-holder">
+                                            <i class="icon icon_cone"></i>
+                                        </div><!--//icon-holder-->
+                                        <div class="content">
+                                            <h4 class="callout-title">Still Under Construction!</h4>
+                                            <p>Pardon the dust, this diagram is still being created, check back later.</p>
+                                        </div><!--//content-->
+                                    </div><!--//callout-block-->
+                                </div>
+                                <div id="faucet-arch" class="section-block">
+                                    <h3 class="block-title">Faucet</h3>
+                                    <div class="callout-block callout-warning">
+                                        <div class="icon-holder">
+                                            <i class="icon icon_cone"></i>
+                                        </div><!--//icon-holder-->
+                                        <div class="content">
+                                            <h4 class="callout-title">Still Under Construction!</h4>
+                                            <p>Pardon the dust, this diagram is still being created, check back later.</p>
+                                        </div><!--//content-->
+                                    </div><!--//callout-block-->
+                                </div>
+                                <div id="poseidonml-arch" class="section-block">
+                                    <h3 class="block-title">PoseidonML</h3>
+                                    <div class="callout-block callout-warning">
+                                        <div class="icon-holder">
+                                            <i class="icon icon_cone"></i>
+                                        </div><!--//icon-holder-->
+                                        <div class="content">
+                                            <h4 class="callout-title">Still Under Construction!</h4>
+                                            <p>Pardon the dust, this diagram is still being created, check back later.</p>
+                                        </div><!--//content-->
+                                    </div><!--//callout-block-->
+                                </div><!--//section-block-->
+                                <div id="crviz-arch" class="section-block">
+                                    <h3 class="block-title">CRviz</h3>
+                                    <div class="callout-block callout-warning">
+                                        <div class="icon-holder">
+                                            <i class="icon icon_cone"></i>
+                                        </div><!--//icon-holder-->
+                                        <div class="content">
+                                            <h4 class="callout-title">Still Under Construction!</h4>
+                                            <p>Pardon the dust, this diagram is still being created, check back later.</p>
+                                        </div><!--//content-->
+                                    </div><!--//callout-block-->
+                                </div><!--//section-block-->
+                                <div id="vent-arch" class="section-block">
+                                    <h3 class="block-title">Vent</h3>
+                                    <div class="callout-block callout-warning">
+                                        <div class="icon-holder">
+                                            <i class="icon icon_cone"></i>
+                                        </div><!--//icon-holder-->
+                                        <div class="content">
+                                            <h4 class="callout-title">Still Under Construction!</h4>
+                                            <p>Pardon the dust, this diagram is still being created, check back later.</p>
+                                        </div><!--//content-->
+                                    </div><!--//callout-block-->
+                                </div><!--//section-block-->
+                                <div id="vent-plugins-arch" class="section-block">
+                                    <h3 class="block-title">Vent Plugins</h3>
+                                    <div class="callout-block callout-warning">
+                                        <div class="icon-holder">
+                                            <i class="icon icon_cone"></i>
+                                        </div><!--//icon-holder-->
+                                        <div class="content">
+                                            <h4 class="callout-title">Still Under Construction!</h4>
+                                            <p>Pardon the dust, this diagram is still being created, check back later.</p>
+                                        </div><!--//content-->
+                                    </div><!--//callout-block-->
+                                </div><!--//section-block-->
+                            </section><!--//doc-section-->
+                        </div><!--//content-inner-->
+                    </div><!--//doc-content-->
+                    <div class="doc-sidebar col-md-3 col-12 order-0 d-none d-md-flex">
+                        <div id="doc-nav" class="doc-nav">
+                            <nav id="doc-menu" class="nav doc-menu flex-column sticky">
+                                <a class="nav-link scrollto" href="#what-section">What is Poseidon?</a>
+                                <a class="nav-link scrollto" href="#why-section">Why use Poseidon?</a>
+                                <a class="nav-link scrollto" href="#core-features">Core Features</a>
+                                <nav class="doc-sub-menu nav flex-column">
+                                    <a class="nav-link scrollto" href="#collection">Traffic Collection</a>
+                                    <a class="nav-link scrollto" href="#analysis">Traffic Analysis</a>
+                                    <a class="nav-link scrollto" href="#classification">Device Classification</a>
+                                    <a class="nav-link scrollto" href="#abnormal">Abnormal Device Detection</a>
+                                    <a class="nav-link scrollto" href="#state">State</a>
+                                    <a class="nav-link scrollto" href="#policy">Policy Automation</a>
+                                </nav><!--//nav-->
+                                <a class="nav-link scrollto" href="#architecture-section">Architecture</a>
+                                <nav class="doc-sub-menu nav flex-column">
+                                    <a class="nav-link scrollto" href="#poseidon-arch">Poseidon</a>
+                                    <a class="nav-link scrollto" href="#bigswitch-arch">BigSwitch Cloud Fabric</a>
+                                    <a class="nav-link scrollto" href="#faucet-arch">Faucet</a>
+                                    <a class="nav-link scrollto" href="#poseidonml-arch">PoseidonML</a>
+                                    <a class="nav-link scrollto" href="#crviz-arch">CRviz</a>
+                                    <a class="nav-link scrollto" href="#vent-arch">Vent</a>
+                                    <a class="nav-link scrollto" href="#vent-plugins-arch">Vent Plugins</a>
+                                </nav><!--//nav-->
+                            </nav><!--//doc-menu-->
+                        </div>
+                    </div><!--//doc-sidebar-->
+                </div><!--//doc-body-->
+            </div><!--//container-->
+        </div><!--//doc-wrapper-->
+    </div><!--//page-wrapper-->
+
+    <footer id="footer" class="footer text-center">
+        <div class="container">
+            <!--/* This template is released under the Creative Commons Attribution 3.0 License. Please keep the attribution link below when using for your own project. Thank you for your support. :) If you'd like to use the template without the attribution, you can buy the commercial license via our website: themes.3rdwavemedia.com */-->
+            <small class="copyright">Written by the <a href="https://github.com/cyberreboot">Cyber Reboot team</a> and designed with <i class="fas fa-heart"></i> by <a href="https://themes.3rdwavemedia.com/" target="_blank">Xiaoying Riley</a>.</small>
+        </div><!--//container-->
+    </footer><!--//footer-->
+
+    <!-- Main Javascript -->
+    <script type="text/javascript" src="assets/plugins/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="assets/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="assets/plugins/prism/prism.js"></script>
+    <script type="text/javascript" src="assets/plugins/jquery-scrollTo/jquery.scrollTo.min.js"></script>
+    <script type="text/javascript" src="assets/plugins/stickyfill/dist/stickyfill.min.js"></script>
+    <script type="text/javascript" src="assets/js/main.js"></script>
+
+</body>
+</html>
