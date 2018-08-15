@@ -135,7 +135,7 @@ class Handle_FieldConfig(Monitor_Helper_Base):
     def direct_get(self, field, section):
         ''' get the field from the section via owner '''
         ostr = 'Handle_SectionConfig: {0}'.format(section)
-        self.logger.debug(ostr)
+        self.poseidon_logger.debug(ostr)
         retval = ''
         try:
             retval = self.owner.config.get(section, field)

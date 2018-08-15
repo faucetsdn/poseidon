@@ -47,7 +47,7 @@ class Endpoint_Wrapper():
             k, v = item
             self.mod_configuration[k] = v
         ostr = '{0}:config:{1}'.format(self.mod_name, self.mod_configuration)
-        self.logger.debug(ostr)
+        self.poseidon_logger.debug(ostr)
 
     def set(self, ep):
         self.state[ep.make_hash()] = ep
@@ -92,17 +92,18 @@ class Endpoint_Wrapper():
 
         try:
             resp = requests.post(uri, data=json.dumps(payload))
-            self.logger.debug('collector update response: ' + resp.text)
+            self.poseidon_logger.debug(
+                'collector update response: ' + resp.text)
         except Exception as e:  # pragma: no cover
-            self.logger.debug('failed to update vent collector' + str(e))
+            self.logger.error('failed to update vent collector' + str(e))
 
     def print_endpoint_state(self):
         ''' debug output about what the current state of endpoints is '''
-        def same_old(logger, state, letter, endpoint_states):
-            logger.info('*******{0}*********'.format(state))
+        def same_old(state, letter):
+            self.poseidon_logger.info('*******{0}*********'.format(state))
 
             out_flag = False
-            e_states = endpoint_states.copy()
+            e_states = self.state.copy()
             for my_hash in e_states.keys():
                 endpoint = e_states[my_hash]
                 if endpoint.state == state:
@@ -123,25 +124,25 @@ class Endpoint_Wrapper():
                         del pp_endpoint_data['port']
                         pp_endpoint_data['v'] = pp_endpoint_data['tenant']
                         del pp_endpoint_data['tenant']
-                        logger.info('{0}:{1}:{2}->{3}:{4}'.format(letter,
-                                                                  my_hash,
-                                                                  endpoint.state,
-                                                                  endpoint.next_state,
-                                                                  pp_endpoint_data))
+                        self.poseidon_logger.info('{0}:{1}:{2}->{3}:{4}'.format(letter,
+                                                                                my_hash,
+                                                                                endpoint.state,
+                                                                                endpoint.next_state,
+                                                                                pp_endpoint_data))
                     # update metadata on vent collectors
                     self.update_vent_collector(my_hash, endpoint)
             if not out_flag:
-                logger.info('None')
+                self.poseidon_logger.info('None')
 
         states = [('K', 'KNOWN'), ('U', 'UNKNOWN'), ('M', 'MIRRORING'),
                   ('S', 'SHUTDOWN'), ('R', 'REINVESTIGATING')]
 
-        self.logger.info('====START')
+        self.poseidon_logger.info('====START')
         for l, s in states:
-            same_old(self.logger, s, l, self.state)
+            same_old(s, l)
 
-        self.logger.info('****************')
-        self.logger.info('====STOP')
+        self.poseidon_logger.info('****************')
+        self.poseidon_logger.info('====STOP')
 
         # cleanup endpoints that are no longer active
         hashes = self.state.copy()

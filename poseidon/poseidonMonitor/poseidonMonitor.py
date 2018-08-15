@@ -316,9 +316,6 @@ class Monitor(object):
         # set the logger level
         module_logger.set_level(self.mod_configuration['logger_level'])
 
-        # wire up handlers for Config
-        self.logger.debug('handler Config')
-
         # check
         self.Config.configure()
         self.Config.first_run()
@@ -326,9 +323,6 @@ class Monitor(object):
 
         self.m_queue = Queue.Queue()
         self.faucet_event = []
-
-        # wire up handlers for NorthBoundControllerAbstraction
-        self.logger.debug('handler NorthBoundControllerAbstraction')
 
         # check
         self.NorthBoundControllerAbstraction.configure()
@@ -361,8 +355,8 @@ class Monitor(object):
             self.fa_rabbit_routing_key = str(
                 self.mod_configuration['FA_RABBIT_ROUTING_KEY'])
         except Exception as e:  # pragma: no cover
-            self.logger.debug(
-                'unable to see Faucet Rabbit configuration because: ' + str(e))
+            self.logger.error(
+                'Unable to see Faucet Rabbit configuration because: ' + str(e))
 
         self.schedule.every(scan_frequency).seconds.do(
             partial(schedule_job_kickurl, func=self, logger=self.logger))
@@ -525,7 +519,7 @@ class Monitor(object):
         if dev_hash in collectors:
             hash_coll = collectors[dev_hash]
         else:
-            self.logger.info(
+            self.logger.warning(
                 'Key: {0} not found in collector dictionary. '
                 'Treating this as the existence of multiple active'
                 'collectors'.format(dev_hash)

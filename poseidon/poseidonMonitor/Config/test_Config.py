@@ -41,47 +41,10 @@ def test_config_full_get():
     h.update(resp.encode('utf-8'))
 
 
-def test_config_section_get_OK():
-    '''
-    Tests retrieving a section in the config file.
-    '''
-    resp = config_interface.get_endpoint(
-        'Handle_SectionConfig').direct_get('rest config test')
-    assert json.dumps(
-        resp) == '[["key1", "trident"], ["key2", "theseus"], ["double key", "atlas horses"]]'
-
-
 def test_config_section_get_FAIL():
     resp = config_interface.get_endpoint(
         'Handle_SectionConfig').direct_get('not_a_section')
     assert resp == 'Failed to find section: not_a_section'
-
-
-def test_config_field_get_1():
-    '''
-    Tests retrieving field from a section in the config file.
-    '''
-    resp = config_interface.get_endpoint(
-        'Handle_FieldConfig').direct_get('key1', 'rest config test')
-    assert resp == 'trident'
-
-
-def test_config_field_get_2():
-    '''
-    Tests retrieving field from a section in the config file.
-    '''
-    resp = config_interface.get_endpoint(
-        'Handle_FieldConfig').direct_get('key2', 'rest config test')
-    assert resp == 'theseus'
-
-
-def test_config_field_get_3T():
-    '''
-    Tests retrieving field from a section in the config file.
-    '''
-    resp = config_interface.get_endpoint(
-        'Handle_FieldConfig').direct_get('double key', 'rest config test')
-    assert resp == 'atlas horses'
 
 
 def test_config_field_get_4F():
