@@ -27,8 +27,6 @@ from poseidon.poseidonMonitor.endPoint import EndPoint
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import controller_interface
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.NorthBoundControllerAbstraction import Update_Switch_State
 
-module_logger = Logger.logger
-
 
 def make_endpoint_dict(e_dict, my_hash, state, data):
     ''' make a new endpoint '''

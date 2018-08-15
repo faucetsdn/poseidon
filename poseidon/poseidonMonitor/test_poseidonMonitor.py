@@ -39,9 +39,8 @@ def test_signal_handler():
 
     class MockLogger:
         def __init__(self):
-            module_logger = Logger
-            self.logger = module_logger.logger
-            self.poseidon_logger = module_logger.poseidon_logger
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
     class MockRabbitConnection:
         connection_closed = False
@@ -51,10 +50,10 @@ def test_signal_handler():
             return True
 
     class MockMonitor(Monitor):
-        # no need to init the monitor
 
         def __init__(self):
-            pass
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
     class MockScheduele:
         call_log = []
@@ -84,9 +83,8 @@ def test_start_vent_collector_faucet():
 
     class MockLogger:
         def __init__(self):
-            module_logger = Logger
-            self.logger = module_logger.logger
-            self.poseidon_logger = module_logger.poseidon_logger
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
     class requests():
 
@@ -209,6 +207,8 @@ def test_start_vent_collector_faucet():
                 'vent_ip': '0.0.0.0',
                 'vent_port': '8080',
             })
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
             self.uss = Mock_Update_Switch_State()
 
@@ -223,9 +223,8 @@ def test_start_vent_collector_bcf():
 
     class MockLogger:
         def __init__(self):
-            module_logger = Logger
-            self.logger = module_logger.logger
-            self.poseidon_logger = module_logger.poseidon_logger
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
     class requests():
 
@@ -349,6 +348,8 @@ def test_start_vent_collector_bcf():
                 'vent_ip': '0.0.0.0',
                 'vent_port': '8080',
             })
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
             self.uss = Mock_Update_Switch_State()
 
@@ -363,9 +364,8 @@ def test_not_start_vent_collector_bcf():
 
     class MockLogger:
         def __init__(self):
-            module_logger = Logger
-            self.logger = module_logger.logger
-            self.poseidon_logger = module_logger.poseidon_logger
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
     class requests():
 
@@ -488,6 +488,8 @@ def test_not_start_vent_collector_bcf():
                 'vent_ip': '0.0.0.0',
                 'vent_port': '8080',
             })
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
             self.uss = Mock_Update_Switch_State()
 
@@ -502,9 +504,8 @@ def test_get_vent_collectors():
 
     class MockLogger:
         def __init__(self):
-            module_logger = Logger
-            self.logger = module_logger.logger
-            self.poseidon_logger = module_logger.poseidon_logger
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
     class requests():
 
@@ -669,6 +670,8 @@ def test_get_vent_collectors():
                 'vent_ip': '0.0.0.0',
                 'vent_port': '8080',
             })
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
             self.uss = Mock_Update_Switch_State()
 
@@ -682,9 +685,8 @@ def test_host_has_active_collectors_false():
 
     class MockLogger:
         def __init__(self):
-            module_logger = Logger
-            self.logger = module_logger.logger
-            self.poseidon_logger = module_logger.poseidon_logger
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
     class requests():
 
@@ -850,6 +852,8 @@ def test_host_has_active_collectors_false():
                 'vent_ip': '0.0.0.0',
                 'vent_port': '8080',
             })
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
             self.uss = Mock_Update_Switch_State()
 
@@ -864,9 +868,8 @@ def test_host_has_active_collectors_true():
 
     class MockLogger:
         def __init__(self):
-            module_logger = Logger
-            self.logger = module_logger.logger
-            self.poseidon_logger = module_logger.poseidon_logger
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
     class requests():
 
@@ -1031,6 +1034,8 @@ def test_host_has_active_collectors_true():
                 'vent_ip': '0.0.0.0',
                 'vent_port': '8080',
             })
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
             self.uss = Mock_Update_Switch_State()
 
@@ -1050,10 +1055,10 @@ def test_get_q_item():
     poseidonMonitor.CTRL_C['STOP'] = False
 
     class MockMonitor(Monitor):
-        # no need to init the monitor
 
         def __init__(self):
-            pass
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
     mock_monitor = MockMonitor()
     mock_monitor.m_queue = MockMQueue()
@@ -1069,14 +1074,15 @@ def test_format_rabbit_message():
 
     class MockLogger:
         def __init__(self):
-            module_logger = Logger
-            self.logger = module_logger.logger
-            self.poseidon_logger = module_logger.poseidon_logger
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
     class MockMonitor(Monitor):
 
         def __init__(self):
             self.fa_rabbit_routing_key = 'foo'
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
     mockMonitor = MockMonitor()
     mockMonitor.logger = MockLogger().logger
@@ -1132,9 +1138,8 @@ def test_schedule_job_reinvestigation():
 
     class MockLogger:
         def __init__(self):
-            module_logger = Logger
-            self.logger = module_logger.logger
-            self.poseidon_logger = module_logger.poseidon_logger
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
     epw = Endpoint_Wrapper()
 
@@ -1331,9 +1336,8 @@ def test_update_next_state():
     class MockLogger():
 
         def __init__(self):
-            module_logger = Logger
-            self.logger = module_logger.logger
-            self.poseidon_logger = module_logger.poseidon_logger
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
     class Mock_Update_Switch_State():
 
@@ -1425,6 +1429,8 @@ def test_update_next_state():
 
         def __init__(self):
             self.uss = None
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
     monitor = MockMonitor()
     monitor.uss = Mock_Update_Switch_State()
@@ -1598,6 +1604,8 @@ def test_configSelf():
         def __init__(self):
             self.mod_name = None
             self.mod_configuration = dict()
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
     class MockConfig():
 
@@ -1617,9 +1625,8 @@ def test_configSelf():
     class MockLogger():
 
         def __init__(self):
-            module_logger = Logger
-            self.logger = module_logger.logger
-            self.poseidon_logger = module_logger.poseidon_logger
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
     monitor = MockMonitor()
     monitor.logger = MockLogger().logger
@@ -1639,6 +1646,8 @@ def test_configSelf2():
         def __init__(self):
             self.mod_name = 'testingConfigSelf'
             self.mod_configuration = [1, 2, 3, 4]
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
     class MockSectionConfig():
 
@@ -1651,9 +1660,8 @@ def test_configSelf2():
 
     class MockLogger:
         def __init__(self):
-            module_logger = Logger
-            self.logger = module_logger.logger
-            self.poseidon_logger = module_logger.poseidon_logger
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
     class MockConfig():
 
@@ -1678,9 +1686,8 @@ def test_schedule_job_kickurl():
     class MockLogger():
 
         def __init__(self):
-            module_logger = Logger
-            self.logger = module_logger.logger
-            self.poseidon_logger = module_logger.poseidon_logger
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
         def error(self, msg):
             pass
@@ -1778,9 +1785,8 @@ def test_process():
     class MockLogger():
 
         def __init__(self):
-            module_logger = Logger
-            self.logger = module_logger.logger
-            self.poseidon_logger = module_logger.poseidon_logger
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
     class MockEndpoint(Endpoint_Wrapper):
         def __init__(self):
@@ -1905,7 +1911,7 @@ def test_process():
             return self.endpoints
 
     class MockMonitor(Monitor):
-        # no need to init the monitor
+
         def __init__(self):
             self.mod_configuration = {
                 'collector_interval': 900,
@@ -1913,6 +1919,8 @@ def test_process():
                 'vent_ip': '0.0.0.0',
                 'vent_port': '8080'
             }
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
             self.fa_rabbit_routing_key = 'FAUCET.Event'
             self.faucet_event = None
 
@@ -2073,9 +2081,8 @@ def test_schedule_thread_worker():
     class MockLogger():
 
         def __init__(self):
-            module_logger = Logger
-            self.logger = module_logger.logger
-            self.poseidon_logger = module_logger.poseidon_logger
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
 
     class mockSchedule():
 

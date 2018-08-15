@@ -23,8 +23,6 @@ Test module for controllerproxy.
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.controllerproxy import ControllerProxy
 
-module_logger = Logger.logger
-
 
 def test_ControllerProxy():
     """

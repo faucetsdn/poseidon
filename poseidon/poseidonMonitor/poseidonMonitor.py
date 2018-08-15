@@ -47,10 +47,6 @@ from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.NorthBoundControll
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.bcf import \
     BcfProxy
 
-
-# TODO clean up loggers
-module_logger = Logger
-
 requests.packages.urllib3.disable_warnings()
 
 CTRL_C = dict()
@@ -217,13 +213,13 @@ def schedule_job_kickurl(func, logger):
 
 def rabbit_callback(ch, method, properties, body, q=None):
     ''' callback, places rabbit data into internal queue'''
-    module_logger.logger.debug('got a message: {0}:{1}:{2}'.format(
+    Logger.poseidon_logger.debug('got a message: {0}:{1}:{2}'.format(
         method.routing_key, body, type(body)))
     # TODO more
     if q is not None:
         q.put((method.routing_key, body))
     else:
-        module_logger.logger.debug('posedionMain workQueue is None')
+        Logger.poseidon_logger.debug('posedionMain workQueue is None')
 
 
 def schedule_thread_worker(schedule, logger):
@@ -278,10 +274,10 @@ class Monitor(object):
 
     def __init__(self, skip_rabbit):
         # get the logger setup
-        self.logger = module_logger.logger
-        self.poseidon_logger = module_logger.poseidon_logger
+        self.logger = Logger.logger
+        self.poseidon_logger = Logger.poseidon_logger
         self.mod_configuration = dict()
-        module_logger.logger_config(None)
+        Logger.logger_config(None)
 
         self.mod_name = self.__class__.__name__
         self.skip_rabbit = skip_rabbit
@@ -314,7 +310,7 @@ class Monitor(object):
         self.configSelf()
 
         # set the logger level
-        module_logger.set_level(self.mod_configuration['logger_level'])
+        Logger.set_level(self.mod_configuration['logger_level'])
 
         # check
         self.Config.configure()
@@ -359,20 +355,20 @@ class Monitor(object):
                 'Unable to see Faucet Rabbit configuration because: ' + str(e))
 
         self.schedule.every(scan_frequency).seconds.do(
-            partial(schedule_job_kickurl, func=self, logger=self.logger))
+            partial(schedule_job_kickurl, func=self, logger=self.poseidon_logger))
 
         self.schedule.every(reinvestigation_frequency).seconds.do(
             partial(schedule_job_reinvestigation,
                     max_investigations=max_concurrent_reinvestigations,
                     endpoints=self.NorthBoundControllerAbstraction.get_endpoint(
                         'Update_Switch_State').endpoints,
-                    logger=self.logger))
+                    logger=self.poseidon_logger))
 
         self.schedule_thread = threading.Thread(
             target=partial(
                 schedule_thread_worker,
                 schedule=self.schedule,
-                logger=self.logger),
+                logger=self.poseidon_logger),
             name='st_worker')
 
     def configSelf(self):
@@ -382,7 +378,7 @@ class Monitor(object):
             k, v = item
             self.mod_configuration[k] = v
         ostr = '{0}:config:{1}'.format(self.mod_name, self.mod_configuration)
-        self.logger.debug(ostr)
+        self.poseidon_logger.debug(ostr)
 
     def update_next_state(self, ml_returns):
         ''' generate the next_state from known information '''
@@ -425,25 +421,30 @@ class Monitor(object):
                 if ml_returns[my_hash]['valid']:
                     current_state = endpoint.state
                     ml_decision = ml_returns[my_hash]['decisions']['behavior']
-                    self.logger.debug('ML_DECISION:{0}'.format(ml_decision))
+                    self.poseidon_logger.debug(
+                        'ML_DECISION:{0}'.format(ml_decision))
                     if current_state == 'REINVESTIGATING':
                         if ml_decision == 'normal':
                             self.uss.endpoints.change_endpoint_nextstate(
                                 my_hash, 'KNOWN')
-                            self.logger.debug('REINVESTIGATION Making KNOWN')
+                            self.poseidon_logger.debug(
+                                'REINVESTIGATION Making KNOWN')
                         else:
                             self.uss.endpoints.change_endpoint_nextstate(
                                 my_hash, 'UNKNOWN')
-                            self.logger.debug('REINVESTIGATION Making UNKNOWN')
+                            self.poseidon_logger.debug(
+                                'REINVESTIGATION Making UNKNOWN')
                     if current_state == 'MIRRORING':
                         if ml_decision == 'normal':
                             self.uss.endpoints.change_endpoint_nextstate(
                                 my_hash, 'KNOWN')
-                            self.logger.debug('MIRRORING Making KNOWN')
+                            self.poseidon_logger.debug(
+                                'MIRRORING Making KNOWN')
                         else:
                             self.uss.endpoints.change_endpoint_nextstate(
                                 my_hash, 'SHUTDOWN')
-                            self.logger.debug('MIRRORING Making SHUTDOWN')
+                            self.poseidon_logger.debug(
+                                'MIRRORING Making SHUTDOWN')
 
     def start_vent_collector(self, dev_hash, num_captures=1):
         '''
@@ -467,7 +468,7 @@ class Monitor(object):
             'iters': str(num_captures),
             'metadata': endpoint.to_str()}
 
-        self.logger.debug('vent payload: ' + str(payload))
+        self.poseidon_logger.debug('vent payload: ' + str(payload))
 
         vent_addr = self.mod_configuration['vent_ip'] + \
             ':' + self.mod_configuration['vent_port']
@@ -476,13 +477,14 @@ class Monitor(object):
         try:
             if should_start:
                 resp = requests.post(uri, data=json.dumps(payload))
-                self.logger.debug('collector response: ' + resp.text)
+                self.poseidon_logger.debug('collector response: ' + resp.text)
             else:
-                self.logger.debug(
+                self.poseidon_logger.debug(
                     'collector not started due to invalid span fabric configuration.')
 
         except Exception as e:  # pragma: no cover
-            self.logger.debug('failed to start vent collector' + str(e))
+            self.poseidon_logger.debug(
+                'failed to start vent collector' + str(e))
 
     # returns a dictionary of existing collectors keyed on dev_hash
     def get_vent_collectors(self):
@@ -504,10 +506,11 @@ class Monitor(object):
                     collectors.update({coll.hash: coll})
                 statuses = collectors
 
-            self.logger.debug('collector list response: ' + resp.text)
+            self.poseidon_logger.debug('collector list response: ' + resp.text)
         except Exception as e:  # pragma: no cover
             statuses = e
-            self.logger.debug('failed to get vent collector statuses' + str(e))
+            self.poseidon_logger.debug(
+                'failed to get vent collector statuses' + str(e))
 
         return statuses
 
@@ -527,7 +530,7 @@ class Monitor(object):
             return True
 
         for c in collectors:
-            self.logger.debug(c)
+            self.poseidon_logger.debug(c)
             if (
                 collectors[c].hash != dev_hash and
                 collectors[c].host == hash_coll.host and
@@ -545,17 +548,17 @@ class Monitor(object):
         ret_val = {}
 
         routing_key, my_obj = item
-        self.logger.debug('rabbit_message:{0}'.format(my_obj))
+        self.poseidon_logger.debug('rabbit_message:{0}'.format(my_obj))
         # my_obj: (hash,data)
         my_obj = json.loads(my_obj)
-        self.logger.debug('routing_key:{0}'.format(routing_key))
+        self.poseidon_logger.debug('routing_key:{0}'.format(routing_key))
         if routing_key == 'poseidon.algos.decider':
-            self.logger.debug('decider value:{0}'.format(my_obj))
+            self.poseidon_logger.debug('decider value:{0}'.format(my_obj))
             # if valid response then send along otherwise nothing
             for key in my_obj:
                 ret_val[key] = my_obj[key]
         elif routing_key == self.fa_rabbit_routing_key:
-            self.logger.debug('FAUCET Event:{0}'.format(my_obj))
+            self.poseidon_logger.debug('FAUCET Event:{0}'.format(my_obj))
             for key in my_obj:
                 ret_val[key] = my_obj[key]
         # TODO do something with recomendation
@@ -576,9 +579,10 @@ class Monitor(object):
         signal.signal(signal.SIGINT, partial(self.signal_handler))
         while not CTRL_C['STOP']:
             try:
-                self.logger.debug('***************CTRL_C:{0}'.format(CTRL_C))
+                self.poseidon_logger.debug(
+                    '***************CTRL_C:{0}'.format(CTRL_C))
                 time.sleep(1)
-                self.logger.debug('woke from sleeping')
+                self.poseidon_logger.debug('woke from sleeping')
                 found_work, item = self.get_q_item()
                 ml_returns = {}
 
@@ -586,15 +590,16 @@ class Monitor(object):
                 if found_work and item[0] != self.fa_rabbit_routing_key:
                     # TODO make this read until nothing in q
                     ml_returns = self.format_rabbit_message(item)
-                    self.logger.debug('\n\n\n**********************')
-                    self.logger.debug('ml_returns:{0}'.format(ml_returns))
-                    self.logger.debug('**********************\n\n\n')
+                    self.poseidon_logger.debug('\n\n\n**********************')
+                    self.poseidon_logger.debug(
+                        'ml_returns:{0}'.format(ml_returns))
+                    self.poseidon_logger.debug('**********************\n\n\n')
                 elif found_work and item[0] == self.fa_rabbit_routing_key:
                     self.faucet_event.append(self.format_rabbit_message(item))
-                    self.logger.debug('\n\n\n**********************')
-                    self.logger.debug(
+                    self.poseidon_logger.debug('\n\n\n**********************')
+                    self.poseidon_logger.debug(
                         'faucet_event:{0}'.format(self.faucet_event))
-                    self.logger.debug('**********************\n\n\n')
+                    self.poseidon_logger.debug('**********************\n\n\n')
 
                 eps = self.uss.endpoints
                 state_transitions = self.update_next_state(ml_returns)
@@ -611,26 +616,26 @@ class Monitor(object):
                     eps.print_endpoint_state()
 
                     if next_state == 'MIRRORING':
-                        self.logger.debug(
+                        self.poseidon_logger.debug(
                             'updating:{0}:{1}->{2}'.format(endpoint_hash,
                                                            current_state,
                                                            next_state))
-                        self.logger.debug(
+                        self.poseidon_logger.debug(
                             '*********** U NOTIFY VENT ***********')
                         self.start_vent_collector(endpoint_hash)
-                        self.logger.debug(
+                        self.poseidon_logger.debug(
                             '*********** U MIRROR PORT ***********')
                         self.uss.mirror_endpoint(
                             endpoint_hash, messages=self.faucet_event)
                     if next_state == 'REINVESTIGATING':
-                        self.logger.debug(
+                        self.poseidon_logger.debug(
                             'updating:{0}:{1}->{2}'.format(endpoint_hash,
                                                            current_state,
                                                            next_state))
-                        self.logger.debug(
+                        self.poseidon_logger.debug(
                             '*********** R NOTIFY VENT ***********')
                         self.start_vent_collector(endpoint_hash)
-                        self.logger.debug(
+                        self.poseidon_logger.debug(
                             '*********** R MIRROR PORT ***********')
                         self.uss.mirror_endpoint(
                             endpoint_hash, messages=self.faucet_event)
@@ -638,30 +643,30 @@ class Monitor(object):
                         if (current_state == 'REINVESTIGATING' or
                                 current_state == 'MIRRORING'):
                             if not self.host_has_active_collectors(endpoint_hash):
-                                self.logger.debug(
+                                self.poseidon_logger.debug(
                                     '*********** ' +
                                     current_state[0] +
                                     ' UN-MIRROR PORT ***********')
                                 self.uss.unmirror_endpoint(
                                     endpoint_hash, messages=self.faucet_event)
                             else:
-                                self.logger.debug(
+                                self.poseidon_logger.debug(
                                     '*********** ' +
                                     current_state[0] +
                                     ' CAN NOT UN-MIRROR PORT BECAUSE OF ACTIVE COLLECTOR ***********')
                             eps.change_endpoint_state(endpoint_hash)
                         if current_state == 'UNKNOWN':
                             if not self.host_has_active_collectors(endpoint_hash):
-                                self.logger.debug(
+                                self.poseidon_logger.debug(
                                     '*********** U UN-MIRROR PORT ***********')
                                 self.uss.unmirror_endpoint(
                                     endpoint_hash, messages=self.faucet_event)
                             else:
-                                self.logger.debug(
+                                self.poseidon_logger.debug(
                                     '*********** U UN-MIRROR PORT ***********')
                             eps.change_endpoint_state(endpoint_hash)
                     if next_state == 'SHUTDOWN':
-                        self.logger.debug(
+                        self.poseidon_logger.debug(
                             'updating:{0}:{1}->{2}'.format(endpoint_hash,
                                                            current_state,
                                                            next_state))
@@ -669,7 +674,7 @@ class Monitor(object):
 
                     eps.print_endpoint_state()
             except Exception as e:  # pragma: no cover
-                self.logger.debug(
+                self.poseidon_logger.debug(
                     'iteration failed because: {0}'.format(str(e)))
 
     def get_q_item(self):
@@ -696,10 +701,10 @@ class Monitor(object):
         ''' hopefully eat a CTRL_C and signal system shutdown '''
         global CTRL_C
         CTRL_C['STOP'] = True
-        self.logger.debug('=================CTRLC{0}'.format(CTRL_C))
+        self.poseidon_logger.debug('=================CTRLC{0}'.format(CTRL_C))
         try:
             for job in self.schedule.jobs:
-                self.logger.debug('CTRLC:{0}'.format(job))
+                self.poseidon_logger.debug('CTRLC:{0}'.format(job))
                 self.schedule.cancel_job(job)
             self.rabbit_channel_connection_local.close()
             sys.exit()
@@ -792,7 +797,6 @@ def main(skip_rabbit=False):  # pragma: no cover
             rabbit_callback,
             queue_name,
             pmain.m_queue)
-        # def start_channel(self, channel, callback, queue):
 
     if pmain.fa_rabbit_enabled:
         rabbit = Rabbit_Base()
@@ -816,10 +820,8 @@ def main(skip_rabbit=False):  # pragma: no cover
     # loop here until told not to
     pmain.process()
 
-    pmain.logger.debug('SHUTTING DOWN')
-    # pmain.rabbit_channel_connection_local.close()
-    # pmain.rabbit_channel_local.close()
-    pmain.logger.debug('EXITING')
+    pmain.poseidon_logger.debug('SHUTTING DOWN')
+    pmain.poseidon_logger.debug('EXITING')
     sys.exit(0)
 
 

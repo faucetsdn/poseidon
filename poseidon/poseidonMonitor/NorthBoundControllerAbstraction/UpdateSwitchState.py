@@ -32,16 +32,14 @@ from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.bcf impo
 from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.faucet.faucet import \
     FaucetProxy
 
-module_logger = Logger
-
 
 class Update_Switch_State(Monitor_Helper_Base):
     ''' handle periodic process, determine if switch state updated '''
 
     def __init__(self):
         super(Update_Switch_State, self).__init__()
-        self.logger = module_logger.logger
-        self.poseidon_logger = module_logger.poseidon_logger
+        self.logger = Logger.logger
+        self.poseidon_logger = Logger.poseidon_logger
         self.mod_name = self.__class__.__name__
         self.retval = {}
         self.times = 0
@@ -157,7 +155,7 @@ class Update_Switch_State(Monitor_Helper_Base):
             next_state = self.endpoints.get_endpoint_next(my_hash)
             self.sdnc.shutdown_ip(my_ip)
             self.endpoints.change_endpoint_state(my_hash)
-            self.logger.debug(
+            self.poseidon_logger.debug(
                 'endpoint:{0}:{1}:{2}'.format(my_hash, my_ip, next_state))
             return True
         return False
@@ -169,7 +167,7 @@ class Update_Switch_State(Monitor_Helper_Base):
             next_state = self.endpoints.get_endpoint_next(my_hash)
             self.sdnc.mirror_ip(my_ip, messages=messages)
             self.endpoints.change_endpoint_state(my_hash)
-            self.logger.debug(
+            self.poseidon_logger.debug(
                 'endpoint:{0}:{1}:{2}'.format(my_hash, my_ip, next_state))
             return True
         return False
@@ -180,7 +178,7 @@ class Update_Switch_State(Monitor_Helper_Base):
             my_ip = self.endpoints.get_endpoint_ip(my_hash)
             next_state = self.endpoints.get_endpoint_next(my_hash)
             self.sdnc.unmirror_ip(my_ip, messages=messages)
-            self.logger.debug(
+            self.poseidon_logger.debug(
                 'endpoint:{0}:{1}:{2}'.format(my_hash, my_ip, next_state))
             return True
         return False
@@ -194,7 +192,7 @@ class Update_Switch_State(Monitor_Helper_Base):
             # TODO db call to see if really need to run things
             for machine in machines:
                 end_point = EndPoint(machine, state='KNOWN')
-                self.logger.debug(
+                self.poseidon_logger.debug(
                     'adding address to known systems {0}'.format(machine))
                 self.endpoints.set(end_point)
             changed = True
@@ -210,7 +208,7 @@ class Update_Switch_State(Monitor_Helper_Base):
                     machine_hashes.append(h)
 
                     if h not in self.endpoints.state:
-                        self.logger.debug(
+                        self.poseidon_logger.debug(
                             '***** detected new address {0}'.format(machine))
                         self.endpoints.set(end_point)
                         changed = True
@@ -242,7 +240,7 @@ class Update_Switch_State(Monitor_Helper_Base):
             self.retval['controller'] = 'Could not establish connection to {0}.'.format(
                 self.controller['URI'])
 
-        self.logger.debug('MACHINES:{0}'.format(machines))
+        self.poseidon_logger.debug('MACHINES:{0}'.format(machines))
         self.find_new_machines(machines)
 
         self.retval['machines'] = parsed
