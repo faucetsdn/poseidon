@@ -5,7 +5,7 @@
 This demo will be using Faucet and Mininet with an Open vSwitch to demonstrate Poseidon working with a virtual SDN network.
 
 Poseidon has been installed along with all of the dependencies needed for this demo. It is set to start up automatically by default and can take a few minutes to finish initializing. You can check on the progress with `poseidon status`
-Once the service shows Active as 'active' and the logs show that it is no longer "waiting for Poseidon containers to become healthy", you can check the Poseidon logs with `poseidon logs`.
+Once the service shows Active as 'active' and the logs show that it is no longer "waiting for Poseidon containers to become healthy", you can check the Poseidon logs with `poseidon logs` and the system logs with `poseidon system-logs`
 
 In another terminal you can start mininet with the following:
 

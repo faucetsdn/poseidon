@@ -126,7 +126,8 @@ Options:
     -c,  config        display current configuration info
     -h,  help          print this help
     -i,  info/status   display current status of the Poseidon service
-    -l,  logs          display the logs
+    -l,  logs          display the information logs about what Poseidon is doing
+    -L,  system-logs   display the system logs related to Poseidon
     -R,  reconfig      reconfigures all settings (uses sudo, will restart the Poseidon service)
     -r,  restart       restart the Poseidon service (uses sudo)
     -s,  start         start the Poseidon service (uses sudo)
