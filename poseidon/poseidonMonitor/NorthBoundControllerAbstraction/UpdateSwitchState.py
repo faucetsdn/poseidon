@@ -163,23 +163,33 @@ class Update_Switch_State(Monitor_Helper_Base):
     def mirror_endpoint(self, my_hash, messages=None):
         ''' tell the controller to begin mirroring traffic '''
         if my_hash in self.endpoints.state:
+            my_mac = self.endpoints.get_endpoint_mac(my_hash)
             my_ip = self.endpoints.get_endpoint_ip(my_hash)
             next_state = self.endpoints.get_endpoint_next(my_hash)
-            self.sdnc.mirror_ip(my_ip, messages=messages)
+            try:
+                self.sdnc.mirror_mac(my_mac, messages=messages)
+            except:
+                # TODO currently needed for BCF
+                self.sdnc.mirror_ip(my_ip, messages=messages)
             self.endpoints.change_endpoint_state(my_hash)
             self.poseidon_logger.debug(
-                'endpoint:{0}:{1}:{2}'.format(my_hash, my_ip, next_state))
+                'endpoint:{0}:{1}:{2}:{3}'.format(my_hash, my_mac, my_ip, next_state))
             return True
         return False
 
     def unmirror_endpoint(self, my_hash, messages=None):
         ''' tell the controller to unmirror traffic '''
         if my_hash in self.endpoints.state:
+            my_mac = self.endpoints.get_endpoint_mac(my_hash)
             my_ip = self.endpoints.get_endpoint_ip(my_hash)
             next_state = self.endpoints.get_endpoint_next(my_hash)
-            self.sdnc.unmirror_ip(my_ip, messages=messages)
+            try:
+                self.sdnc.unmirror_mac(my_mac, messages=messages)
+            except:
+                # TODO currently needed for BCF
+                self.sdnc.unmirror_ip(my_ip, messages=messages)
             self.poseidon_logger.debug(
-                'endpoint:{0}:{1}:{2}'.format(my_hash, my_ip, next_state))
+                'endpoint:{0}:{1}:{2}:{3}'.format(my_hash, my_mac, my_ip, next_state))
             return True
         return False
 

@@ -230,10 +230,7 @@ def schedule_thread_worker(schedule, logger):
     while not CTRL_C['STOP']:
         sys.stdout.flush()
         schedule.run_pending()
-        logLine = 'scheduler woke {0}'.format(
-            threading.current_thread().getName())
         time.sleep(1)
-        logger.debug(logLine)
     logger.debug('Threading stop:{0}'.format(
         threading.current_thread().getName()))
     sys.exit()
@@ -579,10 +576,7 @@ class Monitor(object):
         signal.signal(signal.SIGINT, partial(self.signal_handler))
         while not CTRL_C['STOP']:
             try:
-                self.poseidon_logger.debug(
-                    '***************CTRL_C:{0}'.format(CTRL_C))
                 time.sleep(1)
-                self.poseidon_logger.debug('woke from sleeping')
                 found_work, item = self.get_q_item()
                 ml_returns = {}
 

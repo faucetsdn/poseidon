@@ -180,7 +180,7 @@ class FaucetProxy(Connection, Parser):
     def get_seq_by_ip(self):
         pass
 
-    def mirror_ip(self, ip, messages=None):
+    def mirror_mac(self, my_mac, messages=None):
         if messages:
             self.poseidon_logger.debug('faucet messages: {0}'.format(messages))
             for message in messages:
@@ -198,7 +198,7 @@ class FaucetProxy(Connection, Parser):
         switch = None
         status = None
         for mac in self.mac_table:
-            if ip == self.mac_table[mac][0]['ip-address']:
+            if my_mac == self.mac_table[mac][0]['mac']:
                 port = self.mac_table[mac][0]['port']
                 switch = self.mac_table[mac][0]['segment']
         if port and switch:
@@ -217,7 +217,7 @@ class FaucetProxy(Connection, Parser):
         self.poseidon_logger.debug('mirror status: ' + str(status))
         # TODO check if config was successfully updated
 
-    def unmirror_ip(self, ip, messages=None):
+    def unmirror_mac(self, my_mac, messages=None):
         if messages:
             self.poseidon_logger.debug('faucet messages: {0}'.format(messages))
             for message in messages:
@@ -235,7 +235,7 @@ class FaucetProxy(Connection, Parser):
         switch = None
         status = None
         for mac in self.mac_table:
-            if ip == self.mac_table[mac][0]['ip-address']:
+            if my_mac == self.mac_table[mac][0]['mac']:
                 port = self.mac_table[mac][0]['port']
                 switch = self.mac_table[mac][0]['segment']
         if port and switch:
