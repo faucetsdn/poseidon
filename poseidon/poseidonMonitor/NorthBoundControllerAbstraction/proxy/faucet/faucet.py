@@ -97,28 +97,21 @@ class FaucetProxy(Connection, Parser):
                 self.log(self.log_file)
         self.poseidon_logger.debug('get_endpoints found:')
         for mac in self.mac_table:
-            if (self.mac_table[mac][0]['ip-address'] != None and
-                self.mac_table[mac][0]['ip-address'] != 'None' and
-                self.mac_table[mac][0]['ip-address'] != '127.0.0.1' and
-                self.mac_table[mac][0]['ip-address'] != '0.0.0.0' and
-                self.mac_table[mac][0]['ip-address'] != '::' and
-                not self.mac_table[mac][0]['ip-address'].startswith('169.254.') and
-                    not self.mac_table[mac][0]['ip-address'].startswith('fe80:')):
-                if not self.learn_pub_adds:
-                    # only allow RFC 1918 ipv4 addresses and fd* ipv6 address
-                    check_sec_octet = self.mac_table[mac][0]['ip-address'].split(
-                        '.')
-                    if len(check_sec_octet) > 1:
-                        check_sec_octet = int(check_sec_octet[1])
-                    if (self.mac_table[mac][0]['ip-address'].startswith('fd') or
-                        self.mac_table[mac][0]['ip-address'].startswith('10.') or
-                        self.mac_table[mac][0]['ip-address'].startswith('192.168.') or
-                        (self.mac_table[mac][0]['ip-address'].startswith('172.') and
-                         isinstance(check_sec_octet, int) and check_sec_octet > 15 and check_sec_octet < 32)):
-                        self.poseidon_logger.debug('{0}:{1}'.format(
-                            mac, self.mac_table[mac]))
-                        retval.append(self.mac_table[mac])
-                else:
+            if self.learn_pub_adds:
+                self.poseidon_logger.debug('{0}:{1}'.format(
+                    mac, self.mac_table[mac]))
+                retval.append(self.mac_table[mac])
+            else:
+                # only allow RFC 1918 ipv4 addresses and fd* ipv6 address
+                check_sec_octet = self.mac_table[mac][0]['ip-address'].split(
+                    '.')
+                if len(check_sec_octet) > 1:
+                    check_sec_octet = int(check_sec_octet[1])
+                if (self.mac_table[mac][0]['ip-address'].startswith('fd') or
+                    self.mac_table[mac][0]['ip-address'].startswith('10.') or
+                    self.mac_table[mac][0]['ip-address'].startswith('192.168.') or
+                    (self.mac_table[mac][0]['ip-address'].startswith('172.') and
+                     isinstance(check_sec_octet, int) and check_sec_octet > 15 and check_sec_octet < 32)):
                     self.poseidon_logger.debug('{0}:{1}'.format(
                         mac, self.mac_table[mac]))
                     retval.append(self.mac_table[mac])

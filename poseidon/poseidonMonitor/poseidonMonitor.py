@@ -463,8 +463,8 @@ class Monitor(object):
             'nic': self.mod_configuration['collector_nic'],
             'id': dev_hash,
             'interval': self.mod_configuration['collector_interval'],
-            'filter': '\'host {0}\''.format(
-                self.uss.endpoints.get_endpoint_ip(dev_hash)),
+            'filter': '\'ether host {0}\''.format(
+                self.uss.endpoints.get_endpoint_mac(dev_hash)),
             'iters': str(num_captures),
             'metadata': endpoint.to_str()}
 

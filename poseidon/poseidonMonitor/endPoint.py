@@ -40,12 +40,10 @@ class EndPoint:
         pre_h = str()
         post_h = None
         # nodhcp -> dhcp withname makes different hashes
-        # {u'tenant': u'FLOORPLATE', u'mac': u'ac:87:a3:2b:7f:12', u'segment': u'prod', u'name': None, u'ip-address': u'10.179.0.100'}}^
-        # {u'tenant': u'FLOORPLATE', u'mac': u'ac:87:a3:2b:7f:12', u'segment': u'prod', u'name': u'demo-laptop', u'ip-address': u'10.179.0.100'}}
-        # ^^^ make different hashes if name is included
-        # for word in ['tenant', 'mac', 'segment', 'name', 'ip-address']:
+        # {u'tenant': u'FLOORPLATE', u'mac': u'ac:87:a3:2b:7f:12', u'segment': u'prod', u'name': None, u'ip-address': u'10.179.0.100'}
+        # {u'tenant': u'FLOORPLATE', u'mac': u'ac:87:a3:2b:7f:12', u'segment': u'prod', u'name': u'demo-laptop', u'ip-address': u'10.179.0.100'}
 
-        for word in ['tenant', 'mac', 'segment', 'ip-address']:
+        for word in ['tenant', 'mac', 'segment']:
             pre_h = pre_h + str(self.endpoint_data.get(str(word), 'missing'))
         h.update(pre_h.encode('utf-8'))
         post_h = h.hexdigest()
