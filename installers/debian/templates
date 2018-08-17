@@ -95,17 +95,17 @@ Description: Set the RabbitMQ host IP address:
 
 Template: poseidon/faucet_fa_rabbit_exchange
 Type: string
-Default: 'topic_recs'
+Default: topic_recs
 Description: Set the name of the RabbitMQ exchange:
 
 Template: poseidon/faucet_fa_rabbit_exchange_type
 Type: string
-Default: 'topic'
+Default: topic
 Description: Set the RabbitMQ exchange type:
 
 Template: poseidon/faucet_fa_rabbit_routing_key
 Type: string
-Default: 'FAUCET.Event'
+Default: FAUCET.Event
 Description: Set the RabbitMQ routing key:
 
 Template: poseidon/faucet_fa_rabbit_port

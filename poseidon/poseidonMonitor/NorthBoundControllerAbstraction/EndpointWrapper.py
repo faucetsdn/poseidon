@@ -68,6 +68,12 @@ class Endpoint_Wrapper():
             return self.state[my_hash].endpoint_data['ip-address']
         return None
 
+    def get_endpoint_mac(self, my_hash):
+        ''' return the mac address associated with a hash '''
+        if my_hash in self.state:
+            return self.state[my_hash].endpoint_data['mac']
+        return None
+
     def change_endpoint_state(self, my_hash, new_state=None):
         ''' update the state of an endpoint '''
         self.state[my_hash].state = new_state or self.state[my_hash].next_state
