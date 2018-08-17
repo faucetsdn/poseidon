@@ -206,7 +206,7 @@ class Update_Switch_State(Monitor_Helper_Base):
             # TODO db call to see if really need to run things
             for machine in machines:
                 end_point = EndPoint(machine, state='KNOWN')
-                self.poseidon_logger.debug(
+                self.poseidon_logger.info(
                     'adding address to known systems {0}'.format(machine))
                 self.endpoints.set(end_point)
             changed = True
@@ -222,7 +222,7 @@ class Update_Switch_State(Monitor_Helper_Base):
                     machine_hashes.append(h)
 
                     if h not in self.endpoints.state:
-                        self.poseidon_logger.debug(
+                        self.poseidon_logger.info(
                             '***** detected new address {0}'.format(machine))
                         self.endpoints.set(end_point)
                         changed = True

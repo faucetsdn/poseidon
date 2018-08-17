@@ -103,6 +103,9 @@ class Endpoint_Wrapper():
 
     def print_endpoint_state(self):
         ''' debug output about what the current state of endpoints is '''
+        return
+
+    def fake(self):
         def same_old(state, letter):
             self.poseidon_logger.info('*******{0}*********'.format(state))
 

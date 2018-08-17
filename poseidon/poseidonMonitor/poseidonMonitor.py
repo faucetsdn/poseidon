@@ -611,7 +611,7 @@ class Monitor(object):
                     eps.print_endpoint_state()
 
                     if next_state == 'MIRRORING':
-                        self.poseidon_logger.debug(
+                        self.poseidon_logger.info(
                             'updating:{0}:{1}->{2}'.format(endpoint_hash,
                                                            current_state,
                                                            next_state))
@@ -623,7 +623,7 @@ class Monitor(object):
                         self.uss.mirror_endpoint(
                             endpoint_hash, messages=self.faucet_event)
                     if next_state == 'REINVESTIGATING':
-                        self.poseidon_logger.debug(
+                        self.poseidon_logger.info(
                             'updating:{0}:{1}->{2}'.format(endpoint_hash,
                                                            current_state,
                                                            next_state))
@@ -661,7 +661,7 @@ class Monitor(object):
                                     '*********** U UN-MIRROR PORT ***********')
                             eps.change_endpoint_state(endpoint_hash)
                     if next_state == 'SHUTDOWN':
-                        self.poseidon_logger.debug(
+                        self.poseidon_logger.info(
                             'updating:{0}:{1}->{2}'.format(endpoint_hash,
                                                            current_state,
                                                            next_state))
@@ -669,8 +669,8 @@ class Monitor(object):
 
                     eps.print_endpoint_state()
             except Exception as e:  # pragma: no cover
-                self.poseidon_logger.debug(
-                    'iteration failed because: {0}'.format(str(e)))
+                self.logger.error(
+                    'Iteration failed because: {0}'.format(str(e)))
 
     def get_q_item(self):
         ''' attempt to get a workitem from the queue'''
