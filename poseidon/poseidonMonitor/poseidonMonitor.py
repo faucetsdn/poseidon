@@ -58,14 +58,15 @@ def schedule_job_kickurl(func, logger):
 
     def ip2int(ip):
         ''' convert ip quad octet string to an int '''
-        if ':' in ip:
+        if ip in [None, '::']:
+            res = 0
+        elif ':' in ip:
             res = int(hexlify(socket.inet_pton(socket.AF_INET6, ip)), 16)
         else:
             o = list(map(int, ip.split('.')))
             res = (16777216 * o[0]) + (65536 * o[1]) + (256 * o[2]) + o[3]
         return res
 
-    logger.debug('kick')
     func.NorthBoundControllerAbstraction.get_endpoint(
         'Update_Switch_State').update_endpoint_state(messages=func.faucet_event)
     # check the length didn't change before wiping it out
