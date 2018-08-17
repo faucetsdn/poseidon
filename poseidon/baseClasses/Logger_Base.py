@@ -45,7 +45,7 @@ class Logger:
                                   '%(module)s:%(lineno)-3d - %(message)s')
 
     # timestamp - logger_level:class:line number - message
-    p_formatter = logging.Formatter('%(timestamp)s - %(levelname)s:'
+    p_formatter = logging.Formatter('%(asctime)s - %(levelname)s:'
                                     '%(module)s:%(lineno)-3d - %(message)s')
 
     # set the logger to log to console
