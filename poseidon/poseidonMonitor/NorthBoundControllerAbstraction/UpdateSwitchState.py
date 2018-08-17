@@ -168,7 +168,7 @@ class Update_Switch_State(Monitor_Helper_Base):
             next_state = self.endpoints.get_endpoint_next(my_hash)
             try:
                 self.sdnc.mirror_mac(my_mac, messages=messages)
-            except:
+            except Exception as e:
                 # TODO currently needed for BCF
                 self.sdnc.mirror_ip(my_ip, messages=messages)
             self.endpoints.change_endpoint_state(my_hash)
