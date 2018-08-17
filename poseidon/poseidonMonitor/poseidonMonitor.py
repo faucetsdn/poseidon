@@ -58,7 +58,7 @@ def schedule_job_kickurl(func, logger):
 
     def ip2int(ip):
         ''' convert ip quad octet string to an int '''
-        if ip in [None, '::']:
+        if ip in [None, 'None', '::']:
             res = 0
         elif ':' in ip:
             res = int(hexlify(socket.inet_pton(socket.AF_INET6, ip)), 16)
