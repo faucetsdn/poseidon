@@ -52,14 +52,6 @@
                 <div class="doc-body row">
                     <div class="doc-content col-md-9 col-12 order-1">
                         <div class="content-inner">
-                            <section id="endpoint-state" class="doc-section">
-                                <h2 class="section-title">Get State of Endpoints</h2>
-                                <div class="section-block">
-                                    <p>TODO
-                                    </p>
-                                </div><!--//section-block-->
-                            </section><!--//doc-section-->
-
                             <section id="logs" class="doc-section">
                                 <h2 class="section-title">Get Logs</h2>
                                 <div class="section-block">
@@ -79,8 +71,8 @@
                                     </p>
                                 </div><!--//section-block-->
                             </section><!--//doc-section-->
-                            <section id="trigger-learn" class="doc-section">
-                                <h2 class="section-title">Trigger Device Learning</h2>
+                            <section id="endpoint-state" class="doc-section">
+                                <h2 class="section-title">Get State of Endpoints</h2>
                                 <div class="section-block">
                                     <p>TODO
                                     </p>
@@ -88,6 +80,22 @@
                             </section><!--//doc-section-->
                             <section id="submit-pcap" class="doc-section">
                                 <h2 class="section-title">Submit PCAP Files for Analysis</h2>
+                                <div class="section-block">
+                                    <p>Behind the scenes Poseidon uses the Vent pipeline to orchestrate collection and analysis. By default Poseidon connects to an SDN controller and uses events from that to tell Vent what to collect. However, it's possible to use the same analysis pipeline and skip over the SDN controller and collection pieces. Suppose instead you already have a PCAP you've collected and you want to know what devices are in that capture and what they are. You can simply drop that PCAP file into the pipeline and Vent will take care of the rest. Vent is looking for PCAP files from Poseidon in <code>/opt/vent_files</code>, so by putting your file there (recommend a <code>mv</code> operation that is atomic) it will then trigger the rest of the downstream pipeline which includes device classification.
+                                    </p>
+                                    <p>The major difference will be in finding the results. Since this analysis wasn't triggered by a new device showing up on the network from an SDN controller, Poseidon doesn't have an ID to keep track of any endpoints that are in these one-off captures and so it doesn't know what to do with them. Instead these results get logged in the Vent system. See the <a href="#get-vent-logs">Get Vent Logs</a> section on how to navigate those to get the results.
+                                    </p>
+                                </div><!--//section-block-->
+                            </section><!--//doc-section-->
+                            <section id="trigger-learn" class="doc-section">
+                                <h2 class="section-title">Trigger Device Learning</h2>
+                                <div class="section-block">
+                                    <p>TODO
+                                    </p>
+                                </div><!--//section-block-->
+                            </section><!--//doc-section-->
+                            <section id="get-vent-logs" class="doc-section">
+                                <h2 class="section-title">Get Vent Logs</h2>
                                 <div class="section-block">
                                     <p>TODO
                                     </p>
@@ -98,10 +106,11 @@
                     <div class="doc-sidebar col-md-3 col-12 order-0 d-none d-md-flex">
                         <div id="doc-nav" class="doc-nav">
                             <nav id="doc-menu" class="nav doc-menu flex-column sticky">
-                                <a class="nav-link scrollto" href="#endpoint-state">Get State of Endpoints</a>
                                 <a class="nav-link scrollto" href="#logs">Get Logs</a>
-                                <a class="nav-link scrollto" href="#trigger-learn">Trigger Device Learning</a>
+                                <a class="nav-link scrollto" href="#endpoint-state">Get State of Endpoints</a>
                                 <a class="nav-link scrollto" href="#submit-pcap">Submit PCAP Files for Analysis</a>
+                                <a class="nav-link scrollto" href="#trigger-learn">Trigger Device Learning</a>
+                                <a class="nav-link scrollto" href="#logs">Get Vent Logs</a>
                             </nav><!--//doc-menu-->
                         </div>
                     </div><!--//doc-sidebar-->
