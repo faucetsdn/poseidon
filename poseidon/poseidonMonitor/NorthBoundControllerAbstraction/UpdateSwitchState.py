@@ -170,6 +170,8 @@ class Update_Switch_State(Monitor_Helper_Base):
                 self.sdnc.mirror_mac(my_mac, messages=messages)
             except Exception as e:
                 # TODO currently needed for BCF
+                self.poseidon_logger.debug(
+                    'currently only mirroring by IP address, not MAC because: {0}'.format(str(e)))
                 self.sdnc.mirror_ip(my_ip, messages=messages)
             self.endpoints.change_endpoint_state(my_hash)
             self.poseidon_logger.debug(
@@ -185,8 +187,10 @@ class Update_Switch_State(Monitor_Helper_Base):
             next_state = self.endpoints.get_endpoint_next(my_hash)
             try:
                 self.sdnc.unmirror_mac(my_mac, messages=messages)
-            except:
+            except Exception as e:
                 # TODO currently needed for BCF
+                self.poseidon_logger.debug(
+                    'currently only mirroring by IP address, not MAC because: {0}'.format(str(e)))
                 self.sdnc.unmirror_ip(my_ip, messages=messages)
             self.poseidon_logger.debug(
                 'endpoint:{0}:{1}:{2}:{3}'.format(my_hash, my_mac, my_ip, next_state))
