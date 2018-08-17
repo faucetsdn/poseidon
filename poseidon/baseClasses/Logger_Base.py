@@ -40,16 +40,20 @@ class Logger:
     logger.setLevel(logging.INFO)
     logger.propagate = False
 
-    # timestamp - logger_level - class:line number - message
+    # logger_level:class:line number - message
     formatter = logging.Formatter('%(levelname)s:'
                                   '%(module)s:%(lineno)-3d - %(message)s')
+
+    # timestamp - logger_level:class:line number - message
+    p_formatter = logging.Formatter('%(timestamp)s - %(levelname)s:'
+                                    '%(module)s:%(lineno)-3d - %(message)s')
 
     # set the logger to log to console
     ch = logging.StreamHandler()
     ch.setFormatter(formatter)
     logger.addHandler(ch)
 
-    poseidon_logger = logging.getLogger("poseidon")
+    poseidon_logger = logging.getLogger('poseidon')
     poseidon_logger.setLevel(logging.INFO)
     poseidon_logger.propagate = False
 
@@ -57,7 +61,7 @@ class Logger:
     try:
         fh = logging.handlers.RotatingFileHandler(
             '/var/log/poseidon.log', backupCount=5, maxBytes=(10*1024*1024))
-        fh.setFormatter(formatter)
+        fh.setFormatter(p_formatter)
         poseidon_logger.addHandler(fh)
     except Exception as e:
         logger.warning(
