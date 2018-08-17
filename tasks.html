@@ -63,7 +63,19 @@
                             <section id="logs" class="doc-section">
                                 <h2 class="section-title">Get Logs</h2>
                                 <div class="section-block">
-                                    <p>TODO
+                                    <p>Getting the Poseidon logs is straightforward.  The logs for Poseidon are split into two different logs, one that goes into the system log for status and health of Poseidon and one that is informational about what Poseidon is doing.
+                                    </p>
+                                    <p>To get the Poseidon system logs, you can use journalctl if you prefer, like so:
+                                    <pre><code class="language-git">journalctl -u poseidon</code></pre>
+                                    Alternatively, if you aren't familiar with journalctl or want to use that, you can simply use:
+                                    <pre><code class="language-git">poseidon system-logs</code></pre>
+                                    Either will get you the same logs using journalctl behind the scenes. Note this command will also follow the log file in case any new records come in, to exit out of the command when you're done, use <code>ctrl-c</code>.
+                                    </p>
+                                    <p>Getting the informational logs is similar, except they are written out to the log file: <code>/var/log/poseidon.log</code> so instead of using journalctl, you can use something like:
+                                    <pre><code class="language-git">cat /var/log/poseidon.log</code></pre>
+                                    Similarly to the system logs, there is a Poseidon command that will get these logs and follow them:
+                                    <pre><code class="language-git">poseidon logs</code></pre>
+                                    The system logs will have any errors or warnings associated with Poseidon, as well as if it was started or stopped, and if Poseidon is generally in a healthy state.  The informational logs will have runtime information such as learned devices, classifications, and any additional metadata discovered about endpoints. The informational logs will also be where any debugging logging will go.
                                     </p>
                                 </div><!--//section-block-->
                             </section><!--//doc-section-->
