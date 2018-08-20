@@ -430,7 +430,48 @@ def test_get_seq_by_ip():
     assert answer == ret_val
 
 
-def test_mirror_ip():
+def test_get_seq_by_mac():
+
+    class MockBcfProxy(BcfProxy):
+
+        def __init__(self):
+            self.endpoints = None
+            self.span_fabric = None
+            self.logger = MockLogger().logger
+            self.poseidon_logger = MockLogger().poseidon_logger
+
+        def get_span_fabric(self):
+            return self.span_fabric
+
+    bcf = MockBcfProxy()
+
+    filemap = {
+        '/data/controller/applications/bcf/info/fabric/switch': 'sample_switches.json',
+        '/data/controller/applications/bcf/info/endpoint-manager/tenant': 'sample_tenants.json',
+        '/data/controller/applications/bcf/info/endpoint-manager/segment': 'sample_segments.json',
+        '/data/controller/applications/bcf/info/endpoint-manager/endpoint': 'sample_endpoints.json',
+        '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22]': 'sample_span_fabric.json',
+        # %22 = url-encoded double quotes
+        '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22][dest-interface-group=%22INTERFACE_GROUP%22]': 'sample_span_fabric.json',
+    }
+    proxy = None
+    endpoints = None
+    span_fabric = None
+    with HTTMock(mock_factory(r'.*', filemap)):
+        proxy = BcfProxy('http://localhost', 'login',
+                         {'username': username, 'password': password}, span_fabric_name='SPAN_FABRIC', interface_group='INTERFACE_GROUP')
+
+        endpoints = proxy.get_endpoints()
+        span_fabric = proxy.get_span_fabric()
+
+    bcf.endpoints = endpoints
+    bcf.span_fabric = span_fabric
+    ret_val = bcf.get_seq_by_mac('00:00:00:00:00:02')
+    answer = list()
+    assert answer == ret_val
+
+
+def test_mirror_mac():
 
     class MockBcfProxy(BcfProxy):
 
@@ -480,13 +521,13 @@ def test_mirror_ip():
 
     bcf.endpoints = endpoints
     bcf.span_fabric = span_fabric
-    ret_val = bcf.mirror_ip('10.0.0.2')
+    ret_val = bcf.mirror_mac('00:00:00:00:00:02')
 
     bcf.get_highest = bcf.bad_get_highest
-    ret_val = bcf.mirror_ip('10.0.0.2')
+    ret_val = bcf.mirror_mac('00:00:00:00:00:02')
 
 
-def test_unmirror_ip():
+def test_unmirror_mac():
 
     class MockBcfProxy(BcfProxy):
 
@@ -522,4 +563,4 @@ def test_unmirror_ip():
 
     bcf.endpoints = endpoints
     bcf.span_fabric = span_fabric
-    ret_val = bcf.unmirror_ip('10.0.0.2')
+    ret_val = bcf.unmirror_mac('00:00:00:00:00:01')

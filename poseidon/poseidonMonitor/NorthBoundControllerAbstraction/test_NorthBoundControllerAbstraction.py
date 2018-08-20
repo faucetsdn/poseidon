@@ -175,8 +175,8 @@ def test_unmirror_endpoint():
         def __init__(self):
             pass
 
-        def unmirror_ip(self, my_ip, messages=None):
-            assert my_ip == '10.0.0.99'
+        def unmirror_mac(self, my_mac, messages=None):
+            assert my_mac == '20:4c:9e:5f:e3:c3'
 
     uss = Update_Switch_State()
     uss.first_time = False
@@ -517,8 +517,8 @@ def test_mirror_endpoint():
         def __init__(self):
             pass
 
-        def mirror_ip(self, ip, messages=None):
-            assert ip == '10.0.0.99'
+        def mirror_mac(self, mac, messages=None):
+            assert mac == '20:4c:9e:5f:e3:c3'
 
     uss = Update_Switch_State()
     uss.sdnc = Mockbcf()
