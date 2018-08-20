@@ -272,19 +272,33 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
                         retval.append(f.get('seq'))
         return retval
 
-    def mirror_ip(self, ip, messages=None):
+    def get_seq_by_mac(self, mac):
+        my_filter = self.get_span_fabric().get('filter')
+        retval = []
+        if my_filter is not None:
+            for f in my_filter:
+                if 'match-specification' in f:
+                    dst = f[
+                        'match-specification'].get('dst-mac', 'broke')
+                    src = f[
+                        'match-specification'].get('src-mac', 'broke')
+                    if src == mac or dst == mac:
+                        retval.append(f.get('seq'))
+        return retval
+
+    def mirror_mac(self, mac, messages=None):
         my_start = self.get_highest(self.get_span_fabric())
         if my_start is not None:
             self.poseidon_logger.debug('mirroring {0}'.format(my_start))
-            src = {'match-specification': {'src-ip-cidr': '{0}/32'.format(ip)}}
-            dst = {'match-specification': {'dst-ip-cidr': '{0}/32'.format(ip)}}
+            src = {'match-specification': {'src-mac': '{0}'.format(mac)}}
+            dst = {'match-specification': {'dst-mac': '{0}'.format(mac)}}
             self.mirror_traffic(my_start, mirror=True, s_dict=src)
             self.mirror_traffic(my_start + 1, mirror=True, s_dict=dst)
         else:
-            self.poseidon_logger.error('mirror_ip:None')
+            self.poseidon_logger.error('mirror_mac:None')
 
-    def unmirror_ip(self, ip, messages=None):
-        kill_list = self.get_seq_by_ip(ip)
+    def unmirror_mac(self, mac, messages=None):
+        kill_list = self.get_seq_by_mac(mac)
         for kill in kill_list:
             self.poseidon_logger.debug('unmirror:{0}'.format(kill))
             self.mirror_traffic(kill, mirror=False)
