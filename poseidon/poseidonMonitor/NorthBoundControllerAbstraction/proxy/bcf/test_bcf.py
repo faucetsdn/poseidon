@@ -466,7 +466,7 @@ def test_get_seq_by_mac():
 
     bcf.endpoints = endpoints
     bcf.span_fabric = span_fabric
-    ret_val = bcf.get_seq_by_mac('00:00:00:00:02')
+    ret_val = bcf.get_seq_by_mac('00:00:00:00:00:02')
     answer = list()
     assert answer == ret_val
 
@@ -521,10 +521,10 @@ def test_mirror_mac():
 
     bcf.endpoints = endpoints
     bcf.span_fabric = span_fabric
-    ret_val = bcf.mirror_mac('00:00:00:00:02')
+    ret_val = bcf.mirror_mac('00:00:00:00:00:02')
 
     bcf.get_highest = bcf.bad_get_highest
-    ret_val = bcf.mirror_mac('00:00:00:00:02')
+    ret_val = bcf.mirror_mac('00:00:00:00:00:02')
 
 
 def test_unmirror_mac():
