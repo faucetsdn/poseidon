@@ -144,10 +144,6 @@ class Parser:
             data['port'] = str(message['L2_LEARN']['port_no'])
             data['tenant'] = 'VLAN'+str(message['L2_LEARN']['vid'])
             data['active'] = 1
-            self.poseidon_logger.debug(
-                'mac: ' + message['L2_LEARN']['eth_src'])
-            self.poseidon_logger.debug(
-                'mac table before: ' + str(self.mac_table))
             if message['L2_LEARN']['eth_src'] in self.mac_table:
                 dup = False
                 for d in self.mac_table[message['L2_LEARN']['eth_src']]:
@@ -158,8 +154,6 @@ class Parser:
                 self.mac_table[message['L2_LEARN']['eth_src']].insert(0, data)
             else:
                 self.mac_table[message['L2_LEARN']['eth_src']] = [data]
-            self.poseidon_logger.debug(
-                'mac table after: ' + str(self.mac_table))
         elif 'L2_EXPIRE' in message:
             self.poseidon_logger.debug(
                 'got faucet message for l2_expire: {0}'.format(message))
