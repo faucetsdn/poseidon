@@ -197,6 +197,8 @@ class FaucetProxy(Connection, Parser):
         port = None
         switch = None
         status = None
+        self.poseidon_logger.debug("mirroring: " + my_mac)
+        self.poseidon_logger.debug("mac table: " + str(self.mac_table))
         for mac in self.mac_table:
             if my_mac == mac:
                 port = self.mac_table[mac][0]['port']
