@@ -198,7 +198,7 @@ class FaucetProxy(Connection, Parser):
         switch = None
         status = None
         for mac in self.mac_table:
-            if my_mac == self.mac_table[mac][0]['mac']:
+            if my_mac == mac:
                 port = self.mac_table[mac][0]['port']
                 switch = self.mac_table[mac][0]['segment']
         if port and switch:
@@ -235,7 +235,7 @@ class FaucetProxy(Connection, Parser):
         switch = None
         status = None
         for mac in self.mac_table:
-            if my_mac == self.mac_table[mac][0]['mac']:
+            if my_mac == mac:
                 port = self.mac_table[mac][0]['port']
                 switch = self.mac_table[mac][0]['segment']
         if port and switch:
