@@ -60,7 +60,7 @@ function check_args()
                     port=$(echo "$port_map" | cut -d':' -f2)
                     default_iface=$(awk '$2 == 00000000 { print $1 }' /proc/net/route)
                     default_ip=$(ip addr show dev "$default_iface" | awk '$1 ~ /^inet/ { sub("/.*", "", $2); print $2 }' | head -1)
-                    echo "Poseidon API is accessible here: http://$default_ip:$port/v1"
+                    echo "Poseidon API endpoints are accessible here: http://$default_ip:$port/v1"
                 else
                     echo "Poseidon API is not running."
                 fi
