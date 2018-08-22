@@ -47,7 +47,7 @@
             <div class="container">
                 <div id="doc-header" class="doc-header text-center">
                     <h1 class="doc-title"><span aria-hidden="true" class="icon icon_pencil-edit"></span> Tasks</h1>
-                    <div class="meta"><i class="far fa-clock"></i> Last updated: August 15th, 2018</div>
+                    <div class="meta"><i class="far fa-clock"></i> Last updated: August 22th, 2018</div>
                 </div><!--//doc-header-->
                 <div class="doc-body row">
                     <div class="doc-content col-md-9 col-12 order-1">
@@ -74,7 +74,58 @@
                             <section id="endpoint-state" class="doc-section">
                                 <h2 class="section-title">Get State of Endpoints</h2>
                                 <div class="section-block">
-                                    <p>TODO
+                                    <p>Poseidon has an API which will let you query about the network that Poseidon has learned. To get the URL of the API do the following:
+                                    <pre><code class="language-git">poseidon api
+Poseidon API is accessible here: http://192.168.0.8:32771/v1</code></pre>
+                                    The returned URL will provide you all of the available API paths:
+                                    <pre><code class="language-git">["/v1", "/v1/info", "/v1/network", "/v1/network_full"]</code></pre>
+                                    To get the full state of the network endpoints that Poseidon knows about for instance, you'd browse to: <code>http://192.168.0.8:32771/v1/network_full</code> and it would return something like the following:
+                                    <pre><code class="language-git">{
+  "dataset": [
+    {
+      "ip": "fe80::200:ff:fe00:2",
+      "mac": "00:00:00:00:00:02",
+      "segment": "switch-1",
+      "port": "2",
+      "tenant": "VLAN8",
+      "record_source": "Poseidon",
+      "role": "Unknown",
+      "os": "Unknown",
+      "behavior": 0,
+      "hash": "67abf9ebc159477cc0ae56cf364d6806ac37ca1a",
+      "state": "MIRRORING",
+      "active": 1
+    },
+    {
+      "ip": "fe80::200:ff:fe00:1",
+      "mac": "00:00:00:00:00:01",
+      "segment": "switch-1",
+      "port": "1",
+      "tenant": "VLAN8",
+      "record_source": "Poseidon",
+      "role": "Unknown",
+      "os": "Unknown",
+      "behavior": 0,
+      "hash": "06993213bb893220bdc674c4b8efd9afd17b9870",
+      "state": "MIRRORING",
+      "active": 1
+    },
+    {
+      "ip": "None",
+      "mac": "00:00:00:00:00:02",
+      "segment": "switch-1",
+      "port": "2",
+      "tenant": "VLAN8",
+      "record_source": "Poseidon",
+      "role": "Unknown",
+      "os": "Unknown",
+      "behavior": 0,
+      "hash": "67abf9ebc159477cc0ae56cf364d6806ac37ca1a",
+      "state": "MIRRORING",
+      "active": 1
+    }
+  ]
+}</code></pre>
                                     </p>
                                 </div><!--//section-block-->
                             </section><!--//doc-section-->
@@ -90,14 +141,24 @@
                             <section id="trigger-learn" class="doc-section">
                                 <h2 class="section-title">Trigger Device Learning</h2>
                                 <div class="section-block">
-                                    <p>TODO
+                                    <p>Either BCF or Faucet will now learn devices at Layer 2, meaning once a device appears on the network with a MAC address generating traffic, it will get sent to Poseidon as a device to learn. For Poseidon to properly learn about this device and make a classification and fingerprint it needs that device to generate TCP and/or UDP traffic with at least 5 sessions during the mirroring stage.  An unknown device gets putting to investigation which will start a network capture that mirrors the traffic of the device.  The default time of this capture is 15 minutes, and starts when the device is first seen and passed on from the controller to Poseidon.  Poseidon has a default setting of concurrently learning about 2 devices for investigation, so if more than that are appearing at the same time, they will get queued up until the current running investigations finish their 15 minute intervals.  Poseidon will also reinvestigate already known devices once it is idle and no longer learning unknown devices.
+                                    </p>
+                                    <p>The simplest way see the above explained behavior is to plug a new device into the switch controlled by your SDN controller, and then once you see that Poseidon has put your new device into a mirroring state (using <code>poseidon logs</code>) make sure to initiate traffic that will create at least 5 sessions of TCP or UDP traffic on that device.  Once the 15 minutes of capture is complete, it will send that traffic off to the machine learning portion of Poseidon as well as p0f to <a href="examples.html#classification">get a classification of the device role</a> and a fingerprint of the device type.
                                     </p>
                                 </div><!--//section-block-->
                             </section><!--//doc-section-->
                             <section id="get-vent-logs" class="doc-section">
                                 <h2 class="section-title">Get Vent Logs</h2>
                                 <div class="section-block">
-                                    <p>TODO
+                                    <p>Vent is the orchestration that ties together the various pieces of Poseidon, as well as making it flexible to include or exclude additional <a href="concepts.html#vent-plugins-arch">plugins</a>. To follow the logs of the different plugins that are installed once Vent is running (Poseidon will start Vent for you) simplyi (<code>ctrl-c</code> to exit):
+                                    <pre><code class="language-git">docker logs -f cyberreboot-vent-syslog-master</code></pre>
+                                    You can verify that Vent is running by using <code>docker ps</code> and depending on what plugins you have enabled should see a number of Vent containers. There is the main one that controls all the others called <code>vent</code> and minimally the syslog one which will have all the logs called <code>cyberreboot-vent-syslog-master</code>.
+                                    </p>
+                                    <p>The main Vent container also has its own logs that can be used to verify that the system itself is healthy (in case, for example, the syslog container fails to start). To get those logs, you'll need to exec into the vent container and cat out the log:
+                                    <pre><code class="language-git">docker exec -it vent /bin/sh
+/ # cd /root/.vent
+~/.vent # cat vent.log
+~/.vent # exit</code></pre>
                                     </p>
                                 </div><!--//section-block-->
                             </section><!--//doc-section-->
