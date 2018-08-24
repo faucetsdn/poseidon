@@ -1,4 +1,4 @@
-certifi==2018.8.13
+certifi==2018.8.24
 httmock==1.2.6
 mock==2.0.0
 pika==0.12.0
