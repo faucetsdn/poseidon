@@ -202,7 +202,7 @@ def test_start_vent_collector_faucet():
         def __init__(self):
 
             self.mod_configuration = dict({
-                'collector_interval': 900,
+                'reinvestigation_frequency': 900,
                 'collector_nic': 2,
                 'vent_ip': '0.0.0.0',
                 'vent_port': '8080',
@@ -343,7 +343,7 @@ def test_start_vent_collector_bcf():
         def __init__(self):
 
             self.mod_configuration = dict({
-                'collector_interval': 900,
+                'reinvestigation_frequency': 900,
                 'collector_nic': 2,
                 'vent_ip': '0.0.0.0',
                 'vent_port': '8080',
@@ -483,7 +483,7 @@ def test_not_start_vent_collector_bcf():
         def __init__(self):
 
             self.mod_configuration = dict({
-                'collector_interval': 900,
+                'reinvestigation_frequency': 900,
                 'collector_nic': 2,
                 'vent_ip': '0.0.0.0',
                 'vent_port': '8080',
@@ -665,7 +665,7 @@ def test_get_vent_collectors():
         def __init__(self):
 
             self.mod_configuration = dict({
-                'collector_interval': 900,
+                'reinvestigation_frequency': 900,
                 'collector_nic': 2,
                 'vent_ip': '0.0.0.0',
                 'vent_port': '8080',
@@ -847,7 +847,7 @@ def test_host_has_active_collectors_false():
         def __init__(self):
 
             self.mod_configuration = dict({
-                'collector_interval': 900,
+                'reinvestigation_frequency': 900,
                 'collector_nic': 2,
                 'vent_ip': '0.0.0.0',
                 'vent_port': '8080',
@@ -1029,7 +1029,7 @@ def test_host_has_active_collectors_true():
         def __init__(self):
 
             self.mod_configuration = dict({
-                'collector_interval': 900,
+                'reinvestigation_frequency': 900,
                 'collector_nic': 2,
                 'vent_ip': '0.0.0.0',
                 'vent_port': '8080',
@@ -1914,7 +1914,7 @@ def test_process():
 
         def __init__(self):
             self.mod_configuration = {
-                'collector_interval': 900,
+                'reinvestigation_frequency': 900,
                 'collector_nic': 2,
                 'vent_ip': '0.0.0.0',
                 'vent_port': '8080'

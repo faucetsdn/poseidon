@@ -39,6 +39,8 @@ class FaucetProxy(Connection, Parser):
                  mirror_ports=None,
                  rabbit_enabled=None,
                  learn_pub_adds=None,
+                 reinvestigation_frequency=None,
+                 max_concurrent_reinvestigations=None,
                  *args,
                  **kwargs):
         '''Initializes Faucet object.'''
@@ -50,6 +52,8 @@ class FaucetProxy(Connection, Parser):
                                           mirror_ports,
                                           rabbit_enabled,
                                           learn_pub_adds,
+                                          reinvestigation_frequency,
+                                          max_concurrent_reinvestigations,
                                           *args,
                                           **kwargs)
         if isinstance(mirror_ports, str):
@@ -58,6 +62,8 @@ class FaucetProxy(Connection, Parser):
             self.mirror_ports = mirror_ports
         self.rabbit_enabled = rabbit_enabled
         self.learn_pub_adds = learn_pub_adds
+        self.reinvestigation_frequency = reinvestigation_frequency
+        self.max_concurrent_reinvestigations = max_concurrent_reinvestigations
         self.logger = Logger.logger
         self.poseidon_logger = Logger.poseidon_logger
         self.mac_table = {}

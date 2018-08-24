@@ -29,10 +29,12 @@ def represent_none(dumper, _):
 
 class Parser:
 
-    def __init__(self, mirror_ports=None):
+    def __init__(self, mirror_ports=None, reinvestigation_frequency=None, max_concurrent_reinvestigations=None):
         self.logger = Logger.logger
         self.poseidon_logger = Logger.poseidon_logger
         self.mirror_ports = mirror_ports
+        self.reinvestigation_frequency = reinvestigation_frequency
+        self.max_concurrent_reinvestigations = max_concurrent_reinvestigations
 
     def config(self, config_file, action, port, switch):
         switch_found = None
@@ -92,6 +94,9 @@ class Parser:
                             ]
             if ok:
                 if action == 'mirror':
+                    # TODO make this smarter about more complex configurations (backup original values, etc)
+                    obj_doc['dps'][switch_found]['timeout'] = self.reinvestigation_frequency
+                    obj_doc['dps'][switch_found]['arp_neighbor_timeout'] = self.reinvestigation_frequency
                     if not port in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] and port is not None:
                         obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'].append(
                             port)
@@ -115,6 +120,9 @@ class Parser:
             if len(obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']) == 0:
                 obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]].remove(
                     'mirror')
+                # TODO make this smarter about more complex configurations (backup original values, etc)
+                del obj_doc['dps'][switch_found]['timeout']
+                del obj_doc['dps'][switch_found]['arp_neighbor_timeout']
             else:
                 ports = []
                 for p in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']:

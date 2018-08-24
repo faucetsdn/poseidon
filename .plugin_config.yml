@@ -8,7 +8,6 @@ poseidon:
         rabbit_server: RABBIT_SERVER
         rabbit_port: 5672
         collector_nic: enp7s0f0
-        collector_interval: 900
         vent_ip: vent_ip
         vent_port: 8080
         FA_RABBIT_ENABLED: True

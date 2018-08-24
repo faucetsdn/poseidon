@@ -61,6 +61,10 @@ class Update_Switch_State(Monitor_Helper_Base):
         self.controller['RABBIT_ENABLED'] = False
         self.controller['LEARN_PUBLIC_ADDRESSES'] = False
 
+        # set defaults
+        self.reinvestigation_frequency = 900
+        self.max_concurrent_reinvestigations = 2
+
         self.sdnc = None
         self.first_time = True
         self.endpoints = Endpoint_Wrapper()
@@ -138,7 +142,9 @@ class Update_Switch_State(Monitor_Helper_Base):
                                             log_file=self.controller['LOG_FILE'],
                                             mirror_ports=self.controller['MIRROR_PORTS'],
                                             rabbit_enabled=self.controller['RABBIT_ENABLED'],
-                                            learn_pub_adds=self.controller['LEARN_PUBLIC_ADDRESSES'])
+                                            learn_pub_adds=self.controller['LEARN_PUBLIC_ADDRESSES'],
+                                            reinvestigation_frequency=self.reinvestigation_frequency,
+                                            max_concurrent_reinvestigations=self.max_concurrent_reinvestigations)
                 except BaseException as e:  # pragma: no cover
                     self.logger.error(
                         'FaucetProxy could not connect to {0} because {1}'.format(
