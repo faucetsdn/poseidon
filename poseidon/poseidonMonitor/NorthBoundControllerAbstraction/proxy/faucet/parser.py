@@ -51,10 +51,6 @@ class Parser:
                 'Failed to load config because: {0}'.format(str(e)))
             return False
 
-        # TODO set the timeout and arp_neighbor_timeout for each dp to the reinvestigation_frequency or 900 seconds
-        self.logger.info("reinvestigation_freq: " + str(self.reinvestigation_frequency))
-        self.logger.info("max_concurrent: " + str(self.max_concurrent_reinvestigations))
-
         if action == 'mirror' or action == 'unmirror':
             ok = True
             if not self.mirror_ports:
@@ -98,6 +94,9 @@ class Parser:
                             ]
             if ok:
                 if action == 'mirror':
+                    # TODO make this smarter about more complex configurations (backup original values, etc)
+                    obj_doc['dps'][switch_found]['timeout'] = self.reinvestigation_frequency
+                    obj_doc['dps'][switch_found]['arp_neighbor_timeout'] = self.reinvestigation_frequency
                     if not port in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] and port is not None:
                         obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'].append(
                             port)
@@ -121,6 +120,9 @@ class Parser:
             if len(obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']) == 0:
                 obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]].remove(
                     'mirror')
+                # TODO make this smarter about more complex configurations (backup original values, etc)
+                del obj_doc['dps'][switch_found]['timeout']
+                del obj_doc['dps'][switch_found]['arp_neighbor_timeout']
             else:
                 ports = []
                 for p in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']:
