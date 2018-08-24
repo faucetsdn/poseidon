@@ -1,3 +1,12 @@
+# v0.3.3 (2018-08-24)
+
+ - Updated version of certifi, gevent, and pytest
+ - Automatically sets timeouts for L2 and L3 for Faucet based on reinvestigation frequency
+ - Add api option to poseidon tool
+ - Collect and learn at L2 now instead of requiring L3
+ - Add timestamps to poseidon.log
+ - Improved logging, both poseidon logs and poseidon system-logs exist now
+
 # v0.3.2 (2018-08-10)
 
  - Updated README
