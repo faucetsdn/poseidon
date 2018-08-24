@@ -113,7 +113,14 @@ class FaucetProxy(Connection, Parser):
                     '.')
                 if len(check_sec_octet) > 1:
                     check_sec_octet = int(check_sec_octet[1])
-                if (self.mac_table[mac][0]['ip-address'].startswith('fd') or
+                if (self.mac_table[mac][0]['ip-address'] == 'None' or
+                    self.mac_table[mac][0]['ip-address'] == None or
+                    self.mac_table[mac][0]['ip-address'] == '::' or
+                    self.mac_table[mac][0]['ip-address'] == '127.0.0.1' or
+                    self.mac_table[mac][0]['ip-address'] == '0.0.0.0' or
+                    self.mac_table[mac][0]['ip-address'].startswith('fe80::') or
+                    self.mac_table[mac][0]['ip-address'].startswith('169.254.') or
+                    self.mac_table[mac][0]['ip-address'].startswith('fd') or
                     self.mac_table[mac][0]['ip-address'].startswith('10.') or
                     self.mac_table[mac][0]['ip-address'].startswith('192.168.') or
                     (self.mac_table[mac][0]['ip-address'].startswith('172.') and
@@ -203,8 +210,6 @@ class FaucetProxy(Connection, Parser):
         port = None
         switch = None
         status = None
-        self.poseidon_logger.debug("mirroring: " + my_mac)
-        self.poseidon_logger.debug("mac table: " + str(self.mac_table))
         for mac in self.mac_table:
             if my_mac == mac:
                 port = self.mac_table[mac][0]['port']

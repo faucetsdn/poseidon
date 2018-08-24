@@ -27,6 +27,7 @@ function show_help()
 
 Usage: poseidon [option]
 Options:
+    -a,  api           get url to the Poseidon API
     -c,  config        display current configuration info
     -h,  help          print this help
     -i,  info/status   display current status of the Poseidon service
@@ -53,6 +54,18 @@ function check_args()
 
     while :; do
         case $1 in
+            -a|api)
+                if [ "$(docker ps -q --filter "name=cyberreboot-poseidon-api-master" | wc -l)" -eq 1 ]; then
+                    port_map=$(docker port cyberreboot-poseidon-api-master 8000/tcp)
+                    port=$(echo "$port_map" | cut -d':' -f2)
+                    default_iface=$(awk '$2 == 00000000 { print $1 }' /proc/net/route)
+                    default_ip=$(ip addr show dev "$default_iface" | awk '$1 ~ /^inet/ { sub("/.*", "", $2); print $2 }' | head -1)
+                    echo "Poseidon API endpoints are accessible here: http://$default_ip:$port/v1"
+                else
+                    echo "Poseidon API is not running."
+                fi
+                exit
+                ;;
             -c|config)
                 cat /etc/poseidon/default.conf
                 exit
