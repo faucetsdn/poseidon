@@ -335,6 +335,9 @@ class Monitor(object):
         max_concurrent_reinvestigations = int(
             self.mod_configuration['max_concurrent_reinvestigations'])
 
+        self.uss.reinvestigation_frequency = reinvestigation_frequency
+        self.uss.max_concurrent_reinvestigations = max_concurrent_reinvestigations
+
         try:
             self.fa_rabbit_enabled = ast.literal_eval(
                 self.mod_configuration['FA_RABBIT_ENABLED'])

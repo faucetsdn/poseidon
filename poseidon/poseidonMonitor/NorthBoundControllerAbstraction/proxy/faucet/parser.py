@@ -29,10 +29,12 @@ def represent_none(dumper, _):
 
 class Parser:
 
-    def __init__(self, mirror_ports=None):
+    def __init__(self, mirror_ports=None, reinvestigation_frequency=None, max_concurrent_reinvestigations=None):
         self.logger = Logger.logger
         self.poseidon_logger = Logger.poseidon_logger
         self.mirror_ports = mirror_ports
+        self.reinvestigation_frequency = reinvestigation_frequency
+        self.max_concurrent_reinvestigations = max_concurrent_reinvestigations
 
     def config(self, config_file, action, port, switch):
         switch_found = None
@@ -48,6 +50,10 @@ class Parser:
             self.logger.error(
                 'Failed to load config because: {0}'.format(str(e)))
             return False
+
+        # TODO set the timeout and arp_neighbor_timeout for each dp to the reinvestigation_frequency or 900 seconds
+        self.logger.info("reinvestigation_freq: " + str(self.reinvestigation_frequency))
+        self.logger.info("max_concurrent: " + str(self.max_concurrent_reinvestigations))
 
         if action == 'mirror' or action == 'unmirror':
             ok = True
