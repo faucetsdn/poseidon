@@ -463,7 +463,7 @@ class Monitor(object):
         payload = {
             'nic': self.mod_configuration['collector_nic'],
             'id': dev_hash,
-            'interval': self.mod_configuration['collector_interval'],
+            'interval': self.mod_configuration['reinvestigation_frequency'],
             'filter': '\'ether host {0}\''.format(
                 self.uss.endpoints.get_endpoint_mac(dev_hash)),
             'iters': str(num_captures),
