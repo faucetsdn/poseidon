@@ -318,11 +318,6 @@ class Monitor(object):
         self.m_queue = Queue.Queue()
         self.faucet_event = []
 
-        # check
-        self.NorthBoundControllerAbstraction.configure()
-        self.NorthBoundControllerAbstraction.first_run()
-        self.NorthBoundControllerAbstraction.configure_endpoints()
-
         # make a shortcut
         self.uss = self.NorthBoundControllerAbstraction.get_endpoint(
             'Update_Switch_State')
@@ -337,6 +332,11 @@ class Monitor(object):
 
         self.uss.reinvestigation_frequency = reinvestigation_frequency
         self.uss.max_concurrent_reinvestigations = max_concurrent_reinvestigations
+
+        # check
+        self.NorthBoundControllerAbstraction.configure()
+        self.NorthBoundControllerAbstraction.first_run()
+        self.NorthBoundControllerAbstraction.configure_endpoints()
 
         try:
             self.fa_rabbit_enabled = ast.literal_eval(
