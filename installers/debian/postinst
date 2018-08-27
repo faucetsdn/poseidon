@@ -160,6 +160,11 @@ if db_go; then
                 echo "max_concurrent_reinvestigations=$RET" >> /etc/poseidon/default.conf
             fi
 
+            db_get poseidon/reinvestigation_frequency
+            if [[ ! -z "$RET" ]]; then
+                echo "reinvestigation_frequency=$RET" >> /etc/poseidon/default.conf
+            fi
+
             db_get poseidon/learn_public_addresses
             if [[ ! -z "$RET" ]]; then
                 echo "learn_public_addresses=$RET" >> /etc/poseidon/default.conf
@@ -206,6 +211,7 @@ if db_go; then
             echo "controller_uri=" >> /etc/poseidon/default.conf
             echo "controller_mirror_ports='{\"switch-1\":3}'" >> /etc/poseidon/default.conf
             echo "collector_nic=s1-eth3" >> /etc/poseidon/default.conf
+            echo "reinvestigation_frequency=300" >> /etc/poseidon/default.conf
 
             # settings for Faucet
             mkdir -p /etc/faucet
