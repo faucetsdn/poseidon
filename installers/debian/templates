@@ -58,6 +58,11 @@ Type: string
 Default: 2
 Description: Set the maximum number of endpoint investigations to run at the same time:
 
+Template: poseidon/reinvestigation_frequency
+Type: string
+Default: 900
+Description: Set the amount of time in seconds to run investigations and reinvestigations on an endpoint:
+
 Template: poseidon/faucet_controller_mirror_ports
 Type: string
 Description: Set the controller mirror ports:
