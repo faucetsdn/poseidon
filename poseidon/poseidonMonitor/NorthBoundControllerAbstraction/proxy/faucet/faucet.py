@@ -82,6 +82,14 @@ class FaucetProxy(Connection, Parser):
             ret_list.append(md)
         return ret_list
 
+    def check_connection(self):
+        connected = False
+        if self.host:
+            pass
+        else:
+            pass
+        return connected
+
     def get_endpoints(self, messages=None):
         retval = []
 

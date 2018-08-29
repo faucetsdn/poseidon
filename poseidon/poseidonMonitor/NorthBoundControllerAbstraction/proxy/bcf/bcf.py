@@ -73,6 +73,10 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
                 ret_list.append(ipa[0])
         return ret_list
 
+    def check_connection(self):
+        connected = False
+        return connected
+
     def get_endpoints(
             self,
             messages=None,

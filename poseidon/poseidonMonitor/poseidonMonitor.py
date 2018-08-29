@@ -69,7 +69,7 @@ def schedule_job_kickurl(func, logger):
 
     func.NorthBoundControllerAbstraction.get_endpoint(
         'Update_Switch_State').update_endpoint_state(messages=func.faucet_event)
-    # check the length didn't change before wiping it out
+    # TODO check the length didn't change before wiping it out
     func.faucet_event = []
 
     # get current state
@@ -324,7 +324,6 @@ class Monitor(object):
 
         # TODO better error checking needed here since this is user input
         scan_frequency = int(self.mod_configuration['scan_frequency'])
-
         reinvestigation_frequency = int(
             self.mod_configuration['reinvestigation_frequency'])
         max_concurrent_reinvestigations = int(
@@ -474,6 +473,11 @@ class Monitor(object):
         vent_addr = self.mod_configuration['vent_ip'] + \
             ':' + self.mod_configuration['vent_port']
         uri = 'http://' + vent_addr + '/create'
+
+        try:
+            endpoints = self.uss.get_endpoints()
+        except Exception as e:
+            self.logger.error("failed to connect to the controller because: {0}".format(str(e)))
 
         try:
             if should_start:
