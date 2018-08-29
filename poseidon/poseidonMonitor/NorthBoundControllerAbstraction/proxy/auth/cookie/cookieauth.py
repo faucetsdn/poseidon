@@ -31,8 +31,6 @@ class CookieAuthControllerProxy(ControllerProxy):
             base_uri, *args, **kwargs)
         self.login_resource = login_resource
         self.auth = auth
-        self.logger.info("waiting for request")
         r = ControllerProxy.requests_retry_session(session=self.session).post(
             urljoin(self.base_uri, login_resource), timeout=(1, 10), json=auth, verify=False)
-        self.logger.info("finished request")
         self.session.cookies = r.cookies

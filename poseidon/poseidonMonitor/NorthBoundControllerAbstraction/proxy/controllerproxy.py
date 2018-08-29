@@ -56,11 +56,11 @@ class ControllerProxy(object):
 
     def get_resource(self, resource, *args, **kwargs):
         uri = urljoin(self.base_uri, resource)
-        return requests_retry_session(session=self.session).get(uri, timeout=(1, 10), *args, **kwargs)
+        return self.requests_retry_session(session=self.session).get(uri, timeout=(1, 10), *args, **kwargs)
 
     def post_resource(self, resource, *args, **kwargs):
         uri = urljoin(self.base_uri, resource)
-        return requests_retry_session(session=self.session).post(uri, timeout=(1, 10), *args, **kwargs)
+        return self.requests_retry_session(session=self.session).post(uri, timeout=(1, 10), *args, **kwargs)
 
     def request_resource(self, *args, **kwargs):
-        return requests_retry_session(session=self.session).request(timeout=(1, 10), *args, **kwargs)
+        return self.requests_retry_session(session=self.session).request(timeout=(1, 10), *args, **kwargs)
