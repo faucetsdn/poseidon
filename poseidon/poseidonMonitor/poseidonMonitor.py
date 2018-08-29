@@ -474,7 +474,7 @@ class Monitor(object):
             ':' + self.mod_configuration['vent_port']
         uri = 'http://' + vent_addr + '/create'
 
-        connected = self.uss.check_connection()
+        connected = self.uss.sdnc.check_connection()
         if connected:
             try:
                 if should_start:
