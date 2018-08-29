@@ -83,11 +83,14 @@ class FaucetProxy(Connection, Parser):
         return ret_list
 
     def check_connection(self):
+        # TODO this should actually check if faucet is running (package or container)
         connected = False
         if self.host:
-            pass
-        else:
-            pass
+            self._connect()
+            if self.ssh:
+                connected = True
+        else: # faucet is running on the same host
+            connected = True
         return connected
 
     def get_endpoints(self, messages=None):

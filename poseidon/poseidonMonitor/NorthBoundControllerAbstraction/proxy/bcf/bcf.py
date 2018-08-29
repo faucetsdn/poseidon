@@ -75,6 +75,11 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
 
     def check_connection(self):
         connected = False
+        try:
+            self.get_endpoints()
+            connected = True
+        except Exception as e:
+            self.poseidon_logger.warning("unable to connect to the controller because: {0}".format(str(e)))
         return connected
 
     def get_endpoints(

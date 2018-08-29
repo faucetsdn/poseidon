@@ -474,22 +474,22 @@ class Monitor(object):
             ':' + self.mod_configuration['vent_port']
         uri = 'http://' + vent_addr + '/create'
 
-        try:
-            endpoints = self.uss.get_endpoints()
-        except Exception as e:
-            self.logger.error("failed to connect to the controller because: {0}".format(str(e)))
+        connected = self.uss.check_connection()
+        if connected:
+            try:
+                if should_start:
+                    resp = requests.post(uri, data=json.dumps(payload))
+                    self.poseidon_logger.debug('collector response: ' + resp.text)
+                else:
+                    self.poseidon_logger.debug(
+                        'collector not started due to invalid span fabric configuration.')
 
-        try:
-            if should_start:
-                resp = requests.post(uri, data=json.dumps(payload))
-                self.poseidon_logger.debug('collector response: ' + resp.text)
-            else:
+            except Exception as e:  # pragma: no cover
                 self.poseidon_logger.debug(
-                    'collector not started due to invalid span fabric configuration.')
-
-        except Exception as e:  # pragma: no cover
+                    'failed to start vent collector' + str(e))
+        else:
             self.poseidon_logger.debug(
-                'failed to start vent collector' + str(e))
+                    'not starting vent collector because not connected a controller')
 
     # returns a dictionary of existing collectors keyed on dev_hash
     def get_vent_collectors(self):
