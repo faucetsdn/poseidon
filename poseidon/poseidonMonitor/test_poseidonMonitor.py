@@ -105,6 +105,9 @@ def test_start_vent_collector_faucet():
         def __init__(self):
             pass
 
+        def check_connection(self):
+            return True
+
     poseidonMonitor.CTRL_C['STOP'] = False
     poseidonMonitor.requests = requests()
 
@@ -244,6 +247,9 @@ def test_start_vent_collector_bcf():
 
         def __init__(self):
             pass
+
+        def check_connection(self):
+            return True
 
     poseidonMonitor.CTRL_C['STOP'] = False
     poseidonMonitor.requests = requests()
@@ -385,6 +391,9 @@ def test_not_start_vent_collector_bcf():
 
         def __init__(self):
             pass
+
+        def check_connection(self):
+            return False
 
     poseidonMonitor.CTRL_C['STOP'] = False
     poseidonMonitor.requests = requests()

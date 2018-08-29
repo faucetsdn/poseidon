@@ -69,7 +69,7 @@ def schedule_job_kickurl(func, logger):
 
     func.NorthBoundControllerAbstraction.get_endpoint(
         'Update_Switch_State').update_endpoint_state(messages=func.faucet_event)
-    # check the length didn't change before wiping it out
+    # TODO check the length didn't change before wiping it out
     func.faucet_event = []
 
     # get current state
@@ -324,7 +324,6 @@ class Monitor(object):
 
         # TODO better error checking needed here since this is user input
         scan_frequency = int(self.mod_configuration['scan_frequency'])
-
         reinvestigation_frequency = int(
             self.mod_configuration['reinvestigation_frequency'])
         max_concurrent_reinvestigations = int(
@@ -475,17 +474,22 @@ class Monitor(object):
             ':' + self.mod_configuration['vent_port']
         uri = 'http://' + vent_addr + '/create'
 
-        try:
-            if should_start:
-                resp = requests.post(uri, data=json.dumps(payload))
-                self.poseidon_logger.debug('collector response: ' + resp.text)
-            else:
-                self.poseidon_logger.debug(
-                    'collector not started due to invalid span fabric configuration.')
+        connected = self.uss.sdnc.check_connection()
+        if connected:
+            try:
+                if should_start:
+                    resp = requests.post(uri, data=json.dumps(payload))
+                    self.poseidon_logger.debug('collector response: ' + resp.text)
+                else:
+                    self.poseidon_logger.debug(
+                        'collector not started due to invalid span fabric configuration.')
 
-        except Exception as e:  # pragma: no cover
+            except Exception as e:  # pragma: no cover
+                self.poseidon_logger.debug(
+                    'failed to start vent collector' + str(e))
+        else:
             self.poseidon_logger.debug(
-                'failed to start vent collector' + str(e))
+                    'not starting vent collector because not connected a controller')
 
     # returns a dictionary of existing collectors keyed on dev_hash
     def get_vent_collectors(self):
