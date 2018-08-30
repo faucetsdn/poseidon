@@ -82,7 +82,7 @@ Template: poseidon/learn_public_addresses
 Type: select
 Choices: Yes, No
 Default: No
-Description: Should Poseidon learn public address?
+Description: Should Poseidon learn public IP addresses?
  If Yes is selected, Poseidon will learn about public addresses, otherwise if No, it will only learn RFC 1918 addresses and ignore any public traffic.
 
 Template: poseidon/faucet_fa_rabbit_enabled
