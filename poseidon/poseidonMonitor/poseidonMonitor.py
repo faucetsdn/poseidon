@@ -216,7 +216,6 @@ def rabbit_callback(ch, method, properties, body, q=None):
     ''' callback, places rabbit data into internal queue'''
     Logger.poseidon_logger.debug('got a message: {0}:{1}:{2}'.format(
         method.routing_key, body, type(body)))
-    # TODO more
     if q is not None:
         q.put((method.routing_key, body))
     else:
@@ -407,17 +406,16 @@ class Monitor(object):
                 #                      'Smartphone',
                 #                      'Developer '
                 #                      'workstation']
-                #             },
-                #            'decisions': {
-                #                            'behavior': 'normal',
-                #                            'investigate': True
-                #             },
-                #            'timestamp': 1508366767.45571,
-                #            'valid': True
+                #        },
+                #        'decisions': {
+                #             'behavior': 'normal',
+                #             'investigate': True
+                #        },
+                #        'timestamp': 1508366767.45571,
+                #        'valid': True
                 #        }
                 #    }
                 #
-                # TODO is this the best place for this?
                 if ml_returns[my_hash]['valid']:
                     current_state = endpoint.state
                     ml_decision = ml_returns[my_hash]['decisions']['behavior']
@@ -445,6 +443,11 @@ class Monitor(object):
                                 my_hash, 'SHUTDOWN')
                             self.poseidon_logger.debug(
                                 'MIRRORING Making SHUTDOWN')
+                else:
+                    self.uss.endpoints.change_endpoint_nextstate(
+                        my_hash, 'REINVESTIGATING')
+                    self.poseidon_logger.debug(
+                        'ML results failed, reinvestigating')
 
     def start_vent_collector(self, dev_hash, num_captures=1):
         '''
