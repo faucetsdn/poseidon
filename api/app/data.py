@@ -55,11 +55,11 @@ class NetworkFull(object):
         status = self.connect_redis()
         if status[0] and self.r:
             try:
-                ip_addresses = self.r.smembers('ip_addresses')
-                for ip_address in ip_addresses:
+                mac_addresses = self.r.smembers('mac_addresses')
+                for mac in mac_addresses:
                     node = {}
-                    node['ip'] = ip_address
-                    node['mac'] = 0
+                    node['mac'] = mac
+                    node['ip'] = 0
                     node['segment'] = 0
                     node['port'] = 0
                     node['tenant'] = 0
@@ -71,16 +71,18 @@ class NetworkFull(object):
                     node['state'] = 'UNDEFINED'
                     node['active'] = 0
                     try:
-                        ip_info = self.r.hgetall(ip_address)
-                        if 'poseidon_hash' in ip_info:
-                            node['hash'] = ip_info['poseidon_hash']
+                        ip_address = 'None'
+                        mac_info = self.r.hgetall(mac_address)
+                        if 'poseidon_hash' in mac_info:
+                            node['hash'] = mac_info['poseidon_hash']
                             try:
                                 poseidon_info = self.r.hgetall(
-                                    ip_info['poseidon_hash'])
+                                    mac_info['poseidon_hash'])
                                 if 'endpoint_data' in poseidon_info:
                                     endpoint_data = ast.literal_eval(
                                         poseidon_info['endpoint_data'])
-                                    node['mac'] = endpoint_data['mac']
+                                    ip_address = endpoint_data['ip_address']
+                                    node['ip'] = ip_address
                                     node['segment'] = endpoint_data['segment']
                                     node['port'] = endpoint_data['port']
                                     node['tenant'] = endpoint_data['tenant']
@@ -89,10 +91,10 @@ class NetworkFull(object):
                                     node['state'] = poseidon_info['state']
                             except Exception as e:  # pragma: no cover
                                 pass
-                        if 'timestamps' in ip_info:
+                        if 'timestamps' in mac_info:
                             try:
                                 timestamps = ast.literal_eval(
-                                    ip_info['timestamps'])
+                                    mac_info['timestamps'])
                                 ml_info = self.r.hgetall(
                                     ip_address+'_'+str(timestamps[-1]))
                                 if 'labels' in ml_info:
@@ -101,8 +103,8 @@ class NetworkFull(object):
                                     node['role'] = labels[0]
                             except Exception as e:  # pragma: no cover
                                 pass
-                        if 'short_os' in ip_info:
-                            short_os = ip_info['short_os']
+                        if 'short_os' in mac_info:
+                            short_os = mac_info['short_os']
                             node['os'] = short_os
                     except Exception as e:  # pragma: no cover
                         pass
@@ -145,23 +147,16 @@ class Network(object):
         status = self.connect_redis()
         if status[0] and self.r:
             try:
-                ip_addresses = self.r.smembers('ip_addresses')
-                for ip_address in ip_addresses:
+                mac_addresses = self.r.smembers('mac_addresses')
+                for mac in mac_addresses:
                     node = {}
                     # TODO lock in the uid
                     node['uid'] = str(uuid.uuid4())
-                    node['IP'] = ip_address
-                    # cheating for now
-                    if ':' in ip_address:
-                        node['subnet'] = ':'.join(
-                            ip_address.split(':')[0:4])+'::0/64'
-                    else:
-                        node['subnet'] = '.'.join(
-                            ip_address.split('.')[:-1])+'.0/24'
-                    # setting to unknown for now
-                    node['rDNS_host'] = 'Unknown'
+                    node['mac'] = mac
                     # set as unknown until it's set below
-                    node['mac'] = 'Unknown'
+                    node['IP'] = 'Unknown'
+                    node['subnet'] = 'Unknown'
+                    node['rDNS_host'] = 'Unknown'
                     node['record'] = {}
                     node['role'] = {}
                     node['role']['role'] = 'Unknown'
@@ -172,22 +167,33 @@ class Network(object):
                         endpoint_data = {}
                         labels = []
                         confidences = []
-                        ip_info = self.r.hgetall(ip_address)
+                        mac_info = self.r.hgetall(mac_address)
+                        ip_address = 'None'
 
-                        if 'poseidon_hash' in ip_info:
+                        if 'poseidon_hash' in mac_info:
                             try:
                                 poseidon_info = self.r.hgetall(
-                                    ip_info['poseidon_hash'])
+                                    mac_info['poseidon_hash'])
                                 if 'endpoint_data' in poseidon_info:
                                     endpoint_data = ast.literal_eval(
                                         poseidon_info['endpoint_data'])
-                                    node['mac'] = endpoint_data['mac']
+                                    ip_address = endpoint_data['ip-address']
+                                    node['IP'] = ip_address
+                                    # cheating for now
+                                    if ':' in ip_address:
+                                        node['subnet'] = ':'.join(
+                                            ip_address.split(':')[0:4])+'::0/64'
+                                    elif ip_address == 'None':
+                                        node['subnet'] = 'Unknown'
+                                    else:
+                                        node['subnet'] = '.'.join(
+                                            ip_address.split('.')[:-1])+'.0/24'
                             except Exception as e:  # pragma: no cover
                                 pass
-                        if 'timestamps' in ip_info:
+                        if 'timestamps' in mac_info:
                             try:
                                 timestamps = ast.literal_eval(
-                                    ip_info['timestamps'])
+                                    mac_info['timestamps'])
                                 node['record']['source'] = 'poseidon'
                                 node['record']['timestamp'] = str(
                                     datetime.fromtimestamp(float(timestamps[-1])))
@@ -204,8 +210,8 @@ class Network(object):
                                         confidences[0]*100)
                             except Exception as e:  # pragma: no cover
                                 pass
-                        if 'short_os' in ip_info:
-                            short_os = ip_info['short_os']
+                        if 'short_os' in mac_info:
+                            short_os = mac_info['short_os']
                             node['os']['os'] = short_os
                     except Exception as e:  # pragma: no cover
                         pass
