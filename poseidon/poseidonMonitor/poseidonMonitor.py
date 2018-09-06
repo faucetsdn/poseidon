@@ -622,9 +622,9 @@ class Monitor(object):
 
                     if next_state == 'MIRRORING':
                         self.poseidon_logger.info(
-                            'updating:{0}:{1}->{2}'.format(endpoint_hash,
-                                                           current_state,
-                                                           next_state))
+                            'Updating: {0}:{1}->{2}'.format(endpoint_hash,
+                                                            current_state,
+                                                            next_state))
                         self.poseidon_logger.debug(
                             '*********** U NOTIFY VENT ***********')
                         self.start_vent_collector(endpoint_hash)
@@ -634,9 +634,9 @@ class Monitor(object):
                             endpoint_hash, messages=self.faucet_event)
                     if next_state == 'REINVESTIGATING':
                         self.poseidon_logger.info(
-                            'updating:{0}:{1}->{2}'.format(endpoint_hash,
-                                                           current_state,
-                                                           next_state))
+                            'Updating: {0}:{1}->{2}'.format(endpoint_hash,
+                                                            current_state,
+                                                            next_state))
                         self.poseidon_logger.debug(
                             '*********** R NOTIFY VENT ***********')
                         self.start_vent_collector(endpoint_hash)
@@ -672,9 +672,9 @@ class Monitor(object):
                             eps.change_endpoint_state(endpoint_hash)
                     if next_state == 'SHUTDOWN':
                         self.poseidon_logger.info(
-                            'updating:{0}:{1}->{2}'.format(endpoint_hash,
-                                                           current_state,
-                                                           next_state))
+                            'Updating: {0}:{1}->{2}'.format(endpoint_hash,
+                                                            current_state,
+                                                            next_state))
                         self.uss.shutdown_endpoint(endpoint_hash)
 
                     eps.print_endpoint_state()

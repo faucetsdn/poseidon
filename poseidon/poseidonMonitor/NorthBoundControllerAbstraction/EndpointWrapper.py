@@ -103,7 +103,7 @@ class Endpoint_Wrapper():
 
     def print_endpoint_state(self):
         def same_old(state, letter):
-            self.poseidon_logger.info('*******{0}*********'.format(state))
+            #self.poseidon_logger.info('*******{0}*********'.format(state))
 
             out_flag = False
             e_states = self.state.copy()
@@ -127,28 +127,28 @@ class Endpoint_Wrapper():
                         del pp_endpoint_data['port']
                         pp_endpoint_data['v'] = pp_endpoint_data['tenant']
                         del pp_endpoint_data['tenant']
-                        self.poseidon_logger.info('{0}:{1}:{2}->{3}:{4}'.format(letter,
-                                                                                my_hash,
-                                                                                endpoint.state,
-                                                                                endpoint.next_state,
-                                                                                pp_endpoint_data))
+                        #self.poseidon_logger.info('{0}:{1}:{2}->{3}:{4}'.format(letter,
+                        #                                                        my_hash,
+                        #                                                        endpoint.state,
+                        #                                                        endpoint.next_state,
+                        #                                                        pp_endpoint_data))
                     # update metadata on vent collectors
                     self.update_vent_collector(my_hash, endpoint)
-            if not out_flag:
-                self.poseidon_logger.info('None')
+            #if not out_flag:
+            #    self.poseidon_logger.info('None')
 
         states = [('K', 'KNOWN'), ('U', 'UNKNOWN'), ('M', 'MIRRORING'),
                   ('S', 'SHUTDOWN'), ('R', 'REINVESTIGATING')]
 
-        self.poseidon_logger.info('====START')
+        #self.poseidon_logger.info('====START')
         for l, s in states:
             same_old(s, l)
 
-        self.poseidon_logger.info('****************')
-        self.poseidon_logger.info('====STOP')
+        #self.poseidon_logger.info('****************')
+        #self.poseidon_logger.info('====STOP')
 
         # cleanup endpoints that are no longer active
-        hashes = self.state.copy()
-        for my_hash in hashes:
-            if self.state[my_hash].endpoint_data['active'] == 0:
-                del self.state[my_hash]
+        #hashes = self.state.copy()
+        #for my_hash in hashes:
+        #    if self.state[my_hash].endpoint_data['active'] == 0:
+        #        del self.state[my_hash]
