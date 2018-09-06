@@ -148,7 +148,7 @@ class Endpoint_Wrapper():
         #self.poseidon_logger.info('====STOP')
 
         # cleanup endpoints that are no longer active
-        #hashes = self.state.copy()
-        #for my_hash in hashes:
-        #    if self.state[my_hash].endpoint_data['active'] == 0:
-        #        del self.state[my_hash]
+        hashes = self.state.copy()
+        for my_hash in hashes:
+            if self.state[my_hash].endpoint_data['active'] == 0:
+                del self.state[my_hash]
