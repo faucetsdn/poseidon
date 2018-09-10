@@ -253,7 +253,7 @@ def schedule_job_reinvestigation(max_investigations, currently_mirrored, endpoin
     # get random order of things that are known
     random.shuffle(candidates)
 
-    if currently_investigating + currently_mirrored < max_investigations:
+    if currently_investigating + currently_mirrored <= max_investigations:
         ostr = 'room to investigate'
         logger.debug(ostr)
         for x in range(max_investigations - currently_investigating):

@@ -65,8 +65,6 @@ class Update_Switch_State(Monitor_Helper_Base):
         self.reinvestigation_frequency = 900
         self.max_concurrent_reinvestigations = 2
 
-        self.mirrored_endpoint_count = 0
-
         self.sdnc = None
         self.first_time = True
         self.endpoints = Endpoint_Wrapper()
@@ -75,9 +73,6 @@ class Update_Switch_State(Monitor_Helper_Base):
     def return_endpoint_state(self):
         ''' give access to the endpoint_states '''
         return self.endpoints
-
-    def get_mirrored_endpoint_count(self):
-        return self.mirrored_endpoint_count
 
     def first_run(self):
         ''' do some pre-run setup/configuration '''
@@ -179,7 +174,6 @@ class Update_Switch_State(Monitor_Helper_Base):
             next_state = self.endpoints.get_endpoint_next(my_hash)
             self.sdnc.mirror_mac(my_mac, messages=messages)
             self.endpoints.change_endpoint_state(my_hash)
-            self.mirrored_endpoint_count += 1
             self.poseidon_logger.debug(
                 'endpoint:{0}:{1}:{2}:{3}'.format(my_hash, my_mac, my_ip, next_state))
             return True
@@ -192,7 +186,6 @@ class Update_Switch_State(Monitor_Helper_Base):
             my_ip = self.endpoints.get_endpoint_ip(my_hash)
             next_state = self.endpoints.get_endpoint_next(my_hash)
             self.sdnc.unmirror_mac(my_mac, messages=messages)
-            self.mirrored_endpoint_count -= 1
             self.poseidon_logger.debug(
                 'endpoint:{0}:{1}:{2}:{3}'.format(my_hash, my_mac, my_ip, next_state))
             return True
