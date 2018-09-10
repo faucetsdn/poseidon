@@ -152,3 +152,13 @@ class Endpoint_Wrapper():
         for my_hash in hashes:
             if self.state[my_hash].endpoint_data['active'] == 0:
                 del self.state[my_hash]
+
+    def get_endpoints_in_state(self, state):
+        e_states = self.state.copy()
+        for my_hash in e_states.keys():
+            endpoint = e_states[my_hash]
+            if endpoint.state != state:
+                del e_states[my_hash]
+
+        return e_states
+        
