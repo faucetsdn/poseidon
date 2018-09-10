@@ -1224,7 +1224,7 @@ def test_schedule_job_reinvestigation():
 
     assert len(epw.state) == 9
 
-    poseidonMonitor.schedule_job_reinvestigation(9, epw, MockLogger().logger)
+    poseidonMonitor.schedule_job_reinvestigation(9, 1, epw, MockLogger().logger)
 
     epw = Endpoint_Wrapper()
 
@@ -1329,15 +1329,15 @@ def test_schedule_job_reinvestigation():
     for s in stuff:
         epw.state[s] = stuff[s]
 
-    poseidonMonitor.schedule_job_reinvestigation(4, epw, MockLogger().logger)
+    poseidonMonitor.schedule_job_reinvestigation(4, 1, epw, MockLogger().logger)
 
     epw = Endpoint_Wrapper()
     #end_points = {}
-    poseidonMonitor.schedule_job_reinvestigation(4, epw, MockLogger().logger)
+    poseidonMonitor.schedule_job_reinvestigation(4, 0, epw, MockLogger().logger)
 
     epw.state['4ee39d254db3e4a5264b75ce8ae312d69f9e73a3'] = stuff['4ee39d254db3e4a5264b75ce8ae312d69f9e73a3']
     #end_points = {"hash_0": {"MALFORMED": "YES"}}
-    poseidonMonitor.schedule_job_reinvestigation(4, epw, MockLogger().logger)
+    poseidonMonitor.schedule_job_reinvestigation(4, 0, epw, MockLogger().logger)
 
 
 def test_update_next_state():

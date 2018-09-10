@@ -564,3 +564,20 @@ def test_print_endpoint_state():
     state = 'TEST_STATE'
     make_endpoint_dict(uss.endpoints.state, hash_value, state, endpoint_data)
     uss.endpoints.print_endpoint_state()
+
+def test_get_endpoints_in_state():
+    uss = Update_Switch_State()
+    uss.first_time = False
+    endpoint_data = dict({'ip-address': '10.0.0.99',
+                          'mac': '20:4c:9e:5f:e3:c3',
+                          'segment': 'to-core-router',
+                          'tenant': 'EXTERNAL',
+                          'active': 1,
+                          'name': None})
+    hash_value = '87a07fa79d4d855e5392e6863586584ebacc9d2a'
+    state = 'TEST_STATE'
+    make_endpoint_dict(uss.endpoints.state, hash_value, state, endpoint_data)
+    actual = len(uss.endpoints.get_endpoints_in_state('TEST_STATE'))
+    expected = 1
+
+    assert actual == expected
