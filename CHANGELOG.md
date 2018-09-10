@@ -1,3 +1,16 @@
+# v0.3.4 (2018-09-10)
+
+ - Updated version of pytest and pytest-cov
+ - Fixed the number of endpoints that can be in the mirroring/investigating state
+ - Improvements to the logging output
+ - Fixed API when learning at L2
+ - Reinvestigates if ML results come back with nothing
+ - Validates connectivity to the controller before making network_tap requests
+ - Reduce connection timeout times
+ - Now uses Docker for building Debian package
+ - Added reinvestigation_frequency as a configuration option for the Debian package
+ - Fix reprompting when using the Debian package with demo and upgrading
+
 # v0.3.3 (2018-08-24)
 
  - Updated version of certifi, gevent, and pytest
