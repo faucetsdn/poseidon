@@ -72,7 +72,7 @@ class NetworkFull(object):
                     node['active'] = 0
                     try:
                         ip_address = 'None'
-                        mac_info = self.r.hgetall(mac_address)
+                        mac_info = self.r.hgetall(mac)
                         if 'poseidon_hash' in mac_info:
                             node['hash'] = mac_info['poseidon_hash']
                             try:
@@ -169,7 +169,7 @@ class Network(object):
                         endpoint_data = {}
                         labels = []
                         confidences = []
-                        mac_info = self.r.hgetall(mac_address)
+                        mac_info = self.r.hgetall(mac)
                         ip_address = 'None'
 
                         if 'poseidon_hash' in mac_info:
