@@ -81,7 +81,7 @@ class NetworkFull(object):
                                 if 'endpoint_data' in poseidon_info:
                                     endpoint_data = ast.literal_eval(
                                         poseidon_info['endpoint_data'])
-                                    ip_address = endpoint_data['ip_address']
+                                    ip_address = endpoint_data['ip-address']
                                     node['ip'] = ip_address
                                     node['segment'] = endpoint_data['segment']
                                     node['port'] = endpoint_data['port']
@@ -90,7 +90,8 @@ class NetworkFull(object):
                                 if 'state' in poseidon_info:
                                     node['state'] = poseidon_info['state']
                             except Exception as e:  # pragma: no cover
-                                pass
+                                print(
+                                    'Failed to set all poseidon info because: ' + str(e))
                         if 'timestamps' in mac_info:
                             try:
                                 timestamps = ast.literal_eval(
@@ -102,15 +103,16 @@ class NetworkFull(object):
                                         ml_info['labels'])
                                     node['role'] = labels[0]
                             except Exception as e:  # pragma: no cover
-                                pass
+                                print(
+                                    'Failed to set all timestamp info because: ' + str(e))
                         if 'short_os' in mac_info:
                             short_os = mac_info['short_os']
                             node['os'] = short_os
                     except Exception as e:  # pragma: no cover
-                        pass
+                        print('Failed to set all info because: ' + str(e))
                     dataset.append(node)
             except Exception as e:  # pragma: no cover
-                pass
+                print('Failed to set all macs because: ' + str(e))
         return dataset
 
     def on_get(self, req, resp):
@@ -189,7 +191,8 @@ class Network(object):
                                         node['subnet'] = '.'.join(
                                             ip_address.split('.')[:-1])+'.0/24'
                             except Exception as e:  # pragma: no cover
-                                pass
+                                print(
+                                    'Failed to set all poseidon info because: ' + str(e))
                         if 'timestamps' in mac_info:
                             try:
                                 timestamps = ast.literal_eval(
@@ -209,15 +212,16 @@ class Network(object):
                                     node['role']['confidence'] = int(
                                         confidences[0]*100)
                             except Exception as e:  # pragma: no cover
-                                pass
+                                print(
+                                    'Failed to set all timestamp info because: ' + str(e))
                         if 'short_os' in mac_info:
                             short_os = mac_info['short_os']
                             node['os']['os'] = short_os
                     except Exception as e:  # pragma: no cover
-                        pass
+                        print('Failed to set all info because: ' + str(e))
                     dataset.append(node)
             except Exception as e:  # pragma: no cover
-                pass
+                print('Failed to set all macs info because: ' + str(e))
 
         return dataset
 
