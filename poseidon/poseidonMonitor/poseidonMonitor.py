@@ -81,6 +81,7 @@ def schedule_job_kickurl(func, logger):
                'oses': {},
                'current_states': {('Poseidon', 'KNOWN'): 0,
                                   ('Poseidon', 'UNKNOWN'): 0,
+                                  ('Poseidon', 'INACTIVE'): 0,
                                   ('Poseidon', 'MIRRORING'): 0,
                                   ('Poseidon', 'SHUTDOWN'): 0,
                                   ('Poseidon', 'REINVESTIGATING'): 0},
@@ -359,7 +360,8 @@ class Monitor(object):
         self.schedule.every(reinvestigation_frequency).seconds.do(
             partial(schedule_job_reinvestigation,
                     max_investigations=max_concurrent_reinvestigations,
-                    currently_mirrored=len(self.uss.endpoints.get_endpoints_in_state('MIRRORING')),
+                    currently_mirrored=len(
+                        self.uss.endpoints.get_endpoints_in_state('MIRRORING')),
                     endpoints=self.NorthBoundControllerAbstraction.get_endpoint(
                         'Update_Switch_State').endpoints,
                     logger=self.poseidon_logger))
@@ -483,7 +485,8 @@ class Monitor(object):
             try:
                 if should_start:
                     resp = requests.post(uri, data=json.dumps(payload))
-                    self.poseidon_logger.debug('collector response: ' + resp.text)
+                    self.poseidon_logger.debug(
+                        'collector response: ' + resp.text)
                 else:
                     self.poseidon_logger.debug(
                         'collector not started due to invalid span fabric configuration.')
@@ -493,7 +496,7 @@ class Monitor(object):
                     'failed to start vent collector' + str(e))
         else:
             self.poseidon_logger.debug(
-                    'not starting vent collector because not connected a controller')
+                'not starting vent collector because not connected a controller')
 
     # returns a dictionary of existing collectors keyed on dev_hash
     def get_vent_collectors(self):
