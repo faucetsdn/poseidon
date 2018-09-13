@@ -171,6 +171,7 @@ class Network(object):
                         confidences = []
                         mac_info = self.r.hgetall(mac)
                         ip_address = 'None'
+                        ip_info = 'None'
 
                         if 'poseidon_hash' in mac_info:
                             try:
@@ -181,6 +182,7 @@ class Network(object):
                                         poseidon_info['endpoint_data'])
                                     ip_address = endpoint_data['ip-address']
                                     node['IP'] = ip_address
+                                    ip_info = self.r.hgetall(ip_address)
                                     # cheating for now
                                     if ':' in ip_address:
                                         node['subnet'] = ':'.join(
@@ -214,8 +216,8 @@ class Network(object):
                             except Exception as e:  # pragma: no cover
                                 print(
                                     'Failed to set all timestamp info because: ' + str(e))
-                        if 'short_os' in mac_info:
-                            short_os = mac_info['short_os']
+                        if ip_info and 'short_os' in ip_info:
+                            short_os = ip_info['short_os']
                             node['os']['os'] = short_os
                     except Exception as e:  # pragma: no cover
                         print('Failed to set all info because: ' + str(e))
