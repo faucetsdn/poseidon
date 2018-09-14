@@ -60,7 +60,7 @@ class Logger:
     # set the poseidon logger to log to file
     try:
         fh = logging.handlers.RotatingFileHandler(
-            '/var/log/poseidon.log', backupCount=5, maxBytes=(10*1024*1024))
+            '/var/log/poseidon.log', backupCount=5, maxBytes=(100*1024*1024))
         fh.setFormatter(p_formatter)
         poseidon_logger.addHandler(fh)
     except Exception as e:

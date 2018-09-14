@@ -72,6 +72,7 @@ class NetworkFull(object):
                     node['active'] = 0
                     try:
                         ip_address = 'None'
+                        ip_info = None
                         mac_info = self.r.hgetall(mac)
                         if 'poseidon_hash' in mac_info:
                             node['hash'] = mac_info['poseidon_hash']
@@ -87,6 +88,7 @@ class NetworkFull(object):
                                     node['port'] = endpoint_data['port']
                                     node['tenant'] = endpoint_data['tenant']
                                     node['active'] = endpoint_data['active']
+                                    ip_info = self.r.hgetall(ip_address)
                                 if 'state' in poseidon_info:
                                     node['state'] = poseidon_info['state']
                             except Exception as e:  # pragma: no cover
@@ -105,8 +107,8 @@ class NetworkFull(object):
                             except Exception as e:  # pragma: no cover
                                 print(
                                     'Failed to set all timestamp info because: ' + str(e))
-                        if 'short_os' in mac_info:
-                            short_os = mac_info['short_os']
+                        if ip_info and 'short_os' in ip_info:
+                            short_os = ip_info['short_os']
                             node['os'] = short_os
                     except Exception as e:  # pragma: no cover
                         print('Failed to set all info because: ' + str(e))
@@ -171,7 +173,7 @@ class Network(object):
                         confidences = []
                         mac_info = self.r.hgetall(mac)
                         ip_address = 'None'
-                        ip_info = 'None'
+                        ip_info = None
 
                         if 'poseidon_hash' in mac_info:
                             try:
@@ -182,7 +184,6 @@ class Network(object):
                                         poseidon_info['endpoint_data'])
                                     ip_address = endpoint_data['ip-address']
                                     node['IP'] = ip_address
-                                    ip_info = self.r.hgetall(ip_address)
                                     # cheating for now
                                     if ':' in ip_address:
                                         node['subnet'] = ':'.join(
@@ -192,6 +193,7 @@ class Network(object):
                                     else:
                                         node['subnet'] = '.'.join(
                                             ip_address.split('.')[:-1])+'.0/24'
+                                    ip_info = self.r.hgetall(ip_address)
                             except Exception as e:  # pragma: no cover
                                 print(
                                     'Failed to set all poseidon info because: ' + str(e))
