@@ -253,7 +253,8 @@ def schedule_job_reinvestigation(max_investigations, currently_mirrored, endpoin
 
     # get random order of things that are known
     random.shuffle(candidates)
-
+    ostr = '{0} investigating & {1} mirroring'.format(currently_investigating, currently_mirrored)
+    logger.debug(ostr)
     if currently_investigating + currently_mirrored <= max_investigations:
         ostr = 'room to investigate'
         logger.debug(ostr)
