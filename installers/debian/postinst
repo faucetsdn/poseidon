@@ -234,7 +234,7 @@ if db_go; then
             echo "  8:" >> /etc/faucet/faucet.yaml
 
             mkdir -p /var/log/poseidon
-            chmod -R 666 /var/log/poseidon
+            chmod -R 755 /var/log/poseidon
             touch /var/log/poseidon/poseidon.log
 
             command -v python >/dev/null 2>&1 || { echo >&2 -e "${red}Python not installed, please install it first: sudo apt-get install python${endColor}"; db_unregister poseidon/controller_type; exit 1; }
