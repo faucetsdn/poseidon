@@ -21,7 +21,7 @@ declare FA_RABBIT_PORT
 declare max_concurrent_reinvestigations
 
 sudo mkdir -p /var/log/poseidon
-sudo chmod -R 666 /var/log/poseidon
+sudo chmod -R 755 /var/log/poseidon
 touch /var/log/poseidon/poseidon.log
 
 d_comm="docker run -dit -v /var/run/docker.sock:/var/run/docker.sock -v /opt/vent_files:/opt/vent_files -v $(pwd)/.plugin_config.yml:/root/.plugin_config.yml -v $(pwd)/.vent_startup.yml:/root/.vent_startup.yml "
