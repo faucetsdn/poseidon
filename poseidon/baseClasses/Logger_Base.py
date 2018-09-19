@@ -58,6 +58,8 @@ class Logger:
     poseidon_logger.propagate = False
 
     # ensure log file exists
+    if not os.path.exists('/var/log/poseidon'):
+        os.makedirs('/var/log/poseidon')
     if not os.path.exists('/var/log/poseidon/poseidon.log'):
         with open('/var/log/poseidon/poseidon.log', 'w'): pass
 
