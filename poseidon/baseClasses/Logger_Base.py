@@ -57,21 +57,28 @@ class Logger:
     poseidon_logger.setLevel(logging.INFO)
     poseidon_logger.propagate = False
 
+    use_file_logger = True
     # ensure log file exists
-    if not os.path.exists('/var/log/poseidon'):
-        os.makedirs('/var/log/poseidon')
-    if not os.path.exists('/var/log/poseidon/poseidon.log'):
-        with open('/var/log/poseidon/poseidon.log', 'w'): pass
-
-    # set the poseidon logger to log to file
     try:
-        fh = logging.handlers.RotatingFileHandler(
-            '/var/log/poseidon/poseidon.log', backupCount=5, maxBytes=(100*1024*1024))
-        fh.setFormatter(p_formatter)
-        poseidon_logger.addHandler(fh)
+        if not os.path.exists('/var/log/poseidon'):
+            os.makedirs('/var/log/poseidon')
+        if not os.path.exists('/var/log/poseidon/poseidon.log'):
+            with open('/var/log/poseidon/poseidon.log', 'w'): pass
     except Exception as e:
+        use_file_logger = False
         logger.warning(
             'Unable to setup Poseidon logger because: {0}'.format(str(e)))
+
+    if use_file_logger:
+        # set the poseidon logger to log to file
+        try:
+            fh = logging.handlers.RotatingFileHandler(
+                '/var/log/poseidon/poseidon.log', backupCount=5, maxBytes=(100*1024*1024))
+            fh.setFormatter(p_formatter)
+            poseidon_logger.addHandler(fh)
+        except Exception as e:
+            logger.warning(
+                'Unable to setup Poseidon logger because: {0}'.format(str(e)))
 
     # don't try to connect to a syslog address if one was not supplied
     if host != 'NOT_CONFIGURED':  # pragma: no cover
