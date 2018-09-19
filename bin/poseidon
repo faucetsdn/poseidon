@@ -85,7 +85,7 @@ function check_args()
                 exit
                 ;;
             -l|logs)
-                tail -n 100 -f /var/log/poseidon.log
+                tail -n 100 -f /var/log/poseidon/poseidon.log
                 exit
                 ;;
             -L|system-logs)
