@@ -1,3 +1,10 @@
+# v0.3.5 (2018-09-21)
+
+ - added an inactive state
+ - fixed operating system results from p0f
+ - fixes roles results from PoseidonML
+ - fixed log file creation and rotation
+ - 
 # v0.3.4 (2018-09-10)
 
  - Updated version of pytest and pytest-cov
