@@ -99,7 +99,7 @@ class NetworkFull(object):
                                 timestamps = ast.literal_eval(
                                     mac_info['timestamps'])
                                 ml_info = self.r.hgetall(
-                                    ip_address+'_'+str(timestamps[-1]))
+                                    mac+'_'+str(timestamps[-1]))
                                 if 'labels' in ml_info:
                                     labels = ast.literal_eval(
                                         ml_info['labels'])
@@ -205,7 +205,7 @@ class Network(object):
                                 node['record']['timestamp'] = str(
                                     datetime.fromtimestamp(float(timestamps[-1])))
                                 ml_info = self.r.hgetall(
-                                    ip_address+'_'+str(timestamps[-1]))
+                                    mac+'_'+str(timestamps[-1]))
                                 if 'labels' in ml_info:
                                     labels = ast.literal_eval(
                                         ml_info['labels'])
