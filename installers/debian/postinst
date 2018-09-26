@@ -233,7 +233,9 @@ if db_go; then
             echo "vlans:" >> /etc/faucet/faucet.yaml
             echo "  8:" >> /etc/faucet/faucet.yaml
 
-            touch /var/log/poseidon.log
+            mkdir -p /var/log/poseidon
+            chmod -R 755 /var/log/poseidon
+            touch /var/log/poseidon/poseidon.log
 
             command -v python >/dev/null 2>&1 || { echo >&2 -e "${red}Python not installed, please install it first: sudo apt-get install python${endColor}"; db_unregister poseidon/controller_type; exit 1; }
             command -v mn >/dev/null 2>&1 || { echo >&2 -e "${red}Mininet not installed, please install it first: sudo apt-get install mininet${endColor}"; db_unregister poseidon/controller_type; exit 1; }
