@@ -237,7 +237,7 @@ def schedule_thread_worker(schedule, logger):
     sys.exit()
 
 
-def schedule_job_reinvestigation(max_investigations, currently_mirrored, endpoints, logger):
+def schedule_job_reinvestigation(max_investigations, endpoints, logger):
     ''' put endpoints into the reinvestigation state if possible '''
     ostr = 'reinvestigation time'
     logger.debug(ostr)
@@ -245,15 +245,19 @@ def schedule_job_reinvestigation(max_investigations, currently_mirrored, endpoin
     candidates = []
 
     currently_investigating = 0
+    currently_mirrored = 0
     for my_hash, my_value in endpoints.state.items():
         if my_value.state == 'REINVESTIGATING' or my_value.next_state == 'REINVESTIGATING':
             currently_investigating += 1
+        if my_value.state == 'MIRRORING' or my_value.next_state == 'MIRRORING':
+            currently_mirrored += 1
         elif my_value.state == 'KNOWN':
             candidates.append(my_hash)
 
     # get random order of things that are known
     random.shuffle(candidates)
-
+    ostr = '{0} investigating & {1} mirroring'.format(currently_investigating, currently_mirrored)
+    logger.debug(ostr)
     if currently_investigating + currently_mirrored <= max_investigations:
         ostr = 'room to investigate'
         logger.debug(ostr)
@@ -360,8 +364,6 @@ class Monitor(object):
         self.schedule.every(reinvestigation_frequency).seconds.do(
             partial(schedule_job_reinvestigation,
                     max_investigations=max_concurrent_reinvestigations,
-                    currently_mirrored=len(
-                        self.uss.endpoints.get_endpoints_in_state('MIRRORING')),
                     endpoints=self.NorthBoundControllerAbstraction.get_endpoint(
                         'Update_Switch_State').endpoints,
                     logger=self.poseidon_logger))
