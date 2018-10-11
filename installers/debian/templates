@@ -66,7 +66,7 @@ Description: Set the amount of time in seconds to run investigations and reinves
 Template: poseidon/faucet_controller_mirror_ports
 Type: string
 Description: Set the controller mirror ports:
- Poseidonn needs to know which switches and ports on Faucet will be used for mirroring. Should be in the form of '{"switch-name":3}' where 3 is the interface number on switch-name that should be getting traffic mirrored to from the other ports.
+ Poseidon needs to know which switches and ports on Faucet will be used for mirroring. Should be in the form of '{"switch-name":3}' where 3 is the interface number on switch-name that should be getting traffic mirrored to from the other ports.
 
 Template: poseidon/bcf_controller_span_fabric_name
 Type: string
