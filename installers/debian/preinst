@@ -7,27 +7,27 @@ endColor='\e[0m'
 
 command -v docker >/dev/null 2>&1 || { echo >&2 -e "${red}Docker not installed, please install it first: https://docs.docker.com/install/linux/docker-ce/ubuntu/${endColor}"; exit 1; }
 
-if [! -d /var/log/faucet ]
+if [ ! -d /var/log/faucet ]; then
 	mkdir -p /var/log/faucet
 fi 
-if [! -f /var/log/faucet/faucet.log ]
+if [ ! -f /var/log/faucet/faucet.log ]; then
 	touch /var/log/faucet/faucet.log
 fi 
-if [! -f /var/log/faucet/faucet_exception.log ]
+if [ ! -f /var/log/faucet/faucet_exception.log ]; then
 	touch /var/log/faucet/faucet_exception.log
 fi 
 
-if [! -d /var/log/poseidon ]
+if [ ! -d /var/log/poseidon ]; then
 	mkdir -p /var/log/poseidon
 fi 
 chmod -R 755 /var/log/poseidon
-if [! -f /var/log/poseidon/poseidon.log ]
+if [ ! -f /var/log/poseidon/poseidon.log ]; then
 	touch /var/log/poseidon/poseidon.log
 fi 
 
-if [! -d /etc/faucet/ ]
+if [ ! -d /etc/faucet/ ]; then
 	mkdir -p /etc/faucet/
 fi 
-if [! -f /etc/faucet/faucet.yaml ]
+if [ ! -f /etc/faucet/faucet.yaml ]; then
 	touch /etc/faucet/faucet.yaml
 fi 
