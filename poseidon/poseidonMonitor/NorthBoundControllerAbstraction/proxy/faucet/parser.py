@@ -95,7 +95,7 @@ class Parser:
             if ok:
                 if action == 'mirror':
                     # TODO make this smarter about more complex configurations (backup original values, etc)
-                    if self.reingestigation_frequency:
+                    if self.reinvestigation_frequency:
                         obj_doc['dps'][switch_found]['timeout'] = (
                             self.reinvestigation_frequency * 2) + 1
                     else:
