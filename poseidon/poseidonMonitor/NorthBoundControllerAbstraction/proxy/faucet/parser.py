@@ -95,7 +95,11 @@ class Parser:
             if ok:
                 if action == 'mirror':
                     # TODO make this smarter about more complex configurations (backup original values, etc)
-                    obj_doc['dps'][switch_found]['timeout'] = self.reinvestigation_frequency
+                    if self.reinvestigation_frequency:
+                        obj_doc['dps'][switch_found]['timeout'] = (
+                            self.reinvestigation_frequency * 2) + 1
+                    else:
+                        obj_doc['dps'][switch_found]['timeout'] = self.reinvestigation_frequency
                     obj_doc['dps'][switch_found]['arp_neighbor_timeout'] = self.reinvestigation_frequency
                     if not port in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] and port is not None:
                         obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'].append(
