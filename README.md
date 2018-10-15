@@ -181,7 +181,21 @@ To continue to test (assuming demo installation), please see `/opt/poseidon/docs
 
 
 ## Developing
+
+### Modifying Code that Runs in a Docker Container
+
 If installed as described above, poseidon's codebase will be at `/opt/poseidon`.  At this location, a `.vent_startup.yml` file can be edited to point to a fork of the original repository.  Develop and commit changes on the poseidon fork and use `poseidon -r` to reload and see your changes.
+You can verify that it's building against your fork by doing a `docker ps` and the poseidon container will be named off of your fork.
+
+### Modifying Code that Runs on the Host Machine
+
+To make changes to anything outside of the `poseidon` subdirectory you will need to build a new `.deb` and reinstall.
+```
+git clone <YOUR-POSEIDON-FORK>
+cd poseidon
+make build_installers
+sudo dpkg -i dist/poseidon*.deb
+```
 
 
 ## Related Components

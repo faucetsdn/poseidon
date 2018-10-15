@@ -98,6 +98,8 @@ function check_args()
                 ;;
             -r|restart)
                 # TODO add some verbosity
+                echo "Checking volumes..."
+                check_files
                 echo "Restarting Poseidon..."
                 sudo systemctl restart poseidon
                 echo "done."
@@ -109,6 +111,8 @@ function check_args()
                    sudo systemctl stop poseidon
                 fi
                 if [ "$2" = "-D" ]; then
+                    echo "Checking volumes..."
+                    check_files
                     echo "Starting Poseidon..."
                     docker run -dit --rm -v /var/run/docker.sock:/var/run/docker.sock -v /opt/vent_files:/opt/vent_files -v /opt/poseidon/.plugin_config.yml:/root/.plugin_config.yml -v /opt/poseidon/.vent_startup.yml:/root/.vent_startup.yml --env-file /etc/poseidon/default.conf --name vent cyberreboot/vent
                     until [ "$(docker ps -q -f name=-poseidon-)" ] && [ "$(docker ps -q -f name=-poseidon- | head -1 | xargs docker container inspect -f \{\{.State.Health.Status\}\})" = "healthy" ]
@@ -167,6 +171,46 @@ function check_args()
         esac
         shift
     done
+}
+
+function check_files()
+{
+    if [ ! -d /var/log/faucet ]; then
+        sudo mkdir -p /var/log/faucet
+    fi
+    if [ -d /var/log/faucet/faucet.log ]; then
+        sudo rm -rf /var/log/faucet/faucet.log
+    fi
+    if [ -d /var/log/faucet/faucet_exception.log ]; then
+        sudo rm -rf /var/log/faucet/faucet_exception.log
+    fi
+    if [ ! -f /var/log/faucet/faucet.log ]; then
+        sudo touch /var/log/faucet/faucet.log
+    fi 
+    if [ ! -f /var/log/faucet/faucet_exception.log ]; then
+        sudo touch /var/log/faucet/faucet_exception.log
+    fi 
+
+    if [ ! -d /var/log/poseidon ]; then
+        sudo mkdir -p /var/log/poseidon
+        sudo chmod -R 755 /var/log/poseidon
+    fi 
+    if [ -d /var/log/poseidon/poseidon.log ]; then
+        sudo rm -rf /var/log/poseidon/poseidon.log
+    fi 
+    if [ ! -f /var/log/poseidon/poseidon.log ]; then
+        sudo touch /var/log/poseidon/poseidon.log
+    fi
+
+    if [ ! -d /etc/faucet/ ]; then
+        sudo mkdir -p /etc/faucet/
+    fi
+    if [ -d /etc/faucet/faucet.yaml ]; then
+        sudo rm -rf /etc/faucet/faucet.yaml
+    fi
+    if [ ! -f /etc/faucet/faucet.yaml ]; then
+        sudo touch /etc/faucet/faucet.yaml
+    fi
 }
 
 # entry point

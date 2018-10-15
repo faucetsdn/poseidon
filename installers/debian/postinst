@@ -214,10 +214,6 @@ if db_go; then
             echo "reinvestigation_frequency=300" >> /etc/poseidon/default.conf
 
             # settings for Faucet
-            mkdir -p /etc/faucet
-            mkdir -p /var/log/faucet
-            touch /var/log/faucet/faucet.log
-            touch /var/log/faucet/faucet_exception.log
             echo "dps:" > /etc/faucet/faucet.yaml
             echo "  switch-1:" >> /etc/faucet/faucet.yaml
             echo "    dp_id: 1" >> /etc/faucet/faucet.yaml
@@ -232,10 +228,6 @@ if db_go; then
             echo "        output_only: true" >> /etc/faucet/faucet.yaml
             echo "vlans:" >> /etc/faucet/faucet.yaml
             echo "  8:" >> /etc/faucet/faucet.yaml
-
-            mkdir -p /var/log/poseidon
-            chmod -R 755 /var/log/poseidon
-            touch /var/log/poseidon/poseidon.log
 
             command -v python >/dev/null 2>&1 || { echo >&2 -e "${red}Python not installed, please install it first: sudo apt-get install python${endColor}"; db_unregister poseidon/controller_type; exit 1; }
             command -v mn >/dev/null 2>&1 || { echo >&2 -e "${red}Mininet not installed, please install it first: sudo apt-get install mininet${endColor}"; db_unregister poseidon/controller_type; exit 1; }
