@@ -7,7 +7,7 @@ pylint==2.1.1
 pytest-cov==2.6.0
 pytest==3.9.1
 pyyaml==3.13
-requests==2.19.1
+requests==2.20.0
 schedule==0.5.0
 scp==0.12.1
 urllib3==1.24
