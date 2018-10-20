@@ -114,7 +114,7 @@ Faucet is now configured and ready for use with Poseidon.
 
 ## Usage
 
-NEW: If you have used the .DEB installer, Poseidon is now packaged as a standard Linux service, and ties in nicely to both systemctl and journalctl.
+NEW: If you have used the .DEB installer previously, it is worth noting that Poseidon is now packaged as a standard Linux service, and ties in nicely to both systemctl and journalctl.
 
 After installation you'll have a new command `poseidon` available for looking at the status, logs, changing the configuration, or stopping and starting the service.
 ```
@@ -138,7 +138,7 @@ Options:
 
 ```
 
-Poseidon makes heavy use of a sister project, [vent](https://vent.readthedocs.io/en/latest/?badge=latest). With a succesful installation you should minimally see a combination of Poseidon and Vent components, to include:
+Poseidon makes heavy use of a sister project, [vent](https://vent.readthedocs.io/en/latest/?badge=latest). With a successful installation you should minimally see a combination of Poseidon and Vent components, to include:
 
 1. The following 14 containers with a "(healthy)" STATUS listed (NOTE: this is truncated output):
 ```
