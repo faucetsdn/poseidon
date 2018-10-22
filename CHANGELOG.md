@@ -1,10 +1,18 @@
+# v0.3.6 (2018-10-22)
+
+ - Updated version of pytest, gunicorn, prometheus_client, urllib3, scp, gevent, certifi, requests
+ - Fixed a few typos
+ - Fixed L2 timeout compared with ARP timeout for Faucet
+ - Fixed creation of files/dirs at container start time for volumes
+ - Added some developer instructions to the Readme
+
 # v0.3.5 (2018-09-21)
 
  - added an inactive state
  - fixed operating system results from p0f
  - fixes roles results from PoseidonML
  - fixed log file creation and rotation
- - 
+ -
 # v0.3.4 (2018-09-10)
 
  - Updated version of pytest and pytest-cov
