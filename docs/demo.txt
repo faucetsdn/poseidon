@@ -9,9 +9,9 @@ Once the service shows Active as 'active' and the logs show that it is no longer
 
 In another terminal you can start mininet with the following:
 
-sudo mn --topo single,3 --mac --switch ovsk --controller=remote,ip=127.0.0.1:6653
+sudo mn --topo single,3 --mac --switch ovsk --controller=remote
 
-Mininet will have created an OVS switch, attached 3 hosts (h1-h3) on ports 1-3, respectively, and connected to Faucet using OpenFlow over port 6653. We will generate some traffic between h1 and h2, and use our 3rd interface as our mirror port.  See '/etc/faucet/faucet.yaml' for the configuration.
+Mininet will have created an OVS switch, attached 3 hosts (h1-h3) on ports 1-3, respectively, and connected to Faucet using OpenFlow over the default port of 6653. We will generate some traffic between h1 and h2, and use our 3rd interface as our mirror port.  See '/etc/faucet/faucet.yaml' for the configuration.
 
 At the mininet prompt start a simple webserver on h1:
 
