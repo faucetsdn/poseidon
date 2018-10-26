@@ -213,6 +213,8 @@ if db_go; then
             echo "collector_nic=s1-eth3" >> /etc/poseidon/default.conf
             echo "reinvestigation_frequency=300" >> /etc/poseidon/default.conf
 
+            mkdir -p /etc/faucet
+            touch /etc/faucet/faucet.yaml
             # settings for Faucet
             echo "dps:" > /etc/faucet/faucet.yaml
             echo "  switch-1:" >> /etc/faucet/faucet.yaml
