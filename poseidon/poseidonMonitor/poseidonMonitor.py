@@ -29,6 +29,7 @@ import sys
 import threading
 import time
 from binascii import hexlify
+from copy import deepcopy
 from functools import partial
 from os import getenv
 
@@ -256,7 +257,8 @@ def schedule_job_reinvestigation(max_investigations, endpoints, logger):
 
     # get random order of things that are known
     random.shuffle(candidates)
-    ostr = '{0} investigating & {1} mirroring'.format(currently_investigating, currently_mirrored)
+    ostr = '{0} investigating & {1} mirroring'.format(
+        currently_investigating, currently_mirrored)
     logger.debug(ostr)
     if currently_investigating + currently_mirrored <= max_investigations:
         ostr = 'room to investigate'
@@ -616,7 +618,8 @@ class Monitor(object):
                 state_transitions = self.update_next_state(ml_returns)
 
                 # make the transitions
-                for endpoint_hash in eps.state:
+                dup_eps_state = deepcopy(eps.state)
+                for endpoint_hash in dup_eps_state:
                     current_state = eps.get_endpoint_state(endpoint_hash)
                     next_state = eps.get_endpoint_next(endpoint_hash)
 

@@ -111,6 +111,7 @@ class Endpoint_Wrapper():
                 endpoint = e_states[my_hash]
                 if endpoint.state == state:
                     if 'active' in endpoint.endpoint_data and endpoint.endpoint_data['active'] == 0:
+                        # TODO this doesn't seem right
                         endpoint.prev_state = endpoint.state
                         endpoint.state = 'UNKNOWN'
                         endpoint.next_state = 'REINVESTIGATING'
