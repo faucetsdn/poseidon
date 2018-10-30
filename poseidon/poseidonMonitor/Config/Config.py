@@ -50,7 +50,7 @@ class Config(Monitor_Action_Base):
         else:
             raise Exception(
                 'Could not find poseidon config. Make sure to set the POSEIDON_CONFIG environment variable')
-        self.config.readfp(open(self.config_path, 'r'))
+        self.config.read_file(open(self.config_path, 'r'))
 
     def configure(self):
         ostr = '{0}:configure'.format(self.mod_name)
