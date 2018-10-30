@@ -63,7 +63,8 @@ class Logger:
         if not os.path.exists('/var/log/poseidon'):
             os.makedirs('/var/log/poseidon')
         if not os.path.exists('/var/log/poseidon/poseidon.log'):
-            with open('/var/log/poseidon/poseidon.log', 'w'): pass
+            with open('/var/log/poseidon/poseidon.log', 'w'):
+                pass
     except Exception as e:
         use_file_logger = False
         logger.warning(
@@ -73,7 +74,7 @@ class Logger:
         # set the poseidon logger to log to file
         try:
             fh = logging.handlers.RotatingFileHandler(
-                '/var/log/poseidon/poseidon.log', backupCount=5, maxBytes=(100*1024*1024))
+                '/var/log/poseidon/poseidon.log')
             fh.setFormatter(p_formatter)
             poseidon_logger.addHandler(fh)
         except Exception as e:
