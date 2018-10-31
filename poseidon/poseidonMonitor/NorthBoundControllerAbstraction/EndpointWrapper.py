@@ -139,7 +139,7 @@ class Endpoint_Wrapper():
                 self.poseidon_logger.info('None')
 
         states = [('K', 'KNOWN'), ('U', 'UNKNOWN'), ('M', 'MIRRORING'),
-                  ('I', 'INACTIVE'), ('S', 'SHUTDOWN'),
+                  ('I', 'INACTIVE'), ('A', 'ABNORMAL'), ('S', 'SHUTDOWN'),
                   ('R', 'REINVESTIGATING')]
 
         self.poseidon_logger.info('====START')
