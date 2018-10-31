@@ -11,5 +11,6 @@ priority = 9
 
 [docker]
 environment = ["PYTHONUNBUFFERED=0"]
+ports = {'8000/tcp': ('0.0.0.0', 5000)}
 publish_all_ports = True
 links = {"Redis":"redis"}
