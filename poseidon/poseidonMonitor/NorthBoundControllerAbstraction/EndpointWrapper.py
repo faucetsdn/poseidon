@@ -76,6 +76,7 @@ class Endpoint_Wrapper():
 
     def change_endpoint_state(self, my_hash, new_state=None):
         ''' update the state of an endpoint '''
+        self.state[my_hash].prev_state = self.state[my_hash].state
         self.state[my_hash].state = new_state or self.state[my_hash].next_state
         self.state[my_hash].next_state = 'NONE'
 
@@ -112,9 +113,10 @@ class Endpoint_Wrapper():
                 if endpoint.state == state:
                     if 'active' in endpoint.endpoint_data and endpoint.endpoint_data['active'] == 0:
                         # TODO this doesn't seem right
-                        endpoint.prev_state = endpoint.state
-                        endpoint.state = 'UNKNOWN'
-                        endpoint.next_state = 'REINVESTIGATING'
+                        self.change_endpoint_state(
+                            my_hash, new_state='UNKNOWN')
+                        self.change_endpoint_nextstate(
+                            my_hash, 'REINVESTIGATING')
                     else:
                         out_flag = True
                         pp_endpoint_data = endpoint.endpoint_data.copy()
@@ -140,7 +142,7 @@ class Endpoint_Wrapper():
 
         states = [('K', 'KNOWN'), ('U', 'UNKNOWN'), ('M', 'MIRRORING'),
                   ('I', 'INACTIVE'), ('A', 'ABNORMAL'), ('S', 'SHUTDOWN'),
-                  ('R', 'REINVESTIGATING')]
+                  ('R', 'REINVESTIGATING'), ('Q', 'QUEUED')]
 
         self.poseidon_logger.info('====START')
         for l, s in states:
