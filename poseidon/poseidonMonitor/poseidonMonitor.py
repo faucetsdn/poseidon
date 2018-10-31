@@ -85,6 +85,8 @@ def schedule_job_kickurl(func, logger):
                                   ('Poseidon', 'INACTIVE'): 0,
                                   ('Poseidon', 'MIRRORING'): 0,
                                   ('Poseidon', 'SHUTDOWN'): 0,
+                                  ('Poseidon', 'QUEUED'): 0,
+                                  ('Poseidon', 'ABNORMAL'): 0,
                                   ('Poseidon', 'REINVESTIGATING'): 0},
                'vlans': {},
                'record_sources': {},
@@ -398,7 +400,8 @@ class Monitor(object):
             # TODO move this lower with the rest of the checks
             if current_state == 'UNKNOWN':
                 if endpoint.next_state != 'KNOWN':
-                    endpoint.next_state = 'MIRRORING'
+                    self.uss.endpoints.change_endpoint_nextstate(
+                        my_hash, 'MIRRORING')
 
         for my_hash in ml_returns:
             if my_hash in endpoints.state:
