@@ -131,7 +131,7 @@ class Endpoint_Wrapper():
                     # update metadata on vent collectors
                     self.update_vent_collector(my_hash, endpoint)
             if not out_flag:
-                self.poseidon_logger.info('No endpoints to output')
+                self.poseidon_logger.info('')
 
         states = [('K', 'KNOWN'), ('U', 'UNKNOWN'), ('M', 'MIRRORING'),
                   ('I', 'INACTIVE'), ('A', 'ABNORMAL'), ('S', 'SHUTDOWN'),
