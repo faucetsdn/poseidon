@@ -439,9 +439,9 @@ class Monitor(object):
                                 'REINVESTIGATION Making KNOWN')
                         else:
                             self.uss.endpoints.change_endpoint_nextstate(
-                                my_hash, 'UNKNOWN')
+                                my_hash, 'ABNORMAL')
                             self.poseidon_logger.debug(
-                                'REINVESTIGATION Making UNKNOWN')
+                                'REINVESTIGATION Making ABNORMAL')
                     if current_state == 'MIRRORING':
                         if ml_decision == 'normal':
                             self.uss.endpoints.change_endpoint_nextstate(
@@ -450,9 +450,9 @@ class Monitor(object):
                                 'MIRRORING Making KNOWN')
                         else:
                             self.uss.endpoints.change_endpoint_nextstate(
-                                my_hash, 'SHUTDOWN')
+                                my_hash, 'ABNORMAL')
                             self.poseidon_logger.debug(
-                                'MIRRORING Making SHUTDOWN')
+                                'MIRRORING Making ABNORMAL')
                 else:
                     self.uss.endpoints.change_endpoint_nextstate(
                         my_hash, 'REINVESTIGATING')
@@ -632,6 +632,14 @@ class Monitor(object):
 
                     eps.print_endpoint_state()
 
+                    self.uss.max_concurrent_reinvestigations
+                    if (next_state == 'MIRRORING' or next_state == 'REINVESTIGATING') and (len(eps.get_endpoints_in_state('MIRRORING')) + len(eps.get_endpoints_in_state('REINVESTIGATING'))) >= self.uss.max_concurrent_reinvestigations:
+                        eps.change_endpoint_state(
+                            endpoint_hash, new_state='QUEUED')
+                        eps.state[endpoint_hash].prev_state = next_state
+                    if current_state == 'QUEUED' and (len(eps.get_endpoints_in_state('MIRRORING')) + len(eps.get_endpoints_in_state('REINVESTIGATING'))) < self.uss.max_concurrent_reinvestigations:
+                        eps.change_endpoint_state(
+                            endpoint_hash, new_state=eps.state[endpoint_hash].prev_state)
                     if next_state == 'MIRRORING':
                         self.poseidon_logger.info(
                             'Updating: {0}:{1}->{2}'.format(endpoint_hash,
@@ -688,6 +696,14 @@ class Monitor(object):
                                                             current_state,
                                                             next_state))
                         self.uss.shutdown_endpoint(endpoint_hash)
+                    if next_state == 'ABNORMAL':
+                        self.poseidon_logger.info(
+                            'Updating: {0}:{1}->{2}'.format(endpoint_hash,
+                                                            current_state,
+                                                            next_state))
+                        eps.change_endpoint_state(
+                            endpoint_hash, new_state='ABNORMAL')
+                        # TODO
 
                     eps.print_endpoint_state()
             except Exception as e:  # pragma: no cover
