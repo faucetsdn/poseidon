@@ -145,13 +145,8 @@ class Endpoint_Wrapper():
         return
 
     def get_endpoints_in_state(self, s):
-        self.poseidon_logger.info("get_endpoints_in_state")
         e_states = deepcopy(self.state)
-        self.poseidon_logger.info("keys: {0}".format(len(e_states)))
-
         for my_hash in self.state:
-            self.poseidon_logger.info("states: {0} {1}".format(e_states[my_hash].state, s))
             if e_states[my_hash].state != s:
                 del e_states[my_hash]
-
         return e_states
