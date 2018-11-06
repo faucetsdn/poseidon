@@ -19,6 +19,7 @@ Created on 21 Nov 2017
 '''
 import json
 from collections import defaultdict
+from copy import deepcopy
 
 import requests
 
