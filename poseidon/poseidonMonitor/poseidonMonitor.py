@@ -636,7 +636,6 @@ class Monitor(object):
                     if next_state == 'NONE':
                         continue
                     if (next_state == 'MIRRORING' or next_state == 'REINVESTIGATING') and (len(eps.get_endpoints_in_state('MIRRORING')) + len(eps.get_endpoints_in_state('REINVESTIGATING'))) >= self.uss.max_concurrent_reinvestigations:
-                        self.poseidon_logger.info("queueing endpoint....")
                         eps.change_endpoint_state(
                             endpoint_hash, new_state='QUEUED')
                         eps.change_endpoint_nextstate(
