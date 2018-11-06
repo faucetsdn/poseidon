@@ -635,7 +635,7 @@ class Monitor(object):
                     # dont do anything
                     if next_state == 'NONE':
                         continue
-                    if (next_state == 'MIRRORING' or next_state == 'REINVESTIGATING') and (len(eps.get_endpoints_in_state('MIRRORING')) + len(eps.get_endpoints_in_state('REINVESTIGATING'))) >= self.uss.max_concurrent_reinvestigations:
+                    if current_state != 'QUEUED' and ((next_state == 'MIRRORING' or next_state == 'REINVESTIGATING') and (len(eps.get_endpoints_in_state('MIRRORING')) + len(eps.get_endpoints_in_state('REINVESTIGATING'))) >= self.uss.max_concurrent_reinvestigations):
                         self.poseidon_logger.info(
                             'Updating: {0}:{1}->{2}'.format(endpoint_hash,
                                                             current_state,
