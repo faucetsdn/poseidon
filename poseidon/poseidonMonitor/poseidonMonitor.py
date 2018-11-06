@@ -631,7 +631,6 @@ class Monitor(object):
                 for endpoint_hash in dup_eps_state:
                     current_state = eps.get_endpoint_state(endpoint_hash)
                     next_state = eps.get_endpoint_next(endpoint_hash)
-                    eps.print_endpoint_state()
 
                     # dont do anything
                     if next_state == 'NONE':
@@ -708,7 +707,6 @@ class Monitor(object):
                             endpoint_hash, new_state='ABNORMAL')
                         # TODO
 
-                    eps.print_endpoint_state()
             except Exception as e:  # pragma: no cover
                 self.logger.error(
                     'Iteration failed because: {0}'.format(str(e)))
