@@ -594,6 +594,7 @@ class Monitor(object):
         }
         '''
 
+        self.poseidon_logger.info(self.uss.max_concurrent_reinvestigations)
         global CTRL_C
         signal.signal(signal.SIGINT, partial(self.signal_handler))
         while not CTRL_C['STOP']:
@@ -627,9 +628,9 @@ class Monitor(object):
                         eps.change_endpoint_state(my_hash, new_state='INACTIVE')
                         eps.change_endpoint_nextstate(my_hash, 'NONE')
 
-                self.logger.info(self.uss.max_concurrent_reinvestigations)
-                self.logger.info("WHHHHHHHAAAAAAAAAAAA: {0}".format(eps.get_endpoints_in_state('MIRRORING')))
-                self.logger.info("WHHHHHHHAAAAAAAAAAAA: {0}".format(eps.get_endpoints_in_state('REINVESTIGATING')))
+                self.poseidon_logger.info(self.uss.max_concurrent_reinvestigations)
+                self.poseidon_logger.info("WHHHHHHHAAAAAAAAAAAA: {0}".format(eps.get_endpoints_in_state('MIRRORING')))
+                self.poseidon_logger.info("WHHHHHHHAAAAAAAAAAAA: {0}".format(eps.get_endpoints_in_state('REINVESTIGATING')))
                 # make the transitions
                 for endpoint_hash in dup_eps_state:
                     current_state = eps.get_endpoint_state(endpoint_hash)
@@ -856,7 +857,6 @@ def main(skip_rabbit=False):  # pragma: no cover
     pmain.schedule_thread.start()
 
     # loop here until told not to
-    pmain.poseidon_logger.info("does this happen?")
     pmain.process()
 
     pmain.poseidon_logger.debug('SHUTTING DOWN')
