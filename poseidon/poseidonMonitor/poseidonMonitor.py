@@ -856,6 +856,7 @@ def main(skip_rabbit=False):  # pragma: no cover
     pmain.schedule_thread.start()
 
     # loop here until told not to
+    pmain.logger.info("does this happen?")
     pmain.process()
 
     pmain.poseidon_logger.debug('SHUTTING DOWN')
