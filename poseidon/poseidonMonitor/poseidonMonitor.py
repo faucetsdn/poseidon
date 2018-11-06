@@ -640,8 +640,8 @@ class Monitor(object):
                             endpoint_hash, new_state='QUEUED')
                         eps.state[endpoint_hash].prev_state = next_state
                     if current_state == 'QUEUED' and (len(eps.get_endpoints_in_state('MIRRORING')) + len(eps.get_endpoints_in_state('REINVESTIGATING'))) < self.uss.max_concurrent_reinvestigations:
-                        eps.change_endpoint_state(
-                            endpoint_hash, new_state=eps.state[endpoint_hash].prev_state)
+                        eps.change_endpoint_nextstate(
+                            endpoint_hash, eps.state[endpoint_hash].prev_state)
                     if next_state == 'MIRRORING':
                         self.poseidon_logger.info(
                             'Updating: {0}:{1}->{2}'.format(endpoint_hash,
