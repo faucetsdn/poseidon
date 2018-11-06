@@ -137,12 +137,6 @@ class Endpoint_Wrapper():
                   ('I', 'INACTIVE'), ('A', 'ABNORMAL'), ('S', 'SHUTDOWN'),
                   ('R', 'REINVESTIGATING'), ('Q', 'QUEUED')]
 
-        # cleanup endpoints that are no longer active
-        for my_hash in self.state:
-            if self.state[my_hash].endpoint_data['active'] == 0:
-                self.change_endpoint_state(my_hash, new_state='INACTIVE')
-                self.change_endpoint_nextstate(my_hash, 'NONE')
-
         self.poseidon_logger.info('====ENDPOINTS')
         for l, s in states:
             same_old(s, l)

@@ -619,9 +619,15 @@ class Monitor(object):
 
                 eps = self.uss.endpoints
                 state_transitions = self.update_next_state(ml_returns)
+                dup_eps_state = deepcopy(eps.state)
+
+                # cleanup endpoints that are no longer active
+                for my_hash in dup_eps_state:
+                    if eps.state[my_hash].endpoint_data['active'] == 0:
+                        eps.change_endpoint_state(my_hash, new_state='INACTIVE')
+                        eps.change_endpoint_nextstate(my_hash, 'NONE')
 
                 # make the transitions
-                dup_eps_state = deepcopy(eps.state)
                 for endpoint_hash in dup_eps_state:
                     current_state = eps.get_endpoint_state(endpoint_hash)
                     next_state = eps.get_endpoint_next(endpoint_hash)
@@ -632,8 +638,9 @@ class Monitor(object):
 
                     eps.print_endpoint_state()
 
-                    self.poseidon_logger.info("WHHHHHHHAAAAAAAAAAAA: {0}".format(eps.get_endpoints_in_state('MIRRORING')))
-                    self.poseidon_logger.info("WHHHHHHHAAAAAAAAAAAA: {0}".format(eps.get_endpoints_in_state('REINVESTIGATING')))
+                    self.logger.info(self.uss.max_concurrent_reinvestigations)
+                    self.logger.info("WHHHHHHHAAAAAAAAAAAA: {0}".format(eps.get_endpoints_in_state('MIRRORING')))
+                    self.logger.info("WHHHHHHHAAAAAAAAAAAA: {0}".format(eps.get_endpoints_in_state('REINVESTIGATING')))
                     if (next_state == 'MIRRORING' or next_state == 'REINVESTIGATING') and (len(eps.get_endpoints_in_state('MIRRORING')) + len(eps.get_endpoints_in_state('REINVESTIGATING'))) >= self.uss.max_concurrent_reinvestigations:
                         eps.change_endpoint_state(
                             endpoint_hash, new_state='QUEUED')
