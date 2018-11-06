@@ -638,11 +638,8 @@ class Monitor(object):
                     if (next_state == 'MIRRORING' or next_state == 'REINVESTIGATING') and (len(eps.get_endpoints_in_state('MIRRORING')) + len(eps.get_endpoints_in_state('REINVESTIGATING'))) >= self.uss.max_concurrent_reinvestigations:
                         eps.change_endpoint_state(
                             endpoint_hash, new_state='QUEUED')
-                        eps.state[endpoint_hash].prev_state = next_state
-                    if current_state == 'QUEUED' and (len(eps.get_endpoints_in_state('MIRRORING')) + len(eps.get_endpoints_in_state('REINVESTIGATING'))) < self.uss.max_concurrent_reinvestigations:
-                        eps.change_endpoint_nextstate(
-                            endpoint_hash, eps.state[endpoint_hash].prev_state)
-                    if next_state == 'MIRRORING':
+                        current_state = 'QUEUED'
+                    if next_state == 'MIRRORING' and (len(eps.get_endpoints_in_state('MIRRORING')) + len(eps.get_endpoints_in_state('REINVESTIGATING'))) < self.uss.max_concurrent_reinvestigations:
                         self.poseidon_logger.info(
                             'Updating: {0}:{1}->{2}'.format(endpoint_hash,
                                                             current_state,
@@ -654,7 +651,7 @@ class Monitor(object):
                             '*********** U MIRROR PORT ***********')
                         self.uss.mirror_endpoint(
                             endpoint_hash, messages=self.faucet_event)
-                    if next_state == 'REINVESTIGATING':
+                    if next_state == 'REINVESTIGATING' and (len(eps.get_endpoints_in_state('MIRRORING')) + len(eps.get_endpoints_in_state('REINVESTIGATING'))) < self.uss.max_concurrent_reinvestigations:
                         self.poseidon_logger.info(
                             'Updating: {0}:{1}->{2}'.format(endpoint_hash,
                                                             current_state,
