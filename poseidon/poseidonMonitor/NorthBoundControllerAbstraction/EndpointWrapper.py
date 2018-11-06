@@ -141,8 +141,6 @@ class Endpoint_Wrapper():
         for l, s in states:
             same_old(s, l)
 
-        self.poseidon_logger.info('****************')
-
         return
 
     def get_endpoints_in_state(self, state):
