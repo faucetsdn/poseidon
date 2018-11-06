@@ -641,6 +641,7 @@ class Monitor(object):
                         eps.change_endpoint_nextstate(
                             endpoint_hash, next_state)
                         current_state = 'QUEUED'
+                        eps.print_endpoint_state()
                     if next_state == 'MIRRORING' and (len(eps.get_endpoints_in_state('MIRRORING')) + len(eps.get_endpoints_in_state('REINVESTIGATING'))) < self.uss.max_concurrent_reinvestigations:
                         self.poseidon_logger.info(
                             'Updating: {0}:{1}->{2}'.format(endpoint_hash,
@@ -653,6 +654,7 @@ class Monitor(object):
                             '*********** U MIRROR PORT ***********')
                         self.uss.mirror_endpoint(
                             endpoint_hash, messages=self.faucet_event)
+                        eps.print_endpoint_state()
                     if next_state == 'REINVESTIGATING' and (len(eps.get_endpoints_in_state('MIRRORING')) + len(eps.get_endpoints_in_state('REINVESTIGATING'))) < self.uss.max_concurrent_reinvestigations:
                         self.poseidon_logger.info(
                             'Updating: {0}:{1}->{2}'.format(endpoint_hash,
@@ -665,6 +667,7 @@ class Monitor(object):
                             '*********** R MIRROR PORT ***********')
                         self.uss.mirror_endpoint(
                             endpoint_hash, messages=self.faucet_event)
+                        eps.print_endpoint_state()
                     if next_state == 'KNOWN':
                         if (current_state == 'REINVESTIGATING' or
                                 current_state == 'MIRRORING'):
@@ -691,12 +694,14 @@ class Monitor(object):
                                 self.poseidon_logger.debug(
                                     '*********** U UN-MIRROR PORT ***********')
                             eps.change_endpoint_state(endpoint_hash)
+                        eps.print_endpoint_state()
                     if next_state == 'SHUTDOWN':
                         self.poseidon_logger.info(
                             'Updating: {0}:{1}->{2}'.format(endpoint_hash,
                                                             current_state,
                                                             next_state))
                         self.uss.shutdown_endpoint(endpoint_hash)
+                        eps.print_endpoint_state()
                     if next_state == 'ABNORMAL':
                         self.poseidon_logger.info(
                             'Updating: {0}:{1}->{2}'.format(endpoint_hash,
@@ -704,6 +709,7 @@ class Monitor(object):
                                                             next_state))
                         eps.change_endpoint_state(
                             endpoint_hash, new_state='ABNORMAL')
+                        eps.print_endpoint_state()
                         # TODO
 
             except Exception as e:  # pragma: no cover
