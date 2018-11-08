@@ -52,22 +52,9 @@ class Rabbit_Base(object):
 
         while wait and total_sleep > 0:
             try:
-                # look for rabbit hosts
-                rabbit_hosts = [pika.URLParameters('amqp://'+host)]
-                i = 2
-                more_hosts = True
-                while more_hosts:
-                    if os.environ.get('RABBIT_SERVER' + str(i) + '_NAME') is not None:
-                        rabbit_hosts.append(pika.URLParameters('amqp://RABBIT_SERVER'+str(i)))
-                    else:
-                        more_hosts = False
-                    i += 1
-
-                random.shuffle(rabbit_hosts)
-
                 # Starting rabbit connection
                 rabbit_connection = pika.BlockingConnection(
-                    pika.ConnectionParameters(rabbit_hosts)
+                    pika.ConnectionParameters(host=host, port=port)
                 )
                 rabbit_channel = rabbit_connection.channel()
                 rabbit_channel.exchange_declare(exchange=exchange,
