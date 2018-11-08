@@ -53,12 +53,12 @@ class Rabbit_Base(object):
         while wait and total_sleep > 0:
             try:
                 # look for rabbit hosts
-                rabbit_hosts = [host]
+                rabbit_hosts = [pika.URLParameters('amqp://'+host)]
                 i = 2
                 more_hosts = True
                 while more_hosts:
                     if os.environ.get('RABBIT_SERVER' + str(i) + '_NAME') is not None:
-                        rabbit_hosts.append(pika.URLParameters('amqp://rabbit_server'+str(i)))
+                        rabbit_hosts.append(pika.URLParameters('amqp://RABBIT_SERVER'+str(i)))
                     else:
                         more_hosts = False
                     i += 1

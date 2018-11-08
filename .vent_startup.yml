@@ -11,8 +11,6 @@ https://github.com/cyberreboot/vent:
     rabbitmq:
         build: yes
         start: yes
-        settings:
-            instances: 3
     redis:
         build: yes
         start: yes
