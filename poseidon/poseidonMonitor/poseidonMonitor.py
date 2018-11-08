@@ -623,8 +623,12 @@ class Monitor(object):
 
                 # cleanup endpoints that are no longer active
                 for my_hash in dup_eps_state:
-                    self.poseidon_logger.info('hashes: {0}'.format(my_hash))
                     if eps.state[my_hash].endpoint_data['active'] == 0:
+                        current_state = eps.get_endpoint_state(my_hash)
+                        self.poseidon_logger.info(
+                            'Updating: {0}:{1}->{2}'.format(my_hash,
+                                                            current_state,
+                                                            'INACTIVE'))
                         eps.change_endpoint_state(
                             my_hash, new_state='INACTIVE')
                         eps.change_endpoint_nextstate(my_hash, 'NONE')
