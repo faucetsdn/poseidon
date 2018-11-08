@@ -628,12 +628,22 @@ class Monitor(object):
                             my_hash, new_state='INACTIVE')
                         eps.change_endpoint_nextstate(my_hash, 'NONE')
                     elif eps.get_endpoint_state(my_hash) == 'INACTIVE':
+                        current_state = eps.get_endpoint_state(my_hash)
+                        self.poseidon_logger.info(
+                            'Updating: {0}:{1}->{2}'.format(my_hash,
+                                                            current_state,
+                                                            'QUEUED'))
+                        eps.change_endpoint_state(
+                            my_hash, new_state='QUEUED')
+                        current_state = eps.get_endpoint_state(my_hash)
                         self.poseidon_logger.info(
                             'Updating: {0}:{1}->{2}'.format(my_hash,
                                                             current_state,
                                                             'REINVESTIGATING'))
                         eps.change_endpoint_nextstate(
                             my_hash, 'REINVESTIGATING')
+
+                dup_eps_state = deepcopy(eps.state)
 
                 # make the transitions
                 for endpoint_hash in dup_eps_state:
