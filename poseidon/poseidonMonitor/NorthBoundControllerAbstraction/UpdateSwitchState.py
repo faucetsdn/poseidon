@@ -211,12 +211,12 @@ class Update_Switch_State(Monitor_Helper_Base):
                 ep = None
                 if h in self.endpoints.state:
                     ep = self.endpoints.state[h]
-                if ep is not None:
+                if ep is not None and ep.endpoint_data != end_point.endpoint_data:
                     self.poseidon_logger.info(
                         'Device changed: {0}:{1}'.format(h, machine))
                     self.endpoints.set(end_point)
                     changed = True
-                elif end_point.endpoint_data['active'] == 1:
+                elif ep is None and end_point.endpoint_data['active'] == 1:
                     self.poseidon_logger.info(
                         'Detected new device: {0}:{1}'.format(h, machine))
                     self.endpoints.set(end_point)
