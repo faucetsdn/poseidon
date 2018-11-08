@@ -205,24 +205,20 @@ class Update_Switch_State(Monitor_Helper_Base):
                 self.endpoints.set(end_point)
             changed = True
         else:
-            machine_hashes = []
             for machine in machines:
                 end_point = EndPoint(machine, state='UNKNOWN')
                 h = end_point.make_hash()
                 ep = None
                 if h in self.endpoints.state:
                     ep = self.endpoints.state[h]
-                if end_point.endpoint_data['active'] == 1:
-                    machine_hashes.append(h)
-
-                    if h not in self.endpoints.state:
-                        self.poseidon_logger.info(
-                            'Detected new device: {0}:{1}'.format(h, machine))
-                        self.endpoints.set(end_point)
-                        changed = True
-                elif ep is not None and end_point.endpoint_data['active'] != ep.endpoint_data['active']:
+                if ep is not None:
                     self.poseidon_logger.info(
                         'Device changed: {0}:{1}'.format(h, machine))
+                    self.endpoints.set(end_point)
+                    changed = True
+                elif end_point.endpoint_data['active'] == 1:
+                    self.poseidon_logger.info(
+                        'Detected new device: {0}:{1}'.format(h, machine))
                     self.endpoints.set(end_point)
                     changed = True
         if changed:
