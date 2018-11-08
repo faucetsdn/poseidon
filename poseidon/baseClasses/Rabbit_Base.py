@@ -17,6 +17,8 @@
 ''' Created on 21 August 2017
 @author: dgrossman
 '''
+import os
+import random
 import threading
 import time
 from functools import partial
@@ -50,8 +52,23 @@ class Rabbit_Base(object):
 
         while wait and total_sleep > 0:
             try:
+                # look for rabbit hosts
+                rabbit_hosts = [host]
+                i = 2
+                more_hosts = True
+                while more_hosts:
+                    if os.environ.get('RABBIT_SERVER' + str(i) + '_NAME') is not None:
+                        rabbit_hosts.append(pika.URLParameters('amqp://rabbit_server'+str(i)))
+                    else:
+                        more_hosts = False
+                    i += 1
+
+                random.shuffle(rabbit_hosts)
+
+                # Starting rabbit connection
                 rabbit_connection = pika.BlockingConnection(
-                    pika.ConnectionParameters(host=host, port=port))
+                    pika.ConnectionParameters(rabbit_hosts)
+                )
                 rabbit_channel = rabbit_connection.channel()
                 rabbit_channel.exchange_declare(exchange=exchange,
                                                 exchange_type='topic')
