@@ -29,6 +29,7 @@ class EndPoint:
         self.prev_state = prev_state
         self.state = state
         self.next_state = next_state
+        self.mirror_timer = None
         if endpoint_data is not None:
             self.endpoint_data = dict(endpoint_data)
         else:

@@ -21,6 +21,7 @@ import ast
 import json
 
 import queue as Queue
+from redis import StrictRedis
 
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
@@ -174,6 +175,7 @@ class Update_Switch_State(Monitor_Helper_Base):
             next_state = self.endpoints.get_endpoint_next(my_hash)
             self.sdnc.mirror_mac(my_mac, messages=messages)
             self.endpoints.change_endpoint_state(my_hash)
+            self.endpoints.start_mirror_timer(my_hash, self.reinvestigation_frequency)
             self.poseidon_logger.debug(
                 'endpoint:{0}:{1}:{2}:{3}'.format(my_hash, my_mac, my_ip, next_state))
             return True
@@ -186,10 +188,21 @@ class Update_Switch_State(Monitor_Helper_Base):
             my_ip = self.endpoints.get_endpoint_ip(my_hash)
             next_state = self.endpoints.get_endpoint_next(my_hash)
             self.sdnc.unmirror_mac(my_mac, messages=messages)
+            self.endpoints.reset_mirror_timer(my_hash)
             self.poseidon_logger.debug(
                 'endpoint:{0}:{1}:{2}:{3}'.format(my_hash, my_mac, my_ip, next_state))
             return True
         return False
+
+    def connect_redis(self, host='redis', port=6379, db=0):
+        self.r = None
+        try:
+            self.r = StrictRedis(host=host, port=port, db=db,
+                                 socket_connect_timeout=2)
+        except Exception as e:
+            self.logger.error(
+                'Failed connect to Redis because: {0}'.format(str(e)))
+        return
 
     def find_new_machines(self, machines):
         '''parse switch structure to find new machines added to network

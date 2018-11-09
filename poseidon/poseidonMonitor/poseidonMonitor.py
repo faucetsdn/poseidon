@@ -616,8 +616,18 @@ class Monitor(object):
                 self.update_next_state(ml_returns)
                 dup_eps_state = deepcopy(eps.state)
 
-                # cleanup endpoints that are no longer active/inactive
+                # cleanup endpoints
                 for my_hash in dup_eps_state:
+                    if eps.state[my_hash].mirror_timer:
+                        eps.state[my_hash].mirror_timer -= 1
+                        if eps.state[my_hash].mirror_timer < 1:
+                            self.uss.unmirror_endpoint(
+                                endpoint_hash, messages=self.faucet_event)
+                            self.poseidon_logger.info(
+                                'Updating: {0}:{1}->{2}'.format(endpoint_hash,
+                                                                current_state,
+                                                                next_state))
+                            eps.change_endpoint_state(endpoint_hash)
                     if eps.state[my_hash].endpoint_data['active'] == 0 and eps.get_endpoint_state(my_hash) != 'INACTIVE':
                         current_state = eps.get_endpoint_state(my_hash)
                         self.poseidon_logger.info(
