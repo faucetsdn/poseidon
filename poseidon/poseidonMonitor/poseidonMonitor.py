@@ -627,6 +627,8 @@ class Monitor(object):
                             eps.change_endpoint_state(my_hash, new_state='UNKNOWN')
                             eps.change_endpoint_nextstate(my_hash, 'KNOWN')
                     if eps.state[my_hash].endpoint_data['active'] == 0 and eps.get_endpoint_state(my_hash) != 'INACTIVE':
+                        if eps.state[my_hash].mirror_timer:
+                            eps.state[my_hash].mirror_timer = None
                         current_state = eps.get_endpoint_state(my_hash)
                         change = True
                         self.poseidon_logger.info(
