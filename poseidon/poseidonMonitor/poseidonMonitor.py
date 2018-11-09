@@ -406,6 +406,7 @@ class Monitor(object):
         for my_hash in ml_returns:
             if my_hash in endpoints.state:
                 endpoint = endpoints.state[my_hash]
+                endpoint.mirror_timer = None
                 #
                 #    {'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {
                 #        'classification': {
