@@ -458,6 +458,7 @@ class Monitor(object):
                         my_hash, 'REINVESTIGATING')
                     self.poseidon_logger.debug(
                         'ML results failed, reinvestigating')
+        return
 
     def start_vent_collector(self, dev_hash, num_captures=1):
         '''
@@ -602,26 +603,20 @@ class Monitor(object):
                 found_work, item = self.get_q_item()
                 ml_returns = {}
 
-                # plan out the transitions
                 if found_work and item[0] != self.fa_rabbit_routing_key:
-                    # TODO make this read until nothing in q
                     ml_returns = self.format_rabbit_message(item)
-                    self.poseidon_logger.debug('\n\n\n**********************')
-                    self.poseidon_logger.debug(
+                    self.poseidon_logger.info(
                         'ml_returns:{0}'.format(ml_returns))
-                    self.poseidon_logger.debug('**********************\n\n\n')
                 elif found_work and item[0] == self.fa_rabbit_routing_key:
                     self.faucet_event.append(self.format_rabbit_message(item))
-                    self.poseidon_logger.debug('\n\n\n**********************')
-                    self.poseidon_logger.debug(
+                    self.poseidon_logger.info(
                         'faucet_event:{0}'.format(self.faucet_event))
-                    self.poseidon_logger.debug('**********************\n\n\n')
 
                 eps = self.uss.endpoints
-                state_transitions = self.update_next_state(ml_returns)
+                self.update_next_state(ml_returns)
                 dup_eps_state = deepcopy(eps.state)
 
-                # cleanup endpoints that are no longer active
+                # cleanup endpoints that are no longer active/inactive
                 for my_hash in dup_eps_state:
                     if eps.state[my_hash].endpoint_data['active'] == 0 and eps.get_endpoint_state(my_hash) != 'INACTIVE':
                         current_state = eps.get_endpoint_state(my_hash)
