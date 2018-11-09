@@ -65,6 +65,7 @@ target/
 .ipynb_checkpoints
 
 # swap files
+*.swo
 *.swp
 
 # OSX crap

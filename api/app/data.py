@@ -160,6 +160,10 @@ class Network(object):
                     # set as unknown until it's set below
                     node['IP'] = 'Unknown'
                     node['subnet'] = 'Unknown'
+                    node['VLAN'] = 'Unknown'
+                    node['behavior'] = 'Unknown'
+                    node['active'] = -1
+                    node['state'] = 'UNDEFINED'
                     node['rDNS_host'] = 'Unknown'
                     node['record'] = {}
                     node['role'] = {}
@@ -184,6 +188,8 @@ class Network(object):
                                         poseidon_info['endpoint_data'])
                                     ip_address = endpoint_data['ip-address']
                                     node['IP'] = ip_address
+                                    node['VLAN'] = endpoint_data['tenant']
+                                    node['active'] = endpoint_data['active']
                                     # cheating for now
                                     if ':' in ip_address:
                                         node['subnet'] = ':'.join(
@@ -194,6 +200,8 @@ class Network(object):
                                         node['subnet'] = '.'.join(
                                             ip_address.split('.')[:-1])+'.0/24'
                                     ip_info = self.r.hgetall(ip_address)
+                                if 'state' in poseidon_info:
+                                    node['state'] = poseidon_info['state']
                             except Exception as e:  # pragma: no cover
                                 print(
                                     'Failed to set all poseidon info because: ' + str(e))
@@ -206,6 +214,14 @@ class Network(object):
                                     datetime.fromtimestamp(float(timestamps[-1])))
                                 ml_info = self.r.hgetall(
                                     mac+'_'+str(timestamps[-1]))
+                                if 'poseidon_hash' in mac_info and mac_info['poseidon_hash'] in ml_info:
+                                    try:
+                                        results = ast.literal_eval(
+                                            ml_info[mac_info['poseidon_hash']])
+                                        node['behavior'] = results['decisions']['behavior']
+                                    except Exception as e:  # pragma: no cover
+                                        print(
+                                            'Failed to get behavior info because: ' + str(e))
                                 if 'labels' in ml_info:
                                     labels = ast.literal_eval(
                                         ml_info['labels'])
