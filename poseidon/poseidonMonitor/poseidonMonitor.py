@@ -619,6 +619,7 @@ class Monitor(object):
                 # cleanup endpoints
                 for my_hash in dup_eps_state:
                     if eps.state[my_hash].mirror_timer:
+                        self.poseidon_logger.info("timer: {0} {1}".format(my_hash, eps.state[my_hash].mirror_timer))
                         eps.state[my_hash].mirror_timer -= 1
                         if eps.state[my_hash].mirror_timer < 1:
                             self.uss.unmirror_endpoint(
