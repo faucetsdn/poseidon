@@ -213,6 +213,12 @@ class Update_Switch_State(Monitor_Helper_Base):
         if self.first_time:
             self.first_time = False
             # TODO db call to see if really need to run things
+            # TODO needs work
+            #if self.r and self.r.exists(h):
+            #    self.poseidon_logger.info(
+            #        'adding address to known systems {0}'.format(machine))
+            #    end_point = EndPoint(machine, state='KNOWN')
+            #    self.endpoints.set(end_point)
             for machine in machines:
                 end_point = EndPoint(machine, state='KNOWN')
                 self.poseidon_logger.info(
@@ -223,25 +229,19 @@ class Update_Switch_State(Monitor_Helper_Base):
             for machine in machines:
                 end_point = EndPoint(machine, state='UNKNOWN')
                 h = end_point.make_hash()
-                if self.r and self.r.exists(h):
+                ep = None
+                if h in self.endpoints.state:
+                    ep = self.endpoints.state[h]
+                if ep is not None and ep.endpoint_data != end_point.endpoint_data:
                     self.poseidon_logger.info(
-                        'adding address to known systems {0}'.format(machine))
-                    end_point = EndPoint(machine, state='KNOWN')
+                        'Device changed: {0}:{1}'.format(h, machine))
                     self.endpoints.set(end_point)
-                else:
-                    ep = None
-                    if h in self.endpoints.state:
-                        ep = self.endpoints.state[h]
-                    if ep is not None and ep.endpoint_data != end_point.endpoint_data:
-                        self.poseidon_logger.info(
-                            'Device changed: {0}:{1}'.format(h, machine))
-                        self.endpoints.set(end_point)
-                        changed = True
-                    elif ep is None and end_point.endpoint_data['active'] == 1:
-                        self.poseidon_logger.info(
-                            'Detected new device: {0}:{1}'.format(h, machine))
-                        self.endpoints.set(end_point)
-                changed = True
+                    changed = True
+                elif ep is None and end_point.endpoint_data['active'] == 1:
+                    self.poseidon_logger.info(
+                        'Detected new device: {0}:{1}'.format(h, machine))
+                    self.endpoints.set(end_point)
+            changed = True
         if changed:
             self.endpoints.print_endpoint_state()
 
