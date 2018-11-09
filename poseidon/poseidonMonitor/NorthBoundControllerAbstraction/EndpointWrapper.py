@@ -63,6 +63,14 @@ class Endpoint_Wrapper():
             return self.state[my_hash].next_state
         return None
 
+    def start_mirror_timer(self, my_hash, secs):
+        ''' starts the timer for mirroring '''
+        self.state[my_hash].mirror_timer = secs
+
+    def reset_mirror_timer(self, my_hash):
+        ''' resets the timer for mirroring '''
+        self.state[my_hash].mirror_timer = None
+
     def get_endpoint_ip(self, my_hash):
         ''' return the ip address associated with a hash '''
         if my_hash in self.state:
