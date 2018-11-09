@@ -427,38 +427,32 @@ class Monitor(object):
                 #        }
                 #    }
                 #
-                if ml_returns[my_hash]['valid']:
-                    current_state = endpoint.state
-                    ml_decision = ml_returns[my_hash]['decisions']['behavior']
-                    self.poseidon_logger.debug(
-                        'ML_DECISION:{0}'.format(ml_decision))
-                    if current_state == 'REINVESTIGATING':
-                        if ml_decision == 'normal':
-                            self.uss.endpoints.change_endpoint_nextstate(
-                                my_hash, 'KNOWN')
-                            self.poseidon_logger.debug(
-                                'REINVESTIGATION Making KNOWN')
-                        else:
-                            self.uss.endpoints.change_endpoint_nextstate(
-                                my_hash, 'ABNORMAL')
-                            self.poseidon_logger.debug(
-                                'REINVESTIGATION Making ABNORMAL')
-                    if current_state == 'MIRRORING':
-                        if ml_decision == 'normal':
-                            self.uss.endpoints.change_endpoint_nextstate(
-                                my_hash, 'KNOWN')
-                            self.poseidon_logger.debug(
-                                'MIRRORING Making KNOWN')
-                        else:
-                            self.uss.endpoints.change_endpoint_nextstate(
-                                my_hash, 'ABNORMAL')
-                            self.poseidon_logger.debug(
-                                'MIRRORING Making ABNORMAL')
-                else:
-                    self.uss.endpoints.change_endpoint_nextstate(
-                        my_hash, 'REINVESTIGATING')
-                    self.poseidon_logger.debug(
-                        'ML results failed, reinvestigating')
+                current_state = endpoint.state
+                ml_decision = ml_returns[my_hash]['decisions']['behavior']
+                self.poseidon_logger.debug(
+                    'ML_DECISION:{0}'.format(ml_decision))
+                if current_state == 'REINVESTIGATING':
+                    if ml_decision == 'normal':
+                        self.uss.endpoints.change_endpoint_nextstate(
+                            my_hash, 'KNOWN')
+                        self.poseidon_logger.debug(
+                            'REINVESTIGATION Making KNOWN')
+                    else:
+                        self.uss.endpoints.change_endpoint_nextstate(
+                            my_hash, 'ABNORMAL')
+                        self.poseidon_logger.debug(
+                            'REINVESTIGATION Making ABNORMAL')
+                if current_state == 'MIRRORING':
+                    if ml_decision == 'normal':
+                        self.uss.endpoints.change_endpoint_nextstate(
+                            my_hash, 'KNOWN')
+                        self.poseidon_logger.debug(
+                            'MIRRORING Making KNOWN')
+                    else:
+                        self.uss.endpoints.change_endpoint_nextstate(
+                            my_hash, 'ABNORMAL')
+                        self.poseidon_logger.debug(
+                            'MIRRORING Making ABNORMAL')
         return
 
     def start_vent_collector(self, dev_hash, num_captures=1):
@@ -631,6 +625,7 @@ class Monitor(object):
                                                                 eps.get_endpoint_state(my_hash),
                                                                 eps.get_endpoint_nextstate(my_hash)))
                             eps.change_endpoint_state(my_hash, new_state='UNKNOWN')
+                            eps.change_endpoint_nextstate(my_hash, 'KNOWN')
                     if eps.state[my_hash].endpoint_data['active'] == 0 and eps.get_endpoint_state(my_hash) != 'INACTIVE':
                         current_state = eps.get_endpoint_state(my_hash)
                         change = True
