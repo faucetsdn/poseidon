@@ -756,9 +756,9 @@ class Monitor(object):
                         eps.change_endpoint_state(
                             endpoint_hash, new_state='ABNORMAL')
                         # TODO
-               if change:
-                   eps.print_endpoint_state()
-                   change = False
+                if change:
+                    eps.print_endpoint_state()
+                    change = False
 
             except Exception as e:  # pragma: no cover
                 self.logger.error(
