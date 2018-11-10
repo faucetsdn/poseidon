@@ -1983,7 +1983,7 @@ def test_process():
                     'name': None}},
             '4ee39d254db3e4a5264b75ce8ae312d69f9e73a5': {
                 'state': 'INACTIVE',
-                'next-state': 'MIRRORING',
+                'next-state': 'NONE',
                 'endpoint': {
                     'ip-address': '10.0.0.101',
                     'mac': 'f8:b1:56:fe:f2:de',
@@ -2033,7 +2033,7 @@ def test_process():
                     'name': None}},
             'd60c5fa5c980b1cd791208eaf62aba9fb46d3aab': {
                 'state': 'KNOWN',
-                'next-state': 'MIRRORING',
+                'next-state': 'NONE',
                 'endpoint': {
                     'ip-address': '10.0.0.99',
                     'mac': '20:4c:9e:5f:e3:c3',

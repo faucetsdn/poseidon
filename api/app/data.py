@@ -162,7 +162,7 @@ class Network(object):
                     node['subnet'] = 'Unknown'
                     node['VLAN'] = 'Unknown'
                     node['behavior'] = 'Unknown'
-                    node['active'] = -1
+                    node['active'] = 'Unknown'
                     node['state'] = 'UNDEFINED'
                     node['rDNS_host'] = 'Unknown'
                     node['record'] = {}
@@ -189,7 +189,11 @@ class Network(object):
                                     ip_address = endpoint_data['ip-address']
                                     node['IP'] = ip_address
                                     node['VLAN'] = endpoint_data['tenant']
-                                    node['active'] = endpoint_data['active']
+                                    active = endpoint_data['active']
+                                    if active == 1:
+                                        node['active'] = 'Active'
+                                    elif active == 0:
+                                        node['active'] = 'Inactive'
                                     # cheating for now
                                     if ':' in ip_address:
                                         node['subnet'] = ':'.join(

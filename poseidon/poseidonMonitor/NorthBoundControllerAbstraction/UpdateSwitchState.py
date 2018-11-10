@@ -214,11 +214,27 @@ class Update_Switch_State(Monitor_Helper_Base):
             self.first_time = False
             # TODO db call to see if really need to run things
             # TODO needs work
-            #if self.r and self.r.exists(h):
-            #    self.poseidon_logger.info(
-            #        'adding address to known systems {0}'.format(machine))
-            #    end_point = EndPoint(machine, state='KNOWN')
-            #    self.endpoints.set(end_point)
+            if self.r:
+                try:
+                    mac_addresses = self.r.smembers('mac_addresses')
+                    for mac in mac_addresses:
+                        try:
+                            mac_info = self.r.hgetall(mac)
+                            if 'poseidon_hash' in mac_info:
+                                try:
+                                    poseidon_info = self.r.hgetall(mac_info['poseidon_hash'])
+                                    if 'endpoint_data' in poseidon_info:
+                                        endpoint_data = ast.literal_eval(poseidon_info['endpoint_data'])
+                                        self.poseidon_logger.info(
+                                            'adding address to known systems {0}'.format(machine))
+                                        end_point = EndPoint(endpoint_data, state='KNOWN')
+                                        self.endpoints.set(end_point)
+                                except Exception as e:  # pragma: no cover
+                                    self.logger.error('Unable to get endpoint data for {0} from Redis because {1}'.format(mac, str(e)))
+                        except Exception as e:  # pragma: no cover
+                            self.logger.error('Unable to get MAC information for {0} from Redis because {1}'.format(mac, str(e)))
+                except Exception as e:  # pragma: no cover
+                    self.logger.error('Unable to get existing DB information from Redis because {0}'.format(str(e)))
             for machine in machines:
                 end_point = EndPoint(machine, state='KNOWN')
                 self.poseidon_logger.info(

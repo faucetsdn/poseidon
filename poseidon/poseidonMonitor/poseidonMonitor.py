@@ -619,18 +619,17 @@ class Monitor(object):
                         if eps.state[my_hash].mirror_timer < 1:
                             self.uss.unmirror_endpoint(
                                 my_hash, messages=self.faucet_event)
-                            change = True
                             self.poseidon_logger.info(
                                 'Updating: {0}:{1}->{2}'.format(my_hash,
                                                                 eps.get_endpoint_state(my_hash),
                                                                 eps.get_endpoint_nextstate(my_hash)))
                             eps.change_endpoint_state(my_hash, new_state='UNKNOWN')
                             eps.change_endpoint_nextstate(my_hash, 'KNOWN')
+                            eps.print_endpoint_state()
                     if eps.state[my_hash].endpoint_data['active'] == 0 and eps.get_endpoint_state(my_hash) != 'INACTIVE':
                         if eps.state[my_hash].mirror_timer:
                             eps.state[my_hash].mirror_timer = None
                         current_state = eps.get_endpoint_state(my_hash)
-                        change = True
                         self.poseidon_logger.info(
                             'Updating: {0}:{1}->{2}'.format(my_hash,
                                                             current_state,
@@ -638,23 +637,24 @@ class Monitor(object):
                         eps.change_endpoint_state(
                             my_hash, new_state='INACTIVE')
                         eps.change_endpoint_nextstate(my_hash, 'NONE')
+                        eps.print_endpoint_state()
                     elif eps.state[my_hash].endpoint_data['active'] == 1 and eps.get_endpoint_state(my_hash) == 'INACTIVE':
                         current_state = eps.get_endpoint_state(my_hash)
-                        change = True
                         self.poseidon_logger.info(
                             'Updating: {0}:{1}->{2}'.format(my_hash,
                                                             current_state,
                                                             'QUEUED'))
                         eps.change_endpoint_state(
                             my_hash, new_state='QUEUED')
+                        eps.print_endpoint_state()
                         current_state = eps.get_endpoint_state(my_hash)
-                        change = True
                         self.poseidon_logger.info(
                             'Updating: {0}:{1}->{2}'.format(my_hash,
                                                             current_state,
                                                             'REINVESTIGATING'))
                         eps.change_endpoint_nextstate(
                             my_hash, 'REINVESTIGATING')
+                        eps.print_endpoint_state()
 
                 dup_eps_state = deepcopy(eps.state)
 
