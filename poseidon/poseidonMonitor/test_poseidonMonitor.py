@@ -157,7 +157,7 @@ def test_start_vent_collector_faucet():
                         'segment': 'prod',
                         'tenant': 'FOO',
                         'name': None},
-                        prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
+                        prev_state='NONE', state='UNKNOWN', next_state='ABNORMAL'),
                     'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
                         'ip-address': '10.0.0.99',
                         'mac': '20:4c:9e:5f:e3:c3',
@@ -300,7 +300,7 @@ def test_start_vent_collector_bcf():
                         'segment': 'prod',
                         'tenant': 'FOO',
                         'name': None},
-                        prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
+                        prev_state='NONE', state='UNKNOWN', next_state='ABNORMAL'),
                     'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
                         'ip-address': '10.0.0.99',
                         'mac': '20:4c:9e:5f:e3:c3',
@@ -444,7 +444,7 @@ def test_not_start_vent_collector_bcf():
                         'segment': 'prod',
                         'tenant': 'FOO',
                         'name': None},
-                        prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
+                        prev_state='NONE', state='UNKNOWN', next_state='ABNORMAL'),
                     'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
                         'ip-address': '10.0.0.99',
                         'mac': '20:4c:9e:5f:e3:c3',
@@ -631,7 +631,7 @@ def test_get_vent_collectors():
                         'segment': 'prod',
                         'tenant': 'FOO',
                         'name': None},
-                        prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
+                        prev_state='NONE', state='UNKNOWN', next_state='ABNORMAL'),
                     'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
                         'ip-address': '10.0.0.99',
                         'mac': '20:4c:9e:5f:e3:c3',
@@ -812,7 +812,7 @@ def test_host_has_active_collectors_false():
                         'segment': 'prod',
                         'tenant': 'FOO',
                         'name': None},
-                        prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
+                        prev_state='NONE', state='UNKNOWN', next_state='ABNORMAL'),
                     'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
                         'ip-address': '10.0.0.99',
                         'mac': '20:4c:9e:5f:e3:c3',
@@ -995,7 +995,7 @@ def test_host_has_active_collectors_true():
                         'segment': 'prod',
                         'tenant': 'FOO',
                         'name': None},
-                        prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
+                        prev_state='NONE', state='UNKNOWN', next_state='ABNORMAL'),
                     'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
                         'ip-address': '10.0.0.99',
                         'mac': '20:4c:9e:5f:e3:c3',
@@ -1195,7 +1195,7 @@ def test_schedule_job_reinvestigation():
                 'segment': 'prod',
                 'tenant': 'FOO',
                 'name': None},
-                prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
+                prev_state='NONE', state='UNKNOWN', next_state='ABNORMAL'),
             'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
                 'ip-address': '10.0.0.99',
                 'mac': '20:4c:9e:5f:e3:c3',
@@ -1271,7 +1271,7 @@ def test_schedule_job_reinvestigation():
                 'segment': 'prod',
                 'tenant': 'FOO',
                 'name': None},
-                prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
+                prev_state='NONE', state='UNKNOWN', next_state='ABNORMAL'),
             'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
                 'ip-address': '10.0.0.99',
                 'mac': '20:4c:9e:5f:e3:c3',
@@ -1394,7 +1394,7 @@ def test_update_next_state():
                         'segment': 'prod',
                         'tenant': 'FOO',
                         'name': None},
-                        prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
+                        prev_state='NONE', state='UNKNOWN', next_state='ABNORMAL'),
                     'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
                         'ip-address': '10.0.0.99',
                         'mac': '20:4c:9e:5f:e3:c3',
@@ -1538,7 +1538,7 @@ def test_update_next_state():
                     'name': None}},
             'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa1': {
                 'state': 'MIRRORING',
-                'next-state': 'SHUTDOWN',
+                'next-state': 'ABNORMAL',
                 'endpoint': {
                     'ip-address': '10.0.0.99',
                     'mac': '20:4c:9e:5f:e3:c3',
@@ -1556,7 +1556,7 @@ def test_update_next_state():
                     'name': None}},
             'd60c5fa5c980b1cd791208eaf62aba9fb46d3aa3': {
                 'state': 'REINVESTIGATING',
-                'next-state': 'UNKNOWN',
+                'next-state': 'ABNORMAL',
                 'endpoint': {
                     'ip-address': '10.0.0.99',
                     'mac': '20:4c:9e:5f:e3:c3',
@@ -1860,7 +1860,7 @@ def test_process():
                         'tenant': 'FOO',
                         'active': 1,
                         'name': None},
-                        prev_state='NONE', state='UNKNOWN', next_state='SHUTDOWN'),
+                        prev_state='NONE', state='UNKNOWN', next_state='ABNORMAL'),
                     'd60c5fa5c980b1cd791208eaf62aba9fb46d3aaa': EndPoint({
                         'ip-address': '10.0.0.99',
                         'mac': '20:4c:9e:5f:e3:c3',
@@ -1901,6 +1901,7 @@ def test_process():
     class MockUss():
 
         def __init__(self):
+            self.max_concurrent_reinvestigations = 20
             self.endpoints = MockEndpoint()
             self.endpoints.makedata()
 
@@ -1981,8 +1982,8 @@ def test_process():
                     'active': 1,
                     'name': None}},
             '4ee39d254db3e4a5264b75ce8ae312d69f9e73a5': {
-                'state': 'UNKNOWN',
-                'next-state': 'MIRRORING',
+                'state': 'INACTIVE',
+                'next-state': 'NONE',
                 'endpoint': {
                     'ip-address': '10.0.0.101',
                     'mac': 'f8:b1:56:fe:f2:de',

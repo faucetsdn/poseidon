@@ -21,6 +21,7 @@ import ast
 import json
 
 import queue as Queue
+from redis import StrictRedis
 
 from poseidon.baseClasses.Logger_Base import Logger
 from poseidon.baseClasses.Monitor_Helper_Base import Monitor_Helper_Base
@@ -65,6 +66,8 @@ class Update_Switch_State(Monitor_Helper_Base):
         self.reinvestigation_frequency = 900
         self.max_concurrent_reinvestigations = 2
 
+        self.r = None
+        #self.connect_redis()
         self.sdnc = None
         self.first_time = True
         self.endpoints = Endpoint_Wrapper()
@@ -174,6 +177,8 @@ class Update_Switch_State(Monitor_Helper_Base):
             next_state = self.endpoints.get_endpoint_next(my_hash)
             self.sdnc.mirror_mac(my_mac, messages=messages)
             self.endpoints.change_endpoint_state(my_hash)
+            self.endpoints.start_mirror_timer(
+                my_hash, self.reinvestigation_frequency)
             self.poseidon_logger.debug(
                 'endpoint:{0}:{1}:{2}:{3}'.format(my_hash, my_mac, my_ip, next_state))
             return True
@@ -186,10 +191,21 @@ class Update_Switch_State(Monitor_Helper_Base):
             my_ip = self.endpoints.get_endpoint_ip(my_hash)
             next_state = self.endpoints.get_endpoint_next(my_hash)
             self.sdnc.unmirror_mac(my_mac, messages=messages)
+            self.endpoints.reset_mirror_timer(my_hash)
             self.poseidon_logger.debug(
                 'endpoint:{0}:{1}:{2}:{3}'.format(my_hash, my_mac, my_ip, next_state))
             return True
         return False
+
+    def connect_redis(self, host='redis', port=6379, db=0):
+        self.r = None
+        try:
+            self.r = StrictRedis(host=host, port=port, db=db,
+                                 socket_connect_timeout=2)
+        except Exception as e:
+            self.logger.error(
+                'Failed connect to Redis because: {0}'.format(str(e)))
+        return
 
     def find_new_machines(self, machines):
         '''parse switch structure to find new machines added to network
@@ -197,7 +213,30 @@ class Update_Switch_State(Monitor_Helper_Base):
         changed = False
         if self.first_time:
             self.first_time = False
-            # TODO db call to see if really need to run things
+            # db call to see if really need to run things
+            # TODO - still not right
+            if self.r:
+                try:
+                    mac_addresses = self.r.smembers('mac_addresses')
+                    for mac in mac_addresses:
+                        try:
+                            mac_info = self.r.hgetall(mac)
+                            if 'poseidon_hash' in mac_info:
+                                try:
+                                    poseidon_info = self.r.hgetall(mac_info['poseidon_hash'])
+                                    if 'endpoint_data' in poseidon_info:
+                                        endpoint_data = ast.literal_eval(poseidon_info['endpoint_data'])
+                                        self.poseidon_logger.info(
+                                            'adding address to known systems {0}'.format(endpoint_data))
+                                        # endpoint_data seems to be incorrect
+                                        #end_point = EndPoint(endpoint_data, state='KNOWN')
+                                        #self.endpoints.set(end_point)
+                                except Exception as e:  # pragma: no cover
+                                    self.logger.error('Unable to get endpoint data for {0} from Redis because {1}'.format(mac, str(e)))
+                        except Exception as e:  # pragma: no cover
+                            self.logger.error('Unable to get MAC information for {0} from Redis because {1}'.format(mac, str(e)))
+                except Exception as e:  # pragma: no cover
+                    self.logger.error('Unable to get existing DB information from Redis because {0}'.format(str(e)))
             for machine in machines:
                 end_point = EndPoint(machine, state='KNOWN')
                 self.poseidon_logger.info(
@@ -205,24 +244,20 @@ class Update_Switch_State(Monitor_Helper_Base):
                 self.endpoints.set(end_point)
             changed = True
         else:
-            machine_hashes = []
             for machine in machines:
                 end_point = EndPoint(machine, state='UNKNOWN')
                 h = end_point.make_hash()
                 ep = None
                 if h in self.endpoints.state:
                     ep = self.endpoints.state[h]
-                if end_point.endpoint_data['active'] == 1:
-                    machine_hashes.append(h)
-
-                    if h not in self.endpoints.state:
-                        self.poseidon_logger.info(
-                            'Detected new device: {0}:{1}'.format(h, machine))
-                        self.endpoints.set(end_point)
-                        changed = True
-                elif ep is not None and end_point.endpoint_data['active'] != ep.endpoint_data['active']:
+                if ep is not None and ep.endpoint_data != end_point.endpoint_data:
                     self.poseidon_logger.info(
                         'Device changed: {0}:{1}'.format(h, machine))
+                    self.endpoints.set(end_point)
+                    changed = True
+                elif ep is None and end_point.endpoint_data['active'] == 1:
+                    self.poseidon_logger.info(
+                        'Detected new device: {0}:{1}'.format(h, machine))
                     self.endpoints.set(end_point)
                     changed = True
         if changed:
