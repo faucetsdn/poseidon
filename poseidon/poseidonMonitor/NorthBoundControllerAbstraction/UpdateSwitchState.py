@@ -66,7 +66,8 @@ class Update_Switch_State(Monitor_Helper_Base):
         self.reinvestigation_frequency = 900
         self.max_concurrent_reinvestigations = 2
 
-        self.connect_redis()
+        self.r = None
+        #self.connect_redis()
         self.sdnc = None
         self.first_time = True
         self.endpoints = Endpoint_Wrapper()
@@ -214,7 +215,7 @@ class Update_Switch_State(Monitor_Helper_Base):
             self.first_time = False
             # db call to see if really need to run things
             # TODO - still not right
-            if self.r != None:
+            if self.r:
                 try:
                     mac_addresses = self.r.smembers('mac_addresses')
                     for mac in mac_addresses:
@@ -227,20 +228,20 @@ class Update_Switch_State(Monitor_Helper_Base):
                                         endpoint_data = ast.literal_eval(poseidon_info['endpoint_data'])
                                         self.poseidon_logger.info(
                                             'adding address to known systems {0}'.format(machine))
-                                        end_point = EndPoint(endpoint_data, state='KNOWN')
-                                        self.endpoints.set(end_point)
+                                        # endpoint_data seems to be incorrect
+                                        #end_point = EndPoint(endpoint_data, state='KNOWN')
+                                        #self.endpoints.set(end_point)
                                 except Exception as e:  # pragma: no cover
                                     self.logger.error('Unable to get endpoint data for {0} from Redis because {1}'.format(mac, str(e)))
                         except Exception as e:  # pragma: no cover
                             self.logger.error('Unable to get MAC information for {0} from Redis because {1}'.format(mac, str(e)))
                 except Exception as e:  # pragma: no cover
                     self.logger.error('Unable to get existing DB information from Redis because {0}'.format(str(e)))
-            else:
-                for machine in machines:
-                    end_point = EndPoint(machine, state='KNOWN')
-                    self.poseidon_logger.info(
-                        'adding address to known systems {0}'.format(machine))
-                    self.endpoints.set(end_point)
+            for machine in machines:
+                end_point = EndPoint(machine, state='KNOWN')
+                self.poseidon_logger.info(
+                    'adding address to known systems {0}'.format(machine))
+                self.endpoints.set(end_point)
             changed = True
         else:
             for machine in machines:
