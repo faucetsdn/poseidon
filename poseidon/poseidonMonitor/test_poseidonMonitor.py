@@ -2033,7 +2033,7 @@ def test_process():
                     'name': None}},
             'd60c5fa5c980b1cd791208eaf62aba9fb46d3aab': {
                 'state': 'KNOWN',
-                'next-state': 'NONE',
+                'next-state': 'MIRRORING',
                 'endpoint': {
                     'ip-address': '10.0.0.99',
                     'mac': '20:4c:9e:5f:e3:c3',

@@ -241,7 +241,7 @@ class Update_Switch_State(Monitor_Helper_Base):
                     self.poseidon_logger.info(
                         'Detected new device: {0}:{1}'.format(h, machine))
                     self.endpoints.set(end_point)
-            changed = True
+                    changed = True
         if changed:
             self.endpoints.print_endpoint_state()
 
