@@ -227,7 +227,7 @@ class Update_Switch_State(Monitor_Helper_Base):
                                     if 'endpoint_data' in poseidon_info:
                                         endpoint_data = ast.literal_eval(poseidon_info['endpoint_data'])
                                         self.poseidon_logger.info(
-                                            'adding address to known systems {0}'.format(machine))
+                                            'adding address to known systems {0}'.format(endpoint_data))
                                         # endpoint_data seems to be incorrect
                                         #end_point = EndPoint(endpoint_data, state='KNOWN')
                                         #self.endpoints.set(end_point)

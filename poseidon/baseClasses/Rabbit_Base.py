@@ -17,8 +17,6 @@
 ''' Created on 21 August 2017
 @author: dgrossman
 '''
-import os
-import random
 import threading
 import time
 from functools import partial
