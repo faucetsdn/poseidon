@@ -212,9 +212,9 @@ class Update_Switch_State(Monitor_Helper_Base):
         changed = False
         if self.first_time:
             self.first_time = False
-            # TODO db call to see if really need to run things
-            # TODO needs work
-            if self.r:
+            # db call to see if really need to run things
+            # TODO - still not right
+            if self.r != None:
                 try:
                     mac_addresses = self.r.smembers('mac_addresses')
                     for mac in mac_addresses:
@@ -235,11 +235,12 @@ class Update_Switch_State(Monitor_Helper_Base):
                             self.logger.error('Unable to get MAC information for {0} from Redis because {1}'.format(mac, str(e)))
                 except Exception as e:  # pragma: no cover
                     self.logger.error('Unable to get existing DB information from Redis because {0}'.format(str(e)))
-            for machine in machines:
-                end_point = EndPoint(machine, state='KNOWN')
-                self.poseidon_logger.info(
-                    'adding address to known systems {0}'.format(machine))
-                self.endpoints.set(end_point)
+            else:
+                for machine in machines:
+                    end_point = EndPoint(machine, state='KNOWN')
+                    self.poseidon_logger.info(
+                        'adding address to known systems {0}'.format(machine))
+                    self.endpoints.set(end_point)
             changed = True
         else:
             for machine in machines:
