@@ -262,14 +262,14 @@ class FaucetProxy(Connection, Parser):
             if my_mac == mac:
                 port = self.mac_table[mac][0]['port']
                 switch = self.mac_table[mac][0]['segment']
-        if port and switch:
-            if self.host:
-                self.receive_file('config')
-                if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
-                               'unmirror', int(port), switch):
-                    self.send_file('config')
-            else:
-                status = self.config(
-                    self.config_file, 'unmirror', int(port), switch)
-        self.poseidon_logger.debug('unmirror status: ' + str(status))
+        #if port and switch:
+        #    if self.host:
+        #        self.receive_file('config')
+        #        if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
+        #                       'unmirror', int(port), switch):
+        #            self.send_file('config')
+        #    else:
+        #        status = self.config(
+        #            self.config_file, 'unmirror', int(port), switch)
+        #self.poseidon_logger.debug('unmirror status: ' + str(status))
         # TODO check if config was successfully updated

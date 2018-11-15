@@ -19,6 +19,7 @@ Created on 21 Nov 2017
 '''
 import json
 from collections import defaultdict
+from copy import deepcopy
 
 import requests
 
@@ -61,6 +62,14 @@ class Endpoint_Wrapper():
         if my_hash in self.state:
             return self.state[my_hash].next_state
         return None
+
+    def start_mirror_timer(self, my_hash, secs):
+        ''' starts the timer for mirroring '''
+        self.state[my_hash].mirror_timer = secs
+
+    def reset_mirror_timer(self, my_hash):
+        ''' resets the timer for mirroring '''
+        self.state[my_hash].mirror_timer = None
 
     def get_endpoint_ip(self, my_hash):
         ''' return the ip address associated with a hash '''
@@ -111,59 +120,41 @@ class Endpoint_Wrapper():
             for my_hash in e_states.keys():
                 endpoint = e_states[my_hash]
                 if endpoint.state == state:
-                    if 'active' in endpoint.endpoint_data and endpoint.endpoint_data['active'] == 0:
-                        # TODO this doesn't seem right
-                        self.change_endpoint_state(
-                            my_hash, new_state='UNKNOWN')
-                        self.change_endpoint_nextstate(
-                            my_hash, 'REINVESTIGATING')
-                    else:
-                        out_flag = True
-                        pp_endpoint_data = endpoint.endpoint_data.copy()
-                        del pp_endpoint_data['active']
-                        del pp_endpoint_data['name']
-                        pp_endpoint_data['ip'] = pp_endpoint_data['ip-address']
-                        del pp_endpoint_data['ip-address']
-                        pp_endpoint_data['s'] = pp_endpoint_data['segment']
-                        del pp_endpoint_data['segment']
-                        pp_endpoint_data['p'] = pp_endpoint_data['port']
-                        del pp_endpoint_data['port']
-                        pp_endpoint_data['v'] = pp_endpoint_data['tenant']
-                        del pp_endpoint_data['tenant']
-                        self.poseidon_logger.info('{0}:{1}:{2}->{3}:{4}'.format(letter,
-                                                                                my_hash,
-                                                                                endpoint.state,
-                                                                                endpoint.next_state,
-                                                                                pp_endpoint_data))
+                    out_flag = True
+                    pp_endpoint_data = endpoint.endpoint_data.copy()
+                    del pp_endpoint_data['active']
+                    del pp_endpoint_data['name']
+                    pp_endpoint_data['ip'] = pp_endpoint_data['ip-address']
+                    del pp_endpoint_data['ip-address']
+                    pp_endpoint_data['s'] = pp_endpoint_data['segment']
+                    del pp_endpoint_data['segment']
+                    pp_endpoint_data['p'] = pp_endpoint_data['port']
+                    del pp_endpoint_data['port']
+                    pp_endpoint_data['v'] = pp_endpoint_data['tenant']
+                    del pp_endpoint_data['tenant']
+                    self.poseidon_logger.info('{0}:{1}:{2}->{3}:{4}'.format(letter,
+                                                                            my_hash,
+                                                                            endpoint.state,
+                                                                            endpoint.next_state,
+                                                                            pp_endpoint_data))
                     # update metadata on vent collectors
                     self.update_vent_collector(my_hash, endpoint)
             if not out_flag:
-                self.poseidon_logger.info('None')
+                self.poseidon_logger.info('')
 
         states = [('K', 'KNOWN'), ('U', 'UNKNOWN'), ('M', 'MIRRORING'),
                   ('I', 'INACTIVE'), ('A', 'ABNORMAL'), ('S', 'SHUTDOWN'),
                   ('R', 'REINVESTIGATING'), ('Q', 'QUEUED')]
 
-        self.poseidon_logger.info('====START')
+        self.poseidon_logger.info('====ENDPOINTS')
         for l, s in states:
             same_old(s, l)
 
-        self.poseidon_logger.info('****************')
-        self.poseidon_logger.info('====STOP')
+        return
 
-        # cleanup endpoints that are no longer active
-        hashes = self.state.copy()
-        for my_hash in hashes:
-            if self.state[my_hash].endpoint_data['active'] == 0:
-                #del self.state[my_hash]
-                self.state[my_hash].state = 'INACTIVE'
-                self.state[my_hash].next_state = 'NONE'
-
-    def get_endpoints_in_state(self, state):
-        e_states = self.state.copy()
-        for my_hash in e_states.keys():
-            endpoint = e_states[my_hash]
-            if endpoint.state != state:
+    def get_endpoints_in_state(self, s):
+        e_states = deepcopy(self.state)
+        for my_hash in self.state:
+            if e_states[my_hash].state != s:
                 del e_states[my_hash]
-
         return e_states

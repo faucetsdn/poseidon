@@ -406,6 +406,7 @@ class Monitor(object):
         for my_hash in ml_returns:
             if my_hash in endpoints.state:
                 endpoint = endpoints.state[my_hash]
+                endpoint.mirror_timer = None
                 #
                 #    {'4ee39d254db3e4a5264b75ce8ae312d69f9e73a3': {
                 #        'classification': {
@@ -426,38 +427,33 @@ class Monitor(object):
                 #        }
                 #    }
                 #
-                if ml_returns[my_hash]['valid']:
-                    current_state = endpoint.state
-                    ml_decision = ml_returns[my_hash]['decisions']['behavior']
-                    self.poseidon_logger.debug(
-                        'ML_DECISION:{0}'.format(ml_decision))
-                    if current_state == 'REINVESTIGATING':
-                        if ml_decision == 'normal':
-                            self.uss.endpoints.change_endpoint_nextstate(
-                                my_hash, 'KNOWN')
-                            self.poseidon_logger.debug(
-                                'REINVESTIGATION Making KNOWN')
-                        else:
-                            self.uss.endpoints.change_endpoint_nextstate(
-                                my_hash, 'UNKNOWN')
-                            self.poseidon_logger.debug(
-                                'REINVESTIGATION Making UNKNOWN')
-                    if current_state == 'MIRRORING':
-                        if ml_decision == 'normal':
-                            self.uss.endpoints.change_endpoint_nextstate(
-                                my_hash, 'KNOWN')
-                            self.poseidon_logger.debug(
-                                'MIRRORING Making KNOWN')
-                        else:
-                            self.uss.endpoints.change_endpoint_nextstate(
-                                my_hash, 'SHUTDOWN')
-                            self.poseidon_logger.debug(
-                                'MIRRORING Making SHUTDOWN')
-                else:
-                    self.uss.endpoints.change_endpoint_nextstate(
-                        my_hash, 'REINVESTIGATING')
-                    self.poseidon_logger.debug(
-                        'ML results failed, reinvestigating')
+                current_state = endpoint.state
+                ml_decision = ml_returns[my_hash]['decisions']['behavior']
+                self.poseidon_logger.debug(
+                    'ML_DECISION:{0}'.format(ml_decision))
+                if current_state == 'REINVESTIGATING':
+                    if ml_decision == 'normal':
+                        self.uss.endpoints.change_endpoint_nextstate(
+                            my_hash, 'KNOWN')
+                        self.poseidon_logger.debug(
+                            'REINVESTIGATION Making KNOWN')
+                    else:
+                        self.uss.endpoints.change_endpoint_nextstate(
+                            my_hash, 'ABNORMAL')
+                        self.poseidon_logger.debug(
+                            'REINVESTIGATION Making ABNORMAL')
+                if current_state == 'MIRRORING':
+                    if ml_decision == 'normal':
+                        self.uss.endpoints.change_endpoint_nextstate(
+                            my_hash, 'KNOWN')
+                        self.poseidon_logger.debug(
+                            'MIRRORING Making KNOWN')
+                    else:
+                        self.uss.endpoints.change_endpoint_nextstate(
+                            my_hash, 'ABNORMAL')
+                        self.poseidon_logger.debug(
+                            'MIRRORING Making ABNORMAL')
+        return
 
     def start_vent_collector(self, dev_hash, num_captures=1):
         '''
@@ -598,30 +594,71 @@ class Monitor(object):
         signal.signal(signal.SIGINT, partial(self.signal_handler))
         while not CTRL_C['STOP']:
             try:
+                change = False
                 time.sleep(1)
                 found_work, item = self.get_q_item()
                 ml_returns = {}
 
-                # plan out the transitions
                 if found_work and item[0] != self.fa_rabbit_routing_key:
-                    # TODO make this read until nothing in q
                     ml_returns = self.format_rabbit_message(item)
-                    self.poseidon_logger.debug('\n\n\n**********************')
-                    self.poseidon_logger.debug(
+                    self.poseidon_logger.info(
                         'ml_returns:{0}'.format(ml_returns))
-                    self.poseidon_logger.debug('**********************\n\n\n')
                 elif found_work and item[0] == self.fa_rabbit_routing_key:
                     self.faucet_event.append(self.format_rabbit_message(item))
-                    self.poseidon_logger.debug('\n\n\n**********************')
-                    self.poseidon_logger.debug(
+                    self.poseidon_logger.info(
                         'faucet_event:{0}'.format(self.faucet_event))
-                    self.poseidon_logger.debug('**********************\n\n\n')
 
                 eps = self.uss.endpoints
-                state_transitions = self.update_next_state(ml_returns)
+                self.update_next_state(ml_returns)
+                dup_eps_state = deepcopy(eps.state)
+
+                # cleanup endpoints
+                for my_hash in dup_eps_state:
+                    if eps.state[my_hash].mirror_timer:
+                        eps.state[my_hash].mirror_timer -= 1
+                        if eps.state[my_hash].mirror_timer < 1:
+                            self.uss.unmirror_endpoint(
+                                my_hash, messages=self.faucet_event)
+                            self.poseidon_logger.info(
+                                'Updating: {0}:{1}->{2}'.format(my_hash,
+                                                                eps.get_endpoint_state(my_hash),
+                                                                eps.get_endpoint_nextstate(my_hash)))
+                            eps.change_endpoint_state(my_hash, new_state='UNKNOWN')
+                            eps.change_endpoint_nextstate(my_hash, 'KNOWN')
+                            eps.print_endpoint_state()
+                    if eps.state[my_hash].endpoint_data['active'] == 0 and eps.get_endpoint_state(my_hash) != 'INACTIVE':
+                        if eps.state[my_hash].mirror_timer:
+                            eps.state[my_hash].mirror_timer = None
+                        current_state = eps.get_endpoint_state(my_hash)
+                        self.poseidon_logger.info(
+                            'Updating: {0}:{1}->{2}'.format(my_hash,
+                                                            current_state,
+                                                            'INACTIVE'))
+                        eps.change_endpoint_state(
+                            my_hash, new_state='INACTIVE')
+                        eps.change_endpoint_nextstate(my_hash, 'NONE')
+                        eps.print_endpoint_state()
+                    elif eps.state[my_hash].endpoint_data['active'] == 1 and eps.get_endpoint_state(my_hash) == 'INACTIVE':
+                        current_state = eps.get_endpoint_state(my_hash)
+                        self.poseidon_logger.info(
+                            'Updating: {0}:{1}->{2}'.format(my_hash,
+                                                            current_state,
+                                                            'QUEUED'))
+                        eps.change_endpoint_state(
+                            my_hash, new_state='QUEUED')
+                        eps.print_endpoint_state()
+                        current_state = eps.get_endpoint_state(my_hash)
+                        self.poseidon_logger.info(
+                            'Updating: {0}:{1}->{2}'.format(my_hash,
+                                                            current_state,
+                                                            'REINVESTIGATING'))
+                        eps.change_endpoint_nextstate(
+                            my_hash, 'REINVESTIGATING')
+                        eps.print_endpoint_state()
+
+                dup_eps_state = deepcopy(eps.state)
 
                 # make the transitions
-                dup_eps_state = deepcopy(eps.state)
                 for endpoint_hash in dup_eps_state:
                     current_state = eps.get_endpoint_state(endpoint_hash)
                     next_state = eps.get_endpoint_next(endpoint_hash)
@@ -629,10 +666,18 @@ class Monitor(object):
                     # dont do anything
                     if next_state == 'NONE':
                         continue
-
-                    eps.print_endpoint_state()
-
-                    if next_state == 'MIRRORING':
+                    elif current_state != 'QUEUED' and ((next_state == 'MIRRORING' or next_state == 'REINVESTIGATING') and (len(eps.get_endpoints_in_state('MIRRORING')) + len(eps.get_endpoints_in_state('REINVESTIGATING'))) >= self.uss.max_concurrent_reinvestigations):
+                        change = True
+                        self.poseidon_logger.info(
+                            'Updating: {0}:{1}->{2}'.format(endpoint_hash,
+                                                            current_state,
+                                                            'QUEUED'))
+                        eps.change_endpoint_state(
+                            endpoint_hash, new_state='QUEUED')
+                        eps.change_endpoint_nextstate(
+                            endpoint_hash, next_state)
+                    elif next_state == 'MIRRORING' and (len(eps.get_endpoints_in_state('MIRRORING')) + len(eps.get_endpoints_in_state('REINVESTIGATING'))) < self.uss.max_concurrent_reinvestigations:
+                        change = True
                         self.poseidon_logger.info(
                             'Updating: {0}:{1}->{2}'.format(endpoint_hash,
                                                             current_state,
@@ -644,7 +689,8 @@ class Monitor(object):
                             '*********** U MIRROR PORT ***********')
                         self.uss.mirror_endpoint(
                             endpoint_hash, messages=self.faucet_event)
-                    if next_state == 'REINVESTIGATING':
+                    elif next_state == 'REINVESTIGATING' and (len(eps.get_endpoints_in_state('MIRRORING')) + len(eps.get_endpoints_in_state('REINVESTIGATING'))) < self.uss.max_concurrent_reinvestigations:
+                        change = True
                         self.poseidon_logger.info(
                             'Updating: {0}:{1}->{2}'.format(endpoint_hash,
                                                             current_state,
@@ -656,7 +702,7 @@ class Monitor(object):
                             '*********** R MIRROR PORT ***********')
                         self.uss.mirror_endpoint(
                             endpoint_hash, messages=self.faucet_event)
-                    if next_state == 'KNOWN':
+                    elif next_state == 'KNOWN':
                         if (current_state == 'REINVESTIGATING' or
                                 current_state == 'MIRRORING'):
                             if not self.host_has_active_collectors(endpoint_hash):
@@ -671,8 +717,13 @@ class Monitor(object):
                                     '*********** ' +
                                     current_state[0] +
                                     ' CAN NOT UN-MIRROR PORT BECAUSE OF ACTIVE COLLECTOR ***********')
+                            change = True
+                            self.poseidon_logger.info(
+                                'Updating: {0}:{1}->{2}'.format(endpoint_hash,
+                                                                current_state,
+                                                                next_state))
                             eps.change_endpoint_state(endpoint_hash)
-                        if current_state == 'UNKNOWN':
+                        elif current_state == 'UNKNOWN':
                             if not self.host_has_active_collectors(endpoint_hash):
                                 self.poseidon_logger.debug(
                                     '*********** U UN-MIRROR PORT ***********')
@@ -681,15 +732,32 @@ class Monitor(object):
                             else:
                                 self.poseidon_logger.debug(
                                     '*********** U UN-MIRROR PORT ***********')
+                            change = True
+                            self.poseidon_logger.info(
+                                'Updating: {0}:{1}->{2}'.format(endpoint_hash,
+                                                                current_state,
+                                                                next_state))
                             eps.change_endpoint_state(endpoint_hash)
-                    if next_state == 'SHUTDOWN':
+                    elif next_state == 'SHUTDOWN':
+                        change = True
                         self.poseidon_logger.info(
                             'Updating: {0}:{1}->{2}'.format(endpoint_hash,
                                                             current_state,
                                                             next_state))
                         self.uss.shutdown_endpoint(endpoint_hash)
-
+                    elif next_state == 'ABNORMAL':
+                        change = True
+                        self.poseidon_logger.info(
+                            'Updating: {0}:{1}->{2}'.format(endpoint_hash,
+                                                            current_state,
+                                                            next_state))
+                        eps.change_endpoint_state(
+                            endpoint_hash, new_state='ABNORMAL')
+                        # TODO
+                if change:
                     eps.print_endpoint_state()
+                    change = False
+
             except Exception as e:  # pragma: no cover
                 self.logger.error(
                     'Iteration failed because: {0}'.format(str(e)))

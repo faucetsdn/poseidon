@@ -7,6 +7,7 @@ pylint==2.1.1
 pytest-cov==2.6.0
 pytest==3.10.0
 pyyaml==3.13
+redis==2.10.6
 requests==2.20.1
 schedule==0.5.0
 scp==0.12.1
