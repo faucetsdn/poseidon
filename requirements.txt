@@ -10,5 +10,5 @@ pyyaml==3.13
 redis==2.10.6
 requests==2.20.0
 schedule==0.5.0
-scp==0.12.1
+scp==0.13.0
 urllib3==1.24.1
