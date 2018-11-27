@@ -3,12 +3,12 @@ httmock==1.2.6
 mock==2.0.0
 pika==0.12.0
 prometheus_client==0.4.2
-pylint==2.1.1
+pylint==2.2.1
 pytest-cov==2.6.0
-pytest==3.10.0
+pytest==4.0.1
 pyyaml==3.13
 redis==2.10.6
-requests==2.20.0
+requests==2.20.1
 schedule==0.5.0
-scp==0.12.1
+scp==0.13.0
 urllib3==1.24.1
