@@ -1,0 +1,20 @@
+[
+  {
+    "active": true,
+    "dest-interface-group": "INTERFACE_GROUP",
+    "filter": [
+      {
+        "segment": "prod",
+        "seq": 1,
+        "tenant": "port2"
+      },
+      {
+        "segment": "prod",
+        "seq": 2,
+        "tenant": "port5"
+      }
+    ],
+    "name": "SPAN_FABRIC",
+    "priority": 1
+  }
+]

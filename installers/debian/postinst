@@ -167,7 +167,11 @@ if db_go; then
 
             db_get poseidon/learn_public_addresses
             if [[ ! -z "$RET" ]]; then
-                echo "learn_public_addresses=$RET" >> /etc/poseidon/default.conf
+                if [ "$RET" == "Yes" ]; then
+                    echo "learn_public_addresses=True" >> /etc/poseidon/default.conf
+                else
+                    echo "learn_public_addresses=False" >> /etc/poseidon/default.conf
+                fi
             fi
 
             db_get poseidon/logging_level
