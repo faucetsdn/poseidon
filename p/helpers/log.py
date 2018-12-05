@@ -82,13 +82,3 @@ class Logger:
         """
         Logger.logger.setLevel(Logger.level_int[level.upper()])
         Logger.poseidon_logger.setLevel(Logger.level_int[level.upper()])
-
-    @staticmethod
-    def logger_config(config):
-        """
-        Load configuration files if they exist for loggers.
-        """
-        if config:
-            logging.config.dictConfigClass(config)
-        else:
-            logging.basicConfig()

@@ -3,6 +3,9 @@
 Created on 5 December 2018
 @author: Charlie Lewis
 """
+import socket
+from binascii import hexlify
+
 from prometheus_client import Gauge
 from prometheus_client import start_http_server
 
@@ -86,6 +89,18 @@ class Prometheus():
         return metrics
 
     def update_metrics(self, hosts):
+
+        def ip2int(ip):
+            ''' convert ip quad octet string to an int '''
+            if ip in [None, 'None', '::']:
+                res = 0
+            elif ':' in ip:
+                res = int(hexlify(socket.inet_pton(socket.AF_INET6, ip)), 16)
+            else:
+                o = list(map(int, ip.split('.')))
+                res = (16777216 * o[0]) + (65536 * o[1]) + (256 * o[2]) + o[3]
+            return res
+
         metrics = Prometheus.get_metrics()
         for host in hosts:
             if host['active'] == 0:

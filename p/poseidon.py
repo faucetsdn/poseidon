@@ -7,11 +7,18 @@ Monitor class.
 Created on 3 December 2018
 @author: Charlie Lewis
 """
+import ast
 import hashlib
 import json
+import random
+import signal
+import sys
+import threading
+import time
 from functools import partial
 
 import queue
+import requests
 import schedule
 
 from p.controllers.bcf.bcf import BcfProxy
@@ -21,6 +28,11 @@ from p.helpers.endpoint import Endpoint
 from p.helpers.log import Logger
 from p.helpers.prometheus import Prometheus
 from p.helpers.rabbit import Rabbit
+
+requests.packages.urllib3.disable_warnings()
+
+CTRL_C = dict()
+CTRL_C['STOP'] = False
 
 
 def rabbit_callback(ch, method, properties, body, q=None):
@@ -34,7 +46,17 @@ def rabbit_callback(ch, method, properties, body, q=None):
 
 
 def schedule_job_kickurl(func, logger):
-    pass
+    # func.NorthBoundControllerAbstraction.get_endpoint(
+    #    'Update_Switch_State').update_endpoint_state(messages=func.faucet_event)
+    # TODO check the length didn't change before wiping it out
+    func.faucet_event = []
+
+    # get current state
+    r = requests.get('http://poseidon-api:8000/v1/network_full')
+
+    # send results to prometheus
+    hosts = r.json()['dataset']
+    func.prom.update_metrics(hosts)
 
 
 def schedule_job_reinvestigation(max_investigations, endpoints, logger):
@@ -218,9 +240,6 @@ class SDNConnect(object):
 class Monitor(object):
 
     def __init__(self, skip_rabbit):
-        # get the logger setup
-        self.logger = Logger.logger
-        self.poseidon_logger = Logger.poseidon_logger
         self.faucet_event = []
         self.m_queue = queue.Queue()
         self.skip_rabbit = skip_rabbit
@@ -230,16 +249,24 @@ class Monitor(object):
 
         m = Endpoint('foo')
         s = SDNConnect()
-        Logger.set_level(s.controller['logger_level'])
+        self.controller = s.controller
 
-        self.schedule.every(self.scan_frequency).seconds.do(
+        # get the loggers setup
+        Logger.set_level(s.controller['logger_level'])
+        self.logger = Logger.logger
+        self.poseidon_logger = Logger.poseidon_logger
+
+        # setup prometheus
+        self.prom = Prometheus()
+        self.prom.start()
+
+        self.schedule.every(s.controller['scan_frequency']).seconds.do(
             partial(schedule_job_kickurl, func=self, logger=self.poseidon_logger))
 
-        self.schedule.every(self.reinvestigation_frequency).seconds.do(
+        self.schedule.every(s.controller['reinvestigation_frequency']).seconds.do(
             partial(schedule_job_reinvestigation,
-                    max_investigations=max_concurrent_reinvestigations,
-                    endpoints=self.NorthBoundControllerAbstraction.get_endpoint(
-                        'Update_Switch_State').endpoints,
+                    max_investigations=s.controller['max_concurrent_reinvestigations'],
+                    endpoints=[],
                     logger=self.poseidon_logger))
 
         self.schedule_thread = threading.Thread(
@@ -248,6 +275,80 @@ class Monitor(object):
                 schedule=self.schedule,
                 logger=self.poseidon_logger),
             name='st_worker')
+
+    def format_rabbit_message(self, item):
+        ''' read a message off the rabbit_q
+        the message should be item = (routing_key,msg)
+        '''
+        ret_val = {}
+
+        routing_key, my_obj = item
+        self.poseidon_logger.debug('rabbit_message:{0}'.format(my_obj))
+        # my_obj: (hash,data)
+        my_obj = json.loads(my_obj)
+        self.poseidon_logger.debug('routing_key:{0}'.format(routing_key))
+        if routing_key == 'poseidon.algos.decider':
+            self.poseidon_logger.debug('decider value:{0}'.format(my_obj))
+            # if valid response then send along otherwise nothing
+            for key in my_obj:
+                ret_val[key] = my_obj[key]
+        elif routing_key == self.controller['FA_RABBIT_ROUTING_KEY']:
+            self.poseidon_logger.debug('FAUCET Event:{0}'.format(my_obj))
+            for key in my_obj:
+                ret_val[key] = my_obj[key]
+        # TODO do something with recomendation
+        return ret_val
+
+    def process(self):
+        global CTRL_C
+        signal.signal(signal.SIGINT, partial(self.signal_handler))
+        while not CTRL_C['STOP']:
+            time.sleep(1)
+            found_work, item = self.get_q_item()
+            ml_returns = {}
+
+            if found_work and item[0] != self.controller['FA_RABBIT_ROUTING_KEY']:
+                ml_returns = self.format_rabbit_message(item)
+                self.poseidon_logger.info(
+                    'ml_returns:{0}'.format(ml_returns))
+            elif found_work and item[0] == self.controller['FA_RABBIT_ROUTING_KEY']:
+                self.faucet_event.append(self.format_rabbit_message(item))
+                self.poseidon_logger.info(
+                    'faucet_event:{0}'.format(self.faucet_event))
+
+    def get_q_item(self):
+        ''' attempt to get a workitem from the queue'''
+        ''' m_queue -> (routing_key, body)
+            a read from get_q_item should be of the form
+            (boolean,(routing_key, body))
+
+        '''
+        found_work = False
+        item = None
+        global CTRL_C
+
+        if not CTRL_C['STOP']:
+            try:
+                item = self.m_queue.get(False)
+                found_work = True
+            except queue.Empty:  # pragma: no cover
+                pass
+
+        return (found_work, item)
+
+    def signal_handler(self, signal, frame):
+        ''' hopefully eat a CTRL_C and signal system shutdown '''
+        global CTRL_C
+        CTRL_C['STOP'] = True
+        self.poseidon_logger.debug('=================CTRLC{0}'.format(CTRL_C))
+        try:
+            for job in self.schedule.jobs:
+                self.poseidon_logger.debug('CTRLC:{0}'.format(job))
+                self.schedule.cancel_job(job)
+            self.rabbit_channel_connection_local.close()
+            sys.exit()
+        except BaseException:  # pragma: no cover
+            pass
 
 
 class Collector(object):
@@ -263,11 +364,6 @@ class Collector(object):
 
 
 def main(skip_rabbit=False):  # pragma: no cover
-    # setup prometheus
-    prom = Prometheus()
-    prom.update_metrics()
-    prom.start()
-
     # setup rabbit and monitoring of the network
     pmain = Monitor(skip_rabbit=skip_rabbit)
     if not skip_rabbit:
@@ -287,7 +383,7 @@ def main(skip_rabbit=False):  # pragma: no cover
             queue_name,
             pmain.m_queue)
 
-    if pmain.fa_rabbit_enabled:
+    if pmain.controller['FA_RABBIT_ENABLED']:
         rabbit = Rabbit()
         host = pmain.controller['FA_RABBIT_HOST']
         port = pmain.controller['FA_RABBIT_PORT']

@@ -45,7 +45,7 @@ class Endpoint(object):
 
     def __init__(self, hashed_val):
         log_format = '[%(levelname)s] %(name)s - %(message)s'
-        logging.basicConfig(level=logging.DEBUG, format=log_format)
+        logging.basicConfig(level=logging.INFO, format=log_format)
         logging.getLogger('transitions').setLevel(logging.INFO)
 
         # Initialize the state machine
