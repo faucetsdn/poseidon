@@ -215,11 +215,13 @@ class SDNConnect(object):
                 h = SDNConnect().make_hash(machine)
                 m = Endpoint(h)
                 self.endpoints.append(m)
-                self.poseidon_logger.info(
+                self.logger.info(
                     'Adding new endpoint {0}'.format(machine))
         else:
             for machine in machines:
                 h = SDNConnect().make_hash(machine)
+                self.logger.info(
+                    'Checking endpoint {0}'.format(machine))
                 ep = None
                 for endpoint in self.endpoints:
                     if h == endpoint.name:
