@@ -216,8 +216,8 @@ class SDNConnect(object):
             for machine in machines:
                 h = SDNConnect().make_hash(machine)
                 m = Endpoint(h)
-                m.endpoint_data = machine
-                self.endpoints.append(m)
+                m.machine.endpoint_data = machine
+                self.endpoints.append(m.machine)
                 self.logger.info(
                     'Adding new endpoint {0}'.format(machine))
         else:
@@ -237,8 +237,8 @@ class SDNConnect(object):
                     self.poseidon_logger.info(
                         'Detected new endpoint: {0}:{1}'.format(h, machine))
                     m = Endpoint(h)
-                    m.endpoint_data = machine
-                    self.endpoints.append(m)
+                    m.machine.endpoint_data = machine
+                    self.endpoints.append(m.machine)
 
 
 class Monitor(object):
