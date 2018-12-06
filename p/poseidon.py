@@ -154,7 +154,6 @@ class SDNConnect(object):
             parsed = self.sdnc.format_endpoints(current)
             machines = parsed
             self.poseidon_logger.debug('MACHINES:{0}'.format(machines))
-            self.find_new_machines(machines)
             self.retval['machines'] = parsed
             self.retval['resp'] = 'ok'
         except BaseException as e:  # pragma: no cover
@@ -163,6 +162,8 @@ class SDNConnect(object):
                     self.controller['URI'], e))
             self.retval['controller'] = 'Could not establish connection to {0}.'.format(
                 self.controller['URI'])
+
+        self.find_new_machines(machines)
 
         return json.dumps(self.retval)
 
@@ -215,6 +216,7 @@ class SDNConnect(object):
             for machine in machines:
                 h = SDNConnect().make_hash(machine)
                 m = Endpoint(h)
+                m.endpoint_data = machine
                 self.endpoints.append(m)
                 self.logger.info(
                     'Adding new endpoint {0}'.format(machine))
@@ -234,7 +236,9 @@ class SDNConnect(object):
                 elif ep is None:
                     self.poseidon_logger.info(
                         'Detected new endpoint: {0}:{1}'.format(h, machine))
-                    self.endpoints.append(machine)
+                    m = Endpoint(h)
+                    m.endpoint_data = machine
+                    self.endpoints.append(m)
 
 
 class Monitor(object):
