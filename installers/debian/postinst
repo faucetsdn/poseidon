@@ -14,13 +14,13 @@ if db_go; then
 
     # read from db to set variables in default.conf
     db_get poseidon/controller_type
-    if [[ ! -z "$RET" ]]; then
+    if [[ -n "$RET" ]]; then
         if [ "$RET" == "Faucet" ]; then
             echo "controller_type=faucet" >> /etc/poseidon/default.conf
             db_get poseidon/faucet_same_host
             if [ "$RET" == "No" ]; then
                 db_get poseidon/faucet_controller_uri
-                if [[ ! -z "$RET" ]]; then
+                if [[ -n "$RET" ]]; then
                     echo "controller_uri=$RET" >> /etc/poseidon/default.conf
                 else
                     echo >&2 -e "${red}You need to specify the IP or hostname of the Faucet controller.${endColor}"
@@ -28,7 +28,7 @@ if db_go; then
                     failed=true
                 fi
                 db_get poseidon/faucet_controller_user
-                if [[ ! -z "$RET" ]]; then
+                if [[ -n "$RET" ]]; then
                     echo "controller_user=$RET" >> /etc/poseidon/default.conf
                 else
                     echo >&2 -e "${red}You need to specify the username to SSH to the Faucet controller.${endColor}"
@@ -36,7 +36,7 @@ if db_go; then
                     failed=true
                 fi
                 db_get poseidon/faucet_controller_pass
-                if [[ ! -z "$RET" ]]; then
+                if [[ -n "$RET" ]]; then
                     echo "controller_pass=$RET" >> /etc/poseidon/default.conf
                 else
                     echo >&2 -e "${red}You need to specify the password to SSH to the Faucet controller.${endColor}"
@@ -47,7 +47,7 @@ if db_go; then
                 echo "controller_uri=" >> /etc/poseidon/default.conf
             fi
             db_get poseidon/faucet_controller_mirror_ports
-            if [[ ! -z "$RET" ]]; then
+            if [[ -n "$RET" ]]; then
                 echo "controller_mirror_ports=$RET" >> /etc/poseidon/default.conf
             else
                 echo >&2 -e "${red}You need to specify at least one mirror port.${endColor}"
@@ -55,27 +55,27 @@ if db_go; then
                 failed=true
             fi
             db_get poseidon/faucet_fa_rabbit_enabled
-            if [[ ! -z "$RET" ]]; then
+            if [[ -n "$RET" ]]; then
                 if [ "$RET" == "Yes" ]; then
                     echo "FA_RABBIT_ENABLED=True" >> /etc/poseidon/default.conf
                     db_get poseidon/faucet_fa_rabbit_host
-                    if [[ ! -z "$RET" ]]; then
+                    if [[ -n "$RET" ]]; then
                         echo "FA_RABBIT_HOST=$RET" >> /etc/poseidon/default.conf
                     fi
                     db_get poseidon/faucet_fa_rabbit_port
-                    if [[ ! -z "$RET" ]]; then
+                    if [[ -n "$RET" ]]; then
                         echo "FA_RABBIT_PORT=$RET" >> /etc/poseidon/default.conf
                     fi
                     db_get poseidon/faucet_fa_rabbit_exchange
-                    if [[ ! -z "$RET" ]]; then
+                    if [[ -n "$RET" ]]; then
                         echo "FA_RABBIT_EXCHANGE=$RET" >> /etc/poseidon/default.conf
                     fi
                     db_get poseidon/faucet_fa_rabbit_exchange_type
-                    if [[ ! -z "$RET" ]]; then
+                    if [[ -n "$RET" ]]; then
                         echo "FA_RABBIT_EXCHANGE_TYPE=$RET" >> /etc/poseidon/default.conf
                     fi
                     db_get poseidon/faucet_fa_rabbit_routing_key
-                    if [[ ! -z "$RET" ]]; then
+                    if [[ -n "$RET" ]]; then
                         echo "FA_RABBIT_ROUTING_KEY=$RET" >> /etc/poseidon/default.conf
                     fi
                 else
@@ -85,7 +85,7 @@ if db_go; then
         elif [ "$RET" == "BigSwitch Cloud Fabric" ]; then
             echo "controller_type=bcf" >> /etc/poseidon/default.conf
             db_get poseidon/bcf_controller_uri
-            if [[ ! -z "$RET" ]]; then
+            if [[ -n "$RET" ]]; then
                 echo "controller_uri=https://$RET/api/v1/" >> /etc/poseidon/default.conf
             else
                 echo >&2 -e "${red}You need to specify the IP or hostname of the BigSwitch Cloud Fabric controller.${endColor}"
@@ -93,7 +93,7 @@ if db_go; then
                 failed=true
             fi
             db_get poseidon/bcf_controller_user
-            if [[ ! -z "$RET" ]]; then
+            if [[ -n "$RET" ]]; then
                 echo "controller_user=$RET" >> /etc/poseidon/default.conf
             else
                 echo >&2 -e "${red}You need to specify the username to connect to the BigSwitch Cloud Fabric controller.${endColor}"
@@ -101,7 +101,7 @@ if db_go; then
                 failed=true
             fi
             db_get poseidon/bcf_controller_pass
-            if [[ ! -z "$RET" ]]; then
+            if [[ -n "$RET" ]]; then
                 echo "controller_pass=$RET" >> /etc/poseidon/default.conf
             else
                 echo >&2 -e "${red}You need to specify the password to connect to the BigSwitch Cloud Fabric controller.${endColor}"
@@ -109,11 +109,11 @@ if db_go; then
                 failed=true
             fi
             db_get poseidon/bcf_controller_interface_group
-            if [[ ! -z "$RET" ]]; then
+            if [[ -n "$RET" ]]; then
                 echo "controller_interface_group=$RET" >> /etc/poseidon/default.conf
             fi
             db_get poseidon/bcf_controller_span_fabric_name
-            if [[ ! -z "$RET" ]]; then
+            if [[ -n "$RET" ]]; then
                 echo "controller_span_fabric_name=$RET" >> /etc/poseidon/default.conf
             fi
         fi
@@ -124,13 +124,13 @@ if db_go; then
     fi
 
     db_get poseidon/controller_type
-    if [[ ! -z "$RET" ]]; then
+    if [[ -n "$RET" ]]; then
         if [ "$RET" != "Demo" ]; then
             db_get poseidon/collector_nic
-            if [[ ! -z "$RET" ]]; then
+            if [[ -n "$RET" ]]; then
                 if [ "$RET" == "Specify your own" ]; then
                     db_get poseidon/specify_nic
-                    if [[ ! -z "$RET" ]]; then
+                    if [[ -n "$RET" ]]; then
                         echo "collector_nic=$RET" >> /etc/poseidon/default.conf
                     else
                         echo >&2 -e "${red}You need to specify a collector NIC.${endColor}"
@@ -140,7 +140,7 @@ if db_go; then
                     fi
                 else
                     db_get poseidon/available_nics
-                    if [[ ! -z "$RET" ]]; then
+                    if [[ -n "$RET" ]]; then
                         echo "collector_nic=$RET" >> /etc/poseidon/default.conf
                     else
                         echo >&2 -e "${red}You need to specify a collector NIC.${endColor}"
@@ -156,17 +156,17 @@ if db_go; then
             fi
 
             db_get poseidon/max_concurrent_reinvestigations
-            if [[ ! -z "$RET" ]]; then
+            if [[ -n "$RET" ]]; then
                 echo "max_concurrent_reinvestigations=$RET" >> /etc/poseidon/default.conf
             fi
 
             db_get poseidon/reinvestigation_frequency
-            if [[ ! -z "$RET" ]]; then
+            if [[ -n "$RET" ]]; then
                 echo "reinvestigation_frequency=$RET" >> /etc/poseidon/default.conf
             fi
 
             db_get poseidon/learn_public_addresses
-            if [[ ! -z "$RET" ]]; then
+            if [[ -n "$RET" ]]; then
                 if [ "$RET" == "Yes" ]; then
                     echo "learn_public_addresses=True" >> /etc/poseidon/default.conf
                 else
@@ -175,7 +175,7 @@ if db_go; then
             fi
 
             db_get poseidon/logging_level
-            if [[ ! -z "$RET" ]]; then
+            if [[ -n "$RET" ]]; then
                 echo "logger_level=$RET" >> /etc/poseidon/default.conf
             fi
         fi
@@ -205,7 +205,7 @@ if db_go; then
     systemctl start poseidon
 
     db_get poseidon/controller_type
-    if [[ ! -z "$RET" ]]; then
+    if [[ -n "$RET" ]]; then
         if [ "$RET" == "Demo" ]; then
             default_iface=$(awk '$2 == 00000000 { print $1 }' /proc/net/route)
             default_ip=$(ip addr show dev "$default_iface" | awk '$1 ~ /^inet/ { sub("/.*", "", $2); print $2 }' | head -1)
