@@ -109,16 +109,14 @@ def schedule_thread_worker(schedule, logger):
 
 class SDNConnect(object):
 
-    def __init__(self, logger=None):
-        if not logger:
-            logger = Logger()
-        self.logger = logger.logger
-        self.poseidon_logger = logger.poseidon_logger
+    def __init__(self):
         self.retval = {}
         self.r = None
         self.first_time = True
         self.sdnc = None
         self.controller = Config().set_config()
+        self.logger = Logger.logger
+        self.poseidon_logger = Logger.poseidon_logger
         self.get_sdn_context()
         self.endpoints = []
 
@@ -214,14 +212,14 @@ class SDNConnect(object):
                     self.logger.error(
                         'Unable to get existing DB information from Redis because {0}'.format(str(e)))
             for machine in machines:
-                h = SDNConnect.make_hash()
+                h = SDNConnect().make_hash()
                 m = Endpoint(h)
                 self.endpoints.append(m)
                 self.poseidon_logger.info(
                     'Adding new endpoint {0}'.format(machine))
         else:
             for machine in machines:
-                h = SDNConnect.make_hash()
+                h = SDNConnect().make_hash()
                 ep = None
                 for endpoint in self.endpoints:
                     if h == endpoint.name:
@@ -243,17 +241,18 @@ class Monitor(object):
         self.m_queue = queue.Queue()
         self.skip_rabbit = skip_rabbit
 
+        # get config options
+        self.controller = Config().set_config()
+
+        # get the loggers setup
+        self.logger = Logger.logger
+        self.poseidon_logger = Logger.poseidon_logger
+
         # timer class to call things periodically in own thread
         self.schedule = schedule
 
-        log = Logger()
-        self.s = SDNConnect(logger=log)
-        self.controller = self.s.controller
-
-        # get the loggers setup
-        log.set_level(self.controller['logger_level'])
-        self.logger = log.logger
-        self.poseidon_logger = log.poseidon_logger
+        # initialize sdnconnect
+        self.s = SDNConnect()
 
         # setup prometheus
         self.prom = Prometheus()
@@ -345,6 +344,7 @@ class Monitor(object):
                 self.poseidon_logger.debug('CTRLC:{0}'.format(job))
                 self.schedule.cancel_job(job)
             self.rabbit_channel_connection_local.close()
+            self.rabbit_channel_connection_local_fa.close()
             sys.exit()
         except BaseException:  # pragma: no cover
             pass
@@ -392,7 +392,7 @@ def main(skip_rabbit=False):  # pragma: no cover
         retval = rabbit.make_rabbit_connection(
             host, port, exchange, queue_name, binding_key)
         pmain.rabbit_channel_local = retval[0]
-        pmain.rabbit_channel_connection_local = retval[1]
+        pmain.rabbit_channel_connection_local_fa = retval[1]
         pmain.rabbit_thread = rabbit.start_channel(
             pmain.rabbit_channel_local,
             rabbit_callback,

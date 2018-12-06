@@ -3,10 +3,11 @@
 @author: Jeff Wang
 """
 import logging
-import logging.config
 import logging.handlers
 import os
 import socket
+
+from p.helpers.config import Config
 
 
 class Logger:
@@ -21,9 +22,7 @@ class Logger:
     level_int = {'CRITICAL': 50, 'ERROR': 40, 'WARNING': 30,
                  'INFO': 20, 'DEBUG': 10}
 
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.INFO)
-    logger.propagate = False
+    controller = Config().set_config()
 
     # logger_level:class:line number - message
     formatter = logging.Formatter('%(levelname)s:'
@@ -33,14 +32,20 @@ class Logger:
     p_formatter = logging.Formatter('%(asctime)s - %(levelname)s:'
                                     '%(module)s:%(lineno)-3d - %(message)s')
 
+    log_format = '[%(levelname)s] %(name)s - %(message)s'
+    logging.basicConfig(
+        level=level_int[controller['logger_level'].upper()], format=log_format)
+
+    poseidon_logger = logging.getLogger('poseidon')
+    logger = logging.getLogger('console')
+
+    logger.setLevel(level_int[controller['logger_level'].upper()])
+    poseidon_logger.setLevel(level_int[controller['logger_level'].upper()])
+
     # set the logger to log to console
     ch = logging.StreamHandler()
     ch.setFormatter(formatter)
     logger.addHandler(ch)
-
-    poseidon_logger = logging.getLogger('poseidon')
-    poseidon_logger.setLevel(logging.INFO)
-    poseidon_logger.propagate = False
 
     use_file_logger = True
     # ensure log file exists
@@ -74,11 +79,3 @@ class Logger:
         syslog.setFormatter(formatter)
         logger.addHandler(syslog)
         poseidon_logger.addHandler(syslog)
-
-    @staticmethod
-    def set_level(level):
-        """
-        Set the logger level. That level and above gets logged.
-        """
-        Logger.logger.setLevel(Logger.level_int[level.upper()])
-        Logger.poseidon_logger.setLevel(Logger.level_int[level.upper()])

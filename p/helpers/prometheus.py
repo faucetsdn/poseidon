@@ -15,7 +15,8 @@ from p.helpers.log import Logger
 class Prometheus():
 
     def __init__(self):
-        self.logger = Logger.poseidon_logger
+        self.logger = Logger.logger
+        self.poseidon_logger = Logger.poseidon_logger
         self.prom_metrics = {}
         self.prom_metrics['inactive'] = Gauge('poseidon_endpoint_inactive',
                                               'Number of endpoints that are inactive')

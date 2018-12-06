@@ -3,8 +3,6 @@
 Created on 3 December 2018
 @author: Charlie Lewis
 """
-import logging
-
 from transitions import Machine
 
 
@@ -44,10 +42,6 @@ class Endpoint(object):
     ]
 
     def __init__(self, hashed_val):
-        log_format = '[%(levelname)s] %(name)s - %(message)s'
-        logging.basicConfig(level=logging.INFO, format=log_format)
-        logging.getLogger('transitions').setLevel(logging.INFO)
-
         # Initialize the state machine
         self.machine = Machine(model=self, states=Endpoint.states,
                                transitions=Endpoint.transitions, initial='unknown')
