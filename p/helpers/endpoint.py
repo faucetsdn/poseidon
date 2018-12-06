@@ -46,3 +46,4 @@ class Endpoint(object):
         self.machine = Machine(model=self, states=Endpoint.states,
                                transitions=Endpoint.transitions, initial='unknown')
         self.machine.name = hashed_val
+        self.machine.endpoint_data = None

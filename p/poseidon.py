@@ -49,6 +49,7 @@ def schedule_job_kickurl(func, logger):
     machines = func.s.check_endpoints(messages=func.faucet_event)
     # TODO check the length didn't change before wiping it out
     func.faucet_event = []
+    logger.info('endpoints: {0}'.format(func.s.endpoints))
 
     # get current state
     req = requests.get('http://poseidon-api:8000/v1/network_full')
@@ -226,14 +227,14 @@ class SDNConnect(object):
                 for endpoint in self.endpoints:
                     if h == endpoint.name:
                         ep = endpoint
-                    if ep is not None and ep.endpoint_data != endpoint.endpoint_data:
-                        self.poseidon_logger.info(
-                            'Endpoint changed: {0}:{1}'.format(h, machine))
-                        # TODO update the object in the self.endpoints array
-                    elif ep is None and machine.endpoint_data['active'] == 1:
-                        self.poseidon_logger.info(
-                            'Detected new endpoint: {0}:{1}'.format(h, machine))
-                        self.endpoints.append(machine)
+                if ep is not None and ep.endpoint_data != machine.endpoint_data:
+                    self.poseidon_logger.info(
+                        'Endpoint changed: {0}:{1}'.format(h, machine))
+                    # TODO update the object in the self.endpoints array
+                elif ep is None:
+                    self.poseidon_logger.info(
+                        'Detected new endpoint: {0}:{1}'.format(h, machine))
+                    self.endpoints.append(machine)
 
 
 class Monitor(object):
