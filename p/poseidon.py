@@ -212,14 +212,14 @@ class SDNConnect(object):
                     self.logger.error(
                         'Unable to get existing DB information from Redis because {0}'.format(str(e)))
             for machine in machines:
-                h = SDNConnect().make_hash()
+                h = SDNConnect().make_hash(machine)
                 m = Endpoint(h)
                 self.endpoints.append(m)
                 self.poseidon_logger.info(
                     'Adding new endpoint {0}'.format(machine))
         else:
             for machine in machines:
-                h = SDNConnect().make_hash()
+                h = SDNConnect().make_hash(machine)
                 ep = None
                 for endpoint in self.endpoints:
                     if h == endpoint.name:
