@@ -46,16 +46,15 @@ def rabbit_callback(ch, method, properties, body, q=None):
 
 
 def schedule_job_kickurl(func, logger):
-    # func.NorthBoundControllerAbstraction.get_endpoint(
-    #    'Update_Switch_State').update_endpoint_state(messages=func.faucet_event)
+    machines = func.s.check_endpoints(messages=func.faucet_event)
     # TODO check the length didn't change before wiping it out
     func.faucet_event = []
 
     # get current state
-    r = requests.get('http://poseidon-api:8000/v1/network_full')
+    req = requests.get('http://poseidon-api:8000/v1/network_full')
 
     # send results to prometheus
-    hosts = r.json()['dataset']
+    hosts = req.json()['dataset']
     func.prom.update_metrics(hosts)
 
 
@@ -68,7 +67,7 @@ def schedule_job_reinvestigation(max_investigations, endpoints, logger):
 
     currently_investigating = 0
     currently_mirrored = 0
-    for my_hash, my_value in endpoints.state.items():
+    for my_hash, my_value in endpoints:
         if my_value.state == 'REINVESTIGATING' or my_value.next_state == 'REINVESTIGATING':
             currently_investigating += 1
         if my_value.state == 'MIRRORING' or my_value.next_state == 'MIRRORING':
@@ -98,8 +97,7 @@ def schedule_job_reinvestigation(max_investigations, endpoints, logger):
 def schedule_thread_worker(schedule, logger):
     ''' schedule thread, takes care of running processes in the future '''
     global CTRL_C
-    logLine = 'starting thread_worker'
-    logger.debug(logLine)
+    logger.debug('starting thread_worker')
     while not CTRL_C['STOP']:
         sys.stdout.flush()
         schedule.run_pending()
@@ -111,10 +109,13 @@ def schedule_thread_worker(schedule, logger):
 
 class SDNConnect(object):
 
-    def __init__(self):
-        self.logger = Logger.logger
-        self.poseidon_logger = Logger.poseidon_logger
+    def __init__(self, logger=None):
+        if not logger:
+            logger = Logger()
+        self.logger = logger.logger
+        self.poseidon_logger = logger.poseidon_logger
         self.retval = {}
+        self.r = None
         self.first_time = True
         self.sdnc = None
         self.controller = Config().set_config()
@@ -141,7 +142,7 @@ class SDNConnect(object):
                 'Unknown SDN controller config: {0}'.format(
                     self.controller))
 
-    def check_endpoints(self):
+    def check_endpoints(self, messages=None):
         self.retval['machines'] = None
         self.retval['resp'] = 'bad'
 
@@ -153,18 +154,16 @@ class SDNConnect(object):
             current = self.sdnc.get_endpoints(messages=messages)
             parsed = self.sdnc.format_endpoints(current)
             machines = parsed
+            self.poseidon_logger.debug('MACHINES:{0}'.format(machines))
+            self.find_new_machines(machines)
+            self.retval['machines'] = parsed
+            self.retval['resp'] = 'ok'
         except BaseException as e:  # pragma: no cover
             self.logger.error(
                 'Could not establish connection to {0} because {1}.'.format(
                     self.controller['URI'], e))
             self.retval['controller'] = 'Could not establish connection to {0}.'.format(
                 self.controller['URI'])
-
-        self.poseidon_logger.debug('MACHINES:{0}'.format(machines))
-        self.find_new_machines(machines)
-
-        self.retval['machines'] = parsed
-        self.retval['resp'] = 'ok'
 
         return json.dumps(self.retval)
 
@@ -247,25 +246,25 @@ class Monitor(object):
         # timer class to call things periodically in own thread
         self.schedule = schedule
 
-        m = Endpoint('foo')
-        s = SDNConnect()
-        self.controller = s.controller
+        log = Logger()
+        self.s = SDNConnect(logger=log)
+        self.controller = self.s.controller
 
         # get the loggers setup
-        Logger.set_level(s.controller['logger_level'])
-        self.logger = Logger.logger
-        self.poseidon_logger = Logger.poseidon_logger
+        log.set_level(self.controller['logger_level'])
+        self.logger = log.logger
+        self.poseidon_logger = log.poseidon_logger
 
         # setup prometheus
         self.prom = Prometheus()
         self.prom.start()
 
-        self.schedule.every(s.controller['scan_frequency']).seconds.do(
+        self.schedule.every(self.controller['scan_frequency']).seconds.do(
             partial(schedule_job_kickurl, func=self, logger=self.poseidon_logger))
 
-        self.schedule.every(s.controller['reinvestigation_frequency']).seconds.do(
+        self.schedule.every(self.controller['reinvestigation_frequency']).seconds.do(
             partial(schedule_job_reinvestigation,
-                    max_investigations=s.controller['max_concurrent_reinvestigations'],
+                    max_investigations=self.controller['max_concurrent_reinvestigations'],
                     endpoints=[],
                     logger=self.poseidon_logger))
 
@@ -296,7 +295,7 @@ class Monitor(object):
             self.poseidon_logger.debug('FAUCET Event:{0}'.format(my_obj))
             for key in my_obj:
                 ret_val[key] = my_obj[key]
-        # TODO do something with recomendation
+        # TODO do something with recommendation
         return ret_val
 
     def process(self):
@@ -317,7 +316,7 @@ class Monitor(object):
                     'faucet_event:{0}'.format(self.faucet_event))
 
     def get_q_item(self):
-        ''' attempt to get a workitem from the queue'''
+        ''' attempt to get a work item from the queue'''
         ''' m_queue -> (routing_key, body)
             a read from get_q_item should be of the form
             (boolean,(routing_key, body))
