@@ -220,8 +220,8 @@ class SDNConnect(object):
                 self.poseidon_logger.info(
                     'Detected new endpoint: {0}:{1}'.format(h, machine))
                 m = Endpoint(h)
-                m.machine.endpoint_data = machine
-                self.endpoints.append(m.machine)
+                m.endpoint_data = machine
+                self.endpoints.append(m)
             else:
                 self.poseidon_logger.info(
                     'No changes to endpoint: {0}:{1}'.format(h, machine))

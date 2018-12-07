@@ -45,9 +45,9 @@ class Endpoint(object):
         # Initialize the state machine
         self.machine = Machine(model=self, states=Endpoint.states,
                                transitions=Endpoint.transitions, initial='unknown')
-        self.machine.name = hashed_val
-        self.machine.endpoint_data = None
-        self.machine.p_next_state = None
+        self.name = hashed_val
+        self.endpoint_data = None
+        self.p_next_state = None
 
     def shutdown_endpoint(self, my_hash):
         ''' tell the controller to shutdown an endpoint by hash '''
