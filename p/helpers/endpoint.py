@@ -30,6 +30,7 @@ class Endpoint(object):
         {'trigger': 'abnormal', 'source': 'reinvestigating', 'dest': 'abnormal'},
         {'trigger': 'inactive', 'source': 'reinvestigating', 'dest': 'inactive'},
         {'trigger': 'inactive', 'source': 'queued', 'dest': 'inactive'},
+        {'trigger': 'inactive', 'source': 'shutdown', 'dest': 'inactive'},
         {'trigger': 'mirror', 'source': 'queued', 'dest': 'mirroring'},
         {'trigger': 'reinvestigate', 'source': 'queued', 'dest': 'reinvestigating'},
         # must be pulled from database to get to these transitions
@@ -48,6 +49,7 @@ class Endpoint(object):
         self.name = hashed_val
         self.endpoint_data = None
         self.p_next_state = None
+        self.p_prev_states = []
 
     def shutdown_endpoint(self, my_hash):
         ''' tell the controller to shutdown an endpoint by hash '''

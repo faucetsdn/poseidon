@@ -122,6 +122,8 @@ class SDNConnect(object):
         self.poseidon_logger = Logger.poseidon_logger
         self.get_sdn_context()
         self.endpoints = []
+
+    def get_stored_endpoints(self):
         self.connect_redis()
         # load existing endpoints if any
         if self.r:
@@ -132,6 +134,7 @@ class SDNConnect(object):
             except Exception as e:  # pragma: no cover
                 self.logger.error(
                     'Unable to get existing endpoints from Redis because {0}'.format(str(e)))
+        return
 
     def get_sdn_context(self):
         if 'TYPE' in self.controller and self.controller['TYPE'] == 'bcf':
@@ -206,8 +209,6 @@ class SDNConnect(object):
         since last call'''
         for machine in machines:
             h = SDNConnect().make_hash(machine)
-            self.logger.info(
-                'Checking endpoint {0}'.format(machine))
             ep = None
             for endpoint in self.endpoints:
                 if h == endpoint.name:
@@ -215,18 +216,20 @@ class SDNConnect(object):
             if ep is not None and ep.endpoint_data != machine:
                 self.poseidon_logger.info(
                     'Endpoint changed: {0}:{1}'.format(h, machine))
-                # TODO update the object in the self.endpoints array
+                ep.endpoint_data = machine
+                if ep.state == 'inactive' and machine['active'] == 1:
+                    if ep.p_next_state in ['known', 'abnormal']:
+                        ep.set_state(ep.p_next_state)
+                    else:
+                        ep.unknown()
+                    ep.p_prev_states.append((ep.state, int(time.time())))
             elif ep is None:
                 self.poseidon_logger.info(
                     'Detected new endpoint: {0}:{1}'.format(h, machine))
                 m = Endpoint(h)
+                m.p_prev_states.append((m.state, int(time.time())))
                 m.endpoint_data = machine
-                self.poseidon_logger.info(
-                    'check the initial state of endpoint: {0}'.format(m.state))
                 self.endpoints.append(m)
-            else:
-                self.poseidon_logger.info(
-                    'No changes to endpoint: {0}:{1}'.format(h, machine))
 
         # store latest version of endpoints in redis
         if self.r:
@@ -256,22 +259,34 @@ class Monitor(object):
         # timer class to call things periodically in own thread
         self.schedule = schedule
 
-        # initialize sdnconnect
-        self.s = SDNConnect()
-
         # setup prometheus
         self.prom = Prometheus()
         self.prom.start()
 
+        # initialize sdnconnect
+        self.s = SDNConnect()
+
+        # retrieve endpoints from redis
+        self.s.get_stored_endpoints()
+        # set all retrieved endpoints to inactive at the start
+        for endpoint in self.s.endpoints:
+            endpoint.p_next_state = endpoint.state
+            endpoint.endpoint_data['active'] = 0
+            endpoint.inactive()
+            endpoint.p_prev_states.append((endpoint.state, int(time.time())))
+
+        # schedule periodic scan of endpoints thread
         self.schedule.every(self.controller['scan_frequency']).seconds.do(
             partial(schedule_job_kickurl, func=self, logger=self.poseidon_logger))
 
+        # schedule periodic reinvestigations thread
         self.schedule.every(self.controller['reinvestigation_frequency']).seconds.do(
             partial(schedule_job_reinvestigation,
                     max_investigations=self.controller['max_concurrent_reinvestigations'],
                     endpoints=[],
                     logger=self.poseidon_logger))
 
+        # schedule all threads
         self.schedule_thread = threading.Thread(
             target=partial(
                 schedule_thread_worker,
@@ -319,11 +334,8 @@ class Monitor(object):
                 self.faucet_event.append(self.format_rabbit_message(item))
                 self.poseidon_logger.info(
                     'faucet_event:{0}'.format(self.faucet_event))
-                # this can trigger inactive
 
             for endpoint in self.s.endpoints:
-                self.poseidon_logger.info(
-                    'endpoint {0}:{1}'.format(endpoint.name, endpoint.state))
                 if endpoint.state == 'unknown':
                     # move to mirroring state
                     if self.investigations < self.controller['max_concurrent_reinvestigations']:
