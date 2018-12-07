@@ -51,7 +51,10 @@ def schedule_job_kickurl(func, logger):
     machines = func.s.check_endpoints(messages=func.faucet_event)
     # TODO check the length didn't change before wiping it out
     func.faucet_event = []
-    logger.info('endpoints: {0}'.format(func.s.endpoints))
+    endpoints = []
+    for endpoint in func.s.endpoints:
+        endpoints.append((endpoint.name, endpoint.state))
+    logger.info('endpoints: {0}'.format(endpoints))
 
     # get current state
     req = requests.get('http://poseidon-api:8000/v1/network_full')
