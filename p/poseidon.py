@@ -221,6 +221,8 @@ class SDNConnect(object):
                     'Detected new endpoint: {0}:{1}'.format(h, machine))
                 m = Endpoint(h)
                 m.endpoint_data = machine
+                self.poseidon_logger.info(
+                    'check the initial state of endpoint: {0}'.format(m.state))
                 self.endpoints.append(m)
             else:
                 self.poseidon_logger.info(
