@@ -171,7 +171,7 @@ class SDNConnect(object):
             current = self.sdnc.get_endpoints(messages=messages)
             parsed = self.sdnc.format_endpoints(current)
             machines = parsed
-            self.poseidon_logger.debug('MACHINES:{0}'.format(machines))
+            self.poseidon_logger.info('MACHINES:{0}'.format(machines))
             self.retval['machines'] = parsed
             self.retval['resp'] = 'ok'
         except BaseException as e:  # pragma: no cover
