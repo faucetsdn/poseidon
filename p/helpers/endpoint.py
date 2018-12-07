@@ -47,7 +47,7 @@ class Endpoint(object):
                                transitions=Endpoint.transitions, initial='unknown')
         self.machine.name = hashed_val
         self.machine.endpoint_data = None
-        self.machine.next_state = None
+        self.machine.p_next_state = None
 
     def shutdown_endpoint(self, my_hash):
         ''' tell the controller to shutdown an endpoint by hash '''
