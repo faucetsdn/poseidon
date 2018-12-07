@@ -217,7 +217,7 @@ class SDNConnect(object):
                 if h == endpoint.name:
                     ep = endpoint
             self.poseidon_logger.info(
-                'find_new_machine machine: {0} | {1}'.format(ep, machine))
+                'find_new_machine machine: {0} | {1}'.format(ep.endpoint_data, machine))
             if ep is not None and ep.endpoint_data != machine:
                 self.poseidon_logger.info(
                     'Endpoint changed: {0}:{1}'.format(h, machine))
