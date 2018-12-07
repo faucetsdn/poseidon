@@ -223,6 +223,11 @@ class SDNConnect(object):
                     else:
                         ep.unknown()
                     ep.p_prev_states.append((ep.state, int(time.time())))
+                elif ep.state != 'inactive' and machine['active'] == 0:
+                    ep.p_next_state(ep.state)
+                    ep.endpoint_data['active'] = 0
+                    ep.inactive()
+                    ep.p_prev_states.append((ep.state, int(time.time())))
             elif ep is None:
                 self.poseidon_logger.info(
                     'Detected new endpoint: {0}:{1}'.format(h, machine))
