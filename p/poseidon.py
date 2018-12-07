@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-The main entrypoint for Poseidon, controls the state machine and defines the
-Monitor class.
+The main entrypoint for Poseidon, schedules the threads, connects to SDN
+controllers and defines the Monitor class.
 
 Created on 3 December 2018
 @author: Charlie Lewis
@@ -10,6 +10,7 @@ Created on 3 December 2018
 import ast
 import hashlib
 import json
+import pickle
 import random
 import signal
 import sys
@@ -20,6 +21,7 @@ from functools import partial
 import queue
 import requests
 import schedule
+from redis import StrictRedis
 
 from p.controllers.bcf.bcf import BcfProxy
 from p.controllers.faucet.faucet import FaucetProxy
@@ -115,11 +117,21 @@ class SDNConnect(object):
         self.r = None
         self.first_time = True
         self.sdnc = None
-        self.controller = Config().set_config()
+        self.controller = Config().get_config()
         self.logger = Logger.logger
         self.poseidon_logger = Logger.poseidon_logger
         self.get_sdn_context()
         self.endpoints = []
+        self.connect_redis()
+        # load existing endpoints if any
+        if self.r:
+            try:
+                p_endpoints = self.r.get('p_endpoints')
+                if p_endpoints:
+                    self.endpoints = pickle.loads(p_endpoints)
+            except Exception as e:  # pragma: no cover
+                self.logger.error(
+                    'Unable to get existing endpoints from Redis because {0}'.format(str(e)))
 
     def get_sdn_context(self):
         if 'TYPE' in self.controller and self.controller['TYPE'] == 'bcf':
@@ -179,66 +191,49 @@ class SDNConnect(object):
         post_h = h.hexdigest()
         return post_h
 
+    def connect_redis(self, host='redis', port=6379, db=0):
+        self.r = None
+        try:
+            self.r = StrictRedis(host=host, port=port, db=db,
+                                 socket_connect_timeout=2)
+        except Exception as e:
+            self.logger.error(
+                'Failed connect to Redis because: {0}'.format(str(e)))
+        return
+
     def find_new_machines(self, machines):
         '''parse switch structure to find new machines added to network
         since last call'''
-        if self.first_time:
-            self.first_time = False
-            # db call to see if really need to run things
-            # TODO - still not right
-            if self.r:
-                try:
-                    mac_addresses = self.r.smembers('mac_addresses')
-                    for mac in mac_addresses:
-                        try:
-                            mac_info = self.r.hgetall(mac)
-                            if 'poseidon_hash' in mac_info:
-                                try:
-                                    poseidon_info = self.r.hgetall(
-                                        mac_info['poseidon_hash'])
-                                    if 'endpoint_data' in poseidon_info:
-                                        endpoint_data = ast.literal_eval(
-                                            poseidon_info['endpoint_data'])
-                                        self.poseidon_logger.info(
-                                            'adding address to known systems {0}'.format(endpoint_data))
-                                        # endpoint_data seems to be incorrect
-                                        #end_point = EndPoint(endpoint_data, state='KNOWN')
-                                        # self.endpoints.set(end_point)
-                                except Exception as e:  # pragma: no cover
-                                    self.logger.error(
-                                        'Unable to get endpoint data for {0} from Redis because {1}'.format(mac, str(e)))
-                        except Exception as e:  # pragma: no cover
-                            self.logger.error(
-                                'Unable to get MAC information for {0} from Redis because {1}'.format(mac, str(e)))
-                except Exception as e:  # pragma: no cover
-                    self.logger.error(
-                        'Unable to get existing DB information from Redis because {0}'.format(str(e)))
-            for machine in machines:
-                h = SDNConnect().make_hash(machine)
+        for machine in machines:
+            h = SDNConnect().make_hash(machine)
+            self.logger.info(
+                'Checking endpoint {0}'.format(machine))
+            ep = None
+            for endpoint in self.endpoints:
+                if h == endpoint.name:
+                    ep = endpoint
+            if ep is not None and ep.endpoint_data != machine:
+                self.poseidon_logger.info(
+                    'Endpoint changed: {0}:{1}'.format(h, machine))
+                # TODO update the object in the self.endpoints array
+            elif ep is None:
+                self.poseidon_logger.info(
+                    'Detected new endpoint: {0}:{1}'.format(h, machine))
                 m = Endpoint(h)
                 m.machine.endpoint_data = machine
                 self.endpoints.append(m.machine)
-                self.logger.info(
-                    'Adding new endpoint {0}'.format(machine))
-        else:
-            for machine in machines:
-                h = SDNConnect().make_hash(machine)
-                self.logger.info(
-                    'Checking endpoint {0}'.format(machine))
-                ep = None
-                for endpoint in self.endpoints:
-                    if h == endpoint.name:
-                        ep = endpoint
-                if ep is not None and ep.endpoint_data != machine:
-                    self.poseidon_logger.info(
-                        'Endpoint changed: {0}:{1}'.format(h, machine))
-                    # TODO update the object in the self.endpoints array
-                elif ep is None:
-                    self.poseidon_logger.info(
-                        'Detected new endpoint: {0}:{1}'.format(h, machine))
-                    m = Endpoint(h)
-                    m.machine.endpoint_data = machine
-                    self.endpoints.append(m.machine)
+            else:
+                self.poseidon_logger.info(
+                    'No changes to endpoint: {0}:{1}'.format(h, machine))
+
+        # store latest version of endpoints in redis
+        if self.r:
+            try:
+                pickled_endpoints = pickle.dumps(self.endpoints)
+                self.r.set('p_endpoints', pickled_endpoints)
+            except Exception as e:  # pragma: no cover
+                self.logger.error(
+                    'Unable to store endpoints in Redis because {0}'.format(str(e)))
 
 
 class Monitor(object):
@@ -247,9 +242,10 @@ class Monitor(object):
         self.faucet_event = []
         self.m_queue = queue.Queue()
         self.skip_rabbit = skip_rabbit
+        self.investigations = 0
 
         # get config options
-        self.controller = Config().set_config()
+        self.controller = Config().get_config()
 
         # get the loggers setup
         self.logger = Logger.logger
@@ -316,10 +312,38 @@ class Monitor(object):
                 ml_returns = self.format_rabbit_message(item)
                 self.poseidon_logger.info(
                     'ml_returns:{0}'.format(ml_returns))
+                # this can trigger change out of mirroring/reinvestigating
             elif found_work and item[0] == self.controller['FA_RABBIT_ROUTING_KEY']:
                 self.faucet_event.append(self.format_rabbit_message(item))
                 self.poseidon_logger.info(
                     'faucet_event:{0}'.format(self.faucet_event))
+                # this can trigger inactive
+
+            for endpoint in self.s.endpoints:
+                self.poseidon_logger.info(
+                    'endpoint {0}:{1}'.format(endpoint.name, endpoint.state))
+                if endpoint.state == 'unknown':
+                    # move to mirroring state
+                    if self.investigations < self.controller['max_concurrent_reinvestigations']:
+                        self.investigations += 1
+                        endpoint.mirror()
+                    else:
+                        endpoint.next_state = 'mirroring'
+                        endpoint.queue()
+                elif endpoint.state == 'known':
+                    pass
+                elif endpoint.state == 'mirroring':
+                    pass
+                elif endpoint.state == 'inactive':
+                    pass
+                elif endpoint.state == 'abnormal':
+                    pass
+                elif endpoint.state == 'shutdown':
+                    pass
+                elif endpoint.state == 'reinvestigating':
+                    pass
+                elif endpoint.state == 'queued':
+                    pass
 
     def get_q_item(self):
         ''' attempt to get a work item from the queue'''

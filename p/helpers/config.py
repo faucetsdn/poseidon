@@ -21,7 +21,7 @@ class Config():
                 'Could not find poseidon config. Make sure to set the POSEIDON_CONFIG environment variable')
         self.config.read_file(open(self.config_path, 'r'))
 
-    def set_config(self):
+    def get_config(self):
         # set some defaults
         controller = {'URI': None,
                       'USER': None,

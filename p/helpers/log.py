@@ -22,7 +22,7 @@ class Logger:
     level_int = {'CRITICAL': 50, 'ERROR': 40, 'WARNING': 30,
                  'INFO': 20, 'DEBUG': 10}
 
-    controller = Config().set_config()
+    controller = Config().get_config()
 
     # logger_level:class:line number - message
     formatter = logging.Formatter('%(levelname)s:'
