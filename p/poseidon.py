@@ -192,6 +192,12 @@ class SDNConnect(object):
     def find_new_machines(self, machines):
         '''parse switch structure to find new machines added to network
         since last call'''
+        endpoints = []
+        for endpoint in self.endpoints:
+            endpoints.append(
+                (endpoint.name, endpoint.state, endpoint.endpoint_data))
+        self.poseidon_logger.info('pre endpoints: {0}'.format(endpoints))
+
         for machine in machines:
             h = Endpoint.make_hash(machine)
             ep = None
@@ -224,7 +230,7 @@ class SDNConnect(object):
         for endpoint in self.endpoints:
             endpoints.append(
                 (endpoint.name, endpoint.state, endpoint.endpoint_data))
-        self.poseidon_logger.info('endpoints: {0}'.format(endpoints))
+        self.poseidon_logger.info('post endpoints: {0}'.format(endpoints))
 
         # store latest version of endpoints in redis
         if self.r:
