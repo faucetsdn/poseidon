@@ -47,6 +47,12 @@ def rabbit_callback(ch, method, properties, body, q=None):
 
 
 def schedule_job_kickurl(func, logger):
+    endpoints = []
+    for endpoint in func.s.endpoints:
+        endpoints.append(
+            (endpoint.name, endpoint.state, endpoint.endpoint_data))
+    self.poseidon_logger.info('kickurl endpoints: {0}'.format(endpoints))
+
     machines = func.s.check_endpoints(messages=func.faucet_event)
     # TODO check the length didn't change before wiping it out
     func.faucet_event = []
@@ -161,6 +167,12 @@ class SDNConnect(object):
         current = None
         parsed = None
         machines = {}
+
+        endpoints = []
+        for endpoint in self.endpoints:
+            endpoints.append(
+                (endpoint.name, endpoint.state, endpoint.endpoint_data))
+        self.poseidon_logger.info('check endpoints: {0}'.format(endpoints))
 
         try:
             current = self.sdnc.get_endpoints(messages=messages)
