@@ -51,10 +51,6 @@ def schedule_job_kickurl(func, logger):
     machines = func.s.check_endpoints(messages=func.faucet_event)
     # TODO check the length didn't change before wiping it out
     func.faucet_event = []
-    endpoints = []
-    for endpoint in func.s.endpoints:
-        endpoints.append((endpoint.name, endpoint.state))
-    logger.info('endpoints: {0}'.format(endpoints))
 
     # get current state
     req = requests.get('http://poseidon-api:8000/v1/network_full')
@@ -171,7 +167,6 @@ class SDNConnect(object):
             current = self.sdnc.get_endpoints(messages=messages)
             parsed = self.sdnc.format_endpoints(current)
             machines = parsed
-            self.poseidon_logger.info('MACHINES:{0}'.format(machines))
             self.retval['machines'] = parsed
             self.retval['resp'] = 'ok'
         except BaseException as e:  # pragma: no cover
@@ -216,8 +211,6 @@ class SDNConnect(object):
             for endpoint in self.endpoints:
                 if h == endpoint.name:
                     ep = endpoint
-            self.poseidon_logger.info(
-                'find_new_machine machine: {0} | {1}'.format(ep.endpoint_data, machine))
             if ep is not None and ep.endpoint_data != machine:
                 self.poseidon_logger.info(
                     'Endpoint changed: {0}:{1}'.format(h, machine))
@@ -239,6 +232,11 @@ class SDNConnect(object):
                 m.p_prev_states.append((m.state, int(time.time())))
                 m.endpoint_data = machine
                 self.endpoints.append(m)
+
+        endpoints = []
+        for endpoint in self.endpoints:
+            endpoints.append((endpoint.name, endpoint.state))
+        logger.info('endpoints: {0}'.format(endpoints))
 
         # store latest version of endpoints in redis
         if self.r:
