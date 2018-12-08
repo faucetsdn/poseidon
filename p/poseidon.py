@@ -68,29 +68,23 @@ def schedule_job_reinvestigation(max_investigations, endpoints, logger):
     candidates = []
 
     currently_investigating = 0
-    currently_mirrored = 0
-    for my_hash, my_value in endpoints:
-        if my_value.state == 'REINVESTIGATING' or my_value.next_state == 'REINVESTIGATING':
+    for endpoint in endpoints:
+        if endpoint.state == 'REINVESTIGATING' or endpoint.state == 'MIRRORING':
             currently_investigating += 1
-        if my_value.state == 'MIRRORING' or my_value.next_state == 'MIRRORING':
-            currently_mirrored += 1
-        elif my_value.state == 'KNOWN':
-            candidates.append(my_hash)
+        elif endpoint.state == 'KNOWN':
+            candidates.append(endpoint)
 
     # get random order of things that are known
-    random.shuffle(candidates)
-    ostr = '{0} investigating & {1} mirroring'.format(
-        currently_investigating, currently_mirrored)
-    logger.debug(ostr)
-    if currently_investigating + currently_mirrored <= max_investigations:
-        ostr = 'room to investigate'
-        logger.debug(ostr)
+    if currently_investigating < max_investigations:
         for x in range(max_investigations - currently_investigating):
-            if len(candidates) >= 1:
+            if len(candidates) > 0:
+                random.shuffle(candidates)
                 chosen = candidates.pop()
                 ostr = 'starting investigation {0}:{1}'.format(x, chosen)
                 logger.debug(ostr)
-                endpoints.state[chosen].next_state = 'REINVESTIGATING'
+                endpoint.reinvestigate()
+                endpoint.p_prev_states.append(
+                    (endpoint.state, int(time.time())))
     else:
         ostr = 'investigators all busy'
         logger.debug(ostr)
@@ -272,7 +266,7 @@ class Monitor(object):
         self.schedule.every(self.controller['reinvestigation_frequency']).seconds.do(
             partial(schedule_job_reinvestigation,
                     max_investigations=self.controller['max_concurrent_reinvestigations'],
-                    endpoints=[],
+                    endpoints=self.s.endpoints,
                     logger=self.poseidon_logger))
 
         # schedule all threads
@@ -330,9 +324,13 @@ class Monitor(object):
                     if self.investigations < self.controller['max_concurrent_reinvestigations']:
                         self.investigations += 1
                         endpoint.mirror()
+                        endpoint.p_prev_states.append(
+                            (endpoint.state, int(time.time())))
                     else:
                         endpoint.next_state = 'mirroring'
                         endpoint.queue()
+                        endpoint.p_prev_states.append(
+                            (endpoint.state, int(time.time())))
                 elif endpoint.state == 'known':
                     pass
                 elif endpoint.state == 'mirroring':
