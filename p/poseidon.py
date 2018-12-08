@@ -160,6 +160,7 @@ class SDNConnect(object):
                     self.controller))
 
     def check_endpoints(self, messages=None):
+        retval = {}
         retval['machines'] = None
         retval['resp'] = 'bad'
 
