@@ -236,7 +236,7 @@ class SDNConnect(object):
         endpoints = []
         for endpoint in self.endpoints:
             endpoints.append((endpoint.name, endpoint.state))
-        logger.info('endpoints: {0}'.format(endpoints))
+        self.poseidon_logger.info('endpoints: {0}'.format(endpoints))
 
         # store latest version of endpoints in redis
         if self.r:
