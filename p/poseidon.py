@@ -205,6 +205,8 @@ class SDNConnect(object):
     def find_new_machines(self, machines):
         '''parse switch structure to find new machines added to network
         since last call'''
+        self.poseidon_logger.info(
+            'self object from find_new_machines {0}'.format(self))
         for machine in machines:
             h = SDNConnect().make_hash(machine)
             ep = None
