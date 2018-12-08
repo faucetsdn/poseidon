@@ -169,9 +169,10 @@ class Parser:
         elif 'L2_EXPIRE' in message:
             self.poseidon_logger.debug(
                 'got faucet message for l2_expire: {0}'.format(message))
-            if message['L2_EXPIRE']['eth_src'] in self.mac_table:
-                self.mac_table[message['L2_EXPIRE']
-                               ['eth_src']][0]['active'] = 0
+            # TODO temporarily commenting out
+            # if message['L2_EXPIRE']['eth_src'] in self.mac_table:
+            #    self.mac_table[message['L2_EXPIRE']
+            #                   ['eth_src']][0]['active'] = 0
         elif 'PORT_CHANGE' in message:
             self.poseidon_logger.debug(
                 'got faucet message for port_change: {0}'.format(message))
