@@ -209,7 +209,7 @@ class SDNConnect(object):
                         ep.unknown()
                     ep.p_prev_states.append((ep.state, int(time.time())))
                 elif ep.state != 'inactive' and machine['active'] == 0:
-                    ep.p_next_state(ep.state)
+                    ep.p_next_state = ep.state
                     ep.inactive()
                     ep.p_prev_states.append((ep.state, int(time.time())))
             elif ep is None:
