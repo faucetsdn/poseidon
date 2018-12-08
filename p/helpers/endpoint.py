@@ -3,6 +3,8 @@
 Created on 3 December 2018
 @author: Charlie Lewis
 """
+import hashlib
+
 from transitions import Machine
 
 
@@ -90,3 +92,15 @@ class Endpoint(object):
                 'endpoint:{0}:{1}:{2}:{3}'.format(my_hash, my_mac, my_ip, next_state))
             return True
         return False
+
+    @staticmethod
+    def make_hash(machine):
+        ''' hash the unique metadata parts of an endpoint '''
+        h = hashlib.new('ripemd160')
+        pre_h = str()
+        post_h = None
+        for word in ['tenant', 'mac', 'segment']:
+            pre_h = pre_h + str(machine.get(word, 'missing'))
+        h.update(pre_h.encode('utf-8'))
+        post_h = h.hexdigest()
+        return post_h

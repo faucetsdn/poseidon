@@ -8,7 +8,6 @@ Created on 3 December 2018
 @author: Charlie Lewis
 """
 import ast
-import hashlib
 import json
 import pickle
 import random
@@ -180,18 +179,6 @@ class SDNConnect(object):
 
         return json.dumps(self.retval)
 
-    @staticmethod
-    def make_hash(machine):
-        ''' hash the unique metadata parts of an endpoint '''
-        h = hashlib.new('ripemd160')
-        pre_h = str()
-        post_h = None
-        for word in ['tenant', 'mac', 'segment']:
-            pre_h = pre_h + str(machine.get(word, 'missing'))
-        h.update(pre_h.encode('utf-8'))
-        post_h = h.hexdigest()
-        return post_h
-
     def connect_redis(self, host='redis', port=6379, db=0):
         self.r = None
         try:
@@ -206,7 +193,7 @@ class SDNConnect(object):
         '''parse switch structure to find new machines added to network
         since last call'''
         for machine in machines:
-            h = SDNConnect().make_hash(machine)
+            h = Endpoint.make_hash(machine)
             ep = None
             for endpoint in self.endpoints:
                 if h == endpoint.name:
