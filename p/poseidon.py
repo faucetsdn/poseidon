@@ -15,6 +15,7 @@ import signal
 import sys
 import threading
 import time
+from copy import deepcopy
 from functools import partial
 
 import queue
@@ -47,12 +48,6 @@ def rabbit_callback(ch, method, properties, body, q=None):
 
 
 def schedule_job_kickurl(func, logger):
-    endpoints = []
-    for endpoint in func.s.endpoints:
-        endpoints.append(
-            (endpoint.name, endpoint.state, endpoint.endpoint_data))
-    func.poseidon_logger.info('kickurl endpoints: {0}'.format(endpoints))
-
     machines = func.s.check_endpoints(messages=func.faucet_event)
     # TODO check the length didn't change before wiping it out
     func.faucet_event = []
@@ -168,22 +163,9 @@ class SDNConnect(object):
         parsed = None
         machines = {}
 
-        endpoints = []
-        for endpoint in self.endpoints:
-            endpoints.append(
-                (endpoint.name, endpoint.state, endpoint.endpoint_data))
-        self.poseidon_logger.info('check endpoints: {0}'.format(endpoints))
-
         try:
             current = self.sdnc.get_endpoints(messages=messages)
-            endpoints = []
-            for endpoint in self.endpoints:
-                endpoints.append(
-                    (endpoint.name, endpoint.state, endpoint.endpoint_data))
-            self.poseidon_logger.info(
-                'after get_endpoints endpoints: {0}'.format(endpoints))
             parsed = self.sdnc.format_endpoints(current)
-            self.poseidon_logger.info('machines: {0}'.format(parsed))
             retval['machines'] = parsed
             retval['resp'] = 'ok'
         except BaseException as e:  # pragma: no cover
@@ -210,12 +192,6 @@ class SDNConnect(object):
     def find_new_machines(self, machines):
         '''parse switch structure to find new machines added to network
         since last call'''
-        endpoints = []
-        for endpoint in self.endpoints:
-            endpoints.append(
-                (endpoint.name, endpoint.state, endpoint.endpoint_data))
-        self.poseidon_logger.info('pre endpoints: {0}'.format(endpoints))
-
         for machine in machines:
             h = Endpoint.make_hash(machine)
             ep = None
@@ -225,7 +201,7 @@ class SDNConnect(object):
             if ep is not None and ep.endpoint_data != machine:
                 self.poseidon_logger.info(
                     'Endpoint changed: {0}:{1}'.format(h, machine))
-                ep.endpoint_data = machine
+                ep.endpoint_data = deepcopy(machine)
                 if ep.state == 'inactive' and machine['active'] == 1:
                     if ep.p_next_state in ['known', 'abnormal']:
                         ep.set_state(ep.p_next_state)
@@ -241,14 +217,8 @@ class SDNConnect(object):
                     'Detected new endpoint: {0}:{1}'.format(h, machine))
                 m = Endpoint(h)
                 m.p_prev_states.append((m.state, int(time.time())))
-                m.endpoint_data = machine
+                m.endpoint_data = deepcopy(machine)
                 self.endpoints.append(m)
-
-        endpoints = []
-        for endpoint in self.endpoints:
-            endpoints.append(
-                (endpoint.name, endpoint.state, endpoint.endpoint_data))
-        self.poseidon_logger.info('post endpoints: {0}'.format(endpoints))
 
         # store latest version of endpoints in redis
         if self.r:
