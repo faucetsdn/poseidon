@@ -47,7 +47,7 @@ def rabbit_callback(ch, method, properties, body, q=None):
         Logger.poseidon_logger.debug('posedionMain workQueue is None')
 
 
-def schedule_job_kickurl(func, logger):
+def schedule_job_kickurl(func):
     machines = func.s.check_endpoints(messages=func.faucet_event)
     # TODO check the length didn't change before wiping it out
     func.faucet_event = []
@@ -60,34 +60,28 @@ def schedule_job_kickurl(func, logger):
     func.prom.update_metrics(hosts)
 
 
-def schedule_job_reinvestigation(max_investigations, endpoints, logger):
+def schedule_job_reinvestigation(func):
     ''' put endpoints into the reinvestigation state if possible '''
     ostr = 'reinvestigation time'
-    logger.debug(ostr)
-    logger.debug('endpoints:{0}'.format(endpoints))
+    self.poseidon_logger.debug(ostr)
+    self.poseidon_logger.debug('endpoints:{0}'.format(func.s.endpoints))
     candidates = []
 
-    currently_investigating = 0
-    for endpoint in endpoints:
-        if endpoint.state == 'REINVESTIGATING' or endpoint.state == 'MIRRORING':
-            currently_investigating += 1
-        elif endpoint.state == 'KNOWN':
+    for endpoint in func.s.endpoints:
+        if endpoint.state in ['known', 'abnormal']:
             candidates.append(endpoint)
 
     # get random order of things that are known
-    if currently_investigating < max_investigations:
-        for x in range(max_investigations - currently_investigating):
-            if len(candidates) > 0:
-                random.shuffle(candidates)
-                chosen = candidates.pop()
-                ostr = 'starting investigation {0}:{1}'.format(x, chosen)
-                logger.debug(ostr)
-                endpoint.reinvestigate()
-                endpoint.p_prev_states.append(
-                    (endpoint.state, int(time.time())))
-    else:
-        ostr = 'investigators all busy'
-        logger.debug(ostr)
+    for x in range(func.controller['max_investigations'] - func.s.investigations):
+        if len(candidates) > 0:
+            random.shuffle(candidates)
+            chosen = candidates.pop()
+            ostr = 'starting investigation {0}:{1}'.format(x, chosen)
+            self.poseidon_logger.debug(ostr)
+            chosen.reinvestigate()
+            func.s.investigations += 1
+            chosen.p_prev_states.append(
+                (endpoint.state, int(time.time())))
 
 
 def schedule_thread_worker(schedule, logger):
@@ -114,6 +108,7 @@ class SDNConnect(object):
         self.poseidon_logger = Logger.poseidon_logger
         self.get_sdn_context()
         self.endpoints = []
+        self.investigations = 0
 
     def get_stored_endpoints(self):
         self.connect_redis()
@@ -203,6 +198,8 @@ class SDNConnect(object):
                         ep.unknown()
                     ep.p_prev_states.append((ep.state, int(time.time())))
                 elif ep.state != 'inactive' and machine['active'] == 0:
+                    if ep.state in ['mirroring', 'reinvestigating']:
+                        self.investigations -= 1
                     ep.p_next_state = ep.state
                     ep.inactive()
                     ep.p_prev_states.append((ep.state, int(time.time())))
@@ -230,7 +227,6 @@ class Monitor(object):
         self.faucet_event = []
         self.m_queue = queue.Queue()
         self.skip_rabbit = skip_rabbit
-        self.investigations = 0
 
         # get config options
         self.controller = Config().get_config()
@@ -260,14 +256,11 @@ class Monitor(object):
 
         # schedule periodic scan of endpoints thread
         self.schedule.every(self.controller['scan_frequency']).seconds.do(
-            partial(schedule_job_kickurl, func=self, logger=self.poseidon_logger))
+            partial(schedule_job_kickurl, func=self))
 
         # schedule periodic reinvestigations thread
         self.schedule.every(self.controller['reinvestigation_frequency']).seconds.do(
-            partial(schedule_job_reinvestigation,
-                    max_investigations=self.controller['max_concurrent_reinvestigations'],
-                    endpoints=self.s.endpoints,
-                    logger=self.poseidon_logger))
+            partial(schedule_job_reinvestigation, func=self))
 
         # schedule all threads
         self.schedule_thread = threading.Thread(
@@ -321,8 +314,8 @@ class Monitor(object):
             for endpoint in self.s.endpoints:
                 if endpoint.state == 'unknown':
                     # move to mirroring state
-                    if self.investigations < self.controller['max_concurrent_reinvestigations']:
-                        self.investigations += 1
+                    if self.s.investigations < self.controller['max_concurrent_reinvestigations']:
+                        self.s.investigations += 1
                         endpoint.mirror()
                         endpoint.p_prev_states.append(
                             (endpoint.state, int(time.time())))
