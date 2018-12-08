@@ -117,7 +117,6 @@ def schedule_thread_worker(schedule, logger):
 class SDNConnect(object):
 
     def __init__(self):
-        self.retval = {}
         self.r = None
         self.first_time = True
         self.sdnc = None
@@ -161,8 +160,8 @@ class SDNConnect(object):
                     self.controller))
 
     def check_endpoints(self, messages=None):
-        self.retval['machines'] = None
-        self.retval['resp'] = 'bad'
+        retval['machines'] = None
+        retval['resp'] = 'bad'
 
         current = None
         parsed = None
@@ -178,18 +177,19 @@ class SDNConnect(object):
             current = self.sdnc.get_endpoints(messages=messages)
             parsed = self.sdnc.format_endpoints(current)
             machines = parsed
-            self.retval['machines'] = parsed
-            self.retval['resp'] = 'ok'
+            self.poseidon_logger.info('machines: {0}'.format(machines))
+            retval['machines'] = parsed
+            retval['resp'] = 'ok'
         except BaseException as e:  # pragma: no cover
             self.logger.error(
                 'Could not establish connection to {0} because {1}.'.format(
                     self.controller['URI'], e))
-            self.retval['controller'] = 'Could not establish connection to {0}.'.format(
+            retval['controller'] = 'Could not establish connection to {0}.'.format(
                 self.controller['URI'])
 
         self.find_new_machines(machines)
 
-        return json.dumps(self.retval)
+        return json.dumps(retval)
 
     def connect_redis(self, host='redis', port=6379, db=0):
         self.r = None
