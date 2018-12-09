@@ -38,7 +38,7 @@ class Collector(object):
             'iters': self.iterations,
             'metadata': str(self.endpoint_data)}
 
-        self.poseidon_logger.debug('vent payload: ' + str(payload))
+        self.poseidon_logger.info('vent payload: ' + str(payload))
 
         vent_addr = self.controller['vent_ip'] + \
             ':' + self.controller['vent_port']
@@ -46,10 +46,10 @@ class Collector(object):
 
         try:
             resp = requests.post(uri, data=json.dumps(payload))
-            self.poseidon_logger.debug(
+            self.poseidon_logger.info(
                 'collector response: ' + resp.text)
         except Exception as e:  # pragma: no cover
-            self.poseidon_logger.debug(
+            self.poseidon_logger.error(
                 'failed to start vent collector' + str(e))
         return
 
