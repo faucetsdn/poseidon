@@ -63,8 +63,8 @@ def schedule_job_kickurl(func):
 def schedule_job_reinvestigation(func):
     ''' put endpoints into the reinvestigation state if possible '''
     ostr = 'reinvestigation time'
-    self.poseidon_logger.debug(ostr)
-    self.poseidon_logger.debug('endpoints:{0}'.format(func.s.endpoints))
+    func.poseidon_logger.debug(ostr)
+    func.poseidon_logger.debug('endpoints:{0}'.format(func.s.endpoints))
     candidates = []
 
     for endpoint in func.s.endpoints:
@@ -77,7 +77,7 @@ def schedule_job_reinvestigation(func):
             random.shuffle(candidates)
             chosen = candidates.pop()
             ostr = 'starting investigation {0}:{1}'.format(x, chosen)
-            self.poseidon_logger.debug(ostr)
+            func.poseidon_logger.debug(ostr)
             chosen.reinvestigate()
             func.s.investigations += 1
             chosen.p_prev_states.append(
