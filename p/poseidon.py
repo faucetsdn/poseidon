@@ -251,10 +251,12 @@ class Monitor(object):
         self.s.get_stored_endpoints()
         # set all retrieved endpoints to inactive at the start
         for endpoint in self.s.endpoints:
-            endpoint.p_next_state = endpoint.state
-            endpoint.endpoint_data['active'] = 0
-            endpoint.inactive()
-            endpoint.p_prev_states.append((endpoint.state, int(time.time())))
+            if endpoint.state != 'inactive':
+                endpoint.p_next_state = endpoint.state
+                endpoint.endpoint_data['active'] = 0
+                endpoint.inactive()
+                endpoint.p_prev_states.append(
+                    (endpoint.state, int(time.time())))
 
         # schedule periodic scan of endpoints thread
         self.schedule.every(self.controller['scan_frequency']).seconds.do(
