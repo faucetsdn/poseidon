@@ -36,7 +36,7 @@ class Collector(object):
             'interval': self.interval,
             'filter': '\'ether host {0}\''.format(self.mac),
             'iters': self.iterations,
-            'metadata': str(self.endpoint_data)}
+            'metadata': "{'endpoint_data': " + str(self.endpoint_data) + '}'}
 
         self.poseidon_logger.info('vent payload: ' + str(payload))
 
