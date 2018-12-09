@@ -354,6 +354,7 @@ class Monitor(object):
             try:
                 item = self.m_queue.get(False)
                 found_work = True
+                self.m_queue.task_done()
             except queue.Empty:  # pragma: no cover
                 pass
 
