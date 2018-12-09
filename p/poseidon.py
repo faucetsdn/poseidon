@@ -72,7 +72,7 @@ def schedule_job_reinvestigation(func):
             candidates.append(endpoint)
 
     # get random order of things that are known
-    for x in range(func.controller['max_investigations'] - func.s.investigations):
+    for x in range(func.controller['max_concurrent_reinvestigations'] - func.s.investigations):
         if len(candidates) > 0:
             random.shuffle(candidates)
             chosen = candidates.pop()
