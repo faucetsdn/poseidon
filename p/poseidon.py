@@ -50,7 +50,7 @@ def rabbit_callback(ch, method, properties, body, q=None):
 def schedule_job_kickurl(func):
     machines = func.s.check_endpoints(messages=func.faucet_event)
     # TODO check the length didn't change before wiping it out
-    func.faucet_event = []
+    del func.faucet_event[:]
 
     # get current state
     req = requests.get('http://poseidon-api:8000/v1/network_full')
