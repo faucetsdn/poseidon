@@ -199,6 +199,7 @@ class FaucetProxy(Connection, Parser):
         pass
 
     def mirror_mac(self, my_mac, messages=None):
+        self.poseidon_logger.info('mirroring mac')
         if messages:
             self.poseidon_logger.debug('faucet messages: {0}'.format(messages))
             for message in messages:
@@ -232,7 +233,7 @@ class FaucetProxy(Connection, Parser):
                     self.config_file, 'mirror', int(port), switch)
         else:
             status = False
-        self.poseidon_logger.debug('mirror status: ' + str(status))
+        self.poseidon_logger.info('mirror status: ' + str(status))
         # TODO check if config was successfully updated
 
     def unmirror_mac(self, my_mac, messages=None):
