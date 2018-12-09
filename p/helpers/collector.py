@@ -22,8 +22,8 @@ class Collector(object):
         self.mac = endpoint.endpoint_data['mac']
         self.endpoint_data = endpoint.endpoint_data
         self.nic = self.controller['collector_nic']
-        self.interval = self.controller['reinvestigation_frequency']
-        self.iterations = iterations
+        self.interval = str(self.controller['reinvestigation_frequency'])
+        self.iterations = str(iterations)
 
     def start_vent_collector(self):
         '''
