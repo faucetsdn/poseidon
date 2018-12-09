@@ -25,6 +25,7 @@ from redis import StrictRedis
 
 from p.controllers.bcf.bcf import BcfProxy
 from p.controllers.faucet.faucet import FaucetProxy
+from p.helpers.actions import Actions
 from p.helpers.config import Config
 from p.helpers.endpoint import Endpoint
 from p.helpers.log import Logger
@@ -82,6 +83,7 @@ def schedule_job_reinvestigation(func):
             func.s.investigations += 1
             chosen.p_prev_states.append(
                 (endpoint.state, int(time.time())))
+            Actions(chosen, func.s.sdnc).mirror_endpoint()
 
 
 def schedule_thread_worker(schedule, logger):
@@ -319,6 +321,7 @@ class Monitor(object):
                         endpoint.mirror()
                         endpoint.p_prev_states.append(
                             (endpoint.state, int(time.time())))
+                        Actions(endpoint, self.s.sdnc).mirror_endpoint()
                     else:
                         endpoint.next_state = 'mirroring'
                         endpoint.queue()
@@ -374,18 +377,6 @@ class Monitor(object):
             sys.exit()
         except BaseException:  # pragma: no cover
             pass
-
-
-class Collector(object):
-
-    def __init__(self, id, nic, interval, hash, iterations, host, status):
-        self.id = id
-        self.nic = nic
-        self.interval = interval
-        self.hash = hash
-        self.iterations = iterations
-        self.host = host
-        self.status = status
 
 
 def main(skip_rabbit=False):  # pragma: no cover
