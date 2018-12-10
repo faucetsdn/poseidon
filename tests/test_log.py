@@ -12,4 +12,3 @@ def test_logger_base():
             pass
 
     logger = MockLogger()
-    logger.logger_config(None)

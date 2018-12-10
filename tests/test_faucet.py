@@ -6,6 +6,7 @@ Test module for faucet.
 import os
 
 from poseidon.controllers.faucet.faucet import FaucetProxy
+from poseidon.helpers.config import Config
 
 
 def test_get_endpoints():
@@ -58,17 +59,12 @@ def test_get_endpoints():
         f.write('            6:\n')
         f.write('                native_vlan: open')
 
-    # with a host
-    proxy = FaucetProxy(host='foo')
-    a = proxy.get_endpoints()
-
-    # without a host
-    proxy = FaucetProxy()
+    controller = Config().get_config()
+    proxy = FaucetProxy(controller)
     a = proxy.get_endpoints()
     assert isinstance(a, list)
 
-    # without a host and with a message
-    proxy = FaucetProxy()
+    proxy = FaucetProxy(controller)
     a = proxy.get_endpoints(messages=[{'dp_name': 'switch', 'L2_LEARN': {'l3_src_ip': '10.0.0.1', 'eth_src': '00:00:00:00:00:00', 'port_no': 1, 'vid': '100'}}, {
                             'version': 1, 'time': 1525205350.0357792, 'dp_id': 1, 'dp_name': 'switch-1', 'event_id': 5, 'PORT_CHANGE': {'port_no': 1, 'reason': 'MODIFY', 'status': False}}, {}])
     assert isinstance(a, list)
@@ -78,8 +74,8 @@ def test_FaucetProxy():
     """
     Tests Faucet
     """
-    # with a host
-    proxy = FaucetProxy(host='foo')
+    controller = Config().get_config()
+    proxy = FaucetProxy(controller)
     proxy.get_switches()
     proxy.get_ports()
     proxy.get_vlans()
@@ -94,24 +90,7 @@ def test_FaucetProxy():
     proxy.mirror_mac('00:00:00:00:00:01')
     proxy.unmirror_mac('00:00:00:00:00:00')
 
-    # without a host
-    proxy = FaucetProxy()
-    proxy.get_switches()
-    proxy.get_ports()
-    proxy.get_vlans()
-    proxy.get_span_fabric()
-    proxy.get_byip('10.0.0.9')
-    proxy.get_bymac('00:00:00:00:12:00')
-    proxy.shutdown_ip('10.0.0.9')
-    proxy.shutdown_endpoint()
-    proxy.get_highest()
-    proxy.get_seq_by_ip()
-    proxy.mirror_mac('00:00:00:00:00:00')
-    proxy.mirror_mac('00:00:00:00:00:01')
-    proxy.unmirror_mac('00:00:00:00:00:00')
-
-    # without a host and messages
-    proxy = FaucetProxy()
+    proxy = FaucetProxy(controller)
     proxy.get_switches()
     proxy.get_ports()
     proxy.get_vlans()
