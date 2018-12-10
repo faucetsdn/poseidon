@@ -78,7 +78,7 @@ def schedule_job_reinvestigation(func):
             random.shuffle(candidates)
             chosen = candidates.pop()
             ostr = 'starting investigation {0}:{1}'.format(x, chosen)
-            func.poseidon_logger.debug(ostr)
+            func.poseidon_logger.info(ostr)
             chosen.reinvestigate()
             func.s.investigations += 1
             chosen.p_prev_states.append(
@@ -287,14 +287,13 @@ class Monitor(object):
         self.poseidon_logger.debug('routing_key:{0}'.format(routing_key))
         if routing_key == 'poseidon.algos.decider':
             self.poseidon_logger.debug('decider value:{0}'.format(my_obj))
-            # if valid response then send along otherwise nothing
+            # TODO if valid response then send along otherwise nothing
             for key in my_obj:
                 ret_val[key] = my_obj[key]
         elif routing_key == self.controller['FA_RABBIT_ROUTING_KEY']:
             self.poseidon_logger.debug('FAUCET Event:{0}'.format(my_obj))
             for key in my_obj:
                 ret_val[key] = my_obj[key]
-        # TODO do something with recommendation
         return ret_val
 
     def process(self):
@@ -329,20 +328,26 @@ class Monitor(object):
                         endpoint.queue()
                         endpoint.p_prev_states.append(
                             (endpoint.state, int(time.time())))
-                elif endpoint.state == 'known':
-                    pass
-                elif endpoint.state == 'mirroring':
-                    pass
-                elif endpoint.state == 'inactive':
-                    pass
-                elif endpoint.state == 'abnormal':
-                    pass
-                elif endpoint.state == 'shutdown':
-                    pass
-                elif endpoint.state == 'reinvestigating':
-                    pass
-                elif endpoint.state == 'queued':
-                    pass
+                elif endpoint.state in ['mirroring', 'reinvestigating']:
+                    if endpoint.name in ml_returns:
+                        Actions(endpoint, self.s.sdnc).unmirror_endpoint()
+                        ml_decision = ml_returns[endpoint.name]['decisions']['behavior']
+                        if ml_decision == 'normal':
+                            endpoint.known()
+                        else:
+                            endpoint.abnormal()
+                        endpoint.p_prev_states.append(
+                            (endpoint.state, int(time.time())))
+                    else:
+                        cur_time = int(time.time())
+                        # timeout after 2 times the reinvestigation frequency
+                        # in case something didn't report back, put back in an
+                        # unknown state
+                        if cur_time - endpoint.p_prev_states[-1][1] > 2*self.controller['reinvestigation_frequency']:
+                            Actions(endpoint, self.s.sdnc).unmirror_endpoint()
+                            endpoint.unknown()
+                            endpoint.p_prev_states.append(
+                                (endpoint.state, int(time.time())))
 
     def get_q_item(self):
         ''' attempt to get a work item from the queue'''
