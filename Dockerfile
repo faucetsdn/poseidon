@@ -35,4 +35,4 @@ ENV SYS_LOG_PORT 514
 
 EXPOSE 9304
 
-CMD (flask run > /dev/null 2>&1) & (tini -s -- /usr/bin/python3 /poseidon/poseidon/poseidon.py)
+CMD (flask run > /dev/null 2>&1) & (tini -s -- /usr/bin/python3 /poseidon/poseidon/main.py)

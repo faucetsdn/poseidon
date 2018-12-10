@@ -10,10 +10,10 @@ import json
 from prometheus_client import Gauge
 
 from poseidon.helpers.log import Logger
-from poseidon.poseidon import CTRL_C
-from poseidon.poseidon import Monitor
-from poseidon.poseidon import schedule_job_kickurl
-from poseidon.poseidon import schedule_thread_worker
+from poseidon.main import CTRL_C
+from poseidon.main import Monitor
+from poseidon.main import schedule_job_kickurl
+from poseidon.main import schedule_thread_worker
 
 
 def test_signal_handler():
