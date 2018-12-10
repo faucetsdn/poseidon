@@ -18,7 +18,7 @@ def test_JsonMixin():
     Tests JsonMixin
     """
     # Craft a JSON response object
-    with open(os.path.join(cur_dir, '../poseidon/controllers/mixins/sample_json.json')) as f:
+    with open(os.path.join(cur_dir, 'sample_json.json')) as f:
         j = json.loads(f.read().replace('\n', ''))
     res = response(content=json.dumps(j), headers={
                    'content-type': 'application/json'})
