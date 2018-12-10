@@ -219,7 +219,6 @@ class SDNConnect(object):
                 pickled_endpoints = pickle.dumps(self.endpoints)
                 self.r.set('p_endpoints', pickled_endpoints)
             except Exception as e:  # pragma: no cover
-                self.logger.info('endpoints: {0}'.format(self.endpoints))
                 self.logger.error(
                     'Unable to store endpoints in Redis because {0}'.format(str(e)))
 
@@ -326,7 +325,7 @@ class Monitor(object):
                         Actions(endpoint, self.s.sdnc).mirror_endpoint()
                     else:
                         endpoint.p_next_state = 'mirroring'
-                        endpoint.queued()
+                        endpoint.queue()
                         endpoint.p_prev_states.append(
                             (endpoint.state, int(time.time())))
                 elif endpoint.state in ['mirroring', 'reinvestigating']:
