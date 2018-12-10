@@ -7,8 +7,6 @@ import hashlib
 
 from transitions import Machine
 
-from poseidon.helpers.log import Logger
-
 
 class Endpoint(object):
 
@@ -47,9 +45,6 @@ class Endpoint(object):
     ]
 
     def __init__(self, hashed_val):
-        self.logger = Logger.logger
-        self.poseidon_logger = Logger.poseidon_logger
-
         # Initialize the state machine
         self.machine = Machine(model=self, states=Endpoint.states,
                                transitions=Endpoint.transitions, initial='unknown')
