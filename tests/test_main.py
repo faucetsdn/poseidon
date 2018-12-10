@@ -17,6 +17,7 @@ from poseidon.main import rabbit_callback
 from poseidon.main import schedule_job_kickurl
 from poseidon.main import schedule_job_reinvestigation
 from poseidon.main import schedule_thread_worker
+from poseidon.main import SDNConnect
 
 
 def test_signal_handler():
@@ -39,6 +40,7 @@ def test_signal_handler():
             self.logger = Logger.logger
             self.poseidon_logger = Logger.poseidon_logger
             self.controller = Config().get_config()
+            self.s = SDNConnect()
 
     class MockScheduele:
         call_log = []
@@ -81,6 +83,7 @@ def test_get_q_item():
             self.logger = Logger.logger
             self.poseidon_logger = Logger.poseidon_logger
             self.controller = Config().get_config()
+            self.s = SDNConnect()
 
     mock_monitor = MockMonitor()
     mock_monitor.m_queue = MockMQueue()
@@ -106,6 +109,7 @@ def test_format_rabbit_message():
             self.logger = Logger.logger
             self.poseidon_logger = Logger.poseidon_logger
             self.controller = Config().get_config()
+            self.s = SDNConnect()
 
     mockMonitor = MockMonitor()
     mockMonitor.logger = MockLogger().logger
@@ -187,7 +191,10 @@ def test_schedule_job_kickurl():
     class func():
 
         def __init__(self):
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
             self.faucet_event = []
+            self.s = SDNConnect()
 
     schedule_job_kickurl(func())
 
@@ -220,6 +227,7 @@ def test_process():
             self.fa_rabbit_routing_key = 'FAUCET.Event'
             self.faucet_event = None
             self.controller = Config().get_config()
+            self.s = SDNConnect()
 
         def get_q_item(self):
             return (True, ('foo', {}))

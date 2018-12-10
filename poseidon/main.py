@@ -53,12 +53,17 @@ def schedule_job_kickurl(func):
     # TODO check the length didn't change before wiping it out
     del func.faucet_event[:]
 
-    # get current state
-    req = requests.get('http://poseidon-api:8000/v1/network_full')
+    try:
+        # get current state
+        req = requests.get(
+            'http://poseidon-api:8000/v1/network_full', timeout=10)
 
-    # send results to prometheus
-    hosts = req.json()['dataset']
-    func.prom.update_metrics(hosts)
+        # send results to prometheus
+        hosts = req.json()['dataset']
+        func.prom.update_metrics(hosts)
+    except Exception as e:  # pragma: no cover
+        func.poseidon_logger.error(
+            'Unable to get current state and send it to Prometheus because: {0}'.format(str(e)))
 
 
 def schedule_job_reinvestigation(func):
