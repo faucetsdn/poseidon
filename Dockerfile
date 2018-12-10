@@ -23,7 +23,7 @@ HEALTHCHECK --interval=15s --timeout=15s \
 
 COPY . /poseidon
 WORKDIR /poseidon
-ENV PYTHONPATH /poseidon/p:$PYTHONPATH
+ENV PYTHONPATH /poseidon/poseidon:$PYTHONPATH
 ENV POSEIDON_CONFIG /poseidon/config/poseidon.config
 
 # install dependencies of poseidon modules for poseidon
@@ -35,4 +35,4 @@ ENV SYS_LOG_PORT 514
 
 EXPOSE 9304
 
-CMD (flask run > /dev/null 2>&1) & (tini -s -- /usr/bin/python3 /poseidon/p/poseidon.py)
+CMD (flask run > /dev/null 2>&1) & (tini -s -- /usr/bin/python3 /poseidon/poseidon/poseidon.py)
