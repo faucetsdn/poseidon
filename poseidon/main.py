@@ -324,7 +324,7 @@ class Monitor(object):
                             (endpoint.state, int(time.time())))
                         Actions(endpoint, self.s.sdnc).mirror_endpoint()
                     else:
-                        endpoint.next_state = 'mirroring'
+                        endpoint.p_next_state = 'mirroring'
                         endpoint.queued()
                         endpoint.p_prev_states.append(
                             (endpoint.state, int(time.time())))
