@@ -1,22 +1,6 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-#   Copyright (c) 2016-2017 In-Q-Tel, Inc, All Rights Reserved.
-#
-#   Licensed under the Apache License, Version 2.0 (the "License");
-#   you may not use this file except in compliance with the License.
-#   You may obtain a copy of the License at
-#
-#       http://www.apache.org/licenses/LICENSE-2.0
-#
-#   Unless required by applicable law or agreed to in writing, software
-#   distributed under the License is distributed on an "AS IS" BASIS,
-#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#   See the License for the specific language governing permissions and
-#   limitations under the License.
 """
 Test module for bcf.
-
 @author: kylez
 """
 import json
@@ -26,9 +10,9 @@ from httmock import HTTMock
 from httmock import response
 from httmock import urlmatch
 
-from poseidon.baseClasses.Logger_Base import Logger
-from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.bcf import BcfProxy
-from poseidon.poseidonMonitor.NorthBoundControllerAbstraction.proxy.bcf.sample_state import span_fabric_state
+from poseidon.controllers.bcf.bcf import BcfProxy
+from poseidon.controllers.bcf.sample_state import span_fabric_state
+from poseidon.helpers.log import Logger
 
 
 class MockLogger:
