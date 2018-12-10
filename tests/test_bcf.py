@@ -89,8 +89,9 @@ def test_BcfProxy():
         '/data/controller/applications/bcf/span-fabric[name=%22empty%22][dest-interface-group=%22empty%22]': 'sample_span_fabric_empty.json',
     }
     proxy = None
+    controller = {'URI': 'http://localhost'}
     with HTTMock(mock_factory(r'.*', filemap)):
-        proxy = BcfProxy('http://localhost', 'login',
+        proxy = BcfProxy(controller, 'login',
                          {'username': username, 'password': password}, span_fabric_name='SPAN_FABRIC', interface_group='INTERFACE_GROUP')
 
         endpoints = proxy.get_endpoints()
@@ -227,8 +228,9 @@ def test_get_byip():
     }
     proxy = None
     endpoints = None
+    controller = {'URI': 'http://localhost'}
     with HTTMock(mock_factory(r'.*', filemap)):
-        proxy = BcfProxy('http://localhost', 'login',
+        proxy = BcfProxy(controller, 'login',
                          {'username': username, 'password': password}, span_fabric_name='SPAN_FABRIC', interface_group='INTERFACE_GROUP')
 
         endpoints = proxy.get_endpoints()
@@ -268,8 +270,9 @@ def test_get_bymac():
     }
     proxy = None
     endpoints = None
+    controller = {'URI': 'http://localhost'}
     with HTTMock(mock_factory(r'.*', filemap)):
-        proxy = BcfProxy('http://localhost', 'login',
+        proxy = BcfProxy(controller, 'login',
                          {'username': username, 'password': password}, span_fabric_name='SPAN_FABRIC', interface_group='INTERFACE_GROUP')
 
         endpoints = proxy.get_endpoints()
@@ -308,8 +311,9 @@ def test_shutdown_ip():
     }
     proxy = None
     endpoints = None
+    controller = {'URI': 'http://localhost'}
     with HTTMock(mock_factory(r'.*', filemap)):
-        proxy = BcfProxy('http://localhost', 'login',
+        proxy = BcfProxy(controller, 'login',
                          {'username': username, 'password': password}, span_fabric_name='SPAN_FABRIC', interface_group='INTERFACE_GROUP')
 
         endpoints = proxy.get_endpoints()
@@ -358,8 +362,9 @@ def test_get_highest():
     proxy = None
     endpoints = None
     span_fabric = None
+    controller = {'URI': 'http://localhost'}
     with HTTMock(mock_factory(r'.*', filemap)):
-        proxy = BcfProxy('http://localhost', 'login',
+        proxy = BcfProxy(controller, 'login',
                          {'username': username, 'password': password}, span_fabric_name='SPAN_FABRIC', interface_group='INTERFACE_GROUP')
 
         endpoints = proxy.get_endpoints()
@@ -400,8 +405,9 @@ def test_get_seq_by_ip():
     proxy = None
     endpoints = None
     span_fabric = None
+    controller = {'URI': 'http://localhost'}
     with HTTMock(mock_factory(r'.*', filemap)):
-        proxy = BcfProxy('http://localhost', 'login',
+        proxy = BcfProxy(controller, 'login',
                          {'username': username, 'password': password}, span_fabric_name='SPAN_FABRIC', interface_group='INTERFACE_GROUP')
 
         endpoints = proxy.get_endpoints()
@@ -441,8 +447,9 @@ def test_get_seq_by_mac():
     proxy = None
     endpoints = None
     span_fabric = None
+    controller = {'URI': 'http://localhost'}
     with HTTMock(mock_factory(r'.*', filemap)):
-        proxy = BcfProxy('http://localhost', 'login',
+        proxy = BcfProxy(controller, 'login',
                          {'username': username, 'password': password}, span_fabric_name='SPAN_FABRIC', interface_group='INTERFACE_GROUP')
 
         endpoints = proxy.get_endpoints()
@@ -496,8 +503,9 @@ def test_mirror_mac():
     proxy = None
     endpoints = None
     span_fabric = None
+    controller = {'URI': 'http://localhost'}
     with HTTMock(mock_factory(r'.*', filemap)):
-        proxy = BcfProxy('http://localhost', 'login',
+        proxy = BcfProxy(controller, 'login',
                          {'username': username, 'password': password}, span_fabric_name='SPAN_FABRIC', interface_group='INTERFACE_GROUP')
 
         endpoints = proxy.get_endpoints()
@@ -538,8 +546,10 @@ def test_unmirror_mac():
     proxy = None
     endpoints = None
     span_fabric = None
+    controller = {'URI': 'http://localhost',
+                  'username': username, 'password': password}
     with HTTMock(mock_factory(r'.*', filemap)):
-        proxy = BcfProxy('http://localhost', 'login',
+        proxy = BcfProxy(controller, 'login',
                          {'username': username, 'password': password}, span_fabric_name='SPAN_FABRIC', interface_group='INTERFACE_GROUP')
 
         endpoints = proxy.get_endpoints()

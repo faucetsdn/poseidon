@@ -54,7 +54,8 @@ class Connection:
             ssh = SSHClient()
             ssh.set_missing_host_key_policy(AutoAddPolicy())
             ssh.load_system_host_keys()
-            ssh.connect(self.host, username=self.user, password=self.pw)
+            ssh.connect(self.host, username=self.user, password=self.pw,
+                        timeout=10, auth_timeout=10, banner_timeout=10)
             self.ssh = ssh
         except Exception as e:  # pragma: no cover
             self.logger.error('failed to connect because: {0}'.format(e))
