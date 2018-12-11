@@ -61,6 +61,7 @@ def test_get_endpoints():
 
     controller = Config().get_config()
     proxy = FaucetProxy(controller)
+    proxy.check_connection()
     a = proxy.get_endpoints()
     assert isinstance(a, list)
 
@@ -76,6 +77,22 @@ def test_FaucetProxy():
     """
     controller = Config().get_config()
     proxy = FaucetProxy(controller)
+    proxy.get_switches()
+    proxy.get_ports()
+    proxy.get_vlans()
+    proxy.get_span_fabric()
+    proxy.get_byip('10.0.0.9')
+    proxy.get_bymac('00:00:00:00:12:00')
+    proxy.shutdown_ip('10.0.0.9')
+    proxy.shutdown_endpoint()
+    proxy.get_highest()
+    proxy.get_seq_by_ip()
+    proxy.mirror_mac('00:00:00:00:00:00')
+    proxy.mirror_mac('00:00:00:00:00:01')
+    proxy.unmirror_mac('00:00:00:00:00:00')
+
+    proxy = FaucetProxy(controller)
+    proxy.rabbit_enabled = False
     proxy.get_switches()
     proxy.get_ports()
     proxy.get_vlans()

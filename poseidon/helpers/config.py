@@ -16,7 +16,7 @@ class Config():
         self.config.optionxform = str
         if os.environ.get('POSEIDON_CONFIG') is not None:
             self.config_path = os.environ.get('POSEIDON_CONFIG')
-        else:
+        else:  # pragma: no cover
             raise Exception(
                 'Could not find poseidon config. Make sure to set the POSEIDON_CONFIG environment variable')
         self.config.read_file(open(self.config_path, 'r'))

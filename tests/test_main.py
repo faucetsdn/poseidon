@@ -180,14 +180,6 @@ def test_schedule_job_kickurl():
         def error(self, msg):
             pass
 
-    class helper():
-
-        def __init__(self):
-            pass
-
-        def update_endpoint_state(self, messages=None):
-            pass
-
     class func():
 
         def __init__(self):
@@ -197,6 +189,29 @@ def test_schedule_job_kickurl():
             self.s = SDNConnect()
 
     schedule_job_kickurl(func())
+
+
+def test_schedule_job_reinvestigation():
+
+    class MockLogger():
+
+        def __init__(self):
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
+
+        def error(self, msg):
+            pass
+
+    class func():
+
+        def __init__(self):
+            self.logger = Logger.logger
+            self.poseidon_logger = Logger.poseidon_logger
+            self.faucet_event = []
+            self.controller = Config().get_config()
+            self.s = SDNConnect()
+
+    schedule_job_reinvestigation(func())
 
 
 def test_Monitor_init():

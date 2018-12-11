@@ -3,8 +3,9 @@ import os
 import falcon
 import pytest
 import redis
-from app.app import api
 from falcon import testing
+
+from api.app.app import api
 
 
 @pytest.fixture
