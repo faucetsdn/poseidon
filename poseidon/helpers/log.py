@@ -27,8 +27,6 @@ class Logger:
 
     # setup existing loggers
     logging.getLogger('schedule').setLevel(logging.ERROR)
-    t_formatter = logging.Formatter('[%(levelname)s] %(name)s - %(message)s')
-    logging.getLogger('transitions').setFormatter(t_formatter)
 
     use_file_logger = True
     # ensure log file exists
@@ -55,6 +53,7 @@ class Logger:
     console.setFormatter(formatter)
     # add the handler to the root logger
     logging.getLogger('').addHandler(console)
+    logging.getLogger('transitions').addHandler(console)
 
     # don't try to connect to a syslog address if one was not supplied
     if host != 'NOT_CONFIGURED':  # pragma: no cover
