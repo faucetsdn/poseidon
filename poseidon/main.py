@@ -315,12 +315,12 @@ class Monitor(object):
             if found_work and item[0] != self.controller['FA_RABBIT_ROUTING_KEY']:
                 ml_returns = self.format_rabbit_message(item)
                 self.logger.info(
-                    'ml_returns:{0}'.format(ml_returns))
+                    'ML results: {0}'.format(ml_returns))
                 # this can trigger change out of mirroring/reinvestigating
             elif found_work and item[0] == self.controller['FA_RABBIT_ROUTING_KEY']:
                 self.faucet_event.append(self.format_rabbit_message(item))
                 self.logger.info(
-                    'faucet_event:{0}'.format(self.faucet_event))
+                    'Faucet event: {0}'.format(self.faucet_event))
 
             for endpoint in self.s.endpoints:
                 if endpoint.state == 'unknown':

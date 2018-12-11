@@ -159,22 +159,7 @@ def test_rabbit_callback():
         None)
 
 
-def test_schedule_job_reinvestigation():
-
-    class MockLogger:
-        def __init__(self):
-            self.logger = logger
-
-
 def test_schedule_job_kickurl():
-
-    class MockLogger():
-
-        def __init__(self):
-            self.logger = logger
-
-        def error(self, msg):
-            pass
 
     class func():
 
@@ -187,14 +172,6 @@ def test_schedule_job_kickurl():
 
 
 def test_schedule_job_reinvestigation():
-
-    class MockLogger():
-
-        def __init__(self):
-            self.logger = logger
-
-        def error(self, msg):
-            pass
 
     class func():
 
@@ -249,11 +226,6 @@ def test_process():
         time.sleep(5)
         CTRL_C['STOP'] = True
 
-    class MockLogger():
-
-        def __init__(self):
-            self.logger = logger
-
     class MockMonitor(Monitor):
 
         def __init__(self):
@@ -283,7 +255,6 @@ def test_process():
             return False
 
     mock_monitor = MockMonitor()
-    mock_monitor.logger = MockLogger().logger
 
     t1 = Thread(target=thread1)
     t1.start()

@@ -183,7 +183,7 @@ class FaucetProxy(Connection, Parser):
         pass
 
     def mirror_mac(self, my_mac, messages=None):
-        self.logger.info('mirroring mac')
+        self.logger.debug('mirroring mac')
         if messages:
             self.logger.debug('faucet messages: {0}'.format(messages))
             for message in messages:
@@ -217,7 +217,7 @@ class FaucetProxy(Connection, Parser):
                     self.config_file, 'mirror', int(port), switch)
         else:
             status = False
-        self.logger.info('mirror status: ' + str(status))
+        self.logger.debug('mirror status: ' + str(status))
         # TODO check if config was successfully updated
 
     def unmirror_mac(self, my_mac, messages=None):

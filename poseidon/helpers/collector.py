@@ -38,7 +38,7 @@ class Collector(object):
             'iters': self.iterations,
             'metadata': "{'endpoint_data': " + str(self.endpoint_data) + '}'}
 
-        self.logger.info('vent payload: ' + str(payload))
+        self.logger.info('Vent payload: ' + str(payload))
 
         vent_addr = self.controller['vent_ip'] + \
             ':' + self.controller['vent_port']
