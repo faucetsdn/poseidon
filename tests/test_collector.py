@@ -3,8 +3,6 @@
 Test module for vent collector.
 @author: Charlie Lewis
 """
-import os
-
 from poseidon.helpers.collector import Collector
 from poseidon.helpers.endpoint import Endpoint
 

@@ -3,13 +3,12 @@
 Created on 18 November 2017
 @author: Charlie Lewis
 """
+import logging
 import os
 
 from paramiko import AutoAddPolicy
 from paramiko import SSHClient
 from scp import SCPClient
-
-from poseidon.helpers.log import Logger
 
 
 class Connection:
@@ -22,7 +21,7 @@ class Connection:
                  log_file=None,
                  *args,
                  **kwargs):
-        self.logger = Logger.logger
+        self.logger = logging.getLogger('connection')
         self.host = host
         self.user = user
         self.pw = pw

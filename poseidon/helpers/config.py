@@ -4,6 +4,7 @@ Created on 5 December 2018
 @author: Charlie Lewis
 """
 import ast
+import logging
 import os
 
 import configparser
@@ -12,6 +13,7 @@ import configparser
 class Config():
 
     def __init__(self):
+        self.logger = logging.getLogger('config')
         self.config = configparser.RawConfigParser()
         self.config.optionxform = str
         if os.environ.get('POSEIDON_CONFIG') is not None:

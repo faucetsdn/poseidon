@@ -3,13 +3,12 @@
 Created on 21 August 2017
 @author: dgrossman
 """
+import logging
 import threading
 import time
 from functools import partial
 
 import pika
-
-from poseidon.helpers.log import Logger
 
 
 class Rabbit(object):
@@ -18,8 +17,7 @@ class Rabbit(object):
     '''
 
     def __init__(self):
-        self.logger = Logger.logger
-        self.poseidon_logger = Logger.poseidon_logger
+        self.logger = logging.getLogger('rabbit')
 
     def make_rabbit_connection(self, host, port, exchange, queue_name, keys,
                                total_sleep=float('inf')):  # pragma: no cover
@@ -44,13 +42,13 @@ class Rabbit(object):
                 rabbit_channel.exchange_declare(exchange=exchange,
                                                 exchange_type='topic')
                 rabbit_channel.queue_declare(queue=queue_name, exclusive=False)
-                self.poseidon_logger.debug(
+                self.logger.debug(
                     'connected to {0} rabbitmq...'.format(host))
                 wait = False
             except Exception as e:
-                self.poseidon_logger.debug(
+                self.logger.debug(
                     'waiting for connection to {0} rabbitmq...'.format(host))
-                self.poseidon_logger.debug(str(e))
+                self.logger.debug(str(e))
                 time.sleep(2)
                 total_sleep -= 2
                 wait = True
@@ -60,14 +58,14 @@ class Rabbit(object):
 
         if isinstance(keys, list) and not wait:
             for key in keys:
-                self.poseidon_logger.debug(
+                self.logger.debug(
                     'array adding key:{0} to rabbitmq channel'.format(key))
                 rabbit_channel.queue_bind(exchange=exchange,
                                           queue=queue_name,
                                           routing_key=key)
 
         if isinstance(keys, str) and not wait:
-            self.poseidon_logger.debug(
+            self.logger.debug(
                 'string adding key:{0} to rabbitmq channel'.format(keys))
             rabbit_channel.queue_bind(exchange=exchange,
                                       queue=queue_name,
@@ -77,7 +75,7 @@ class Rabbit(object):
 
     def start_channel(self, channel, mycallback, queue, m_queue):
         ''' handle threading for messagetype '''
-        self.poseidon_logger.debug(
+        self.logger.debug(
             'about to start channel {0}'.format(channel))
         channel.basic_consume(partial(mycallback, q=m_queue), queue=queue,
                               no_ack=True)

@@ -5,18 +5,17 @@ Created on 9 December 2018
 """
 import ast
 import json
+import logging
 
 import requests
 
 from poseidon.helpers.config import Config
-from poseidon.helpers.log import Logger
 
 
 class Collector(object):
 
     def __init__(self, endpoint, iterations=1):
-        self.logger = Logger.logger
-        self.poseidon_logger = Logger.poseidon_logger
+        self.logger = logging.getLogger('collector')
         self.controller = Config().get_config()
         self.endpoint = endpoint
         self.id = endpoint.name
@@ -39,7 +38,7 @@ class Collector(object):
             'iters': self.iterations,
             'metadata': "{'endpoint_data': " + str(self.endpoint_data) + '}'}
 
-        self.poseidon_logger.info('vent payload: ' + str(payload))
+        self.logger.info('vent payload: ' + str(payload))
 
         vent_addr = self.controller['vent_ip'] + \
             ':' + self.controller['vent_port']
@@ -47,10 +46,10 @@ class Collector(object):
 
         try:
             resp = requests.post(uri, data=json.dumps(payload))
-            self.poseidon_logger.info(
+            self.logger.info(
                 'collector response: ' + resp.text)
         except Exception as e:  # pragma: no cover
-            self.poseidon_logger.error(
+            self.logger.error(
                 'failed to start vent collector' + str(e))
         return
 
@@ -75,9 +74,9 @@ class Collector(object):
                     #collectors.update({coll.hash: coll})
                 collectors = c
 
-            self.poseidon_logger.debug('collector list response: ' + resp.text)
+            self.logger.debug('collector list response: ' + resp.text)
         except Exception as e:  # pragma: no cover
-            self.poseidon_logger.debug(
+            self.logger.debug(
                 'failed to get vent collector statuses' + str(e))
 
         return collectors
@@ -98,7 +97,7 @@ class Collector(object):
             return True
 
         for c in collectors:
-            self.poseidon_logger.debug(c)
+            self.logger.debug(c)
             if (
                 collectors[c].hash != dev_hash and
                 collectors[c].host == hash_coll.host and

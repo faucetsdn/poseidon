@@ -4,6 +4,7 @@ Test module for bcf.
 @author: kylez
 """
 import json
+import logging
 import os
 
 from httmock import HTTMock
@@ -12,13 +13,13 @@ from httmock import urlmatch
 
 from poseidon.controllers.bcf.bcf import BcfProxy
 from poseidon.controllers.bcf.sample_state import span_fabric_state
-from poseidon.helpers.log import Logger
+
+logger = logging.getLogger('test')
 
 
 class MockLogger:
     def __init__(self):
-        self.logger = Logger.logger
-        self.poseidon_logger = Logger.poseidon_logger
+        self.logger = logger
 
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
@@ -210,7 +211,6 @@ def test_get_byip():
         def __init__(self):
             self.endpoints = None
             self.logger = MockLogger().logger
-            self.poseidon_logger = MockLogger().poseidon_logger
 
         def get_endpoints(self):
             return self.endpoints
@@ -252,7 +252,6 @@ def test_get_bymac():
         def __init__(self):
             self.endpoints = None
             self.logger = MockLogger().logger
-            self.poseidon_logger = MockLogger().poseidon_logger
 
         def get_endpoints(self):
             return self.endpoints
@@ -290,7 +289,6 @@ def test_shutdown_ip():
         def __init__(self):
             self.endpoints = None
             self.logger = MockLogger().logger
-            self.poseidon_logger = MockLogger().poseidon_logger
 
         def get_endpoints(self):
             return self.endpoints
@@ -346,7 +344,6 @@ def test_get_highest():
             self.endpoints = None
             self.span_fabric = None
             self.logger = MockLogger().logger
-            self.poseidon_logger = MockLogger().poseidon_logger
 
     bcf = MockBcfProxy()
 
@@ -386,7 +383,6 @@ def test_get_seq_by_ip():
             self.endpoints = None
             self.span_fabric = None
             self.logger = MockLogger().logger
-            self.poseidon_logger = MockLogger().poseidon_logger
 
         def get_span_fabric(self):
             return self.span_fabric
@@ -428,7 +424,6 @@ def test_get_seq_by_mac():
             self.endpoints = None
             self.span_fabric = None
             self.logger = MockLogger().logger
-            self.poseidon_logger = MockLogger().poseidon_logger
 
         def get_span_fabric(self):
             return self.span_fabric
@@ -470,7 +465,6 @@ def test_mirror_mac():
             self.endpoints = None
             self.span_fabric = None
             self.logger = MockLogger().logger
-            self.poseidon_logger = MockLogger().poseidon_logger
 
         def mirror_traffic(
                 self,
@@ -527,7 +521,6 @@ def test_unmirror_mac():
             self.endpoints = None
             self.span_fabric = None
             self.logger = MockLogger().logger
-            self.poseidon_logger = MockLogger().poseidon_logger
 
         def get_span_fabric(self):
             return self.span_fabric

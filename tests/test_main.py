@@ -6,11 +6,12 @@ Created on 28 June 2016
 @author: Charlie Lewis, dgrossman, MShel
 """
 import json
+import logging
 
 from prometheus_client import Gauge
 
 from poseidon.helpers.config import Config
-from poseidon.helpers.log import Logger
+from poseidon.helpers.endpoint import Endpoint
 from poseidon.main import CTRL_C
 from poseidon.main import Monitor
 from poseidon.main import rabbit_callback
@@ -19,13 +20,14 @@ from poseidon.main import schedule_job_reinvestigation
 from poseidon.main import schedule_thread_worker
 from poseidon.main import SDNConnect
 
+logger = logging.getLogger('test')
+
 
 def test_signal_handler():
 
     class MockLogger:
         def __init__(self):
-            self.logger = Logger.logger
-            self.poseidon_logger = Logger.poseidon_logger
+            self.logger = logger
 
     class MockRabbitConnection:
         connection_closed = False
@@ -37,8 +39,7 @@ def test_signal_handler():
     class MockMonitor(Monitor):
 
         def __init__(self):
-            self.logger = Logger.logger
-            self.poseidon_logger = Logger.poseidon_logger
+            self.logger = logger
             self.controller = Config().get_config()
             self.s = SDNConnect()
 
@@ -80,8 +81,7 @@ def test_get_q_item():
     class MockMonitor(Monitor):
 
         def __init__(self):
-            self.logger = Logger.logger
-            self.poseidon_logger = Logger.poseidon_logger
+            self.logger = logger
             self.controller = Config().get_config()
             self.s = SDNConnect()
 
@@ -99,15 +99,13 @@ def test_format_rabbit_message():
 
     class MockLogger:
         def __init__(self):
-            self.logger = Logger.logger
-            self.poseidon_logger = Logger.poseidon_logger
+            self.logger = logger
 
     class MockMonitor(Monitor):
 
         def __init__(self):
             self.fa_rabbit_routing_key = 'foo'
-            self.logger = Logger.logger
-            self.poseidon_logger = Logger.poseidon_logger
+            self.logger = logger
             self.controller = Config().get_config()
             self.s = SDNConnect()
 
@@ -165,8 +163,7 @@ def test_schedule_job_reinvestigation():
 
     class MockLogger:
         def __init__(self):
-            self.logger = Logger.logger
-            self.poseidon_logger = Logger.poseidon_logger
+            self.logger = logger
 
 
 def test_schedule_job_kickurl():
@@ -174,8 +171,7 @@ def test_schedule_job_kickurl():
     class MockLogger():
 
         def __init__(self):
-            self.logger = Logger.logger
-            self.poseidon_logger = Logger.poseidon_logger
+            self.logger = logger
 
         def error(self, msg):
             pass
@@ -183,8 +179,7 @@ def test_schedule_job_kickurl():
     class func():
 
         def __init__(self):
-            self.logger = Logger.logger
-            self.poseidon_logger = Logger.poseidon_logger
+            self.logger = logger
             self.faucet_event = []
             self.s = SDNConnect()
 
@@ -196,8 +191,7 @@ def test_schedule_job_reinvestigation():
     class MockLogger():
 
         def __init__(self):
-            self.logger = Logger.logger
-            self.poseidon_logger = Logger.poseidon_logger
+            self.logger = logger
 
         def error(self, msg):
             pass
@@ -205,13 +199,39 @@ def test_schedule_job_reinvestigation():
     class func():
 
         def __init__(self):
-            self.logger = Logger.logger
-            self.poseidon_logger = Logger.poseidon_logger
+            self.logger = logger
             self.faucet_event = []
             self.controller = Config().get_config()
+            self.controller['max_concurrent_reinvestigations'] = 10
             self.s = SDNConnect()
+            endpoint = Endpoint('foo')
+            endpoint.endpoint_data = {
+                'tenant': 'foo', 'mac': '00:00:00:00:00:00'}
+            endpoint.mirror()
+            endpoint.known()
+            self.s.endpoints.append(endpoint)
+            endpoint = Endpoint('foo2')
+            endpoint.endpoint_data = {
+                'tenant': 'foo', 'mac': '00:00:00:00:00:00'}
+            endpoint.mirror()
+            endpoint.known()
+            self.s.endpoints.append(endpoint)
+            self.s.store_endpoints()
 
     schedule_job_reinvestigation(func())
+
+
+def test_find_new_machines():
+    s = SDNConnect()
+    machines = [{'active': 0, 'record_source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'os': 'unknown', 'tenant': 'vlan1', 'port': 1, 'segment': 'switch1', 'ip': '123.123.123.123', 'mac': '00:00:00:00:00:00', 'hash': 'foo1', 'behavior': 1},
+                {'active': 1, 'record_source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'os': 'unknown', 'tenant': 'vlan1',
+                    'port': 1, 'segment': 'switch1', 'ip': '123.123.123.123', 'mac': '00:00:00:00:00:00', 'hash': 'foo2', 'behavior': 1},
+                {'active': 0, 'record_source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'os': 'unknown', 'tenant': 'vlan1',
+                    'port': 1, 'segment': 'switch1', 'ip': '123.123.123.123', 'mac': '00:00:00:00:00:00', 'hash': 'foo3', 'behavior': 1},
+                {'active': 1, 'record_source': 'poseidon1', 'role': 'unknown', 'state': 'unknown', 'os': 'unknown', 'tenant': 'vlan1',
+                 'port': 2, 'segment': 'switch1', 'ip': '2106::1', 'mac': '00:00:00:00:00:00', 'hash': 'foo4', 'behavior': 1},
+                {'active': 1, 'record_source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'os': 'unknown', 'tenant': 'vlan1', 'port': 1, 'segment': 'switch1', 'ip': '::', 'mac': '00:00:00:00:00:00', 'hash': 'foo5', 'behavior': 1}]
+    s.find_new_machines(machines)
 
 
 def test_Monitor_init():
@@ -231,14 +251,12 @@ def test_process():
     class MockLogger():
 
         def __init__(self):
-            self.logger = Logger.logger
-            self.poseidon_logger = Logger.poseidon_logger
+            self.logger = logger
 
     class MockMonitor(Monitor):
 
         def __init__(self):
-            self.logger = Logger.logger
-            self.poseidon_logger = Logger.poseidon_logger
+            self.logger = logger
             self.fa_rabbit_routing_key = 'FAUCET.Event'
             self.faucet_event = None
             self.controller = Config().get_config()
@@ -287,12 +305,6 @@ def test_schedule_thread_worker():
         time.sleep(5)
         CTRL_C['STOP'] = True
 
-    class MockLogger():
-
-        def __init__(self):
-            self.logger = Logger.logger
-            self.poseidon_logger = Logger.poseidon_logger
-
     class mockSchedule():
 
         def __init__(self):
@@ -313,7 +325,7 @@ def test_schedule_thread_worker():
     t1 = Thread(target=thread1)
     t1.start()
     try:
-        schedule_thread_worker(mockSchedule(), MockLogger().logger)
+        schedule_thread_worker(mockSchedule())
     except SystemExit:
         pass
 

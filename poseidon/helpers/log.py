@@ -14,8 +14,8 @@ from poseidon.helpers.config import Config
 class Logger:
     """
     Base logger class that handles logging. Outputs to both console, a poseidon
-    specific log file and a user specified syslog. To log, use the class's
-    variable 'logger'
+    specific log file and a user specified syslog. To log, create a logger:
+    logger1 = logging.getLogger('mpapp.area1')
     """
     host = os.getenv('SYSLOG_HOST', 'NOT_CONFIGURED')
     port = int(os.getenv('SYSLOG_PORT', 514))
@@ -25,29 +25,6 @@ class Logger:
 
     controller = Config().get_config()
 
-    # logger_level:class:line number - message
-    formatter = logging.Formatter('%(levelname)s:'
-                                  '%(module)s:%(lineno)-3d - %(message)s')
-
-    # timestamp - logger_level:class:line number - message
-    p_formatter = logging.Formatter('%(asctime)s - %(levelname)s:'
-                                    '%(module)s:%(lineno)-3d - %(message)s')
-
-    log_format = '[%(levelname)s] %(name)s - %(message)s'
-    logging.basicConfig(
-        level=level_int[controller['logger_level'].upper()], format=log_format)
-
-    poseidon_logger = logging.getLogger('poseidon')
-    logger = logging.getLogger('console')
-
-    logger.setLevel(level_int[controller['logger_level'].upper()])
-    poseidon_logger.setLevel(level_int[controller['logger_level'].upper()])
-
-    # set the logger to log to console
-    ch = logging.StreamHandler()
-    ch.setFormatter(formatter)
-    logger.addHandler(ch)
-
     use_file_logger = True
     # ensure log file exists
     try:
@@ -56,27 +33,30 @@ class Logger:
         if not os.path.exists('/var/log/poseidon/poseidon.log'):
             with open('/var/log/poseidon/poseidon.log', 'w'):
                 pass
-    except Exception as e:
+        # set up logging to file
+        logging.basicConfig(level=level_int[controller['logger_level'].upper()],
+                            format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                            filename='/var/log/poseidon/poseidon.log',
+                            filemode='a')
+    except Exception as e:  # pragma: no cover
         use_file_logger = False
-        logger.warning(
-            'Unable to setup Poseidon logger because: {0}'.format(str(e)))
 
-    if use_file_logger:
-        # set the poseidon logger to log to file
-        try:
-            fh = logging.handlers.RotatingFileHandler(
-                '/var/log/poseidon/poseidon.log')
-            fh.setFormatter(p_formatter)
-            poseidon_logger.addHandler(fh)
-        except Exception as e:
-            logger.warning(
-                'Unable to setup Poseidon logger because: {0}'.format(str(e)))
+    # define a Handler which writes INFO messages or higher to the sys.stderr
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    # set a format which is simpler for console use
+    formatter = logging.Formatter('[%(levelname)s] %(name)s - %(message)s')
+    # tell the handler to use this format
+    console.setFormatter(formatter)
+    # add the handler to the root logger
+    logging.getLogger('').addHandler(console)
 
     # don't try to connect to a syslog address if one was not supplied
     if host != 'NOT_CONFIGURED':  # pragma: no cover
         # if a syslog address was supplied, log to it
         syslog = logging.handlers.SysLogHandler(
             address=(host, port), socktype=socket.SOCK_STREAM)
-        syslog.setFormatter(formatter)
-        logger.addHandler(syslog)
-        poseidon_logger.addHandler(syslog)
+        f_format = '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'
+        f_formatter = logging.Formatter(f_format)
+        syslog.setFormatter(f_formatter)
+        logging.getLogger('').addHandler(syslog)

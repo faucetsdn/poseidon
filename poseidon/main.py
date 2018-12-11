@@ -9,6 +9,7 @@ Created on 3 December 2018
 """
 import ast
 import json
+import logging
 import pickle
 import random
 import signal
@@ -36,16 +37,18 @@ requests.packages.urllib3.disable_warnings()
 
 CTRL_C = dict()
 CTRL_C['STOP'] = False
+Logger()
+logger = logging.getLogger('main')
 
 
 def rabbit_callback(ch, method, properties, body, q=None):
     ''' callback, places rabbit data into internal queue'''
-    Logger.poseidon_logger.debug('got a message: {0}:{1}:{2}'.format(
+    logger.debug('got a message: {0}:{1}:{2}'.format(
         method.routing_key, body, type(body)))
     if q is not None:
         q.put((method.routing_key, body))
     else:
-        Logger.poseidon_logger.debug('posedionMain workQueue is None')
+        logger.debug('posedionMain workQueue is None')
 
 
 def schedule_job_kickurl(func):
@@ -62,15 +65,15 @@ def schedule_job_kickurl(func):
         hosts = req.json()['dataset']
         func.prom.update_metrics(hosts)
     except Exception as e:  # pragma: no cover
-        func.poseidon_logger.error(
+        func.logger.error(
             'Unable to get current state and send it to Prometheus because: {0}'.format(str(e)))
 
 
 def schedule_job_reinvestigation(func):
     ''' put endpoints into the reinvestigation state if possible '''
     ostr = 'reinvestigation time'
-    func.poseidon_logger.debug(ostr)
-    func.poseidon_logger.debug('endpoints:{0}'.format(func.s.endpoints))
+    func.logger.debug(ostr)
+    func.logger.debug('endpoints:{0}'.format(func.s.endpoints))
     candidates = []
 
     for endpoint in func.s.endpoints:
@@ -83,7 +86,7 @@ def schedule_job_reinvestigation(func):
             random.shuffle(candidates)
             chosen = candidates.pop()
             ostr = 'starting investigation {0}:{1}'.format(x, chosen)
-            func.poseidon_logger.info(ostr)
+            func.logger.info(ostr)
             chosen.reinvestigate()
             func.s.investigations += 1
             chosen.p_prev_states.append(
@@ -91,7 +94,7 @@ def schedule_job_reinvestigation(func):
             Actions(chosen, func.s.sdnc).mirror_endpoint()
 
 
-def schedule_thread_worker(schedule, logger):
+def schedule_thread_worker(schedule):
     ''' schedule thread, takes care of running processes in the future '''
     global CTRL_C
     logger.debug('starting thread_worker')
@@ -111,8 +114,7 @@ class SDNConnect(object):
         self.first_time = True
         self.sdnc = None
         self.controller = Config().get_config()
-        self.logger = Logger.logger
-        self.poseidon_logger = Logger.poseidon_logger
+        self.logger = logger
         self.get_sdn_context()
         self.endpoints = []
         self.investigations = 0
@@ -195,7 +197,7 @@ class SDNConnect(object):
                 if h == endpoint.name:
                     ep = endpoint
             if ep is not None and ep.endpoint_data != machine:
-                self.poseidon_logger.info(
+                self.logger.info(
                     'Endpoint changed: {0}:{1}'.format(h, machine))
                 ep.endpoint_data = deepcopy(machine)
                 if ep.state == 'inactive' and machine['active'] == 1:
@@ -211,13 +213,17 @@ class SDNConnect(object):
                     ep.inactive()
                     ep.p_prev_states.append((ep.state, int(time.time())))
             elif ep is None:
-                self.poseidon_logger.info(
+                self.logger.info(
                     'Detected new endpoint: {0}:{1}'.format(h, machine))
                 m = Endpoint(h)
                 m.p_prev_states.append((m.state, int(time.time())))
                 m.endpoint_data = deepcopy(machine)
                 self.endpoints.append(m)
 
+        self.store_endpoints()
+        return
+
+    def store_endpoints(self):
         # store latest version of endpoints in redis
         if self.r:
             try:
@@ -226,6 +232,7 @@ class SDNConnect(object):
             except Exception as e:  # pragma: no cover
                 self.logger.error(
                     'Unable to store endpoints in Redis because {0}'.format(str(e)))
+        return
 
 
 class Monitor(object):
@@ -234,13 +241,10 @@ class Monitor(object):
         self.faucet_event = []
         self.m_queue = queue.Queue()
         self.skip_rabbit = skip_rabbit
+        self.logger = logger
 
         # get config options
         self.controller = Config().get_config()
-
-        # get the loggers setup
-        self.logger = Logger.logger
-        self.poseidon_logger = Logger.poseidon_logger
 
         # timer class to call things periodically in own thread
         self.schedule = schedule
@@ -275,8 +279,7 @@ class Monitor(object):
         self.schedule_thread = threading.Thread(
             target=partial(
                 schedule_thread_worker,
-                schedule=self.schedule,
-                logger=self.poseidon_logger),
+                schedule=self.schedule),
             name='st_worker')
 
     def format_rabbit_message(self, item):
@@ -286,17 +289,17 @@ class Monitor(object):
         ret_val = {}
 
         routing_key, my_obj = item
-        self.poseidon_logger.debug('rabbit_message:{0}'.format(my_obj))
+        self.logger.debug('rabbit_message:{0}'.format(my_obj))
         # my_obj: (hash,data)
         my_obj = json.loads(my_obj)
-        self.poseidon_logger.debug('routing_key:{0}'.format(routing_key))
+        self.logger.debug('routing_key:{0}'.format(routing_key))
         if routing_key == 'poseidon.algos.decider':
-            self.poseidon_logger.debug('decider value:{0}'.format(my_obj))
+            self.logger.debug('decider value:{0}'.format(my_obj))
             # TODO if valid response then send along otherwise nothing
             for key in my_obj:
                 ret_val[key] = my_obj[key]
         elif routing_key == self.controller['FA_RABBIT_ROUTING_KEY']:
-            self.poseidon_logger.debug('FAUCET Event:{0}'.format(my_obj))
+            self.logger.debug('FAUCET Event:{0}'.format(my_obj))
             for key in my_obj:
                 ret_val[key] = my_obj[key]
         return ret_val
@@ -311,12 +314,12 @@ class Monitor(object):
 
             if found_work and item[0] != self.controller['FA_RABBIT_ROUTING_KEY']:
                 ml_returns = self.format_rabbit_message(item)
-                self.poseidon_logger.info(
+                self.logger.info(
                     'ml_returns:{0}'.format(ml_returns))
                 # this can trigger change out of mirroring/reinvestigating
             elif found_work and item[0] == self.controller['FA_RABBIT_ROUTING_KEY']:
                 self.faucet_event.append(self.format_rabbit_message(item))
-                self.poseidon_logger.info(
+                self.logger.info(
                     'faucet_event:{0}'.format(self.faucet_event))
 
             for endpoint in self.s.endpoints:
@@ -381,10 +384,10 @@ class Monitor(object):
         ''' hopefully eat a CTRL_C and signal system shutdown '''
         global CTRL_C
         CTRL_C['STOP'] = True
-        self.poseidon_logger.debug('=================CTRLC{0}'.format(CTRL_C))
+        self.logger.debug('=================CTRLC{0}'.format(CTRL_C))
         try:
             for job in self.schedule.jobs:
-                self.poseidon_logger.debug('CTRLC:{0}'.format(job))
+                self.logger.debug('CTRLC:{0}'.format(job))
                 self.schedule.cancel_job(job)
             self.rabbit_channel_connection_local.close()
             self.rabbit_channel_connection_local_fa.close()
@@ -435,8 +438,8 @@ def main(skip_rabbit=False):  # pragma: no cover
     # loop here until told not to
     pmain.process()
 
-    pmain.poseidon_logger.debug('SHUTTING DOWN')
-    pmain.poseidon_logger.debug('EXITING')
+    pmain.logger.debug('SHUTTING DOWN')
+    pmain.logger.debug('EXITING')
     sys.exit(0)
 
 

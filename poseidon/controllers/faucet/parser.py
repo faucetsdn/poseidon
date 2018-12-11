@@ -3,9 +3,9 @@
 Created on 19 November 2017
 @author: Charlie Lewis
 """
-import yaml
+import logging
 
-from poseidon.helpers.log import Logger
+import yaml
 
 
 def represent_none(dumper, _):
@@ -15,8 +15,7 @@ def represent_none(dumper, _):
 class Parser:
 
     def __init__(self, mirror_ports=None, reinvestigation_frequency=None, max_concurrent_reinvestigations=None):
-        self.logger = Logger.logger
-        self.poseidon_logger = Logger.poseidon_logger
+        self.logger = logging.getLogger('parser')
         self.mirror_ports = mirror_ports
         self.reinvestigation_frequency = reinvestigation_frequency
         self.max_concurrent_reinvestigations = max_concurrent_reinvestigations
@@ -132,7 +131,7 @@ class Parser:
     def event(self, message):
         data = {}
         if 'L2_LEARN' in message:
-            self.poseidon_logger.debug(
+            self.logger.debug(
                 'got faucet message for l2_learn: {0}'.format(message))
             data['ip-address'] = message['L2_LEARN']['l3_src_ip']
             data['ip-state'] = 'L2 learned'
@@ -152,13 +151,13 @@ class Parser:
             else:
                 self.mac_table[message['L2_LEARN']['eth_src']] = [data]
         elif 'L2_EXPIRE' in message:
-            self.poseidon_logger.debug(
+            self.logger.debug(
                 'got faucet message for l2_expire: {0}'.format(message))
             if message['L2_EXPIRE']['eth_src'] in self.mac_table:
                 self.mac_table[message['L2_EXPIRE']
                                ['eth_src']][0]['active'] = 0
         elif 'PORT_CHANGE' in message:
-            self.poseidon_logger.debug(
+            self.logger.debug(
                 'got faucet message for port_change: {0}'.format(message))
             if not message['PORT_CHANGE']['status']:
                 m_table = self.mac_table.copy()
@@ -171,7 +170,7 @@ class Parser:
         return
 
     def log(self, log_file):
-        self.poseidon_logger.debug('parsing log file')
+        self.logger.debug('parsing log file')
         if not log_file:
             # default to FAUCET default
             log_file = '/var/log/faucet/faucet.log'

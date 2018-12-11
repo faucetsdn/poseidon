@@ -6,7 +6,6 @@ Created on 25 July 2016
 from urllib.parse import urljoin
 
 from poseidon.controllers.controllerproxy import ControllerProxy
-from poseidon.helpers.log import Logger
 
 
 class CookieAuthControllerProxy(ControllerProxy):

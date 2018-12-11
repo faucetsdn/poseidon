@@ -9,16 +9,12 @@ import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
-from poseidon.helpers.log import Logger
-
 requests.packages.urllib3.disable_warnings()
 
 
 class ControllerProxy(object):
 
     def __init__(self, base_uri, *args, **kwargs):
-        self.logger = Logger.logger
-        self.poseidon_logger = Logger.poseidon_logger
         self.base_uri = base_uri
         self.session = requests.Session()
 
