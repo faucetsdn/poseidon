@@ -48,7 +48,7 @@ class Endpoint(object):
         # Initialize the state machine
         self.machine = Machine(model=self, states=Endpoint.states,
                                transitions=Endpoint.transitions, initial='unknown')
-        self.machine.name = hashed_val
+        self.machine.name = hashed_val+' '
         self.name = hashed_val
         self.endpoint_data = None
         self.p_next_state = None
