@@ -38,7 +38,7 @@ class Collector(object):
             'iters': self.iterations,
             'metadata': "{'endpoint_data': " + str(self.endpoint_data) + '}'}
 
-        self.logger.info('Vent payload: ' + str(payload))
+        self.logger.debug('Vent payload: {0}'.format(str(payload)))
 
         vent_addr = self.controller['vent_ip'] + \
             ':' + self.controller['vent_port']
@@ -46,11 +46,12 @@ class Collector(object):
 
         try:
             resp = requests.post(uri, data=json.dumps(payload))
-            self.logger.info(
-                'collector response: ' + resp.text)
+            # TODO improve logged output
+            self.logger.debug(
+                'Collector response: {0}'.format(resp.text))
         except Exception as e:  # pragma: no cover
             self.logger.error(
-                'failed to start vent collector' + str(e))
+                'Failed to start vent collector because: {0}'.format(str(e)))
         return
 
     # returns a dictionary of existing collectors keyed on dev_hash

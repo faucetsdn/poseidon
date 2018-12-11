@@ -53,7 +53,6 @@ def rabbit_callback(ch, method, properties, body, q=None):
 
 def schedule_job_kickurl(func):
     machines = func.s.check_endpoints(messages=func.faucet_event)
-    # TODO check the length didn't change before wiping it out
     del func.faucet_event[:]
 
     try:
@@ -71,13 +70,10 @@ def schedule_job_kickurl(func):
 
 def schedule_job_reinvestigation(func):
     ''' put endpoints into the reinvestigation state if possible '''
-    ostr = 'reinvestigation time'
-    func.logger.debug(ostr)
-    func.logger.debug('endpoints:{0}'.format(func.s.endpoints))
     candidates = []
 
     for endpoint in func.s.endpoints:
-        if endpoint.state in ['known', 'abnormal']:
+        if endpoint.state in ['queued', 'known', 'abnormal']:
             candidates.append(endpoint)
 
     # get random order of things that are known
@@ -85,7 +81,8 @@ def schedule_job_reinvestigation(func):
         if len(candidates) > 0:
             random.shuffle(candidates)
             chosen = candidates.pop()
-            ostr = 'starting investigation {0}:{1}'.format(x, chosen)
+            ostr = 'Starting reinvestigation on: {1}'.format(
+                chosen.name, chosen.state)
             func.logger.info(ostr)
             chosen.reinvestigate()
             func.s.investigations += 1
@@ -97,7 +94,7 @@ def schedule_job_reinvestigation(func):
 def schedule_thread_worker(schedule):
     ''' schedule thread, takes care of running processes in the future '''
     global CTRL_C
-    logger.debug('starting thread_worker')
+    logger.debug('Starting thread_worker')
     while not CTRL_C['STOP']:
         sys.stdout.flush()
         schedule.run_pending()
@@ -323,9 +320,15 @@ class Monitor(object):
                     'Faucet event: {0}'.format(self.faucet_event))
 
             for endpoint in self.s.endpoints:
-                self.logger.debug('processing endpoint: {0} {1} {2}'.format(
-                    endpoint.name, endpoint.state, endpoint.endpoint_data))
-                if endpoint.state == 'unknown':
+                if endpoint.state == 'queued':
+                    if self.s.investigations < self.controller['max_concurrent_reinvestigations']:
+                        self.s.investigations += 1
+                        endpoint.set_state(endpoint.p_next_state)
+                        endpoint.p_next_state = None
+                        endpoint.p_prev_states.append(
+                            (endpoint.state, int(time.time())))
+                        Actions(endpoint, self.s.sdnc).mirror_endpoint()
+                elif endpoint.state == 'unknown':
                     # move to mirroring state
                     if self.s.investigations < self.controller['max_concurrent_reinvestigations']:
                         self.s.investigations += 1
