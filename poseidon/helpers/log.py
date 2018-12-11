@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on 18 September 2017
-@author: Jeff Wang
+@author: Jeff Wang, Charlie Lewis
 """
 import logging
 import logging.handlers
@@ -38,7 +38,7 @@ class Logger:
                 pass
         # set up logging to file
         logging.basicConfig(level=level_int[controller['logger_level'].upper()],
-                            format='%(asctime)s [%(levelname)s] %(module)s - %(message)s',
+                            format='%(asctime)s [%(levelname)s] %(name)s - %(message)s',
                             filename='/var/log/poseidon/poseidon.log',
                             filemode='a')
     except Exception as e:  # pragma: no cover
@@ -48,7 +48,7 @@ class Logger:
     console = logging.StreamHandler()
     console.setLevel(logging.INFO)
     # set a format which is simpler for console use
-    formatter = logging.Formatter('[%(levelname)s] %(module)s - %(message)s')
+    formatter = logging.Formatter('[%(levelname)s] - %(message)s')
     # tell the handler to use this format
     console.setFormatter(formatter)
     # add the handler to the root logger
@@ -59,7 +59,7 @@ class Logger:
         # if a syslog address was supplied, log to it
         syslog = logging.handlers.SysLogHandler(
             address=(host, port), socktype=socket.SOCK_STREAM)
-        f_format = '%(asctime)s [%(levelname)s] %(module)s - %(message)s'
+        f_format = '%(asctime)s [%(levelname)s] %(name)s - %(message)s'
         f_formatter = logging.Formatter(f_format)
         syslog.setFormatter(f_formatter)
         logging.getLogger('').addHandler(syslog)
