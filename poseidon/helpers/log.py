@@ -59,7 +59,7 @@ class Logger:
         # if a syslog address was supplied, log to it
         syslog = logging.handlers.SysLogHandler(
             address=(host, port), socktype=socket.SOCK_STREAM)
-        f_format = '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'
+        f_format = '%(asctime)s [%(levelname)s] %(name)s - %(message)s'
         f_formatter = logging.Formatter(f_format)
         syslog.setFormatter(f_formatter)
         logging.getLogger('').addHandler(syslog)
