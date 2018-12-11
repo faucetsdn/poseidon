@@ -38,7 +38,7 @@ class Logger:
                 pass
         # set up logging to file
         logging.basicConfig(level=level_int[controller['logger_level'].upper()],
-                            format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                            format='%(asctime)s %(name)s %(levelname)s %(message)s',
                             filename='/var/log/poseidon/poseidon.log',
                             filemode='a')
     except Exception as e:  # pragma: no cover
@@ -53,7 +53,6 @@ class Logger:
     console.setFormatter(formatter)
     # add the handler to the root logger
     logging.getLogger('').addHandler(console)
-    logging.getLogger('transitions.core').addHandler(console)
 
     # don't try to connect to a syslog address if one was not supplied
     if host != 'NOT_CONFIGURED':  # pragma: no cover
