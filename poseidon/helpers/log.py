@@ -53,7 +53,7 @@ class Logger:
     console.setFormatter(formatter)
     # add the handler to the root logger
     logging.getLogger('').addHandler(console)
-    logging.getLogger('transitions').addHandler(console)
+    logging.getLogger('transitions.core').addHandler(console)
 
     # don't try to connect to a syslog address if one was not supplied
     if host != 'NOT_CONFIGURED':  # pragma: no cover
