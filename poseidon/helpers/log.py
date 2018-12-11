@@ -25,6 +25,11 @@ class Logger:
 
     controller = Config().get_config()
 
+    # setup existing loggers
+    logging.getLogger('schedule').setLevel(logging.ERROR)
+    t_formatter = logging.Formatter('[%(levelname)s] %(name)s - %(message)s')
+    logging.getLogger('transitions').setFormatter(t_formatter)
+
     use_file_logger = True
     # ensure log file exists
     try:

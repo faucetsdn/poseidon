@@ -217,6 +217,7 @@ def test_schedule_job_reinvestigation():
             endpoint.known()
             self.s.endpoints.append(endpoint)
             self.s.store_endpoints()
+            self.s.get_stored_endpoints()
 
     schedule_job_reinvestigation(func())
 
@@ -261,6 +262,10 @@ def test_process():
             self.faucet_event = None
             self.controller = Config().get_config()
             self.s = SDNConnect()
+            self.s.controller['TYPE'] = 'bcf'
+            self.s.get_sdn_context()
+            self.s.controller['TYPE'] = 'faucet'
+            self.s.get_sdn_context()
 
         def get_q_item(self):
             return (True, ('foo', {}))
