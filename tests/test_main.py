@@ -248,12 +248,6 @@ def test_process():
         def format_rabbit_message(self, item):
             return {}
 
-        def start_vent_collector(self, endpoint_hash):
-            return None
-
-        def host_has_active_collectors(self, endpoint_hash):
-            return False
-
     mock_monitor = MockMonitor()
 
     t1 = Thread(target=thread1)

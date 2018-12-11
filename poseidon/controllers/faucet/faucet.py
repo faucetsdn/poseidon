@@ -90,11 +90,8 @@ class FaucetProxy(Connection, Parser):
                 self.log(os.path.join(self.log_dir, 'faucet.log'))
             else:
                 self.log(self.log_file)
-        self.logger.debug('get_endpoints found:')
         for mac in self.mac_table:
             if self.learn_pub_adds:
-                self.logger.debug('{0}:{1}'.format(
-                    mac, self.mac_table[mac]))
                 retval.append(self.mac_table[mac])
             else:
                 # only allow RFC 1918 ipv4 addresses and fd* ipv6 address
@@ -114,8 +111,6 @@ class FaucetProxy(Connection, Parser):
                     self.mac_table[mac][0]['ip-address'].startswith('192.168.') or
                     (self.mac_table[mac][0]['ip-address'].startswith('172.') and
                      isinstance(check_sec_octet, int) and check_sec_octet > 15 and check_sec_octet < 32)):
-                    self.logger.debug('{0}:{1}'.format(
-                        mac, self.mac_table[mac]))
                     retval.append(self.mac_table[mac])
         return retval
 

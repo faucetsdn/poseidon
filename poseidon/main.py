@@ -319,10 +319,12 @@ class Monitor(object):
                 # this can trigger change out of mirroring/reinvestigating
             elif found_work and item[0] == self.controller['FA_RABBIT_ROUTING_KEY']:
                 self.faucet_event.append(self.format_rabbit_message(item))
-                self.logger.info(
+                self.logger.debug(
                     'Faucet event: {0}'.format(self.faucet_event))
 
             for endpoint in self.s.endpoints:
+                self.logger.debug('processing endpoint: {0} {1} {2}'.format(
+                    endpoint.name, endpoint.state, endpoint.endpoint_data))
                 if endpoint.state == 'unknown':
                     # move to mirroring state
                     if self.s.investigations < self.controller['max_concurrent_reinvestigations']:
@@ -339,11 +341,16 @@ class Monitor(object):
                 elif endpoint.state in ['mirroring', 'reinvestigating']:
                     if endpoint.name in ml_returns:
                         Actions(endpoint, self.s.sdnc).unmirror_endpoint()
-                        ml_decision = ml_returns[endpoint.name]['decisions']['behavior']
-                        if ml_decision == 'normal':
-                            endpoint.known()
+                        if 'valid' in ml_returns[endpoint.name] and ml_returns[endpoint.name]['valid']:
+                            ml_decision = None
+                            if 'decisions' in ml_returns[endpoint.name] and 'behavior' in ml_returns[endpoint.name]['decisions']:
+                                ml_decision = ml_returns[endpoint.name]['decisions']['behavior']
+                            if ml_decision == 'normal':
+                                endpoint.known()
+                            else:
+                                endpoint.abnormal()
                         else:
-                            endpoint.abnormal()
+                            endpoint.unknown()
                         self.s.investigations -= 1
                         endpoint.p_prev_states.append(
                             (endpoint.state, int(time.time())))
