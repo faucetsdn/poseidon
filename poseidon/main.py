@@ -251,6 +251,11 @@ class Monitor(object):
 
         # setup prometheus
         self.prom = Prometheus()
+        try:
+            self.prom.initialize_metrics()
+        except Exception as e:  # pragma: no cover
+            self.logger.debug(
+                'Prometheus metrics are already initialized: {0}'.format(str(e)))
         self.prom.start()
 
         # initialize sdnconnect

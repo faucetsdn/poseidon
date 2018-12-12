@@ -7,7 +7,6 @@ import logging
 import socket
 from binascii import hexlify
 
-from prometheus_client import CollectorRegistry
 from prometheus_client import Gauge
 from prometheus_client import start_http_server
 
@@ -17,11 +16,12 @@ class Prometheus():
     def __init__(self):
         self.logger = logging.getLogger('prometheus')
         self.prom_metrics = {}
-        registry = CollectorRegistry()
+
+    def initialize_metrics(self):
         self.prom_metrics['inactive'] = Gauge('poseidon_endpoint_inactive',
-                                              'Number of endpoints that are inactive', registry=registry)
+                                              'Number of endpoints that are inactive')
         self.prom_metrics['active'] = Gauge('poseidon_endpoint_active',
-                                            'Number of endpoints that are active', registry=registry)
+                                            'Number of endpoints that are active')
         self.prom_metrics['behavior'] = Gauge('poseidon_endpoint_behavior',
                                               'Behavior of an endpoint, 0 is normal, 1 is abnormal',
                                               ['ip',
@@ -31,7 +31,7 @@ class Prometheus():
                                                'port',
                                                'role',
                                                'os',
-                                               'record_source'], registry=registry)
+                                               'record_source'])
         self.prom_metrics['ip_table'] = Gauge('poseidon_endpoint_ip_table',
                                               'IP Table',
                                               ['mac',
@@ -41,33 +41,33 @@ class Prometheus():
                                                'role',
                                                'os',
                                                'hash_id',
-                                               'record_source'], registry=registry)
+                                               'record_source'])
         self.prom_metrics['roles'] = Gauge('poseidon_endpoint_roles',
                                            'Number of endpoints by role',
                                            ['record_source',
-                                            'role'], registry=registry)
+                                            'role'])
         self.prom_metrics['oses'] = Gauge('poseidon_endpoint_oses',
                                           'Number of endpoints by OS',
                                           ['record_source',
-                                           'os'], registry=registry)
+                                           'os'])
         self.prom_metrics['current_states'] = Gauge('poseidon_endpoint_current_states',
                                                     'Number of endpoints by current state',
                                                     ['record_source',
-                                                     'current_state'], registry=registry)
+                                                     'current_state'])
         self.prom_metrics['vlans'] = Gauge('poseidon_endpoint_vlans',
                                            'Number of endpoints by VLAN',
                                            ['record_source',
-                                            'tenant'], registry=registry)
+                                            'tenant'])
         self.prom_metrics['record_sources'] = Gauge('poseidon_endpoint_record_sources',
                                                     'Number of endpoints by record source',
-                                                    ['record_source'], registry=registry)
+                                                    ['record_source'])
         self.prom_metrics['port_tenants'] = Gauge('poseidon_endpoint_port_tenants',
                                                   'Number of tenants by port',
                                                   ['port',
-                                                   'tenant'], registry=registry)
+                                                   'tenant'])
         self.prom_metrics['port_hosts'] = Gauge('poseidon_endpoint_port_hosts',
                                                 'Number of hosts by port',
-                                                ['port'], registry=registry)
+                                                ['port'])
 
     @staticmethod
     def get_metrics():
