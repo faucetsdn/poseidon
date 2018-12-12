@@ -199,14 +199,17 @@ class SDNConnect(object):
                 ep.endpoint_data = deepcopy(machine)
                 if ep.state == 'inactive' and machine['active'] == 1:
                     if ep.p_next_state in ['known', 'abnormal']:
-                        ep.set_state(ep.p_next_state)
+                        ep.trigger(ep.p_next_state)
                     else:
                         ep.unknown()
                     ep.p_prev_states.append((ep.state, int(time.time())))
                 elif ep.state != 'inactive' and machine['active'] == 0:
                     if ep.state in ['mirroring', 'reinvestigating']:
                         self.investigations -= 1
-                    ep.p_next_state = ep.state
+                        if ep.state == 'mirroring':
+                            ep.p_next_state = 'mirror'
+                        elif ep.state == 'reinvestigating':
+                            ep.p_next_state = 'reinvestigate'
                     ep.inactive()
                     ep.p_prev_states.append((ep.state, int(time.time())))
             elif ep is None:
@@ -258,7 +261,12 @@ class Monitor(object):
         # set all retrieved endpoints to inactive at the start
         for endpoint in self.s.endpoints:
             if endpoint.state != 'inactive':
-                endpoint.p_next_state = endpoint.state
+                if endpoint.state == 'mirroring':
+                    endpoint.p_next_state = 'mirror'
+                elif endpoint.state == 'reinvestigating':
+                    endpoint.p_next_state = 'reinvestigate'
+                elif endpoint.state == 'queued':
+                    endpoint.p_next_state = 'queue'
                 endpoint.endpoint_data['active'] = 0
                 endpoint.inactive()
                 endpoint.p_prev_states.append(
@@ -337,7 +345,7 @@ class Monitor(object):
                             (endpoint.state, int(time.time())))
                         Actions(endpoint, self.s.sdnc).mirror_endpoint()
                     else:
-                        endpoint.p_next_state = 'mirroring'
+                        endpoint.p_next_state = 'mirror'
                         endpoint.queue()
                         endpoint.p_prev_states.append(
                             (endpoint.state, int(time.time())))
