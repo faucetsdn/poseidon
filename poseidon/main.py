@@ -331,7 +331,7 @@ class Monitor(object):
                 if endpoint.state == 'queued':
                     if self.s.investigations < self.controller['max_concurrent_reinvestigations']:
                         self.s.investigations += 1
-                        endpoint.set_state(endpoint.p_next_state)
+                        endpoint.trigger(endpoint.p_next_state)
                         endpoint.p_next_state = None
                         endpoint.p_prev_states.append(
                             (endpoint.state, int(time.time())))
