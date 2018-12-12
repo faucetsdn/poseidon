@@ -11,6 +11,7 @@ def test_Prometheus():
     Tests Prometheus
     """
     p = Prometheus.get_metrics()
+    p.initialize_metrics()
     hosts = [{'active': 0, 'record_source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'os': 'unknown', 'tenant': 'vlan1', 'port': 1, 'segment': 'switch1', 'ip': '123.123.123.123', 'mac': '00:00:00:00:00:00', 'hash': 'foo1', 'behavior': 1},
              {'active': 1, 'record_source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'os': 'unknown', 'tenant': 'vlan1',
                  'port': 1, 'segment': 'switch1', 'ip': '123.123.123.123', 'mac': '00:00:00:00:00:00', 'hash': 'foo2', 'behavior': 1},
