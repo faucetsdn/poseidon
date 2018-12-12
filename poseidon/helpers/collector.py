@@ -21,6 +21,8 @@ class Collector(object):
         self.id = endpoint.name
         self.mac = endpoint.endpoint_data['mac']
         self.endpoint_data = endpoint.endpoint_data
+        self.endpoint_data['state'] = endpoint.state
+        self.endpoint_data['prev_states'] = endpoint.p_prev_states
         self.nic = self.controller['collector_nic']
         self.interval = str(self.controller['reinvestigation_frequency'])
         self.iterations = str(iterations)
