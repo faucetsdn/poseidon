@@ -64,11 +64,12 @@ class NetworkFull(object):
                     node['port'] = 0
                     node['tenant'] = 0
                     node['record_source'] = 'Poseidon'
-                    node['role'] = 'Unknown'
-                    node['os'] = 'Unknown'
+                    node['role'] = 'UNDEFINED'
+                    node['os'] = 'UNDEFINED'
                     node['behavior'] = 0
                     node['hash'] = '0'
                     node['state'] = 'UNDEFINED'
+                    node['previous_states'] = 'UNDEFINED'
                     node['active'] = 0
                     try:
                         ip_address = 'None'
@@ -88,9 +89,9 @@ class NetworkFull(object):
                                     node['port'] = endpoint_data['port']
                                     node['tenant'] = endpoint_data['tenant']
                                     node['active'] = endpoint_data['active']
+                                    node['state'] = endpoint_data['state']
+                                    node['previous_states'] = endpoint_data['prev_states']
                                     ip_info = self.r.hgetall(ip_address)
-                                if 'state' in poseidon_info:
-                                    node['state'] = poseidon_info['state']
                             except Exception as e:  # pragma: no cover
                                 print(
                                     'Failed to set all poseidon info because: ' + str(e))
@@ -158,18 +159,18 @@ class Network(object):
                     node['uid'] = str(uuid.uuid4())
                     node['mac'] = mac
                     # set as unknown until it's set below
-                    node['IP'] = 'Unknown'
-                    node['subnet'] = 'Unknown'
-                    node['VLAN'] = 'Unknown'
-                    node['behavior'] = 'Unknown'
-                    node['active'] = 'Unknown'
+                    node['IP'] = 'UNDEFINED'
+                    node['subnet'] = 'UNDEFINED'
+                    node['VLAN'] = 'UNDEFINED'
+                    node['behavior'] = 'UNDEFINED'
+                    node['active'] = 'UNDEFINED'
                     node['state'] = 'UNDEFINED'
-                    node['rDNS_host'] = 'Unknown'
+                    node['rDNS_host'] = 'UNDEFINED'
                     node['record'] = {}
                     node['role'] = {}
-                    node['role']['role'] = 'Unknown'
+                    node['role']['role'] = 'UNDEFINED'
                     node['os'] = {}
-                    node['os']['os'] = 'Unknown'
+                    node['os']['os'] = 'UNDEFINED'
                     try:
                         short_os = None
                         endpoint_data = {}
@@ -189,6 +190,7 @@ class Network(object):
                                     ip_address = endpoint_data['ip-address']
                                     node['IP'] = ip_address
                                     node['VLAN'] = endpoint_data['tenant']
+                                    node['state'] = endpoint_data['state']
                                     active = endpoint_data['active']
                                     if active == 1:
                                         node['active'] = 'Active'
@@ -204,8 +206,6 @@ class Network(object):
                                         node['subnet'] = '.'.join(
                                             ip_address.split('.')[:-1])+'.0/24'
                                     ip_info = self.r.hgetall(ip_address)
-                                if 'state' in poseidon_info:
-                                    node['state'] = poseidon_info['state']
                             except Exception as e:  # pragma: no cover
                                 print(
                                     'Failed to set all poseidon info because: ' + str(e))
