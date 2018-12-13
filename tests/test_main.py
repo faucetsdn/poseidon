@@ -7,6 +7,7 @@ Created on 28 June 2016
 """
 import json
 import logging
+import time
 
 from prometheus_client import Gauge
 
@@ -247,6 +248,27 @@ def test_process():
             self.s.get_sdn_context()
             self.s.controller['TYPE'] = 'faucet'
             self.s.get_sdn_context()
+            endpoint = Endpoint('foo')
+            endpoint.endpoint_data = {
+                'tenant': 'foo', 'mac': '00:00:00:00:00:00'}
+            endpoint.mirror()
+            endpoint.p_prev_states.append(
+                (endpoint.state, int(time.time())))
+            self.s.endpoints.append(endpoint)
+            endpoint = Endpoint('foo2')
+            endpoint.endpoint_data = {
+                'tenant': 'foo', 'mac': '00:00:00:00:00:00'}
+            endpoint.p_next_state = 'mirror'
+            endpoint.queue()
+            endpoint.p_prev_states.append(
+                (endpoint.state, int(time.time())))
+            self.s.endpoints.append(endpoint)
+            endpoint = Endpoint('foo3')
+            endpoint.endpoint_data = {
+                'tenant': 'foo', 'mac': '00:00:00:00:00:00'}
+            self.s.endpoints.append(endpoint)
+            self.s.store_endpoints()
+            self.s.get_stored_endpoints()
 
         def get_q_item(self):
             return (True, ('foo', {}))
