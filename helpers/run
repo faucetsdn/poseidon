@@ -25,16 +25,16 @@ sudo chmod -R 755 /var/log/poseidon
 touch /var/log/poseidon/poseidon.log
 
 d_comm="docker run -dit -v /var/run/docker.sock:/var/run/docker.sock -v /opt/vent_files:/opt/vent_files -v $(pwd)/.plugin_config.yml:/root/.plugin_config.yml -v $(pwd)/.vent_startup.yml:/root/.vent_startup.yml "
-if [[ ! -z "${controller_uri}" ]]; then
+if [[ -n "${controller_uri}" ]]; then
 	d_comm+="-e controller_uri=$controller_uri "
 fi
-if [[ ! -z "${controller_user}" ]]; then
+if [[ -n "${controller_user}" ]]; then
 	d_comm+="-e controller_user=$controller_user "
 fi
-if [[ ! -z "${controller_pass}" ]]; then
+if [[ -n "${controller_pass}" ]]; then
 	d_comm+="-e controller_pass=$controller_pass "
 fi
-if [[ ! -z "${controller_type}" ]]; then
+if [[ -n "${controller_type}" ]]; then
 	d_comm+="-e controller_type=$controller_type "
 	if [ "$controller_type" == "faucet" ]; then
 		if [ ! -f /etc/faucet/faucet.yaml ]; then
@@ -45,46 +45,46 @@ if [[ ! -z "${controller_type}" ]]; then
 		fi
 	fi
 fi
-if [[ ! -z "${collector_nic}" ]]; then
+if [[ -n "${collector_nic}" ]]; then
 	d_comm+="-e collector_nic=$collector_nic "
 fi
-if [[ ! -z "${controller_log_file}" ]]; then
+if [[ -n "${controller_log_file}" ]]; then
 	d_comm+="-e controller_log_file=$controller_log_file "
 fi
-if [[ ! -z "${controller_config_file}" ]]; then
+if [[ -n "${controller_config_file}" ]]; then
 	d_comm+="-e controller_config_file=$controller_config_file "
 fi
-if [[ ! -z "${controller_mirror_ports}" ]]; then
+if [[ -n "${controller_mirror_ports}" ]]; then
 	d_comm+="-e controller_mirror_ports=$controller_mirror_ports "
 fi
-if [[ ! -z "${controller_span_fabric_name}" ]]; then
+if [[ -n "${controller_span_fabric_name}" ]]; then
 	d_comm+="-e controller_span_fabric_name=$controller_span_fabric_name "
 fi
-if [[ ! -z "${controller_interface_group}" ]]; then
+if [[ -n "${controller_interface_group}" ]]; then
 	d_comm+="-e controller_interface_group=$controller_interface_group "
 fi
-if [[ ! -z "${rabbit_enabled}" ]]; then
+if [[ -n "${rabbit_enabled}" ]]; then
 	d_comm+="-e rabbit_enabled=$rabbit_enabled "
 fi
-if [[ ! -z "${learn_public_addresses}" ]]; then
+if [[ -n "${learn_public_addresses}" ]]; then
 	d_comm+="-e learn_public_addresses=$learn_public_addresses "
 fi
-if [[ ! -z "${FA_RABBIT_ENABLED}" ]]; then
+if [[ -n "${FA_RABBIT_ENABLED}" ]]; then
 	d_comm+="-e FA_RABBIT_ENABLED=$FA_RABBIT_ENABLED "
 fi
-if [[ ! -z "${FA_RABBIT_HOST}" ]]; then
+if [[ -n "${FA_RABBIT_HOST}" ]]; then
 	d_comm+="-e FA_RABBIT_HOST=$FA_RABBIT_HOST "
 fi
-if [[ ! -z "${FA_RABBIT_EXCHANGE}" ]]; then
+if [[ -n "${FA_RABBIT_EXCHANGE}" ]]; then
 	d_comm+="-e FA_RABBIT_EXCHANGE=$FA_RABBIT_EXCHANGE "
 fi
-if [[ ! -z "${FA_RABBIT_ROUTING_KEY}" ]]; then
+if [[ -n "${FA_RABBIT_ROUTING_KEY}" ]]; then
 	d_comm+="-e FA_RABBIT_ROUTING_KEY=$FA_RABBIT_ROUTING_KEY "
 fi
-if [[ ! -z "${FA_RABBIT_PORT}" ]]; then
+if [[ -n "${FA_RABBIT_PORT}" ]]; then
 	d_comm+="-e FA_RABBIT_PORT=$FA_RABBIT_PORT "
 fi
-if [[ ! -z "${max_concurrent_reinvestigations}" ]]; then
+if [[ -n "${max_concurrent_reinvestigations}" ]]; then
 	d_comm+="-e max_concurrent_reinvestigations=$max_concurrent_reinvestigations "
 fi
 d_comm+="--name vent cyberreboot/vent"

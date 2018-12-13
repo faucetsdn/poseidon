@@ -47,7 +47,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Poseidon'
-copyright = u'2016-2018, In-Q-Tel, Inc'
+copyright = u'2016-2018, IQT Labs LLC'
 author = u'Cyber Reboot'
 
 # The version info for the project you're documenting, acts as replacement for
