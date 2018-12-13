@@ -228,7 +228,6 @@ def test_Monitor_init():
 
 def test_process():
     from threading import Thread
-    import time
 
     def thread1():
         global CTRL_C
@@ -298,7 +297,6 @@ def test_process():
 
 def test_schedule_thread_worker():
     from threading import Thread
-    import time
 
     def thread1():
         global CTRL_C

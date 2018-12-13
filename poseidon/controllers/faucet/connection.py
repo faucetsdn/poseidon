@@ -109,8 +109,3 @@ class Connection:
                 self.logger.error(
                     'failed to send file {0} because: {1}'.format(f_type, e))
             self._disconnect()
-
-    def event_listener(self):
-        # TODO - if using an event adapter from FAUCET, such as rabbbitmq
-        event = None
-        return event

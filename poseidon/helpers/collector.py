@@ -69,12 +69,12 @@ class Collector(object):
                 items = ast.literal_eval(
                     text[text.find(',')+2:text.rfind(')')])
                 c = {}
-                for item in items:
-                    host = item['args'][4][5:]
-                    # TODO
-                    # coll = Collector(item['id'], item['args'][0], item['args'][1],
-                    #                 item['args'][2], item['args'][3], host, item['status'])
-                    #collectors.update({coll.hash: coll})
+                # for item in items:
+                #    host = item['args'][4][5:]
+                #    # TODO
+                #    # coll = Collector(item['id'], item['args'][0], item['args'][1],
+                #    #                 item['args'][2], item['args'][3], host, item['status'])
+                #    #collectors.update({coll.hash: coll})
                 collectors = c
 
             self.logger.debug('collector list response: ' + resp.text)

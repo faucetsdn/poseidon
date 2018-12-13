@@ -229,5 +229,6 @@ class Prometheus():
             self.logger.error(
                 'unable to send results to prometheus because {0}'.format(str(e)))
 
-    def start(self, port=9304):
+    @staticmethod
+    def start(port=9304):
         start_http_server(port)

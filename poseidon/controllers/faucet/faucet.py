@@ -131,7 +131,6 @@ class FaucetProxy(Connection, Parser):
         return records about ip addresses from get_endpoints
         to be used by shutdown_ip
         '''
-        endpoints = self.get_endpoints()
         match_list = []
         # TODO
         return match_list
@@ -140,7 +139,6 @@ class FaucetProxy(Connection, Parser):
         '''
         return records about mac address from get_endpoints
         '''
-        endpoints = self.get_endpoints()
         match_list = []
         # TODO
         return match_list

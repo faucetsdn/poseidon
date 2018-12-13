@@ -7,7 +7,6 @@ controllers and defines the Monitor class.
 Created on 3 December 2018
 @author: Charlie Lewis
 """
-import ast
 import json
 import logging
 import pickle
@@ -52,7 +51,7 @@ def rabbit_callback(ch, method, properties, body, q=None):
 
 
 def schedule_job_kickurl(func):
-    machines = func.s.check_endpoints(messages=func.faucet_event)
+    func.s.check_endpoints(messages=func.faucet_event)
     del func.faucet_event[:]
 
     try:
@@ -77,13 +76,12 @@ def schedule_job_reinvestigation(func):
             candidates.append(endpoint)
 
     # get random order of things that are known
-    for x in range(func.controller['max_concurrent_reinvestigations'] - func.s.investigations):
+    for _ in range(func.controller['max_concurrent_reinvestigations'] - func.s.investigations):
         if len(candidates) > 0:
             random.shuffle(candidates)
             chosen = candidates.pop()
-            ostr = 'Starting reinvestigation on: {1}'.format(
-                chosen.name, chosen.state)
-            func.logger.info(ostr)
+            func.logger.info('Starting reinvestigation on: {0} {1}'.format(
+                chosen.name, chosen.state))
             chosen.reinvestigate()
             func.s.investigations += 1
             chosen.p_prev_states.append(
@@ -156,7 +154,6 @@ class SDNConnect(object):
 
         current = None
         parsed = None
-        machines = {}
 
         try:
             current = self.sdnc.get_endpoints(messages=messages)
@@ -172,7 +169,7 @@ class SDNConnect(object):
 
         self.find_new_machines(parsed)
 
-        return json.dumps(retval)
+        return
 
     def connect_redis(self, host='redis', port=6379, db=0):
         self.r = None
@@ -256,7 +253,7 @@ class Monitor(object):
         except Exception as e:  # pragma: no cover
             self.logger.debug(
                 'Prometheus metrics are already initialized: {0}'.format(str(e)))
-        self.prom.start()
+        Prometheus.start()
 
         # initialize sdnconnect
         self.s = SDNConnect()
@@ -385,11 +382,11 @@ class Monitor(object):
                                 (endpoint.state, int(time.time())))
 
     def get_q_item(self):
-        ''' attempt to get a work item from the queue'''
-        ''' m_queue -> (routing_key, body)
-            a read from get_q_item should be of the form
-            (boolean,(routing_key, body))
-
+        '''
+        attempt to get a work item from the queue
+        m_queue -> (routing_key, body)
+        a read from get_q_item should be of the form
+        (boolean,(routing_key, body))
         '''
         found_work = False
         item = None
