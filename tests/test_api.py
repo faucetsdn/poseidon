@@ -40,24 +40,24 @@ def test_setup_redis():
             {'poseidon_hash': '6cd09124a66ef1bbc72c1aff4e333766d3533f83',
              'timestamps': "['1527208220', '1527208228']",
              'short_os': 'Linux'})
-    r.hmset('10.0.0.1_1527208227', {'labels': ['Developer workstation',
-                                               'Unknown',
-                                               'Smartphone'],
-                                    'confidences': [0.6065386838895384,
-                                                    0.3487681867266965,
-                                                    0.015645883198622094]})
-    r.hmset('10.0.0.2_1527208227', {'labels': ['Developer workstation',
-                                               'Unknown',
-                                               'Smartphone'],
-                                    'confidences': [0.6065386838895384,
-                                                    0.3487681867266965,
-                                                    0.015645883198622094]})
-    r.hmset('10.0.0.3_1527208228', {'labels': ['Developer workstation',
-                                               'Unknown',
-                                               'Smartphone'],
-                                    'confidences': [0.6065386838895384,
-                                                    0.3487681867266965,
-                                                    0.015645883198622094]})
+    r.hmset('10.0.0.1_1527208227', {'labels': "['Developer workstation', \
+                                                'Unknown', \
+                                                'Smartphone']",
+                                    'confidences': '[0.6065386838895384, \
+                                                     0.3487681867266965, \
+                                                     0.015645883198622094]'})
+    r.hmset('10.0.0.2_1527208227', {'labels': "['Developer workstation', \
+                                                'Unknown', \
+                                                'Smartphone']",
+                                    'confidences': '[0.6065386838895384, \
+                                                     0.3487681867266965, \
+                                                     0.015645883198622094]'})
+    r.hmset('10.0.0.3_1527208228', {'labels': "['Developer workstation', \
+                                                'Unknown', \
+                                                'Smartphone']",
+                                    'confidences': '[0.6065386838895384, \
+                                                     0.3487681867266965, \
+                                                     0.015645883198622094]'})
     r.hmset('6cd09124a66ef1bbc72c1aff4e333766d3533f81',
             {'transition_time': '1524623228.1019075',
              'prev_state': 'None',
