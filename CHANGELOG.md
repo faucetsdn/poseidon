@@ -1,3 +1,11 @@
+# v0.4.0 (2018-12-14)
+
+ - Updated version of pytest, urllib3, requests, scp, pylint, certifi, redis, prometheus_client
+ - Restructred the code base into a more simplified architecture
+ - Replaced the custom state machine with pytransitions to make it more reliable
+ - Cleaned up logging to be more readable at an INFO level and more useful at a DEBUG level
+ - Various bug fixes along the way
+
 # v0.3.6 (2018-10-22)
 
  - Updated version of pytest, gunicorn, prometheus_client, urllib3, scp, gevent, certifi, requests
@@ -8,11 +16,11 @@
 
 # v0.3.5 (2018-09-21)
 
- - added an inactive state
- - fixed operating system results from p0f
- - fixes roles results from PoseidonML
- - fixed log file creation and rotation
- -
+ - Added an inactive state
+ - Fixed operating system results from p0f
+ - Fixes roles results from PoseidonML
+ - Fixed log file creation and rotation
+
 # v0.3.4 (2018-09-10)
 
  - Updated version of pytest and pytest-cov
