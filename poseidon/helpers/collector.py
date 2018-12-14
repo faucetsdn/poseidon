@@ -65,19 +65,18 @@ class Collector(object):
         try:
             resp = requests.get(uri)
             text = resp.text
-            if text.index('True') != -1:
-                items = ast.literal_eval(
-                    text[text.find(',')+2:text.rfind(')')])
-                c = {}
-                # for item in items:
-                #    host = item['args'][4][5:]
-                #    # TODO
-                #    # coll = Collector(item['id'], item['args'][0], item['args'][1],
-                #    #                 item['args'][2], item['args'][3], host, item['status'])
-                #    #collectors.update({coll.hash: coll})
-                collectors = c
-
-            self.logger.debug('collector list response: ' + resp.text)
+            # if text.index('True') != -1:
+            #    #items = ast.literal_eval(
+            #    #    text[text.find(',')+2:text.rfind(')')])
+            #    #c = {}
+            #    # for item in items:
+            #    #    host = item['args'][4][5:]
+            #    #    # TODO
+            #    #    # coll = Collector(item['id'], item['args'][0], item['args'][1],
+            #    #    #                 item['args'][2], item['args'][3], host, item['status'])
+            #    #    #collectors.update({coll.hash: coll})
+            #    #collectors = c
+            self.logger.debug('collector list response: ' + text)
         except Exception as e:  # pragma: no cover
             self.logger.debug(
                 'failed to get vent collector statuses' + str(e))

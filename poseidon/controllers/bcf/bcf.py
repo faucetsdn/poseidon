@@ -126,17 +126,17 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             span_name='',
             interface_group='',
             span_fabric_resource='data/controller/applications/bcf/span-fabric'):
+        '''
+        GET list of span fabric configuration.
+
+        use this to task mirror_traffic
+        '''
 
         if not span_name and self.span_fabric_name:
             span_name = self.span_fabric_name
         if not interface_group and self.interface_group:
             interface_group = self.interface_group
 
-        '''
-        GET list of span fabric configuration.
-
-        use this to task mirror_traffic
-        '''
         if span_name:
             span_fabric_resource = ''.join(
                 [span_fabric_resource, '[name="%s"]' % span_name])
