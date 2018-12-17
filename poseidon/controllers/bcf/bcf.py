@@ -65,7 +65,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         try:
             self.get_endpoints()
             connected = True
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.warning(
                 'unable to connect to the controller because: {0}'.format(str(e)))
         return connected

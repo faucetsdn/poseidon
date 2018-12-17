@@ -364,6 +364,7 @@ def test_get_highest():
     with HTTMock(mock_factory(r'.*', filemap)):
         proxy = BcfProxy(controller, 'login')
 
+        proxy.check_connection()
         endpoints = proxy.get_endpoints()
         span_fabric = proxy.get_span_fabric()
 
@@ -371,6 +372,46 @@ def test_get_highest():
     bcf.span_fabric = span_fabric
     ret_val = bcf.get_highest(span_fabric)
     answer = 3
+
+    assert answer == ret_val
+
+
+def test_get_highest_no_filter():
+
+    class MockBcfProxy(BcfProxy):
+
+        def __init__(self):
+            self.endpoints = None
+            self.span_fabric = None
+            self.logger = MockLogger().logger
+
+    bcf = MockBcfProxy()
+
+    filemap = {
+        '/data/controller/applications/bcf/info/fabric/switch': 'sample_switches.json',
+        '/data/controller/applications/bcf/info/endpoint-manager/tenant': 'sample_tenants.json',
+        '/data/controller/applications/bcf/info/endpoint-manager/segment': 'sample_segments.json',
+        '/data/controller/applications/bcf/info/endpoint-manager/endpoint': 'sample_endpoints.json',
+        '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22]': 'sample_span_fabric_empty.json',
+        # %22 = url-encoded double quotes
+        '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22][dest-interface-group=%22INTERFACE_GROUP%22]': 'sample_span_fabric_empty.json',
+    }
+    proxy = None
+    endpoints = None
+    span_fabric = None
+    controller = {'URI': 'http://localhost',
+                  'USER': username, 'PASS': password, 'SPAN_FABRIC_NAME': 'SPAN_FABRIC', 'INTERFACE_GROUP': 'INTERFACE_GROUP'}
+    with HTTMock(mock_factory(r'.*', filemap)):
+        proxy = BcfProxy(controller, 'login')
+
+        proxy.check_connection()
+        endpoints = proxy.get_endpoints()
+        span_fabric = proxy.get_span_fabric()
+
+    bcf.endpoints = endpoints
+    bcf.span_fabric = span_fabric
+    ret_val = bcf.get_highest(span_fabric)
+    answer = 1
 
     assert answer == ret_val
 
