@@ -41,7 +41,7 @@ class NetworkFull(object):
                                            port=6379,
                                            db=0,
                                            decode_responses=True)
-            else:
+            else:  # pragma: no cover
                 self.r = redis.StrictRedis(host='redis',
                                            port=6379,
                                            db=0,
@@ -138,7 +138,7 @@ class Network(object):
                                            port=6379,
                                            db=0,
                                            decode_responses=True)
-            else:
+            else:  # pragma: no cover
                 self.r = redis.StrictRedis(host='redis',
                                            port=6379,
                                            db=0,
