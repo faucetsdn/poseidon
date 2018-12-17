@@ -28,34 +28,37 @@ def test_setup_redis():
     r.sadd('ip_addresses', '10.0.0.2')
     r.sadd('ip_addresses', '10.0.0.3')
     r.sadd('ip_addresses', '2601:645:8200:a571:18fd:6640:9cd9:10d3')
-    r.hmset('10.0.0.1',
+    r.sadd('mac_addresses', '00:00:00:00:00:01')
+    r.sadd('mac_addresses', '00:00:00:00:00:02')
+    r.sadd('mac_addresses', '00:00:00:00:00:03')
+    r.hmset('00:00:00:00:00:01',
             {'poseidon_hash': '6cd09124a66ef1bbc72c1aff4e333766d3533f81',
              'timestamps': "['1527208227']",
              'short_os': 'Mac'})
-    r.hmset('10.0.0.2',
+    r.hmset('00:00:00:00:00:02',
             {'poseidon_hash': '6cd09124a66ef1bbc72c1aff4e333766d3533f82',
              'timestamps': "['1527208220', '1527208227']",
              'short_os': 'Windows'})
-    r.hmset('10.0.0.3',
+    r.hmset('00:00:00:00:00:03',
             {'poseidon_hash': '6cd09124a66ef1bbc72c1aff4e333766d3533f83',
              'timestamps': "['1527208220', '1527208228']",
              'short_os': 'Linux'})
-    r.hmset('10.0.0.1_1527208227', {'labels': "['Developer workstation', \
+    r.hmset('00:00:00:00:00:01_1527208227', {'labels': "['Developer workstation', \
                                                 'Unknown', \
                                                 'Smartphone']",
-                                    'confidences': '[0.6065386838895384, \
+                                             'confidences': '[0.6065386838895384, \
                                                      0.3487681867266965, \
                                                      0.015645883198622094]'})
-    r.hmset('10.0.0.2_1527208227', {'labels': "['Developer workstation', \
+    r.hmset('00:00:00:00:00:02_1527208227', {'labels': "['Developer workstation', \
                                                 'Unknown', \
                                                 'Smartphone']",
-                                    'confidences': '[0.6065386838895384, \
+                                             'confidences': '[0.6065386838895384, \
                                                      0.3487681867266965, \
                                                      0.015645883198622094]'})
-    r.hmset('10.0.0.3_1527208228', {'labels': "['Developer workstation', \
+    r.hmset('00:00:00:00:00:03_1527208228', {'labels': "['Developer workstation', \
                                                 'Unknown', \
                                                 'Smartphone']",
-                                    'confidences': '[0.6065386838895384, \
+                                             'confidences': '[0.6065386838895384, \
                                                      0.3487681867266965, \
                                                      0.015645883198622094]'})
     r.hmset('6cd09124a66ef1bbc72c1aff4e333766d3533f81',
