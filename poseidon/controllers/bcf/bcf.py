@@ -65,7 +65,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         try:
             self.get_endpoints()
             connected = True
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.warning(
                 'unable to connect to the controller because: {0}'.format(str(e)))
         return connected
@@ -238,8 +238,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         self.logger.debug(sout)
         return retval
 
-    @staticmethod
-    def get_highest(span_fabric):
+    def get_highest(self, span_fabric):
         '''
         get the max number, should be all clear after it
         '''

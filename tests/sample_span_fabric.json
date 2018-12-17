@@ -4,11 +4,23 @@
     "dest-interface-group": "INTERFACE_GROUP",
     "filter": [
       {
+        "match-specification": {
+          "dst-ip-cidr": "10.0.0.2",
+          "dst-mac": "00:00:00:00:00:02",
+          "src-ip-cidr": "10.0.0.1",
+          "src-mac": "00:00:00:00:00:01"
+        },
         "segment": "prod",
         "seq": 1,
         "tenant": "port2"
       },
       {
+        "match-specification": {
+          "dst-ip-cidr": "10.0.0.2",
+          "dst-mac": "00:00:00:00:00:02",
+          "src-ip-cidr": "10.0.0.1",
+          "src-mac": "00:00:00:00:00:01"
+        },
         "segment": "prod",
         "seq": 2,
         "tenant": "port5"
