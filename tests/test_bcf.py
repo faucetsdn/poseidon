@@ -561,8 +561,17 @@ def test_unmirror_mac():
         def __init__(self):
             self.endpoints = None
             self.span_fabric = None
-            self.span_fabric_name = 'SPAN_FABRIC'
             self.logger = MockLogger().logger
+
+        def mirror_traffic(
+                self,
+                seq,
+                mirror=True,
+                span_name='SPAN_FABRIC',
+                s_dict=None,
+                fabric_span_endpoint='',
+                **target_kwargs):
+            pass
 
         def get_span_fabric(self):
             return self.span_fabric
