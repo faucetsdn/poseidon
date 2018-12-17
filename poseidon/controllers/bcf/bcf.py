@@ -238,8 +238,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         self.logger.debug(sout)
         return retval
 
-    @staticmethod
-    def get_highest(span_fabric):
+    def get_highest(self, span_fabric):
         '''
         get the max number, should be all clear after it
         '''

@@ -494,7 +494,7 @@ def test_get_seq_by_mac():
     bcf.endpoints = endpoints
     bcf.span_fabric = span_fabric
     ret_val = bcf.get_seq_by_mac('00:00:00:00:00:02')
-    answer = list()
+    answer = [1, 2]
     assert answer == ret_val
 
 
@@ -561,6 +561,7 @@ def test_unmirror_mac():
         def __init__(self):
             self.endpoints = None
             self.span_fabric = None
+            self.span_fabric_name = 'SPAN_FABRIC'
             self.logger = MockLogger().logger
 
         def get_span_fabric(self):
