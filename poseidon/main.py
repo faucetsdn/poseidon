@@ -236,7 +236,7 @@ class SDNConnect(object):
                 serialized_endpoints = []
                 for endpoint in self.endpoints:
                     serialized_endpoints.append(json.dumps(
-                        endpoint, default=lambda x: getattr(x, '__dict__', ['deque']+list(x))))
+                        endpoint, default=lambda x: {'__{}__'.format(x.__class__.__name__): x.__dict__}))
                 self.r.set('p_endpoints', str(serialized_endpoints))
             except Exception as e:  # pragma: no cover
                 self.logger.error(
