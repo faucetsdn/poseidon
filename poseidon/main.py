@@ -120,8 +120,9 @@ class SDNConnect(object):
         # load existing endpoints if any
         if self.r:
             try:
-                p_endpoints = ast.literal_eval(self.r.get('p_endpoints'))
+                p_endpoints = self.r.get('p_endpoints')
                 if p_endpoints:
+                    p_endpoints = ast.literal_eval(p_endpoints)
                     self.endpoints = []
                     for endpoint in p_endpoints:
                         self.endpoints.append(EndpointDecoder(endpoint))
@@ -251,7 +252,8 @@ class EndpointEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, collections.deque):
             return {'__collections.deque__': list(o)}
-        return {'__{}__'.format(o.__class__.__name__): o.__dict__}
+        # return {'__{0}__'.format(o.__class__.__name__): o.__dict__}
+        return json.JSONEncode.default(self, o)
 
 
 class Monitor(object):
