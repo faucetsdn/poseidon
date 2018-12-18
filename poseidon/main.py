@@ -8,6 +8,7 @@ Created on 3 December 2018
 @author: Charlie Lewis
 """
 import ast
+import collections
 import json
 import logging
 import random
@@ -102,13 +103,6 @@ def schedule_thread_worker(schedule):
     sys.exit()
 
 
-class LoadEndpoint(object):
-    def __init__(self, endpoint):
-        # TODO needs data validation
-        logger.info(json.loads(endpoint))
-        self.__dict__ = json.loads(endpoint)
-
-
 class SDNConnect(object):
 
     def __init__(self):
@@ -130,7 +124,7 @@ class SDNConnect(object):
                 if p_endpoints:
                     self.endpoints = []
                     for endpoint in p_endpoints:
-                        self.endpoints.append(LoadEndpoint(endpoint))
+                        self.endpoints.append(EndpointDecoder(endpoint))
             except Exception as e:  # pragma: no cover
                 self.logger.error(
                     'Unable to get existing endpoints from Redis because {0}'.format(str(e)))
@@ -236,12 +230,28 @@ class SDNConnect(object):
                 serialized_endpoints = []
                 for endpoint in self.endpoints:
                     serialized_endpoints.append(json.dumps(
-                        endpoint, default=lambda x: {'__{}__'.format(x.__class__.__name__): x.__dict__}))
+                        endpoint, cls=EndpointEncoder))
                 self.r.set('p_endpoints', str(serialized_endpoints))
             except Exception as e:  # pragma: no cover
                 self.logger.error(
                     'Unable to store endpoints in Redis because {0}'.format(str(e)))
         return
+
+
+class EndpointDecoder(object):
+    def __init__(self, endpoint):
+        # TODO needs data validation
+        logger.info(json.loads(endpoint))
+        self.__dict__ = json.loads(endpoint)
+
+
+class EndpointEncoder(json.JSONEncoder):
+
+    def default(self, o):
+        if isinstance(o, collections.deque):
+            return {'__collections.deque__': list(o)}
+        else:
+            return {'__{}__'.format(o.__class__.__name__): o.__dict__}
 
 
 class Monitor(object):
