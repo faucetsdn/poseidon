@@ -7,7 +7,8 @@ function check_images()
         if [ "$(ls -A /opt/poseidon/dist)" ]; then
             ls /opt/poseidon/dist 2> /dev/null | \
             while read -r line ; do
-                image=echo "$line" | sed 's/-/\//' | sed 's/.tar/:master'
+                image="${line/-/\/}"
+                image="${image/.tar/:master}"
                 if [ "$line" == "cyberreboot/vent:master" ]; then
                     if [ "$(docker images cyberreboot/vent:latest | wc -l)" -eq 1 ]; then
                         result=1
