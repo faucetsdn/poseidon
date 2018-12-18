@@ -11,7 +11,7 @@ db_capb backup
 docker pull cyberreboot/gonet > /dev/null 2>&1
 declare -a OPTIONS
 COUNT=0
-for interface in $(docker run --net=host cyberreboot/gonet);
+for interface in $(docker run --net=host --rm cyberreboot/gonet);
 do
     if [ "$interface" != "lo" ] && [ "$interface" != "" ] && [[ ! "$interface" =~ ^veth ]]; then
         OPTIONS[$COUNT]=$interface;
