@@ -1,22 +1,11 @@
 #!/bin/bash
 
-# reset configuration (db_purge)
-# version
-# configure
-# logs
-# restart
-# status
-# start
-# stop
-# show current configuration
-
 function logging()
 {
     docker logs -f cyberreboot-vent-syslog-master | \
     while read -r line ; do
         echo "$line" | grep -v 'poseidon-api' | grep -i 'poseidon' | awk '{$1=$2=$3=""; print $0}' | sed -e 's/^[ \t]*//'
     done
-
 }
 
 function show_help()
@@ -42,7 +31,8 @@ Options:
     -Z,  reset         reset the configuration (uses sudo)"
 }
 
-function die() {
+function die()
+{
     printf '%s\n' "$1" >&2
     exit 1
 }
@@ -186,18 +176,18 @@ function check_files()
     fi
     if [ ! -f /var/log/faucet/faucet.log ]; then
         sudo touch /var/log/faucet/faucet.log
-    fi 
+    fi
     if [ ! -f /var/log/faucet/faucet_exception.log ]; then
         sudo touch /var/log/faucet/faucet_exception.log
-    fi 
+    fi
 
     if [ ! -d /var/log/poseidon ]; then
         sudo mkdir -p /var/log/poseidon
         sudo chmod -R 755 /var/log/poseidon
-    fi 
+    fi
     if [ -d /var/log/poseidon/poseidon.log ]; then
         sudo rm -rf /var/log/poseidon/poseidon.log
-    fi 
+    fi
     if [ ! -f /var/log/poseidon/poseidon.log ]; then
         sudo touch /var/log/poseidon/poseidon.log
     fi
