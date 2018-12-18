@@ -105,6 +105,7 @@ def schedule_thread_worker(schedule):
 class LoadEndpoint(object):
     def __init__(self, endpoint):
         # TODO needs data validation
+        logger.info(json.loads(endpoint))
         self.__dict__ = json.loads(endpoint)
 
 
@@ -235,7 +236,7 @@ class SDNConnect(object):
                 serialized_endpoints = []
                 for endpoint in self.endpoints:
                     serialized_endpoints.append(json.dumps(
-                        endpoint, default=lambda o: o.__dict__))
+                        endpoint, default=lambda x: getattr(x, '__dict__', ['deque']+list(x))))
                 self.r.set('p_endpoints', str(serialized_endpoints))
             except Exception as e:  # pragma: no cover
                 self.logger.error(
