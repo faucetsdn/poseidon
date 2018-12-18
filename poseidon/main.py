@@ -9,7 +9,6 @@ Created on 3 December 2018
 """
 import json
 import logging
-import pickle
 import random
 import signal
 import sys
@@ -102,6 +101,12 @@ def schedule_thread_worker(schedule):
     sys.exit()
 
 
+class LoadEndpoint(object):
+    def __init__(self, endpoint):
+        # TODO needs data validation
+        self.__dict__ = json.loads(endpoint)
+
+
 class SDNConnect(object):
 
     def __init__(self):
@@ -121,7 +126,9 @@ class SDNConnect(object):
             try:
                 p_endpoints = self.r.get('p_endpoints')
                 if p_endpoints:
-                    self.endpoints = pickle.loads(p_endpoints)
+                    self.endpoints = []
+                    for endpoint in p_endpoints:
+                        self.endpoints.append(LoadEndpoint(endpoint))
             except Exception as e:  # pragma: no cover
                 self.logger.error(
                     'Unable to get existing endpoints from Redis because {0}'.format(str(e)))
@@ -224,8 +231,11 @@ class SDNConnect(object):
         # store latest version of endpoints in redis
         if self.r:
             try:
-                pickled_endpoints = pickle.dumps(self.endpoints)
-                self.r.set('p_endpoints', pickled_endpoints)
+                serialized_endpoints = []
+                for endpoint in self.endpoints:
+                    serialized_endpoints.append(json.dumps(
+                        endpoint, default=lambda o: o.__dict__))
+                self.r.set('p_endpoints', serialized_endpoints)
             except Exception as e:  # pragma: no cover
                 self.logger.error(
                     'Unable to store endpoints in Redis because {0}'.format(str(e)))
