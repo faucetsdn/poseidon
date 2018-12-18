@@ -1,14 +1,30 @@
 #!/bin/bash
 
-# reset configuration (db_purge)
-# version
-# configure
-# logs
-# restart
-# status
-# start
-# stop
-# show current configuration
+function check_images()
+{
+    local result=1
+    if [ -d "/opt/poseidon/dist" ]; then
+        if [ "$(ls -A /opt/poseidon/dist)" ]; then
+            ls /opt/poseidon/dist 2> /dev/null | \
+            while read -r line ; do
+                image=echo "$line" | sed 's/-/\//' | sed 's/.tar/:master'
+                if [ "$line" == "cyberreboot/vent:master" ]; then
+                    if [ "$(docker images cyberreboot/vent:latest | wc -l)" -eq 1 ]; then
+                        result=1
+                    fi
+                elif [ "$(docker images $line | wc -l)" -eq 1 ]; then
+                    result=1
+                fi
+            done
+        else
+            result=1
+        fi
+    else
+        result=1
+    fi
+    result=0
+    echo $result
+}
 
 function logging()
 {
@@ -16,7 +32,6 @@ function logging()
     while read -r line ; do
         echo "$line" | grep -v 'poseidon-api' | grep -i 'poseidon' | awk '{$1=$2=$3=""; print $0}' | sed -e 's/^[ \t]*//'
     done
-
 }
 
 function show_help()
@@ -42,7 +57,8 @@ Options:
     -Z,  reset         reset the configuration (uses sudo)"
 }
 
-function die() {
+function die()
+{
     printf '%s\n' "$1" >&2
     exit 1
 }
@@ -109,6 +125,12 @@ function check_args()
                 if [ "$(docker ps -q --filter "name=vent" | wc -l)" -eq 1 ]; then
                    echo "Found at least part of Poseidon already running, cleaning up first."
                    sudo systemctl stop poseidon
+                fi
+                echo "Checking images..."
+                response=$(check_images)
+                if [ "$response" != "0" ]; then
+                    echo "Not all of Poseidon's images were found, try 'reconfig' instead"
+                    exit 1
                 fi
                 if [ "$2" = "-D" ]; then
                     echo "Checking volumes..."
@@ -186,18 +208,18 @@ function check_files()
     fi
     if [ ! -f /var/log/faucet/faucet.log ]; then
         sudo touch /var/log/faucet/faucet.log
-    fi 
+    fi
     if [ ! -f /var/log/faucet/faucet_exception.log ]; then
         sudo touch /var/log/faucet/faucet_exception.log
-    fi 
+    fi
 
     if [ ! -d /var/log/poseidon ]; then
         sudo mkdir -p /var/log/poseidon
         sudo chmod -R 755 /var/log/poseidon
-    fi 
+    fi
     if [ -d /var/log/poseidon/poseidon.log ]; then
         sudo rm -rf /var/log/poseidon/poseidon.log
-    fi 
+    fi
     if [ ! -f /var/log/poseidon/poseidon.log ]; then
         sudo touch /var/log/poseidon/poseidon.log
     fi
