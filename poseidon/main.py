@@ -239,6 +239,7 @@ class SDNConnect(object):
 
 
 class EndpointDecoder(object):
+
     def __init__(self, endpoint):
         # TODO needs data validation
         logger.info(json.loads(endpoint))
@@ -250,8 +251,7 @@ class EndpointEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, collections.deque):
             return {'__collections.deque__': list(o)}
-        else:
-            return {'__{}__'.format(o.__class__.__name__): o.__dict__}
+        return {'__{}__'.format(o.__class__.__name__): o.__dict__}
 
 
 class Monitor(object):
