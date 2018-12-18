@@ -7,6 +7,7 @@ controllers and defines the Monitor class.
 Created on 3 December 2018
 @author: Charlie Lewis
 """
+import ast
 import json
 import logging
 import random
@@ -124,7 +125,7 @@ class SDNConnect(object):
         # load existing endpoints if any
         if self.r:
             try:
-                p_endpoints = self.r.get('p_endpoints')
+                p_endpoints = ast.literal_eval(self.r.get('p_endpoints'))
                 if p_endpoints:
                     self.endpoints = []
                     for endpoint in p_endpoints:
@@ -235,7 +236,7 @@ class SDNConnect(object):
                 for endpoint in self.endpoints:
                     serialized_endpoints.append(json.dumps(
                         endpoint, default=lambda o: o.__dict__))
-                self.r.set('p_endpoints', serialized_endpoints)
+                self.r.set('p_endpoints', str(serialized_endpoints))
             except Exception as e:  # pragma: no cover
                 self.logger.error(
                     'Unable to store endpoints in Redis because {0}'.format(str(e)))
