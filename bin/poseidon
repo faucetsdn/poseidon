@@ -1,31 +1,5 @@
 #!/bin/bash
 
-function check_images()
-{
-    local result=1
-    if [ -d "/opt/poseidon/dist" ]; then
-        if [ "$(ls -A /opt/poseidon/dist)" ]; then
-            ls /opt/poseidon/dist 2> /dev/null | \
-            while read -r line ; do
-                image=echo "$line" | sed 's/-/\//' | sed 's/.tar/:master'
-                if [ "$line" == "cyberreboot/vent:master" ]; then
-                    if [ "$(docker images cyberreboot/vent:latest | wc -l)" -eq 1 ]; then
-                        result=1
-                    fi
-                elif [ "$(docker images $line | wc -l)" -eq 1 ]; then
-                    result=1
-                fi
-            done
-        else
-            result=1
-        fi
-    else
-        result=1
-    fi
-    result=0
-    echo $result
-}
-
 function logging()
 {
     docker logs -f cyberreboot-vent-syslog-master | \
@@ -125,12 +99,6 @@ function check_args()
                 if [ "$(docker ps -q --filter "name=vent" | wc -l)" -eq 1 ]; then
                    echo "Found at least part of Poseidon already running, cleaning up first."
                    sudo systemctl stop poseidon
-                fi
-                echo "Checking images..."
-                response=$(check_images)
-                if [ "$response" != "0" ]; then
-                    echo "Not all of Poseidon's images were found, try 'reconfig' instead"
-                    exit 1
                 fi
                 if [ "$2" = "-D" ]; then
                     echo "Checking volumes..."
