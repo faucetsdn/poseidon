@@ -253,7 +253,7 @@ class EndpointEncoder(json.JSONEncoder):
         if isinstance(o, collections.deque):
             return {'__collections.deque__': list(o)}
         # return {'__{0}__'.format(o.__class__.__name__): o.__dict__}
-        return json.JSONEncode.default(self, o)
+        return json.JSONEncoder.default(self, o)
 
 
 class Monitor(object):
