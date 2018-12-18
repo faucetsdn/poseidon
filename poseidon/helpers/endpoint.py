@@ -3,9 +3,19 @@
 Created on 3 December 2018
 @author: Charlie Lewis
 """
+import collections
 import hashlib
+import json
 
 from transitions import Machine
+
+
+class EndpointEncoder(json.JSONEncoder):
+
+    def default(self, o):
+        if isinstance(o, collections.deque):
+            return {'__collections.deque__': list(o)}
+        return json.JSONEncoder.default(self, o)
 
 
 class Endpoint(object):
@@ -53,6 +63,10 @@ class Endpoint(object):
         self.endpoint_data = None
         self.p_next_state = None
         self.p_prev_states = []
+
+    def to_JSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__,
+                          sort_keys=True, indent=4)
 
     @staticmethod
     def make_hash(machine):

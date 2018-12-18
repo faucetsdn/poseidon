@@ -8,7 +8,6 @@ Created on 3 December 2018
 @author: Charlie Lewis
 """
 import ast
-import collections
 import json
 import logging
 import random
@@ -230,8 +229,8 @@ class SDNConnect(object):
             try:
                 serialized_endpoints = []
                 for endpoint in self.endpoints:
-                    serialized_endpoints.append(json.dumps(
-                        endpoint, cls=EndpointEncoder))
+                    e = endpoint.to_JSON()
+                    serialized_endpoints.append(json.dumps(e))
                 self.r.set('p_endpoints', str(serialized_endpoints))
             except Exception as e:  # pragma: no cover
                 self.logger.error(
@@ -245,15 +244,7 @@ class EndpointDecoder(object):
         # TODO needs data validation
         logger.info(json.loads(endpoint))
         self.__dict__ = json.loads(endpoint)
-
-
-class EndpointEncoder(json.JSONEncoder):
-
-    def default(self, o):
-        if isinstance(o, collections.deque):
-            return {'__collections.deque__': list(o)}
         # return {'__{0}__'.format(o.__class__.__name__): o.__dict__}
-        return json.JSONEncoder.default(self, o)
 
 
 class Monitor(object):
