@@ -28,6 +28,7 @@ from poseidon.controllers.faucet.faucet import FaucetProxy
 from poseidon.helpers.actions import Actions
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import Endpoint
+from poseidon.helpers.endpoint import EndpointDecoder
 from poseidon.helpers.log import Logger
 from poseidon.helpers.prometheus import Prometheus
 from poseidon.helpers.rabbit import Rabbit
