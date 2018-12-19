@@ -114,9 +114,9 @@ class SDNConnect(object):
         self.get_sdn_context()
         self.endpoints = []
         self.investigations = 0
+        self.connect_redis()
 
     def get_stored_endpoints(self):
-        self.connect_redis()
         # load existing endpoints if any
         if self.r:
             try:
