@@ -194,6 +194,7 @@ def test_schedule_job_reinvestigation():
             endpoint.mirror()
             endpoint.known()
             self.s.endpoints.append(endpoint)
+            self.s.get_stored_endpoints()
             self.s.store_endpoints()
             self.s.get_stored_endpoints()
 
@@ -266,6 +267,7 @@ def test_process():
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00'}
             self.s.endpoints.append(endpoint)
+            self.s.get_stored_endpoints()
             self.s.store_endpoints()
             self.s.get_stored_endpoints()
 
