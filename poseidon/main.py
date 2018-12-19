@@ -181,7 +181,7 @@ class SDNConnect(object):
         try:
             self.r = StrictRedis(host=host, port=port, db=db,
                                  socket_connect_timeout=2)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.error(
                 'Failed connect to Redis because: {0}'.format(str(e)))
         return

@@ -189,7 +189,6 @@ def test_schedule_job_reinvestigation():
                                              port=6379,
                                              db=0,
                                              decode_responses=True)
-            self.s.get_stored_endpoints()
             endpoint = Endpoint('foo')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00'}
@@ -260,7 +259,6 @@ def test_process():
                                              port=6379,
                                              db=0,
                                              decode_responses=True)
-            self.s.get_stored_endpoints()
             endpoint = Endpoint('foo')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00'}
