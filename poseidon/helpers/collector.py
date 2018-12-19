@@ -3,6 +3,7 @@
 Created on 9 December 2018
 @author: Charlie Lewis
 """
+import ast
 import json
 import logging
 
@@ -50,6 +51,13 @@ class Collector(object):
             # TODO improve logged output
             self.logger.debug(
                 'Collector response: {0}'.format(resp.text))
+            response = ast.literal_eval(resp.text)
+            if response[0]:
+                self.logger.info(
+                    'Successfully started the vent collector for: {0}'.format(self.id))
+            else:
+                self.logger.error(
+                    'Failed to start vent collector because: {0}'.format(response[1]))
         except Exception as e:  # pragma: no cover
             self.logger.error(
                 'Failed to start vent collector because: {0}'.format(str(e)))
