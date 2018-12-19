@@ -121,7 +121,7 @@ class SDNConnect(object):
             try:
                 p_endpoints = self.r.get('p_endpoints')
                 if p_endpoints:
-                    p_endpoints = ast.literal_eval(p_endpoints)
+                    p_endpoints = ast.literal_eval(p_endpoints.decode('ascii'))
                     self.endpoints = []
                     for endpoint in p_endpoints:
                         self.endpoints.append(
