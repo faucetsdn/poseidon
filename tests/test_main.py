@@ -182,6 +182,7 @@ def test_schedule_job_reinvestigation():
             self.controller = Config().get_config()
             self.controller['max_concurrent_reinvestigations'] = 10
             self.s = SDNConnect()
+            self.s.get_stored_endpoints()
             endpoint = Endpoint('foo')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00'}
@@ -194,7 +195,6 @@ def test_schedule_job_reinvestigation():
             endpoint.mirror()
             endpoint.known()
             self.s.endpoints.append(endpoint)
-            self.s.get_stored_endpoints()
             self.s.store_endpoints()
             self.s.get_stored_endpoints()
 
@@ -248,6 +248,7 @@ def test_process():
             self.s.get_sdn_context()
             self.s.controller['TYPE'] = 'faucet'
             self.s.get_sdn_context()
+            self.s.get_stored_endpoints()
             endpoint = Endpoint('foo')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00'}
@@ -267,7 +268,6 @@ def test_process():
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00'}
             self.s.endpoints.append(endpoint)
-            self.s.get_stored_endpoints()
             self.s.store_endpoints()
             self.s.get_stored_endpoints()
 
