@@ -7,8 +7,10 @@ Created on 28 June 2016
 """
 import json
 import logging
+import os
 import time
 
+import redis
 from prometheus_client import Gauge
 
 from poseidon.helpers.config import Config
@@ -182,6 +184,11 @@ def test_schedule_job_reinvestigation():
             self.controller = Config().get_config()
             self.controller['max_concurrent_reinvestigations'] = 10
             self.s = SDNConnect()
+            if 'POSEIDON_TRAVIS' in os.environ:
+                self.s.r = redis.StrictRedis(host='localhost',
+                                             port=6379,
+                                             db=0,
+                                             decode_responses=True)
             endpoint = Endpoint('foo')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00'}
@@ -247,6 +254,11 @@ def test_process():
             self.s.get_sdn_context()
             self.s.controller['TYPE'] = 'faucet'
             self.s.get_sdn_context()
+            if 'POSEIDON_TRAVIS' in os.environ:
+                self.s.r = redis.StrictRedis(host='localhost',
+                                             port=6379,
+                                             db=0,
+                                             decode_responses=True)
             endpoint = Endpoint('foo')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00'}

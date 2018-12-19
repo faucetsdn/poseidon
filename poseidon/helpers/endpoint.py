@@ -4,8 +4,23 @@ Created on 3 December 2018
 @author: Charlie Lewis
 """
 import hashlib
+import json
 
 from transitions import Machine
+
+
+class EndpointDecoder(object):
+
+    def __init__(self, endpoint):
+        e = json.loads(endpoint)
+        self.endpoint = Endpoint(e['name'])
+        self.endpoint.state = e['state']
+        self.endpoint.endpoint_data = e['endpoint_data']
+        self.endpoint.p_next_state = e['p_next_state']
+        self.endpoint.p_prev_states = e['p_prev_states']
+
+    def get_endpoint(self):
+        return self.endpoint
 
 
 class Endpoint(object):
@@ -53,6 +68,15 @@ class Endpoint(object):
         self.endpoint_data = None
         self.p_next_state = None
         self.p_prev_states = []
+
+    def encode(self):
+        endpoint_d = {}
+        endpoint_d['name'] = self.name
+        endpoint_d['state'] = self.state
+        endpoint_d['endpoint_data'] = self.endpoint_data
+        endpoint_d['p_next_state'] = self.p_next_state
+        endpoint_d['p_prev_states'] = self.p_prev_states
+        return str(json.dumps(endpoint_d))
 
     @staticmethod
     def make_hash(machine):

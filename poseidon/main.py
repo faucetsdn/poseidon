@@ -7,9 +7,9 @@ controllers and defines the Monitor class.
 Created on 3 December 2018
 @author: Charlie Lewis
 """
+import ast
 import json
 import logging
-import pickle
 import random
 import signal
 import sys
@@ -28,6 +28,7 @@ from poseidon.controllers.faucet.faucet import FaucetProxy
 from poseidon.helpers.actions import Actions
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import Endpoint
+from poseidon.helpers.endpoint import EndpointDecoder
 from poseidon.helpers.log import Logger
 from poseidon.helpers.prometheus import Prometheus
 from poseidon.helpers.rabbit import Rabbit
@@ -113,15 +114,19 @@ class SDNConnect(object):
         self.get_sdn_context()
         self.endpoints = []
         self.investigations = 0
+        self.connect_redis()
 
     def get_stored_endpoints(self):
-        self.connect_redis()
         # load existing endpoints if any
         if self.r:
             try:
                 p_endpoints = self.r.get('p_endpoints')
                 if p_endpoints:
-                    self.endpoints = pickle.loads(p_endpoints)
+                    p_endpoints = ast.literal_eval(p_endpoints.decode('ascii'))
+                    self.endpoints = []
+                    for endpoint in p_endpoints:
+                        self.endpoints.append(
+                            EndpointDecoder(endpoint).get_endpoint())
             except Exception as e:  # pragma: no cover
                 self.logger.error(
                     'Unable to get existing endpoints from Redis because {0}'.format(str(e)))
@@ -176,7 +181,7 @@ class SDNConnect(object):
         try:
             self.r = StrictRedis(host=host, port=port, db=db,
                                  socket_connect_timeout=2)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.error(
                 'Failed connect to Redis because: {0}'.format(str(e)))
         return
@@ -224,8 +229,10 @@ class SDNConnect(object):
         # store latest version of endpoints in redis
         if self.r:
             try:
-                pickled_endpoints = pickle.dumps(self.endpoints)
-                self.r.set('p_endpoints', pickled_endpoints)
+                serialized_endpoints = []
+                for endpoint in self.endpoints:
+                    serialized_endpoints.append(endpoint.encode())
+                self.r.set('p_endpoints', str(serialized_endpoints))
             except Exception as e:  # pragma: no cover
                 self.logger.error(
                     'Unable to store endpoints in Redis because {0}'.format(str(e)))
