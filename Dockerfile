@@ -1,6 +1,8 @@
 FROM alpine:3.8
 LABEL maintainer="clewis@iqt.org"
 
+COPY requirements.txt requirements.txt
+COPY healthcheck /healthcheck
 RUN apk upgrade --no-cache && \
     apk add --no-cache \
     build-base \
@@ -10,13 +12,16 @@ RUN apk upgrade --no-cache && \
     py3-paramiko \
     tini \
     yaml-dev && \
-    pip3 install --no-cache-dir --trusted-host pypi.python.org --upgrade pip && \
+    pip3 install --no-cache-dir --upgrade pip && \
+    pip3 install --no-cache-dir -r requirements.txt && \
+    pip3 install --no-cache-dir -r /healthcheck/requirements.txt && \
+    apk del build-base \
+    python3-dev \
+    yaml-dev && \
     rm -rf /var/cache/* && \
     rm -rf /root/.cache/*
 
 # healthcheck
-COPY healthcheck /healthcheck
-RUN pip3 install -r /healthcheck/requirements.txt
 ENV FLASK_APP /healthcheck/hc.py
 HEALTHCHECK --interval=15s --timeout=15s \
  CMD curl --silent --fail http://localhost:5000/healthcheck || exit 1
@@ -25,9 +30,6 @@ COPY . /poseidon
 WORKDIR /poseidon
 ENV PYTHONPATH /poseidon/poseidon:$PYTHONPATH
 ENV POSEIDON_CONFIG /poseidon/config/poseidon.config
-
-# install dependencies of poseidon modules for poseidon
-RUN find . -name requirements.txt -type f -exec pip3 install -r {} \;
 
 ENV PYTHONUNBUFFERED 0
 ENV SYS_LOG_HOST NOT_CONFIGURED
