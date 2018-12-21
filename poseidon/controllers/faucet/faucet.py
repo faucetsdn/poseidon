@@ -211,7 +211,7 @@ class FaucetProxy(Connection, Parser):
         else:
             status = False
         self.logger.debug('mirror status: ' + str(status))
-        # TODO check if config was successfully updated
+        return status
 
     def unmirror_mac(self, my_mac, messages=None):
         if messages:
