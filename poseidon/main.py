@@ -87,7 +87,8 @@ def schedule_job_reinvestigation(func):
             func.s.investigations += 1
             chosen.p_prev_states.append(
                 (endpoint.state, int(time.time())))
-            Actions(chosen, func.s.sdnc).mirror_endpoint()
+            status = Actions(chosen, func.s.sdnc).mirror_endpoint()
+            # TODO only do these thing if status is true, otherwise keep trying candidates
 
 
 def schedule_thread_worker(schedule):
@@ -344,7 +345,9 @@ class Monitor(object):
                         endpoint.p_next_state = None
                         endpoint.p_prev_states.append(
                             (endpoint.state, int(time.time())))
-                        Actions(endpoint, self.s.sdnc).mirror_endpoint()
+                        status = Actions(
+                            endpoint, self.s.sdnc).mirror_endpoint()
+                        # TODO only do these thing if status is true
                 elif endpoint.state == 'unknown':
                     # move to mirroring state
                     if self.s.investigations < self.controller['max_concurrent_reinvestigations']:
@@ -352,7 +355,9 @@ class Monitor(object):
                         endpoint.mirror()
                         endpoint.p_prev_states.append(
                             (endpoint.state, int(time.time())))
-                        Actions(endpoint, self.s.sdnc).mirror_endpoint()
+                        status = Actions(
+                            endpoint, self.s.sdnc).mirror_endpoint()
+                        # TODO only do these thing if status is true
                     else:
                         endpoint.p_next_state = 'mirror'
                         endpoint.queue()
@@ -360,7 +365,9 @@ class Monitor(object):
                             (endpoint.state, int(time.time())))
                 elif endpoint.state in ['mirroring', 'reinvestigating']:
                     if endpoint.name in ml_returns:
-                        Actions(endpoint, self.s.sdnc).unmirror_endpoint()
+                        status = Actions(
+                            endpoint, self.s.sdnc).unmirror_endpoint()
+                        # TODO only do these thing if status is true
                         self.logger.info('ml_valid type: {0}'.format(
                             type(ml_returns[endpoint.name]['valid'])))
                         if 'valid' in ml_returns[endpoint.name] and ml_returns[endpoint.name]['valid']:
@@ -382,7 +389,9 @@ class Monitor(object):
                         # in case something didn't report back, put back in an
                         # unknown state
                         if cur_time - endpoint.p_prev_states[-1][1] > 2*self.controller['reinvestigation_frequency']:
-                            Actions(endpoint, self.s.sdnc).unmirror_endpoint()
+                            status = Actions(
+                                endpoint, self.s.sdnc).unmirror_endpoint()
+                            # TODO only do these thing if status is true
                             endpoint.unknown()
                             self.s.investigations -= 1
                             endpoint.p_prev_states.append(

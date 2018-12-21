@@ -32,6 +32,7 @@ class Collector(object):
         Starts vent collector for a given device with the
         options passed in at the creation of the class instance.
         '''
+        status = False
         payload = {
             'nic': self.nic,
             'id': self.id,
@@ -55,13 +56,14 @@ class Collector(object):
             if response[0]:
                 self.logger.info(
                     'Successfully started the vent collector for: {0}'.format(self.id))
+                status = True
             else:
                 self.logger.error(
                     'Failed to start vent collector because: {0}'.format(response[1]))
         except Exception as e:  # pragma: no cover
             self.logger.error(
                 'Failed to start vent collector because: {0}'.format(str(e)))
-        return
+        return status
 
     # returns a dictionary of existing collectors keyed on dev_hash
     def get_vent_collectors(self):

@@ -22,11 +22,12 @@ class Actions(object):
         tell vent to start a collector and the controller to begin
         mirroring traffic
         '''
+        status = False
         if self.sdnc.mirror_mac(self.endpoint.endpoint_data['mac']):
-            Collector(self.endpoint).start_vent_collector()
-        return
+            status = Collector(self.endpoint).start_vent_collector()
+        return statue
 
     def unmirror_endpoint(self):
         ''' tell the controller to unmirror traffic '''
-        self.sdnc.unmirror_mac(self.endpoint.endpoint_data['mac'])
-        return
+        status = self.sdnc.unmirror_mac(self.endpoint.endpoint_data['mac'])
+        return status
