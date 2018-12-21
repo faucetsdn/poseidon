@@ -240,8 +240,10 @@ class FaucetProxy(Connection, Parser):
                 if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
                                'unmirror', int(port), switch):
                     self.send_file('config')
+                    # TODO check if config was successfully updated
+                    status = True
             else:
                 status = self.config(
                     self.config_file, 'unmirror', int(port), switch)
         self.logger.debug('unmirror status: ' + str(status))
-        # TODO check if config was successfully updated
+        return status
