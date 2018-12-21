@@ -198,6 +198,7 @@ if db_go; then
     docker load -i /opt/poseidon/dist/cyberreboot-vent-plugins-tcprewrite-dot1q.tar
     docker load -i /opt/poseidon/dist/cyberreboot-crviz.tar
     docker load -i /opt/poseidon/dist/cyberreboot-poseidonml.tar
+    docker load -i /opt/poseidon/dist/cyberreboot-poseidon.tar
 
     # start poseidon service
     systemctl stop poseidon || true
