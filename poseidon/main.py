@@ -368,8 +368,6 @@ class Monitor(object):
                         status = Actions(
                             endpoint, self.s.sdnc).unmirror_endpoint()
                         # TODO only do these thing if status is true
-                        self.logger.info('ml_valid type: {0}'.format(
-                            type(ml_returns[endpoint.name]['valid'])))
                         if 'valid' in ml_returns[endpoint.name] and ml_returns[endpoint.name]['valid']:
                             ml_decision = None
                             if 'decisions' in ml_returns[endpoint.name] and 'behavior' in ml_returns[endpoint.name]['decisions']:
