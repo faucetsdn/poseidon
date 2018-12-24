@@ -208,8 +208,8 @@ if db_go; then
     db_get poseidon/controller_type
     if [[ -n "$RET" ]]; then
         if [ "$RET" == "Demo" ]; then
-            default_iface=$(awk '$2 == 00000000 { print $1 }' /proc/net/route)
-            default_ip=$(ip addr show dev "$default_iface" | awk '$1 ~ /^inet/ { sub("/.*", "", $2); print $2 }' | head -1)
+            default_iface=$(ip route list | head -1 | awk '{print $5}')
+            default_ip=$(ip addr show dev "$default_iface" | awk '$1 == "inet" { sub("/.*", "", $2); print $2 }' | head -1)
 
             # settings in /etc/poseidon/default.conf
             echo "controller_type=faucet" >> /etc/poseidon/default.conf
