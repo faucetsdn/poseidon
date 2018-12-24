@@ -88,7 +88,7 @@ def schedule_job_reinvestigation(func):
             chosen.p_prev_states.append(
                 (endpoint.state, int(time.time())))
             status = Actions(chosen, func.s.sdnc).mirror_endpoint()
-            # TODO only do these thing if status is true, otherwise keep trying candidates
+            # TODO only do these things if status is true, otherwise keep trying candidates
 
 
 def schedule_thread_worker(schedule):
@@ -327,15 +327,36 @@ class Monitor(object):
             found_work, item = self.get_q_item()
             ml_returns = {}
 
-            if found_work and item[0] != self.controller['FA_RABBIT_ROUTING_KEY']:
-                ml_returns = self.format_rabbit_message(item)
-                self.logger.info(
-                    'ML results: {0}'.format(ml_returns))
-                # this can trigger change out of mirroring/reinvestigating
-            elif found_work and item[0] == self.controller['FA_RABBIT_ROUTING_KEY']:
+            if found_work and item[0] == self.controller['FA_RABBIT_ROUTING_KEY']:
                 self.faucet_event.append(self.format_rabbit_message(item))
                 self.logger.debug(
                     'Faucet event: {0}'.format(self.faucet_event))
+            elif found_work:
+                ml_returns = self.format_rabbit_message(item)
+                self.logger.info(
+                    'ML results: {0}'.format(ml_returns))
+                # process results from ml output and update impacted endpoints
+                for ep in self.s.endpoints:
+                    if ep.name in ml_returns and 'valid' in ml_returns[ep.name]:
+                        if ep.state in ['mirroring', 'reinvestigating']:
+                            status = Actions(
+                                ep, self.s.sdnc).unmirror_endpoint()
+                            if not status:
+                                self.logger.warning(
+                                    'Unable to unmirror the endpoint: {0}'.format(ep.name))
+                            self.s.investigations -= 1
+                        if ml_returns[ep.name]['valid']:
+                            ml_decision = None
+                            if 'decisions' in ml_returns[ep.name] and 'behavior' in ml_returns[ep.name]['decisions']:
+                                ml_decision = ml_returns[ep.name]['decisions']['behavior']
+                            if ml_decision == 'normal':
+                                ep.known()
+                            else:
+                                ep.abnormal()
+                        else:
+                            ep.unknown()
+                        ep.p_prev_states.append(
+                            (ep.state, int(time.time())))
 
             for endpoint in self.s.endpoints:
                 if endpoint.state == 'queued':
@@ -347,7 +368,7 @@ class Monitor(object):
                             (endpoint.state, int(time.time())))
                         status = Actions(
                             endpoint, self.s.sdnc).mirror_endpoint()
-                        # TODO only do these thing if status is true
+                        # TODO only do these things if status is true
                 elif endpoint.state == 'unknown':
                     # move to mirroring state
                     if self.s.investigations < self.controller['max_concurrent_reinvestigations']:
@@ -357,45 +378,25 @@ class Monitor(object):
                             (endpoint.state, int(time.time())))
                         status = Actions(
                             endpoint, self.s.sdnc).mirror_endpoint()
-                        # TODO only do these thing if status is true
+                        # TODO only do these things if status is true
                     else:
                         endpoint.p_next_state = 'mirror'
                         endpoint.queue()
                         endpoint.p_prev_states.append(
                             (endpoint.state, int(time.time())))
                 elif endpoint.state in ['mirroring', 'reinvestigating']:
-                    if endpoint.name in ml_returns:
+                    cur_time = int(time.time())
+                    # timeout after 2 times the reinvestigation frequency
+                    # in case something didn't report back, put back in an
+                    # unknown state
+                    if cur_time - endpoint.p_prev_states[-1][1] > 2*self.controller['reinvestigation_frequency']:
                         status = Actions(
                             endpoint, self.s.sdnc).unmirror_endpoint()
-                        # TODO only do these thing if status is true
-                        self.logger.info('ml_valid type: {0}'.format(
-                            type(ml_returns[endpoint.name]['valid'])))
-                        if 'valid' in ml_returns[endpoint.name] and ml_returns[endpoint.name]['valid']:
-                            ml_decision = None
-                            if 'decisions' in ml_returns[endpoint.name] and 'behavior' in ml_returns[endpoint.name]['decisions']:
-                                ml_decision = ml_returns[endpoint.name]['decisions']['behavior']
-                            if ml_decision == 'normal':
-                                endpoint.known()
-                            else:
-                                endpoint.abnormal()
-                        else:
-                            endpoint.unknown()
+                        # TODO only do these things if status is true
+                        endpoint.unknown()
                         self.s.investigations -= 1
                         endpoint.p_prev_states.append(
                             (endpoint.state, int(time.time())))
-                    else:
-                        cur_time = int(time.time())
-                        # timeout after 2 times the reinvestigation frequency
-                        # in case something didn't report back, put back in an
-                        # unknown state
-                        if cur_time - endpoint.p_prev_states[-1][1] > 2*self.controller['reinvestigation_frequency']:
-                            status = Actions(
-                                endpoint, self.s.sdnc).unmirror_endpoint()
-                            # TODO only do these thing if status is true
-                            endpoint.unknown()
-                            self.s.investigations -= 1
-                            endpoint.p_prev_states.append(
-                                (endpoint.state, int(time.time())))
 
     def get_q_item(self):
         '''
