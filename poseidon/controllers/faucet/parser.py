@@ -106,8 +106,7 @@ class Parser:
             self.logger.warning('Unknown action: {0}'.format(action))
         try:
             if len(obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']) == 0:
-                obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]].remove(
-                    'mirror')
+                del obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']
                 # TODO make this smarter about more complex configurations (backup original values, etc)
                 del obj_doc['dps'][switch_found]['timeout']
                 del obj_doc['dps'][switch_found]['arp_neighbor_timeout']
