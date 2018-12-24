@@ -57,7 +57,7 @@ class FaucetProxy(Connection, Parser):
         for d in data:
             md = d[0]
             d.reverse()
-            for i in range(len(d)):
+            for i, _ in enumerate(d):
                 ipv4_set = False
                 ipv6_set = False
                 if 'ip-address' in d[i]:

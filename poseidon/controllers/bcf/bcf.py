@@ -61,7 +61,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
                 # get both ipv4 and ipv6 addresses if available
                 # reverse to set the most recent ip last
                 ipa.reverse()
-                for i in range(len(ipa)):
+                for i, _ in enumerate(ipa):
                     ip_val = ipa[i].pop('ip-address', None)
                     ipv4_set = False
                     ipv6_set = False

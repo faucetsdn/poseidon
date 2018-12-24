@@ -2,7 +2,6 @@ import ast
 import json
 import os
 from copy import deepcopy
-from datetime import datetime
 
 import falcon
 import redis
@@ -59,7 +58,7 @@ class Nodes():
     def build_nodes(self):
         status = self.connect_redis()
         if status[0] and self.r:
-            mac_address = []
+            mac_addresses = []
             try:
                 mac_addresses = self.r.smembers('mac_addresses')
             except Exception as e:  # pragma: no cover
@@ -158,7 +157,7 @@ class Nodes():
 
 class NetworkFull(object):
 
-    def get_dataset(self):
+    def get_dataset():
         fields = {'mac': 0, 'id': 'UNDEFINED', 'ipv4': 0, 'ipv6': 0, 'ipv4_subnet': 'UNDEFINED', 'ipv6_subnet': 'UNDEFINED', 'segment': 0, 'port': 0, 'tenant': 0, 'active': 0,
                   'state': 'UNDEFINED', 'prev_states': 'UNDEFINED', 'role': 'UNDEFINED', 'role_confidence': 0, 'behavior': 0, 'ipv4_os': 'UNDEFINED', 'ipv6_os': 'UNDEFINED', 'source': 'UNDEFINED'}
         n = Nodes(fields)
@@ -166,7 +165,7 @@ class NetworkFull(object):
 
     def on_get(self, req, resp):
         network = {}
-        dataset = self.get_dataset()
+        dataset = NetworkFull.get_dataset()
         network['dataset'] = dataset
 
         resp.body = json.dumps(network, indent=2)
@@ -176,7 +175,7 @@ class NetworkFull(object):
 
 class Network(object):
 
-    def get_dataset(self):
+    def get_dataset():
         fields = {'mac': 0, 'ipv4': 0, 'ipv6': 0, 'ipv4_subnet': 'UNDEFINED', 'ipv6_subnet': 'UNDEFINED', 'tenant': 0, 'active': 0, 'state': 'UNDEFINED',
                   'role': 'UNDEFINED', 'role_confidence': 0, 'behavior': 0, 'ipv4_os': 'UNDEFINED', 'ipv6_os': 'UNDEFINED', 'source': 'UNDEFINED'}
         n = Nodes(fields)
@@ -188,7 +187,7 @@ class Network(object):
 
     def on_get(self, req, resp):
         network = {}
-        dataset = self.get_dataset()
+        dataset = Network.get_dataset()
         configuration = self.get_configuration()
 
         network['dataset'] = dataset
