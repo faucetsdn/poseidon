@@ -51,13 +51,32 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         for d in data:
             ipa = d.get('ip-address')
             if ipa is not None and ipa[0] is not None:
-                ipa[0]['name'] = d.get('name')
+                md = ipa[0]
+                md['name'] = d.get('name')
                 # TODO this should grab 'state': 'Active'
-                ipa[0]['active'] = 1
+                md['active'] = 1
                 # TODO this should grab interface
-                ipa[0]['port'] = None
-                ipa[0].pop('ip-state', None)
-                ret_list.append(ipa[0])
+                md['port'] = None
+                md.pop('ip-state', None)
+                # get both ipv4 and ipv6 addresses if available
+                # reverse to set the most recent ip last
+                ipa.reverse()
+                for i in range(len(ipa)):
+                    ip_val = ipa[i].pop('ip-address', None)
+                    ipv4_set = False
+                    ipv6_set = False
+                    if ':' in ip_val:
+                        md['ipv6'] = ip_val
+                        ipv6_set = True
+                    else:
+                        md['ipv4'] = ip_val
+                        ipv4_set = True
+                if not ipv4_set:
+                    md['ipv4'] = None
+                if not ipv6_set:
+                    md['ipv6'] = None
+
+                ret_list.append(md)
         return ret_list
 
     def check_connection(self):

@@ -7,6 +7,8 @@ import json
 import logging
 import os
 
+import ipaddress
+
 from poseidon.controllers.faucet.connection import Connection
 from poseidon.controllers.faucet.parser import Parser
 
@@ -54,8 +56,26 @@ class FaucetProxy(Connection, Parser):
         ret_list = list()
         for d in data:
             md = d[0]
+            d.reverse()
+            for i in range(len(d)):
+                ipv4_set = False
+                ipv6_set = False
+                if 'ip-address' in d[i]:
+                    if ':' in d[i]['ip-address']:
+                        md['ipv6'] = d[i]['ip-address']
+                        ipv6_set = True
+                    else:
+                        md['ipv4'] = d[i]['ip-address']
+                        ipv4_set = True
+            if not ipv4_set:
+                md['ipv4'] = None
+            if not ipv6_set:
+                md['ipv6'] = None
             if 'ip-state' in md:
                 del md['ip-state']
+            if 'ip-address' in md:
+                del md['ip-address']
+
             md['name'] = None
             ret_list.append(md)
         return ret_list
@@ -94,23 +114,10 @@ class FaucetProxy(Connection, Parser):
             if self.learn_pub_adds:
                 retval.append(self.mac_table[mac])
             else:
-                # only allow RFC 1918 ipv4 addresses and fd* ipv6 address
-                check_sec_octet = self.mac_table[mac][0]['ip-address'].split(
-                    '.')
-                if len(check_sec_octet) > 1:
-                    check_sec_octet = int(check_sec_octet[1])
+                # only allow private addresses
                 if (self.mac_table[mac][0]['ip-address'] == 'None' or
                     self.mac_table[mac][0]['ip-address'] == None or
-                    self.mac_table[mac][0]['ip-address'] == '::' or
-                    self.mac_table[mac][0]['ip-address'] == '127.0.0.1' or
-                    self.mac_table[mac][0]['ip-address'] == '0.0.0.0' or
-                    self.mac_table[mac][0]['ip-address'].startswith('fe80::') or
-                    self.mac_table[mac][0]['ip-address'].startswith('169.254.') or
-                    self.mac_table[mac][0]['ip-address'].startswith('fd') or
-                    self.mac_table[mac][0]['ip-address'].startswith('10.') or
-                    self.mac_table[mac][0]['ip-address'].startswith('192.168.') or
-                    (self.mac_table[mac][0]['ip-address'].startswith('172.') and
-                     isinstance(check_sec_octet, int) and check_sec_octet > 15 and check_sec_octet < 32)):
+                        not ipaddress.ip_address(self.mac_table[mac][0]['ip-address']).is_global):
                     retval.append(self.mac_table[mac])
         return retval
 
