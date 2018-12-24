@@ -70,25 +70,34 @@ def schedule_job_kickurl(func):
 
 def schedule_job_reinvestigation(func):
     ''' put endpoints into the reinvestigation state if possible '''
+    def trigger_reinvestigation(candidates):
+        # get random order of things that are known
+        for _ in range(func.controller['max_concurrent_reinvestigations'] - func.s.investigations):
+            if len(candidates) > 0:
+                chosen = candidates.pop()
+                func.logger.info('Starting reinvestigation on: {0} {1}'.format(
+                    chosen.name, chosen.state))
+                chosen.reinvestigate()
+                func.s.investigations += 1
+                chosen.p_prev_states.append(
+                    (endpoint.state, int(time.time())))
+                status = Actions(chosen, func.s.sdnc).mirror_endpoint()
+                # TODO only do these things if status is true, otherwise keep trying candidates
+        return
+
     candidates = []
-
     for endpoint in func.s.endpoints:
-        if endpoint.state in ['queued', 'known', 'abnormal']:
+        # queued endpoints have priority
+        if endpoint.state in ['queued']:
             candidates.append(endpoint)
-
-    # get random order of things that are known
-    for _ in range(func.controller['max_concurrent_reinvestigations'] - func.s.investigations):
+    if len(candidates) == 0:
+        # if no queued endpoints, then known and abnormal are candidates
+        for endpoint in func.s.endpoints:
+            if endpoint.state in ['known', 'abnormal']:
+                candidates.append(endpoint)
         if len(candidates) > 0:
             random.shuffle(candidates)
-            chosen = candidates.pop()
-            func.logger.info('Starting reinvestigation on: {0} {1}'.format(
-                chosen.name, chosen.state))
-            chosen.reinvestigate()
-            func.s.investigations += 1
-            chosen.p_prev_states.append(
-                (endpoint.state, int(time.time())))
-            status = Actions(chosen, func.s.sdnc).mirror_endpoint()
-            # TODO only do these things if status is true, otherwise keep trying candidates
+    trigger_reinvestigation(candidates)
 
 
 def schedule_thread_worker(schedule):
