@@ -72,9 +72,9 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
                         md['ipv4'] = ip_val
                         ipv4_set = True
                 if not ipv4_set:
-                    md['ipv4'] = None
+                    md['ipv4'] = 0
                 if not ipv6_set:
-                    md['ipv6'] = None
+                    md['ipv6'] = 0
 
                 ret_list.append(md)
         return ret_list
