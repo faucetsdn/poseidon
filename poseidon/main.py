@@ -83,7 +83,7 @@ def schedule_job_reinvestigation(func):
                     (chosen.state, int(time.time())))
                 status = Actions(chosen, func.s.sdnc).mirror_endpoint()
                 if not status:
-                    self.logger.warning(
+                    func.logger.warning(
                         'Unable to mirror the endpoint: {0}'.format(chosen.name))
         return
 
