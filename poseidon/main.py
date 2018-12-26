@@ -229,6 +229,8 @@ class SDNConnect(object):
                             ep.p_next_state = 'mirror'
                         elif ep.state == 'reinvestigating':
                             ep.p_next_state = 'reinvestigate'
+                    if ep.state in ['known', 'abnormal']:
+                        ep.p_next_state = ep.state
                     ep.inactive()
                     ep.p_prev_states.append((ep.state, int(time.time())))
             elif ep is None:
@@ -293,6 +295,8 @@ class Monitor(object):
                     endpoint.p_next_state = 'reinvestigate'
                 elif endpoint.state == 'queued':
                     endpoint.p_next_state = 'queue'
+                elif endpoint.state in ['known', 'abnormal']:
+                    endpoint.p_next_state = endpoint.state
                 endpoint.endpoint_data['active'] = 0
                 endpoint.inactive()
                 endpoint.p_prev_states.append(
