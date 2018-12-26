@@ -161,7 +161,8 @@ class NetworkFull(object):
         fields = {'mac': 0, 'id': 'UNDEFINED', 'ipv4': 0, 'ipv6': 0, 'ipv4_subnet': 'UNDEFINED', 'ipv6_subnet': 'UNDEFINED', 'segment': 0, 'port': 0, 'tenant': 0, 'active': 0,
                   'state': 'UNDEFINED', 'prev_states': 'UNDEFINED', 'role': 'UNDEFINED', 'role_confidence': 0, 'behavior': 0, 'ipv4_os': 'UNDEFINED', 'ipv6_os': 'UNDEFINED', 'source': 'UNDEFINED'}
         n = Nodes(fields)
-        return n.build_nodes()
+        n.build_nodes()
+        return n.nodes
 
     def on_get(self, req, resp):
         network = {}
@@ -179,7 +180,8 @@ class Network(object):
         fields = {'mac': 0, 'ipv4': 0, 'ipv6': 0, 'ipv4_subnet': 'UNDEFINED', 'ipv6_subnet': 'UNDEFINED', 'tenant': 0, 'active': 0, 'state': 'UNDEFINED',
                   'role': 'UNDEFINED', 'role_confidence': 0, 'behavior': 0, 'ipv4_os': 'UNDEFINED', 'ipv6_os': 'UNDEFINED', 'source': 'UNDEFINED'}
         n = Nodes(fields)
-        return n.build_nodes()
+        n.build_nodes()
+        return n.nodes
 
     def get_configuration(self):
         configuration = {}
