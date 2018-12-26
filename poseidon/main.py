@@ -80,9 +80,11 @@ def schedule_job_reinvestigation(func):
                 chosen.reinvestigate()
                 func.s.investigations += 1
                 chosen.p_prev_states.append(
-                    (endpoint.state, int(time.time())))
+                    (chosen.state, int(time.time())))
                 status = Actions(chosen, func.s.sdnc).mirror_endpoint()
-                # TODO only do these things if status is true, otherwise keep trying candidates
+                if not status:
+                    self.logger.warning(
+                        'Unable to mirror the endpoint: {0}'.format(chosen.name))
         return
 
     candidates = []
@@ -217,6 +219,11 @@ class SDNConnect(object):
                     ep.p_prev_states.append((ep.state, int(time.time())))
                 elif ep.state != 'inactive' and machine['active'] == 0:
                     if ep.state in ['mirroring', 'reinvestigating']:
+                        status = Actions(
+                            ep, self.sdnc).unmirror_endpoint()
+                        if not status:
+                            self.logger.warning(
+                                'Unable to unmirror the endpoint: {0}'.format(ep.name))
                         self.investigations -= 1
                         if ep.state == 'mirroring':
                             ep.p_next_state = 'mirror'
@@ -377,7 +384,9 @@ class Monitor(object):
                             (endpoint.state, int(time.time())))
                         status = Actions(
                             endpoint, self.s.sdnc).mirror_endpoint()
-                        # TODO only do these things if status is true
+                        if not status:
+                            self.logger.warning(
+                                'Unable to mirror the endpoint: {0}'.format(endpoint.name))
                 elif endpoint.state == 'unknown':
                     # move to mirroring state
                     if self.s.investigations < self.controller['max_concurrent_reinvestigations']:
@@ -387,7 +396,9 @@ class Monitor(object):
                             (endpoint.state, int(time.time())))
                         status = Actions(
                             endpoint, self.s.sdnc).mirror_endpoint()
-                        # TODO only do these things if status is true
+                        if not status:
+                            self.logger.warning(
+                                'Unable to mirror the endpoint: {0}'.format(endpoint.name))
                     else:
                         endpoint.p_next_state = 'mirror'
                         endpoint.queue()
@@ -401,7 +412,9 @@ class Monitor(object):
                     if cur_time - endpoint.p_prev_states[-1][1] > 2*self.controller['reinvestigation_frequency']:
                         status = Actions(
                             endpoint, self.s.sdnc).unmirror_endpoint()
-                        # TODO only do these things if status is true
+                        if not status:
+                            self.logger.warning(
+                                'Unable to unmirror the endpoint: {0}'.format(endpoint.name))
                         endpoint.unknown()
                         self.s.investigations -= 1
                         endpoint.p_prev_states.append(
