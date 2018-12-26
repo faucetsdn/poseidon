@@ -118,7 +118,7 @@ class Prometheus():
                 else:
                     metrics['roles'][(host['source'], host['role'])] = 0
 
-            if (host['source'], host['os']) in metrics['oses']:
+            if (host['source'], host['ipv4_os']) in metrics['oses']:
                 if host['active'] == 1:
                     metrics['oses'][(host['source'], host['ipv4_os'])] += 1
             else:
