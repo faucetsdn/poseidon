@@ -115,9 +115,9 @@ class FaucetProxy(Connection, Parser):
                 retval.append(self.mac_table[mac])
             else:
                 # only allow private addresses
-                if (self.mac_table[mac][0]['ip-address'] == 'None' or
-                    self.mac_table[mac][0]['ip-address'] == None or
-                        not ipaddress.ip_address(self.mac_table[mac][0]['ip-address']).is_global):
+                if 'ip-address' in self.mac_table[mac][0] and (self.mac_table[mac][0]['ip-address'] == 'None' or
+                                                               self.mac_table[mac][0]['ip-address'] == None or
+                                                               not ipaddress.ip_address(self.mac_table[mac][0]['ip-address']).is_global):
                     retval.append(self.mac_table[mac])
         return retval
 
