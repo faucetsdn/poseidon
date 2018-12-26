@@ -24,43 +24,43 @@ class Prometheus():
                                             'Number of endpoints that are active')
         self.prom_metrics['behavior'] = Gauge('poseidon_endpoint_behavior',
                                               'Behavior of an endpoint, 0 is normal, 1 is abnormal',
-                                              ['ip',
+                                              ['ipv4',
                                                'mac',
                                                'tenant',
                                                'segment',
                                                'port',
                                                'role',
                                                'os',
-                                               'record_source'])
-        self.prom_metrics['ip_table'] = Gauge('poseidon_endpoint_ip_table',
-                                              'IP Table',
-                                              ['mac',
-                                               'tenant',
-                                               'segment',
-                                               'port',
-                                               'role',
-                                               'os',
-                                               'hash_id',
-                                               'record_source'])
+                                               'source'])
+        self.prom_metrics['ipv4_table'] = Gauge('poseidon_endpoint_ip_table',
+                                                'IP Table',
+                                                ['mac',
+                                                 'tenant',
+                                                 'segment',
+                                                 'port',
+                                                 'role',
+                                                 'os',
+                                                 'id',
+                                                 'source'])
         self.prom_metrics['roles'] = Gauge('poseidon_endpoint_roles',
                                            'Number of endpoints by role',
-                                           ['record_source',
+                                           ['source',
                                             'role'])
         self.prom_metrics['oses'] = Gauge('poseidon_endpoint_oses',
                                           'Number of endpoints by OS',
-                                          ['record_source',
+                                          ['source',
                                            'os'])
         self.prom_metrics['current_states'] = Gauge('poseidon_endpoint_current_states',
                                                     'Number of endpoints by current state',
-                                                    ['record_source',
+                                                    ['source',
                                                      'current_state'])
         self.prom_metrics['vlans'] = Gauge('poseidon_endpoint_vlans',
                                            'Number of endpoints by VLAN',
-                                           ['record_source',
+                                           ['source',
                                             'tenant'])
-        self.prom_metrics['record_sources'] = Gauge('poseidon_endpoint_record_sources',
-                                                    'Number of endpoints by record source',
-                                                    ['record_source'])
+        self.prom_metrics['sources'] = Gauge('poseidon_endpoint_sources',
+                                             'Number of endpoints by record source',
+                                             ['source'])
         self.prom_metrics['port_tenants'] = Gauge('poseidon_endpoint_port_tenants',
                                                   'Number of tenants by port',
                                                   ['port',
@@ -82,7 +82,7 @@ class Prometheus():
                                       ('Poseidon', 'abnormal'): 0,
                                       ('Poseidon', 'reinvestigating'): 0},
                    'vlans': {},
-                   'record_sources': {},
+                   'sources': {},
                    'port_tenants': {},
                    'port_hosts': {},
                    'inactives': 0,
@@ -108,57 +108,57 @@ class Prometheus():
                 metrics['inactives'] += 1
             if host['active'] == 1:
                 metrics['actives'] += 1
-            if (host['record_source'], host['role']) in metrics['roles']:
+            if (host['source'], host['role']) in metrics['roles']:
                 if host['active'] == 1:
-                    metrics['roles'][(host['record_source'],
+                    metrics['roles'][(host['source'],
                                       host['role'])] += 1
             else:
                 if host['active'] == 1:
-                    metrics['roles'][(host['record_source'], host['role'])] = 1
+                    metrics['roles'][(host['source'], host['role'])] = 1
                 else:
-                    metrics['roles'][(host['record_source'], host['role'])] = 0
+                    metrics['roles'][(host['source'], host['role'])] = 0
 
-            if (host['record_source'], host['os']) in metrics['oses']:
+            if (host['source'], host['os']) in metrics['oses']:
                 if host['active'] == 1:
-                    metrics['oses'][(host['record_source'], host['os'])] += 1
+                    metrics['oses'][(host['source'], host['ipv4_os'])] += 1
             else:
                 if host['active'] == 1:
-                    metrics['oses'][(host['record_source'], host['os'])] = 1
+                    metrics['oses'][(host['source'], host['ipv4_os'])] = 1
                 else:
-                    metrics['oses'][(host['record_source'], host['os'])] = 0
+                    metrics['oses'][(host['source'], host['ipv4_os'])] = 0
 
-            if (host['record_source'], host['state']) in metrics['current_states']:
+            if (host['source'], host['state']) in metrics['current_states']:
                 if host['active'] == 1:
-                    metrics['current_states'][(host['record_source'],
+                    metrics['current_states'][(host['source'],
                                                host['state'])] += 1
             else:
                 if host['active'] == 1:
-                    metrics['current_states'][(host['record_source'],
+                    metrics['current_states'][(host['source'],
                                                host['state'])] = 1
                 else:
-                    metrics['current_states'][(host['record_source'],
+                    metrics['current_states'][(host['source'],
                                                host['state'])] = 0
 
-            if (host['record_source'], host['tenant']) in metrics['vlans']:
+            if (host['source'], host['tenant']) in metrics['vlans']:
                 if host['active'] == 1:
-                    metrics['vlans'][(host['record_source'],
+                    metrics['vlans'][(host['source'],
                                       host['tenant'])] += 1
             else:
                 if host['active'] == 1:
-                    metrics['vlans'][(host['record_source'],
+                    metrics['vlans'][(host['source'],
                                       host['tenant'])] = 1
                 else:
-                    metrics['vlans'][(host['record_source'],
+                    metrics['vlans'][(host['source'],
                                       host['tenant'])] = 0
 
-            if (host['record_source']) in metrics['record_sources']:
+            if (host['source']) in metrics['sources']:
                 if host['active'] == 1:
-                    metrics['record_sources'][(host['record_source'])] += 1
+                    metrics['sources'][(host['source'])] += 1
             else:
                 if host['active'] == 1:
-                    metrics['record_sources'][(host['record_source'])] = 1
+                    metrics['sources'][(host['source'])] = 1
                 else:
-                    metrics['record_sources'][(host['record_source'])] = 0
+                    metrics['sources'][(host['source'])] = 0
 
             if (host['port'], host['tenant']) in metrics['port_tenants']:
                 if host['active'] == 1:
@@ -181,42 +181,42 @@ class Prometheus():
 
             try:
                 if host['active'] == 1:
-                    self.prom_metrics['behavior'].labels(ip=host['ip'],
+                    self.prom_metrics['behavior'].labels(ip=host['ipv4'],
                                                          mac=host['mac'],
                                                          tenant=host['tenant'],
                                                          segment=host['segment'],
                                                          port=host['port'],
                                                          role=host['role'],
-                                                         os=host['os'],
-                                                         record_source=host['record_source']).set(host['behavior'])
-                    self.prom_metrics['ip_table'].labels(mac=host['mac'],
-                                                         tenant=host['tenant'],
-                                                         segment=host['segment'],
-                                                         port=host['port'],
-                                                         role=host['role'],
-                                                         os=host['os'],
-                                                         hash_id=host['hash'],
-                                                         record_source=host['record_source']).set(ip2int(host['ip']))
+                                                         os=host['ipv4_os'],
+                                                         source=host['source']).set(host['behavior'])
+                    self.prom_metrics['ipv4_table'].labels(mac=host['mac'],
+                                                           tenant=host['tenant'],
+                                                           segment=host['segment'],
+                                                           port=host['port'],
+                                                           role=host['role'],
+                                                           os=host['ipv4_os'],
+                                                           id=host['id'],
+                                                           source=host['source']).set(ip2int(host['ipv4']))
             except Exception as e:  # pragma: no cover
                 self.logger.error(
                     'Unable to send {0} results to prometheus because {1}'.format(host, str(e)))
 
         try:
             for role in metrics['roles']:
-                self.prom_metrics['roles'].labels(record_source=role[0],
+                self.prom_metrics['roles'].labels(source=role[0],
                                                   role=role[1]).set(metrics['roles'][role])
             for os_t in metrics['oses']:
-                self.prom_metrics['oses'].labels(record_source=os_t[0],
+                self.prom_metrics['oses'].labels(source=os_t[0],
                                                  os=os_t[1]).set(metrics['oses'][os_t])
             for current_state in metrics['current_states']:
-                self.prom_metrics['current_states'].labels(record_source=current_state[0],
+                self.prom_metrics['current_states'].labels(source=current_state[0],
                                                            current_state=current_state[1]).set(metrics['current_states'][current_state])
             for vlan in metrics['vlans']:
-                self.prom_metrics['vlans'].labels(record_source=vlan[0],
+                self.prom_metrics['vlans'].labels(source=vlan[0],
                                                   tenant=vlan[1]).set(metrics['vlans'][vlan])
-            for record_source in metrics['record_sources']:
-                self.prom_metrics['record_sources'].labels(record_source=record_source).set(
-                    metrics['record_sources'][record_source])
+            for source in metrics['sources']:
+                self.prom_metrics['sources'].labels(source=source).set(
+                    metrics['sources'][source])
             for port_tenant in metrics['port_tenants']:
                 self.prom_metrics['port_tenants'].labels(port=port_tenant[0],
                                                          tenant=port_tenant[1]).set(metrics['port_tenants'][port_tenant])

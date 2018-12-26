@@ -68,9 +68,9 @@ class FaucetProxy(Connection, Parser):
                         md['ipv4'] = d[i]['ip-address']
                         ipv4_set = True
             if not ipv4_set:
-                md['ipv4'] = None
+                md['ipv4'] = 0
             if not ipv6_set:
-                md['ipv6'] = None
+                md['ipv6'] = 0
             if 'ip-state' in md:
                 del md['ip-state']
             if 'ip-address' in md:
