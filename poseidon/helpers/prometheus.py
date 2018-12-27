@@ -40,7 +40,7 @@ class Prometheus():
                                                  'port',
                                                  'role',
                                                  'ipv4_os',
-                                                 'id',
+                                                 'hash_id',
                                                  'source'])
         self.prom_metrics['roles'] = Gauge('poseidon_endpoint_roles',
                                            'Number of endpoints by role',
@@ -195,7 +195,7 @@ class Prometheus():
                                                            port=host['port'],
                                                            role=host['role'],
                                                            ipv4_os=host['ipv4_os'],
-                                                           id=host['id'],
+                                                           hash_id=host['id'],
                                                            source=host['source']).set(ip2int(host['ipv4']))
             except Exception as e:  # pragma: no cover
                 self.logger.error(
@@ -207,7 +207,7 @@ class Prometheus():
                                                   role=role[1]).set(metrics['roles'][role])
             for os_t in metrics['oses']:
                 self.prom_metrics['oses'].labels(source=os_t[0],
-                                                 os=os_t[1]).set(metrics['oses'][os_t])
+                                                 ipv4_os=os_t[1]).set(metrics['oses'][os_t])
             for current_state in metrics['current_states']:
                 self.prom_metrics['current_states'].labels(source=current_state[0],
                                                            current_state=current_state[1]).set(metrics['current_states'][current_state])
