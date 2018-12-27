@@ -47,6 +47,7 @@ class FaucetProxy(Connection, Parser):
             self.max_concurrent_reinvestigations, *args, **kwargs)
         self.logger = logging.getLogger('faucet')
         self.mac_table = {}
+        self.clear_mirrors(os.path.join(self.config_file, 'faucet.yaml'))
 
     @staticmethod
     def format_endpoints(data):

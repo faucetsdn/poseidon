@@ -4,8 +4,11 @@ Created on 19 November 2017
 @author: Charlie Lewis
 """
 import logging
+from copy import deepcopy
 
 import yaml
+
+from poseidon.helpers.exception_decor import exception
 
 
 def represent_none(dumper, _):
@@ -20,19 +23,54 @@ class Parser:
         self.reinvestigation_frequency = reinvestigation_frequency
         self.max_concurrent_reinvestigations = max_concurrent_reinvestigations
 
-    def config(self, config_file, action, port, switch):
-        switch_found = None
+    @staticmethod
+    @exception
+    def get_config_file(config_file):
         # TODO check for other files
         if not config_file:
             # default to FAUCET default
             config_file = '/etc/faucet/faucet.yaml'
-        try:
-            stream = open(config_file, 'r')
-            obj_doc = yaml.safe_load(stream)
-            stream.close()
-        except Exception as e:
-            self.logger.error(
-                'Failed to load config because: {0}'.format(str(e)))
+        return config_file
+
+    @staticmethod
+    @exception
+    def yaml_in(config_file):
+        stream = open(config_file, 'r')
+        obj_doc = yaml.safe_load(stream)
+        stream.close()
+        return obj_doc
+
+    @staticmethod
+    @exception
+    def yaml_out(config_file, obj_doc):
+        stream = open(config_file, 'w')
+        yaml.add_representer(type(None), represent_none)
+        yaml.dump(obj_doc, stream, default_flow_style=False)
+        return True
+
+    def clear_mirrors(self, config_file):
+        config_file = Parser().get_config_file(config_file)
+        obj_doc = Parser().yaml_in(config_file)
+        if obj_doc:
+            # TODO make this smarter about more complex configurations (backup original values, etc)
+            obj_copy = deepcopy(obj_doc)
+            for switch in obj_copy['dps']:
+                for port in obj_copy['dps'][switch]:
+                    if 'mirror' in obj_copy['dps'][switch]['interfaces'][port]:
+                        del obj_doc['dps'][switch]['interfaces'][port]['mirror']
+                if 'timeout' in obj_copy['dps'][switch]:
+                    del obj_doc['dps'][switch]['timeout']
+                if 'arp_neighbor_timeout' in obj_copy['dps'][switch]:
+                    del obj_doc['dps'][switch]['arp_neighbor_timeout']
+            return Parser().yaml_out(config_file, obj_doc)
+        return False
+
+    def config(self, config_file, action, port, switch):
+        switch_found = None
+        config_file = Parser().get_config_file(config_file)
+        obj_doc = Parser().yaml_in(config_file)
+
+        if not obj_doc:
             return False
 
         if action == 'mirror' or action == 'unmirror':
@@ -121,11 +159,7 @@ class Parser:
             self.logger.warning(
                 'Unable to remove empty mirror list because: {0}'.format(str(e)))
 
-        stream = open(config_file, 'w')
-        yaml.add_representer(type(None), represent_none)
-        yaml.dump(obj_doc, stream, default_flow_style=False)
-
-        return True
+        return Parser().yaml_out(config_file, obj_doc)
 
     def event(self, message):
         data = {}
