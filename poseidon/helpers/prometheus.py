@@ -181,20 +181,20 @@ class Prometheus():
 
             try:
                 if host['active'] == 1:
-                    self.prom_metrics['behavior'].labels(ip=host['ipv4'],
+                    self.prom_metrics['behavior'].labels(ipv4=host['ipv4'],
                                                          mac=host['mac'],
                                                          tenant=host['tenant'],
                                                          segment=host['segment'],
                                                          port=host['port'],
                                                          role=host['role'],
-                                                         os=host['ipv4_os'],
+                                                         ipv4_os=host['ipv4_os'],
                                                          source=host['source']).set(host['behavior'])
                     self.prom_metrics['ipv4_table'].labels(mac=host['mac'],
                                                            tenant=host['tenant'],
                                                            segment=host['segment'],
                                                            port=host['port'],
                                                            role=host['role'],
-                                                           os=host['ipv4_os'],
+                                                           ipv4_os=host['ipv4_os'],
                                                            id=host['id'],
                                                            source=host['source']).set(ip2int(host['ipv4']))
             except Exception as e:  # pragma: no cover
