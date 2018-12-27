@@ -30,7 +30,7 @@ class Prometheus():
                                                'segment',
                                                'port',
                                                'role',
-                                               'os',
+                                               'ipv4_os',
                                                'source'])
         self.prom_metrics['ipv4_table'] = Gauge('poseidon_endpoint_ip_table',
                                                 'IP Table',
@@ -39,8 +39,8 @@ class Prometheus():
                                                  'segment',
                                                  'port',
                                                  'role',
-                                                 'os',
-                                                 'id',
+                                                 'ipv4_os',
+                                                 'hash_id',
                                                  'source'])
         self.prom_metrics['roles'] = Gauge('poseidon_endpoint_roles',
                                            'Number of endpoints by role',
@@ -49,7 +49,7 @@ class Prometheus():
         self.prom_metrics['oses'] = Gauge('poseidon_endpoint_oses',
                                           'Number of endpoints by OS',
                                           ['source',
-                                           'os'])
+                                           'ipv4_os'])
         self.prom_metrics['current_states'] = Gauge('poseidon_endpoint_current_states',
                                                     'Number of endpoints by current state',
                                                     ['source',
@@ -195,7 +195,7 @@ class Prometheus():
                                                            port=host['port'],
                                                            role=host['role'],
                                                            ipv4_os=host['ipv4_os'],
-                                                           id=host['id'],
+                                                           hash_id=host['id'],
                                                            source=host['source']).set(ip2int(host['ipv4']))
             except Exception as e:  # pragma: no cover
                 self.logger.error(
@@ -207,7 +207,7 @@ class Prometheus():
                                                   role=role[1]).set(metrics['roles'][role])
             for os_t in metrics['oses']:
                 self.prom_metrics['oses'].labels(source=os_t[0],
-                                                 os=os_t[1]).set(metrics['oses'][os_t])
+                                                 ipv4_os=os_t[1]).set(metrics['oses'][os_t])
             for current_state in metrics['current_states']:
                 self.prom_metrics['current_states'].labels(source=current_state[0],
                                                            current_state=current_state[1]).set(metrics['current_states'][current_state])
@@ -227,7 +227,7 @@ class Prometheus():
             self.prom_metrics['active'].set(metrics['actives'])
         except Exception as e:  # pragma: no cover
             self.logger.error(
-                'unable to send results to prometheus because {0}'.format(str(e)))
+                'Unable to send results to prometheus because {0}'.format(str(e)))
 
     @staticmethod
     def start(port=9304):
