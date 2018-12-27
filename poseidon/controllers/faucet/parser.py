@@ -70,6 +70,9 @@ class Parser:
         config_file = Parser().get_config_file(config_file)
         obj_doc = Parser().yaml_in(config_file)
 
+        if not obj_doc:
+            return False
+
         if action == 'mirror' or action == 'unmirror':
             ok = True
             if not self.mirror_ports:
