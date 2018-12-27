@@ -503,6 +503,9 @@ def main(skip_rabbit=False):  # pragma: no cover
     # loop here until told not to
     pmain.process()
 
+    if isinstance(pmain.s.sdnc, FaucetProxy):
+        pmain.s.sdnc.clear_mirrors(os.path.join(
+            pmain.controller['CONFIG_FILE'], 'faucet.yaml'))
     pmain.logger.debug('SHUTTING DOWN')
     pmain.logger.debug('EXITING')
     sys.exit(0)

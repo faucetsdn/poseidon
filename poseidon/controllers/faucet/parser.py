@@ -4,6 +4,7 @@ Created on 19 November 2017
 @author: Charlie Lewis
 """
 import logging
+from copy import deepcopy
 
 import yaml
 
@@ -19,6 +20,32 @@ class Parser:
         self.mirror_ports = mirror_ports
         self.reinvestigation_frequency = reinvestigation_frequency
         self.max_concurrent_reinvestigations = max_concurrent_reinvestigations
+
+    def clear_mirrors(self, config_file):
+        # TODO check for other files
+        if not config_file:
+            # default to FAUCET default
+            config_file = '/etc/faucet/faucet.yaml'
+        try:
+            stream = open(config_file, 'r')
+            obj_doc = yaml.safe_load(stream)
+            stream.close()
+        except Exception as e:
+            self.logger.error(
+                'Failed to load config because: {0}'.format(str(e)))
+            return False
+
+        # TODO make this smarter about more complex configurations (backup original values, etc)
+        obj_copy = deepcopy(obj_doc)
+        for switch in obj_copy['dps']:
+            for port in obj_copy['dps'][switch]:
+                if 'mirror' in obj_copy['dps'][switch]['interfaces'][port]:
+                    del obj_doc['dps'][switch]['interfaces'][port]['mirror']
+            if 'timeout' in obj_copy['dps'][switch]:
+                del obj_doc['dps'][switch]['timeout']
+            if 'arp_neighbor_timeout' in obj_copy['dps'][switch]:
+                del obj_doc['dps'][switch]['arp_neighbor_timeout']
+        return True
 
     def config(self, config_file, action, port, switch):
         switch_found = None
