@@ -147,7 +147,9 @@ class Nodes():
                             if 'behavior' in node:
                                 results = ast.literal_eval(
                                     ml_info[mac_info['poseidon_hash']])
-                                node['behavior'] = results['decisions']['behavior']
+                                node['behavior'] = 1
+                                if results['decisions']['behavior'] == 'normal':
+                                    node['behavior'] = 0
                         except Exception as e:  # pragma: no cover
                             print(
                                 'Failed to set all ML info because: {0}'.format(str(e)))
