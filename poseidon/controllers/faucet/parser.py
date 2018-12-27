@@ -48,7 +48,8 @@ class Parser:
         yaml.dump(obj_doc, stream, default_flow_style=False)
         return True
 
-    def clear_mirrors(self, config_file):
+    @staticmethod
+    def clear_mirrors(config_file):
         config_file = Parser().get_config_file(config_file)
         obj_doc = Parser().yaml_in(config_file)
         if obj_doc:

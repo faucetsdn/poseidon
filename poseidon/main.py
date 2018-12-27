@@ -25,6 +25,7 @@ from redis import StrictRedis
 
 from poseidon.controllers.bcf.bcf import BcfProxy
 from poseidon.controllers.faucet.faucet import FaucetProxy
+from poseidon.controllers.faucet.parser import Parser
 from poseidon.helpers.actions import Actions
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import Endpoint
@@ -504,7 +505,7 @@ def main(skip_rabbit=False):  # pragma: no cover
     pmain.process()
 
     if isinstance(pmain.s.sdnc, FaucetProxy):
-        pmain.s.sdnc.clear_mirrors(os.path.join(
+        Parser().clear_mirrors(os.path.join(
             pmain.controller['CONFIG_FILE'], 'faucet.yaml'))
     pmain.logger.debug('SHUTTING DOWN')
     pmain.logger.debug('EXITING')
