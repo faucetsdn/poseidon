@@ -93,7 +93,7 @@ class Prometheus():
 
         def ip2int(ip):
             ''' convert ip quad octet string to an int '''
-            if ip in [None, 'None', '::']:
+            if not ip or ip in ['None', '::']:
                 res = 0
             elif ':' in ip:
                 res = int(hexlify(socket.inet_pton(socket.AF_INET6, ip)), 16)
