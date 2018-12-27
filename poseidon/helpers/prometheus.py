@@ -30,7 +30,7 @@ class Prometheus():
                                                'segment',
                                                'port',
                                                'role',
-                                               'os',
+                                               'ipv4_os',
                                                'source'])
         self.prom_metrics['ipv4_table'] = Gauge('poseidon_endpoint_ip_table',
                                                 'IP Table',
@@ -39,7 +39,7 @@ class Prometheus():
                                                  'segment',
                                                  'port',
                                                  'role',
-                                                 'os',
+                                                 'ipv4_os',
                                                  'id',
                                                  'source'])
         self.prom_metrics['roles'] = Gauge('poseidon_endpoint_roles',
@@ -49,7 +49,7 @@ class Prometheus():
         self.prom_metrics['oses'] = Gauge('poseidon_endpoint_oses',
                                           'Number of endpoints by OS',
                                           ['source',
-                                           'os'])
+                                           'ipv4_os'])
         self.prom_metrics['current_states'] = Gauge('poseidon_endpoint_current_states',
                                                     'Number of endpoints by current state',
                                                     ['source',
@@ -227,7 +227,7 @@ class Prometheus():
             self.prom_metrics['active'].set(metrics['actives'])
         except Exception as e:  # pragma: no cover
             self.logger.error(
-                'unable to send results to prometheus because {0}'.format(str(e)))
+                'Unable to send results to prometheus because {0}'.format(str(e)))
 
     @staticmethod
     def start(port=9304):
