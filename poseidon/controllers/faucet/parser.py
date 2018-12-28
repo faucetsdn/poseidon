@@ -55,15 +55,17 @@ class Parser:
         if obj_doc:
             # TODO make this smarter about more complex configurations (backup original values, etc)
             obj_copy = deepcopy(obj_doc)
-            for switch in obj_copy['dps']:
-                for port in obj_copy['dps'][switch]:
-                    if 'mirror' in obj_copy['dps'][switch]['interfaces'][port]:
-                        del obj_doc['dps'][switch]['interfaces'][port]['mirror']
-                if 'timeout' in obj_copy['dps'][switch]:
-                    del obj_doc['dps'][switch]['timeout']
-                if 'arp_neighbor_timeout' in obj_copy['dps'][switch]:
-                    del obj_doc['dps'][switch]['arp_neighbor_timeout']
-            return Parser().yaml_out(config_file, obj_doc)
+            if 'dps' in obj_copy:
+                for switch in obj_copy['dps']:
+                    if 'interfaces' in obj_copy['dps'][switch]:
+                        for port in obj_copy['dps'][switch]['interfaces']:
+                            if 'mirror' in obj_copy['dps'][switch]['interfaces'][port]:
+                                del obj_doc['dps'][switch]['interfaces'][port]['mirror']
+                    if 'timeout' in obj_copy['dps'][switch]:
+                        del obj_doc['dps'][switch]['timeout']
+                    if 'arp_neighbor_timeout' in obj_copy['dps'][switch]:
+                        del obj_doc['dps'][switch]['arp_neighbor_timeout']
+                return Parser().yaml_out(config_file, obj_doc)
         return False
 
     def config(self, config_file, action, port, switch):
