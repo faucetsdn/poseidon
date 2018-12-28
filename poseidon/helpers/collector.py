@@ -54,7 +54,7 @@ class Collector(object):
                 self.logger.info(
                     'Successfully started the vent collector for: {0}'.format(self.id))
                 self.endpoint.endpoint_data['container_id'] = response[1].rsplit(
-                    ':', 1)[-1].strip()
+                    ':', 1)[-1].strip()[:-1]
                 status = True
             else:
                 self.logger.error(
