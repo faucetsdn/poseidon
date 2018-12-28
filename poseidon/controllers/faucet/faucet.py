@@ -122,35 +122,6 @@ class FaucetProxy(Connection, Parser):
                     retval.append(self.mac_table[mac])
         return retval
 
-    def get_switches(self):
-        pass
-
-    def get_ports(self):
-        pass
-
-    def get_vlans(self):
-        pass
-
-    def get_span_fabric(self):
-        pass
-
-    def get_byip(self, ipaddr):
-        '''
-        return records about ip addresses from get_endpoints
-        to be used by shutdown_ip
-        '''
-        match_list = []
-        # TODO
-        return match_list
-
-    def get_bymac(self, mac_addr):
-        '''
-        return records about mac address from get_endpoints
-        '''
-        match_list = []
-        # TODO
-        return match_list
-
     def shutdown_ip(self, ip_addr, shutdown=True, mac_addr=None):
         shutdowns = []
         port = 0
@@ -176,12 +147,6 @@ class FaucetProxy(Connection, Parser):
         else:
             self.config(self.config_file, 'shutdown', int(port), switch)
         # TODO check if config was successfully updated
-
-    def get_highest(self):
-        pass
-
-    def get_seq_by_ip(self):
-        pass
 
     def mirror_mac(self, my_mac, messages=None):
         self.logger.debug('mirroring mac')
