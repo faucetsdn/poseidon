@@ -159,6 +159,7 @@ class Nodes():
 
 class NetworkFull(object):
 
+    @staticmethod
     def get_dataset():
         fields = {'mac': 0, 'id': 'UNDEFINED', 'ipv4': 0, 'ipv6': 0, 'ipv4_subnet': 'UNDEFINED', 'ipv6_subnet': 'UNDEFINED', 'segment': 0, 'port': 0, 'tenant': 0, 'active': 0,
                   'state': 'UNDEFINED', 'prev_states': 'UNDEFINED', 'role': 'UNDEFINED', 'role_confidence': 0, 'behavior': 0, 'ipv4_os': 'UNDEFINED', 'ipv6_os': 'UNDEFINED', 'source': 'UNDEFINED'}
@@ -178,6 +179,7 @@ class NetworkFull(object):
 
 class Network(object):
 
+    @staticmethod
     def get_dataset():
         fields = {'mac': 0, 'ipv4': 0, 'ipv6': 0, 'ipv4_subnet': 'UNDEFINED', 'ipv6_subnet': 'UNDEFINED', 'tenant': 0, 'active': 0, 'state': 'UNDEFINED',
                   'role': 'UNDEFINED', 'role_confidence': 0, 'behavior': 0, 'ipv4_os': 'UNDEFINED', 'ipv6_os': 'UNDEFINED', 'source': 'UNDEFINED'}
@@ -185,14 +187,15 @@ class Network(object):
         n.build_nodes()
         return n.nodes
 
-    def get_configuration(self):
+    @staticmethod
+    def get_configuration():
         configuration = {}
         return configuration
 
     def on_get(self, req, resp):
         network = {}
         dataset = Network.get_dataset()
-        configuration = self.get_configuration()
+        configuration = Network.get_configuration()
 
         network['dataset'] = dataset
         network['configuration'] = configuration
