@@ -20,9 +20,6 @@ class Collector(object):
         self.endpoint = endpoint
         self.id = endpoint.name
         self.mac = endpoint.endpoint_data['mac']
-        self.endpoint_data = endpoint.endpoint_data
-        self.endpoint_data['state'] = endpoint.state
-        self.endpoint_data['prev_states'] = endpoint.p_prev_states
         self.nic = self.controller['collector_nic']
         self.interval = str(self.controller['reinvestigation_frequency'])
         self.iterations = str(iterations)
@@ -39,7 +36,7 @@ class Collector(object):
             'interval': self.interval,
             'filter': '\'ether host {0}\''.format(self.mac),
             'iters': self.iterations,
-            'metadata': "{'endpoint_data': " + str(self.endpoint_data) + '}'}
+            'metadata': "{'endpoint_data': " + str(self.endpoint.endpoint_data) + '}'}
 
         self.logger.debug('Vent payload: {0}'.format(str(payload)))
 
@@ -56,7 +53,7 @@ class Collector(object):
             if response[0]:
                 self.logger.info(
                     'Successfully started the vent collector for: {0}'.format(self.id))
-                self.endpoint_data['container_id'] = response[1].rsplit(
+                self.endpoint.endpoint_data['container_id'] = response[1].rsplit(
                     ':', 1)[-1].strip()
                 status = True
             else:
@@ -72,12 +69,12 @@ class Collector(object):
         Stops vent collector for a given endpoint.
         '''
         status = False
-        if 'container_id' not in self.endpoint_data:
+        if 'container_id' not in self.endpoint.endpoint_data:
             self.logger.error(
                 'Failed to stop vent collector because no container_id for endpoint')
             return status
 
-        payload = {'id': self.endpoint_data['container_id']}
+        payload = {'id': self.endpoint.endpoint_data['container_id']}
         self.logger.debug('Vent payload: {0}'.format(str(payload)))
 
         vent_addr = self.controller['vent_ip'] + \
