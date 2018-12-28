@@ -251,10 +251,18 @@ class SDNConnect(object):
             try:
                 serialized_endpoints = []
                 for endpoint in self.endpoints:
-                    encoded_endpoint = ast.literal_eval(endpoint.encode())
                     redis_endpoint_data = {}
-                    for key in encoded_endpoint:
-                        redis_endpoint_data[key] = str(encoded_endpoint[key])
+                    redis_endpoint_data['name'] = endpoint.name
+                    redis_endpoint_data['state'] = endpoint.state
+                    redis_endpoint_data['endpoint_data'] = endpoint.endpoint_data
+                    redis_endpoint_data['p_next_state'] = endpoint.p_next_state
+                    redis_endpoint_data['p_prev_states'] = endpoint.p_prev_states
+                    for key in endpoint.endpoint_data:
+                        redis_endpoint_data['endpoint_data'][key] = str(
+                            endpoint.endpoint_data[key])
+                    for key in endpoint.p_prev_states:
+                        redis_endpoint_data['p_prev_states'][key] = str(
+                            endpoint.p_prev_states[key])
                     self.r.hmset(endpoint.name, redis_endpoint_data)
                     mac = endpoint.endpoint_data['mac']
                     self.r.hmset(mac, {'poseidon_hash': endpoint.name})
