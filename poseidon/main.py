@@ -254,13 +254,10 @@ class SDNConnect(object):
                     redis_endpoint_data = {}
                     redis_endpoint_data['name'] = str(endpoint.name)
                     redis_endpoint_data['state'] = str(endpoint.state)
+                    redis_endpoint_data['endpoint_data'] = str(
+                        endpoint.endpoint_data)
                     redis_endpoint_data['p_next_state'] = str(
                         endpoint.p_next_state)
-                    for key in endpoint.endpoint_data:
-                        redis_endpoint_data['endpoint_data'][key] = str(
-                            endpoint.endpoint_data[key])
-                    redis_endpoint_data['p_prev_states'] = str(
-                        endpoint.p_prev_states[i])
                     self.r.hmset(endpoint.name, redis_endpoint_data)
                     mac = endpoint.endpoint_data['mac']
                     self.r.hmset(mac, {'poseidon_hash': str(endpoint.name)})
