@@ -251,6 +251,24 @@ class SDNConnect(object):
             try:
                 serialized_endpoints = []
                 for endpoint in self.endpoints:
+                    redis_endpoint_data = {}
+                    for key in endpoint.endpoint_data:
+                        redis_endpoint_data[key] = str(
+                            endpoint.endpoint_data[key])
+                    self.r.hmset(endpoint.name, redis_endpoint_data)
+                    mac = endpoint.endpoint_data['mac']
+                    self.r.hmset(mac, {'poseidon_hash': endpoint.name})
+                    self.r.sadd('mac_addresses', mac)
+                    if 'ipv4' in endpoint.endpoint_data and endpoint.endpoint_data['ipv4'] != 'None' and endpoint.endpoint_data['ipv4']:
+                        r.hmset(endpoint.endpoint_data['ipv4'],
+                                {'poseidon_hash': endpoint.name})
+                        r.sadd('ip_addresses',
+                               endpoint.endpoint_data['ipv4'])
+                    if 'ipv6' in endpoint.endpoint_data and endpoint.endpoint_data['ipv6'] != 'None' and endpoint.endpoint_data['ipv6']:
+                        r.hmset(endpoint.endpoint_data['ipv6'],
+                                {'poseidon_hash': endpoint.name})
+                        r.sadd('ip_addresses',
+                               endpoint.endpoint_data['ipv6'])
                     serialized_endpoints.append(endpoint.encode())
                 self.r.set('p_endpoints', str(serialized_endpoints))
             except Exception as e:  # pragma: no cover
