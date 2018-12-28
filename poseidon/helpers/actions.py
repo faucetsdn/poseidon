@@ -29,5 +29,7 @@ class Actions(object):
 
     def unmirror_endpoint(self):
         ''' tell the controller to unmirror traffic '''
-        status = self.sdnc.unmirror_mac(self.endpoint.endpoint_data['mac'])
+        status = False
+        if self.sdnc.unmirror_mac(self.endpoint.endpoint_data['mac']):
+            status = Collector(self.endpoint).stop_vent_collector()
         return status
