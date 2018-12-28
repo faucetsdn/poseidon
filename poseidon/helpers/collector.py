@@ -20,16 +20,13 @@ class Collector(object):
         self.endpoint = endpoint
         self.id = endpoint.name
         self.mac = endpoint.endpoint_data['mac']
-        self.endpoint_data = endpoint.endpoint_data
-        self.endpoint_data['state'] = endpoint.state
-        self.endpoint_data['prev_states'] = endpoint.p_prev_states
         self.nic = self.controller['collector_nic']
         self.interval = str(self.controller['reinvestigation_frequency'])
         self.iterations = str(iterations)
 
     def start_vent_collector(self):
         '''
-        Starts vent collector for a given device with the
+        Starts vent collector for a given endpoint with the
         options passed in at the creation of the class instance.
         '''
         status = False
@@ -39,7 +36,7 @@ class Collector(object):
             'interval': self.interval,
             'filter': '\'ether host {0}\''.format(self.mac),
             'iters': self.iterations,
-            'metadata': "{'endpoint_data': " + str(self.endpoint_data) + '}'}
+            'metadata': "{'endpoint_data': " + str(self.endpoint.endpoint_data) + '}'}
 
         self.logger.debug('Vent payload: {0}'.format(str(payload)))
 
@@ -56,10 +53,47 @@ class Collector(object):
             if response[0]:
                 self.logger.info(
                     'Successfully started the vent collector for: {0}'.format(self.id))
+                self.endpoint.endpoint_data['container_id'] = response[1].rsplit(
+                    ':', 1)[-1].strip()
                 status = True
             else:
                 self.logger.error(
                     'Failed to start vent collector because: {0}'.format(response[1]))
+        except Exception as e:  # pragma: no cover
+            self.logger.error(
+                'Failed to start vent collector because: {0}'.format(str(e)))
+        return status
+
+    def stop_vent_collector(self):
+        '''
+        Stops vent collector for a given endpoint.
+        '''
+        status = False
+        if 'container_id' not in self.endpoint.endpoint_data:
+            self.logger.error(
+                'Failed to stop vent collector because no container_id for endpoint')
+            return status
+
+        payload = {'id': self.endpoint.endpoint_data['container_id']}
+        self.logger.debug('Vent payload: {0}'.format(str(payload)))
+
+        vent_addr = self.controller['vent_ip'] + \
+            ':' + self.controller['vent_port']
+        uri = 'http://' + vent_addr + '/stop'
+
+        try:
+            resp = requests.post(uri, data=json.dumps(payload))
+            # TODO improve logged output
+            self.logger.debug(
+                'Collector response: {0}'.format(resp.text))
+            response = ast.literal_eval(resp.text)
+            if response[0]:
+                self.logger.info(
+                    'Successfully stopped the vent collector for: {0}'.format(self.id))
+                status = True
+            else:
+                self.logger.error(
+                    'Failed to stop vent collector because: {0}'.format(response[1]))
         except Exception as e:  # pragma: no cover
             self.logger.error(
                 'Failed to start vent collector because: {0}'.format(str(e)))
