@@ -252,29 +252,27 @@ class SDNConnect(object):
                 serialized_endpoints = []
                 for endpoint in self.endpoints:
                     redis_endpoint_data = {}
-                    redis_endpoint_data['name'] = endpoint.name
-                    redis_endpoint_data['state'] = endpoint.state
-                    redis_endpoint_data['endpoint_data'] = endpoint.endpoint_data
-                    redis_endpoint_data['p_next_state'] = endpoint.p_next_state
-                    redis_endpoint_data['p_prev_states'] = endpoint.p_prev_states
+                    redis_endpoint_data['name'] = str(endpoint.name)
+                    redis_endpoint_data['state'] = str(endpoint.state)
+                    redis_endpoint_data['p_next_state'] = str(
+                        endpoint.p_next_state)
                     for key in endpoint.endpoint_data:
                         redis_endpoint_data['endpoint_data'][key] = str(
                             endpoint.endpoint_data[key])
-                    for key in endpoint.p_prev_states:
-                        redis_endpoint_data['p_prev_states'][key] = str(
-                            endpoint.p_prev_states[key])
+                    redis_endpoint_data['p_prev_states'] = str(
+                        endpoint.p_prev_states[i])
                     self.r.hmset(endpoint.name, redis_endpoint_data)
                     mac = endpoint.endpoint_data['mac']
-                    self.r.hmset(mac, {'poseidon_hash': endpoint.name})
+                    self.r.hmset(mac, {'poseidon_hash': str(endpoint.name)})
                     self.r.sadd('mac_addresses', mac)
                     if 'ipv4' in endpoint.endpoint_data and endpoint.endpoint_data['ipv4'] != 'None' and endpoint.endpoint_data['ipv4']:
                         self.r.hmset(endpoint.endpoint_data['ipv4'],
-                                     {'poseidon_hash': endpoint.name})
+                                     {'poseidon_hash': str(endpoint.name)})
                         self.r.sadd('ip_addresses',
                                     endpoint.endpoint_data['ipv4'])
                     if 'ipv6' in endpoint.endpoint_data and endpoint.endpoint_data['ipv6'] != 'None' and endpoint.endpoint_data['ipv6']:
                         self.r.hmset(endpoint.endpoint_data['ipv6'],
-                                     {'poseidon_hash': endpoint.name})
+                                     {'poseidon_hash': str(endpoint.name)})
                         self.r.sadd('ip_addresses',
                                     endpoint.endpoint_data['ipv6'])
                     serialized_endpoints.append(endpoint.encode())
