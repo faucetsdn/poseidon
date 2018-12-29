@@ -1,3 +1,27 @@
+# v0.5.0 (2018-12-28)
+
+ - BREAKING CHANGES!
+ - Updated Redis key storage - need to clean out redis DB upon upgrade
+ - Updated Prometheus labels - need to clean out prometheus DB upon upgrade
+ - Updated API with different fields
+ - Redis is now updated from Poseidon directly
+ - Split out ip address to both ipv4 and ipv6
+ - Cleaned up containers on reconfig
+ - Poseidon start will recreate images if they were removed
+ - Keeps state of endpoints across restarts
+ - Actually checks if collector response succeeded or not
+ - Only creates a tap if the mirror was successful
+ - Fixes issue where changes to the faucet.yaml file weren't taking effect inside the container
+ - Added extra transitions for external services changing state of endpoints
+ - Prioritizes queued endpoints over reinvestigations
+ - Made default_ip more robust when whening more than one
+ - Cleaned up API to use standard libraries and reduce duplication
+ - Controller updates switch config when an endpoint expires
+ - Ignores learn events for endpoints that are already being investigated
+ - Cleans up mirrors on restarts
+ - Updates Vent to stop captures on expired endpoints
+ - All states of endpoints get stored periodically from Poseidon now, so it is consistent
+
 # v0.4.0 (2018-12-14)
 
  - Updated version of pytest, urllib3, requests, scp, pylint, certifi, redis, prometheus_client
