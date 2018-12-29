@@ -100,30 +100,32 @@ class Nodes():
                             if 'ipv4' in node:
                                 try:
                                     ipv4 = endpoint_data['ipv4']
-                                    if 'ipv4_subnet' in node:
-                                        if '.' in ipv4:
-                                            node['ipv4_subnet'] = '.'.join(
-                                                ipv4.split('.')[:-1])+'.0/24'
-                                        else:
-                                            node['ipv4_subnet'] = 'Unknown'
-                                    ipv4_info = self.r.hgetall(ipv4)
-                                    if ipv4_info and 'short_os' in ipv4_info:
-                                        node['ipv4_os'] = ipv4_info['short_os']
+                                    if isinstance(ipv4, str) and ipv4 != 'None':
+                                        if 'ipv4_subnet' in node:
+                                            if '.' in ipv4:
+                                                node['ipv4_subnet'] = '.'.join(
+                                                    ipv4.split('.')[:-1])+'.0/24'
+                                            else:
+                                                node['ipv4_subnet'] = 'Unknown'
+                                        ipv4_info = self.r.hgetall(ipv4)
+                                        if ipv4_info and 'short_os' in ipv4_info:
+                                            node['ipv4_os'] = ipv4_info['short_os']
                                 except Exception as e:  # pragma: no cover
                                     print(
                                         'Failed to set IPv4 info because: {0}'.format(str(e)))
                             if 'ipv6' in node:
                                 try:
                                     ipv6 = endpoint_data['ipv6']
-                                    if 'ipv6_subnet' in node:
-                                        if ':' in ipv6:
-                                            node['ipv6_subnet'] = ':'.join(
-                                                ipv6.split(':')[0:4])+'::0/64'
-                                        else:
-                                            node['ipv6_subnet'] = 'Unknown'
-                                    ipv6_info = self.r.hgetall(ipv6)
-                                    if ipv6_info and 'short_os' in ipv6_info:
-                                        node['ipv6_os'] = ipv6_info['short_os']
+                                    if isinstance(ipv6, str) and ipv6 != 'None':
+                                        if 'ipv6_subnet' in node:
+                                            if ':' in ipv6:
+                                                node['ipv6_subnet'] = ':'.join(
+                                                    ipv6.split(':')[0:4])+'::0/64'
+                                            else:
+                                                node['ipv6_subnet'] = 'Unknown'
+                                        ipv6_info = self.r.hgetall(ipv6)
+                                        if ipv6_info and 'short_os' in ipv6_info:
+                                            node['ipv6_os'] = ipv6_info['short_os']
                                 except Exception as e:  # pragma: no cover
                                     print(
                                         'Failed to set IPv6 info because: {0}'.format(str(e)))
@@ -165,8 +167,13 @@ class NetworkFull(object):
 
     @staticmethod
     def get_dataset():
-        fields = {'mac': 0, 'id': 'UNDEFINED', 'ipv4': 0, 'ipv6': 0, 'ipv4_subnet': 'UNDEFINED', 'ipv6_subnet': 'UNDEFINED', 'segment': 0, 'port': 0, 'tenant': 0, 'active': 0,
-                  'state': 'UNDEFINED', 'prev_states': 'UNDEFINED', 'role': 'UNDEFINED', 'role_confidence': 0, 'behavior': 0, 'ipv4_os': 'UNDEFINED', 'ipv6_os': 'UNDEFINED', 'source': 'UNDEFINED'}
+        fields = {'mac': 0, 'id': 'UNDEFINED', 'ipv4': 0, 'ipv6': 0,
+                  'ipv4_subnet': 'UNDEFINED', 'ipv6_subnet': 'UNDEFINED',
+                  'segment': 0, 'port': 0, 'tenant': 0, 'active': 0,
+                  'next_state': 'UNDEFINED', 'state': 'UNDEFINED',
+                  'prev_states': 'UNDEFINED', 'role': 'UNDEFINED',
+                  'role_confidence': 0, 'behavior': 0, 'ipv4_os': 'UNDEFINED',
+                  'ipv6_os': 'UNDEFINED', 'source': 'UNDEFINED'}
         n = Nodes(fields)
         n.build_nodes()
         return n.nodes
