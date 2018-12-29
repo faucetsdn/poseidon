@@ -256,9 +256,9 @@ class SDNConnect(object):
                     redis_endpoint_data['state'] = str(endpoint.state)
                     redis_endpoint_data['endpoint_data'] = str(
                         endpoint.endpoint_data)
-                    redis_endpoint_data['p_next_state'] = str(
+                    redis_endpoint_data['next_state'] = str(
                         endpoint.p_next_state)
-                    redis_endpoint_data['p_prev_states'] = str(
+                    redis_endpoint_data['prev_states'] = str(
                         endpoint.p_next_state)
                     self.r.hmset(endpoint.name, redis_endpoint_data)
                     mac = endpoint.endpoint_data['mac']
