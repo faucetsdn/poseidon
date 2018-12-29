@@ -54,7 +54,7 @@ class Collector(object):
                 self.logger.info(
                     'Successfully started the vent collector for: {0}'.format(self.id))
                 self.endpoint.endpoint_data['container_id'] = response[1].rsplit(
-                    ':', 1)[-1].strip()[:-1]
+                    ':', 1)[-1].strip()
                 status = True
             else:
                 self.logger.error(
@@ -74,7 +74,7 @@ class Collector(object):
                 'Failed to stop vent collector because no container_id for endpoint')
             return status
 
-        payload = {'id': self.endpoint.endpoint_data['container_id']}
+        payload = {'id': [self.endpoint.endpoint_data['container_id']]}
         self.logger.debug('Vent payload: {0}'.format(str(payload)))
 
         vent_addr = self.controller['vent_ip'] + \

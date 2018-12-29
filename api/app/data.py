@@ -87,6 +87,10 @@ class Nodes():
                         poseidon_info = self.r.hgetall(
                             mac_info['poseidon_hash'])
 
+                        if 'state' in poseidon_info:
+                            for key in node:
+                                if key in poseidon_info:
+                                    node[key] = poseidon_info[key]
                         if 'endpoint_data' in poseidon_info:
                             endpoint_data = ast.literal_eval(
                                 poseidon_info['endpoint_data'])
