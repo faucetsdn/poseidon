@@ -96,7 +96,7 @@ class Collector(object):
                     'Failed to stop vent collector because: {0}'.format(response[1]))
         except Exception as e:  # pragma: no cover
             self.logger.error(
-                'Failed to start vent collector because: {0}'.format(str(e)))
+                'Failed to stop vent collector because: {0}'.format(str(e)))
         return status
 
     # returns a dictionary of existing collectors keyed on dev_hash
