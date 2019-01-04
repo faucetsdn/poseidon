@@ -135,7 +135,7 @@ class Parser:
                         obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'].remove(
                             port)
                     except ValueError:
-                        self.logger.warning('This port: {0} was not already '
+                        self.logger.warning('Port: {0} was not already '
                                             'mirroring on this switch: {1}'.format(str(port), str(switch_found)))
             else:
                 self.logger.error('Unable to mirror due to warnings')
@@ -149,8 +149,10 @@ class Parser:
             if len(obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']) == 0:
                 del obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']
                 # TODO make this smarter about more complex configurations (backup original values, etc)
-                del obj_doc['dps'][switch_found]['timeout']
-                del obj_doc['dps'][switch_found]['arp_neighbor_timeout']
+                if 'timeout' in obj_doc['dps'][switch_found]:
+                    del obj_doc['dps'][switch_found]['timeout']
+                if 'arp_neighbor_timeout' in obj_doc['dps'][switch_found]:
+                    del obj_doc['dps'][switch_found]['arp_neighbor_timeout']
             else:
                 ports = []
                 for p in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']:
