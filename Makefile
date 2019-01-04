@@ -80,6 +80,7 @@ build_debian_net:
 	mkdir -p installers/debian/$(TAG)-$(VERSION)/DEBIAN
 	cp installers/debian/config installers/debian/$(TAG)-$(VERSION)/DEBIAN/
 	cp installers/debian/control installers/debian/$(TAG)-$(VERSION)/DEBIAN/
+	sed -i 's/Package: poseidon/Package: poseidon-net/g' installers/debian/$(TAG)-$(VERSION)/DEBIAN/control
 	cp installers/debian/postinst installers/debian/$(TAG)-$(VERSION)/DEBIAN/
 	cp installers/debian/preinst installers/debian/$(TAG)-$(VERSION)/DEBIAN/
 	cp installers/debian/prerm installers/debian/$(TAG)-$(VERSION)/DEBIAN/
