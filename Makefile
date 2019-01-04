@@ -19,7 +19,6 @@ run_tests: build_poseidon
 	docker kill $(TAG)-redis
 
 build_debian:
-	rm -rf dist
 	mkdir -p installers/debian/$(TAG)-$(VERSION)/DEBIAN
 	cp installers/debian/config installers/debian/$(TAG)-$(VERSION)/DEBIAN/
 	cp installers/debian/control installers/debian/$(TAG)-$(VERSION)/DEBIAN/
@@ -76,7 +75,6 @@ build_debian:
 	rm -rf installers/debian/$(TAG)-$(VERSION)
 
 build_debian_net:
-	rm -rf dist
 	mkdir -p installers/debian/$(TAG)-$(VERSION)/DEBIAN
 	cp installers/debian/config installers/debian/$(TAG)-$(VERSION)/DEBIAN/
 	cp installers/debian/control installers/debian/$(TAG)-$(VERSION)/DEBIAN/
