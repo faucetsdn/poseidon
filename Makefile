@@ -75,6 +75,35 @@ build_debian:
 	docker run --rm poseidon-dpkg > dist/$(TAG)-$(VERSION).deb
 	rm -rf installers/debian/$(TAG)-$(VERSION)
 
-build_installers: build_debian
+build_debian_net:
+	rm -rf dist
+	mkdir -p installers/debian/$(TAG)-$(VERSION)/DEBIAN
+	cp installers/debian/config installers/debian/$(TAG)-$(VERSION)/DEBIAN/
+	cp installers/debian/control installers/debian/$(TAG)-$(VERSION)/DEBIAN/
+	cp installers/debian/postinst installers/debian/$(TAG)-$(VERSION)/DEBIAN/
+	cp installers/debian/preinst installers/debian/$(TAG)-$(VERSION)/DEBIAN/
+	cp installers/debian/prerm installers/debian/$(TAG)-$(VERSION)/DEBIAN/
+	cp installers/debian/postrm installers/debian/$(TAG)-$(VERSION)/DEBIAN/
+	cp installers/debian/templates installers/debian/$(TAG)-$(VERSION)/DEBIAN/
+	mkdir -p installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist
+	mkdir -p installers/debian/$(TAG)-$(VERSION)/usr/bin
+	mkdir -p installers/debian/$(TAG)-$(VERSION)/etc/systemd/system
+	mkdir -p installers/debian/$(TAG)-$(VERSION)/etc/poseidon
+	cp installers/debian/poseidon.service installers/debian/$(TAG)-$(VERSION)/etc/systemd/system/
+	cp installers/debian/default.conf installers/debian/$(TAG)-$(VERSION)/etc/poseidon/
+	cp -R !(installers) installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
+	cp .dockerignore installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
+	cp .plugin_config.yml installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
+	cp .vent_startup.yml installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
+	cp -R .git installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
+	cp -R bin/* installers/debian/$(TAG)-$(VERSION)/usr/bin/
+	docker pull cyberreboot/vent:latest
+	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-vent.tar cyberreboot/vent:latest
+	mkdir -p dist
+	docker build -t poseidon-dpkg -f Dockerfile.dpkg .
+	docker run --rm poseidon-dpkg > dist/$(TAG)-$(VERSION)-net.deb
+	rm -rf installers/debian/$(TAG)-$(VERSION)
+
+build_installers: build_debian build_debian_net
 
 .PHONY:  build_debian build_installers build_poseidon build_docs run_docs run_tests
