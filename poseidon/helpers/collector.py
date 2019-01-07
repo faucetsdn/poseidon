@@ -93,7 +93,7 @@ class Collector(object):
                 status = True
             else:
                 self.logger.error(
-                    'Failed to stop vent collector because: {0}'.format(response[1]))
+                    'Failed to stop vent collector because response failed with: {0}'.format(response[1]))
         except Exception as e:  # pragma: no cover
             self.logger.error(
                 'Failed to stop vent collector because: {0}'.format(str(e)))
