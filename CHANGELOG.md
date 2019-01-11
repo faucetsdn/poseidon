@@ -1,3 +1,11 @@
+# v0.5.1 (2019-01-11)
+
+ - Improved logging output
+ - Updated version of gevent, pytest, pytest-cov
+ - Made use of sed more stable across platforms
+ - Added an additional debian package poseidon-net that is slim and downloads images after installation
+ - Ensure that timeout exists in faucet config before trying to remove/change it
+
 # v0.5.0 (2018-12-28)
 
  - BREAKING CHANGES!

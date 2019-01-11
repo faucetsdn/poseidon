@@ -70,9 +70,9 @@ class Collector(object):
         '''
         status = False
         if 'container_id' not in self.endpoint.endpoint_data:
-            self.logger.error(
-                'Failed to stop vent collector because no container_id for endpoint')
-            return status
+            self.logger.warning(
+                'No vent collector to stop because no container_id for endpoint')
+            return True
 
         payload = {'id': [self.endpoint.endpoint_data['container_id']]}
         self.logger.debug('Vent payload: {0}'.format(str(payload)))
@@ -83,7 +83,6 @@ class Collector(object):
 
         try:
             resp = requests.post(uri, data=json.dumps(payload))
-            # TODO improve logged output
             self.logger.debug(
                 'Collector response: {0}'.format(resp.text))
             response = ast.literal_eval(resp.text)
