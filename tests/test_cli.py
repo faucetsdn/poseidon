@@ -35,4 +35,4 @@ def test_poseidonshell():
     shell.close()
     answer = PoseidonShell.completion(
         'what', 'foo what', ['what ok yeah'])
-    assert answer == ['what']
+    assert answer == ['what ok yeah']
