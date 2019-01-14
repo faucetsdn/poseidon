@@ -70,5 +70,5 @@ class PoseidonShell(cmd.Cmd):
             self.file = None
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     PoseidonShell().cmdloop()
