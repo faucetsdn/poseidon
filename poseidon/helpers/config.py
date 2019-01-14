@@ -4,10 +4,9 @@ Created on 5 December 2018
 @author: Charlie Lewis
 """
 import ast
+import configparser
 import logging
 import os
-
-import configparser
 
 
 class Config():

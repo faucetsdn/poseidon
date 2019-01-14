@@ -3,11 +3,10 @@
 Created on 17 November 2017
 @author: Charlie Lewis
 '''
+import ipaddress
 import json
 import logging
 import os
-
-import ipaddress
 
 from poseidon.controllers.faucet.connection import Connection
 from poseidon.controllers.faucet.parser import Parser

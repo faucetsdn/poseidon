@@ -146,32 +146,32 @@ Poseidon makes heavy use of a sister project, [vent](https://vent.readthedocs.io
 1. The following 14 containers with a "(healthy)" STATUS listed (NOTE: this is truncated output):
 ```
 # docker ps
-CONTAINER ID        IMAGE                                  COMMAND                  STATUS  
+CONTAINER ID        IMAGE                                  COMMAND                  STATUS
 8c07adf421fb        cyberreboot/poseidon:master            "/bin/sh -c '(flask …"   Up 2 hours (healthy)
 0a4f947f299b        cyberreboot/vent-file-drop:master      "/bin/sh -c '(flask …"   Up 2 hours (healthy)
-511f90c6ddd3        cyberreboot/crviz:master               "serve -s build -l 5…"   Up 2 hours (healthy)  
-fb250044ff17        cyberreboot/poseidon-api:master        "/bin/sh -c '(flask …"   Up 2 hours (healthy)  
-8e898fd68c08        cyberreboot/vent-network-tap:master    "/bin/sh -c '(flask …"   Up 2 hours (healthy)  
-552f65d7a982        cyberreboot/vent-rq-worker:master      "/bin/sh -c '(flask …"   Up 2 hours (healthy)  
-8dbabe78d1b9        cyberreboot/vent-rq-worker:master      "/bin/sh -c '(flask …"   Up 2 hours (healthy)  
-e076452c1515        cyberreboot/vent-rq-worker:master      "/bin/sh -c '(flask …"   Up 2 hours (healthy)  
-d0f406f240b1        cyberreboot/vent-rq-worker:master      "/bin/sh -c '(flask …"   Up 2 hours (healthy)  
-6229e46723a9        cyberreboot/vent-rq-dashboard:master   "/bin/sh -c '(flask …"   Up 2 hours (healthy)  
-5c695040603b        cyberreboot/vent-redis:master          "docker-entrypoint.s…"   Up 2 hours (healthy)  
-004e5fdde96e        cyberreboot/vent-syslog:master         "/usr/sbin/syslog-ng…"   Up 2 hours (healthy)  
-c0cd7c1f881c        cyberreboot/vent-rabbitmq:master       "docker-entrypoint.s…"   Up 2 hours (healthy)  
+511f90c6ddd3        cyberreboot/crviz:master               "serve -s build -l 5…"   Up 2 hours (healthy)
+fb250044ff17        cyberreboot/poseidon-api:master        "/bin/sh -c '(flask …"   Up 2 hours (healthy)
+8e898fd68c08        cyberreboot/vent-network-tap:master    "/bin/sh -c '(flask …"   Up 2 hours (healthy)
+552f65d7a982        cyberreboot/vent-rq-worker:master      "/bin/sh -c '(flask …"   Up 2 hours (healthy)
+8dbabe78d1b9        cyberreboot/vent-rq-worker:master      "/bin/sh -c '(flask …"   Up 2 hours (healthy)
+e076452c1515        cyberreboot/vent-rq-worker:master      "/bin/sh -c '(flask …"   Up 2 hours (healthy)
+d0f406f240b1        cyberreboot/vent-rq-worker:master      "/bin/sh -c '(flask …"   Up 2 hours (healthy)
+6229e46723a9        cyberreboot/vent-rq-dashboard:master   "/bin/sh -c '(flask …"   Up 2 hours (healthy)
+5c695040603b        cyberreboot/vent-redis:master          "docker-entrypoint.s…"   Up 2 hours (healthy)
+004e5fdde96e        cyberreboot/vent-syslog:master         "/usr/sbin/syslog-ng…"   Up 2 hours (healthy)
+c0cd7c1f881c        cyberreboot/vent-rabbitmq:master       "docker-entrypoint.s…"   Up 2 hours (healthy)
 d81f5509628c        cyberreboot/vent                       "/bin/sh -c '(flask …"   Up 2 hours (healthy)
 ```
 
 If you performed the demo installation, you should also see the following Faucet-related containers running (NOTE: Faucet has not yet implemented docker-friendly health checks, so the "(healthy)" reference will not be shown):
 
 ```
-196f53632485        grafana/grafana:5.2.1                  "/run.sh"                Up 2 hours  
-cfb7d68b66e0        prom/prometheus:v2.3.1                 "/bin/prometheus --c…"   Up 2 hours  
-86f4188d67f6        faucet/gauge:latest                    "/usr/local/bin/entr…"   Up 2 hours  
-2e186573532e        faucet/event-adapter-rabbitmq          "/usr/local/bin/entr…"   Up 2 hours  
-c0652a6ccd44        influxdb:1.6-alpine                    "/entrypoint.sh infl…"   Up 2 hours  
-2a949b5b1687        faucet/faucet:latest                   "/usr/local/bin/entr…"   Up 2 hours  
+196f53632485        grafana/grafana:5.2.1                  "/run.sh"                Up 2 hours
+cfb7d68b66e0        prom/prometheus:v2.3.1                 "/bin/prometheus --c…"   Up 2 hours
+86f4188d67f6        faucet/gauge:latest                    "/usr/local/bin/entr…"   Up 2 hours
+2e186573532e        faucet/event-adapter-rabbitmq          "/usr/local/bin/entr…"   Up 2 hours
+c0652a6ccd44        influxdb:1.6-alpine                    "/entrypoint.sh infl…"   Up 2 hours
+2a949b5b1687        faucet/faucet:latest                   "/usr/local/bin/entr…"   Up 2 hours
 ```
 
 2. You should see "Poseidon successfully started, capturing logs..." in your syslog output:

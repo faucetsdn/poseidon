@@ -10,6 +10,7 @@ Created on 3 December 2018
 import ast
 import json
 import logging
+import queue
 import random
 import signal
 import sys
@@ -18,7 +19,6 @@ import time
 from copy import deepcopy
 from functools import partial
 
-import queue
 import requests
 import schedule
 from redis import StrictRedis
