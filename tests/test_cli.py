@@ -33,5 +33,6 @@ def test_poseidonshell():
     shell.do_playback('foo.txt')
     shell.precmd('foo')
     shell.close()
-    answer = PoseidonShell.completion('foo', 'what ok yeah', ['yeah'])
-    assert answer == 'yeah'
+    answer = PoseidonShell.completion(
+        'foo what ok yeah', 'what ok yeah', ['yeah'])
+    assert answer == ['yeah']
