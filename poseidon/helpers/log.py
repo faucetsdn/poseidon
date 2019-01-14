@@ -3,7 +3,6 @@
 Created on 18 September 2017
 @author: Jeff Wang, Charlie Lewis
 """
-import logging
 import logging.handlers
 import os
 import socket
