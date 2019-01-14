@@ -4,12 +4,53 @@ import cmd
 class Commands:
 
     def what_is(self, args):
+        ''' what is a specific thing '''
         return
 
     def where_is(self, args):
+        ''' where topologically is a specific thing '''
         return
 
     def collect_on(self, args):
+        ''' collect on a specific thing '''
+        return
+
+    def show_active(self, args):
+        ''' show all devices that are currently active '''
+        return
+
+    def show_inactive(self, args):
+        '''
+        show all devices that are currently inactive but once were active
+        '''
+        return
+
+    def clear_inactives(self, args):
+        ''' clear out all inactive devices '''
+        return
+
+    def ignore(self, args):
+        ''' ignore a specific thing '''
+        return
+
+    def show_ignored(self, args):
+        ''' show all things that are being ignored '''
+        return
+
+    def remove_ignored(self, args):
+        ''' stop ignoriing a specific thing '''
+        return
+
+    def remove(self, args):
+        ''' remove and forget about a specific thing until it's seen again '''
+        return
+
+    def show_state(self, args):
+        ''' show all devices that are in a specific state '''
+        return
+
+    def show_devices(self, args):
+        ''' show all devices that are of a specific filter'''
         return
 
 
@@ -18,6 +59,26 @@ class PoseidonShell(cmd.Cmd):
     prompt = '\033[1;32mposeidon$ \033[1;m'
     file = None
 
+    what_completions = [
+        'is'
+    ]
+    where_completions = [
+        'is'
+    ]
+    collect_completions = [
+        'on'
+    ]
+
+    @staticmethod
+    def completion(text, line, completions):
+        # TODO handle expectation of '?'
+        if line.endswith('?'):
+            pass
+
+        mline = line.partition(' ')[2]
+        offs = len(mline) - len(text)
+        return [s[offs:] for s in completions if s.lower().startswith(mline.lower())]
+
     def do_what(self, arg):
         '''
         Find out what something is:
@@ -25,6 +86,9 @@ class PoseidonShell(cmd.Cmd):
         WHAT IS 18:EF:02:2D:49:00
         '''
         Commands().what_is(arg)
+
+    def complete_what(self, text, line, begidx, endidx):
+        return PoseidonShell.completion(text, line, self.what_completions)
 
     def do_where(self, arg):
         '''
