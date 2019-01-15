@@ -18,6 +18,7 @@ Usage: poseidon [option]
 Options:
     -a,  api           get url to the Poseidon API
     -c,  config        display current configuration info
+    -e,  shell         enter into the Poseidon shell, requires Poseidon to already be running
     -h,  help          print this help
     -i,  info/status   display current status of the Poseidon service
     -l,  logs          display the information logs about what Poseidon is doing
@@ -93,6 +94,14 @@ function check_args()
                 echo "Restarting Poseidon..."
                 sudo systemctl restart poseidon
                 echo "done."
+                exit
+                ;;
+            -e|shell)
+                if [ "$(docker ps -q --filter "name=cyberreboot-poseidon-master" | wc -l)" -eq 1 ]; then
+                    docker exec -it cyberreboot-poseidon-master python3 /poseidon/poseidon/cli/cli.py
+                else
+                    echo "Poseidon isn't running, you must first start Poseidon to use the shell."
+                fi
                 exit
                 ;;
             -s|start)
