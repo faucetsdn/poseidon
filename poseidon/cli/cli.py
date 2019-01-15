@@ -1,5 +1,7 @@
 import cmd
 
+from poseidon.main import SDNConnect
+
 
 class Commands:
 
@@ -13,16 +15,6 @@ class Commands:
 
     def collect_on(self, args):
         ''' collect on a specific thing '''
-        return
-
-    def show_active(self, args):
-        ''' show all devices that are currently active '''
-        return
-
-    def show_inactive(self, args):
-        '''
-        show all devices that are currently inactive but once were active
-        '''
         return
 
     def clear_inactives(self, args):
@@ -47,10 +39,17 @@ class Commands:
 
     def show_state(self, args):
         ''' show all devices that are in a specific state '''
-        return
+        endpoints = []
+        sdnc = SDNConnect()
+        sdnc.get_stored_endpoints()
+        for endpoint in sdnc.endpoints:
+            # TODO parse out args instead of hardcoding inactive
+            if endpoint.state != 'inactive':
+                endpoints.append(endpoint)
+        return endpoints
 
     def show_devices(self, args):
-        ''' show all devices that are of a specific filter'''
+        ''' show all devices that are of a specific filter. i.e. windows, dev workstation, etc.'''
         return
 
 
@@ -105,6 +104,16 @@ class PoseidonShell(cmd.Cmd):
         COLLECT ON 18:EF:02:2D:49:00 FOR 5 MINUTES
         '''
         Commands().collect_on(arg)
+
+    def do_show(self, arg):
+        '''
+        Show things on the network based on filters:
+        SHOW ACTIVE DEVICES
+        SHOW INACTIVE DEVICES
+        '''
+        # TODO check if it should call show_state or show_devices
+        endpoints = Commands().show_state(arg)
+        print(endpoints)
 
     def do_quit(self, arg):
         'Stop recording and exit:  QUIT'
