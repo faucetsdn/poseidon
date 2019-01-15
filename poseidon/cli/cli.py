@@ -43,9 +43,8 @@ class Commands:
         sdnc = SDNConnect()
         sdnc.get_stored_endpoints()
         for endpoint in sdnc.endpoints:
-            # TODO parse out args instead of hardcoding inactive
-            if endpoint.state != 'inactive':
-                endpoints.append(endpoint)
+            # TODO parse out args instead of all endpoints
+            endpoints.append(endpoint)
         return endpoints
 
     def show_devices(self, args):
