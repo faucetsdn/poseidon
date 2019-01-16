@@ -134,8 +134,16 @@ class PoseidonShell(cmd.Cmd):
         table.add_row(['Name', 'State', 'MAC Address', 'Segment',
                        'Port', 'VLAN', 'IPv4', 'IPv6', 'Next State'])
         for endpoint in endpoints:
-            table.add_row([endpoint.machine.name, endpoint.state, endpoint.endpoint_data['mac'], endpoint.endpoint_data['segment'], endpoint.endpoint_data['port'],
-                           endpoint.endpoint_data['tenant'], endpoint.endpoint_data['ipv4'], endpoint.endpoint_data['ipv6'], endpoint.p_next_state])
+            vlan = endpoint.endpoint_data['tenant']
+            if vlan.startswith('VLAN'):
+                vlan.split('VLAN')[1]
+            table.add_row([endpoint.machine.name, endpoint.state,
+                           endpoint.endpoint_data['mac'],
+                           endpoint.endpoint_data['segment'],
+                           endpoint.endpoint_data['port'],
+                           vlan, endpoint.endpoint_data['ipv4'],
+                           endpoint.endpoint_data['ipv6'],
+                           endpoint.p_next_state])
         print(table.draw())
 
     def do_quit(self, arg):
