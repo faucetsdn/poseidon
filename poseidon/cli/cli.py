@@ -129,11 +129,11 @@ class PoseidonShell(cmd.Cmd):
         # TODO check if it should call show_state or show_devices
         endpoints = Commands().show_state(arg)
         table = Texttable()
-        table.add_row(['Name', 'State', 'Ignore', 'Endpoint Data',
-                       'Next State', 'Previous States'])
+        table.add_row(['Name', 'State', 'Ignored', 'MAC Address', 'Segment', 'Port', 'VLAN', 'IPv4', 'IPv6',
+                       'Next State'])
         for endpoint in endpoints:
-            table.add_row([endpoint.machine.name, endpoint.state, endpoint.ignore,
-                           endpoint.endpoint_data, endpoint.p_next_state, endpoint.p_prev_states])
+            table.add_row([endpoint.machine.name, endpoint.state, str(endpoint.ignore),
+                           endpoint.endpoint_data['mac'], endpoint.endpoint_data['segment'], endpoint.endpoint_data['port'], endpoint.endpoint_data['tenant'], endpoint.endpoint_data['ipv4'], endpoint.endpoint_data['ipv6'], endpoint.p_next_state])
         print(table.draw())
 
     def do_quit(self, arg):

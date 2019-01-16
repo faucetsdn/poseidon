@@ -16,7 +16,10 @@ class EndpointDecoder(object):
         self.endpoint = Endpoint(e['name'])
         self.endpoint.state = e['state']
         if 'ignore' in e:
-            self.endpoint.ignore = e['ignore']
+            if e['ignore']:
+                self.endpoint.ignore = True
+            else:
+                self.endpoint.ignore = False
         else:
             self.endpoint.ignore = False
         self.endpoint.endpoint_data = e['endpoint_data']
