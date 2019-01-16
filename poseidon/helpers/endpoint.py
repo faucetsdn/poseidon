@@ -92,7 +92,7 @@ class Endpoint(object):
         endpoint_d = {}
         endpoint_d['name'] = self.name
         endpoint_d['state'] = self.state
-        endpooint_d['ignore'] = self.ignore
+        endpoint_d['ignore'] = self.ignore
         endpoint_d['endpoint_data'] = self.endpoint_data
         endpoint_d['p_next_state'] = self.p_next_state
         endpoint_d['p_prev_states'] = self.p_prev_states
