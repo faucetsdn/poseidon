@@ -165,6 +165,69 @@ class SDNConnect(object):
                 'Unknown SDN controller config: {0}'.format(
                     self.controller))
 
+    def endpoint_by_name(self, name):
+        for endpoint in self.endpoints:
+            if endpoint.machine.name == name:
+                return endpoint
+
+    def endpoint_by_hash(self, hash_id):
+        for endpoint in self.endpoints:
+            if endpoint.name == hash_id:
+                return endpoint
+
+    def endpoints_by_ip(self, ip):
+        endpoints = []
+        for endpoint in self.endpoints:
+            if ip in [endpoint.endpoint_data['ipv4'], endpoint.endpoint_data['ipv6']]:
+                endpoints.append(endpoint)
+        return endpoints
+
+    def endpoints_by_mac(self, mac):
+        endpoints = []
+        for endpoint in self.endpoints:
+            if mac == endpoint.endpoint_data['mac']:
+                endpoints.append(endpoint)
+        return endpoints
+
+    def collect_on(self, endpoint):
+        # TODO
+        return
+
+    def remove_inactive_endpoints(self):
+        remove_list = []
+        for endpoint in self.endpoints:
+            if endpoint.state == 'inactive':
+                remove_list.append(endpoint)
+        for endpoint in remove_list:
+            self.endpoint.remove(endpoint)
+        self.store_endpoints()
+        return
+
+    def ignore_endpoint(self, endpoint):
+        endpoint.ignore = True
+        self.store_endpoints()
+        return
+
+    def clear_ignored_endpoint(self, endpoint):
+        endpoint.ignore = False
+        self.store_endpoints()
+        return
+
+    def remove_endpoint(self, endpoint):
+        self.endpoints.remove(endpoint)
+        self.store_endpoints()
+        return
+
+    def remove_ignored_endpoints(self):
+        remove_list = []
+        for endpoint in self.endpoints:
+            if endpoint.ignore:
+                remove_list.append(endpoint)
+        for endpoint in remove_list:
+            self.endpoint.remove(endpoint)
+        self.store_endpoints()
+        return
+
     def check_endpoints(self, messages=None):
         retval = {}
         retval['machines'] = None
@@ -208,7 +271,7 @@ class SDNConnect(object):
             for endpoint in self.endpoints:
                 if h == endpoint.name:
                     ep = endpoint
-            if ep is not None and ep.endpoint_data != machine:
+            if ep is not None and ep.endpoint_data != machine and not ep.ignore:
                 self.logger.info(
                     'Endpoint changed: {0}:{1}'.format(h, machine))
                 ep.endpoint_data = deepcopy(machine)
@@ -254,6 +317,7 @@ class SDNConnect(object):
                     redis_endpoint_data = {}
                     redis_endpoint_data['name'] = str(endpoint.name)
                     redis_endpoint_data['state'] = str(endpoint.state)
+                    redis_endpoint_data['ignore'] = str(endpoint.ignore)
                     redis_endpoint_data['endpoint_data'] = str(
                         endpoint.endpoint_data)
                     redis_endpoint_data['next_state'] = str(
@@ -312,19 +376,20 @@ class Monitor(object):
         self.s.get_stored_endpoints()
         # set all retrieved endpoints to inactive at the start
         for endpoint in self.s.endpoints:
-            if endpoint.state != 'inactive':
-                if endpoint.state == 'mirroring':
-                    endpoint.p_next_state = 'mirror'
-                elif endpoint.state == 'reinvestigating':
-                    endpoint.p_next_state = 'reinvestigate'
-                elif endpoint.state == 'queued':
-                    endpoint.p_next_state = 'queue'
-                elif endpoint.state in ['known', 'abnormal']:
-                    endpoint.p_next_state = endpoint.state
-                endpoint.endpoint_data['active'] = 0
-                endpoint.inactive()
-                endpoint.p_prev_states.append(
-                    (endpoint.state, int(time.time())))
+            if not endpoint.ignore:
+                if endpoint.state != 'inactive':
+                    if endpoint.state == 'mirroring':
+                        endpoint.p_next_state = 'mirror'
+                    elif endpoint.state == 'reinvestigating':
+                        endpoint.p_next_state = 'reinvestigate'
+                    elif endpoint.state == 'queued':
+                        endpoint.p_next_state = 'queue'
+                    elif endpoint.state in ['known', 'abnormal']:
+                        endpoint.p_next_state = endpoint.state
+                    endpoint.endpoint_data['active'] = 0
+                    endpoint.inactive()
+                    endpoint.p_prev_states.append(
+                        (endpoint.state, int(time.time())))
 
         # schedule periodic scan of endpoints thread
         self.schedule.every(self.controller['scan_frequency']).seconds.do(
@@ -381,7 +446,7 @@ class Monitor(object):
                     'ML results: {0}'.format(ml_returns))
                 # process results from ml output and update impacted endpoints
                 for ep in self.s.endpoints:
-                    if ep.name in ml_returns and 'valid' in ml_returns[ep.name]:
+                    if ep.name in ml_returns and 'valid' in ml_returns[ep.name] and not ep.ignore:
                         if ep.state in ['mirroring', 'reinvestigating']:
                             status = Actions(
                                 ep, self.s.sdnc).unmirror_endpoint()
@@ -403,50 +468,51 @@ class Monitor(object):
                             (ep.state, int(time.time())))
 
             for endpoint in self.s.endpoints:
-                if endpoint.state == 'queued':
-                    if self.s.investigations < self.controller['max_concurrent_reinvestigations']:
-                        self.s.investigations += 1
-                        endpoint.trigger(endpoint.p_next_state)
-                        endpoint.p_next_state = None
-                        endpoint.p_prev_states.append(
-                            (endpoint.state, int(time.time())))
-                        status = Actions(
-                            endpoint, self.s.sdnc).mirror_endpoint()
-                        if not status:
-                            self.logger.warning(
-                                'Unable to mirror the endpoint: {0}'.format(endpoint.name))
-                elif endpoint.state == 'unknown':
-                    # move to mirroring state
-                    if self.s.investigations < self.controller['max_concurrent_reinvestigations']:
-                        self.s.investigations += 1
-                        endpoint.mirror()
-                        endpoint.p_prev_states.append(
-                            (endpoint.state, int(time.time())))
-                        status = Actions(
-                            endpoint, self.s.sdnc).mirror_endpoint()
-                        if not status:
-                            self.logger.warning(
-                                'Unable to mirror the endpoint: {0}'.format(endpoint.name))
-                    else:
-                        endpoint.p_next_state = 'mirror'
-                        endpoint.queue()
-                        endpoint.p_prev_states.append(
-                            (endpoint.state, int(time.time())))
-                elif endpoint.state in ['mirroring', 'reinvestigating']:
-                    cur_time = int(time.time())
-                    # timeout after 2 times the reinvestigation frequency
-                    # in case something didn't report back, put back in an
-                    # unknown state
-                    if cur_time - endpoint.p_prev_states[-1][1] > 2*self.controller['reinvestigation_frequency']:
-                        status = Actions(
-                            endpoint, self.s.sdnc).unmirror_endpoint()
-                        if not status:
-                            self.logger.warning(
-                                'Unable to unmirror the endpoint: {0}'.format(endpoint.name))
-                        endpoint.unknown()
-                        self.s.investigations -= 1
-                        endpoint.p_prev_states.append(
-                            (endpoint.state, int(time.time())))
+                if not endpoint.ignore:
+                    if endpoint.state == 'queued':
+                        if self.s.investigations < self.controller['max_concurrent_reinvestigations']:
+                            self.s.investigations += 1
+                            endpoint.trigger(endpoint.p_next_state)
+                            endpoint.p_next_state = None
+                            endpoint.p_prev_states.append(
+                                (endpoint.state, int(time.time())))
+                            status = Actions(
+                                endpoint, self.s.sdnc).mirror_endpoint()
+                            if not status:
+                                self.logger.warning(
+                                    'Unable to mirror the endpoint: {0}'.format(endpoint.name))
+                    elif endpoint.state == 'unknown':
+                        # move to mirroring state
+                        if self.s.investigations < self.controller['max_concurrent_reinvestigations']:
+                            self.s.investigations += 1
+                            endpoint.mirror()
+                            endpoint.p_prev_states.append(
+                                (endpoint.state, int(time.time())))
+                            status = Actions(
+                                endpoint, self.s.sdnc).mirror_endpoint()
+                            if not status:
+                                self.logger.warning(
+                                    'Unable to mirror the endpoint: {0}'.format(endpoint.name))
+                        else:
+                            endpoint.p_next_state = 'mirror'
+                            endpoint.queue()
+                            endpoint.p_prev_states.append(
+                                (endpoint.state, int(time.time())))
+                    elif endpoint.state in ['mirroring', 'reinvestigating']:
+                        cur_time = int(time.time())
+                        # timeout after 2 times the reinvestigation frequency
+                        # in case something didn't report back, put back in an
+                        # unknown state
+                        if cur_time - endpoint.p_prev_states[-1][1] > 2*self.controller['reinvestigation_frequency']:
+                            status = Actions(
+                                endpoint, self.s.sdnc).unmirror_endpoint()
+                            if not status:
+                                self.logger.warning(
+                                    'Unable to unmirror the endpoint: {0}'.format(endpoint.name))
+                            endpoint.unknown()
+                            self.s.investigations -= 1
+                            endpoint.p_prev_states.append(
+                                (endpoint.state, int(time.time())))
 
     def get_q_item(self):
         '''
