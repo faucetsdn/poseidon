@@ -133,17 +133,20 @@ class PoseidonShell(cmd.Cmd):
         table.set_cols_dtype(['t']*9)
         table.add_row(['Name', 'State', 'MAC Address', 'Segment',
                        'Port', 'VLAN', 'IPv4', 'IPv6', 'Next State'])
+        matrix = []
         for endpoint in endpoints:
             vlan = endpoint.endpoint_data['tenant']
             if vlan.startswith('VLAN'):
                 vlan.split('VLAN')[1]
-            table.add_row([endpoint.machine.name, endpoint.state,
+            matrix.append([endpoint.machine.name, endpoint.state,
                            endpoint.endpoint_data['mac'],
                            endpoint.endpoint_data['segment'],
                            endpoint.endpoint_data['port'],
                            vlan, endpoint.endpoint_data['ipv4'],
                            endpoint.endpoint_data['ipv6'],
                            endpoint.p_next_state])
+        sorted(matrix, key=lambda endpoint: endpoint[2])
+        table.add_rows(matrix)
         print(table.draw())
 
     def do_quit(self, arg):
