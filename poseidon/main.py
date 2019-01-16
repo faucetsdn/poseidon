@@ -169,11 +169,13 @@ class SDNConnect(object):
         for endpoint in self.endpoints:
             if endpoint.machine.name == name:
                 return endpoint
+        return None
 
     def endpoint_by_hash(self, hash_id):
         for endpoint in self.endpoints:
             if endpoint.name == hash_id:
                 return endpoint
+        return None
 
     def endpoints_by_ip(self, ip):
         endpoints = []
