@@ -42,7 +42,7 @@ class Commands:
         return endpoints
 
     def clear_ignored(self, args):
-        ''' stop ignoriing a specific thing '''
+        ''' stop ignoring a specific thing '''
         return
 
     def remove(self, args):
