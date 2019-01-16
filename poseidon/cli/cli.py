@@ -128,7 +128,7 @@ class PoseidonShell(cmd.Cmd):
         '''
         # TODO check if it should call show_state or show_devices
         endpoints = Commands().show_state(arg)
-        table = Texttable(max_width=120)
+        table = Texttable(max_width=0)
         table.add_row(['Name', 'State', 'MAC Address', 'Segment',
                        'Port', 'VLAN', 'IPv4', 'IPv6', 'Next State'])
         for endpoint in endpoints:
