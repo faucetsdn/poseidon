@@ -132,6 +132,8 @@ class PoseidonShell(cmd.Cmd):
         table.add_row(['Name', 'State', 'MAC Address', 'Segment',
                        'Port', 'VLAN', 'IPv4', 'IPv6', 'Next State'])
         for endpoint in endpoints:
+            print('machine: {0}, {1}'.format(
+                endpoint.machine.name, endpoint.name))
             table.add_row([endpoint.machine.name, endpoint.state, endpoint.endpoint_data['mac'], endpoint.endpoint_data['segment'], endpoint.endpoint_data['port'],
                            endpoint.endpoint_data['tenant'], endpoint.endpoint_data['ipv4'], endpoint.endpoint_data['ipv6'], endpoint.p_next_state])
         print(table.draw())
