@@ -1,5 +1,7 @@
 import cmd
 
+from texttable import Texttable
+
 from poseidon.main import SDNConnect
 
 
@@ -17,8 +19,12 @@ class Commands:
         ''' collect on a specific thing '''
         return
 
-    def clear_inactives(self, args):
-        ''' clear out all inactive devices '''
+    def remove_inactives(self, args):
+        ''' remove all inactive devices '''
+        return
+
+    def remove_ignored(self, args):
+        ''' remove all ignored devices '''
         return
 
     def ignore(self, args):
@@ -27,10 +33,16 @@ class Commands:
 
     def show_ignored(self, args):
         ''' show all things that are being ignored '''
-        return
+        endpoints = []
+        sdnc = SDNConnect()
+        sdnc.get_stored_endpoints()
+        for endpoint in sdnc.endpoints:
+            if endpoint.ignore:
+                endpoints.append(endpoint)
+        return endpoints
 
-    def remove_ignored(self, args):
-        ''' stop ignoriing a specific thing '''
+    def clear_ignored(self, args):
+        ''' stop ignoring a specific thing '''
         return
 
     def remove(self, args):
@@ -82,6 +94,7 @@ class PoseidonShell(cmd.Cmd):
         Find out what something is:
         WHAT IS 10.0.0.1
         WHAT IS 18:EF:02:2D:49:00
+        WHAT IS 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
         '''
         Commands().what_is(arg)
 
@@ -93,6 +106,7 @@ class PoseidonShell(cmd.Cmd):
         Find out where something is:
         WHERE IS 10.0.0.1
         WHERE IS 18:EF:02:2D:49:00
+        WHERE IS 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
         '''
         Commands().where_is(arg)
 
@@ -109,10 +123,31 @@ class PoseidonShell(cmd.Cmd):
         Show things on the network based on filters:
         SHOW ACTIVE DEVICES
         SHOW INACTIVE DEVICES
+        SHOW WINDOWS DEVICES
+        SHOW ABNORMAL DEVICES
         '''
         # TODO check if it should call show_state or show_devices
         endpoints = Commands().show_state(arg)
-        print(endpoints)
+        matrix = []
+        for endpoint in endpoints:
+            vlan = endpoint.endpoint_data['tenant']
+            if vlan.startswith('VLAN'):
+                vlan.split('VLAN')[1]
+            matrix.append([endpoint.machine.name, endpoint.state,
+                           endpoint.endpoint_data['mac'],
+                           endpoint.endpoint_data['segment'],
+                           endpoint.endpoint_data['port'],
+                           vlan, endpoint.endpoint_data['ipv4'],
+                           endpoint.endpoint_data['ipv6'],
+                           endpoint.p_next_state])
+        matrix = sorted(matrix, key=lambda endpoint: endpoint[2])
+        matrix.insert(0, ['Name', 'State', 'MAC Address', 'Segment',
+                          'Port', 'VLAN', 'IPv4', 'IPv6', 'Next State'])
+        table = Texttable(max_width=0)
+        # make all the columns types be text
+        table.set_cols_dtype(['t']*9)
+        table.add_rows(matrix)
+        print(table.draw())
 
     def do_quit(self, arg):
         'Stop recording and exit:  QUIT'

@@ -15,6 +15,13 @@ class EndpointDecoder(object):
         e = json.loads(endpoint)
         self.endpoint = Endpoint(e['name'])
         self.endpoint.state = e['state']
+        if 'ignore' in e:
+            if e['ignore']:
+                self.endpoint.ignore = True
+            else:
+                self.endpoint.ignore = False
+        else:
+            self.endpoint.ignore = False
         self.endpoint.endpoint_data = e['endpoint_data']
         self.endpoint.p_next_state = e['p_next_state']
         self.endpoint.p_prev_states = e['p_prev_states']
@@ -79,6 +86,7 @@ class Endpoint(object):
                                transitions=Endpoint.transitions, initial='unknown')
         self.machine.name = hashed_val[:8]+' '
         self.name = hashed_val
+        self.ignore = False
         self.endpoint_data = None
         self.p_next_state = None
         self.p_prev_states = []
@@ -87,6 +95,7 @@ class Endpoint(object):
         endpoint_d = {}
         endpoint_d['name'] = self.name
         endpoint_d['state'] = self.state
+        endpoint_d['ignore'] = self.ignore
         endpoint_d['endpoint_data'] = self.endpoint_data
         endpoint_d['p_next_state'] = self.p_next_state
         endpoint_d['p_prev_states'] = self.p_prev_states

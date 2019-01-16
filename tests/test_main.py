@@ -26,6 +26,70 @@ from poseidon.main import SDNConnect
 logger = logging.getLogger('test')
 
 
+def test_endpoint_by_name():
+    s = SDNConnect()
+    endpoint = s.endpoint_by_name('foo')
+    assert endpoint == None
+
+
+def test_endpoint_by_hash():
+    s = SDNConnect()
+    endpoint = s.endpoint_by_hash('foo')
+    assert endpoint == None
+
+
+def test_endpoints_by_ip():
+    s = SDNConnect()
+    endpoints = s.endpoints_by_ip('10.0.0.1')
+    assert endpoints == []
+
+
+def test_endpoints_by_mac():
+    s = SDNConnect()
+    endpoints = s.endpoints_by_mac('00:00:00:00:00:01')
+    assert endpoints == []
+
+
+def test_collect_on():
+    s = SDNConnect()
+    s.collect_on('00:00:00:00:00:01')
+
+
+def test_remove_inactive_endpoints():
+    s = SDNConnect()
+    s.remove_inactive_endpoints()
+
+
+def test_ignore_endpoint():
+    s = SDNConnect()
+    endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00'}
+    s.ignore_endpoint(endpoint)
+
+
+def test_clear_ignored_endpoint():
+    s = SDNConnect()
+    endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00'}
+    s.clear_ignored_endpoint(endpoint)
+
+
+def test_remove_endpoint():
+    s = SDNConnect()
+    endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00'}
+    s.endpoints.append(endpoint)
+    s.remove_endpoint(endpoint)
+
+
+def test_remove_ignored_endpoints():
+    s = SDNConnect()
+    s.remove_ignored_endpoints()
+
+
 def test_signal_handler():
 
     class MockLogger:
@@ -46,7 +110,7 @@ def test_signal_handler():
             self.controller = Config().get_config()
             self.s = SDNConnect()
 
-    class MockScheduele:
+    class MockSchedule:
         call_log = []
 
         def __init__(self):
@@ -57,7 +121,7 @@ def test_signal_handler():
             return job + ' cancelled'
 
     mock_monitor = MockMonitor()
-    mock_monitor.schedule = MockScheduele()
+    mock_monitor.schedule = MockSchedule()
     mock_monitor.rabbit_channel_connection_local = MockRabbitConnection()
     mock_monitor.logger = MockLogger().logger
 
