@@ -78,6 +78,15 @@ class PoseidonShell(cmd.Cmd):
     collect_completions = [
         'on'
     ]
+    show_completions = [
+        'active devices', 'inactive devices', 'known devices',
+        'unknown devices', 'mirroring devices', 'abnormal devices',
+        'shutdown devices', 'reinvestigating devices', 'queued devices',
+        'active directory controller devices', 'administrator server devices',
+        'administrator workstation devices', 'business workstation devices',
+        'developer workstation devices', 'gpu laptop devices',
+        'pki server devices', 'windows devices', 'mac devices', 'linux devices'
+    ]
 
     @staticmethod
     def completion(text, line, completions):
@@ -99,8 +108,10 @@ class PoseidonShell(cmd.Cmd):
         Commands().what_is(arg)
 
     def complete_what(self, text, line, begidx, endidx):
-        print('text: {0}, line: {1}'.format(text, line))
         return PoseidonShell.completion(text, line, self.what_completions)
+
+    def complete_show(self, text, line, begidx, endidx):
+        return PoseidonShell.completion(text, line, self.show_completions)
 
     def do_where(self, arg):
         '''
