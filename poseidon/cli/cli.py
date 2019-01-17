@@ -99,6 +99,7 @@ class PoseidonShell(cmd.Cmd):
         Commands().what_is(arg)
 
     def complete_what(self, text, line, begidx, endidx):
+        print('text: {0}, line: {1}'.format(text, line))
         return PoseidonShell.completion(text, line, self.what_completions)
 
     def do_where(self, arg):
