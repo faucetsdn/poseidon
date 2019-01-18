@@ -167,7 +167,7 @@ class SDNConnect(object):
 
     def endpoint_by_name(self, name):
         for endpoint in self.endpoints:
-            if endpoint.machine.name == name:
+            if endpoint.machine.name.strip() == name:
                 return endpoint
         return None
 

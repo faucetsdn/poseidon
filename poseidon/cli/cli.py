@@ -94,7 +94,7 @@ class PoseidonShell(cmd.Cmd):
             if vlan.startswith('VLAN'):
                 vlan.split('VLAN')[1]
             # TODO add options to modify the columns
-            matrix.append([endpoint.machine.name,
+            matrix.append([endpoint.machine.name.strip(),
                            endpoint.endpoint_data['mac'],
                            endpoint.endpoint_data['segment'],
                            endpoint.endpoint_data['port'],
@@ -129,7 +129,7 @@ class PoseidonShell(cmd.Cmd):
             if vlan.startswith('VLAN'):
                 vlan.split('VLAN')[1]
             # TODO add options to modify the columns
-            matrix.append([endpoint.machine.name,
+            matrix.append([endpoint.machine.name.strip(),
                            endpoint.endpoint_data['mac'],
                            endpoint.endpoint_data['segment'],
                            endpoint.endpoint_data['port'],
@@ -175,7 +175,7 @@ class PoseidonShell(cmd.Cmd):
             if vlan.startswith('VLAN'):
                 vlan.split('VLAN')[1]
             # TODO add options to modify the columns
-            matrix.append([endpoint.machine.name, endpoint.state,
+            matrix.append([endpoint.machine.name.strip(), endpoint.state,
                            endpoint.endpoint_data['mac'],
                            endpoint.endpoint_data['segment'],
                            endpoint.endpoint_data['port'],
