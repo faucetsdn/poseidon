@@ -34,7 +34,8 @@ class PoseidonShell(cmd.Cmd):
         'active directory controller devices', 'administrator server devices',
         'administrator workstation devices', 'business workstation devices',
         'developer workstation devices', 'gpu laptop devices',
-        'pki server devices', 'windows devices', 'mac devices', 'linux devices'
+        'pki server devices', 'windows devices', 'mac devices',
+        'linux devices', 'ignored devices'
     ]
 
     @staticmethod
@@ -78,6 +79,36 @@ class PoseidonShell(cmd.Cmd):
         COLLECT ON 18:EF:02:2D:49:00 FOR 5 MINUTES
         '''
         Commands().collect_on(arg)
+
+    def do_ignore(self, arg):
+        '''
+        Ignore something on the network:
+        IGNORE 10.0.0.1
+        IGNORE 18:EF:02:2D:49:00
+        IGNORE 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
+        '''
+        pass
+
+    def do_clear(self, arg):
+        '''
+        Stop ignoring something on the network:
+        CLEAR 10.0.0.1
+        CLEAR 18:EF:02:2D:49:00
+        CLEAR 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
+        CLEAR ALL IGNORED
+        '''
+        pass
+
+    def do_remove(self, arg):
+        '''
+        Remove and forget about something on the network until it's seen again:
+        REMOVE 10.0.0.1
+        REMOVE 18:EF:02:2D:49:00
+        REMOVE 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
+        REMOVE IGNORED
+        REMOVE INACTIVES
+        '''
+        pass
 
     def do_show(self, arg):
         '''
