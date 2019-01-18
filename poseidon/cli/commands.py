@@ -44,7 +44,7 @@ class Commands:
         eps.append(sdnc.endpoint_by_name(device))
         eps.append(sdnc.endpoint_by_hash(device))
         eps += sdnc.endpoints_by_ip(device)
-        eps += sndc.endpoints_by_mac(device)
+        eps += sdnc.endpoints_by_mac(device)
         endpoints = []
         for endpoint in eps:
             if endpoint:
