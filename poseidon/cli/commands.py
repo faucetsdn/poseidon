@@ -52,19 +52,22 @@ class Commands:
                 endpoints.append(endpoint)
         return endpoints
 
-    def show_ignored(self, args):
-        ''' show all things that are being ignored '''
-        endpoints = []
-        sdnc = SDNConnect()
-        sdnc.get_stored_endpoints()
-        for endpoint in sdnc.endpoints:
-            if endpoint.ignore:
-                endpoints.append(endpoint)
-        return endpoints
-
     def clear_ignored(self, args):
         ''' stop ignoring a specific thing '''
-        return
+        eps = []
+        sdnc = SDNConnect()
+        sdnc.get_stored_endpoints()
+        device = args.rsplit(' ', 1)[0]
+        eps.append(sdnc.endpoint_by_name(device))
+        eps.append(sdnc.endpoint_by_hash(device))
+        eps += sdnc.endpoints_by_ip(device)
+        eps += sdnc.endpoints_by_mac(device)
+        endpoints = []
+        for endpoint in eps:
+            if endpoint:
+                sdnc.clear_ignored_endpoint(endpoint)
+                endpoints.append(endpoint)
+        return endpoints
 
     def remove(self, args):
         ''' remove and forget about a specific thing until it's seen again '''
@@ -95,6 +98,8 @@ class Commands:
                 if endpoint.state == state:
                     endpoints.append(endpoint)
             elif type_filter:
+                if type_filter == 'ignored':
+                    if endpoint.ignore:
+                        endpoints.append(endpoint)
                 # TODO
-                pass
         return endpoints

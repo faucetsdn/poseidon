@@ -14,7 +14,6 @@ def test_commands():
     commands.remove_inactives('foo')
     commands.remove_ignored('foo')
     commands.ignore('foo')
-    commands.show_ignored('foo')
     commands.clear_ignored('foo')
     commands.remove('foo')
     commands.show_devices('foo')
