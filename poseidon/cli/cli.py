@@ -87,8 +87,7 @@ class PoseidonShell(cmd.Cmd):
         SHOW WINDOWS DEVICES
         SHOW ABNORMAL DEVICES
         '''
-        # TODO check if it should call show_state or show_devices
-        endpoints = Commands().show_state(arg)
+        endpoints = Commands().show_devices(arg)
         matrix = []
         for endpoint in endpoints:
             vlan = endpoint.endpoint_data['tenant']
