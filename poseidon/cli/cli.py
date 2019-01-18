@@ -28,7 +28,7 @@ class PoseidonShell(cmd.Cmd):
         'on'
     ]
     show_completions = [
-        'active devices', 'inactive devices', 'known devices',
+        'all devices', 'active devices', 'inactive devices', 'known devices',
         'unknown devices', 'mirroring devices', 'abnormal devices',
         'shutdown devices', 'reinvestigating devices', 'queued devices',
         'active directory controller devices', 'administrator server devices',
@@ -109,6 +109,8 @@ class PoseidonShell(cmd.Cmd):
             table.set_cols_dtype(['t']*9)
             table.add_rows(matrix)
             print(table.draw())
+        elif not arg in self.show_completions:
+            print('Invalid query, try using TAB to see available options')
         else:
             print('No results found for that query.')
 

@@ -64,16 +64,21 @@ class Commands:
         '''
         state = None
         type_filter = None
+        all_devices = False
         query = args.rsplit(' ', 1)[0]
         if query in self.states:
             state = query
+        elif query == 'all':
+            all_devices = True
         else:
             type_filter = query
         endpoints = []
         sdnc = SDNConnect()
         sdnc.get_stored_endpoints()
         for endpoint in sdnc.endpoints:
-            if state:
+            if all_devices:
+                endpoints.append(endpoint)
+            elif state:
                 if endpoint.state == state:
                     endpoints.append(endpoint)
             elif type_filter:
