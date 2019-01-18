@@ -93,6 +93,7 @@ class PoseidonShell(cmd.Cmd):
             vlan = endpoint.endpoint_data['tenant']
             if vlan.startswith('VLAN'):
                 vlan.split('VLAN')[1]
+            # TODO add options to modify the columns
             matrix.append([endpoint.machine.name, endpoint.state,
                            endpoint.endpoint_data['mac'],
                            endpoint.endpoint_data['segment'],
@@ -101,6 +102,7 @@ class PoseidonShell(cmd.Cmd):
                            endpoint.endpoint_data['ipv6'],
                            endpoint.p_next_state])
         if len(matrix) > 0:
+            # TODO add options to maodify the sorted by key and the header options
             matrix = sorted(matrix, key=lambda endpoint: endpoint[2])
             matrix.insert(0, ['Name', 'State', 'MAC Address', 'Segment',
                               'Port', 'VLAN', 'IPv4', 'IPv6', 'Next State'])
