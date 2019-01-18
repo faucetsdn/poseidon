@@ -87,7 +87,32 @@ class PoseidonShell(cmd.Cmd):
         IGNORE 18:EF:02:2D:49:00
         IGNORE 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
         '''
-        pass
+        endpoints = Commands().ignore(arg)
+        matrix = []
+        for endpoint in endpoints:
+            vlan = endpoint.endpoint_data['tenant']
+            if vlan.startswith('VLAN'):
+                vlan.split('VLAN')[1]
+            # TODO add options to modify the columns
+            matrix.append([endpoint.machine.name,
+                           endpoint.endpoint_data['mac'],
+                           endpoint.endpoint_data['segment'],
+                           endpoint.endpoint_data['port'],
+                           vlan, endpoint.endpoint_data['ipv4'],
+                           endpoint.endpoint_data['ipv6']])
+        if len(matrix) > 0:
+            # TODO add options to maodify the sorted by key and the header options
+            matrix = sorted(matrix, key=lambda endpoint: endpoint[1])
+            matrix.insert(0, ['Name', 'MAC Address', 'Segment',
+                              'Port', 'VLAN', 'IPv4', 'IPv6'])
+            table = Texttable(max_width=0)
+            # make all the columns types be text
+            table.set_cols_dtype(['t']*7)
+            table.add_rows(matrix)
+            print('Ignored the following devices:')
+            print(table.draw())
+        else:
+            print('No results found for that query, no devices were ignored.')
 
     def do_clear(self, arg):
         '''

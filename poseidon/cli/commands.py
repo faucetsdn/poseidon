@@ -37,7 +37,20 @@ class Commands:
 
     def ignore(self, args):
         ''' ignore a specific thing '''
-        return
+        eps = []
+        sdnc = SDNConnect()
+        sdnc.get_stored_endpoints()
+        device = args.rsplit(' ', 1)[0]
+        eps.append(sdnc.endpoint_by_name(device))
+        eps.append(sdnc.endpoint_by_hash(device))
+        eps += sdnc.endpoints_by_ip(device)
+        eps += sndc.endpoints_by_mac(device)
+        endpoints = []
+        for endpoint in eps:
+            if endpoint:
+                sdnc.ignore_endpoint(endpoint)
+                endpoints.append(endpoint)
+        return endpoints
 
     def show_ignored(self, args):
         ''' show all things that are being ignored '''
