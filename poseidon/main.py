@@ -167,7 +167,7 @@ class SDNConnect(object):
 
     def endpoint_by_name(self, name):
         for endpoint in self.endpoints:
-            if endpoint.machine.name == name:
+            if endpoint.machine.name.strip() == name:
                 return endpoint
         return None
 
@@ -206,12 +206,16 @@ class SDNConnect(object):
         return
 
     def ignore_endpoint(self, endpoint):
-        endpoint.ignore = True
+        for ep in self.endpoints:
+            if ep.name == endpoint.name:
+                ep.ignore = True
         self.store_endpoints()
         return
 
     def clear_ignored_endpoint(self, endpoint):
-        endpoint.ignore = False
+        for ep in self.endpoints:
+            if ep.name == endpoint.name:
+                ep.ignore = False
         self.store_endpoints()
         return
 
@@ -267,6 +271,7 @@ class SDNConnect(object):
     def find_new_machines(self, machines):
         '''parse switch structure to find new machines added to network
         since last call'''
+        self.get_stored_endpoints()
         for machine in machines:
             h = Endpoint.make_hash(machine)
             ep = None

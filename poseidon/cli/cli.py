@@ -1,67 +1,16 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+The main entrypoint for the Poseidon shell.
+
+Created on 14 January 2019
+@author: Charlie Lewis
+"""
 import cmd
 
 from texttable import Texttable
 
-from poseidon.main import SDNConnect
-
-
-class Commands:
-
-    def what_is(self, args):
-        ''' what is a specific thing '''
-        return
-
-    def where_is(self, args):
-        ''' where topologically is a specific thing '''
-        return
-
-    def collect_on(self, args):
-        ''' collect on a specific thing '''
-        return
-
-    def remove_inactives(self, args):
-        ''' remove all inactive devices '''
-        return
-
-    def remove_ignored(self, args):
-        ''' remove all ignored devices '''
-        return
-
-    def ignore(self, args):
-        ''' ignore a specific thing '''
-        return
-
-    def show_ignored(self, args):
-        ''' show all things that are being ignored '''
-        endpoints = []
-        sdnc = SDNConnect()
-        sdnc.get_stored_endpoints()
-        for endpoint in sdnc.endpoints:
-            if endpoint.ignore:
-                endpoints.append(endpoint)
-        return endpoints
-
-    def clear_ignored(self, args):
-        ''' stop ignoring a specific thing '''
-        return
-
-    def remove(self, args):
-        ''' remove and forget about a specific thing until it's seen again '''
-        return
-
-    def show_state(self, args):
-        ''' show all devices that are in a specific state '''
-        endpoints = []
-        sdnc = SDNConnect()
-        sdnc.get_stored_endpoints()
-        for endpoint in sdnc.endpoints:
-            # TODO parse out args instead of all endpoints
-            endpoints.append(endpoint)
-        return endpoints
-
-    def show_devices(self, args):
-        ''' show all devices that are of a specific filter. i.e. windows, dev workstation, etc.'''
-        return
+from poseidon.cli.commands import Commands
 
 
 class PoseidonShell(cmd.Cmd):
@@ -77,6 +26,16 @@ class PoseidonShell(cmd.Cmd):
     ]
     collect_completions = [
         'on'
+    ]
+    show_completions = [
+        'all devices', 'active devices', 'inactive devices', 'known devices',
+        'unknown devices', 'mirroring devices', 'abnormal devices',
+        'shutdown devices', 'reinvestigating devices', 'queued devices',
+        'active directory controller devices', 'administrator server devices',
+        'administrator workstation devices', 'business workstation devices',
+        'developer workstation devices', 'gpu laptop devices',
+        'pki server devices', 'windows devices', 'mac devices',
+        'linux devices', 'ignored devices'
     ]
 
     @staticmethod
@@ -101,6 +60,9 @@ class PoseidonShell(cmd.Cmd):
     def complete_what(self, text, line, begidx, endidx):
         return PoseidonShell.completion(text, line, self.what_completions)
 
+    def complete_show(self, text, line, begidx, endidx):
+        return PoseidonShell.completion(text, line, self.show_completions)
+
     def do_where(self, arg):
         '''
         Find out where something is:
@@ -118,6 +80,86 @@ class PoseidonShell(cmd.Cmd):
         '''
         Commands().collect_on(arg)
 
+    def do_ignore(self, arg):
+        '''
+        Ignore something on the network:
+        IGNORE 10.0.0.1
+        IGNORE 18:EF:02:2D:49:00
+        IGNORE 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
+        '''
+        endpoints = Commands().ignore(arg)
+        matrix = []
+        for endpoint in endpoints:
+            vlan = endpoint.endpoint_data['tenant']
+            if vlan.startswith('VLAN'):
+                vlan.split('VLAN')[1]
+            # TODO add options to modify the columns
+            matrix.append([endpoint.machine.name.strip(),
+                           endpoint.endpoint_data['mac'],
+                           endpoint.endpoint_data['segment'],
+                           endpoint.endpoint_data['port'],
+                           vlan, endpoint.endpoint_data['ipv4'],
+                           endpoint.endpoint_data['ipv6']])
+        if len(matrix) > 0:
+            # TODO add options to maodify the sorted by key and the header options
+            matrix = sorted(matrix, key=lambda endpoint: endpoint[1])
+            matrix.insert(0, ['Name', 'MAC Address', 'Segment',
+                              'Port', 'VLAN', 'IPv4', 'IPv6'])
+            table = Texttable(max_width=0)
+            # make all the columns types be text
+            table.set_cols_dtype(['t']*7)
+            table.add_rows(matrix)
+            print('Ignored the following devices:')
+            print(table.draw())
+        else:
+            print('No results found for that query, no devices were ignored.')
+
+    def do_clear(self, arg):
+        '''
+        Stop ignoring something on the network:
+        CLEAR 10.0.0.1
+        CLEAR 18:EF:02:2D:49:00
+        CLEAR 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
+        CLEAR ALL IGNORED
+        '''
+        endpoints = Commands().clear_ignored(arg)
+        matrix = []
+        for endpoint in endpoints:
+            vlan = endpoint.endpoint_data['tenant']
+            if vlan.startswith('VLAN'):
+                vlan.split('VLAN')[1]
+            # TODO add options to modify the columns
+            matrix.append([endpoint.machine.name.strip(),
+                           endpoint.endpoint_data['mac'],
+                           endpoint.endpoint_data['segment'],
+                           endpoint.endpoint_data['port'],
+                           vlan, endpoint.endpoint_data['ipv4'],
+                           endpoint.endpoint_data['ipv6']])
+        if len(matrix) > 0:
+            # TODO add options to maodify the sorted by key and the header options
+            matrix = sorted(matrix, key=lambda endpoint: endpoint[1])
+            matrix.insert(0, ['Name', 'MAC Address', 'Segment',
+                              'Port', 'VLAN', 'IPv4', 'IPv6'])
+            table = Texttable(max_width=0)
+            # make all the columns types be text
+            table.set_cols_dtype(['t']*7)
+            table.add_rows(matrix)
+            print('Cleared the following devices that were being ignored:')
+            print(table.draw())
+        else:
+            print('No results found for that query, no devices were cleared.')
+
+    def do_remove(self, arg):
+        '''
+        Remove and forget about something on the network until it's seen again:
+        REMOVE 10.0.0.1
+        REMOVE 18:EF:02:2D:49:00
+        REMOVE 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
+        REMOVE IGNORED
+        REMOVE INACTIVES
+        '''
+        pass
+
     def do_show(self, arg):
         '''
         Show things on the network based on filters:
@@ -126,28 +168,34 @@ class PoseidonShell(cmd.Cmd):
         SHOW WINDOWS DEVICES
         SHOW ABNORMAL DEVICES
         '''
-        # TODO check if it should call show_state or show_devices
-        endpoints = Commands().show_state(arg)
+        endpoints = Commands().show_devices(arg)
         matrix = []
         for endpoint in endpoints:
             vlan = endpoint.endpoint_data['tenant']
             if vlan.startswith('VLAN'):
                 vlan.split('VLAN')[1]
-            matrix.append([endpoint.machine.name, endpoint.state,
+            # TODO add options to modify the columns
+            matrix.append([endpoint.machine.name.strip(), endpoint.state,
                            endpoint.endpoint_data['mac'],
                            endpoint.endpoint_data['segment'],
                            endpoint.endpoint_data['port'],
                            vlan, endpoint.endpoint_data['ipv4'],
                            endpoint.endpoint_data['ipv6'],
                            endpoint.p_next_state])
-        matrix = sorted(matrix, key=lambda endpoint: endpoint[2])
-        matrix.insert(0, ['Name', 'State', 'MAC Address', 'Segment',
-                          'Port', 'VLAN', 'IPv4', 'IPv6', 'Next State'])
-        table = Texttable(max_width=0)
-        # make all the columns types be text
-        table.set_cols_dtype(['t']*9)
-        table.add_rows(matrix)
-        print(table.draw())
+        if len(matrix) > 0:
+            # TODO add options to maodify the sorted by key and the header options
+            matrix = sorted(matrix, key=lambda endpoint: endpoint[2])
+            matrix.insert(0, ['Name', 'State', 'MAC Address', 'Segment',
+                              'Port', 'VLAN', 'IPv4', 'IPv6', 'Next State'])
+            table = Texttable(max_width=0)
+            # make all the columns types be text
+            table.set_cols_dtype(['t']*9)
+            table.add_rows(matrix)
+            print(table.draw())
+        elif not arg in self.show_completions:
+            print('Invalid query, try using TAB to see available options')
+        else:
+            print('No results found for that query.')
 
     def do_quit(self, arg):
         'Stop recording and exit:  QUIT'
