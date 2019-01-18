@@ -271,6 +271,7 @@ class SDNConnect(object):
     def find_new_machines(self, machines):
         '''parse switch structure to find new machines added to network
         since last call'''
+        self.get_stored_endpoints()
         for machine in machines:
             h = Endpoint.make_hash(machine)
             ep = None
