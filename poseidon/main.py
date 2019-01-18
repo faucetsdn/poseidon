@@ -206,12 +206,16 @@ class SDNConnect(object):
         return
 
     def ignore_endpoint(self, endpoint):
-        endpoint.ignore = True
+        for ep in self.endpoints:
+            if ep.name == endpoint.name:
+                ep.ignore = True
         self.store_endpoints()
         return
 
     def clear_ignored_endpoint(self, endpoint):
-        endpoint.ignore = False
+        for ep in self.endpoints:
+            if ep.name == endpoint.name:
+                ep.ignore = False
         self.store_endpoints()
         return
 
