@@ -62,11 +62,21 @@ class Commands:
         show all devices that are of a specific filter. i.e. windows,
         developer workstation, abnormal, mirroring, etc.
         '''
-        print('args: {0}'.format(args.split()))
+        state = None
+        type_filter = None
+        query = args.rsplit(' ', 1)[0]
+        if query in self.states:
+            state = query
+        else:
+            type_filter = query
         endpoints = []
         sdnc = SDNConnect()
         sdnc.get_stored_endpoints()
         for endpoint in sdnc.endpoints:
-            # TODO parse out args instead of all endpoints
-            endpoints.append(endpoint)
+            if state:
+                if endpoint.state == state:
+                    endpoints.append(endpoint)
+            elif type_filter:
+                # TODO
+                pass
         return endpoints

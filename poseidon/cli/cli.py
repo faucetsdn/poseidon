@@ -100,14 +100,17 @@ class PoseidonShell(cmd.Cmd):
                            vlan, endpoint.endpoint_data['ipv4'],
                            endpoint.endpoint_data['ipv6'],
                            endpoint.p_next_state])
-        matrix = sorted(matrix, key=lambda endpoint: endpoint[2])
-        matrix.insert(0, ['Name', 'State', 'MAC Address', 'Segment',
-                          'Port', 'VLAN', 'IPv4', 'IPv6', 'Next State'])
-        table = Texttable(max_width=0)
-        # make all the columns types be text
-        table.set_cols_dtype(['t']*9)
-        table.add_rows(matrix)
-        print(table.draw())
+        if len(matrix) > 0:
+            matrix = sorted(matrix, key=lambda endpoint: endpoint[2])
+            matrix.insert(0, ['Name', 'State', 'MAC Address', 'Segment',
+                              'Port', 'VLAN', 'IPv4', 'IPv6', 'Next State'])
+            table = Texttable(max_width=0)
+            # make all the columns types be text
+            table.set_cols_dtype(['t']*9)
+            table.add_rows(matrix)
+            print(table.draw())
+        else:
+            print('No results found for that query.')
 
     def do_quit(self, arg):
         'Stop recording and exit:  QUIT'
