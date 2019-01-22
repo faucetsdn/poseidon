@@ -29,11 +29,19 @@ class Commands:
 
     def remove_inactives(self, args):
         ''' remove all inactive devices '''
-        return
+        eps = []
+        sdnc = SDNConnect()
+        sdnc.get_stored_endpoints()
+        eps = sdnc.remove_inactive_endpoints()
+        return eps
 
     def remove_ignored(self, args):
         ''' remove all ignored devices '''
-        return
+        eps = []
+        sdnc = SDNConnect()
+        sdnc.get_stored_endpoints()
+        eps = sdnc.remove_ignored_endpoints()
+        return eps
 
     def ignore(self, args):
         ''' ignore a specific thing '''
@@ -41,10 +49,16 @@ class Commands:
         sdnc = SDNConnect()
         sdnc.get_stored_endpoints()
         device = args.rsplit(' ', 1)[0]
-        eps.append(sdnc.endpoint_by_name(device))
-        eps.append(sdnc.endpoint_by_hash(device))
-        eps += sdnc.endpoints_by_ip(device)
-        eps += sdnc.endpoints_by_mac(device)
+        if device == 'inactive':
+            for endpoint in sdnc.endpoints:
+                if endpoint.state == 'inactive':
+                    eps.append(endpoint)
+        else:
+            eps.append(sdnc.endpoint_by_name(device))
+            eps.append(sdnc.endpoint_by_hash(device))
+            eps += sdnc.endpoints_by_ip(device)
+            eps += sdnc.endpoints_by_mac(device)
+
         endpoints = []
         for endpoint in eps:
             if endpoint:
@@ -58,10 +72,16 @@ class Commands:
         sdnc = SDNConnect()
         sdnc.get_stored_endpoints()
         device = args.rsplit(' ', 1)[0]
-        eps.append(sdnc.endpoint_by_name(device))
-        eps.append(sdnc.endpoint_by_hash(device))
-        eps += sdnc.endpoints_by_ip(device)
-        eps += sdnc.endpoints_by_mac(device)
+        if device == 'ignored':
+            for endpoint in sdnc.endpoints:
+                if endpoint.ignore:
+                    eps.append(endpoint)
+        else:
+            eps.append(sdnc.endpoint_by_name(device))
+            eps.append(sdnc.endpoint_by_hash(device))
+            eps += sdnc.endpoints_by_ip(device)
+            eps += sdnc.endpoints_by_mac(device)
+
         endpoints = []
         for endpoint in eps:
             if endpoint:
@@ -71,7 +91,20 @@ class Commands:
 
     def remove(self, args):
         ''' remove and forget about a specific thing until it's seen again '''
-        return
+        eps = []
+        sdnc = SDNConnect()
+        sdnc.get_stored_endpoints()
+        device = args.rsplit(' ', 1)[0]
+        eps.append(sdnc.endpoint_by_name(device))
+        eps.append(sdnc.endpoint_by_hash(device))
+        eps += sdnc.endpoints_by_ip(device)
+        eps += sdnc.endpoints_by_mac(device)
+        endpoints = []
+        for endpoint in eps:
+            if endpoint:
+                sdnc.remove_endpoint(endpoint)
+                endpoints.append(endpoint)
+        return endpoints
 
     def show_devices(self, args):
         '''

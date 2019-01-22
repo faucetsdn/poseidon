@@ -88,6 +88,7 @@ def schedule_job_reinvestigation(func):
                         'Unable to mirror the endpoint: {0}'.format(chosen.name))
         return
 
+    func.s.get_stored_endpoints()
     candidates = []
     for endpoint in func.s.endpoints:
         # queued endpoints have priority
@@ -101,6 +102,7 @@ def schedule_job_reinvestigation(func):
         if len(candidates) > 0:
             random.shuffle(candidates)
     trigger_reinvestigation(candidates)
+    func.s.store_endpoints()
 
 
 def schedule_thread_worker(schedule):
@@ -201,7 +203,14 @@ class SDNConnect(object):
             if endpoint.state == 'inactive':
                 remove_list.append(endpoint)
         for endpoint in remove_list:
-            self.endpoint.remove(endpoint)
+            self.endpoints.remove(endpoint)
+        self.store_endpoints()
+        return remove_list
+
+    def ignore_inactive_endpoints(self):
+        for ep in self.endpoints:
+            if ep.state == 'ignore':
+                ep.ignore = True
         self.store_endpoints()
         return
 
@@ -230,9 +239,9 @@ class SDNConnect(object):
             if endpoint.ignore:
                 remove_list.append(endpoint)
         for endpoint in remove_list:
-            self.endpoint.remove(endpoint)
+            self.endpoints.remove(endpoint)
         self.store_endpoints()
-        return
+        return remove_list
 
     def check_endpoints(self, messages=None):
         retval = {}
