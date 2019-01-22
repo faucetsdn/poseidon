@@ -203,7 +203,7 @@ class SDNConnect(object):
             if endpoint.state == 'inactive':
                 remove_list.append(endpoint)
         for endpoint in remove_list:
-            self.endpoint.remove(endpoint)
+            self.endpoints.remove(endpoint)
         self.store_endpoints()
         return remove_list
 
@@ -239,7 +239,7 @@ class SDNConnect(object):
             if endpoint.ignore:
                 remove_list.append(endpoint)
         for endpoint in remove_list:
-            self.endpoint.remove(endpoint)
+            self.endpoints.remove(endpoint)
         self.store_endpoints()
         return remove_list
 
