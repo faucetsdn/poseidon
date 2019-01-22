@@ -29,25 +29,18 @@ class Commands:
 
     def remove_inactives(self, args):
         ''' remove all inactive devices '''
-        eps = []
         sdnc = SDNConnect()
-        sdnc.get_stored_endpoints()
-        eps = sdnc.remove_inactive_endpoints()
-        return eps
+        return sdnc.remove_inactive_endpoints()
 
     def remove_ignored(self, args):
         ''' remove all ignored devices '''
-        eps = []
         sdnc = SDNConnect()
-        sdnc.get_stored_endpoints()
-        eps = sdnc.remove_ignored_endpoints()
-        return eps
+        return sdnc.remove_ignored_endpoints()
 
     def ignore(self, args):
         ''' ignore a specific thing '''
         eps = []
         sdnc = SDNConnect()
-        sdnc.get_stored_endpoints()
         device = args.rsplit(' ', 1)[0]
         if device == 'inactive':
             for endpoint in sdnc.endpoints:
@@ -70,7 +63,6 @@ class Commands:
         ''' stop ignoring a specific thing '''
         eps = []
         sdnc = SDNConnect()
-        sdnc.get_stored_endpoints()
         device = args.rsplit(' ', 1)[0]
         if device == 'ignored':
             for endpoint in sdnc.endpoints:
@@ -93,7 +85,6 @@ class Commands:
         ''' remove and forget about a specific thing until it's seen again '''
         eps = []
         sdnc = SDNConnect()
-        sdnc.get_stored_endpoints()
         device = args.rsplit(' ', 1)[0]
         eps.append(sdnc.endpoint_by_name(device))
         eps.append(sdnc.endpoint_by_hash(device))
@@ -121,18 +112,5 @@ class Commands:
             all_devices = True
         else:
             type_filter = query
-        endpoints = []
         sdnc = SDNConnect()
-        sdnc.get_stored_endpoints()
-        for endpoint in sdnc.endpoints:
-            if all_devices:
-                endpoints.append(endpoint)
-            elif state:
-                if endpoint.state == state:
-                    endpoints.append(endpoint)
-            elif type_filter:
-                if type_filter == 'ignored':
-                    if endpoint.ignore:
-                        endpoints.append(endpoint)
-                # TODO
-        return endpoints
+        return sdnc.show_endpoints(state, type_filter, all_devices)

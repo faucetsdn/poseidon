@@ -12,7 +12,7 @@ RUN apk upgrade --no-cache && \
     py3-paramiko \
     tini \
     yaml-dev && \
-    pip3 install --no-cache-dir --upgrade pip && \
+    pip3 install --no-cache-dir --upgrade pip==18.1 && \
     pip3 install --no-cache-dir -r requirements.txt && \
     pip3 install --no-cache-dir -r /healthcheck/requirements.txt && \
     apk del build-base \
