@@ -406,6 +406,8 @@ class Monitor(object):
                     endpoint.inactive()
                     endpoint.p_prev_states.append(
                         (endpoint.state, int(time.time())))
+        # store changes to state
+        self.s.store_endpoints()
 
         # schedule periodic scan of endpoints thread
         self.schedule.every(self.controller['scan_frequency']).seconds.do(
