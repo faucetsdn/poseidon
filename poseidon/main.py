@@ -168,18 +168,21 @@ class SDNConnect(object):
                     self.controller))
 
     def endpoint_by_name(self, name):
+        self.get_stored_endpoints()
         for endpoint in self.endpoints:
             if endpoint.machine.name.strip() == name:
                 return endpoint
         return None
 
     def endpoint_by_hash(self, hash_id):
+        self.get_stored_endpoints()
         for endpoint in self.endpoints:
             if endpoint.name == hash_id:
                 return endpoint
         return None
 
     def endpoints_by_ip(self, ip):
+        self.get_stored_endpoints()
         endpoints = []
         for endpoint in self.endpoints:
             if ip in [endpoint.endpoint_data['ipv4'], endpoint.endpoint_data['ipv6']]:
@@ -187,6 +190,7 @@ class SDNConnect(object):
         return endpoints
 
     def endpoints_by_mac(self, mac):
+        self.get_stored_endpoints()
         endpoints = []
         for endpoint in self.endpoints:
             if mac == endpoint.endpoint_data['mac']:
@@ -198,6 +202,7 @@ class SDNConnect(object):
         return
 
     def remove_inactive_endpoints(self):
+        self.get_stored_endpoints()
         remove_list = []
         for endpoint in self.endpoints:
             if endpoint.state == 'inactive':
@@ -208,6 +213,7 @@ class SDNConnect(object):
         return remove_list
 
     def ignore_inactive_endpoints(self):
+        self.get_stored_endpoints()
         for ep in self.endpoints:
             if ep.state == 'ignore':
                 ep.ignore = True
@@ -215,6 +221,7 @@ class SDNConnect(object):
         return
 
     def ignore_endpoint(self, endpoint):
+        self.get_stored_endpoints()
         for ep in self.endpoints:
             if ep.name == endpoint.name:
                 ep.ignore = True
@@ -222,6 +229,7 @@ class SDNConnect(object):
         return
 
     def clear_ignored_endpoint(self, endpoint):
+        self.get_stored_endpoints()
         for ep in self.endpoints:
             if ep.name == endpoint.name:
                 ep.ignore = False
@@ -229,11 +237,14 @@ class SDNConnect(object):
         return
 
     def remove_endpoint(self, endpoint):
-        self.endpoints.remove(endpoint)
+        self.get_stored_endpoints()
+        if endpoint in self.endpoints:
+            self.endpoints.remove(endpoint)
         self.store_endpoints()
         return
 
     def remove_ignored_endpoints(self):
+        self.get_stored_endpoints()
         remove_list = []
         for endpoint in self.endpoints:
             if endpoint.ignore:
@@ -242,6 +253,21 @@ class SDNConnect(object):
             self.endpoints.remove(endpoint)
         self.store_endpoints()
         return remove_list
+
+    def show_endpoints(self, state, type_filter, all_devices):
+        endpoints = []
+        for endpoint in self.endpoints:
+            if all_devices:
+                endpoints.append(endpoint)
+            elif state:
+                if endpoint.state == state:
+                    endpoints.append(endpoint)
+            elif type_filter:
+                if type_filter == 'ignored':
+                    if endpoint.ignore:
+                        endpoints.append(endpoint)
+                # TODO
+        return endpoints
 
     def check_endpoints(self, messages=None):
         retval = {}
