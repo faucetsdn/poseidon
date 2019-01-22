@@ -49,7 +49,7 @@ class Commands:
         sdnc = SDNConnect()
         sdnc.get_stored_endpoints()
         device = args.rsplit(' ', 1)[0]
-        if device == 'devices':
+        if device == 'inactive':
             for endpoint in sdnc.endpoints:
                 if endpoint.state == 'inactive':
                     eps.append(endpoint)
@@ -72,7 +72,7 @@ class Commands:
         sdnc = SDNConnect()
         sdnc.get_stored_endpoints()
         device = args.rsplit(' ', 1)[0]
-        if device == 'devices':
+        if device == 'ignored':
             for endpoint in sdnc.endpoints:
                 if endpoint.ignore:
                     eps.append(endpoint)
