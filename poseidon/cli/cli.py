@@ -27,6 +27,16 @@ class PoseidonShell(cmd.Cmd):
     collect_completions = [
         'on'
     ]
+    clear_completions = [
+        'ignored devices'
+    ]
+    ignore_completions = [
+        'inactive devices'
+    ]
+    remove_completions = [
+        'ignored devices',
+        'inactive devices'
+    ]
     show_completions = [
         'all devices', 'active devices', 'inactive devices', 'known devices',
         'unknown devices', 'mirroring devices', 'abnormal devices',
@@ -48,6 +58,21 @@ class PoseidonShell(cmd.Cmd):
         offs = len(mline) - len(text)
         return [s[offs:] for s in completions if s.lower().startswith(mline.lower())]
 
+    def complete_what(self, text, line, begidx, endidx):
+        return PoseidonShell.completion(text, line, self.what_completions)
+
+    def complete_show(self, text, line, begidx, endidx):
+        return PoseidonShell.completion(text, line, self.show_completions)
+
+    def complete_clear(self, text, line, begidx, endidx):
+        return PoseidonShell.completion(text, line, self.clear_completions)
+
+    def complete_ignore(self, text, line, begidx, endidx):
+        return PoseidonShell.completion(text, line, self.ignore_completions)
+
+    def complete_remove(self, text, line, begidx, endidx):
+        return PoseidonShell.completion(text, line, self.remove_completions)
+
     def do_what(self, arg):
         '''
         Find out what something is:
@@ -56,12 +81,6 @@ class PoseidonShell(cmd.Cmd):
         WHAT IS 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
         '''
         Commands().what_is(arg)
-
-    def complete_what(self, text, line, begidx, endidx):
-        return PoseidonShell.completion(text, line, self.what_completions)
-
-    def complete_show(self, text, line, begidx, endidx):
-        return PoseidonShell.completion(text, line, self.show_completions)
 
     def do_where(self, arg):
         '''
@@ -86,6 +105,7 @@ class PoseidonShell(cmd.Cmd):
         IGNORE 10.0.0.1
         IGNORE 18:EF:02:2D:49:00
         IGNORE 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
+        IGNORE INACTIVE DEVICES
         '''
         endpoints = Commands().ignore(arg)
         matrix = []
@@ -120,7 +140,7 @@ class PoseidonShell(cmd.Cmd):
         CLEAR 10.0.0.1
         CLEAR 18:EF:02:2D:49:00
         CLEAR 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
-        CLEAR ALL IGNORED
+        CLEAR IGNORED DEVICES
         '''
         endpoints = Commands().clear_ignored(arg)
         matrix = []
@@ -155,10 +175,41 @@ class PoseidonShell(cmd.Cmd):
         REMOVE 10.0.0.1
         REMOVE 18:EF:02:2D:49:00
         REMOVE 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
-        REMOVE IGNORED
-        REMOVE INACTIVES
+        REMOVE IGNORED DEVICES
+        REMOVE INACTIVE DEVICES
         '''
-        pass
+        endpoints = []
+        if arg.startswith('ignored'):
+            endpoints = Commands().remove_ignored(arg)
+        elif arg.startswith('inactive'):
+            endpoints = Commands().remove_inactives(arg)
+        else:
+            endpoints = Commands().remove(arg)
+        matrix = []
+        for endpoint in endpoints:
+            vlan = endpoint.endpoint_data['tenant']
+            if vlan.startswith('VLAN'):
+                vlan.split('VLAN')[1]
+            # TODO add options to modify the columns
+            matrix.append([endpoint.machine.name.strip(),
+                           endpoint.endpoint_data['mac'],
+                           endpoint.endpoint_data['segment'],
+                           endpoint.endpoint_data['port'],
+                           vlan, endpoint.endpoint_data['ipv4'],
+                           endpoint.endpoint_data['ipv6']])
+        if len(matrix) > 0:
+            # TODO add options to maodify the sorted by key and the header options
+            matrix = sorted(matrix, key=lambda endpoint: endpoint[1])
+            matrix.insert(0, ['Name', 'MAC Address', 'Segment',
+                              'Port', 'VLAN', 'IPv4', 'IPv6'])
+            table = Texttable(max_width=0)
+            # make all the columns types be text
+            table.set_cols_dtype(['t']*7)
+            table.add_rows(matrix)
+            print('Removed the following devices:')
+            print(table.draw())
+        else:
+            print('No results found for that query, no devices were removed.')
 
     def do_show(self, arg):
         '''
