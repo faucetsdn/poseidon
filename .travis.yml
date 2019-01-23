@@ -1,6 +1,4 @@
-sudo: required
-dist: trusty
-group: edge
+dist: xenial
 
 services:
   - redis
