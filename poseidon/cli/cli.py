@@ -109,8 +109,9 @@ class PoseidonShell(cmd.Cmd):
         WHAT IS 18:EF:02:2D:49:00
         WHAT IS 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
         '''
-        # TODO
-        Commands().what_is(arg)
+        endpoints = Commands().what_is(arg)
+        for endpoint in endpoints:
+            print('Endpoint: {0} {1}'.format(endpoint[0], endpoint[1]))
 
     @staticmethod
     def do_where(arg):
@@ -120,8 +121,9 @@ class PoseidonShell(cmd.Cmd):
         WHERE IS 18:EF:02:2D:49:00
         WHERE IS 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
         '''
-        # TODO
-        Commands().where_is(arg)
+        endpoints = Commands().where_is(arg)
+        for endpoint in endpoints:
+            print('Endpoint: {0} {1}'.format(endpoint[0], endpoint[1]))
 
     @staticmethod
     def do_collect(arg):
@@ -130,8 +132,9 @@ class PoseidonShell(cmd.Cmd):
         COLLECT ON 10.0.0.1 FOR 300 SECONDS
         COLLECT ON 18:EF:02:2D:49:00 FOR 5 MINUTES
         '''
-        # TODO
-        Commands().collect_on(arg)
+        endpoints = Commands().collect_on(arg)
+        for endpoint in endpoints:
+            print('Endpoint: {0}'.format(endpoint[0]))
 
     @staticmethod
     def do_ignore(arg):
@@ -225,7 +228,7 @@ class PoseidonShell(cmd.Cmd):
         CHANGE 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293 TO SHUTDOWN
         '''
         # TODO
-        Commands().where_is(arg)
+        return
 
     def do_quit(self, arg):
         'Stop recording and exit:  QUIT'

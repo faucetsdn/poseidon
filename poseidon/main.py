@@ -198,6 +198,7 @@ class SDNConnect(object):
         return endpoints
 
     def collect_on(self, endpoint):
+        self.get_stored_endpoints()
         # TODO
         return
 
