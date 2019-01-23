@@ -18,6 +18,8 @@ class PoseidonShell(cmd.Cmd):
     prompt = '\033[1;32mposeidon$ \033[1;m'
     file = None
 
+    default_fields = ['Name', 'MAC Address',
+                      'Switch', 'Port', 'VLAN', 'IPv4', 'IPv6']
     what_completions = [
         'is'
     ]
@@ -59,27 +61,71 @@ class PoseidonShell(cmd.Cmd):
         return [s[offs:] for s in completions if s.lower().startswith(mline.lower())]
 
     @staticmethod
-    def display_results(endpoints, fields, sortby):
+    def _get_name(endpoint):
+        return endpoint.machine.name.strip()
+
+    @staticmethod
+    def _get_mac(endpoint):
+        return endpoint.endpoint_data['mac']
+
+    @staticmethod
+    def _get_switch(endpoint):
+        return endpoint.endpoint_data['segment']
+
+    @staticmethod
+    def _get_port(endpoint):
+        return endpoint.endpoint_data['port']
+
+    @staticmethod
+    def _get_vlan(endpoint):
+        vlan = endpoint.endpoint_data['tenant']
+        return vlan.split('VLAN')[1] if vlan.startswith('VLAN') else vlan
+
+    @staticmethod
+    def _get_ipv4(endpoint):
+        return endpoint.endpoint_data['ipv4']
+
+    @staticmethod
+    def _get_ipv6(endpoint):
+        return endpoint.endpoint_data['ipv6']
+
+    @staticmethod
+    def _get_state(endpoint):
+        return endpoint.state
+
+    @staticmethod
+    def _get_next_state(endpoint):
+        return endpoint.p_next_state
+
+    @staticmethod
+    def _get_prev_states(endpoint):
+        return endpoint.p_prev_states
+
+    @staticmethod
+    def display_results(endpoints, fields, sort_by):
         matrix = []
+        fields_lookup = {'Name': PoseidonShell._get_name,
+                         'MAC Address': PoseidonShell._get_mac,
+                         'Switch': PoseidonShell._get_switch,
+                         'Port': PoseidonShell._get_port,
+                         'VLAN': PoseidonShell._get_vlan,
+                         'IPv4': PoseidonShell._get_ipv4,
+                         'IPv6': PoseidonShell._get_ipv6,
+                         'State': PoseidonShell._get_state,
+                         'Next State': PoseidonShell._get_next_state,
+                         'Previous States': PoseidonShell._get_prev_states}
         for endpoint in endpoints:
-            vlan = endpoint.endpoint_data['tenant']
-            if vlan.startswith('VLAN'):
-                vlan = vlan.split('VLAN')[1]
-            # TODO add options to modify the columns
-            matrix.append([endpoint.machine.name.strip(),
-                           endpoint.endpoint_data['mac'],
-                           endpoint.endpoint_data['segment'],
-                           endpoint.endpoint_data['port'],
-                           vlan, endpoint.endpoint_data['ipv4'],
-                           endpoint.endpoint_data['ipv6']])
+            record = []
+            for field in fields:
+                record.append(fields_lookup[field](endpoint))
+            matrix.append(record)
         if len(matrix) > 0:
-            # TODO add options to maodify the sorted by key and the header options
-            matrix = sorted(matrix, key=lambda endpoint: endpoint[1])
-            matrix.insert(0, ['Name', 'MAC Address', 'Segment',
-                              'Port', 'VLAN', 'IPv4', 'IPv6'])
+            matrix = sorted(matrix, key=lambda endpoint: endpoint[sort_by])
+            # set the header
+            matrix.insert(0, fields)
             table = Texttable(max_width=0)
-            # make all the columns types be text
-            table.set_cols_dtype(['t']*7)
+            # make all the column types be text
+            table.set_cols_dtype(['t']*len(fields))
             table.add_rows(matrix)
             print(table.draw())
         else:
@@ -101,43 +147,39 @@ class PoseidonShell(cmd.Cmd):
     def complete_remove(self, text, line, begidx, endidx):
         return PoseidonShell.completion(text, line, self.remove_completions)
 
-    @staticmethod
-    def do_what(arg):
+    def do_what(self, arg):
         '''
         Find out what something is:
         WHAT IS 10.0.0.1
         WHAT IS 18:EF:02:2D:49:00
         WHAT IS 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
         '''
-        endpoints = Commands().what_is(arg)
-        for endpoint in endpoints:
-            print('Endpoint: {0} {1}'.format(endpoint[0], endpoint[1]))
+        # TODO print more info
+        PoseidonShell.display_results(Commands().what_is(
+            arg), self.default_fields, 0)
 
-    @staticmethod
-    def do_where(arg):
+    def do_where(self, arg):
         '''
         Find out where something is:
         WHERE IS 10.0.0.1
         WHERE IS 18:EF:02:2D:49:00
         WHERE IS 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
         '''
-        endpoints = Commands().where_is(arg)
-        for endpoint in endpoints:
-            print('Endpoint: {0} {1}'.format(endpoint[0], endpoint[1]))
+        # TODO print where info specifically
+        PoseidonShell.display_results(
+            Commands().where_is(arg), self.default_fields, 0)
 
-    @staticmethod
-    def do_collect(arg):
+    def do_collect(self, arg):
         '''
         Collect on something on the network:
         COLLECT ON 10.0.0.1 FOR 300 SECONDS
         COLLECT ON 18:EF:02:2D:49:00 FOR 5 MINUTES
         '''
-        endpoints = Commands().collect_on(arg)
-        for endpoint in endpoints:
-            print('Endpoint: {0}'.format(endpoint[0]))
+        print('Collecting on the following devices:')
+        PoseidonShell.display_results(
+            Commands().collect_on(arg), self.default_fields, 0)
 
-    @staticmethod
-    def do_ignore(arg):
+    def do_ignore(self, arg):
         '''
         Ignore something on the network:
         IGNORE 10.0.0.1
@@ -146,10 +188,10 @@ class PoseidonShell(cmd.Cmd):
         IGNORE INACTIVE DEVICES
         '''
         print('Ignored the following devices:')
-        PoseidonShell.display_results(Commands().ignore(arg), None, None)
+        PoseidonShell.display_results(
+            Commands().ignore(arg), self.default_fields, 0)
 
-    @staticmethod
-    def do_clear(arg):
+    def do_clear(self, arg):
         '''
         Stop ignoring something on the network:
         CLEAR 10.0.0.1
@@ -159,10 +201,9 @@ class PoseidonShell(cmd.Cmd):
         '''
         print('Cleared the following devices that were being ignored:')
         PoseidonShell.display_results(
-            Commands().clear_ignored(arg), None, None)
+            Commands().clear_ignored(arg), self.default_fields, 0)
 
-    @staticmethod
-    def do_remove(arg):
+    def do_remove(self, arg):
         '''
         Remove and forget about something on the network until it's seen again:
         REMOVE 10.0.0.1
@@ -179,7 +220,7 @@ class PoseidonShell(cmd.Cmd):
         else:
             endpoints = Commands().remove(arg)
         print('Removed the following devices:')
-        PoseidonShell.display_results(endpoints, None, None)
+        PoseidonShell.display_results(endpoints, self.default_fields, 0)
 
     def do_show(self, arg):
         '''
@@ -189,34 +230,8 @@ class PoseidonShell(cmd.Cmd):
         SHOW WINDOWS DEVICES
         SHOW ABNORMAL DEVICES
         '''
-        endpoints = Commands().show_devices(arg)
-        matrix = []
-        for endpoint in endpoints:
-            vlan = endpoint.endpoint_data['tenant']
-            if vlan.startswith('VLAN'):
-                vlan = vlan.split('VLAN')[1]
-            # TODO add options to modify the columns
-            matrix.append([endpoint.machine.name.strip(), endpoint.state,
-                           endpoint.endpoint_data['mac'],
-                           endpoint.endpoint_data['segment'],
-                           endpoint.endpoint_data['port'],
-                           vlan, endpoint.endpoint_data['ipv4'],
-                           endpoint.endpoint_data['ipv6'],
-                           endpoint.p_next_state])
-        if len(matrix) > 0:
-            # TODO add options to maodify the sorted by key and the header options
-            matrix = sorted(matrix, key=lambda endpoint: endpoint[2])
-            matrix.insert(0, ['Name', 'State', 'MAC Address', 'Segment',
-                              'Port', 'VLAN', 'IPv4', 'IPv6', 'Next State'])
-            table = Texttable(max_width=0)
-            # make all the columns types be text
-            table.set_cols_dtype(['t']*9)
-            table.add_rows(matrix)
-            print(table.draw())
-        elif not arg in self.show_completions:
-            print('Invalid query, try using TAB to see available options')
-        else:
-            print('No results found for that query.')
+        PoseidonShell.display_results(Commands().show_devices(
+            arg), self.default_fields + ['State', 'Next State'], 0)
 
     @staticmethod
     def do_change(arg):
