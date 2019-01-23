@@ -101,7 +101,8 @@ class PoseidonShell(cmd.Cmd):
     def complete_remove(self, text, line, begidx, endidx):
         return PoseidonShell.completion(text, line, self.remove_completions)
 
-    def do_what(self, arg):
+    @staticmethod
+    def do_what(arg):
         '''
         Find out what something is:
         WHAT IS 10.0.0.1
@@ -111,7 +112,8 @@ class PoseidonShell(cmd.Cmd):
         # TODO
         Commands().what_is(arg)
 
-    def do_where(self, arg):
+    @staticmethod
+    def do_where(arg):
         '''
         Find out where something is:
         WHERE IS 10.0.0.1
@@ -156,7 +158,8 @@ class PoseidonShell(cmd.Cmd):
         PoseidonShell.display_results(
             Commands().clear_ignored(arg), None, None)
 
-    def do_remove(self, arg):
+    @staticmethod
+    def do_remove(arg):
         '''
         Remove and forget about something on the network until it's seen again:
         REMOVE 10.0.0.1
@@ -212,7 +215,8 @@ class PoseidonShell(cmd.Cmd):
         else:
             print('No results found for that query.')
 
-    def do_change(self, arg):
+    @staticmethod
+    def do_change(arg):
         '''
         Change state of things on the network:
         CHANGE 10.0.0.1 TO INACTIVE
