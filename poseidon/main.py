@@ -255,6 +255,7 @@ class SDNConnect(object):
         return remove_list
 
     def show_endpoints(self, state, type_filter, all_devices):
+        self.get_stored_endpoints()
         endpoints = []
         for endpoint in self.endpoints:
             if all_devices:
