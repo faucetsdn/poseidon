@@ -28,7 +28,8 @@ class Commands:
 
     def what_is(self, args):
         ''' what is a specific thing '''
-        endpoints = self._get_endpoints(args, -1)
+        endpoints = []
+        eps = self._get_endpoints(args, -1)
         for endpoint in eps:
             if endpoint:
                 endpoints.append(endpoint)
@@ -36,7 +37,8 @@ class Commands:
 
     def where_is(self, args):
         ''' where topologically is a specific thing '''
-        endpoints = self._get_endpoints(args, -1)
+        endpoints = []
+        eps = self._get_endpoints(args, -1)
         for endpoint in eps:
             if endpoint:
                 endpoints.append(endpoint)
@@ -44,7 +46,8 @@ class Commands:
 
     def collect_on(self, args):
         ''' collect on a specific thing '''
-        endpoints = self._get_endpoints(args, -1)
+        endpoints = []
+        eps = self._get_endpoints(args, -1)
         for endpoint in eps:
             if endpoint:
                 self.sdnc.collect_on(endpoint)
@@ -103,7 +106,8 @@ class Commands:
 
     def remove(self, args):
         ''' remove and forget about a specific thing until it's seen again '''
-        endpoints = self._get_endpoints(args, 0)
+        endpoints = []
+        eps = self._get_endpoints(args, 0)
         for endpoint in eps:
             if endpoint:
                 self.sdnc.remove_endpoint(endpoint)
