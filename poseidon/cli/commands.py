@@ -16,45 +16,38 @@ class Commands:
                        'mirroring', 'abnormal', 'shutdown', 'reinvestigating', 'queued']
         self.sdnc = SDNConnect()
 
-    def what_is(self, args):
-        ''' what is a specific thing '''
+    def _get_endpoints(self, args, idx):
+        ''' get endpoints that match '''
         eps = []
-        device = args.rsplit(' ', 1)[-1]
+        device = args.rsplit(' ', 1)[idx]
         eps.append(self.sdnc.endpoint_by_name(device))
         eps.append(self.sdnc.endpoint_by_hash(device))
         eps += self.sdnc.endpoints_by_ip(device)
         eps += self.sdnc.endpoints_by_mac(device)
+        return eps
+
+    def what_is(self, args):
+        ''' what is a specific thing '''
         endpoints = []
+        eps = self._get_endpoints(args, -1)
         for endpoint in eps:
             if endpoint:
-                info = self.sdnc.what_is(endpoint)
-                endpoints.append((endpoint, info))
+                endpoints.append(endpoint)
         return endpoints
 
     def where_is(self, args):
         ''' where topologically is a specific thing '''
-        eps = []
-        device = args.rsplit(' ', 1)[-1]
-        eps.append(self.sdnc.endpoint_by_name(device))
-        eps.append(self.sdnc.endpoint_by_hash(device))
-        eps += self.sdnc.endpoints_by_ip(device)
-        eps += self.sdnc.endpoints_by_mac(device)
         endpoints = []
+        eps = self._get_endpoints(args, -1)
         for endpoint in eps:
             if endpoint:
-                info = self.sdnc.where_is(endpoint)
-                endpoints.append((endpoint, info))
+                endpoints.append(endpoint)
         return endpoints
 
     def collect_on(self, args):
         ''' collect on a specific thing '''
-        eps = []
-        device = args.rsplit(' ', 1)[-1]
-        eps.append(self.sdnc.endpoint_by_name(device))
-        eps.append(self.sdnc.endpoint_by_hash(device))
-        eps += self.sdnc.endpoints_by_ip(device)
-        eps += self.sdnc.endpoints_by_mac(device)
         endpoints = []
+        eps = self._get_endpoints(args, -1)
         for endpoint in eps:
             if endpoint:
                 self.sdnc.collect_on(endpoint)
@@ -113,13 +106,8 @@ class Commands:
 
     def remove(self, args):
         ''' remove and forget about a specific thing until it's seen again '''
-        eps = []
-        device = args.rsplit(' ', 1)[0]
-        eps.append(self.sdnc.endpoint_by_name(device))
-        eps.append(self.sdnc.endpoint_by_hash(device))
-        eps += self.sdnc.endpoints_by_ip(device)
-        eps += self.sdnc.endpoints_by_mac(device)
         endpoints = []
+        eps = self._get_endpoints(args, 0)
         for endpoint in eps:
             if endpoint:
                 self.sdnc.remove_endpoint(endpoint)
