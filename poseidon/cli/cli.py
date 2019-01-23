@@ -64,7 +64,7 @@ class PoseidonShell(cmd.Cmd):
         for endpoint in endpoints:
             vlan = endpoint.endpoint_data['tenant']
             if vlan.startswith('VLAN'):
-                vlan.split('VLAN')[1]
+                vlan = vlan.split('VLAN')[1]
             # TODO add options to modify the columns
             matrix.append([endpoint.machine.name.strip(),
                            endpoint.endpoint_data['mac'],
@@ -121,7 +121,8 @@ class PoseidonShell(cmd.Cmd):
         # TODO
         Commands().where_is(arg)
 
-    def do_collect(self, arg):
+    @staticmethod
+    def do_collect(arg):
         '''
         Collect on something on the network:
         COLLECT ON 10.0.0.1 FOR 300 SECONDS
@@ -130,7 +131,8 @@ class PoseidonShell(cmd.Cmd):
         # TODO
         Commands().collect_on(arg)
 
-    def do_ignore(self, arg):
+    @staticmethod
+    def do_ignore(arg):
         '''
         Ignore something on the network:
         IGNORE 10.0.0.1
@@ -141,7 +143,8 @@ class PoseidonShell(cmd.Cmd):
         print('Ignored the following devices:')
         PoseidonShell.display_results(Commands().ignore(arg), None, None)
 
-    def do_clear(self, arg):
+    @staticmethod
+    def do_clear(arg):
         '''
         Stop ignoring something on the network:
         CLEAR 10.0.0.1
@@ -185,7 +188,7 @@ class PoseidonShell(cmd.Cmd):
         for endpoint in endpoints:
             vlan = endpoint.endpoint_data['tenant']
             if vlan.startswith('VLAN'):
-                vlan.split('VLAN')[1]
+                vlan = vlan.split('VLAN')[1]
             # TODO add options to modify the columns
             matrix.append([endpoint.machine.name.strip(), endpoint.state,
                            endpoint.endpoint_data['mac'],
