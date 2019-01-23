@@ -156,7 +156,7 @@ class PoseidonShell(cmd.Cmd):
         '''
         # TODO print more info
         PoseidonShell.display_results(Commands().what_is(
-            arg), self.default_fields, 0)
+            arg), self.default_fields + ['State', 'Next State', 'Previous States'], 0)
 
     def do_where(self, arg):
         '''
@@ -167,7 +167,7 @@ class PoseidonShell(cmd.Cmd):
         '''
         # TODO print where info specifically
         PoseidonShell.display_results(
-            Commands().where_is(arg), self.default_fields, 0)
+            Commands().where_is(arg), ['Name', 'MAC Address', 'Switch', 'Port'], 0)
 
     def do_collect(self, arg):
         '''
