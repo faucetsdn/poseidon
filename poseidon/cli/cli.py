@@ -6,7 +6,6 @@ The main entrypoint for the Poseidon shell.
 Created on 14 January 2019
 @author: Charlie Lewis
 """
-import ast
 import cmd
 import time
 
@@ -69,10 +68,10 @@ class PoseidonShell(cmd.Cmd):
                 command, value = flag.split('=', 1)
                 if '[' in value and ']' in value:
                     val = value.rsplit(']', 1)[0].split('[', 1)[1]
-                    flags[command] = val
+                    flags[command] = [val]
                     not_f = value.rsplit(']', 1)
                 else:
-                    val = value.split(' ', 1)
+                    val = value.split(' ', 1)[0]
                     flags[command] = val
                     not_f = value.split(' ', 1)
                 not_f.pop(0)
@@ -241,7 +240,7 @@ class PoseidonShell(cmd.Cmd):
         flags, arg = PoseidonShell.get_flags(arg)
         for flag in flags:
             if flag == 'fields':
-                fields = ast.literal_eval(flags[flag])
+                fields = flags[flag]
             elif flag == 'sort_by':
                 sort_by = int(flags[flag])
             elif flag == 'max_width':
