@@ -6,6 +6,7 @@ The main entrypoint for the Poseidon shell.
 Created on 14 January 2019
 @author: Charlie Lewis
 """
+import ast
 import cmd
 import time
 
@@ -62,6 +63,7 @@ class PoseidonShell(cmd.Cmd):
         not_flags = []
         args = text.split(' ', 1)
         while len(args) > 0:
+            print('args: {0}'.format(args))
             if args[0].startswith('--'):
                 arg, rest = args
                 while '[' in arg and ']' not in arg:
