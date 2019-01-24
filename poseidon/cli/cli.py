@@ -57,13 +57,19 @@ class PoseidonShell(cmd.Cmd):
     def get_flags(text):
         flags = {}
         not_flags = []
-        args = text.split()
-        for arg in args:
-            if arg.startswith('--'):
+        args = text.split(' ', 1)
+        while len(args > 1):
+            if args[0].startswith('--'):
+                arg, rest = args
+                while '[' in arg and ']' not in arg:
+                    temp_arg, rest = rest.split(' ', 1)
+                    arg = ' '.join([arg, temp_arg])
                 flag = arg.split('=')
                 flags[flag[0][2:]] = flag[1]
+                args = rest.split(' ', 1)
             else:
                 not_flags.append(arg)
+        print('flags: {0}, not flags: {1}'.format(flags, ' '.join(not_flags)))
         return flags, ' '.join(not_flags)
 
     @staticmethod
@@ -211,11 +217,11 @@ class PoseidonShell(cmd.Cmd):
         flags, arg = PoseidonShell.get_flags(arg)
         for flag in flags:
             if flag == 'fields':
-                fields = flags[flag]
+                fields = ast.literal_eval(flags[flag])
             elif flag == 'sort_by':
-                sort_by = flags[flag]
+                sort_by = int(flags[flag])
             elif flag == 'max_width':
-                max_width = flags[flag]
+                max_width = int(flags[flag])
 
         # TODO print more info
         PoseidonShell.display_results(Commands().what_is(
