@@ -68,7 +68,11 @@ class PoseidonShell(cmd.Cmd):
                 command, value = flag.split('=', 1)
                 if '[' in value and ']' in value:
                     val = value.rsplit(']', 1)[0].split('[', 1)[1]
-                    flags[command] = val.split(',')
+                    val = val.split(',')
+                    store_vals = []
+                    for v in val:
+                        store_vals.append(v.strip())
+                    flags[command] = store_vals
                     not_f = value.rsplit(']', 1)
                 else:
                     val = value.split(' ', 1)[0]
