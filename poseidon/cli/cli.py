@@ -93,6 +93,10 @@ class PoseidonShell(cmd.Cmd):
         return endpoint.endpoint_data['ipv6']
 
     @staticmethod
+    def _get_ignored(endpoint):
+        return str(endpoint.ignore)
+
+    @staticmethod
     def _get_state(endpoint):
         return endpoint.state
 
@@ -117,12 +121,17 @@ class PoseidonShell(cmd.Cmd):
             oldest_state[1])) + ' (' + duration(oldest_state[1]) + ') and put into state: ' + oldest_state[0] + '\n'
         last_state = oldest_state
         for state in prev_states:
-            output += delta(state[1], last_state[1])[0] + ' later it changed into state: ' + state[0] + \
+            delay = delta(state[1], last_state[1])[0]
+            if delay == 'just now':
+                delay = 'immediately'
+            else:
+                delay += ' later'
+            output += 'then ' + delay + ' it changed into state: ' + state[0] + \
                 ' (' + time.strftime('%Y-%m-%d %H:%M:%S',
                                      time.localtime(state[1])) + ')\n'
             last_state = state
-        output += 'Last seen: ' + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
-            current_state[1])) + ' (' + duration(current_state[1]) + ') and currently in state: ' + PoseidonShell._get_state(endpoint) + '\n'
+        output += 'Finally it was last seen: ' + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
+            current_state[1])) + ' (' + duration(current_state[1]) + ')'
         return output
 
     @staticmethod
@@ -135,6 +144,7 @@ class PoseidonShell(cmd.Cmd):
                          'VLAN': PoseidonShell._get_vlan,
                          'IPv4': PoseidonShell._get_ipv4,
                          'IPv6': PoseidonShell._get_ipv6,
+                         'Ignored': PoseidonShell._get_ignored,
                          'State': PoseidonShell._get_state,
                          'Next State': PoseidonShell._get_next_state,
                          'Previous States': PoseidonShell._get_prev_states}
