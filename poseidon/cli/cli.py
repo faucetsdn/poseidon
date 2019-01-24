@@ -61,22 +61,23 @@ class PoseidonShell(cmd.Cmd):
     def get_flags(text):
         flags = {}
         not_flags = []
-        args = text.split(' ', 1)
-        while len(args) > 0:
-            print('args: {0}'.format(args))
-            if args[0].startswith('--'):
-                arg, rest = args
-                while '[' in arg and ']' not in arg:
-                    temp_arg, rest = rest.split(' ', 1)
-                    arg = ' '.join([arg, temp_arg])
-                flag = arg.split('=')
-                flags[flag[0][2:]] = flag[1]
-                args = rest.split(' ', 1)
-            else:
-                not_flags.append(args[0])
-                args.pop(0)
-                if args:
-                    args = args[0].split(' ',  1)
+        first = text.split('--')
+        not_flags += first[0].split()
+        first.pop(0)
+        for flag in first:
+            if '=' in flag:
+                command, value = flag.split('=', 1)
+                if '[' in value and ']' in value:
+                    val = value.rsplit(']', 1)[0].split('[', 1)[1]
+                    flags[command] = val
+                    not_f = value.rsplit(']', 1)
+                else:
+                    val = value.split(' ', 1)
+                    flags[command] = val
+                    not_f = value.split(' ', 1)
+                not_f.pop(0)
+                if not_f:
+                    not_flags += not_f[0].split()
         print('flags: {0}, not flags: {1}'.format(flags, ' '.join(not_flags)))
         return flags, ' '.join(not_flags)
 
