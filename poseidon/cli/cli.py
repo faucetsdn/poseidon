@@ -60,20 +60,27 @@ class PoseidonShell(cmd.Cmd):
     def get_flags(text):
         flags = {}
         not_flags = []
-        args = text.split(' ', 1)
-        while len(args) > 0:
-            if args[0].startswith('--'):
-                arg, rest = args
-                while '[' in arg and ']' not in arg:
-                    temp_arg, rest = rest.split(' ', 1)
-                    arg = ' '.join([arg, temp_arg])
-                flag = arg.split('=')
-                flags[flag[0][2:]] = flag[1]
-                args = rest.split(' ', 1)
-            else:
-                not_flags.append(args[0])
-                args.pop(0)
-        print('flags: {0}, not flags: {1}'.format(flags, ' '.join(not_flags)))
+        first = text.split('--')
+        not_flags += first[0].split()
+        first.pop(0)
+        for flag in first:
+            if '=' in flag:
+                command, value = flag.split('=', 1)
+                if '[' in value and ']' in value:
+                    val = value.rsplit(']', 1)[0].split('[', 1)[1]
+                    val = val.split(',')
+                    store_vals = []
+                    for v in val:
+                        store_vals.append(v.strip())
+                    flags[command] = store_vals
+                    not_f = value.rsplit(']', 1)
+                else:
+                    val = value.split(' ', 1)[0]
+                    flags[command] = val
+                    not_f = value.split(' ', 1)
+                not_f.pop(0)
+                if not_f:
+                    not_flags += not_f[0].split()
         return flags, ' '.join(not_flags)
 
     @staticmethod
@@ -170,23 +177,23 @@ class PoseidonShell(cmd.Cmd):
     @staticmethod
     def display_results(endpoints, fields, sort_by=0, max_width=0):
         matrix = []
-        fields_lookup = {'ID': PoseidonShell._get_name,
-                         'MAC Address': PoseidonShell._get_mac,
-                         'Switch': PoseidonShell._get_switch,
-                         'Port': PoseidonShell._get_port,
-                         'VLAN': PoseidonShell._get_vlan,
-                         'IPv4': PoseidonShell._get_ipv4,
-                         'IPv6': PoseidonShell._get_ipv6,
-                         'Ignored': PoseidonShell._get_ignored,
-                         'State': PoseidonShell._get_state,
-                         'Next State': PoseidonShell._get_next_state,
-                         'First Seen': PoseidonShell._get_first_seen,
-                         'Last Seen': PoseidonShell._get_last_seen,
-                         'Previous States': PoseidonShell._get_prev_states}
+        fields_lookup = {'id': PoseidonShell._get_name,
+                         'mac address': PoseidonShell._get_mac,
+                         'switch': PoseidonShell._get_switch,
+                         'port': PoseidonShell._get_port,
+                         'vlan': PoseidonShell._get_vlan,
+                         'ipv4': PoseidonShell._get_ipv4,
+                         'ipv6': PoseidonShell._get_ipv6,
+                         'ignored': PoseidonShell._get_ignored,
+                         'state': PoseidonShell._get_state,
+                         'next state': PoseidonShell._get_next_state,
+                         'first seen': PoseidonShell._get_first_seen,
+                         'last seen': PoseidonShell._get_last_seen,
+                         'previous states': PoseidonShell._get_prev_states}
         for endpoint in endpoints:
             record = []
             for field in fields:
-                record.append(fields_lookup[field](endpoint))
+                record.append(fields_lookup[field.lower()](endpoint))
             matrix.append(record)
         if len(matrix) > 0:
             matrix = sorted(matrix, key=lambda endpoint: endpoint[sort_by])
@@ -219,6 +226,17 @@ class PoseidonShell(cmd.Cmd):
     def complete_remove(self, text, line, begidx, endidx):
         return PoseidonShell.completion(text, line, self.remove_completions)
 
+    @staticmethod
+    def _check_flags(flags, fields, sort_by=0, max_width=0):
+        for flag in flags:
+            if flag == 'fields':
+                fields = flags[flag]
+            elif flag == 'sort_by':
+                sort_by = int(flags[flag])
+            elif flag == 'max_width':
+                max_width = int(flags[flag])
+        return fields, sort_by, max_width
+
     def do_what(self, arg):
         '''
         Find out what something is:
@@ -230,17 +248,9 @@ class PoseidonShell(cmd.Cmd):
         # defaults
         fields = self.default_fields + \
             ['State', 'Next State', 'First Seen', 'Last Seen']
-        sort_by = 0
-        max_width = 0
 
         flags, arg = PoseidonShell.get_flags(arg)
-        for flag in flags:
-            if flag == 'fields':
-                fields = ast.literal_eval(flags[flag])
-            elif flag == 'sort_by':
-                sort_by = int(flags[flag])
-            elif flag == 'max_width':
-                max_width = int(flags[flag])
+        fields, sort_by, max_width = PoseidonShell._check_flags(flags, fields)
 
         # TODO print more info
         PoseidonShell.display_results(Commands().what_is(
@@ -254,8 +264,15 @@ class PoseidonShell(cmd.Cmd):
         HISTORY OF 18:EF:02:2D:49:00
         HISTORY OF 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
         '''
+        # defaults
+        fields = self.default_fields + \
+            ['State', 'Next State', 'Previous States']
+
+        flags, arg = PoseidonShell.get_flags(arg)
+        fields, sort_by, max_width = PoseidonShell._check_flags(flags, fields)
+
         PoseidonShell.display_results(
-            Commands().history_of(arg), self.default_fields + ['State', 'Next State', 'Previous States'], 0)
+            Commands().history_of(arg), fields, sort_by=sort_by, max_width=max_width)
 
     def do_where(self, arg):
         '''
@@ -265,9 +282,14 @@ class PoseidonShell(cmd.Cmd):
         WHERE IS 18:EF:02:2D:49:00
         WHERE IS 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
         '''
-        # TODO print where info specifically
+        # defaults
+        fields = ['ID', 'MAC Address', 'Switch', 'Port']
+
+        flags, arg = PoseidonShell.get_flags(arg)
+        fields, sort_by, max_width = PoseidonShell._check_flags(flags, fields)
+
         PoseidonShell.display_results(
-            Commands().where_is(arg), ['ID', 'MAC Address', 'Switch', 'Port'], 0)
+            Commands().where_is(arg), fields, sort_by=sort_by, max_width=max_width)
 
     def do_collect(self, arg):
         '''
@@ -278,9 +300,15 @@ class PoseidonShell(cmd.Cmd):
         COLLECT ON 10.0.0.1 FOR 300 SECONDS
         COLLECT ON 18:EF:02:2D:49:00 FOR 5 MINUTES
         '''
+        # defaults
+        fields = self.default_fields
+
+        flags, arg = PoseidonShell.get_flags(arg)
+        fields, sort_by, max_width = PoseidonShell._check_flags(flags, fields)
+
         print('Collecting on the following devices:')
         PoseidonShell.display_results(
-            Commands().collect_on(arg), self.default_fields, 0)
+            Commands().collect_on(arg), fields, sort_by=sort_by, max_width=max_width)
 
     def do_ignore(self, arg):
         '''
@@ -291,9 +319,15 @@ class PoseidonShell(cmd.Cmd):
         IGNORE 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
         IGNORE INACTIVE DEVICES
         '''
+        # defaults
+        fields = self.default_fields
+
+        flags, arg = PoseidonShell.get_flags(arg)
+        fields, sort_by, max_width = PoseidonShell._check_flags(flags, fields)
+
         print('Ignored the following devices:')
         PoseidonShell.display_results(
-            Commands().ignore(arg), self.default_fields, 0)
+            Commands().ignore(arg), fields, sort_by=sort_by, max_width=max_width)
 
     def do_clear(self, arg):
         '''
@@ -304,9 +338,15 @@ class PoseidonShell(cmd.Cmd):
         CLEAR 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
         CLEAR IGNORED DEVICES
         '''
+        # defaults
+        fields = self.default_fields
+
+        flags, arg = PoseidonShell.get_flags(arg)
+        fields, sort_by, max_width = PoseidonShell._check_flags(flags, fields)
+
         print('Cleared the following devices that were being ignored:')
         PoseidonShell.display_results(
-            Commands().clear_ignored(arg), self.default_fields, 0)
+            Commands().clear_ignored(arg), fields, sort_by=sort_by, max_width=max_width)
 
     def do_remove(self, arg):
         '''
@@ -318,6 +358,12 @@ class PoseidonShell(cmd.Cmd):
         REMOVE IGNORED DEVICES
         REMOVE INACTIVE DEVICES
         '''
+        # defaults
+        fields = self.default_fields
+
+        flags, arg = PoseidonShell.get_flags(arg)
+        fields, sort_by, max_width = PoseidonShell._check_flags(flags, fields)
+
         endpoints = []
         if arg.startswith('ignored'):
             endpoints = Commands().remove_ignored(arg)
@@ -326,7 +372,8 @@ class PoseidonShell(cmd.Cmd):
         else:
             endpoints = Commands().remove(arg)
         print('Removed the following devices:')
-        PoseidonShell.display_results(endpoints, self.default_fields, 0)
+        PoseidonShell.display_results(
+            endpoints, fields, sort_by=sort_by, max_width=max_width)
 
     def do_show(self, arg):
         '''
@@ -336,8 +383,14 @@ class PoseidonShell(cmd.Cmd):
         SHOW WINDOWS DEVICES
         SHOW ABNORMAL DEVICES
         '''
+        # defaults
+        fields = self.default_fields + ['State', 'Next State']
+
+        flags, arg = PoseidonShell.get_flags(arg)
+        fields, sort_by, max_width = PoseidonShell._check_flags(flags, fields)
+
         PoseidonShell.display_results(Commands().show_devices(
-            arg), self.default_fields + ['State', 'Next State'], 0)
+            arg), fields, sort_by=sort_by, max_width=max_width)
 
     @staticmethod
     def do_change(arg):
