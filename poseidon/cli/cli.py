@@ -21,7 +21,7 @@ class PoseidonShell(cmd.Cmd):
     prompt = '\033[1;32mposeidon$ \033[1;m'
     file = None
 
-    default_fields = ['Name', 'MAC Address',
+    default_fields = ['ID', 'MAC Address',
                       'Switch', 'Port', 'VLAN', 'IPv4', 'IPv6']
     what_completions = [
         'is'
@@ -137,7 +137,7 @@ class PoseidonShell(cmd.Cmd):
     @staticmethod
     def display_results(endpoints, fields, sort_by):
         matrix = []
-        fields_lookup = {'Name': PoseidonShell._get_name,
+        fields_lookup = {'ID': PoseidonShell._get_name,
                          'MAC Address': PoseidonShell._get_mac,
                          'Switch': PoseidonShell._get_switch,
                          'Port': PoseidonShell._get_port,
@@ -157,7 +157,7 @@ class PoseidonShell(cmd.Cmd):
             matrix = sorted(matrix, key=lambda endpoint: endpoint[sort_by])
             # set the header
             matrix.insert(0, fields)
-            table = Texttable(max_width=0)
+            table = Texttable(max_width=100)
             # make all the column types be text
             table.set_cols_dtype(['t']*len(fields))
             table.add_rows(matrix)
@@ -184,6 +184,7 @@ class PoseidonShell(cmd.Cmd):
     def do_what(self, arg):
         '''
         Find out what something is:
+        WHAT IS [IP|MAC|ID]
         WHAT IS 10.0.0.1
         WHAT IS 18:EF:02:2D:49:00
         WHAT IS 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
@@ -195,17 +196,21 @@ class PoseidonShell(cmd.Cmd):
     def do_where(self, arg):
         '''
         Find out where something is:
+        WHERE IS [IP|MAC|ID]
         WHERE IS 10.0.0.1
         WHERE IS 18:EF:02:2D:49:00
         WHERE IS 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
         '''
         # TODO print where info specifically
         PoseidonShell.display_results(
-            Commands().where_is(arg), ['Name', 'MAC Address', 'Switch', 'Port'], 0)
+            Commands().where_is(arg), ['ID', 'MAC Address', 'Switch', 'Port'], 0)
 
     def do_collect(self, arg):
         '''
+        TODO - NOT IMPLEMENTED YET
+
         Collect on something on the network:
+        COLLECT ON [IP|MAC]
         COLLECT ON 10.0.0.1 FOR 300 SECONDS
         COLLECT ON 18:EF:02:2D:49:00 FOR 5 MINUTES
         '''
@@ -216,6 +221,7 @@ class PoseidonShell(cmd.Cmd):
     def do_ignore(self, arg):
         '''
         Ignore something on the network:
+        IGNORE [IP|MAC|ID]
         IGNORE 10.0.0.1
         IGNORE 18:EF:02:2D:49:00
         IGNORE 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
@@ -228,6 +234,7 @@ class PoseidonShell(cmd.Cmd):
     def do_clear(self, arg):
         '''
         Stop ignoring something on the network:
+        CLEAR [IP|MAC|ID]
         CLEAR 10.0.0.1
         CLEAR 18:EF:02:2D:49:00
         CLEAR 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
@@ -240,6 +247,7 @@ class PoseidonShell(cmd.Cmd):
     def do_remove(self, arg):
         '''
         Remove and forget about something on the network until it's seen again:
+        REMOVE [IP|MAC|ID]
         REMOVE 10.0.0.1
         REMOVE 18:EF:02:2D:49:00
         REMOVE 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
@@ -270,7 +278,10 @@ class PoseidonShell(cmd.Cmd):
     @staticmethod
     def do_change(arg):
         '''
+        TODO - NOT IMPLEMENTED YET
+
         Change state of things on the network:
+        CHANGE [IP|MAC|ID] TO [STATE]
         CHANGE 10.0.0.1 TO INACTIVE
         CHANGE ABNORMAL DEVICES TO UNKNOWN
         CHANGE 18:EF:02:2D:49:00 TO KNOWN
