@@ -7,7 +7,9 @@ Created on 14 January 2019
 @author: Charlie Lewis
 """
 import cmd
+import time
 
+from natural.date import duration
 from texttable import Texttable
 
 from poseidon.cli.commands import Commands
@@ -99,7 +101,25 @@ class PoseidonShell(cmd.Cmd):
 
     @staticmethod
     def _get_prev_states(endpoint):
-        return endpoint.p_prev_states
+        prev_states = endpoint.p_prev_states
+        oldest_state = []
+        output = 'None'
+        if len(prev_states) > 1:
+            oldest_state = prev_states.pop(0)
+            current_state = prev_states.pop()
+        elif len(prev_states) == 1:
+            current_state = oldest_state = prev_states.pop()
+        else:
+            return output
+
+        output += 'First seen: ' + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
+            oldest_state[1])) + ' (' + duration(oldest_state[1]) + ') and put into state: ' + oldest_state[0] + '\n'
+        for i, state in enumerate(prev_states):
+            # TODO
+            pass
+        output += 'Last seen: ' + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
+            current_state[1])) + ' (' + duration(current_state[1]) + ') and currently in state: ' + oldest_state[0] + '\n'
+        return output
 
     @staticmethod
     def display_results(endpoints, fields, sort_by):
