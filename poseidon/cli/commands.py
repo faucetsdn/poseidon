@@ -35,6 +35,15 @@ class Commands:
                 endpoints.append(endpoint)
         return endpoints
 
+    def history_of(self, args):
+        ''' history of a specific thing '''
+        endpoints = []
+        eps = self._get_endpoints(args, -1)
+        for endpoint in eps:
+            if endpoint:
+                endpoints.append(endpoint)
+        return endpoints
+
     def where_is(self, args):
         ''' where topologically is a specific thing '''
         endpoints = []

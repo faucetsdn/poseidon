@@ -32,6 +32,9 @@ class PoseidonShell(cmd.Cmd):
     collect_completions = [
         'on'
     ]
+    history_completions = [
+        'of'
+    ]
     clear_completions = [
         'ignored devices'
     ]
@@ -52,6 +55,26 @@ class PoseidonShell(cmd.Cmd):
         'pki server devices', 'windows devices', 'mac devices',
         'linux devices', 'ignored devices'
     ]
+
+    @staticmethod
+    def get_flags(text):
+        flags = {}
+        not_flags = []
+        args = text.split(' ', 1)
+        while len(args) > 0:
+            if args[0].startswith('--'):
+                arg, rest = args
+                while '[' in arg and ']' not in arg:
+                    temp_arg, rest = rest.split(' ', 1)
+                    arg = ' '.join([arg, temp_arg])
+                flag = arg.split('=')
+                flags[flag[0][2:]] = flag[1]
+                args = rest.split(' ', 1)
+            else:
+                not_flags.append(args[0])
+                args.pop(0)
+        print('flags: {0}, not flags: {1}'.format(flags, ' '.join(not_flags)))
+        return flags, ' '.join(not_flags)
 
     @staticmethod
     def completion(text, line, completions):
@@ -105,6 +128,16 @@ class PoseidonShell(cmd.Cmd):
         return endpoint.p_next_state
 
     @staticmethod
+    def _get_first_seen(endpoint):
+        # TODO
+        return
+
+    @staticmethod
+    def _get_last_seen(endpoint):
+        # TODO
+        return
+
+    @staticmethod
     def _get_prev_states(endpoint):
         prev_states = endpoint.p_prev_states
         oldest_state = []
@@ -135,7 +168,7 @@ class PoseidonShell(cmd.Cmd):
         return output
 
     @staticmethod
-    def display_results(endpoints, fields, sort_by):
+    def display_results(endpoints, fields, sort_by=0, max_width=0):
         matrix = []
         fields_lookup = {'ID': PoseidonShell._get_name,
                          'MAC Address': PoseidonShell._get_mac,
@@ -147,6 +180,8 @@ class PoseidonShell(cmd.Cmd):
                          'Ignored': PoseidonShell._get_ignored,
                          'State': PoseidonShell._get_state,
                          'Next State': PoseidonShell._get_next_state,
+                         'First Seen': PoseidonShell._get_first_seen,
+                         'Last Seen': PoseidonShell._get_last_seen,
                          'Previous States': PoseidonShell._get_prev_states}
         for endpoint in endpoints:
             record = []
@@ -157,7 +192,7 @@ class PoseidonShell(cmd.Cmd):
             matrix = sorted(matrix, key=lambda endpoint: endpoint[sort_by])
             # set the header
             matrix.insert(0, fields)
-            table = Texttable(max_width=100)
+            table = Texttable(max_width=max_width)
             # make all the column types be text
             table.set_cols_dtype(['t']*len(fields))
             table.add_rows(matrix)
@@ -168,6 +203,9 @@ class PoseidonShell(cmd.Cmd):
 
     def complete_what(self, text, line, begidx, endidx):
         return PoseidonShell.completion(text, line, self.what_completions)
+
+    def complete_history(self, text, line, begidx, endidx):
+        return PoseidonShell.completion(text, line, self.history_completions)
 
     def complete_show(self, text, line, begidx, endidx):
         return PoseidonShell.completion(text, line, self.show_completions)
@@ -189,9 +227,35 @@ class PoseidonShell(cmd.Cmd):
         WHAT IS 18:EF:02:2D:49:00
         WHAT IS 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
         '''
+        # defaults
+        fields = self.default_fields + \
+            ['State', 'Next State', 'First Seen', 'Last Seen']
+        sort_by = 0
+        max_width = 0
+
+        flags, arg = PoseidonShell.get_flags(arg)
+        for flag in flags:
+            if flag == 'fields':
+                fields = ast.literal_eval(flags[flag])
+            elif flag == 'sort_by':
+                sort_by = int(flags[flag])
+            elif flag == 'max_width':
+                max_width = int(flags[flag])
+
         # TODO print more info
         PoseidonShell.display_results(Commands().what_is(
-            arg), self.default_fields + ['State', 'Next State', 'Previous States'], 0)
+            arg), fields, sort_by=sort_by, max_width=max_width)
+
+    def do_history(self, arg):
+        '''
+        Find out the history of something on the network:
+        HISTORY OF [IP|MAC|ID]
+        HISTORY OF 10.0.0.1
+        HISTORY OF 18:EF:02:2D:49:00
+        HISTORY OF 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
+        '''
+        PoseidonShell.display_results(
+            Commands().history_of(arg), self.default_fields + ['State', 'Next State', 'Previous States'], 0)
 
     def do_where(self, arg):
         '''
