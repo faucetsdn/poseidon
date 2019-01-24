@@ -71,7 +71,7 @@ class PoseidonShell(cmd.Cmd):
                 flags[flag[0][2:]] = flag[1]
                 args = rest.split(' ', 1)
             else:
-                not_flags.append(arg)
+                not_flags.append(args[0])
         print('flags: {0}, not flags: {1}'.format(flags, ' '.join(not_flags)))
         return flags, ' '.join(not_flags)
 
