@@ -54,6 +54,19 @@ class PoseidonShell(cmd.Cmd):
     ]
 
     @staticmethod
+    def get_flags(text):
+        flags = {}
+        not_flags = []
+        args = text.split()
+        for arg in args:
+            if arg.startswith('--'):
+                flag = arg.split('=')
+                flags[flag[0][2:]] = flag[1]
+            else:
+                not_flags.append(arg)
+        return flags, ' '.join(not_flags)
+
+    @staticmethod
     def completion(text, line, completions):
         # TODO handle expectation of '?'
         if line.endswith('?'):
@@ -135,7 +148,7 @@ class PoseidonShell(cmd.Cmd):
         return output
 
     @staticmethod
-    def display_results(endpoints, fields, sort_by):
+    def display_results(endpoints, fields, sort_by=0, max_width=0):
         matrix = []
         fields_lookup = {'ID': PoseidonShell._get_name,
                          'MAC Address': PoseidonShell._get_mac,
@@ -157,7 +170,7 @@ class PoseidonShell(cmd.Cmd):
             matrix = sorted(matrix, key=lambda endpoint: endpoint[sort_by])
             # set the header
             matrix.insert(0, fields)
-            table = Texttable(max_width=100)
+            table = Texttable(max_width=max_width)
             # make all the column types be text
             table.set_cols_dtype(['t']*len(fields))
             table.add_rows(matrix)
@@ -189,9 +202,24 @@ class PoseidonShell(cmd.Cmd):
         WHAT IS 18:EF:02:2D:49:00
         WHAT IS 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
         '''
+        # defaults
+        fields = self.default_fields + \
+            ['State', 'Next State', 'Previous States']
+        sort_by = 0
+        max_width = 0
+
+        flags, arg = PoseidonShell.get_flags(arg)
+        for flag in flags:
+            if flag == 'fields':
+                fields = flags[flag]
+            elif flag == 'sort_by':
+                sort_by = flags[flag]
+            elif flag == 'max_width':
+                max_width = flags[flag]
+
         # TODO print more info
         PoseidonShell.display_results(Commands().what_is(
-            arg), self.default_fields + ['State', 'Next State', 'Previous States'], 0)
+            arg), fields, sort_by=sort_by, max_width=max_width)
 
     def do_where(self, arg):
         '''
