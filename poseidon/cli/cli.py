@@ -117,7 +117,7 @@ class PoseidonShell(cmd.Cmd):
             oldest_state[1])) + ' (' + duration(oldest_state[1]) + ') and put into state: ' + oldest_state[0] + '\n'
         last_state = oldest_state
         for state in prev_states:
-            output += delta(state[1], last_state[1]) + ' later it changed into state: ' + state[0] + \
+            output += delta(state[1], last_state[1])[0] + ' later it changed into state: ' + state[0] + \
                 ' (' + time.strftime('%Y-%m-%d %H:%M:%S',
                                      time.localtime(state[1])) + ')\n'
             last_state = state
