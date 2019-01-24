@@ -189,7 +189,7 @@ class PoseidonShell(cmd.Cmd):
         for endpoint in endpoints:
             record = []
             for field in fields:
-                record.append(fields_lookup[field](endpoint))
+                record.append(fields_lookup[field.lower()](endpoint))
             matrix.append(record)
         if len(matrix) > 0:
             matrix = sorted(matrix, key=lambda endpoint: endpoint[sort_by])
