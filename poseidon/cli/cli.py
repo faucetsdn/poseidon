@@ -9,6 +9,7 @@ Created on 14 January 2019
 import cmd
 import time
 
+from natural.date import delta
 from natural.date import duration
 from texttable import Texttable
 
@@ -112,13 +113,16 @@ class PoseidonShell(cmd.Cmd):
         else:
             return output
 
-        output += 'First seen: ' + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
+        output = 'First seen: ' + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
             oldest_state[1])) + ' (' + duration(oldest_state[1]) + ') and put into state: ' + oldest_state[0] + '\n'
-        for i, state in enumerate(prev_states):
-            # TODO
-            pass
+        last_state = oldest_state
+        for state in prev_states:
+            output += delta(state[1], last_state[1]) + ' later it changed into state: ' + state[0] + \
+                ' (' + time.strftime('%Y-%m-%d %H:%M:%S',
+                                     time.localtime(state[1])) + ')\n'
+            last_state = state
         output += 'Last seen: ' + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
-            current_state[1])) + ' (' + duration(current_state[1]) + ') and currently in state: ' + oldest_state[0] + '\n'
+            current_state[1])) + ' (' + duration(current_state[1]) + ') and currently in state: ' + PoseidonShell._get_state(endpoint) + '\n'
         return output
 
     @staticmethod
