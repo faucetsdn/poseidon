@@ -137,13 +137,13 @@ class PoseidonShell(cmd.Cmd):
 
     @staticmethod
     def _get_first_seen(endpoint):
-        # TODO
-        return
+        return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
+            endpoint.p_prev_states[0][1])) + ' (' + duration(endpoint.p_prev_states[0][1]) + ')'
 
     @staticmethod
     def _get_last_seen(endpoint):
-        # TODO
-        return
+        return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
+            endpoint.p_prev_states[-1][1])) + ' (' + duration(endpoint.p_prev_states[-1][1]) + ')'
 
     @staticmethod
     def _get_prev_states(endpoint):
