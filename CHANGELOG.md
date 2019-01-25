@@ -1,3 +1,11 @@
+# v0.5.2 (2019-01-25)
+
+ - Updated version of pytest, pika, texttable, schedule
+ - Added first version of CLI, accessed with `poseidon shell`
+ - Can now query endpoint information like what state and when
+ - Can now clear out inactive endpoints or ignore specific endpoints
+ - Pin pip to a version
+
 # v0.5.1 (2019-01-11)
 
  - Improved logging output
