@@ -14,6 +14,7 @@ from natural.date import duration
 from texttable import Texttable
 
 from poseidon.cli.commands import Commands
+from poseidon.helpers.exception_decor import exception
 
 
 class PoseidonShell(cmd.Cmd):
@@ -136,13 +137,13 @@ class PoseidonShell(cmd.Cmd):
 
     @staticmethod
     def _get_first_seen(endpoint):
-        # TODO
-        return
+        return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
+            endpoint.p_prev_states[0][1])) + ' (' + duration(endpoint.p_prev_states[0][1]) + ')'
 
     @staticmethod
     def _get_last_seen(endpoint):
-        # TODO
-        return
+        return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
+            endpoint.p_prev_states[-1][1])) + ' (' + duration(endpoint.p_prev_states[-1][1]) + ')'
 
     @staticmethod
     def _get_prev_states(endpoint):
@@ -237,6 +238,7 @@ class PoseidonShell(cmd.Cmd):
                 max_width = int(flags[flag])
         return fields, sort_by, max_width
 
+    @exception
     def do_what(self, arg):
         '''
         Find out what something is:
@@ -256,6 +258,7 @@ class PoseidonShell(cmd.Cmd):
         PoseidonShell.display_results(Commands().what_is(
             arg), fields, sort_by=sort_by, max_width=max_width)
 
+    @exception
     def do_history(self, arg):
         '''
         Find out the history of something on the network:
@@ -265,8 +268,7 @@ class PoseidonShell(cmd.Cmd):
         HISTORY OF 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
         '''
         # defaults
-        fields = self.default_fields + \
-            ['State', 'Next State', 'Previous States']
+        fields = ['Previous States']
 
         flags, arg = PoseidonShell.get_flags(arg)
         fields, sort_by, max_width = PoseidonShell._check_flags(flags, fields)
@@ -274,6 +276,7 @@ class PoseidonShell(cmd.Cmd):
         PoseidonShell.display_results(
             Commands().history_of(arg), fields, sort_by=sort_by, max_width=max_width)
 
+    @exception
     def do_where(self, arg):
         '''
         Find out where something is:
@@ -291,6 +294,7 @@ class PoseidonShell(cmd.Cmd):
         PoseidonShell.display_results(
             Commands().where_is(arg), fields, sort_by=sort_by, max_width=max_width)
 
+    @exception
     def do_collect(self, arg):
         '''
         TODO - NOT IMPLEMENTED YET
@@ -310,6 +314,7 @@ class PoseidonShell(cmd.Cmd):
         PoseidonShell.display_results(
             Commands().collect_on(arg), fields, sort_by=sort_by, max_width=max_width)
 
+    @exception
     def do_ignore(self, arg):
         '''
         Ignore something on the network:
@@ -329,6 +334,7 @@ class PoseidonShell(cmd.Cmd):
         PoseidonShell.display_results(
             Commands().ignore(arg), fields, sort_by=sort_by, max_width=max_width)
 
+    @exception
     def do_clear(self, arg):
         '''
         Stop ignoring something on the network:
@@ -348,6 +354,7 @@ class PoseidonShell(cmd.Cmd):
         PoseidonShell.display_results(
             Commands().clear_ignored(arg), fields, sort_by=sort_by, max_width=max_width)
 
+    @exception
     def do_remove(self, arg):
         '''
         Remove and forget about something on the network until it's seen again:
@@ -375,6 +382,7 @@ class PoseidonShell(cmd.Cmd):
         PoseidonShell.display_results(
             endpoints, fields, sort_by=sort_by, max_width=max_width)
 
+    @exception
     def do_show(self, arg):
         '''
         Show things on the network based on filters:
@@ -393,6 +401,7 @@ class PoseidonShell(cmd.Cmd):
             arg), fields, sort_by=sort_by, max_width=max_width)
 
     @staticmethod
+    @exception
     def do_change(arg):
         '''
         TODO - NOT IMPLEMENTED YET
