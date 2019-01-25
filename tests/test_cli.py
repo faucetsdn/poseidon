@@ -32,7 +32,7 @@ def test_poseidonshell():
         'what', 'foo what', ['what ok yeah'])
     assert answer == ['what ok yeah']
     fields, sort_by, max_width = PoseidonShell._check_flags(
-        {'fields': 'foo', 'sort_by': '1', 'max_width': '20'})
-    assert fields == {'fields': 'foo', 'sort_by': '1', 'max_width': '20'}
+        {'fields': ['foo'], 'sort_by': '1', 'max_width': '20'}, ['id'])
+    assert fields == ['foo']
     assert sort_by == 1
     assert max_width == 20
