@@ -9,6 +9,7 @@ from poseidon.cli.commands import Commands
 def test_commands():
     commands = Commands()
     commands.what_is('foo')
+    commands.history_of('foo')
     commands.where_is('foo')
     commands.collect_on('foo')
     commands.remove_inactives('foo')
