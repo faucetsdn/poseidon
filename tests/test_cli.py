@@ -10,12 +10,19 @@ def test_poseidonshell():
     shell = PoseidonShell()
     shell.do_record('foo.txt')
     shell.do_what('foo')
+    shell.complete_show('foo', 'what ok yeah', 0, 1)
+    shell.complete_history('foo', 'what ok yeah', 0, 1)
+    shell.complete_clear('foo', 'what ok yeah', 0, 1)
+    shell.complete_ignore('foo', 'what ok yeah', 0, 1)
+    shell.complete_remove('foo', 'what ok yeah', 0, 1)
+    shell.complete_show('foo', 'what ok yeah', 0, 1)
     shell.complete_what('foo', 'what ok yeah', 0, 1)
     shell.do_where('foo')
     shell.do_collect('foo')
     shell.do_ignore('foo')
     shell.do_clear('foo')
     shell.do_remove('foo')
+    shell.do_history('foo')
     shell.do_show('foo')
     shell.do_quit('foo')
     shell.do_playback('foo.txt')
@@ -24,3 +31,8 @@ def test_poseidonshell():
     answer = PoseidonShell.completion(
         'what', 'foo what', ['what ok yeah'])
     assert answer == ['what ok yeah']
+    fields, sort_by, max_width = PoseidonShell._check_flags(
+        {'fields': 'foo', 'sort_by': '1', 'max_width': '20'})
+    assert fields == {'fields': 'foo', 'sort_by': '1', 'max_width': '20'}
+    assert sort_by == 1
+    assert max_width == 20
