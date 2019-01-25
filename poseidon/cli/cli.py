@@ -268,8 +268,7 @@ class PoseidonShell(cmd.Cmd):
         HISTORY OF 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
         '''
         # defaults
-        fields = self.default_fields + \
-            ['State', 'Next State', 'Previous States']
+        fields = ['Previous States']
 
         flags, arg = PoseidonShell.get_flags(arg)
         fields, sort_by, max_width = PoseidonShell._check_flags(flags, fields)
