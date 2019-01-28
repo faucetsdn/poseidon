@@ -33,7 +33,7 @@ build_debian:
 	mkdir -p installers/debian/$(TAG)-$(VERSION)/etc/poseidon
 	cp installers/debian/poseidon.service installers/debian/$(TAG)-$(VERSION)/etc/systemd/system/
 	cp installers/debian/default.conf installers/debian/$(TAG)-$(VERSION)/etc/poseidon/
-	cp -R !(installers) installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
+	cp -R !(installers|dist) installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
 	cp .dockerignore installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
 	cp .plugin_config.yml installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
 	cp .vent_startup.yml installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
@@ -89,7 +89,7 @@ build_debian_net:
 	mkdir -p installers/debian/$(TAG)-$(VERSION)/etc/poseidon
 	cp installers/debian/poseidon.service installers/debian/$(TAG)-$(VERSION)/etc/systemd/system/
 	cp installers/debian/default.conf installers/debian/$(TAG)-$(VERSION)/etc/poseidon/
-	cp -R !(installers) installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
+	cp -R !(installers|dist) installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
 	cp .dockerignore installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
 	cp .plugin_config.yml installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
 	cp .vent_startup.yml installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
@@ -98,7 +98,7 @@ build_debian_net:
 	docker pull cyberreboot/vent:latest
 	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-vent.tar cyberreboot/vent:latest
 	mkdir -p dist
-	docker build -t poseidon-dpkg -f Dockerfile.dpkg .
+	docker build -t poseidon-dpkg --build-arg PKG_NAME=poseidon-net -f Dockerfile.dpkg .
 	docker run --rm poseidon-dpkg > dist/$(TAG)-$(VERSION)-net.deb
 	rm -rf installers/debian/$(TAG)-$(VERSION)
 
