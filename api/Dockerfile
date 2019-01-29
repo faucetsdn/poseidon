@@ -11,7 +11,7 @@ RUN apk add --update \
     musl-dev \
     python3 \
     python3-dev \
-    && pip3 install --no-cache-dir --upgrade pip==18.1 \
+    && pip3 install --no-cache-dir --upgrade pip==19.0.1 \
     && pip3 install --no-cache-dir -r requirements.txt \
     && pip3 install --no-cache-dir -r /healthcheck/requirements.txt \
     && apk del \
