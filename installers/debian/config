@@ -131,6 +131,13 @@ while [ "$STATE" != 0 ] && [ "$STATE" != 13 ]; do
             db_input low poseidon/logging_level || true
         fi
     ;;
+
+    13)
+        db_get poseidon/controller_type
+        if [ "$RET" != "Demo" ]; then
+            db_input low poseidon/trust_certs || true
+        fi
+    ;;
     esac
 
     if db_go; then

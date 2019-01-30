@@ -123,3 +123,10 @@ Type: select
 Choices: INFO, DEBUG, WARNING, ERROR, CRITICAL
 Default: INFO
 Description: Set the logging level:
+
+Template: poseidon/trust_cert
+Type: select
+Choices: Yes, No
+Default: Yes
+Description: Should Poseidon trust self-signed certificates?
+ If Yes, Poseidon will make requests without verifying the certificate authority or validity on the server side of the controller.
