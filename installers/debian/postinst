@@ -178,6 +178,15 @@ if db_go; then
             if [[ -n "$RET" ]]; then
                 echo "logger_level=$RET" >> /etc/poseidon/default.conf
             fi
+
+            db_get poseidon/trust_cert
+            if [[ -n "$RET" ]]; then
+                if [ "$RET" == "Yes" ]; then
+                    echo "trust_self_signed_cert=True" >> /etc/poseidon/default.conf
+                else
+                    echo "trust_self_signed_cert=False" >> /etc/poseidon/default.conf
+                fi
+            fi
         fi
     fi
     if [ "$failed" == true ]; then

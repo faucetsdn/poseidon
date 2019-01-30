@@ -36,8 +36,9 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         auth = auth or default_auth
 
         self.base_uri = controller['URI']
+        self.trust_self_signed_cert = controller['TRUST_SELF_SIGNED_CERT']
         super(BcfProxy, self).__init__(
-            self.base_uri, login_resource, auth, *args, **kwargs)
+            self.base_uri, login_resource, auth, self.trust_self_signed_cert, *args, **kwargs)
         self.span_fabric_name = controller['SPAN_FABRIC_NAME']
         self.interface_group = controller['INTERFACE_GROUP']
         self.get_span_fabric()
@@ -96,7 +97,8 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         '''
         GET list of endpoints from the controller.
         '''
-        r = self.get_resource(endpoints_resource)
+        r = self.get_resource(endpoints_resource,
+                              verify=self.trust_self_signed_cert)
         retval = JsonMixin.parse_json(r)
         self.logger.debug('get_endpoints found:')
         items = retval
@@ -111,7 +113,8 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         '''
         GET list of switches from the controller.
         '''
-        r = self.get_resource(switches_resource)
+        r = self.get_resource(
+            switches_resource, verify=self.trust_self_signed_cert)
         retval = BcfProxy.parse_json(r)
         self.logger.debug('get_switches return:{0}'.format(retval))
         return retval
@@ -122,7 +125,8 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         '''
         GET list of tenants from the controller.
         '''
-        r = self.get_resource(tenant_resource)
+        r = self.get_resource(
+            tenant_resource, verify=self.trust_self_signed_cert)
         retval = BcfProxy.parse_json(r)
         sout = 'get_tenants return:{0}'.format(retval)
         self.logger.debug(sout)
@@ -134,7 +138,8 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         '''
         GET list of segments from the controller.
         '''
-        r = self.get_resource(segment_resource)
+        r = self.get_resource(
+            segment_resource, verify=self.trust_self_signed_cert)
         retval = BcfProxy.parse_json(r)
         sout = 'get_segments return:{0}'.format(retval)
         self.logger.debug(sout)
@@ -162,7 +167,8 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         if interface_group:
             span_fabric_resource = ''.join(
                 [span_fabric_resource, '[dest-interface-group="%s"]' % interface_group])
-        r = self.get_resource(span_fabric_resource)
+        r = self.get_resource(span_fabric_resource,
+                              verify=self.trust_self_signed_cert)
         spanArray = BcfProxy.parse_json(r)
         if len(spanArray) == 0:
             self.logger.error('A span fabric with the configured combination of name: {0} and interface group: {1} could not be'
@@ -251,7 +257,8 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         data = {'shutdown': shutdown, 'name': endpoint_name}
         if mac:
             data['mac'] = mac
-        r = self.request_resource(method='PUT', url=uri, data=json.dumps(data))
+        r = self.request_resource(method='PUT', url=uri, data=json.dumps(
+            data), verify=self.trust_self_signed_cert)
         retval = BcfProxy.parse_json(r)
         sout = 'shutdown_endpoint return:{0}'.format(retval)
         self.logger.debug(sout)
@@ -395,7 +402,8 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         else:  # mirror=False
             data['filter'] = [filter for filter in data[
                 'filter'] if filter['seq'] != seq]
-        r = self.request_resource(method='PUT', url=uri, data=json.dumps(data))
+        r = self.request_resource(method='PUT', url=uri, data=json.dumps(
+            data), verify=self.trust_self_signed_cert)
         retval = BcfProxy.parse_json(r)
         sout = 'mirror_traffic return:{0}'.format(retval)
         self.logger.debug(sout)

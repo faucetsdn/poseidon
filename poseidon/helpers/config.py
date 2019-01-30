@@ -54,6 +54,13 @@ class Config():
                     controller['SPAN_FABRIC_NAME'] = val
                 elif key == 'controller_interface_group':
                     controller['INTERFACE_GROUP'] = val
+                elif key == 'trust_self_signed_cert':
+                    try:
+                        controller['TRUST_SELF_SIGNED_CERT'] = ast.literal_eval(
+                            val)
+                    except Exception as e:  # pragma: no cover
+                        self.logger.error(
+                            'Unable to set configuration option {0} because {1}'.format(key, str(e)))
                 elif key == 'learn_public_addresses':
                     try:
                         controller['LEARN_PUBLIC_ADDRESSES'] = ast.literal_eval(

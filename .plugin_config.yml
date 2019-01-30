@@ -34,3 +34,4 @@ poseidon:
     Bcf:
         controller_span_fabric_name: vent
         controller_interface_group: ig1
+        trust_self_signed_cert: True

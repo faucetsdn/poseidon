@@ -10,11 +10,11 @@ from poseidon.controllers.controllerproxy import ControllerProxy
 
 class CookieAuthControllerProxy(ControllerProxy):
 
-    def __init__(self, base_uri, login_resource, auth, *args, **kwargs):
+    def __init__(self, base_uri, login_resource, auth, trust_self_signed_cert, *args, **kwargs):
         super(CookieAuthControllerProxy, self).__init__(
             base_uri, *args, **kwargs)
         self.login_resource = login_resource
         self.auth = auth
         r = ControllerProxy.requests_retry_session(session=self.session).post(
-            urljoin(self.base_uri, login_resource), timeout=(1, 10), json=auth, verify=False)
+            urljoin(self.base_uri, login_resource), timeout=(1, 10), json=auth, verify=trust_self_signed_cert)
         self.session.cookies = r.cookies
