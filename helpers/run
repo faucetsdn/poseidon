@@ -69,6 +69,9 @@ fi
 if [[ -n "${learn_public_addresses}" ]]; then
 	d_comm+="-e learn_public_addresses=$learn_public_addresses "
 fi
+if [[ -n "${trust_self_signed_cert}" ]]; then
+	d_comm+="-e trust_self_signed_cert=$trust_self_signed_cert "
+fi
 if [[ -n "${FA_RABBIT_ENABLED}" ]]; then
 	d_comm+="-e FA_RABBIT_ENABLED=$FA_RABBIT_ENABLED "
 fi
