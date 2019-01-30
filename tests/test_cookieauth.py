@@ -51,6 +51,7 @@ def test_CookieAuthControllerProxy():
             login_resource='login',
             auth={
                 'username': username,
-                'password': password})
+                'password': password},
+            trust_self_signed_cert=True)
         res = proxy.get_resource('resource')
         assert res
