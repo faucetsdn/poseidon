@@ -13,6 +13,7 @@ declare controller_span_fabric_name
 declare controller_interface_group
 declare rabbit_enabled
 declare learn_public_addresses
+declare trust_self_signed_cert
 declare FA_RABBIT_ENABLED
 declare FA_RABBIT_HOST
 declare FA_RABBIT_EXCHANGE
