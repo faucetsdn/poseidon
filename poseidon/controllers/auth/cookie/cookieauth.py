@@ -16,5 +16,5 @@ class CookieAuthControllerProxy(ControllerProxy):
         self.login_resource = login_resource
         self.auth = auth
         r = ControllerProxy.requests_retry_session(session=self.session).post(
-            urljoin(self.base_uri, login_resource), timeout=(1, 10), json=auth, verify=trust_self_signed_cert)
+            urljoin(self.base_uri, login_resource), timeout=(1, 10), json=auth, verify=(not trust_self_signed_cert))
         self.session.cookies = r.cookies
