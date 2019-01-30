@@ -22,13 +22,13 @@ class ControllerProxy(object):
     def requests_retry_session(retries=3,
                                backoff_factor=0.3,
                                status_forcelist=(500, 502, 504),
-                               session=None,):
+                               session=None, *args, **kwargs):
         session = session or requests.Session()
         retry = Retry(total=retries,
                       read=retries,
                       connect=0,
                       backoff_factor=backoff_factor,
-                      status_forcelist=status_forcelist,)
+                      status_forcelist=status_forcelist, *args, **kwargs)
         adapter = HTTPAdapter(max_retries=retry)
         session.mount('http://', adapter)
         session.mount('https://', adapter)
@@ -36,11 +36,11 @@ class ControllerProxy(object):
 
     def get_resource(self, resource, *args, **kwargs):
         uri = urljoin(self.base_uri, resource)
-        return self.requests_retry_session(session=self.session).get(uri, timeout=(1, 10), *args, **kwargs)
+        return self.requests_retry_session(session=self.session, *args, **kwargs).get(uri, timeout=(1, 10), *args, **kwargs)
 
     def post_resource(self, resource, *args, **kwargs):
         uri = urljoin(self.base_uri, resource)
-        return self.requests_retry_session(session=self.session).post(uri, timeout=(1, 10), *args, **kwargs)
+        return self.requests_retry_session(session=self.session, *args, **kwargs).post(uri, timeout=(1, 10), *args, **kwargs)
 
     def request_resource(self, *args, **kwargs):
-        return self.requests_retry_session(session=self.session).request(timeout=(1, 10), *args, **kwargs)
+        return self.requests_retry_session(session=self.session, *args, **kwargs).request(timeout=(1, 10), *args, **kwargs)
