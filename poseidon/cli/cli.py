@@ -238,7 +238,15 @@ class PoseidonShell(cmd.Cmd):
                          'next state': PoseidonShell._get_next_state,
                          'first seen': PoseidonShell._get_first_seen,
                          'last seen': PoseidonShell._get_last_seen,
-                         'previous states': PoseidonShell._get_prev_states}
+                         'previous states': PoseidonShell._get_prev_states,
+                         'ipv4 os': PoseidonShell._get_ipv4_os,
+                         'ipv6 os': PoseidonShell._get_ipv6_os,
+                         'previous ipv4 oses': PoseidonShell._get_prev_ipv4_oses,
+                         'previous ipv6 oses': PoseidonShell._get_prev_ipv6_oses,
+                         'device type': PoseidonShell._get_device_type,
+                         'previous device types': PoseidonShell._get_prev_device_types,
+                         'device behavior': PoseidonShell._get_device_behavior,
+                         'previous device behaviors': PoseidonShell._get_prev_device_behaviors}
         # TODO #971 check if unqiue flag and limit columns (fields)
         for endpoint in endpoints:
             record = []
