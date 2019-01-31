@@ -161,6 +161,9 @@ class SDNConnect(object):
             for mac in macs:
                 try:
                     mac_info = self.r.hgetall(mac)
+                    self.logger.error('mac info: {0}'.format(mac_info))
+                    mac_info = self.r.hgetall(mac.decode('ascii'))
+                    self.logger.error('mac info ascii: {0}'.format(mac_info))
                     if mac_info['poseidon_hash'] == hash_id:
                         mac_addresses[mac] = {}
                         if 'timestamps' in mac_info:
