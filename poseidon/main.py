@@ -161,24 +161,21 @@ class SDNConnect(object):
             for mac in macs:
                 try:
                     mac_info = self.r.hgetall(mac)
-                    self.logger.error('mac info: {0}'.format(mac_info))
-                    mac_info = self.r.hgetall(mac.decode('ascii'))
-                    self.logger.error('mac info ascii: {0}'.format(mac_info))
-                    if mac_info['poseidon_hash'] == hash_id:
+                    if mac_info[b'poseidon_hash'] == hash_id:
                         mac_addresses[mac] = {}
-                        if 'timestamps' in mac_info:
+                        if b'timestamps' in mac_info:
                             try:
                                 timestamps = ast.literal_eval(
-                                    mac_info['timestamps'])
+                                    mac_info[b'timestamps'])
                                 for timestamp in timestamps:
                                     ml_info = self.r.hgetall(
                                         mac+'_'+str(timestamp))
                                     labels = ast.literal_eval(
-                                        ml_info['labels'])
+                                        ml_info[b'labels'])
                                     confidences = ast.literal_eval(
-                                        ml_info['confidences'])
-                                    behavior = ast.literal_eval(ml_info[mac_info['poseidon_hash']])[
-                                        'decisions']['behavior']
+                                        ml_info[b'confidences'])
+                                    behavior = ast.literal_eval(ml_info[mac_info[b'poseidon_hash']])[
+                                        b'decisions'][b'behavior']
                                     mac_addresses[mac][timestamp] = {
                                         'labels': labels, 'confidences': confidences, 'behavior': behavior}
                             except Exception as e:  # pragma: no cover
@@ -186,28 +183,28 @@ class SDNConnect(object):
                                     'Unable to get existing ML data from Redis because: {0}'.format(str(e)))
                         try:
                             poseidon_info = self.r.hgetall(
-                                mac_info['poseidon_hash'])
+                                mac_info[b'poseidon_hash'])
                             endpoint_data = ast.literal_eval(
-                                poseidon_info['endpoint_data'])
-                            if 'ipv4' in endpoint_data:
+                                poseidon_info[b'endpoint_data'])
+                            if b'ipv4' in endpoint_data:
                                 try:
                                     ipv4_info = self.r.hgetall(
-                                        endpoint_data['ipv4'])
-                                    ipv4_addresses[endpoint_data['ipv4']] = {}
+                                        endpoint_data[b'ipv4'])
+                                    ipv4_addresses[endpoint_data[b'ipv4']] = {}
                                     if ipv4_info and 'short_os' in ipv4_info:
-                                        ipv4_addresses[endpoint_data['ipv4']
-                                                       ]['os'] = ipv4_info['short_os']
+                                        ipv4_addresses[endpoint_data[b'ipv4']
+                                                       ]['os'] = ipv4_info[b'short_os']
                                 except Exception as e:  # pragma: no cover
                                     self.logger.error(
                                         'Unable to get existing ipv4 data from Redis because: {0}'.format(str(e)))
-                            if 'ipv6' in endpoint_data:
+                            if b'ipv6' in endpoint_data:
                                 try:
                                     ipv6_info = self.r.hgetall(
-                                        endpoint_data['ipv6'])
-                                    ipv6_addresses[endpoint_data['ipv6']] = {}
+                                        endpoint_data[b'ipv6'])
+                                    ipv6_addresses[endpoint_data['bipv6']] = {}
                                     if ipv6_info and 'short_os' in ipv6_info:
-                                        ipv6_addresses[endpoint_data['ipv6']
-                                                       ]['os'] = ipv6_info['short_os']
+                                        ipv6_addresses[endpoint_data[b'ipv6']
+                                                       ]['os'] = ipv6_info[b'short_os']
                                 except Exception as e:  # pragma: no cover
                                     self.logger.error(
                                         'Unable to get existing ipv6 data from Redis because: {0}'.format(str(e)))
