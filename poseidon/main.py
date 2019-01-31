@@ -162,8 +162,8 @@ class SDNConnect(object):
                 try:
                     mac_info = self.r.hgetall(mac)
                     if mac_info[b'poseidon_hash'] == hash_id.encode('utf-8'):
-                        self.logger.info('found hash')
                         mac_addresses[mac.decode('ascii')] = {}
+                        self.logger.info('mac_info {0}'.format(mac_info))
                         if b'timestamps' in mac_info:
                             self.logger.info('found timestamps')
                             try:
@@ -188,16 +188,14 @@ class SDNConnect(object):
                         try:
                             poseidon_info = self.r.hgetall(
                                 mac_info[b'poseidon_hash'])
-                            self.logger.info(
-                                'poseidon info {0}'.format(poseidon_info))
                             endpoint_data = ast.literal_eval(
                                 poseidon_info[b'endpoint_data'].decode('ascii'))
-                            self.logger.info(
-                                'endpoint data {0}'.format(endpoint_data))
-                            if 'ipv4' in endpoint_data:
+                            if 'ipv4' in endpoint_data and endpoint_data['ipv4'] not in ['None', 0]:
                                 try:
                                     ipv4_info = self.r.hgetall(
                                         endpoint_data['ipv4'])
+                                    self.logger.info(
+                                        'ipv4_info {0}'.format(ipv4_info))
                                     ipv4_addresses[endpoint_data['ipv4']] = {}
                                     if ipv4_info and 'short_os' in ipv4_info:
                                         ipv4_addresses[endpoint_data['ipv4']
@@ -205,10 +203,12 @@ class SDNConnect(object):
                                 except Exception as e:  # pragma: no cover
                                     self.logger.error(
                                         'Unable to get existing ipv4 data from Redis because: {0}'.format(str(e)))
-                            if 'ipv6' in endpoint_data:
+                            if 'ipv6' in endpoint_data and endpoint_data['ipv6'] not in ['None', 0]:
                                 try:
                                     ipv6_info = self.r.hgetall(
                                         endpoint_data['ipv6'])
+                                    self.logger.info(
+                                        'ipv6_info {0}'.format(ipv6_info))
                                     ipv6_addresses[endpoint_data['ipv6']] = {}
                                     if ipv6_info and 'short_os' in ipv6_info:
                                         ipv6_addresses[endpoint_data['ipv6']
