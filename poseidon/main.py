@@ -214,6 +214,8 @@ class SDNConnect(object):
                 except Exception as e:  # pragma: no cover
                     self.logger.error(
                         'Unable to get existing metadata for {0} from Redis because: {1}'.format(mac, str(e)))
+        self.logger.info('stored metadata: {0}, {1}, {2}'.format(
+            mac_addresses, ipv4_addresses, ipv6_addresses))
         return mac_addresses, ipv4_addresses, ipv6_addresses
 
     def get_sdn_context(self):
