@@ -244,6 +244,7 @@ class PoseidonShell(cmd.Cmd):
                          'previous ipv4 oses': PoseidonShell._get_prev_ipv4_oses,
                          'previous ipv6 oses': PoseidonShell._get_prev_ipv6_oses,
                          'device type': PoseidonShell._get_device_type,
+                         'device type (confidence)': PoseidonShell._get_device_type,
                          'previous device types': PoseidonShell._get_prev_device_types,
                          'device behavior': PoseidonShell._get_device_behavior,
                          'previous device behaviors': PoseidonShell._get_prev_device_behaviors}

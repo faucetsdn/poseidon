@@ -428,10 +428,11 @@ class SDNConnect(object):
                 serialized_endpoints = []
                 for endpoint in self.endpoints:
                     # set metadata
-                    mac_addresses, ipv4_addresses, ipv6_addresses = get_stored_metadata(
+                    mac_addresses, ipv4_addresses, ipv6_addresses = self.get_stored_metadata(
                         str(endpoint.name))
                     endpoint.metadata = {'mac_addresses': mac_addresses,
-                                         'ipv4_addresses': ipv4_addresses, 'ipv6_addresses': ipv6_addresses}
+                                         'ipv4_addresses': ipv4_addresses,
+                                         'ipv6_addresses': ipv6_addresses}
                     redis_endpoint_data = {}
                     redis_endpoint_data['name'] = str(endpoint.name)
                     redis_endpoint_data['state'] = str(endpoint.state)
