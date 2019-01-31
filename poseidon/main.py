@@ -162,11 +162,15 @@ class SDNConnect(object):
                 try:
                     mac_info = self.r.hgetall(mac)
                     if mac_info[b'poseidon_hash'] == hash_id:
+                        self.logger.info('found hash')
                         mac_addresses[mac] = {}
                         if b'timestamps' in mac_info:
+                            self.logger.info('found timestamps')
                             try:
                                 timestamps = ast.literal_eval(
                                     mac_info[b'timestamps'])
+                                self.logger.info(
+                                    'timestamps {0}'.format(timestamps))
                                 for timestamp in timestamps:
                                     ml_info = self.r.hgetall(
                                         mac+'_'+str(timestamp))
@@ -184,8 +188,12 @@ class SDNConnect(object):
                         try:
                             poseidon_info = self.r.hgetall(
                                 mac_info[b'poseidon_hash'])
+                            self.logger.info(
+                                'poseidon info {0}'.format(poseidon_info))
                             endpoint_data = ast.literal_eval(
                                 poseidon_info[b'endpoint_data'])
+                            self.logger.info(
+                                'endpoint data {0}'.format(endpoint_data))
                             if b'ipv4' in endpoint_data:
                                 try:
                                     ipv4_info = self.r.hgetall(
