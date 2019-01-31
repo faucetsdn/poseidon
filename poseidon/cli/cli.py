@@ -28,7 +28,9 @@ class PoseidonShell(cmd.Cmd):
     all_fields = [
         'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4', 'IPv6',
         'Ignored', 'State', 'Next State', 'First Seen', 'Last Seen',
-        'Previous States'
+        'Previous States', 'IPv4 OS', 'Previous IPv4 OSes', 'IPv6 OS',
+        'Previous IPv6 OSes', 'Device Type (Confidence)',
+        'Previous Device Types', 'Device Behavior', 'Previous Device Behaviors'
     ]
     what_completions = [
         'is'
@@ -150,6 +152,46 @@ class PoseidonShell(cmd.Cmd):
     def _get_last_seen(endpoint):
         return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
             endpoint.p_prev_states[-1][1])) + ' (' + duration(endpoint.p_prev_states[-1][1]) + ')'
+
+    @staticmethod
+    def _get_device_type(endpoint):
+        # TODO results from ML
+        return str(endpoint.metadata)
+
+    @staticmethod
+    def _get_ipv4_os(endpoint):
+        # TODO results from p0f
+        return
+
+    @staticmethod
+    def _get_ipv6_os(endpoint):
+        # TODO results from p0f
+        return
+
+    @staticmethod
+    def _get_prev_device_types(endpoint):
+        # TODO results from ML
+        return
+
+    @staticmethod
+    def _get_device_behavior(endpoint):
+        # TODO results from ML
+        return
+
+    @staticmethod
+    def _get_prev_device_behaviors(endpoint):
+        # TODO results from ML
+        return
+
+    @staticmethod
+    def _get_prev_ipv4_oses(endpoint):
+        # TODO results from p0f
+        return
+
+    @staticmethod
+    def _get_prev_ipv6_oses(endpoint):
+        # TODO results from p0f
+        return
 
     @staticmethod
     def _get_prev_states(endpoint):
