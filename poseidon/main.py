@@ -168,19 +168,19 @@ class SDNConnect(object):
                             self.logger.info('found timestamps')
                             try:
                                 timestamps = ast.literal_eval(
-                                    mac_info[b'timestamps'])
+                                    mac_info[b'timestamps'].decode('ascii'))
                                 self.logger.info(
                                     'timestamps {0}'.format(timestamps))
                                 for timestamp in timestamps:
                                     ml_info = self.r.hgetall(
                                         mac+'_'+str(timestamp))
                                     labels = ast.literal_eval(
-                                        ml_info[b'labels'])
+                                        ml_info[b'labels'].decode('ascii'))
                                     confidences = ast.literal_eval(
-                                        ml_info[b'confidences'])
-                                    behavior = ast.literal_eval(ml_info[mac_info[b'poseidon_hash']])[
-                                        b'decisions'][b'behavior']
-                                    mac_addresses[mac][timestamp] = {
+                                        ml_info[b'confidences'].decode('ascii'))
+                                    behavior = ast.literal_eval(ml_info[mac_info[b'poseidon_hash']].decode('ascii'))[
+                                        'decisions']['behavior']
+                                    mac_addresses[mac.decode('ascii')][str(timestamp)] = {
                                         'labels': labels, 'confidences': confidences, 'behavior': behavior}
                             except Exception as e:  # pragma: no cover
                                 self.logger.error(
