@@ -172,9 +172,8 @@ class SDNConnect(object):
                                 self.logger.info(
                                     'timestamps {0}'.format(timestamps))
                                 for timestamp in timestamps:
-                                    b_timestamp = '_' + \
-                                        str(timestamp).encode('utf-8')
-                                    ml_info = self.r.hgetall(mac+b_timestamp)
+                                    ml_info = self.r.hgetall(
+                                        mac.decode('ascii')+'_'+str(timestamp))
                                     labels = ast.literal_eval(
                                         ml_info[b'labels'].decode('ascii'))
                                     confidences = ast.literal_eval(
