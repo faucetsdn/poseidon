@@ -175,8 +175,18 @@ class PoseidonShell(cmd.Cmd):
 
     @staticmethod
     def _get_device_behavior(endpoint):
-        # TODO results from ML
-        return
+        result = 'No behavior yet.'
+        endpoint_mac = PoseidonShell._get_mac(endpoint)
+        if 'mac_addresses' in endpoint.metadata and endpoint_mac in endpoint.metadata['mac_addresses']:
+            metadata = endpoint.metadata['mac_addresses'][endpoint_mac]
+            newest = 0
+            for timestamp in metadata:
+                if timestamp > newest:
+                    newest = timestamp
+            if newest != 0:
+                if 'behavior' in metadata[newest]:
+                    result = metadata[newest]['behavior']
+        return result
 
     @staticmethod
     def _get_prev_device_behaviors(endpoint):
