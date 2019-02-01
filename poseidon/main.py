@@ -163,14 +163,10 @@ class SDNConnect(object):
                     mac_info = self.r.hgetall(mac)
                     if mac_info[b'poseidon_hash'] == hash_id.encode('utf-8'):
                         mac_addresses[mac.decode('ascii')] = {}
-                        self.logger.info('mac_info {0}'.format(mac_info))
                         if b'timestamps' in mac_info:
-                            self.logger.info('found timestamps')
                             try:
                                 timestamps = ast.literal_eval(
                                     mac_info[b'timestamps'].decode('ascii'))
-                                self.logger.info(
-                                    'timestamps {0}'.format(timestamps))
                                 for timestamp in timestamps:
                                     ml_info = self.r.hgetall(
                                         mac.decode('ascii')+'_'+str(timestamp))
@@ -194,8 +190,6 @@ class SDNConnect(object):
                                 try:
                                     ipv4_info = self.r.hgetall(
                                         endpoint_data['ipv4'])
-                                    self.logger.info(
-                                        'ipv4_info {0}'.format(ipv4_info))
                                     ipv4_addresses[endpoint_data['ipv4']] = {}
                                     if ipv4_info and 'short_os' in ipv4_info:
                                         ipv4_addresses[endpoint_data['ipv4']
@@ -207,8 +201,6 @@ class SDNConnect(object):
                                 try:
                                     ipv6_info = self.r.hgetall(
                                         endpoint_data['ipv6'])
-                                    self.logger.info(
-                                        'ipv6_info {0}'.format(ipv6_info))
                                     ipv6_addresses[endpoint_data['ipv6']] = {}
                                     if ipv6_info and 'short_os' in ipv6_info:
                                         ipv6_addresses[endpoint_data['ipv6']
