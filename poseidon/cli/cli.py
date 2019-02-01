@@ -28,7 +28,7 @@ class PoseidonShell(cmd.Cmd):
     all_fields = [
         'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4', 'IPv6',
         'Ignored', 'State', 'Next State', 'First Seen', 'Last Seen',
-        'Previous States', 'IPv4 OS', 'Previous IPv4 OSes', 'IPv6 OS',
+        'Previous States', 'IPv4 OS', 'IPv6 OS', 'Previous IPv4 OSes',
         'Previous IPv6 OSes', 'Device Type (Confidence)',
         'Previous Device Types', 'Device Behavior', 'Previous Device Behaviors'
     ]
@@ -208,7 +208,7 @@ class PoseidonShell(cmd.Cmd):
     @staticmethod
     def _get_prev_device_types(endpoint):
         # TODO results from ML
-        return str(endpoint.metadata)
+        return
 
     @staticmethod
     def _get_prev_device_behaviors(endpoint):
@@ -255,41 +255,45 @@ class PoseidonShell(cmd.Cmd):
             current_state[1])) + ' (' + duration(current_state[1]) + ')'
         return output
 
-    @staticmethod
-    def display_results(endpoints, fields, sort_by=0, max_width=0, unique=False):
+    def display_results(self, endpoints, fields, sort_by=0, max_width=0, unique=False):
         matrix = []
-        fields_lookup = {'id': PoseidonShell._get_name,
-                         'mac address': PoseidonShell._get_mac,
-                         'switch': PoseidonShell._get_switch,
-                         'port': PoseidonShell._get_port,
-                         'vlan': PoseidonShell._get_vlan,
-                         'ipv4': PoseidonShell._get_ipv4,
-                         'ipv6': PoseidonShell._get_ipv6,
-                         'ignored': PoseidonShell._get_ignored,
-                         'state': PoseidonShell._get_state,
-                         'next state': PoseidonShell._get_next_state,
-                         'first seen': PoseidonShell._get_first_seen,
-                         'last seen': PoseidonShell._get_last_seen,
-                         'previous states': PoseidonShell._get_prev_states,
-                         'ipv4 os': PoseidonShell._get_ipv4_os,
-                         'ipv6 os': PoseidonShell._get_ipv6_os,
-                         'previous ipv4 oses': PoseidonShell._get_prev_ipv4_oses,
-                         'previous ipv6 oses': PoseidonShell._get_prev_ipv6_oses,
-                         'device type': PoseidonShell._get_device_type,
-                         'device type (confidence)': PoseidonShell._get_device_type,
-                         'previous device types': PoseidonShell._get_prev_device_types,
-                         'device behavior': PoseidonShell._get_device_behavior,
-                         'previous device behaviors': PoseidonShell._get_prev_device_behaviors}
+        fields_lookup = {'id': (PoseidonShell._get_name, 0),
+                         'mac address': (PoseidonShell._get_mac, 1),
+                         'switch': (PoseidonShell._get_switch, 2),
+                         'port': (PoseidonShell._get_port, 3),
+                         'vlan': (PoseidonShell._get_vlan, 4),
+                         'ipv4': (PoseidonShell._get_ipv4, 5),
+                         'ipv6': (PoseidonShell._get_ipv6, 6),
+                         'ignored': (PoseidonShell._get_ignored, 7),
+                         'state': (PoseidonShell._get_state, 8),
+                         'next state': (PoseidonShell._get_next_state, 9),
+                         'first seen': (PoseidonShell._get_first_seen, 10),
+                         'last seen': (PoseidonShell._get_last_seen, 11),
+                         'previous states': (PoseidonShell._get_prev_states, 12),
+                         'ipv4 os': (PoseidonShell._get_ipv4_os, 13),
+                         'ipv6 os': (PoseidonShell._get_ipv6_os, 14),
+                         'previous ipv4 oses': (PoseidonShell._get_prev_ipv4_oses, 15),
+                         'previous ipv6 oses': (PoseidonShell._get_prev_ipv6_oses, 16),
+                         'device type': (PoseidonShell._get_device_type, 17),
+                         'device type (confidence)': (PoseidonShell._get_device_type, 17),
+                         'previous device types': (PoseidonShell._get_prev_device_types, 18),
+                         'device behavior': (PoseidonShell._get_device_behavior, 19),
+                         'previous device behaviors': (PoseidonShell._get_prev_device_behaviors, 20)}
         # TODO #971 check if unqiue flag and limit columns (fields)
         for endpoint in endpoints:
             record = []
             for field in fields:
-                record.append(fields_lookup[field.lower()](endpoint))
+                record.append(fields_lookup[field.lower()][0](endpoint))
             matrix.append(record)
         if len(matrix) > 0:
             matrix = sorted(matrix, key=lambda endpoint: endpoint[sort_by])
+            # swap out field names for header
+            fields_header = []
+            for field in fields:
+                fields_header.append(
+                    self.all_fields[fields_lookup[field.lower()][1]])
             # set the header
-            matrix.insert(0, fields)
+            matrix.insert(0, fields_header)
             table = Texttable(max_width=max_width)
             # make all the column types be text
             table.set_cols_dtype(['t']*len(fields))
@@ -349,7 +353,7 @@ class PoseidonShell(cmd.Cmd):
         fields, sort_by, max_width, unique = self._check_flags(flags, fields)
 
         # TODO print more info
-        PoseidonShell.display_results(Commands().what_is(
+        self.display_results(Commands().what_is(
             arg), fields, sort_by=sort_by, max_width=max_width, unique=unique)
 
     @exception
@@ -367,7 +371,7 @@ class PoseidonShell(cmd.Cmd):
         flags, arg = PoseidonShell.get_flags(arg)
         fields, sort_by, max_width, unique = self._check_flags(flags, fields)
 
-        PoseidonShell.display_results(
+        self.display_results(
             Commands().history_of(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique)
 
     @exception
@@ -385,7 +389,7 @@ class PoseidonShell(cmd.Cmd):
         flags, arg = PoseidonShell.get_flags(arg)
         fields, sort_by, max_width, unique = self._check_flags(flags, fields)
 
-        PoseidonShell.display_results(
+        self.display_results(
             Commands().where_is(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique)
 
     @exception
@@ -405,7 +409,7 @@ class PoseidonShell(cmd.Cmd):
         fields, sort_by, max_width, unique = self._check_flags(flags, fields)
 
         print('Collecting on the following devices:')
-        PoseidonShell.display_results(
+        self.display_results(
             Commands().collect_on(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique)
 
     @exception
@@ -425,7 +429,7 @@ class PoseidonShell(cmd.Cmd):
         fields, sort_by, max_width, unique = self._check_flags(flags, fields)
 
         print('Ignored the following devices:')
-        PoseidonShell.display_results(
+        self.display_results(
             Commands().ignore(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique)
 
     @exception
@@ -445,7 +449,7 @@ class PoseidonShell(cmd.Cmd):
         fields, sort_by, max_width, unique = self._check_flags(flags, fields)
 
         print('Cleared the following devices that were being ignored:')
-        PoseidonShell.display_results(
+        self.display_results(
             Commands().clear_ignored(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique)
 
     @exception
@@ -473,7 +477,7 @@ class PoseidonShell(cmd.Cmd):
         else:
             endpoints = Commands().remove(arg)
         print('Removed the following devices:')
-        PoseidonShell.display_results(
+        self.display_results(
             endpoints, fields, sort_by=sort_by, max_width=max_width, unique=unique)
 
     @exception
@@ -491,7 +495,7 @@ class PoseidonShell(cmd.Cmd):
         flags, arg = PoseidonShell.get_flags(arg)
         fields, sort_by, max_width, unique = self._check_flags(flags, fields)
 
-        PoseidonShell.display_results(Commands().show_devices(
+        self.display_results(Commands().show_devices(
             arg), fields, sort_by=sort_by, max_width=max_width, unique=unique)
 
     @staticmethod
