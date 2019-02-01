@@ -558,6 +558,9 @@ class Monitor(object):
             found_work, item = self.get_q_item()
             ml_returns = {}
 
+            # retrieve endpoints from redis
+            self.s.get_stored_endpoints()
+
             if found_work and item[0] == self.controller['FA_RABBIT_ROUTING_KEY']:
                 self.faucet_event.append(self.format_rabbit_message(item))
                 self.logger.debug(
@@ -635,6 +638,8 @@ class Monitor(object):
                             self.s.investigations -= 1
                             endpoint.p_prev_states.append(
                                 (endpoint.state, int(time.time())))
+            # store changes to state
+            self.s.store_endpoints()
 
     def get_q_item(self):
         '''
