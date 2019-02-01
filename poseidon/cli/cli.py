@@ -155,27 +155,44 @@ class PoseidonShell(cmd.Cmd):
 
     @staticmethod
     def _get_device_type(endpoint):
-        # TODO results from ML
-        return str(endpoint.metadata)
+        result = 'No type identified yet.'
+        endpoint_mac = PoseidonShell._get_mac(endpoint)
+        if 'mac_addresses' in endpoint.metadata and endpoint_mac in endpoint.metadata['mac_addresses']:
+            metadata = endpoint.metadata['mac_addresses'][endpoint_mac]
+            newest = '0'
+            for timestamp in metadata:
+                if timestamp > newest:
+                    newest = timestamp
+            if newest is not '0':
+                if 'labels' in metadata[newest]:
+                    result = metadata[newest]['labels'][0]
+                if 'confidences' in metadata[newest]:
+                    result += ' ('+metadata[newest]['confidences'][0]+')'
+        return result
 
     @staticmethod
     def _get_ipv4_os(endpoint):
-        # TODO results from p0f
-        return
+        result = 'No OS identified yet.'
+        endpoint_ip = PoseidonShell._get_ipv4(endpoint)
+        if 'ipv4_addresses' in endpoint.metadata and endpoint_ip in endpoint.metadata['ipv4_addresses']:
+            metadata = endpoint.metadata['ipv4_addresses'][endpoint_ip]
+            if 'os' in metadata:
+                result = metadata['os']
+        return result
 
     @staticmethod
     def _get_ipv6_os(endpoint):
-        # TODO results from p0f
-        return
-
-    @staticmethod
-    def _get_prev_device_types(endpoint):
-        # TODO results from ML
-        return
+        result = 'No OS identified yet.'
+        endpoint_ip = PoseidonShell._get_ipv6(endpoint)
+        if 'ipv6_addresses' in endpoint.metadata and endpoint_ip in endpoint.metadata['ipv6_addresses']:
+            metadata = endpoint.metadata['ipv6_addresses'][endpoint_ip]
+            if 'os' in metadata:
+                result = metadata['os']
+        return result
 
     @staticmethod
     def _get_device_behavior(endpoint):
-        result = 'No behavior yet.'
+        result = 'No behavior identified yet.'
         endpoint_mac = PoseidonShell._get_mac(endpoint)
         if 'mac_addresses' in endpoint.metadata and endpoint_mac in endpoint.metadata['mac_addresses']:
             metadata = endpoint.metadata['mac_addresses'][endpoint_mac]
@@ -187,6 +204,11 @@ class PoseidonShell(cmd.Cmd):
                 if 'behavior' in metadata[newest]:
                     result = metadata[newest]['behavior']
         return result
+
+    @staticmethod
+    def _get_prev_device_types(endpoint):
+        # TODO results from ML
+        return str(endpoint.metadata)
 
     @staticmethod
     def _get_prev_device_behaviors(endpoint):
