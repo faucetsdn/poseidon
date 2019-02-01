@@ -31,9 +31,10 @@ def test_poseidonshell():
     answer = PoseidonShell.completion(
         'what', 'foo what', ['what ok yeah'])
     assert answer == ['what ok yeah']
-    fields, sort_by, max_width, unique = shell._check_flags(
+    fields, sort_by, max_width, unique, nonzero = shell._check_flags(
         {'fields': ['foo'], 'sort_by': '1', 'max_width': '20'}, ['id'])
     assert unique == False
+    assert nonzero == False
     assert fields == ['foo']
     assert sort_by == 1
     assert max_width == 20
