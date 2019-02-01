@@ -179,11 +179,11 @@ class PoseidonShell(cmd.Cmd):
         endpoint_mac = PoseidonShell._get_mac(endpoint)
         if 'mac_addresses' in endpoint.metadata and endpoint_mac in endpoint.metadata['mac_addresses']:
             metadata = endpoint.metadata['mac_addresses'][endpoint_mac]
-            newest = 0
+            newest = '0'
             for timestamp in metadata:
                 if timestamp > newest:
                     newest = timestamp
-            if newest != 0:
+            if newest is not '0':
                 if 'behavior' in metadata[newest]:
                     result = metadata[newest]['behavior']
         return result

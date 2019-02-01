@@ -558,9 +558,6 @@ class Monitor(object):
             found_work, item = self.get_q_item()
             ml_returns = {}
 
-            # retrieve endpoints from redis
-            self.s.get_stored_endpoints()
-
             if found_work and item[0] == self.controller['FA_RABBIT_ROUTING_KEY']:
                 self.faucet_event.append(self.format_rabbit_message(item))
                 self.logger.debug(
@@ -591,6 +588,8 @@ class Monitor(object):
                             ep.unknown()
                         ep.p_prev_states.append(
                             (ep.state, int(time.time())))
+                        # store changes to state
+                        self.s.store_endpoints()
 
             for endpoint in self.s.endpoints:
                 if not endpoint.ignore:
@@ -606,6 +605,8 @@ class Monitor(object):
                             if not status:
                                 self.logger.warning(
                                     'Unable to mirror the endpoint: {0}'.format(endpoint.name))
+                            # store changes to state
+                            self.s.store_endpoints()
                     elif endpoint.state == 'unknown':
                         # move to mirroring state
                         if self.s.investigations < self.controller['max_concurrent_reinvestigations']:
@@ -623,6 +624,8 @@ class Monitor(object):
                             endpoint.queue()
                             endpoint.p_prev_states.append(
                                 (endpoint.state, int(time.time())))
+                        # store changes to state
+                        self.s.store_endpoints()
                     elif endpoint.state in ['mirroring', 'reinvestigating']:
                         cur_time = int(time.time())
                         # timeout after 2 times the reinvestigation frequency
@@ -638,8 +641,8 @@ class Monitor(object):
                             self.s.investigations -= 1
                             endpoint.p_prev_states.append(
                                 (endpoint.state, int(time.time())))
-            # store changes to state
-            self.s.store_endpoints()
+                            # store changes to state
+                            self.s.store_endpoints()
 
     def get_q_item(self):
         '''
