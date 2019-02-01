@@ -77,6 +77,7 @@ class PoseidonShell(cmd.Cmd):
                 flags[word[1:]] = True
             else:
                 other_words.append(word)
+        other_words = ' '.join(other_words)
         first = other_words.split('--')
         not_flags += first[0].split()
         first.pop(0)
