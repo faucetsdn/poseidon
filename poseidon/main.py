@@ -191,9 +191,9 @@ class SDNConnect(object):
                                     ipv4_info = self.r.hgetall(
                                         endpoint_data['ipv4'])
                                     ipv4_addresses[endpoint_data['ipv4']] = {}
-                                    if ipv4_info and 'short_os' in ipv4_info:
+                                    if ipv4_info and b'short_os' in ipv4_info:
                                         ipv4_addresses[endpoint_data['ipv4']
-                                                       ]['os'] = ipv4_info['short_os']
+                                                       ]['os'] = ipv4_info[b'short_os'].decode('ascii')
                                 except Exception as e:  # pragma: no cover
                                     self.logger.error(
                                         'Unable to get existing ipv4 data from Redis because: {0}'.format(str(e)))
@@ -202,9 +202,9 @@ class SDNConnect(object):
                                     ipv6_info = self.r.hgetall(
                                         endpoint_data['ipv6'])
                                     ipv6_addresses[endpoint_data['ipv6']] = {}
-                                    if ipv6_info and 'short_os' in ipv6_info:
+                                    if ipv6_info and b'short_os' in ipv6_info:
                                         ipv6_addresses[endpoint_data['ipv6']
-                                                       ]['os'] = ipv6_info['short_os']
+                                                       ]['os'] = ipv6_info[b'short_os'].decode('ascii')
                                 except Exception as e:  # pragma: no cover
                                     self.logger.error(
                                         'Unable to get existing ipv6 data from Redis because: {0}'.format(str(e)))
