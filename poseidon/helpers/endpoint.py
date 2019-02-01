@@ -22,6 +22,10 @@ class EndpointDecoder(object):
                 self.endpoint.ignore = False
         else:
             self.endpoint.ignore = False
+        if 'metadata' in e:
+            self.endpoint.metadata = e['metadata']
+        else:
+            self.endpoint.metadata = {}
         self.endpoint.endpoint_data = e['endpoint_data']
         self.endpoint.p_next_state = e['p_next_state']
         self.endpoint.p_prev_states = e['p_prev_states']
@@ -90,6 +94,7 @@ class Endpoint(object):
         self.endpoint_data = None
         self.p_next_state = None
         self.p_prev_states = []
+        self.metadata = {}
 
     def encode(self):
         endpoint_d = {}
@@ -99,6 +104,7 @@ class Endpoint(object):
         endpoint_d['endpoint_data'] = self.endpoint_data
         endpoint_d['p_next_state'] = self.p_next_state
         endpoint_d['p_prev_states'] = self.p_prev_states
+        endpoint_d['metadata'] = self.metadata
         return str(json.dumps(endpoint_d))
 
     @staticmethod

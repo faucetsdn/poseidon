@@ -28,7 +28,9 @@ class PoseidonShell(cmd.Cmd):
     all_fields = [
         'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4', 'IPv6',
         'Ignored', 'State', 'Next State', 'First Seen', 'Last Seen',
-        'Previous States'
+        'Previous States', 'IPv4 OS', 'Previous IPv4 OSes', 'IPv6 OS',
+        'Previous IPv6 OSes', 'Device Type (Confidence)',
+        'Previous Device Types', 'Device Behavior', 'Previous Device Behaviors'
     ]
     what_completions = [
         'is'
@@ -123,11 +125,11 @@ class PoseidonShell(cmd.Cmd):
 
     @staticmethod
     def _get_ipv4(endpoint):
-        return endpoint.endpoint_data['ipv4']
+        return str(endpoint.endpoint_data['ipv4'])
 
     @staticmethod
     def _get_ipv6(endpoint):
-        return endpoint.endpoint_data['ipv6']
+        return str(endpoint.endpoint_data['ipv6'])
 
     @staticmethod
     def _get_ignored(endpoint):
@@ -150,6 +152,78 @@ class PoseidonShell(cmd.Cmd):
     def _get_last_seen(endpoint):
         return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
             endpoint.p_prev_states[-1][1])) + ' (' + duration(endpoint.p_prev_states[-1][1]) + ')'
+
+    @staticmethod
+    def _get_device_type(endpoint):
+        result = 'No type identified yet.'
+        endpoint_mac = PoseidonShell._get_mac(endpoint)
+        if 'mac_addresses' in endpoint.metadata and endpoint_mac in endpoint.metadata['mac_addresses']:
+            metadata = endpoint.metadata['mac_addresses'][endpoint_mac]
+            newest = '0'
+            for timestamp in metadata:
+                if timestamp > newest:
+                    newest = timestamp
+            if newest is not '0':
+                if 'labels' in metadata[newest]:
+                    result = metadata[newest]['labels'][0]
+                if 'confidences' in metadata[newest]:
+                    result += ' ('+str(metadata[newest]['confidences'][0])+')'
+        return result
+
+    @staticmethod
+    def _get_ipv4_os(endpoint):
+        result = 'No OS identified yet.'
+        endpoint_ip = PoseidonShell._get_ipv4(endpoint)
+        if 'ipv4_addresses' in endpoint.metadata and endpoint_ip in endpoint.metadata['ipv4_addresses']:
+            metadata = endpoint.metadata['ipv4_addresses'][endpoint_ip]
+            if 'os' in metadata:
+                result = metadata['os']
+        return result
+
+    @staticmethod
+    def _get_ipv6_os(endpoint):
+        result = 'No OS identified yet.'
+        endpoint_ip = PoseidonShell._get_ipv6(endpoint)
+        if 'ipv6_addresses' in endpoint.metadata and endpoint_ip in endpoint.metadata['ipv6_addresses']:
+            metadata = endpoint.metadata['ipv6_addresses'][endpoint_ip]
+            if 'os' in metadata:
+                result = metadata['os']
+        return result
+
+    @staticmethod
+    def _get_device_behavior(endpoint):
+        result = 'No behavior identified yet.'
+        endpoint_mac = PoseidonShell._get_mac(endpoint)
+        if 'mac_addresses' in endpoint.metadata and endpoint_mac in endpoint.metadata['mac_addresses']:
+            metadata = endpoint.metadata['mac_addresses'][endpoint_mac]
+            newest = '0'
+            for timestamp in metadata:
+                if timestamp > newest:
+                    newest = timestamp
+            if newest is not '0':
+                if 'behavior' in metadata[newest]:
+                    result = metadata[newest]['behavior']
+        return result
+
+    @staticmethod
+    def _get_prev_device_types(endpoint):
+        # TODO results from ML
+        return str(endpoint.metadata)
+
+    @staticmethod
+    def _get_prev_device_behaviors(endpoint):
+        # TODO results from ML
+        return
+
+    @staticmethod
+    def _get_prev_ipv4_oses(endpoint):
+        # TODO results from p0f
+        return
+
+    @staticmethod
+    def _get_prev_ipv6_oses(endpoint):
+        # TODO results from p0f
+        return
 
     @staticmethod
     def _get_prev_states(endpoint):
@@ -196,7 +270,16 @@ class PoseidonShell(cmd.Cmd):
                          'next state': PoseidonShell._get_next_state,
                          'first seen': PoseidonShell._get_first_seen,
                          'last seen': PoseidonShell._get_last_seen,
-                         'previous states': PoseidonShell._get_prev_states}
+                         'previous states': PoseidonShell._get_prev_states,
+                         'ipv4 os': PoseidonShell._get_ipv4_os,
+                         'ipv6 os': PoseidonShell._get_ipv6_os,
+                         'previous ipv4 oses': PoseidonShell._get_prev_ipv4_oses,
+                         'previous ipv6 oses': PoseidonShell._get_prev_ipv6_oses,
+                         'device type': PoseidonShell._get_device_type,
+                         'device type (confidence)': PoseidonShell._get_device_type,
+                         'previous device types': PoseidonShell._get_prev_device_types,
+                         'device behavior': PoseidonShell._get_device_behavior,
+                         'previous device behaviors': PoseidonShell._get_prev_device_behaviors}
         # TODO #971 check if unqiue flag and limit columns (fields)
         for endpoint in endpoints:
             record = []

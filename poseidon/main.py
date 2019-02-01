@@ -147,6 +147,75 @@ class SDNConnect(object):
                     'Unable to get existing endpoints from Redis because {0}'.format(str(e)))
         return
 
+    def get_stored_metadata(self, hash_id):
+        mac_addresses = {}
+        ipv4_addresses = {}
+        ipv6_addresses = {}
+        if self.r:
+            macs = []
+            try:
+                macs = self.r.smembers('mac_addresses')
+            except Exception as e:  # pragma: no cover
+                self.logger.error(
+                    'Unable to get existing mac addresses from Redis because: {0}'.format(str(e)))
+            for mac in macs:
+                try:
+                    mac_info = self.r.hgetall(mac)
+                    if mac_info[b'poseidon_hash'] == hash_id.encode('utf-8'):
+                        mac_addresses[mac.decode('ascii')] = {}
+                        if b'timestamps' in mac_info:
+                            try:
+                                timestamps = ast.literal_eval(
+                                    mac_info[b'timestamps'].decode('ascii'))
+                                for timestamp in timestamps:
+                                    ml_info = self.r.hgetall(
+                                        mac.decode('ascii')+'_'+str(timestamp))
+                                    labels = ast.literal_eval(
+                                        ml_info[b'labels'].decode('ascii'))
+                                    confidences = ast.literal_eval(
+                                        ml_info[b'confidences'].decode('ascii'))
+                                    behavior = ast.literal_eval(ml_info[mac_info[b'poseidon_hash']].decode('ascii'))[
+                                        'decisions']['behavior']
+                                    mac_addresses[mac.decode('ascii')][str(timestamp)] = {
+                                        'labels': labels, 'confidences': confidences, 'behavior': behavior}
+                            except Exception as e:  # pragma: no cover
+                                self.logger.error(
+                                    'Unable to get existing ML data from Redis because: {0}'.format(str(e)))
+                        try:
+                            poseidon_info = self.r.hgetall(
+                                mac_info[b'poseidon_hash'])
+                            endpoint_data = ast.literal_eval(
+                                poseidon_info[b'endpoint_data'].decode('ascii'))
+                            if 'ipv4' in endpoint_data and endpoint_data['ipv4'] not in ['None', 0]:
+                                try:
+                                    ipv4_info = self.r.hgetall(
+                                        endpoint_data['ipv4'])
+                                    ipv4_addresses[endpoint_data['ipv4']] = {}
+                                    if ipv4_info and b'short_os' in ipv4_info:
+                                        ipv4_addresses[endpoint_data['ipv4']
+                                                       ]['os'] = ipv4_info[b'short_os'].decode('ascii')
+                                except Exception as e:  # pragma: no cover
+                                    self.logger.error(
+                                        'Unable to get existing ipv4 data from Redis because: {0}'.format(str(e)))
+                            if 'ipv6' in endpoint_data and endpoint_data['ipv6'] not in ['None', 0]:
+                                try:
+                                    ipv6_info = self.r.hgetall(
+                                        endpoint_data['ipv6'])
+                                    ipv6_addresses[endpoint_data['ipv6']] = {}
+                                    if ipv6_info and b'short_os' in ipv6_info:
+                                        ipv6_addresses[endpoint_data['ipv6']
+                                                       ]['os'] = ipv6_info[b'short_os'].decode('ascii')
+                                except Exception as e:  # pragma: no cover
+                                    self.logger.error(
+                                        'Unable to get existing ipv6 data from Redis because: {0}'.format(str(e)))
+                        except Exception as e:  # pragma: no cover
+                            self.logger.error(
+                                'Unable to get existing endpoint data from Redis because: {0}'.format(str(e)))
+                except Exception as e:  # pragma: no cover
+                    self.logger.error(
+                        'Unable to get existing metadata for {0} from Redis because: {1}'.format(mac, str(e)))
+        return mac_addresses, ipv4_addresses, ipv6_addresses
+
     def get_sdn_context(self):
         if 'TYPE' in self.controller and self.controller['TYPE'] == 'bcf':
             try:
@@ -358,6 +427,12 @@ class SDNConnect(object):
             try:
                 serialized_endpoints = []
                 for endpoint in self.endpoints:
+                    # set metadata
+                    mac_addresses, ipv4_addresses, ipv6_addresses = self.get_stored_metadata(
+                        str(endpoint.name))
+                    endpoint.metadata = {'mac_addresses': mac_addresses,
+                                         'ipv4_addresses': ipv4_addresses,
+                                         'ipv6_addresses': ipv6_addresses}
                     redis_endpoint_data = {}
                     redis_endpoint_data['name'] = str(endpoint.name)
                     redis_endpoint_data['state'] = str(endpoint.state)
@@ -368,6 +443,7 @@ class SDNConnect(object):
                         endpoint.p_next_state)
                     redis_endpoint_data['prev_states'] = str(
                         endpoint.p_next_state)
+                    redis_endpoint_data['metadata'] = str(endpoint.metadata)
                     self.r.hmset(endpoint.name, redis_endpoint_data)
                     mac = endpoint.endpoint_data['mac']
                     self.r.hmset(mac, {'poseidon_hash': str(endpoint.name)})
@@ -512,6 +588,8 @@ class Monitor(object):
                             ep.unknown()
                         ep.p_prev_states.append(
                             (ep.state, int(time.time())))
+                        # store changes to state
+                        self.s.store_endpoints()
 
             for endpoint in self.s.endpoints:
                 if not endpoint.ignore:
@@ -527,6 +605,8 @@ class Monitor(object):
                             if not status:
                                 self.logger.warning(
                                     'Unable to mirror the endpoint: {0}'.format(endpoint.name))
+                            # store changes to state
+                            self.s.store_endpoints()
                     elif endpoint.state == 'unknown':
                         # move to mirroring state
                         if self.s.investigations < self.controller['max_concurrent_reinvestigations']:
@@ -544,6 +624,8 @@ class Monitor(object):
                             endpoint.queue()
                             endpoint.p_prev_states.append(
                                 (endpoint.state, int(time.time())))
+                        # store changes to state
+                        self.s.store_endpoints()
                     elif endpoint.state in ['mirroring', 'reinvestigating']:
                         cur_time = int(time.time())
                         # timeout after 2 times the reinvestigation frequency
@@ -559,6 +641,8 @@ class Monitor(object):
                             self.s.investigations -= 1
                             endpoint.p_prev_states.append(
                                 (endpoint.state, int(time.time())))
+                            # store changes to state
+                            self.s.store_endpoints()
 
     def get_q_item(self):
         '''
