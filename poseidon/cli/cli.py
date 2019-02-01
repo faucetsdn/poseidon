@@ -125,11 +125,11 @@ class PoseidonShell(cmd.Cmd):
 
     @staticmethod
     def _get_ipv4(endpoint):
-        return endpoint.endpoint_data['ipv4']
+        return str(endpoint.endpoint_data['ipv4'])
 
     @staticmethod
     def _get_ipv6(endpoint):
-        return endpoint.endpoint_data['ipv6']
+        return str(endpoint.endpoint_data['ipv6'])
 
     @staticmethod
     def _get_ignored(endpoint):
@@ -167,7 +167,7 @@ class PoseidonShell(cmd.Cmd):
                 if 'labels' in metadata[newest]:
                     result = metadata[newest]['labels'][0]
                 if 'confidences' in metadata[newest]:
-                    result += ' ('+metadata[newest]['confidences'][0]+')'
+                    result += ' ('+str(metadata[newest]['confidences'][0])+')'
         return result
 
     @staticmethod
