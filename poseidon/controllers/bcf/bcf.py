@@ -314,7 +314,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         my_start = self.get_highest(self.get_span_fabric())
         status = None
         retval = self.get_bymac(mac)
-        self.logger.debug('get_bymac: {0}'.format(retbal))
+        self.logger.debug('get_bymac: {0}'.format(retval))
         if retval:
             if 'attachment-point' in retval[-1] and 'switch' in retval[-1]['attachment-point'] and 'interface' in retval[-1]['attachment-point']:
                 self.logger.debug('mirroring: {0} {1}'.format(
