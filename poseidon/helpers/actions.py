@@ -23,13 +23,13 @@ class Actions(object):
         mirroring traffic
         '''
         status = False
-        if self.sdnc.mirror_mac(self.endpoint.endpoint_data['mac']):
+        if self.sdnc.mirror_mac(self.endpoint.endpoint_data['mac'], self.endpoint.endpoint_data['segment'], self.endpoint.endpoint_data['port']):
             status = Collector(self.endpoint).start_vent_collector()
         return status
 
     def unmirror_endpoint(self):
         ''' tell the controller to unmirror traffic '''
         status = False
-        if self.sdnc.unmirror_mac(self.endpoint.endpoint_data['mac']):
+        if self.sdnc.unmirror_mac(self.endpoint.endpoint_data['mac'], self.endpoint.endpoint_data['segment'], self.endpoint.endpoint_data['port']):
             status = Collector(self.endpoint).stop_vent_collector()
         return status

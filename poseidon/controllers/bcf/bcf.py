@@ -23,7 +23,8 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         Initializes BcfProxy object.
 
         Example usage:
-        bcf = BcfProxy("https://127.0.0.1:8443/api/v1/", auth={"user": "USER", "password": "PASSWORD"})
+        bcf = BcfProxy("https://127.0.0.1:8443/api/v1/",
+                       auth={"user": "USER", "password": "PASSWORD"})
         '''
         self.logger = logging.getLogger('bcf')
         try:
@@ -305,14 +306,16 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
                     src = f[
                         'match-specification'].get('src-mac', 'broke')
                     if src == mac or dst == mac:
+                        self.logger.debug('get_seq_by_mac: {0}'.format(f))
                         retval.append(f.get('seq'))
         return retval
 
-    def mirror_mac(self, mac, messages=None):
+    def mirror_mac(self, mac, switch, port, messages=None):
         status = None
         my_start = self.get_highest(self.get_span_fabric())
         if my_start is not None:
             self.logger.debug('mirroring {0}'.format(my_start))
+            s_dict = {'interface': ''}
             src = {'match-specification': {'src-mac': '{0}'.format(mac)}}
             dst = {'match-specification': {'dst-mac': '{0}'.format(mac)}}
             self.mirror_traffic(my_start, mirror=True, s_dict=src)
@@ -323,7 +326,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             status = False
         return status
 
-    def unmirror_mac(self, mac, messages=None):
+    def unmirror_mac(self, mac, switch, port, messages=None):
         status = None
         kill_list = self.get_seq_by_mac(mac)
         for kill in kill_list:
