@@ -314,6 +314,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
     def mirror_mac(self, mac, switch, port, messages=None):
         status = None
         my_start = self.get_highest(self.get_span_fabric())
+        mac_list = self.get_seq_by_mac(mac)
         if my_start is not None:
             self.logger.debug('mirroring {0}'.format(my_start))
             s_dict = {'interface': ''}

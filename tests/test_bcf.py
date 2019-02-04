@@ -549,10 +549,10 @@ def test_mirror_mac():
 
     bcf.endpoints = endpoints
     bcf.span_fabric = span_fabric
-    ret_val = bcf.mirror_mac('00:00:00:00:00:02')
+    ret_val = bcf.mirror_mac('00:00:00:00:00:02', None)
 
     bcf.get_highest = bcf.bad_get_highest
-    ret_val = bcf.mirror_mac('00:00:00:00:00:02')
+    ret_val = bcf.mirror_mac('00:00:00:00:00:02', None, None)
 
 
 def test_unmirror_mac():
@@ -601,4 +601,4 @@ def test_unmirror_mac():
 
     bcf.endpoints = endpoints
     bcf.span_fabric = span_fabric
-    ret_val = bcf.unmirror_mac('00:00:00:00:00:01')
+    ret_val = bcf.unmirror_mac('00:00:00:00:00:01', None, None)
