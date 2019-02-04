@@ -309,6 +309,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         return retval
 
     def mirror_mac(self, mac, messages=None):
+        status = None
         my_start = self.get_highest(self.get_span_fabric())
         if my_start is not None:
             self.logger.debug('mirroring {0}'.format(my_start))
@@ -316,14 +317,20 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             dst = {'match-specification': {'dst-mac': '{0}'.format(mac)}}
             self.mirror_traffic(my_start, mirror=True, s_dict=src)
             self.mirror_traffic(my_start + 1, mirror=True, s_dict=dst)
+            status = True
         else:
             self.logger.error('mirror_mac:None')
+            status = False
+        return status
 
     def unmirror_mac(self, mac, messages=None):
+        status = None
         kill_list = self.get_seq_by_mac(mac)
         for kill in kill_list:
             self.logger.debug('unmirror:{0}'.format(kill))
             self.mirror_traffic(kill, mirror=False)
+            status = True
+        return status
 
     def mirror_traffic(
             self,
