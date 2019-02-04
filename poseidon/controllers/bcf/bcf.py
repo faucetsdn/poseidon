@@ -206,10 +206,9 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         endpoints = self.get_endpoints()
         match_list = []
         for endpoint in endpoints:
-            self.logger.debug('endpoint values: {0}'.format(endpoint))
             if mac_addr == endpoint.get('mac'):
                 record = {}
-                for value in ['mac', 'name', 'tenant', 'segment']:
+                for value in ['mac', 'name', 'tenant', 'segment', 'attachment-point']:
                     record[value] = endpoint.get(value)
                 match_list.append(record)
         return match_list
@@ -315,14 +314,14 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         my_start = self.get_highest(self.get_span_fabric())
         status = None
         retval = self.get_bymac(mac)
-        for value in retval:
-            self.logger.debug('mirroring {0}'.format(value['segment']))
-            s_dict = {'interface': ''}
-            src = {'match-specification': {'src-mac': '{0}'.format(mac)}}
-            dst = {'match-specification': {'dst-mac': '{0}'.format(mac)}}
+        if retval:
+            self.logger.debug('mirroring: {0} {1}'.format(
+                retval[-1]['attachment-point']['switch'], retval[-1]['attachment-point']['interface']))
+            s_dict = {'interface': retval[-1]['attachment-point']['interface'],
+                      'switch': retval[-1]['attachment-point']['switch']}
             if my_start is not None:
-                self.mirror_traffic(my_start, mirror=True, s_dict=src)
-                self.mirror_traffic(my_start + 1, mirror=True, s_dict=dst)
+                self.mirror_traffic(my_start, mirror=True, s_dict=s_dict)
+                self.mirror_traffic(my_start + 1, mirror=True, s_dict=s_dict)
             status = True
         else:
             self.logger.error('mirror_mac:None')
@@ -333,7 +332,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         status = None
         kill_list = self.get_seq_by_mac(mac)
         for kill in kill_list:
-            self.logger.debug('unmirror:{0}'.format(kill))
+            self.logger.debug('unmirroring: {0}'.format(kill))
             self.mirror_traffic(kill, mirror=False)
             status = True
         return status
