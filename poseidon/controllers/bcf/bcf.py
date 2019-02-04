@@ -269,6 +269,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         '''
         get the max number, should be all clear after it
         '''
+        self.logger.debug('getting highest')
         my_filter = span_fabric.get('filter')
         if my_filter is not None:
             my_max = -1
