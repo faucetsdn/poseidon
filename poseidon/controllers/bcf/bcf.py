@@ -316,16 +316,18 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         retval = self.get_bymac(mac)
         self.logger.debug('get_bymac: {0}'.format(retval))
         if retval:
-            if 'attachment-point' in retval[-1] and 'switch' in retval[-1]['attachment-point'] and 'interface' in retval[-1]['attachment-point']:
-                self.logger.debug('mirroring: {0} {1}'.format(
-                    retval[-1]['attachment-point']['switch'], retval[-1]['attachment-point']['interface']))
-                s_dict = {'interface': retval[-1]['attachment-point']['interface'],
-                          'switch': retval[-1]['attachment-point']['switch']}
-                if my_start is not None:
-                    self.mirror_traffic(my_start, mirror=True, s_dict=s_dict)
-                    self.mirror_traffic(
-                        my_start + 1, mirror=True, s_dict=s_dict)
-                    status = True
+            if 'attachment-point' in retval[-1] and 'switch-interface' in retval[-1]['attachment-point']:
+                if 'switch' in retval[-1]['attachment-point']['switch-interface'] and 'interface' in retval[-1]['attachment-point']['switch-interface']:
+                    self.logger.debug('mirroring: {0} {1}'.format(
+                        retval[-1]['attachment-point']['switch-interface']['switch'], retval[-1]['attachment-point']['switch-interface']['interface']))
+                    s_dict = {'interface': retval[-1]['attachment-point']['switch-interface']['interface'],
+                              'switch': retval[-1]['attachment-point']['switch-interface']['switch']}
+                    if my_start is not None:
+                        self.mirror_traffic(
+                            my_start, mirror=True, s_dict=s_dict)
+                        self.mirror_traffic(
+                            my_start + 1, mirror=True, s_dict=s_dict)
+                        status = True
         else:
             self.logger.error('mirror_mac:None')
             status = False
