@@ -314,15 +314,18 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         my_start = self.get_highest(self.get_span_fabric())
         status = None
         retval = self.get_bymac(mac)
+        self.logger.debug('get_bymac: {0}'.format(retbal))
         if retval:
-            self.logger.debug('mirroring: {0} {1}'.format(
-                retval[-1]['attachment-point']['switch'], retval[-1]['attachment-point']['interface']))
-            s_dict = {'interface': retval[-1]['attachment-point']['interface'],
-                      'switch': retval[-1]['attachment-point']['switch']}
-            if my_start is not None:
-                self.mirror_traffic(my_start, mirror=True, s_dict=s_dict)
-                self.mirror_traffic(my_start + 1, mirror=True, s_dict=s_dict)
-            status = True
+            if 'attachment-point' in retval[-1] and 'switch' in retval[-1]['attachment-point'] and 'interface' in retval[-1]['attachment-point']:
+                self.logger.debug('mirroring: {0} {1}'.format(
+                    retval[-1]['attachment-point']['switch'], retval[-1]['attachment-point']['interface']))
+                s_dict = {'interface': retval[-1]['attachment-point']['interface'],
+                          'switch': retval[-1]['attachment-point']['switch']}
+                if my_start is not None:
+                    self.mirror_traffic(my_start, mirror=True, s_dict=s_dict)
+                    self.mirror_traffic(
+                        my_start + 1, mirror=True, s_dict=s_dict)
+                    status = True
         else:
             self.logger.error('mirror_mac:None')
             status = False
