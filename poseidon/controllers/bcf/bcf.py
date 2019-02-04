@@ -298,6 +298,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
 
     def get_seq_by_mac(self, mac):
         my_filter = self.get_span_fabric().get('filter')
+        self.logger.info('myfilter: {0}'.format(my_filter))
         retval = []
         if my_filter is not None:
             for f in my_filter:
