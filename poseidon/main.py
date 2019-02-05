@@ -554,7 +554,11 @@ class Monitor(object):
         global CTRL_C
         signal.signal(signal.SIGINT, partial(self.signal_handler))
         while not CTRL_C['STOP']:
-            time.sleep(1)
+            time.sleep(5)
+
+            # retrieve endpoints from redis
+            self.s.get_stored_endpoints()
+
             found_work, item = self.get_q_item()
             ml_returns = {}
 
