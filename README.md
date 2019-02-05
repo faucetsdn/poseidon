@@ -11,7 +11,7 @@
 
 <img src="/docs/img/poseidon-logo.png" width="50" height="75"/><a href="https://www.blackducksoftware.com/open-source-rookies-2016" ><img src="/docs/img/Rookies16Badge_1.png" width="100" alt="POSEIDON is now BlackDuck 2016 OpenSource Rookie of the year"></a>
 
-Poseidon is a joint effort between two of the IQT Labs: [Cyber Reboot](https://www.cyberreboot.org/) and [Lab41](http://www.lab41.org/). The project's goal is to explore approaches to better identify what nodes are on a given (computer) network and understand what they are doing.  The project utilizes Software Defined Networking and machine learning to automatically capture network traffic, extract relevant features from that traffic, perform classifications through trained models, convey results, and provide mechanisms to take further action. While the project works best leveraging modern SDNs, parts of it can still be used with little more than packet capture (pcap) files.
+Poseidon began as a joint effort between two of the IQT Labs: [Cyber Reboot](https://www.cyberreboot.org/) and [Lab41](http://www.lab41.org/). The project's goal is to explore approaches to better identify what nodes are on a given (computer) network and understand what they are doing.  The project utilizes Software Defined Networking and machine learning to automatically capture network traffic, extract relevant features from that traffic, perform classifications through trained models, convey results, and provide mechanisms to take further action. While the project works best leveraging modern SDNs, parts of it can still be used with little more than packet capture (pcap) files.
 
 ## Table of Contents
 
@@ -66,12 +66,12 @@ If you prefer a lightweight package that downloads the images from the latest bu
 ## SDN Controller Configuration
 If you opt to do a full install (NOT the demo mode), you need to first identify one of the two supported controllers (*BigSwitch Cloud Fabric* or *Faucet*). The controller needs to be running and accessible (via network API) by the Poseidon system.  We recommend making sure the SDN portion is configured BEFORE the above Poseidon installation, but it's not a hard requirement.
 
-#### Big Cloud Fabric Configuration
+#### BigSwitch Big Cloud Fabric Configuration
 <img src="/docs/img/bcf.png" width="114" height="100"/>
-You will need to add support for moving arbitrary endpoint network data around your network.  The BigSwitch config will need an admin to add:
+You will need to add support in your Big Cloud Fabric (BCF) controller for moving mirrored endpoint network data around your network. In BCF, this is done using 1) the "span-fabric" feature and 2) identifying a switch interface to send the captured ("spanned") traffic out of. The BigSwitch config will need an admin to add:
 
-- span-fabric
-- interface-group
+- span-fabric: you need to define a fabric-wide port mirroring mechanism and give it a name (e.g. 'poseidon')
+- interface-group: you need to identify which port the mirrored traffic is going to egress from, and name it (e.g. 'ig1')
 
 ##### Span Fabric
 
@@ -95,7 +95,25 @@ interface-group <interface-group>
   member switch YOUR_LEAF_SWITCH interface YOUR_INTERFACE_WHERE_VENT_WILL_RECORD_TRAFFIC_FROM
 ```
 
-Poseidon will connect to BCF controller using its REST API, so you'll need the BCF API IP address and credentials to it.
+Poseidon will connect to BCF controller using its REST API, so you will also need the BCF API IP address and credentials for the controller. If your controller is an HA pair and has a virtual IP address, we recommend using that address.  Bringing the above together, below is an example of what the relevant parts of your BCF configuration could look like where the span-fabric is called 'poseidon', the user 'poseidon' is defined for API access, and the egress interface is interface '48' on switch 'leaf04' and labelled as interface group 'ig1': 
+
+```
+! user
+user poseidon
+  hashed-password method=PBKDF2WithHmacSHA512,salt=M4534fcV1Ksg_fNm2pGQ,rounds=25000,ph=true,eWNHYUPVAUYosBVRguJnkmAzM
+
+! interface-group
+interface-group ig1
+  description 'Mirroring for Poseidon'
+  mode span-fabric
+  member switch leaf04 interface ethernet48
+
+! span-fabric
+span-fabric poseidon
+  active
+  destination interface-group ig1
+  priority 1
+```
 
 BCF is now configured and ready for use with Poseidon.
 
