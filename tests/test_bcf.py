@@ -507,6 +507,7 @@ def test_mirror_mac():
             self.endpoints = None
             self.span_fabric = None
             self.trust_self_signed_cert = True
+            self.base_uri = None
             self.logger = MockLogger().logger
 
         def mirror_traffic(
@@ -565,6 +566,7 @@ def test_unmirror_mac():
             self.span_fabric = None
             self.logger = MockLogger().logger
             self.trust_self_signed_cert = True
+            self.base_uri = None
 
         def mirror_traffic(
                 self,
