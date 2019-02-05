@@ -269,7 +269,6 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         '''
         get the max number, should be all clear after it
         '''
-        self.logger.debug('getting highest')
         my_filter = span_fabric.get('filter')
         if my_filter is not None:
             my_max = -1
@@ -277,7 +276,6 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
                 seq = int(f.get('seq', -2))
                 if int(seq) > my_max:
                     my_max = seq
-            self.logger.debug('highest filter: {0}'.format(my_max+1))
             return (my_max + 1)
         else:
             self.logger.debug('noFilters online')
@@ -316,8 +314,6 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         my_start = self.get_highest(self.get_span_fabric())
         status = None
         retval = self.get_bymac(mac)
-        self.logger.debug('get_bymac: {0}'.format(retval))
-        self.logger.debug('seq: {0}'.format(my_start))
         if retval:
             if 'attachment-point' in retval[-1] and 'switch-interface' in retval[-1]['attachment-point']:
                 if 'switch' in retval[-1]['attachment-point']['switch-interface'] and 'interface' in retval[-1]['attachment-point']['switch-interface']:
