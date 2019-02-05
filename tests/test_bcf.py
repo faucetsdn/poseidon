@@ -7,6 +7,7 @@ import json
 import logging
 import os
 
+import requests
 from httmock import HTTMock
 from httmock import response
 from httmock import urlmatch
@@ -508,6 +509,7 @@ def test_mirror_mac():
             self.span_fabric = None
             self.trust_self_signed_cert = True
             self.base_uri = None
+            self.session = requests.Session()
             self.logger = MockLogger().logger
 
         def mirror_traffic(
