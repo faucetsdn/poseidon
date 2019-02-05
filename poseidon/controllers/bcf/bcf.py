@@ -23,7 +23,8 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         Initializes BcfProxy object.
 
         Example usage:
-        bcf = BcfProxy("https://127.0.0.1:8443/api/v1/", auth={"user": "USER", "password": "PASSWORD"})
+        bcf = BcfProxy("https://127.0.0.1:8443/api/v1/",
+                       auth={"user": "USER", "password": "PASSWORD"})
         '''
         self.logger = logging.getLogger('bcf')
         try:
@@ -207,7 +208,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         for endpoint in endpoints:
             if mac_addr == endpoint.get('mac'):
                 record = {}
-                for value in ['mac', 'name', 'tenant', 'segment']:
+                for value in ['mac', 'name', 'tenant', 'segment', 'attachment-point']:
                     record[value] = endpoint.get(value)
                 match_list.append(record)
         return match_list
@@ -299,6 +300,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         retval = []
         if my_filter is not None:
             for f in my_filter:
+                # TODO check this to make sure it still works as expected
                 if 'match-specification' in f:
                     dst = f[
                         'match-specification'].get('dst-mac', 'broke')
@@ -308,26 +310,33 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
                         retval.append(f.get('seq'))
         return retval
 
-    def mirror_mac(self, mac, messages=None):
-        status = None
+    def mirror_mac(self, mac, switch, port, messages=None):
         my_start = self.get_highest(self.get_span_fabric())
-        if my_start is not None:
-            self.logger.debug('mirroring {0}'.format(my_start))
-            src = {'match-specification': {'src-mac': '{0}'.format(mac)}}
-            dst = {'match-specification': {'dst-mac': '{0}'.format(mac)}}
-            self.mirror_traffic(my_start, mirror=True, s_dict=src)
-            self.mirror_traffic(my_start + 1, mirror=True, s_dict=dst)
-            status = True
+        status = None
+        retval = self.get_bymac(mac)
+        if retval:
+            if 'attachment-point' in retval[-1] and 'switch-interface' in retval[-1]['attachment-point']:
+                if 'switch' in retval[-1]['attachment-point']['switch-interface'] and 'interface' in retval[-1]['attachment-point']['switch-interface']:
+                    self.logger.debug('mirroring: {0} {1}'.format(
+                        retval[-1]['attachment-point']['switch-interface']['switch'], retval[-1]['attachment-point']['switch-interface']['interface']))
+                    s_dict = {'interface': retval[-1]['attachment-point']['switch-interface']['interface'],
+                              'switch': retval[-1]['attachment-point']['switch-interface']['switch']}
+                    if my_start is not None:
+                        self.mirror_traffic(
+                            my_start, mirror=True, s_dict=s_dict)
+                        self.logger.debug(
+                            'starting mirror on: {0}'.format(s_dict))
+                        status = True
         else:
             self.logger.error('mirror_mac:None')
             status = False
         return status
 
-    def unmirror_mac(self, mac, messages=None):
+    def unmirror_mac(self, mac, switch, port, messages=None):
         status = None
         kill_list = self.get_seq_by_mac(mac)
         for kill in kill_list:
-            self.logger.debug('unmirror:{0}'.format(kill))
+            self.logger.debug('unmirroring: {0}'.format(kill))
             self.mirror_traffic(kill, mirror=False)
             status = True
         return status
@@ -343,7 +352,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         '''
         mirror_traffic doc string
 
-        mirror_traffic(q,mirror=True,s_dict = {'match-specificaiton' : {'dst-ip-cidr':'10.179.0.33/32'} ...
+        mirror_traffic(q,mirror=True,s_dict = {'interface' : 'ethernet1', 'switch': 'switch1'}
         NOTE: s_dict or kwargs, not both..
 
 
@@ -365,28 +374,15 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             "dest-interface-group": "ig1",
             "filter": [
                   {#sDict
-                            "match-specification": {
-                                        "dst-ip-cidr": "X.A.0.33/32"
-                                      },
+                            "interface": "ethernet21",
+                            "switch": "switch2",
                             "seq": 7
-                          },
-                  {
-                            "match-specification": {
-                                        "src-ip-cidr": "X.A.0.33/32"
-                                      },
-                            "seq": 8
-                          },
-                  {
-                            "match-specification": {
-                                        "src-mac": "AA:AA:AA:AA:AA:AA"
-                                      },
-                            "seq": 9
-                          },
+                  },
                   {#kwargs way
                             "seq": 10,
                             "tenant": "port2",
                             "segment": "prod"
-                          }
+                  }
                 ]
           }
 

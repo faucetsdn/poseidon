@@ -279,7 +279,7 @@ def test_get_bymac():
     bcf.endpoints = endpoints
     ret_val = bcf.get_bymac('00:00:00:00:00:01')
     answer = list([{'mac': '00:00:00:00:00:01', 'name': None,
-                    'tenant': 'poseidon', 'segment': 'poseidon'}])
+                    'tenant': 'poseidon', 'segment': 'poseidon', 'attachment-point': {'switch-interface': {'interface': 'ethernet01', 'switch': 'Leaf2'}, 'type': 'switch-interface'}}])
     assert str(answer) == str(ret_val)
 
 
@@ -332,7 +332,7 @@ def test_shutdown_ip():
     answer = list([{'mac': '00:00:00:00:00:01',
                     'name': None,
                     'tenant': 'poseidon',
-                    'segment': 'poseidon'}])
+                    'segment': 'poseidon', 'attachment-point': {'switch-interface': {'interface': 'ethernet01', 'switch': 'Leaf2'}, 'type': 'switch-interface'}}])
 
     assert str(answer) == str(ret_val)
 
@@ -506,6 +506,8 @@ def test_mirror_mac():
         def __init__(self):
             self.endpoints = None
             self.span_fabric = None
+            self.trust_self_signed_cert = True
+            self.base_uri = None
             self.logger = MockLogger().logger
 
         def mirror_traffic(
@@ -517,6 +519,9 @@ def test_mirror_mac():
                 fabric_span_endpoint='',
                 **target_kwargs):
             pass
+
+        def get_bymac(self, mac):
+            return [{'mac': mac, 'name': 'foo', 'tenant': 'foo', 'segment': 'foo', 'attachment-point': 'foo'}]
 
         def get_span_fabric(self):
             return self.span_fabric
@@ -549,10 +554,10 @@ def test_mirror_mac():
 
     bcf.endpoints = endpoints
     bcf.span_fabric = span_fabric
-    ret_val = bcf.mirror_mac('00:00:00:00:00:02')
+    ret_val = bcf.mirror_mac('00:00:00:00:00:02', None, None)
 
     bcf.get_highest = bcf.bad_get_highest
-    ret_val = bcf.mirror_mac('00:00:00:00:00:02')
+    ret_val = bcf.mirror_mac('00:00:00:00:00:02', None, None)
 
 
 def test_unmirror_mac():
@@ -563,6 +568,8 @@ def test_unmirror_mac():
             self.endpoints = None
             self.span_fabric = None
             self.logger = MockLogger().logger
+            self.trust_self_signed_cert = True
+            self.base_uri = None
 
         def mirror_traffic(
                 self,
@@ -601,4 +608,4 @@ def test_unmirror_mac():
 
     bcf.endpoints = endpoints
     bcf.span_fabric = span_fabric
-    ret_val = bcf.unmirror_mac('00:00:00:00:00:01')
+    ret_val = bcf.unmirror_mac('00:00:00:00:00:01', None, None)
