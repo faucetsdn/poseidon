@@ -506,6 +506,7 @@ def test_mirror_mac():
         def __init__(self):
             self.endpoints = None
             self.span_fabric = None
+            self.trust_self_signed_cert = True
             self.logger = MockLogger().logger
 
         def mirror_traffic(
