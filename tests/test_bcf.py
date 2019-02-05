@@ -543,7 +543,7 @@ def test_mirror_mac():
     controller = {'URI': 'http://localhost',
                   'USER': username, 'PASS': password, 'SPAN_FABRIC_NAME': 'SPAN_FABRIC', 'INTERFACE_GROUP': 'INTERFACE_GROUP', 'TRUST_SELF_SIGNED_CERT': True}
     with HTTMock(mock_factory(r'.*', filemap)):
-        proxy = MockBcfProxy(controller, 'login')
+        proxy = BcfProxy(controller, 'login')
 
         endpoints = proxy.get_endpoints()
         span_fabric = proxy.get_span_fabric()
@@ -564,6 +564,7 @@ def test_unmirror_mac():
             self.endpoints = None
             self.span_fabric = None
             self.logger = MockLogger().logger
+            self.trust_self_signed_cert = True
 
         def mirror_traffic(
                 self,
