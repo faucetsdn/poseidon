@@ -279,7 +279,7 @@ def test_get_bymac():
     bcf.endpoints = endpoints
     ret_val = bcf.get_bymac('00:00:00:00:00:01')
     answer = list([{'mac': '00:00:00:00:00:01', 'name': None,
-                    'tenant': 'poseidon', 'segment': 'poseidon'}])
+                    'tenant': 'poseidon', 'segment': 'poseidon', 'attachment-point': {'switch-interface': {'interface': 'ethernet01', 'switch': 'Leaf2'}, 'type': 'switch-interface'}}])
     assert str(answer) == str(ret_val)
 
 
@@ -332,7 +332,7 @@ def test_shutdown_ip():
     answer = list([{'mac': '00:00:00:00:00:01',
                     'name': None,
                     'tenant': 'poseidon',
-                    'segment': 'poseidon'}])
+                    'segment': 'poseidon', 'attachment-point': {'switch-interface': {'interface': 'ethernet01', 'switch': 'Leaf2'}, 'type': 'switch-interface'}}])
 
     assert str(answer) == str(ret_val)
 
@@ -549,7 +549,7 @@ def test_mirror_mac():
 
     bcf.endpoints = endpoints
     bcf.span_fabric = span_fabric
-    ret_val = bcf.mirror_mac('00:00:00:00:00:02', None)
+    ret_val = bcf.mirror_mac('00:00:00:00:00:02', None, None)
 
     bcf.get_highest = bcf.bad_get_highest
     ret_val = bcf.mirror_mac('00:00:00:00:00:02', None, None)

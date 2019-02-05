@@ -255,13 +255,13 @@ def test_schedule_job_reinvestigation():
                                              decode_responses=True)
             endpoint = Endpoint('foo')
             endpoint.endpoint_data = {
-                'tenant': 'foo', 'mac': '00:00:00:00:00:00'}
+                'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
             endpoint.mirror()
             endpoint.known()
             self.s.endpoints.append(endpoint)
             endpoint = Endpoint('foo2')
             endpoint.endpoint_data = {
-                'tenant': 'foo', 'mac': '00:00:00:00:00:00'}
+                'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
             endpoint.mirror()
             endpoint.known()
             self.s.endpoints.append(endpoint)
