@@ -7,7 +7,6 @@ import json
 import logging
 import os
 
-import requests
 from httmock import HTTMock
 from httmock import response
 from httmock import urlmatch
@@ -509,7 +508,6 @@ def test_mirror_mac():
             self.span_fabric = None
             self.trust_self_signed_cert = True
             self.base_uri = None
-            self.session = requests.Session()
             self.logger = MockLogger().logger
 
         def mirror_traffic(
@@ -521,6 +519,9 @@ def test_mirror_mac():
                 fabric_span_endpoint='',
                 **target_kwargs):
             pass
+
+        def get_bymac(self, mac):
+            return [{'mac': mac, 'name': 'foo', 'tenant': 'foo', 'segment': 'foo', 'attachment-point': 'foo'}]
 
         def get_span_fabric(self):
             return self.span_fabric
