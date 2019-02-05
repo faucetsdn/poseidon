@@ -325,8 +325,6 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
                     if my_start is not None:
                         self.mirror_traffic(
                             my_start, mirror=True, s_dict=s_dict)
-                        self.mirror_traffic(
-                            my_start + 1, mirror=True, s_dict=s_dict)
                         status = True
         else:
             self.logger.error('mirror_mac:None')
@@ -353,7 +351,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         '''
         mirror_traffic doc string
 
-        mirror_traffic(q,mirror=True,s_dict = {'match-specificaiton' : {'dst-ip-cidr':'10.179.0.33/32'} ...
+        mirror_traffic(q,mirror=True,s_dict = {'interface' : 'ethernet1', 'switch': 'switch1'}
         NOTE: s_dict or kwargs, not both..
 
 
@@ -375,28 +373,15 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             "dest-interface-group": "ig1",
             "filter": [
                   {#sDict
-                            "match-specification": {
-                                        "dst-ip-cidr": "X.A.0.33/32"
-                                      },
+                            "interface": "ethernet21",
+                            "switch": "switch2",
                             "seq": 7
-                          },
-                  {
-                            "match-specification": {
-                                        "src-ip-cidr": "X.A.0.33/32"
-                                      },
-                            "seq": 8
-                          },
-                  {
-                            "match-specification": {
-                                        "src-mac": "AA:AA:AA:AA:AA:AA"
-                                      },
-                            "seq": 9
-                          },
+                  },
                   {#kwargs way
                             "seq": 10,
                             "tenant": "port2",
                             "segment": "prod"
-                          }
+                  }
                 ]
           }
 
