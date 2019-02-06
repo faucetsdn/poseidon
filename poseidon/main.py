@@ -432,6 +432,8 @@ class SDNConnect(object):
                 m.endpoint_data = deepcopy(machine)
                 self.endpoints.append(m)
 
+        self.logger.info(
+            'find_machines number of endpoints: {0}'.format(len(self.endpoints)))
         self.store_endpoints()
         return
 
@@ -568,6 +570,8 @@ class Monitor(object):
         global CTRL_C
         signal.signal(signal.SIGINT, partial(self.signal_handler))
         while not CTRL_C['STOP']:
+            self.logger.info(
+                'number of endpoints: {0}'.format(len(self.s.endpoints)))
             time.sleep(1)
             # retrieve endpoints from redis
             self.s.get_stored_endpoints()
