@@ -159,6 +159,7 @@ function check_args()
                 echo "#" | sudo tee -a /etc/poseidon/default.conf > /dev/null
                 echo "#" | sudo tee -a /etc/poseidon/default.conf > /dev/null
                 echo "" | sudo tee -a /etc/poseidon/default.conf > /dev/null
+                sudo rm -rf /opt/redis
                 sudo dpkg-reconfigure poseidon
                 exit
                 ;;
