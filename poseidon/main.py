@@ -331,6 +331,9 @@ class SDNConnect(object):
                 if type_filter == 'ignored':
                     if endpoint.ignore:
                         endpoints.append(endpoint)
+                else:
+                    self.logger.info(
+                        'endpoint_metadata: {0}'.format(endpoint.metadata))
                 # TODO
         return endpoints
 
