@@ -583,9 +583,19 @@ class Monitor(object):
                         ep.p_prev_states.append(
                             (ep.state, int(time.time())))
 
+            # mirror things in the order they got added to the queue
+            queued_endpoints = []
+            unknown_endpoints = []
+            investigating_endpoints = []
             for endpoint in self.s.endpoints:
                 if not endpoint.ignore:
                     if endpoint.state == 'queued':
+                        queued_endpoints.append(
+                            (endpoint.name, endpoint.p_prev_states[-1][1]))
+            queued_endpoints = sorted(queued_endpoints, key=lambda x: x[1])
+            for endpoint in queued_endpoints:
+                for ep in self.s.endpoints:
+                    if ep.name == endpoint.name:
                         if self.s.investigations < self.controller['max_concurrent_reinvestigations']:
                             self.s.investigations += 1
                             endpoint.trigger(endpoint.p_next_state)
@@ -597,23 +607,14 @@ class Monitor(object):
                             if not status:
                                 self.logger.warning(
                                     'Unable to mirror the endpoint: {0}'.format(endpoint.name))
-                    elif endpoint.state == 'unknown':
-                        # move to mirroring state
-                        if self.s.investigations < self.controller['max_concurrent_reinvestigations']:
-                            self.s.investigations += 1
-                            endpoint.mirror()
-                            endpoint.p_prev_states.append(
-                                (endpoint.state, int(time.time())))
-                            status = Actions(
-                                endpoint, self.s.sdnc).mirror_endpoint()
-                            if not status:
-                                self.logger.warning(
-                                    'Unable to mirror the endpoint: {0}'.format(endpoint.name))
-                        else:
-                            endpoint.p_next_state = 'mirror'
-                            endpoint.queue()
-                            endpoint.p_prev_states.append(
-                                (endpoint.state, int(time.time())))
+
+            for endpoint in self.s.endpoints:
+                if not endpoint.ignore:
+                    if endpoint.state == 'unknown':
+                        endpoint.p_next_state = 'mirror'
+                        endpoint.queue()
+                        endpoint.p_prev_states.append(
+                            (endpoint.state, int(time.time())))
                     elif endpoint.state in ['mirroring', 'reinvestigating']:
                         cur_time = int(time.time())
                         # timeout after 2 times the reinvestigation frequency
