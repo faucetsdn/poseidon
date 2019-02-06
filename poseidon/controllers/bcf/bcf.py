@@ -405,6 +405,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         else:  # mirror=False
             data['filter'] = [filter for filter in data[
                 'filter'] if filter['seq'] != seq]
+            self.logger.debug("unmirror put body: {0}".format(data))
         r = self.request_resource(method='PUT', url=uri, data=json.dumps(
             data), verify=(not self.trust_self_signed_cert))
         retval = BcfProxy.parse_json(r)
