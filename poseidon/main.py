@@ -159,7 +159,7 @@ class SDNConnect(object):
             for mac in macs:
                 try:
                     mac_info = self.r.hgetall(mac)
-                    if b'posiedon_hash' in mac_info and mac_info[b'poseidon_hash'] == hash_id.encode('utf-8'):
+                    if b'poseidon_hash' in mac_info and mac_info[b'poseidon_hash'] == hash_id.encode('utf-8'):
                         mac_addresses[mac.decode('ascii')] = {}
                         if b'timestamps' in mac_info:
                             try:
