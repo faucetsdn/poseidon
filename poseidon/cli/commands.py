@@ -20,10 +20,20 @@ class Commands:
         ''' get endpoints that match '''
         eps = []
         device = args.rsplit(' ', 1)[idx]
-        eps.append(self.sdnc.endpoint_by_name(device))
-        eps.append(self.sdnc.endpoint_by_hash(device))
-        eps += self.sdnc.endpoints_by_ip(device)
-        eps += self.sdnc.endpoints_by_mac(device)
+        name_endpoint = self.sdnc.endpoint_by_name(device)
+        if name_endpoint:
+            eps.append(name_endpoint)
+            return eps
+        hash_endpoint = self.sdnc.endpoint_by_hash(device)
+        if hash_endpoint:
+            eps.append(hash_endpoint)
+            return eps
+        ip_endpoints = self.sdnc.endpoints_by_ip(device)
+        if len(ip_endpoints) > 0:
+            return ip_endpoints
+        mac_endpoints = self.sdnc.endpoints_by_mac(device)
+        if len(mac_endpoints) > 0:
+            return mac_endpoints
         return eps
 
     def what_is(self, args):
