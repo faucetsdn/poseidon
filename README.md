@@ -68,7 +68,8 @@ If you opt to do a full install (NOT the demo mode), you need to first identify 
 
 #### BigSwitch Big Cloud Fabric Configuration
 <img src="/docs/img/bcf.png" width="114" height="100"/>
-You will need to add support in your Big Cloud Fabric (BCF) controller for moving mirrored endpoint network data around your network. In BCF, this is done using 1) the "span-fabric" feature and 2) identifying a switch interface to send the captured ("spanned") traffic out of. The BigSwitch config will need an admin to add:
+You will need to access the API of your Big Cloud Fabric (BCF) controller using authorized credentials (user/pass). and you will need to add support in your BCF controller for moving mirrored endpoint network data around your network. In BCF, allowing port mirroring for Poseidon is done using 1) the "span-fabric" feature and 2) identifying a switch interface to send the captured ("spanned") traffic out of. The BigSwitch config will need an admin to add:
+
 
 - span-fabric: you need to define a fabric-wide port mirroring mechanism and give it a name (e.g. 'poseidon')
 - interface-group: you need to identify which port the mirrored traffic is going to egress from, and name it (e.g. 'ig1')
@@ -95,12 +96,16 @@ interface-group <interface-group>
   member switch YOUR_LEAF_SWITCH interface YOUR_INTERFACE_WHERE_VENT_WILL_RECORD_TRAFFIC_FROM
 ```
 
-Poseidon will connect to BCF controller using its REST API, so you will also need the BCF API IP address and credentials for the controller. If your controller is an HA pair and has a virtual IP address, we recommend using that address.  Bringing the above together, below is an example of what the relevant parts of your BCF configuration could look like where the span-fabric is called 'poseidon', the user 'poseidon' is defined for API access, and the egress interface is interface '48' on switch 'leaf04' and labelled as interface group 'ig1': 
+Poseidon will connect to the BCF controller using its REST API, so you will also need the BCF API hostname or IP address and credentials for the controller. If your controller is an HA pair and has a virtual IP address, we recommend using that virtual address. Also, because Poseidon will be making dynamic `filter` rule changes we will need an account that has administrative priveleges.  (Poseidon only modifies the filter rules of the defined span-fabric, but until BigSwitch has more granular access control options this means admin privs!) Bringing the above configuration requirements together, below is an example of what the relevant parts of your BCF configuration could look like where the span-fabric is called 'poseidon', the user 'poseidon' is defined for API access, and the egress interface is interface '48' on switch 'leaf04' and labelled as interface group 'ig1': 
 
 ```
 ! user
 user poseidon
   hashed-password method=PBKDF2WithHmacSHA512,salt=M4534fcV1Ksg_fNm2pGQ,rounds=25000,ph=true,eWNHYUPVAUYosBVRguJnkmAzM
+
+! group
+group admin
+  associate user poseidon
 
 ! interface-group
 interface-group ig1
@@ -180,6 +185,8 @@ d0f406f240b1        cyberreboot/vent-rq-worker:master      "/bin/sh -c '(flask �
 c0cd7c1f881c        cyberreboot/vent-rabbitmq:master       "docker-entrypoint.s…"   Up 2 hours (healthy)
 d81f5509628c        cyberreboot/vent                       "/bin/sh -c '(flask …"   Up 2 hours (healthy)
 ```
+
+(NOTE: On our test systems it usually takes 1-2 minutes for all containers to spin up)
 
 If you performed the demo installation, you should also see the following Faucet-related containers running (NOTE: Faucet has not yet implemented docker-friendly health checks, so the "(healthy)" reference will not be shown):
 
