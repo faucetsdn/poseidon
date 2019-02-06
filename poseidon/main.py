@@ -349,7 +349,7 @@ class SDNConnect(object):
                             if type_filter == metadata['os'].lower():
                                 endpoints.append(endpoint)
                     if 'ipv6_addresses' in endpoint.metadata and endpoint.endpoint_data['ipv6'] in endpoint.metadata['ipv6_addresses']:
-                        metadata = endpoint.metadata['ipv6_addresses'][endpoint.endpoint_data['ipv4']]
+                        metadata = endpoint.metadata['ipv6_addresses'][endpoint.endpoint_data['ipv6']]
                         if 'os' in metadata:
                             if type_filter == metadata['os'].lower():
                                 endpoints.append(endpoint)
