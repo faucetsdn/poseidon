@@ -174,10 +174,16 @@ class SDNConnect(object):
                                         ml_info[b'labels'].decode('ascii'))
                                     confidences = ast.literal_eval(
                                         ml_info[b'confidences'].decode('ascii'))
-                                    behavior = ast.literal_eval(ml_info[mac_info[b'poseidon_hash']].decode('ascii'))[
-                                        'decisions']['behavior']
-                                    mac_addresses[mac.decode('ascii')][str(timestamp)] = {
-                                        'labels': labels, 'confidences': confidences, 'behavior': behavior}
+                                    if mac_info[b'poseidon_hash'] in ml_info:
+                                        behavior = ast.literal_eval(ml_info[mac_info[b'poseidon_hash']].decode('ascii'))[
+                                            'decisions']['behavior']
+                                        mac_addresses[mac.decode('ascii')][str(timestamp)] = {
+                                            'labels': labels, 'confidences': confidences, 'behavior': behavior}
+                                    elif mac_info[b'poseidon_hash'].decode('ascii') in ml_info:
+                                        behavior = ast.literal_eval(ml_info[mac_info[b'poseidon_hash'].decode('ascii')].decode('ascii'))[
+                                            'decisions']['behavior']
+                                        mac_addresses[mac.decode('ascii')][str(timestamp)] = {
+                                            'labels': labels, 'confidences': confidences, 'behavior': behavior}
                             except Exception as e:  # pragma: no cover
                                 self.logger.error(
                                     'Unable to get existing ML data from Redis because: {0}'.format(str(e)))
