@@ -15,6 +15,7 @@ class Commands:
         self.states = ['active', 'inactive', 'known', 'unknown',
                        'mirroring', 'abnormal', 'shutdown', 'reinvestigating', 'queued']
         self.sdnc = SDNConnect()
+        self.sdnc.get_stored_endpoints()
 
     def _get_endpoints(self, args, idx):
         ''' get endpoints that match '''
@@ -65,6 +66,7 @@ class Commands:
 
     def collect_on(self, args):
         ''' collect on a specific thing '''
+        # TODO action required that updates the endpoint
         endpoints = []
         eps = self._get_endpoints(args, -1)
         for endpoint in eps:
@@ -75,14 +77,17 @@ class Commands:
 
     def remove_inactives(self, args):
         ''' remove all inactive devices '''
+        # TODO action required that updates the endpoint
         return self.sdnc.remove_inactive_endpoints()
 
     def remove_ignored(self, args):
         ''' remove all ignored devices '''
+        # TODO action required that updates the endpoint
         return self.sdnc.remove_ignored_endpoints()
 
     def ignore(self, args):
         ''' ignore a specific thing '''
+        # TODO action required that updates the endpoint
         eps = []
         device = args.rsplit(' ', 1)[0]
         if device == 'inactive':
@@ -104,6 +109,7 @@ class Commands:
 
     def clear_ignored(self, args):
         ''' stop ignoring a specific thing '''
+        # TODO action required that updates the endpoint
         eps = []
         device = args.rsplit(' ', 1)[0]
         if device == 'ignored':
@@ -125,6 +131,7 @@ class Commands:
 
     def remove(self, args):
         ''' remove and forget about a specific thing until it's seen again '''
+        # TODO action required that updates the endpoint
         endpoints = []
         eps = self._get_endpoints(args, 0)
         for endpoint in eps:
