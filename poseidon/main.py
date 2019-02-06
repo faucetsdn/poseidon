@@ -593,9 +593,9 @@ class Monitor(object):
                         queued_endpoints.append(
                             (endpoint.name, endpoint.p_prev_states[-1][1]))
             queued_endpoints = sorted(queued_endpoints, key=lambda x: x[1])
-            for endpoint in queued_endpoints:
-                for ep in self.s.endpoints:
-                    if ep.name == endpoint.name:
+            for ep in queued_endpoints:
+                for endpoint in self.s.endpoints:
+                    if ep[0] == endpoint.name:
                         if self.s.investigations < self.controller['max_concurrent_reinvestigations']:
                             self.s.investigations += 1
                             endpoint.trigger(endpoint.p_next_state)
