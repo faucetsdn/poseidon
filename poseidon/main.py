@@ -159,7 +159,7 @@ class SDNConnect(object):
             for mac in macs:
                 try:
                     mac_info = self.r.hgetall(mac)
-                    if b'posiedon_hash' in mac_info and mac_info[b'poseidon_hash'] == hash_id.encode('utf-8'):
+                    if b'poseidon_hash' in mac_info and mac_info[b'poseidon_hash'] == hash_id.encode('utf-8'):
                         mac_addresses[mac.decode('ascii')] = {}
                         if b'timestamps' in mac_info:
                             try:
@@ -331,7 +331,33 @@ class SDNConnect(object):
                 if type_filter == 'ignored':
                     if endpoint.ignore:
                         endpoints.append(endpoint)
-                # TODO
+                else:
+                    # filter by device type or behavior
+                    if 'mac_addresses' in endpoint.metadata and endpoint.endpoint_data['mac'] in endpoint.metadata['mac_addresses']:
+                        timestamps = endpoint.metadata['mac_addresses'][endpoint.endpoint_data['mac']]
+                        newest = '0'
+                        for timestamp in timestamps:
+                            if timestamp > newest:
+                                newest = timestamp
+                        if newest is not '0':
+                            if 'labels' in timestamps[newest]:
+                                if type_filter == timestamps[newest]['labels'][0].lower():
+                                    endpoints.append(endpoint)
+                            if 'behavior' in timestamps[newest]:
+                                if type_filter == timestamps[newest]['behavior'].lower():
+                                    endpoints.append(endpoint)
+
+                    # filter by operating system
+                    if 'ipv4_addresses' in endpoint.metadata and endpoint.endpoint_data['ipv4'] in endpoint.metadata['ipv4_addresses']:
+                        metadata = endpoint.metadata['ipv4_addresses'][endpoint.endpoint_data['ipv4']]
+                        if 'os' in metadata:
+                            if type_filter == metadata['os'].lower():
+                                endpoints.append(endpoint)
+                    if 'ipv6_addresses' in endpoint.metadata and endpoint.endpoint_data['ipv6'] in endpoint.metadata['ipv6_addresses']:
+                        metadata = endpoint.metadata['ipv6_addresses'][endpoint.endpoint_data['ipv6']]
+                        if 'os' in metadata:
+                            if type_filter == metadata['os'].lower():
+                                endpoints.append(endpoint)
         return endpoints
 
     def check_endpoints(self, messages=None):

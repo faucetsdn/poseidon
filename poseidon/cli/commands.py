@@ -149,7 +149,9 @@ class Commands:
         type_filter = None
         all_devices = False
         query = args.rsplit(' ', 1)[0]
-        if query in self.states:
+        if query == 'unknown':
+            type_filter = query
+        elif query in self.states:
             state = query
         elif query == 'all':
             all_devices = True
