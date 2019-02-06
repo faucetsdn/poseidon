@@ -88,7 +88,6 @@ def schedule_job_reinvestigation(func):
                         'Unable to mirror the endpoint: {0}'.format(chosen.name))
         return
 
-    func.s.get_stored_endpoints()
     candidates = []
     for endpoint in func.s.endpoints:
         # queued endpoints have priority
@@ -102,7 +101,6 @@ def schedule_job_reinvestigation(func):
         if len(candidates) > 0:
             random.shuffle(candidates)
     trigger_reinvestigation(candidates)
-    func.s.store_endpoints()
 
 
 def schedule_thread_worker(schedule):
@@ -161,7 +159,7 @@ class SDNConnect(object):
             for mac in macs:
                 try:
                     mac_info = self.r.hgetall(mac)
-                    if mac_info[b'poseidon_hash'] == hash_id.encode('utf-8'):
+                    if b'posiedon_hash' in mac_info and mac_info[b'poseidon_hash'] == hash_id.encode('utf-8'):
                         mac_addresses[mac.decode('ascii')] = {}
                         if b'timestamps' in mac_info:
                             try:
@@ -170,12 +168,23 @@ class SDNConnect(object):
                                 for timestamp in timestamps:
                                     ml_info = self.r.hgetall(
                                         mac.decode('ascii')+'_'+str(timestamp))
-                                    labels = ast.literal_eval(
-                                        ml_info[b'labels'].decode('ascii'))
-                                    confidences = ast.literal_eval(
-                                        ml_info[b'confidences'].decode('ascii'))
-                                    behavior = ast.literal_eval(ml_info[mac_info[b'poseidon_hash']].decode('ascii'))[
-                                        'decisions']['behavior']
+                                    labels = []
+                                    if b'labels' in ml_info:
+                                        labels = ast.literal_eval(
+                                            ml_info[b'labels'].decode('ascii'))
+                                    confidences = []
+                                    if b'confidences' in ml_info:
+                                        confidences = ast.literal_eval(
+                                            ml_info[b'confidences'].decode('ascii'))
+                                    behavior = 'None'
+                                    if mac_info[b'poseidon_hash'] in ml_info:
+                                        tmp = ast.literal_eval(
+                                            ml_info[mac_info[b'poseidon_hash']].decode('ascii'))
+                                    elif mac_info[b'poseidon_hash'].decode('ascii') in ml_info:
+                                        tmp = ast.literal_eval(
+                                            ml_info[mac_info[b'poseidon_hash'].decode('ascii')].decode('ascii'))
+                                    if 'decisions' in tmp and 'behavior' in tmp['decisions']:
+                                        behavior = tmp['decisions']['behavior']
                                     mac_addresses[mac.decode('ascii')][str(timestamp)] = {
                                         'labels': labels, 'confidences': confidences, 'behavior': behavior}
                             except Exception as e:  # pragma: no cover
@@ -184,30 +193,33 @@ class SDNConnect(object):
                         try:
                             poseidon_info = self.r.hgetall(
                                 mac_info[b'poseidon_hash'])
-                            endpoint_data = ast.literal_eval(
-                                poseidon_info[b'endpoint_data'].decode('ascii'))
-                            if 'ipv4' in endpoint_data and endpoint_data['ipv4'] not in ['None', 0]:
-                                try:
-                                    ipv4_info = self.r.hgetall(
-                                        endpoint_data['ipv4'])
-                                    ipv4_addresses[endpoint_data['ipv4']] = {}
-                                    if ipv4_info and b'short_os' in ipv4_info:
-                                        ipv4_addresses[endpoint_data['ipv4']
-                                                       ]['os'] = ipv4_info[b'short_os'].decode('ascii')
-                                except Exception as e:  # pragma: no cover
-                                    self.logger.error(
-                                        'Unable to get existing ipv4 data from Redis because: {0}'.format(str(e)))
-                            if 'ipv6' in endpoint_data and endpoint_data['ipv6'] not in ['None', 0]:
-                                try:
-                                    ipv6_info = self.r.hgetall(
-                                        endpoint_data['ipv6'])
-                                    ipv6_addresses[endpoint_data['ipv6']] = {}
-                                    if ipv6_info and b'short_os' in ipv6_info:
-                                        ipv6_addresses[endpoint_data['ipv6']
-                                                       ]['os'] = ipv6_info[b'short_os'].decode('ascii')
-                                except Exception as e:  # pragma: no cover
-                                    self.logger.error(
-                                        'Unable to get existing ipv6 data from Redis because: {0}'.format(str(e)))
+                            if b'endpoint_data' in poseidon_info:
+                                endpoint_data = ast.literal_eval(
+                                    poseidon_info[b'endpoint_data'].decode('ascii'))
+                                if 'ipv4' in endpoint_data and endpoint_data['ipv4'] not in ['None', 0]:
+                                    try:
+                                        ipv4_info = self.r.hgetall(
+                                            endpoint_data['ipv4'])
+                                        ipv4_addresses[endpoint_data['ipv4']] = {
+                                        }
+                                        if ipv4_info and b'short_os' in ipv4_info:
+                                            ipv4_addresses[endpoint_data['ipv4']
+                                                           ]['os'] = ipv4_info[b'short_os'].decode('ascii')
+                                    except Exception as e:  # pragma: no cover
+                                        self.logger.error(
+                                            'Unable to get existing ipv4 data from Redis because: {0}'.format(str(e)))
+                                if 'ipv6' in endpoint_data and endpoint_data['ipv6'] not in ['None', 0]:
+                                    try:
+                                        ipv6_info = self.r.hgetall(
+                                            endpoint_data['ipv6'])
+                                        ipv6_addresses[endpoint_data['ipv6']] = {
+                                        }
+                                        if ipv6_info and b'short_os' in ipv6_info:
+                                            ipv6_addresses[endpoint_data['ipv6']
+                                                           ]['os'] = ipv6_info[b'short_os'].decode('ascii')
+                                    except Exception as e:  # pragma: no cover
+                                        self.logger.error(
+                                            'Unable to get existing ipv6 data from Redis because: {0}'.format(str(e)))
                         except Exception as e:  # pragma: no cover
                             self.logger.error(
                                 'Unable to get existing endpoint data from Redis because: {0}'.format(str(e)))
@@ -237,21 +249,18 @@ class SDNConnect(object):
                     self.controller))
 
     def endpoint_by_name(self, name):
-        self.get_stored_endpoints()
         for endpoint in self.endpoints:
             if endpoint.machine.name.strip() == name:
                 return endpoint
         return None
 
     def endpoint_by_hash(self, hash_id):
-        self.get_stored_endpoints()
         for endpoint in self.endpoints:
             if endpoint.name == hash_id:
                 return endpoint
         return None
 
     def endpoints_by_ip(self, ip):
-        self.get_stored_endpoints()
         endpoints = []
         for endpoint in self.endpoints:
             if ip in [endpoint.endpoint_data['ipv4'], endpoint.endpoint_data['ipv6']]:
@@ -259,7 +268,6 @@ class SDNConnect(object):
         return endpoints
 
     def endpoints_by_mac(self, mac):
-        self.get_stored_endpoints()
         endpoints = []
         for endpoint in self.endpoints:
             if mac == endpoint.endpoint_data['mac']:
@@ -267,65 +275,51 @@ class SDNConnect(object):
         return endpoints
 
     def collect_on(self, endpoint):
-        self.get_stored_endpoints()
         # TODO
         return
 
     def remove_inactive_endpoints(self):
-        self.get_stored_endpoints()
         remove_list = []
         for endpoint in self.endpoints:
             if endpoint.state == 'inactive':
                 remove_list.append(endpoint)
         for endpoint in remove_list:
             self.endpoints.remove(endpoint)
-        self.store_endpoints()
         return remove_list
 
     def ignore_inactive_endpoints(self):
-        self.get_stored_endpoints()
         for ep in self.endpoints:
             if ep.state == 'ignore':
                 ep.ignore = True
-        self.store_endpoints()
         return
 
     def ignore_endpoint(self, endpoint):
-        self.get_stored_endpoints()
         for ep in self.endpoints:
             if ep.name == endpoint.name:
                 ep.ignore = True
-        self.store_endpoints()
         return
 
     def clear_ignored_endpoint(self, endpoint):
-        self.get_stored_endpoints()
         for ep in self.endpoints:
             if ep.name == endpoint.name:
                 ep.ignore = False
-        self.store_endpoints()
         return
 
     def remove_endpoint(self, endpoint):
-        self.get_stored_endpoints()
         if endpoint in self.endpoints:
             self.endpoints.remove(endpoint)
-        self.store_endpoints()
         return
 
     def remove_ignored_endpoints(self):
-        self.get_stored_endpoints()
         remove_list = []
         for endpoint in self.endpoints:
             if endpoint.ignore:
                 remove_list.append(endpoint)
         for endpoint in remove_list:
             self.endpoints.remove(endpoint)
-        self.store_endpoints()
         return remove_list
 
     def show_endpoints(self, state, type_filter, all_devices):
-        self.get_stored_endpoints()
         endpoints = []
         for endpoint in self.endpoints:
             if all_devices:
@@ -377,7 +371,6 @@ class SDNConnect(object):
     def find_new_machines(self, machines):
         '''parse switch structure to find new machines added to network
         since last call'''
-        self.get_stored_endpoints()
         for machine in machines:
             h = Endpoint.make_hash(machine)
             ep = None
@@ -555,8 +548,6 @@ class Monitor(object):
         signal.signal(signal.SIGINT, partial(self.signal_handler))
         while not CTRL_C['STOP']:
             time.sleep(1)
-            # retrieve endpoints from redis
-            self.s.get_stored_endpoints()
 
             found_work, item = self.get_q_item()
             ml_returns = {}
@@ -591,12 +582,20 @@ class Monitor(object):
                             ep.unknown()
                         ep.p_prev_states.append(
                             (ep.state, int(time.time())))
-                        # store changes to state
-                        self.s.store_endpoints()
 
+            # mirror things in the order they got added to the queue
+            queued_endpoints = []
+            unknown_endpoints = []
+            investigating_endpoints = []
             for endpoint in self.s.endpoints:
                 if not endpoint.ignore:
                     if endpoint.state == 'queued':
+                        queued_endpoints.append(
+                            (endpoint.name, endpoint.p_prev_states[-1][1]))
+            queued_endpoints = sorted(queued_endpoints, key=lambda x: x[1])
+            for ep in queued_endpoints:
+                for endpoint in self.s.endpoints:
+                    if ep[0] == endpoint.name:
                         if self.s.investigations < self.controller['max_concurrent_reinvestigations']:
                             self.s.investigations += 1
                             endpoint.trigger(endpoint.p_next_state)
@@ -608,27 +607,14 @@ class Monitor(object):
                             if not status:
                                 self.logger.warning(
                                     'Unable to mirror the endpoint: {0}'.format(endpoint.name))
-                            # store changes to state
-                            self.s.store_endpoints()
-                    elif endpoint.state == 'unknown':
-                        # move to mirroring state
-                        if self.s.investigations < self.controller['max_concurrent_reinvestigations']:
-                            self.s.investigations += 1
-                            endpoint.mirror()
-                            endpoint.p_prev_states.append(
-                                (endpoint.state, int(time.time())))
-                            status = Actions(
-                                endpoint, self.s.sdnc).mirror_endpoint()
-                            if not status:
-                                self.logger.warning(
-                                    'Unable to mirror the endpoint: {0}'.format(endpoint.name))
-                        else:
-                            endpoint.p_next_state = 'mirror'
-                            endpoint.queue()
-                            endpoint.p_prev_states.append(
-                                (endpoint.state, int(time.time())))
-                        # store changes to state
-                        self.s.store_endpoints()
+
+            for endpoint in self.s.endpoints:
+                if not endpoint.ignore:
+                    if endpoint.state == 'unknown':
+                        endpoint.p_next_state = 'mirror'
+                        endpoint.queue()
+                        endpoint.p_prev_states.append(
+                            (endpoint.state, int(time.time())))
                     elif endpoint.state in ['mirroring', 'reinvestigating']:
                         cur_time = int(time.time())
                         # timeout after 2 times the reinvestigation frequency
@@ -644,8 +630,6 @@ class Monitor(object):
                             self.s.investigations -= 1
                             endpoint.p_prev_states.append(
                                 (endpoint.state, int(time.time())))
-                            # store changes to state
-                            self.s.store_endpoints()
 
     def get_q_item(self):
         '''

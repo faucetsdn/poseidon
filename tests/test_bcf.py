@@ -199,9 +199,9 @@ def test_format_endpoints():
                         'vlan': -1}])
 
     output = BcfProxy.format_endpoints(input_data)
-    answer = list([{'mac': 'f8:b1:56:fe:f2:de', 'segment': 'prod',
+    answer = list([{'mac': 'f8:b1:56:fe:f2:de', 'segment': 'leaf02',
                     'tenant': 'FLOORPLATE', 'name': None, 'active': 1,
-                    'port': None, 'ipv4': '10.0.0.101', 'ipv6': 0}])
+                    'port': 'ethernet16', 'ipv4': '10.0.0.101', 'ipv6': 0}])
     assert str(answer) == str(output)
 
 

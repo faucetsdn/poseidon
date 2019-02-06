@@ -55,10 +55,12 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             if ipa is not None and ipa[0] is not None:
                 md = ipa[0]
                 md['name'] = d.get('name')
-                # TODO this should grab 'state': 'Active'
-                md['active'] = 1
-                # TODO this should grab interface
-                md['port'] = None
+                if d.get('state') == 'Active':
+                    md['active'] = 1
+                else:
+                    md['active'] = 0
+                md['port'] = d.get('interface')
+                md['segment'] = d.get('switch')
                 md.pop('ip-state', None)
                 # get both ipv4 and ipv6 addresses if available
                 # reverse to set the most recent ip last
