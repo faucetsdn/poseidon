@@ -332,9 +332,27 @@ class SDNConnect(object):
                     if endpoint.ignore:
                         endpoints.append(endpoint)
                 else:
-                    self.logger.info(
-                        'endpoint_metadata: {0}'.format(endpoint.metadata))
-                # TODO
+                    # filter by device type
+                    timestamps = endpoint.metadata['mac_addresses'][endpoint.endpoint_data['mac']]
+                    newest = '0'
+                    for timestamp in timestamps:
+                        if timestamp > newest:
+                            newest = timestamp
+                    if newest is not '0' and 'labels' in timestamps[newest]:
+                        if type_filter == timestamps[newest]['labels'][0].lower():
+                            endpoints.append(endpoint)
+
+                    # filter by operating system
+                    if 'ipv4_addresses' in endpoint.metadata and endpoint.endpoint_data['ipv4'] in endpoint.metadata['ipv4_addresses']:
+                        metadata = endpoint.metadata['ipv4_addresses'][endpoint.endpoint_data['ipv4']]
+                        if 'os' in metadata:
+                            if type_filter == metadata['os'].lower():
+                                endpoints.append(endpoint)
+                    if 'ipv6_addresses' in endpoint.metadata and endpoint.endpoint_data['ipv6'] in endpoint.metadata['ipv6_addresses']:
+                        metadata = endpoint.metadata['ipv6_addresses'][endpoint.endpoint_data['ipv4']]
+                        if 'os' in metadata:
+                            if type_filter == metadata['os'].lower():
+                                endpoints.append(endpoint)
         return endpoints
 
     def check_endpoints(self, messages=None):
