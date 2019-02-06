@@ -50,7 +50,8 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         return only the information needed for the application
         '''
         ret_list = list()
-        self.logger.info('format_endpoints: {0}'.format(data))
+        logger = logging.getLogger('bcfffff')
+        logger.info('format_endpoints: {0}'.format(data))
         for d in data:
             ipa = d.get('ip-address')
             if ipa is not None and ipa[0] is not None:
