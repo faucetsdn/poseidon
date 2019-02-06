@@ -88,7 +88,6 @@ def schedule_job_reinvestigation(func):
                         'Unable to mirror the endpoint: {0}'.format(chosen.name))
         return
 
-    func.s.get_stored_endpoints()
     candidates = []
     for endpoint in func.s.endpoints:
         # queued endpoints have priority
@@ -102,7 +101,6 @@ def schedule_job_reinvestigation(func):
         if len(candidates) > 0:
             random.shuffle(candidates)
     trigger_reinvestigation(candidates)
-    func.s.store_endpoints()
 
 
 def schedule_thread_worker(schedule):
@@ -251,21 +249,18 @@ class SDNConnect(object):
                     self.controller))
 
     def endpoint_by_name(self, name):
-        self.get_stored_endpoints()
         for endpoint in self.endpoints:
             if endpoint.machine.name.strip() == name:
                 return endpoint
         return None
 
     def endpoint_by_hash(self, hash_id):
-        self.get_stored_endpoints()
         for endpoint in self.endpoints:
             if endpoint.name == hash_id:
                 return endpoint
         return None
 
     def endpoints_by_ip(self, ip):
-        self.get_stored_endpoints()
         endpoints = []
         for endpoint in self.endpoints:
             if ip in [endpoint.endpoint_data['ipv4'], endpoint.endpoint_data['ipv6']]:
@@ -273,7 +268,6 @@ class SDNConnect(object):
         return endpoints
 
     def endpoints_by_mac(self, mac):
-        self.get_stored_endpoints()
         endpoints = []
         for endpoint in self.endpoints:
             if mac == endpoint.endpoint_data['mac']:
@@ -281,65 +275,51 @@ class SDNConnect(object):
         return endpoints
 
     def collect_on(self, endpoint):
-        self.get_stored_endpoints()
         # TODO
         return
 
     def remove_inactive_endpoints(self):
-        self.get_stored_endpoints()
         remove_list = []
         for endpoint in self.endpoints:
             if endpoint.state == 'inactive':
                 remove_list.append(endpoint)
         for endpoint in remove_list:
             self.endpoints.remove(endpoint)
-        self.store_endpoints()
         return remove_list
 
     def ignore_inactive_endpoints(self):
-        self.get_stored_endpoints()
         for ep in self.endpoints:
             if ep.state == 'ignore':
                 ep.ignore = True
-        self.store_endpoints()
         return
 
     def ignore_endpoint(self, endpoint):
-        self.get_stored_endpoints()
         for ep in self.endpoints:
             if ep.name == endpoint.name:
                 ep.ignore = True
-        self.store_endpoints()
         return
 
     def clear_ignored_endpoint(self, endpoint):
-        self.get_stored_endpoints()
         for ep in self.endpoints:
             if ep.name == endpoint.name:
                 ep.ignore = False
-        self.store_endpoints()
         return
 
     def remove_endpoint(self, endpoint):
-        self.get_stored_endpoints()
         if endpoint in self.endpoints:
             self.endpoints.remove(endpoint)
-        self.store_endpoints()
         return
 
     def remove_ignored_endpoints(self):
-        self.get_stored_endpoints()
         remove_list = []
         for endpoint in self.endpoints:
             if endpoint.ignore:
                 remove_list.append(endpoint)
         for endpoint in remove_list:
             self.endpoints.remove(endpoint)
-        self.store_endpoints()
         return remove_list
 
     def show_endpoints(self, state, type_filter, all_devices):
-        self.get_stored_endpoints()
         endpoints = []
         for endpoint in self.endpoints:
             if all_devices:
@@ -391,7 +371,6 @@ class SDNConnect(object):
     def find_new_machines(self, machines):
         '''parse switch structure to find new machines added to network
         since last call'''
-        self.get_stored_endpoints()
         for machine in machines:
             h = Endpoint.make_hash(machine)
             ep = None
@@ -569,8 +548,6 @@ class Monitor(object):
         signal.signal(signal.SIGINT, partial(self.signal_handler))
         while not CTRL_C['STOP']:
             time.sleep(1)
-            # retrieve endpoints from redis
-            self.s.get_stored_endpoints()
 
             found_work, item = self.get_q_item()
             ml_returns = {}
@@ -605,8 +582,6 @@ class Monitor(object):
                             ep.unknown()
                         ep.p_prev_states.append(
                             (ep.state, int(time.time())))
-                        # store changes to state
-                        self.s.store_endpoints()
 
             for endpoint in self.s.endpoints:
                 if not endpoint.ignore:
@@ -622,8 +597,6 @@ class Monitor(object):
                             if not status:
                                 self.logger.warning(
                                     'Unable to mirror the endpoint: {0}'.format(endpoint.name))
-                            # store changes to state
-                            self.s.store_endpoints()
                     elif endpoint.state == 'unknown':
                         # move to mirroring state
                         if self.s.investigations < self.controller['max_concurrent_reinvestigations']:
@@ -641,8 +614,6 @@ class Monitor(object):
                             endpoint.queue()
                             endpoint.p_prev_states.append(
                                 (endpoint.state, int(time.time())))
-                        # store changes to state
-                        self.s.store_endpoints()
                     elif endpoint.state in ['mirroring', 'reinvestigating']:
                         cur_time = int(time.time())
                         # timeout after 2 times the reinvestigation frequency
@@ -658,8 +629,6 @@ class Monitor(object):
                             self.s.investigations -= 1
                             endpoint.p_prev_states.append(
                                 (endpoint.state, int(time.time())))
-                            # store changes to state
-                            self.s.store_endpoints()
 
     def get_q_item(self):
         '''
