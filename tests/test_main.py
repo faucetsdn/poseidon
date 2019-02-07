@@ -55,41 +55,6 @@ def test_collect_on():
     s.collect_on('00:00:00:00:00:01')
 
 
-def test_remove_inactive_endpoints():
-    s = SDNConnect()
-    s.remove_inactive_endpoints()
-
-
-def test_ignore_endpoint():
-    s = SDNConnect()
-    endpoint = Endpoint('foo')
-    endpoint.endpoint_data = {
-        'tenant': 'foo', 'mac': '00:00:00:00:00:00'}
-    s.ignore_endpoint(endpoint)
-
-
-def test_clear_ignored_endpoint():
-    s = SDNConnect()
-    endpoint = Endpoint('foo')
-    endpoint.endpoint_data = {
-        'tenant': 'foo', 'mac': '00:00:00:00:00:00'}
-    s.clear_ignored_endpoint(endpoint)
-
-
-def test_remove_endpoint():
-    s = SDNConnect()
-    endpoint = Endpoint('foo')
-    endpoint.endpoint_data = {
-        'tenant': 'foo', 'mac': '00:00:00:00:00:00'}
-    s.endpoints.append(endpoint)
-    s.remove_endpoint(endpoint)
-
-
-def test_remove_ignored_endpoints():
-    s = SDNConnect()
-    s.remove_ignored_endpoints()
-
-
 def test_signal_handler():
 
     class MockLogger:

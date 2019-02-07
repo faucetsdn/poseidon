@@ -19,6 +19,7 @@ import time
 from copy import deepcopy
 from functools import partial
 
+import pika
 import requests
 import schedule
 from redis import StrictRedis
@@ -35,6 +36,7 @@ from poseidon.helpers.prometheus import Prometheus
 from poseidon.helpers.rabbit import Rabbit
 
 requests.packages.urllib3.disable_warnings()
+logging.getLogger('pika').setLevel(logging.WARNING)
 
 CTRL_C = dict()
 CTRL_C['STOP'] = False
@@ -49,7 +51,7 @@ def rabbit_callback(ch, method, properties, body, q=None):
     if q is not None:
         q.put((method.routing_key, body))
     else:
-        logger.debug('posedionMain workQueue is None')
+        logger.debug('poseidonMain workQueue is None')
 
 
 def schedule_job_kickurl(func):
@@ -278,46 +280,32 @@ class SDNConnect(object):
         # TODO
         return
 
-    def remove_inactive_endpoints(self):
-        remove_list = []
-        for endpoint in self.endpoints:
-            if endpoint.state == 'inactive':
-                remove_list.append(endpoint)
-        for endpoint in remove_list:
-            self.endpoints.remove(endpoint)
-        return remove_list
+    @staticmethod
+    def _connect_rabbit():
+        # Rabbit settings
+        exchange = 'topic-poseidon-internal'
+        exchange_type = 'topic'
 
-    def ignore_inactive_endpoints(self):
-        for ep in self.endpoints:
-            if ep.state == 'ignore':
-                ep.ignore = True
+        # Starting rabbit connection
+        connection = pika.BlockingConnection(
+            pika.ConnectionParameters(host='RABBIT_SERVER')
+        )
+
+        channel = connection.channel()
+        channel.exchange_declare(
+            exchange=exchange, exchange_type=exchange_type
+        )
+
+        return channel, exchange, connection
+
+    @staticmethod
+    def publish_action(action, message):
+        channel, exchange, connection = SDNConnect._connect_rabbit()
+        channel.basic_publish(exchange=exchange,
+                              routing_key=action,
+                              body=message)
+        connection.close()
         return
-
-    def ignore_endpoint(self, endpoint):
-        for ep in self.endpoints:
-            if ep.name == endpoint.name:
-                ep.ignore = True
-        return
-
-    def clear_ignored_endpoint(self, endpoint):
-        for ep in self.endpoints:
-            if ep.name == endpoint.name:
-                ep.ignore = False
-        return
-
-    def remove_endpoint(self, endpoint):
-        if endpoint in self.endpoints:
-            self.endpoints.remove(endpoint)
-        return
-
-    def remove_ignored_endpoints(self):
-        remove_list = []
-        for endpoint in self.endpoints:
-            if endpoint.ignore:
-                remove_list.append(endpoint)
-        for endpoint in remove_list:
-            self.endpoints.remove(endpoint)
-        return remove_list
 
     def show_endpoints(self, state, type_filter, all_devices):
         endpoints = []
@@ -563,6 +551,43 @@ class Monitor(object):
             # TODO if valid response then send along otherwise nothing
             for key in my_obj:
                 ret_val[key] = my_obj[key]
+        elif routing_key == 'poseidon.action.ignore':
+            for name in my_obj:
+                for endpoint in self.s.endpoints:
+                    if name == endpoint.name:
+                        endpoint.ignore = True
+        elif routing_key == 'poseidon.action.clear.ignored':
+            for name in my_obj:
+                for endpoint in self.s.endpoints:
+                    if name == endpoint.name:
+                        endpoint.ignore = False
+        elif routing_key == 'poseidon.action.change':
+            for name, state in my_obj:
+                for endpoint in self.s.endpoints:
+                    if name == endpoint.name:
+                        endpoint.trigger(state)
+        elif routing_key == 'poseidon.action.remove':
+            remove_list = []
+            for name in my_obj:
+                for endpoint in self.s.endpoints:
+                    if name == endpoint.name:
+                        remove_list.append(endpoint)
+            for endpoint in remove_list:
+                self.s.endpoints.remove(endpoint)
+        elif routing_key == 'poseidon.action.remove.ignored':
+            remove_list = []
+            for endpoint in self.s.endpoints:
+                if endpoint.ignore:
+                    remove_list.append(endpoint)
+            for endpoint in remove_list:
+                self.s.endpoints.remove(endpoint)
+        elif routing_key == 'poseidon.action.remove.inactives':
+            remove_list = []
+            for endpoint in self.s.endpoints:
+                if endpoint.state == 'inactive':
+                    remove_list.append(endpoint)
+            for endpoint in remove_list:
+                self.s.endpoints.remove(endpoint)
         elif routing_key == self.controller['FA_RABBIT_ROUTING_KEY']:
             self.logger.debug('FAUCET Event:{0}'.format(my_obj))
             for key in my_obj:
@@ -584,8 +609,9 @@ class Monitor(object):
                     'Faucet event: {0}'.format(self.faucet_event))
             elif found_work:
                 ml_returns = self.format_rabbit_message(item)
-                self.logger.info(
-                    'ML results: {0}'.format(ml_returns))
+                if ml_returns:
+                    self.logger.info(
+                        'ML results: {0}'.format(ml_returns))
                 # process results from ml output and update impacted endpoints
                 for ep in self.s.endpoints:
                     if ep.name in ml_returns and 'valid' in ml_returns[ep.name] and not ep.ignore:
