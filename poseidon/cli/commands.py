@@ -133,13 +133,11 @@ class Commands:
 
     def remove(self, args):
         ''' remove and forget about a specific thing until it's seen again '''
-        # TODO action required that updates the endpoint
         endpoints = []
         endpoint_names = []
         eps = self._get_endpoints(args, 0)
         for endpoint in eps:
             if endpoint:
-                # self.sdnc.remove_endpoint(endpoint)
                 endpoints.append(endpoint)
                 endpoint_names.append(endpoint.name)
         self.sdnc.publish_action(
