@@ -36,6 +36,7 @@ from poseidon.helpers.prometheus import Prometheus
 from poseidon.helpers.rabbit import Rabbit
 
 requests.packages.urllib3.disable_warnings()
+logging.getLogger('pika').setLevel(logging.WARNING)
 
 CTRL_C = dict()
 CTRL_C['STOP'] = False
