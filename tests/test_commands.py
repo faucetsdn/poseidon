@@ -12,8 +12,4 @@ def test_commands():
     commands.history_of('foo')
     commands.where_is('foo')
     commands.collect_on('foo')
-    commands.remove_inactives('foo')
-    commands.remove_ignored('foo')
-    commands.ignore('foo')
-    commands.clear_ignored('foo')
     commands.show_devices('foo')
