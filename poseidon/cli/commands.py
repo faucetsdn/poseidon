@@ -139,7 +139,7 @@ class Commands:
         for endpoint in eps:
             if endpoint:
                 # self.sdnc.remove_endpoint(endpoint)
-                endpoints.append(endpoint)
+                endpoints.append(endpoint.name)
         self.sdnc.publish_action(
             'poseidon.action.remove', json.dumps(endpoints))
         return endpoints
