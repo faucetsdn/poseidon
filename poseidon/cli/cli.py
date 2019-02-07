@@ -57,12 +57,12 @@ class PoseidonShell(cmd.Cmd):
     show_completions = [
         'all devices', 'active devices', 'inactive devices', 'known devices',
         'unknown devices', 'mirroring devices', 'abnormal devices',
-        'shutdown devices', 'reinvestigating devices', 'queued devices',
-        'active directory controller devices', 'administrator server devices',
-        'administrator workstation devices', 'business workstation devices',
-        'developer workstation devices', 'gpu laptop devices',
-        'pki server devices', 'windows devices', 'mac devices',
-        'linux devices', 'ignored devices'
+        'normal devices', 'shutdown devices', 'reinvestigating devices',
+        'queued devices', 'active directory controller devices',
+        'administrator server devices', 'administrator workstation devices',
+        'business workstation devices', 'developer workstation devices',
+        'gpu laptop devices', 'pki server devices', 'windows devices',
+        'mac devices', 'linux devices', 'ignored devices'
     ]
 
     @staticmethod
