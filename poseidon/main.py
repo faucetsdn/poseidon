@@ -565,7 +565,22 @@ class Monitor(object):
             for name, state in my_obj:
                 for endpoint in self.s.endpoints:
                     if name == endpoint.name:
+                        if state != 'mirror' and state != 'reinvestigate' and (endpoint.state == 'mirror' or endpoint.state == 'reinvestigate'):
+                            status = Actions(
+                                endpoint, self.s.sdnc).unmirror_endpoint()
+                            if not status:
+                                self.logger.warning(
+                                    'Unable to unmirror the endpoint: {0}'.format(endpoint.name))
                         endpoint.trigger(state)
+                        endpoint.p_next_state = None
+                        endpoint.p_prev_states.append(
+                            (endpoint.state, int(time.time())))
+                        if endpoint.state == 'mirror' or endpoint.state == 'reinvestigate':
+                            status = Actions(
+                                endpoint, self.s.sdnc).mirror_endpoint()
+                            if not status:
+                                self.logger.warning(
+                                    'Unable to mirror the endpoint: {0}'.format(endpoint.name))
         elif routing_key == 'poseidon.action.remove':
             remove_list = []
             for name in my_obj:
