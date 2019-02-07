@@ -19,6 +19,7 @@ import time
 from copy import deepcopy
 from functools import partial
 
+import pika
 import requests
 import schedule
 from redis import StrictRedis
@@ -49,7 +50,7 @@ def rabbit_callback(ch, method, properties, body, q=None):
     if q is not None:
         q.put((method.routing_key, body))
     else:
-        logger.debug('posedionMain workQueue is None')
+        logger.debug('poseidonMain workQueue is None')
 
 
 def schedule_job_kickurl(func):
@@ -319,6 +320,33 @@ class SDNConnect(object):
             self.endpoints.remove(endpoint)
         return remove_list
 
+    @staticmethod
+    def _connect_rabbit():
+        # Rabbit settings
+        exchange = 'topic-poseidon-internal'
+        exchange_type = 'topic'
+
+        # Starting rabbit connection
+        connection = pika.BlockingConnection(
+            pika.ConnectionParameters(host='rabbit')
+        )
+
+        channel = connection.channel()
+        channel.exchange_declare(
+            exchange=exchange, exchange_type=exchange_type
+        )
+
+        return channel, exchange, connection
+
+    @staticmethod
+    def publish_action(action, message):
+        channel, exchange, connection = SDNConnect._connect_rabbit()
+        channel.basic_publish(exchange=exchange,
+                              routing_key=action,
+                              body=message)
+        connection.close()
+        return
+
     def show_endpoints(self, state, type_filter, all_devices):
         endpoints = []
         for endpoint in self.endpoints:
@@ -563,6 +591,14 @@ class Monitor(object):
             # TODO if valid response then send along otherwise nothing
             for key in my_obj:
                 ret_val[key] = my_obj[key]
+        elif routing_key == 'poseidon.action.remove':
+            remove_list = []
+            for name in my_obj:
+                for endpoint in self.s.endpoints:
+                    if name == endpoint.name:
+                        remove_list.append(endpoint)
+            for endpoint in remove_list:
+                self.s.endpoints.remove(endpoint)
         elif routing_key == self.controller['FA_RABBIT_ROUTING_KEY']:
             self.logger.debug('FAUCET Event:{0}'.format(my_obj))
             for key in my_obj:
@@ -584,8 +620,9 @@ class Monitor(object):
                     'Faucet event: {0}'.format(self.faucet_event))
             elif found_work:
                 ml_returns = self.format_rabbit_message(item)
-                self.logger.info(
-                    'ML results: {0}'.format(ml_returns))
+                if ml_returns:
+                    self.logger.info(
+                        'ML results: {0}'.format(ml_returns))
                 # process results from ml output and update impacted endpoints
                 for ep in self.s.endpoints:
                     if ep.name in ml_returns and 'valid' in ml_returns[ep.name] and not ep.ignore:
