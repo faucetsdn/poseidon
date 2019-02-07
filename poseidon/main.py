@@ -49,7 +49,7 @@ def rabbit_callback(ch, method, properties, body, q=None):
     if q is not None:
         q.put((method.routing_key, body))
     else:
-        logger.debug('posedionMain workQueue is None')
+        logger.debug('poseidonMain workQueue is None')
 
 
 def schedule_job_kickurl(func):
@@ -318,6 +318,33 @@ class SDNConnect(object):
         for endpoint in remove_list:
             self.endpoints.remove(endpoint)
         return remove_list
+
+    @staticmethod
+    def _connect_rabbit():
+        # Rabbit settings
+        exchange = 'topic-poseidon-internal'
+        exchange_type = 'topic'
+
+        # Starting rabbit connection
+        connection = pika.BlockingConnection(
+            pika.ConnectionParameters(host='rabbit')
+        )
+
+        channel = connection.channel()
+        channel.exchange_declare(
+            exchange=exchange, exchange_type=exchange_type
+        )
+
+        return channel, exchange, connection
+
+    @staticmethod
+    def publish_action(action, message):
+        channel, exchange, connection = SDNConnect._connect_rabbit()
+        channel.basic_publish(exchange=exchange,
+                              routing_key=action,
+                              body=message)
+        connection.close()
+        return
 
     def show_endpoints(self, state, type_filter, all_devices):
         endpoints = []

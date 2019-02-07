@@ -6,6 +6,8 @@ The commands that can be executed in the Poseidon shell.
 Created on 18 January 2019
 @author: Charlie Lewis
 """
+import json
+
 from poseidon.main import SDNConnect
 
 
@@ -136,8 +138,10 @@ class Commands:
         eps = self._get_endpoints(args, 0)
         for endpoint in eps:
             if endpoint:
-                self.sdnc.remove_endpoint(endpoint)
+                # self.sdnc.remove_endpoint(endpoint)
                 endpoints.append(endpoint)
+        self.sdnc.publish_action(
+            'poseidon.action.remove', json.dumps(endpoints))
         return endpoints
 
     def show_devices(self, args):
