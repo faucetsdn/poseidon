@@ -562,7 +562,7 @@ class Monitor(object):
                 for endpoint in self.s.endpoints:
                     if name == endpoint.name:
                         try:
-                            if state != 'mirror' and state != 'reinvestigate' and (endpoint.state == 'mirror' or endpoint.state == 'reinvestigate'):
+                            if state != 'mirror' and state != 'reinvestigate' and (endpoint.state == 'mirroring' or endpoint.state == 'reinvestigating'):
                                 status = Actions(
                                     endpoint, self.s.sdnc).unmirror_endpoint()
                                 if not status:
@@ -572,7 +572,7 @@ class Monitor(object):
                             endpoint.p_next_state = None
                             endpoint.p_prev_states.append(
                                 (endpoint.state, int(time.time())))
-                            if endpoint.state == 'mirror' or endpoint.state == 'reinvestigate':
+                            if endpoint.state == 'mirroring' or endpoint.state == 'reinvestigating':
                                 status = Actions(
                                     endpoint, self.s.sdnc).mirror_endpoint()
                                 if not status:
