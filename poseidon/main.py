@@ -19,6 +19,7 @@ import time
 from copy import deepcopy
 from functools import partial
 
+import pika
 import requests
 import schedule
 from redis import StrictRedis
