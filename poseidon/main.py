@@ -287,7 +287,7 @@ class SDNConnect(object):
 
         # Starting rabbit connection
         connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host='rabbit')
+            pika.ConnectionParameters(host='RABBIT_SERVER')
         )
 
         channel = connection.channel()
