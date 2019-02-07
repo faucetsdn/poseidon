@@ -276,10 +276,6 @@ class SDNConnect(object):
                 endpoints.append(endpoint)
         return endpoints
 
-    def collect_on(self, endpoint):
-        # TODO
-        return
-
     @staticmethod
     def _connect_rabbit():
         # Rabbit settings

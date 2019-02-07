@@ -50,11 +50,6 @@ def test_endpoints_by_mac():
     assert endpoints == []
 
 
-def test_collect_on():
-    s = SDNConnect()
-    s.collect_on('00:00:00:00:00:01')
-
-
 def test_signal_handler():
 
     class MockLogger:

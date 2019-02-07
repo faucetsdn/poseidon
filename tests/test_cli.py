@@ -18,7 +18,6 @@ def test_poseidonshell():
     shell.complete_show('foo', 'what ok yeah', 0, 1)
     shell.complete_what('foo', 'what ok yeah', 0, 1)
     shell.do_where('foo')
-    shell.do_collect('foo')
     shell.do_ignore('foo')
     shell.do_clear('foo')
     shell.do_remove('foo')
