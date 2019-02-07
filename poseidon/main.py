@@ -560,6 +560,11 @@ class Monitor(object):
                 for endpoint in self.s.endpoints:
                     if name == endpoint.name:
                         endpoint.ignore = False
+        elif routing_key == 'poseidon.action.change':
+            for name, state in my_obj:
+                for endpoint in self.s.endpoints:
+                    if name == endpoint.name:
+                        endpoint.trigger(state)
         elif routing_key == 'poseidon.action.remove':
             remove_list = []
             for name in my_obj:
