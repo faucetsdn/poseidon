@@ -389,6 +389,9 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
           }
 
         '''
+        if not mirror:
+            self.logger.debug("Attempting to unmirror")
+        
         resource = fabric_span_endpoint.format(self.span_fabric_name)
         uri = urljoin(self.base_uri, resource)
         data = self.get_span_fabric()  # first element is vent span rule
