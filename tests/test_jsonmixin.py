@@ -32,6 +32,8 @@ def test_empty():
     # Verify that blank text fields are parsed properly.
     def obj(): return True  # Just a proxy object for attaching text field.
     obj.text = ''
+    obj.status_code = 200
+    obj.url = ''
 
     # see if this forces coverge of obj
     assert obj()
