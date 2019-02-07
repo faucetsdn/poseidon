@@ -142,6 +142,7 @@ def test_BcfProxy():
 
     def r(): return True
     r.text = ''
+    r.status_code = 200
 
     # cover object
     assert r()
