@@ -184,6 +184,7 @@ class Commands:
     def change_devices(self, args):
         ''' change state of a specific thing '''
         eps = []
+        endpoints = []
         endpoint_names = []
         device = args.split(' ', 1)[0]
         state = args.rsplit(' ', 1)[-1]
