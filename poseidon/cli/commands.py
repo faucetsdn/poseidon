@@ -79,17 +79,30 @@ class Commands:
 
     def remove_inactives(self, args):
         ''' remove all inactive devices '''
-        # TODO action required that updates the endpoint
-        return self.sdnc.remove_inactive_endpoints()
+        endpoints = []
+        endpoint_names = []
+        for endpoint in self.sdnc.endpoints:
+            if endpoint.state == 'inactive':
+                endpoints.append(endpoint)
+                endpoint_names.append(endpoint.name)
+        self.sdnc.publish_action(
+            'poseidon.action.remove.inactives', json.dumps(endpoint_names))
+        return endpoints
 
     def remove_ignored(self, args):
         ''' remove all ignored devices '''
-        # TODO action required that updates the endpoint
-        return self.sdnc.remove_ignored_endpoints()
+        endpoints = []
+        endpoint_names = []
+        for endpoint in self.sdnc.endpoints:
+            if endpoint.ignore == True:
+                endpoints.append(endpoint)
+                endpoint_names.append(endpoint.name)
+        self.sdnc.publish_action(
+            'poseidon.action.remove.ignored', json.dumps(endpoint_names))
+        return endpoints
 
     def ignore(self, args):
         ''' ignore a specific thing '''
-        # TODO action required that updates the endpoint
         eps = []
         device = args.rsplit(' ', 1)[0]
         if device == 'inactive':
@@ -103,15 +116,17 @@ class Commands:
             eps += self.sdnc.endpoints_by_mac(device)
 
         endpoints = []
+        endpoint_names = []
         for endpoint in eps:
             if endpoint:
-                self.sdnc.ignore_endpoint(endpoint)
                 endpoints.append(endpoint)
+                endpoint_names.append(endpoint.name)
+        self.sdnc.publish_action(
+            'poseidon.action.ignore', json.dumps(endpoint_names))
         return endpoints
 
     def clear_ignored(self, args):
         ''' stop ignoring a specific thing '''
-        # TODO action required that updates the endpoint
         eps = []
         device = args.rsplit(' ', 1)[0]
         if device == 'ignored':
@@ -125,10 +140,13 @@ class Commands:
             eps += self.sdnc.endpoints_by_mac(device)
 
         endpoints = []
+        endpoint_names = []
         for endpoint in eps:
             if endpoint:
-                self.sdnc.clear_ignored_endpoint(endpoint)
                 endpoints.append(endpoint)
+                endpoint_names.append(endpoint.name)
+        self.sdnc.publish_action(
+            'poseidon.action.clear.ignored', json.dumps(endpoint_names))
         return endpoints
 
     def remove(self, args):

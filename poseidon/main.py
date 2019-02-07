@@ -279,47 +279,6 @@ class SDNConnect(object):
         # TODO
         return
 
-    def remove_inactive_endpoints(self):
-        remove_list = []
-        for endpoint in self.endpoints:
-            if endpoint.state == 'inactive':
-                remove_list.append(endpoint)
-        for endpoint in remove_list:
-            self.endpoints.remove(endpoint)
-        return remove_list
-
-    def ignore_inactive_endpoints(self):
-        for ep in self.endpoints:
-            if ep.state == 'ignore':
-                ep.ignore = True
-        return
-
-    def ignore_endpoint(self, endpoint):
-        for ep in self.endpoints:
-            if ep.name == endpoint.name:
-                ep.ignore = True
-        return
-
-    def clear_ignored_endpoint(self, endpoint):
-        for ep in self.endpoints:
-            if ep.name == endpoint.name:
-                ep.ignore = False
-        return
-
-    def remove_endpoint(self, endpoint):
-        if endpoint in self.endpoints:
-            self.endpoints.remove(endpoint)
-        return
-
-    def remove_ignored_endpoints(self):
-        remove_list = []
-        for endpoint in self.endpoints:
-            if endpoint.ignore:
-                remove_list.append(endpoint)
-        for endpoint in remove_list:
-            self.endpoints.remove(endpoint)
-        return remove_list
-
     @staticmethod
     def _connect_rabbit():
         # Rabbit settings
@@ -328,7 +287,7 @@ class SDNConnect(object):
 
         # Starting rabbit connection
         connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host='rabbit')
+            pika.ConnectionParameters(host='RABBIT_SERVER')
         )
 
         channel = connection.channel()
@@ -591,12 +550,36 @@ class Monitor(object):
             # TODO if valid response then send along otherwise nothing
             for key in my_obj:
                 ret_val[key] = my_obj[key]
+        elif routing_key == 'poseidon.action.ignore':
+            for name in my_obj:
+                for endpoint in self.s.endpoints:
+                    if name == endpoint.name:
+                        endpoint.ignore = True
+        elif routing_key == 'poseidon.action.clear.ignored':
+            for name in my_obj:
+                for endpoint in self.s.endpoints:
+                    if name == endpoint.name:
+                        endpoint.ignore = False
         elif routing_key == 'poseidon.action.remove':
             remove_list = []
             for name in my_obj:
                 for endpoint in self.s.endpoints:
                     if name == endpoint.name:
                         remove_list.append(endpoint)
+            for endpoint in remove_list:
+                self.s.endpoints.remove(endpoint)
+        elif routing_key == 'poseidon.action.remove.ignored':
+            remove_list = []
+            for endpoint in self.s.endpoints:
+                if endpoint.ignore:
+                    remove_list.append(endpoint)
+            for endpoint in remove_list:
+                self.s.endpoints.remove(endpoint)
+        elif routing_key == 'poseidon.action.remove.inactives':
+            remove_list = []
+            for endpoint in self.s.endpoints:
+                if endpoint.state == 'inactive':
+                    remove_list.append(endpoint)
             for endpoint in remove_list:
                 self.s.endpoints.remove(endpoint)
         elif routing_key == self.controller['FA_RABBIT_ROUTING_KEY']:
