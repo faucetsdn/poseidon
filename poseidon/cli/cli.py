@@ -518,21 +518,26 @@ class PoseidonShell(cmd.Cmd):
         self.display_results(Commands().show_devices(
             arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
-    @staticmethod
     @exception
-    def do_change(arg):
+    def do_change(self, arg):
         '''
-        TODO - NOT IMPLEMENTED YET
-
         Change state of things on the network:
         CHANGE [IP|MAC|ID] TO [STATE]
         CHANGE 10.0.0.1 TO INACTIVE
-        CHANGE ABNORMAL DEVICES TO UNKNOWN
+        CHANGE ABNORMAL DEVICES TO UNKNOWN (TODO - NOT IMPLEMENTED YET)
         CHANGE 18:EF:02:2D:49:00 TO KNOWN
         CHANGE 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293 TO SHUTDOWN
         '''
-        # TODO
-        return
+        # defaults
+        fields = self.default_fields + ['State', 'Next State']
+
+        flags, arg = PoseidonShell.get_flags(arg)
+        fields, sort_by, max_width, unique, nonzero = self._check_flags(
+            flags, fields)
+
+        print('Changed the following device states:')
+        self.display_results(Commands().change_devices(
+            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     def do_quit(self, arg):
         'Stop recording and exit:  QUIT'

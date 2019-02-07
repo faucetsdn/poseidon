@@ -180,3 +180,22 @@ class Commands:
         else:
             type_filter = query
         return self.sdnc.show_endpoints(state, type_filter, all_devices)
+
+    def change_devices(self, args):
+        ''' change state of a specific thing '''
+        eps = []
+        endpoints = []
+        endpoint_names = []
+        device = args.split(' ', 1)[0]
+        state = args.rsplit(' ', 1)[-1]
+        eps.append(self.sdnc.endpoint_by_name(device))
+        eps.append(self.sdnc.endpoint_by_hash(device))
+        eps += self.sdnc.endpoints_by_ip(device)
+        eps += self.sdnc.endpoints_by_mac(device)
+        for endpoint in eps:
+            if endpoint:
+                endpoints.append(endpoint)
+                endpoint_names.append((endpoint.name, state))
+        self.sdnc.publish_action(
+            'poseidon.action.change', json.dumps(endpoint_names))
+        return endpoints
