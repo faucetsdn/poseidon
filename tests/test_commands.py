@@ -16,5 +16,4 @@ def test_commands():
     commands.remove_ignored('foo')
     commands.ignore('foo')
     commands.clear_ignored('foo')
-    commands.remove('foo')
     commands.show_devices('foo')
