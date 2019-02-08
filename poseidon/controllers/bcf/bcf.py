@@ -337,6 +337,8 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
     def unmirror_mac(self, mac, switch, port, messages=None):
         status = None
         kill_list = self.get_seq_by_mac(mac)
+        if len(kill_list) == 0:
+           self.logger.debug("attempting to unmirror but kill_list is empty") 
         for kill in kill_list:
             self.logger.debug('unmirroring: {0}'.format(kill))
             self.mirror_traffic(kill, mirror=False)
