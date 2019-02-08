@@ -150,9 +150,9 @@ class Nodes():
                                     ml_info['confidences'])
                                 node['role_confidence'] = int(
                                     confidences[0]*100)
-                            if 'behavior' in node:
+                            if 'behavior' in node and 'poseidon_hash' in mac_info and mac_info['poseidon_hash'] in ml_info:
                                 results = ast.literal_eval(
-                                    ml_info[mac_info[b'poseidon_hash']])
+                                    ml_info[mac_info['poseidon_hash']])
                                 node['behavior'] = 1
                                 if results['decisions']['behavior'] == 'normal':
                                     node['behavior'] = 0
