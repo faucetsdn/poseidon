@@ -38,9 +38,6 @@ class PoseidonShell(cmd.Cmd):
     where_completions = [
         'is'
     ]
-    collect_completions = [
-        'on'
-    ]
     history_completions = [
         'of'
     ]
@@ -406,27 +403,6 @@ class PoseidonShell(cmd.Cmd):
 
         self.display_results(
             Commands().where_is(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
-
-    @exception
-    def do_collect(self, arg):
-        '''
-        TODO - NOT IMPLEMENTED YET
-
-        Collect on something on the network:
-        COLLECT ON [IP|MAC]
-        COLLECT ON 10.0.0.1 FOR 300 SECONDS
-        COLLECT ON 18:EF:02:2D:49:00 FOR 5 MINUTES
-        '''
-        # defaults
-        fields = self.default_fields
-
-        flags, arg = PoseidonShell.get_flags(arg)
-        fields, sort_by, max_width, unique, nonzero = self._check_flags(
-            flags, fields)
-
-        print('Collecting on the following devices:')
-        self.display_results(
-            Commands().collect_on(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
     def do_ignore(self, arg):

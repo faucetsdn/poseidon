@@ -66,17 +66,6 @@ class Commands:
                 endpoints.append(endpoint)
         return endpoints
 
-    def collect_on(self, args):
-        ''' collect on a specific thing '''
-        # TODO action required that updates the endpoint
-        endpoints = []
-        eps = self._get_endpoints(args, -1)
-        for endpoint in eps:
-            if endpoint:
-                self.sdnc.collect_on(endpoint)
-                endpoints.append(endpoint)
-        return endpoints
-
     def remove_inactives(self, args):
         ''' remove all inactive devices '''
         endpoints = []

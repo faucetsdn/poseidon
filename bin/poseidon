@@ -2,7 +2,7 @@
 
 function logging()
 {
-    docker logs -f cyberreboot-vent-syslog-master | \
+    docker logs -f "$(docker ps | grep "\-syslog\-" | awk '{print $1}')" | \
     while read -r line ; do
         echo "$line" | grep -v 'poseidon-api' | grep -i 'poseidon' | awk '{$1=$2=$3=""; print $0}' | sed -e 's/^[ \t]*//'
     done
@@ -11,7 +11,7 @@ function logging()
 function show_help()
 {
     local version
-    version=$(dpkg -s poseidon | grep '^Version:' | cut -d' ' -f2-)
+    version=$( (dpkg -s poseidon || dpkg -s poseidon-net) | grep '^Version:' | cut -d' ' -f2-)
     echo "Poseidon $version, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of machine learning techniques. For more info visit: https://github.com/CyberReboot/poseidon
 
 Usage: poseidon [option]
@@ -66,7 +66,7 @@ function check_args()
                 exit
                 ;;
             -i|info|status)
-                systemctl status poseidon
+                systemctl status poseidon || systemctl status poseidon-net
                 exit
                 ;;
             -k|kill)
@@ -80,11 +80,11 @@ function check_args()
                 exit
                 ;;
             -L|system-logs)
-                journalctl -n 100 -f -u poseidon
+                journalctl -n 100 -f -u poseidon || journalctl -n 100 -f -u poseidon-net
                 exit
                 ;;
             -R|reconfig)
-                sudo dpkg-reconfigure poseidon
+                sudo dpkg-reconfigure poseidon || sudo dpkg-reconfigure poseidon-net
                 exit
                 ;;
             -r|restart)
@@ -92,7 +92,7 @@ function check_args()
                 echo "Checking volumes..."
                 check_files
                 echo "Restarting Poseidon..."
-                sudo systemctl restart poseidon
+                sudo systemctl restart poseidon || sudo systemctl restart poseidon-net
                 echo "done."
                 exit
                 ;;
@@ -107,7 +107,7 @@ function check_args()
             -s|start)
                 if [ "$(docker ps -q --filter "name=vent" | wc -l)" -eq 1 ]; then
                    echo "Found at least part of Poseidon already running, cleaning up first."
-                   sudo systemctl stop poseidon
+                   sudo systemctl stop poseidon || sudo systemctl stop poseidon-net
                 fi
                 if [ "$2" = "-D" ]; then
                     echo "Checking volumes..."
@@ -124,14 +124,14 @@ function check_args()
                     echo "Poseidon successfully started, capturing logs..."
                     logging
                 else
-                    sudo systemctl start poseidon
+                    sudo systemctl start poseidon || sudo systemctl start poseidon-net
                     poseidon info
                 fi
                 exit
                 ;;
             -S|stop)
                 echo "Stopping Poseidon..."
-                sudo systemctl stop poseidon && echo "Poseidon successfully stopped."
+                (sudo systemctl stop poseidon || sudo systemctl stop poseidon-net) && echo "Poseidon successfully stopped."
                 exit
                 ;;
             -v|viz|visualize)
@@ -148,19 +148,19 @@ function check_args()
                 exit
                 ;;
             -V|version)
-                version=$(dpkg -s poseidon | grep '^Version:' | cut -d' ' -f2-)
+                version=$( (dpkg -s poseidon || dpkg -s poseidon-net) | grep '^Version:' | cut -d' ' -f2-)
                 echo "Poseidon $version"
                 exit
                 ;;
             -Z|reset)
                 sudo cp /etc/poseidon/default.conf /etc/poseidon/default.conf.bkp
-                echo PURGE | sudo debconf-communicate poseidon > /dev/null
+                echo PURGE | (sudo debconf-communicate poseidon || sudo debconf-communicate poseidon-net) > /dev/null
                 echo "# Generated from debconf - do not edit by hand, to change configuration options run: poseidon reconfig" | sudo tee /etc/poseidon/default.conf > /dev/null
                 echo "#" | sudo tee -a /etc/poseidon/default.conf > /dev/null
                 echo "#" | sudo tee -a /etc/poseidon/default.conf > /dev/null
                 echo "" | sudo tee -a /etc/poseidon/default.conf > /dev/null
                 sudo rm -rf /opt/redis
-                sudo dpkg-reconfigure poseidon
+                sudo dpkg-reconfigure poseidon || sudo dpkg-reconfigure poseidon-net
                 exit
                 ;;
             ?*)
