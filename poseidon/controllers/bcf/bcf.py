@@ -298,18 +298,15 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         return retval
 
     def get_seq_by_mac(self, mac):
+        endpoint = self.get_bymac(mac)
+        interface = endpoint.get('interface')
+        switch = endpoint.get('switch')
         my_filter = self.get_span_fabric().get('filter')
         retval = []
         if my_filter is not None:
             for f in my_filter:
-                # TODO check this to make sure it still works as expected
-                if 'match-specification' in f:
-                    dst = f[
-                        'match-specification'].get('dst-mac', 'broke')
-                    src = f[
-                        'match-specification'].get('src-mac', 'broke')
-                    if src == mac or dst == mac:
-                        retval.append(f.get('seq'))
+                if f.get('interface') == interface and f.get('switch') == switch:
+                    retval.append(f.get('seq'))
         return retval
 
     def mirror_mac(self, mac, switch, port, messages=None):
@@ -337,8 +334,6 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
     def unmirror_mac(self, mac, switch, port, messages=None):
         status = None
         kill_list = self.get_seq_by_mac(mac)
-        if len(kill_list) == 0:
-           self.logger.debug("attempting to unmirror but kill_list is empty") 
         for kill in kill_list:
             self.logger.debug('unmirroring: {0}'.format(kill))
             self.mirror_traffic(kill, mirror=False)
