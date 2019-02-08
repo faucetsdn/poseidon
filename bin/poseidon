@@ -11,7 +11,7 @@ function logging()
 function show_help()
 {
     local version
-    version=$((dpkg -s poseidon || dpkg -s poseidon-net) | grep '^Version:' | cut -d' ' -f2-)
+    version=$( (dpkg -s poseidon || dpkg -s poseidon-net) | grep '^Version:' | cut -d' ' -f2-)
     echo "Poseidon $version, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of machine learning techniques. For more info visit: https://github.com/CyberReboot/poseidon
 
 Usage: poseidon [option]
@@ -148,7 +148,7 @@ function check_args()
                 exit
                 ;;
             -V|version)
-                version=$((dpkg -s poseidon || dpkg -s poseidon-net) | grep '^Version:' | cut -d' ' -f2-)
+                version=$( (dpkg -s poseidon || dpkg -s poseidon-net) | grep '^Version:' | cut -d' ' -f2-)
                 echo "Poseidon $version"
                 exit
                 ;;
