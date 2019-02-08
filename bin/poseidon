@@ -2,7 +2,9 @@
 
 function logging()
 {
-    docker logs -f "$(docker ps | grep "-syslog-" | awk "{print $1}")" | \
+    local container
+    container=$(docker ps | grep "\-syslog\-" | awk "{print $1}")
+    docker logs -f "$container" | \
     while read -r line ; do
         echo "$line" | grep -v 'poseidon-api' | grep -i 'poseidon' | awk '{$1=$2=$3=""; print $0}' | sed -e 's/^[ \t]*//'
     done
