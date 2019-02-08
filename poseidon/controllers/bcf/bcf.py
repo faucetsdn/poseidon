@@ -301,10 +301,11 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         retval = []
         my_filter = self.get_span_fabric().get('filter')
         endpoints = self.get_bymac(mac)
+        self.logger.debug('Endpoints found: {0}'.format(endpoints))
         for endpoint in endpoints:
             interface = endpoint.get('interface')
             switch = endpoint.get('switch')
-            
+
             if my_filter is not None:
                 for f in my_filter:
                     if f.get('interface') == interface and f.get('switch') == switch:
