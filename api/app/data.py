@@ -152,7 +152,7 @@ class Nodes():
                                     confidences[0]*100)
                             if 'behavior' in node:
                                 results = ast.literal_eval(
-                                    ml_info[mac_info['poseidon_hash']])
+                                    ml_info[mac_info[b'poseidon_hash']])
                                 node['behavior'] = 1
                                 if results['decisions']['behavior'] == 'normal':
                                     node['behavior'] = 0
