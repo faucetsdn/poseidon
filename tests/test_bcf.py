@@ -255,6 +255,7 @@ def test_get_bymac():
         def __init__(self):
             self.endpoints = None
             self.logger = MockLogger().logger
+            self.trust_self_signed_cert = True
 
         def get_endpoints(self):
             return self.endpoints
@@ -427,6 +428,7 @@ def test_get_seq_by_ip():
             self.endpoints = None
             self.span_fabric = None
             self.logger = MockLogger().logger
+            self.trust_self_signed_cert = True
 
         def get_span_fabric(self):
             return self.span_fabric
@@ -468,6 +470,10 @@ def test_get_seq_by_mac():
             self.endpoints = None
             self.span_fabric = None
             self.logger = MockLogger().logger
+            self.trust_self_signed_cert = True
+
+        def get_endpoints(self):
+            return self.endpoints
 
         def get_span_fabric(self):
             return self.span_fabric
@@ -582,6 +588,9 @@ def test_unmirror_mac():
                 fabric_span_endpoint='',
                 **target_kwargs):
             pass
+
+        def get_endpoints(self):
+            return self.endpoints
 
         def get_span_fabric(self):
             return self.span_fabric

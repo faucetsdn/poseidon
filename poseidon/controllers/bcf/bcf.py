@@ -298,15 +298,17 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         return retval
 
     def get_seq_by_mac(self, mac):
-        endpoint = self.get_bymac(mac)
-        interface = endpoint.get('interface')
-        switch = endpoint.get('switch')
-        my_filter = self.get_span_fabric().get('filter')
         retval = []
-        if my_filter is not None:
-            for f in my_filter:
-                if f.get('interface') == interface and f.get('switch') == switch:
-                    retval.append(f.get('seq'))
+        my_filter = self.get_span_fabric().get('filter')
+        endpoints = self.get_bymac(mac)
+        for endpoint in endpoints:
+            interface = endpoint.get('interface')
+            switch = endpoint.get('switch')
+            
+            if my_filter is not None:
+                for f in my_filter:
+                    if f.get('interface') == interface and f.get('switch') == switch:
+                        retval.append(f.get('seq'))
         return retval
 
     def mirror_mac(self, mac, switch, port, messages=None):
