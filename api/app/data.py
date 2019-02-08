@@ -151,6 +151,7 @@ class Nodes():
                                 node['role_confidence'] = int(
                                     confidences[0]*100)
                             if 'behavior' in node and 'poseidon_hash' in mac_info and mac_info['poseidon_hash'] in ml_info:
+                                print(mac_info['poseidon_hash'])
                                 results = ast.literal_eval(
                                     ml_info[mac_info['poseidon_hash']])
                                 node['behavior'] = 1
