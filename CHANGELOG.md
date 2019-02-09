@@ -1,3 +1,25 @@
+# v0.5.3 (2019-02-08)
+
+ - Updated version of httmock, redis, pip, pytest
+ - Ability to build both net and regular poseidon packages easier in Make now
+ - Can use the 'all' field sepcifier in the CLI to get all fields
+ - Added new configuration option: trust_self_signed_cert which defaults to True
+ - Output from external sources such as PoseidonML, p0f, etc. now show results in the CLI
+ - Fixed fields of mixed types so they can be used to sort by in the CLI
+ - Original header is preserved when overriding fields in CLI
+ - Updated and improved documentation for using BCF
+ - Fixed an error where results from PoseidonML were sometimes not retrieved
+ - Fixed an error where duplicate records were showing up in the CLI
+ - Fixed an error where endpoints that were already mirroring superceded queued endpoints
+ - `poseidon reset` now clears out the Redis database
+ - Fixed port and switch output in the CLI for BCF results
+ - Finished implementing specific show commands in the CLI
+ - BCF API response codes are now parsed and logged appropriately
+ - Action commands in the CLI now work, including changing state and collecting, via changing to say a mirror state
+ - Fixed the poseidon shell script to handle if the poseidon-net package was installed
+ - Updated Docker images to use alpine 3.9
+ - Fixed a serious bug that cause BCF to no longer work with Poseidon due it not being able to create filters by MAC address
+
 # v0.5.2 (2019-01-25)
 
  - Updated version of pytest, pika, texttable, schedule
