@@ -303,13 +303,13 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         endpoints = self.get_bymac(mac)
         self.logger.debug('Endpoints found: {0}'.format(endpoints))
         for endpoint in endpoints:
-            interface = endpoint.get('interface')
-            switch = endpoint.get('switch')
-
-            if my_filter is not None:
-                for f in my_filter:
-                    if f.get('interface') == interface and f.get('switch') == switch:
-                        retval.append(f.get('seq'))
+            if 'attachment-point' in endpoint and 'switch-interface' in endpoint['attachment-point']:
+                interface = endpoint['attachment-point']['switch-interface'].get('interface')
+                switch = endpoint['attachment-point']['switch-interface'].get('switch')
+                if my_filter is not None:
+                    for f in my_filter:
+                        if f.get('interface') == interface and f.get('switch') == switch:
+                            retval.append(f.get('seq'))
         return retval
 
     def mirror_mac(self, mac, switch, port, messages=None):
