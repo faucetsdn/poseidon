@@ -652,8 +652,6 @@ class Monitor(object):
 
             # mirror things in the order they got added to the queue
             queued_endpoints = []
-            unknown_endpoints = []
-            investigating_endpoints = []
             for endpoint in self.s.endpoints:
                 if not endpoint.ignore:
                     if endpoint.state == 'queued':
