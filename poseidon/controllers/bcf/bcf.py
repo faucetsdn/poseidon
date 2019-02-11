@@ -304,8 +304,10 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         self.logger.debug('Endpoints found: {0}'.format(endpoints))
         for endpoint in endpoints:
             if 'attachment-point' in endpoint and 'switch-interface' in endpoint['attachment-point']:
-                interface = endpoint['attachment-point']['switch-interface'].get('interface')
-                switch = endpoint['attachment-point']['switch-interface'].get('switch')
+                interface = endpoint['attachment-point']['switch-interface'].get(
+                    'interface')
+                switch = endpoint['attachment-point']['switch-interface'].get(
+                    'switch')
                 if my_filter is not None:
                     for f in my_filter:
                         if f.get('interface') == interface and f.get('switch') == switch:
@@ -337,7 +339,8 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
     def unmirror_mac(self, mac, switch, port, messages=None):
         status = None
         kill_list = self.get_seq_by_mac(mac)
-        if not kill_list: return True
+        if not kill_list:
+            return True
         for kill in kill_list:
             self.logger.debug('unmirroring: {0}'.format(kill))
             self.mirror_traffic(kill, mirror=False)
@@ -391,8 +394,8 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
 
         '''
         if not mirror:
-            self.logger.debug("Attempting to unmirror")
-        
+            self.logger.debug('Attempting to unmirror')
+
         resource = fabric_span_endpoint.format(self.span_fabric_name)
         uri = urljoin(self.base_uri, resource)
         data = self.get_span_fabric()  # first element is vent span rule
@@ -411,7 +414,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         else:  # mirror=False
             data['filter'] = [filter for filter in data[
                 'filter'] if filter['seq'] != seq]
-            self.logger.debug("unmirror put body: {0}".format(data))
+            self.logger.debug('unmirror put body: {0}'.format(data))
         r = self.request_resource(method='PUT', url=uri, data=json.dumps(
             data), verify=(not self.trust_self_signed_cert))
         retval = BcfProxy.parse_json(r)
