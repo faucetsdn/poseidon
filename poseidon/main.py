@@ -179,6 +179,7 @@ class SDNConnect(object):
                                         confidences = ast.literal_eval(
                                             ml_info[b'confidences'].decode('ascii'))
                                     behavior = 'None'
+                                    tmp = []
                                     if mac_info[b'poseidon_hash'] in ml_info:
                                         tmp = ast.literal_eval(
                                             ml_info[mac_info[b'poseidon_hash']].decode('ascii'))
