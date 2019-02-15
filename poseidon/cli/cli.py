@@ -450,7 +450,7 @@ class PoseidonShell(cmd.Cmd):
     @exception
     def do_remove(self, arg):
         '''
-        Remove and forget about something on the network until it's seen again:
+        Remove something on the network until it's seen again:
         REMOVE [IP|MAC|ID]
         REMOVE 10.0.0.1
         REMOVE 18:EF:02:2D:49:00
@@ -529,6 +529,27 @@ class PoseidonShell(cmd.Cmd):
         print('Thank you for using Poseidon')
         self.close()
         return True
+
+    @exception
+    def do_help(self, arg):
+        if not arg:
+            print('For help on specific commands: help <command>')
+            print('Commands:')
+            print('  change\tChange state of things on the network')
+            print('  clear\t\tStop ignoring something on the network')
+            print('  exit\t\tStop the shell and exit')
+            print('  history\tFind out the history of something on the network')
+            print('  ignore\tIgnore something on the network')
+            print('  playback\tPlayback commands from a file')
+            print('  quit\t\tStop the shell and exit')
+            print('  record\tSave future commands to a file')
+            print(
+                '  remove\tRemove something on the network until it is seen again')
+            print('  show\t\tShow things on the network based on filters')
+            print('  what\t\tFind out what something is')
+            print('  where\t\tFind out where something is')
+        else:
+            cmd.Cmd.do_help(self, arg)
 
     @exception
     def do_record(self, arg):
