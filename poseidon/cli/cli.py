@@ -29,8 +29,8 @@ class PoseidonShell(cmd.Cmd):
         'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4', 'IPv6',
         'Ignored', 'State', 'Next State', 'First Seen', 'Last Seen',
         'Previous States', 'IPv4 OS', 'IPv6 OS', 'Previous IPv4 OSes',
-        'Previous IPv6 OSes', 'Device Type (Confidence)',
-        'Previous Device Types', 'Device Behavior', 'Previous Device Behaviors'
+        'Previous IPv6 OSes', 'Role (Confidence)',
+        'Previous Roles', 'Behavior', 'Previous Behaviors'
     ]
     what_completions = [
         'is'
@@ -160,7 +160,7 @@ class PoseidonShell(cmd.Cmd):
             endpoint.p_prev_states[-1][1])) + ' (' + duration(endpoint.p_prev_states[-1][1]) + ')'
 
     @staticmethod
-    def _get_device_type(endpoint):
+    def _get_role(endpoint):
         result = 'No type identified yet.'
         endpoint_mac = PoseidonShell._get_mac(endpoint)
         if 'mac_addresses' in endpoint.metadata and endpoint_mac in endpoint.metadata['mac_addresses']:
@@ -197,7 +197,7 @@ class PoseidonShell(cmd.Cmd):
         return result
 
     @staticmethod
-    def _get_device_behavior(endpoint):
+    def _get_behavior(endpoint):
         result = 'No behavior identified yet.'
         endpoint_mac = PoseidonShell._get_mac(endpoint)
         if 'mac_addresses' in endpoint.metadata and endpoint_mac in endpoint.metadata['mac_addresses']:
@@ -212,12 +212,12 @@ class PoseidonShell(cmd.Cmd):
         return result
 
     @staticmethod
-    def _get_prev_device_types(endpoint):
+    def _get_prev_roles(endpoint):
         # TODO results from ML
         return
 
     @staticmethod
-    def _get_prev_device_behaviors(endpoint):
+    def _get_prev_behaviors(endpoint):
         # TODO results from ML
         return
 
@@ -280,11 +280,11 @@ class PoseidonShell(cmd.Cmd):
                          'ipv6 os': (PoseidonShell._get_ipv6_os, 14),
                          'previous ipv4 oses': (PoseidonShell._get_prev_ipv4_oses, 15),
                          'previous ipv6 oses': (PoseidonShell._get_prev_ipv6_oses, 16),
-                         'device type': (PoseidonShell._get_device_type, 17),
-                         'device type (confidence)': (PoseidonShell._get_device_type, 17),
-                         'previous device types': (PoseidonShell._get_prev_device_types, 18),
-                         'device behavior': (PoseidonShell._get_device_behavior, 19),
-                         'previous device behaviors': (PoseidonShell._get_prev_device_behaviors, 20)}
+                         'role': (PoseidonShell._get_role, 17),
+                         'role (confidence)': (PoseidonShell._get_role, 17),
+                         'previous roles': (PoseidonShell._get_prev_roles, 18),
+                         'behavior': (PoseidonShell._get_behavior, 19),
+                         'previous behaviors': (PoseidonShell._get_prev_behaviors, 20)}
         # TODO #971 check if unqiue flag and limit columns (fields)
         # TODO #963 check if nonzero flag and limit rows/columns
         for endpoint in endpoints:
@@ -515,16 +515,26 @@ class PoseidonShell(cmd.Cmd):
         self.display_results(Commands().change_devices(
             arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
+    @exception
     def do_quit(self, arg):
-        'Stop recording and exit:  QUIT'
+        'Stop the shell and exit:  QUIT'
         print('Thank you for using Poseidon')
         self.close()
         return True
 
+    @exception
+    def do_exit(self, arg):
+        'Stop the shell and exit:  EXIT'
+        print('Thank you for using Poseidon')
+        self.close()
+        return True
+
+    @exception
     def do_record(self, arg):
         'Save future commands to filename: RECORD poseidon.cmd'
         self.file = open(arg, 'w')
 
+    @exception
     def do_playback(self, arg):
         'Playback commands from a file: PLAYBACK poseidon.cmd'
         self.close()
