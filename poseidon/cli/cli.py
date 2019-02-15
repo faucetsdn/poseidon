@@ -450,7 +450,7 @@ class PoseidonShell(cmd.Cmd):
     @exception
     def do_remove(self, arg):
         '''
-        Remove and forget about something on the network until it's seen again:
+        Remove something on the network until it's seen again:
         REMOVE [IP|MAC|ID]
         REMOVE 10.0.0.1
         REMOVE 18:EF:02:2D:49:00
@@ -544,7 +544,7 @@ class PoseidonShell(cmd.Cmd):
             print('  quit\t\tStop the shell and exit')
             print('  record\tSave future commands to a file')
             print(
-                '  remove\tRemove and forget about something on the network until it is seen again')
+                '  remove\tRemove something on the network until it is seen again')
             print('  show\t\tShow things on the network based on filters')
             print('  what\t\tFind out what something is')
             print('  where\t\tFind out where something is')
