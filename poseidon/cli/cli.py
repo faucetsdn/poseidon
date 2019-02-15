@@ -55,10 +55,10 @@ class PoseidonShell(cmd.Cmd):
         'all devices', 'active devices', 'inactive devices', 'known devices',
         'unknown devices', 'mirroring devices', 'abnormal devices',
         'normal devices', 'shutdown devices', 'reinvestigating devices',
-        'queued devices', 'active directory controller devices',
-        'administrator server devices', 'administrator workstation devices',
-        'business workstation devices', 'developer workstation devices',
-        'gpu laptop devices', 'pki server devices', 'windows devices',
+        'queued devices', 'active-directory-controller devices',
+        'administrator-server devices', 'administrator-workstation devices',
+        'business-workstation devices', 'developer-workstation devices',
+        'gpu-laptop devices', 'pki-server devices', 'windows devices',
         'mac devices', 'linux devices', 'ignored devices'
     ]
 
@@ -264,6 +264,7 @@ class PoseidonShell(cmd.Cmd):
     def display_results(self, endpoints, fields, sort_by=0, max_width=0, unique=False, nonzero=False):
         matrix = []
         fields_lookup = {'id': (PoseidonShell._get_name, 0),
+                         'mac': (PoseidonShell._get_mac, 1),
                          'mac address': (PoseidonShell._get_mac, 1),
                          'switch': (PoseidonShell._get_switch, 2),
                          'port': (PoseidonShell._get_port, 3),
