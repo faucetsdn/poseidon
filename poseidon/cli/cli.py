@@ -531,6 +531,23 @@ class PoseidonShell(cmd.Cmd):
         return True
 
     @exception
+    def do_help(self, arg):
+        print('For help on specific commands: help <command>')
+        print('Commands:')
+        print('  change\tChange state of things on the network')
+        print('  clear\tStop ignoring something on the network')
+        print('  exit\tStop the shell and exit')
+        print('  history\tFind out the history of something on the network')
+        print('  ignore\tIgnore something on the network')
+        print('  playback\tPlayback commands from a file')
+        print('  quit\tStop the shell and exit')
+        print('  record\tSave future commands to a file')
+        print('  remove\tRemove and forget about something on the network until it is seen again')
+        print('  show\tShow things on the network based on filters')
+        print('  what\tFind out what something is')
+        print('  where\tFind out where something is')
+
+    @exception
     def do_record(self, arg):
         'Save future commands to filename: RECORD poseidon.cmd'
         self.file = open(arg, 'w')
