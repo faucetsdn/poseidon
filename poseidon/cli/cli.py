@@ -532,7 +532,7 @@ class PoseidonShell(cmd.Cmd):
 
     @exception
     def do_help(self, arg):
-        if arg.lower() in ['help', '?']:
+        if not arg:
             print('For help on specific commands: help <command>')
             print('Commands:')
             print('  change\tChange state of things on the network')
