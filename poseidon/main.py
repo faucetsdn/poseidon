@@ -421,13 +421,11 @@ class SDNConnect(object):
                     'Detected new endpoint: {0}:{1}'.format(h, machine))
                 m = Endpoint(h)
                 m.p_prev_states.append((m.state, int(time.time())))
+                machine['ether_vendor'] = get_ether_vendor(
+                    machine['mac'], '/poseidon/poseidon/metadata/nmap-mac-prefixes.txt')
+                machine['ipv4_rdns'] = get_rdns_lookup(machine['ipv4'])
+                machine['ipv6_rdns'] = get_rdns_lookup(machine['ipv6'])
                 m.endpoint_data = deepcopy(machine)
-                m.endpoint_data['ether_vendor'] = get_ether_vendor(
-                    m.endpoint_data['mac'], '/poseidon/poseidon/metadata/nmap-mac-prefixes.txt')
-                m.endpoint_data['ipv4_rdns'] = get_rdns_lookup(
-                    m.endpoint_data['ipv4'])
-                m.endpoint_data['ipv6_rdns'] = get_rdns_lookup(
-                    m.endpoint_data['ipv6'])
                 self.endpoints.append(m)
 
         self.store_endpoints()

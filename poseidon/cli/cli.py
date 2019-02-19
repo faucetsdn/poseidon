@@ -300,8 +300,8 @@ class PoseidonShell(cmd.Cmd):
                          'previous roles': (PoseidonShell._get_prev_roles, 19),
                          'behavior': (PoseidonShell._get_behavior, 20),
                          'previous behaviors': (PoseidonShell._get_prev_behaviors, 21),
-                         'ipv4 rdns': (PoseidonShell._get_prev_behaviors, 22),
-                         'ipv6 rdns': (PoseidonShell._get_prev_behaviors, 23)}
+                         'ipv4 rdns': (PoseidonShell._get_ipv4_rdns, 22),
+                         'ipv6 rdns': (PoseidonShell._get_ipv6_rdns, 23)}
         # TODO #971 check if unqiue flag and limit columns (fields)
         # TODO #963 check if nonzero flag and limit rows/columns
         for endpoint in endpoints:
