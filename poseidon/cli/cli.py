@@ -27,9 +27,9 @@ class PoseidonShell(cmd.Cmd):
     ]
     all_fields = [
         'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4', 'IPv6',
-        'Ignored', 'State', 'Next State', 'First Seen', 'Last Seen',
-        'Previous States', 'IPv4 OS', 'IPv6 OS', 'Previous IPv4 OSes',
-        'Previous IPv6 OSes', 'Role (Confidence)',
+        'Ethernet Vendor', 'Ignored', 'State', 'Next State', 'First Seen',
+        'Last Seen', 'Previous States', 'IPv4 OS', 'IPv6 OS',
+        'Previous IPv4 OSes', 'Previous IPv6 OSes', 'Role (Confidence)',
         'Previous Roles', 'Behavior', 'Previous Behaviors'
     ]
     what_completions = [
@@ -132,6 +132,20 @@ class PoseidonShell(cmd.Cmd):
     @staticmethod
     def _get_ipv4(endpoint):
         return str(endpoint.endpoint_data['ipv4'])
+
+    @staticmethod
+    def _get_ether_vendor(endpoint):
+        result = 'UNDEFINED'
+        endpoint_mac = PoseidonShell._get_mac(endpoint)
+        if 'mac_addresses' in endpoint.metadata and endpoint_mac in endpoint.metadata['mac_addresses']:
+            metadata = endpoint.metadata['mac_addresses'][endpoint_mac]
+            newest = '0'
+            for timestamp in metadata:
+                if timestamp > newest:
+                    newest = timestamp
+            if newest is not '0' and 'ether_vendor' in metadata[newest]:
+                result = metadata[newest]['ether_vendor']
+        return result
 
     @staticmethod
     def _get_ipv6(endpoint):
@@ -271,21 +285,22 @@ class PoseidonShell(cmd.Cmd):
                          'vlan': (PoseidonShell._get_vlan, 4),
                          'ipv4': (PoseidonShell._get_ipv4, 5),
                          'ipv6': (PoseidonShell._get_ipv6, 6),
-                         'ignored': (PoseidonShell._get_ignored, 7),
-                         'state': (PoseidonShell._get_state, 8),
-                         'next state': (PoseidonShell._get_next_state, 9),
-                         'first seen': (PoseidonShell._get_first_seen, 10),
-                         'last seen': (PoseidonShell._get_last_seen, 11),
-                         'previous states': (PoseidonShell._get_prev_states, 12),
-                         'ipv4 os': (PoseidonShell._get_ipv4_os, 13),
-                         'ipv6 os': (PoseidonShell._get_ipv6_os, 14),
-                         'previous ipv4 oses': (PoseidonShell._get_prev_ipv4_oses, 15),
-                         'previous ipv6 oses': (PoseidonShell._get_prev_ipv6_oses, 16),
-                         'role': (PoseidonShell._get_role, 17),
-                         'role (confidence)': (PoseidonShell._get_role, 17),
-                         'previous roles': (PoseidonShell._get_prev_roles, 18),
-                         'behavior': (PoseidonShell._get_behavior, 19),
-                         'previous behaviors': (PoseidonShell._get_prev_behaviors, 20)}
+                         'ethernet vendor': (PoseidonShell._get_ether_vendor, 7),
+                         'ignored': (PoseidonShell._get_ignored, 8),
+                         'state': (PoseidonShell._get_state, 9),
+                         'next state': (PoseidonShell._get_next_state, 10),
+                         'first seen': (PoseidonShell._get_first_seen, 11),
+                         'last seen': (PoseidonShell._get_last_seen, 12),
+                         'previous states': (PoseidonShell._get_prev_states, 13),
+                         'ipv4 os': (PoseidonShell._get_ipv4_os, 14),
+                         'ipv6 os': (PoseidonShell._get_ipv6_os, 15),
+                         'previous ipv4 oses': (PoseidonShell._get_prev_ipv4_oses, 16),
+                         'previous ipv6 oses': (PoseidonShell._get_prev_ipv6_oses, 17),
+                         'role': (PoseidonShell._get_role, 18),
+                         'role (confidence)': (PoseidonShell._get_role, 18),
+                         'previous roles': (PoseidonShell._get_prev_roles, 19),
+                         'behavior': (PoseidonShell._get_behavior, 20),
+                         'previous behaviors': (PoseidonShell._get_prev_behaviors, 21)}
         # TODO #971 check if unqiue flag and limit columns (fields)
         # TODO #963 check if nonzero flag and limit rows/columns
         for endpoint in endpoints:
