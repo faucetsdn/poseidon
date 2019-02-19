@@ -1,6 +1,6 @@
 natural==0.2.0
 pika==0.13.0
-prometheus_client==0.5.0
+prometheus_client==0.6.0
 pyyaml==3.13
 redis==3.2.0
 requests==2.21.0
