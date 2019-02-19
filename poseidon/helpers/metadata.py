@@ -10,9 +10,9 @@ def get_ether_vendor(mac, lookup_path):
     Takes a MAC address and looks up and returns the vendor for it.
     """
     vendor = 'UNDEFINED'
-    mac = ''.join(mac.split(':'))[:6]
+    mac = ''.join(mac.split(':'))[:6].upper()
     with open(lookup_path, 'r') as f:
         for line in f:
             if line.startswith(mac):
-                vendor = line.split()[1].strip()
+                return line.split()[1].strip()
     return vendor

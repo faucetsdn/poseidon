@@ -190,10 +190,14 @@ class SDNConnect(object):
                                     if 'decisions' in tmp and 'behavior' in tmp['decisions']:
                                         behavior = tmp['decisions']['behavior']
                                     if 'ether_vendor' in mac_info[b'endpoint_data']:
+                                        self.logger.info('ethernet vendor: {0}'.format(
+                                            mac_info[b'endpoint_data']['ether_vendor']))
                                         ether_vendor = mac_info[b'endpoint_data']['ether_vendor']
                                     else:
                                         ether_vendor = get_ether_vendor(
                                             mac, '/poseidon/poseidon/metadata/nmap-mac-prefixes.txt')
+                                    self.logger.info(
+                                        'ether_vendor: {0}'.format(ether_vendor))
                                     mac_addresses[mac.decode('ascii')][str(timestamp)] = {
                                         'labels': labels, 'confidences': confidences, 'behavior': behavior, 'ether_vendor': ether_vendor}
                             except Exception as e:  # pragma: no cover
