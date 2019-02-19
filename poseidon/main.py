@@ -33,6 +33,7 @@ from poseidon.helpers.endpoint import Endpoint
 from poseidon.helpers.endpoint import EndpointDecoder
 from poseidon.helpers.log import Logger
 from poseidon.helpers.metadata import get_ether_vendor
+from poseidon.helpers.metadata import get_rdns_lookup
 from poseidon.helpers.prometheus import Prometheus
 from poseidon.helpers.rabbit import Rabbit
 
@@ -422,7 +423,11 @@ class SDNConnect(object):
                 m.p_prev_states.append((m.state, int(time.time())))
                 m.endpoint_data = deepcopy(machine)
                 m.endpoint_data['ether_vendor'] = get_ether_vendor(
-                    endpoint.endpoint_data['mac'], '/poseidon/poseidon/metadata/nmap-mac-prefixes.txt')
+                    m.endpoint_data['mac'], '/poseidon/poseidon/metadata/nmap-mac-prefixes.txt')
+                m.endpoint_data['ipv4_rdns'] = get_rdns_lookup(
+                    m.endpoint_data['ipv4'])
+                m.endpoint_data['ipv6_rdns'] = get_rdns_lookup(
+                    m.endpoint_data['ipv6'])
                 self.endpoints.append(m)
 
         self.store_endpoints()

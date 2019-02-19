@@ -30,7 +30,8 @@ class PoseidonShell(cmd.Cmd):
         'Ethernet Vendor', 'Ignored', 'State', 'Next State', 'First Seen',
         'Last Seen', 'Previous States', 'IPv4 OS', 'IPv6 OS',
         'Previous IPv4 OSes', 'Previous IPv6 OSes', 'Role (Confidence)',
-        'Previous Roles', 'Behavior', 'Previous Behaviors'
+        'Previous Roles', 'Behavior', 'Previous Behaviors', 'IPv4 rDNS',
+        'IPv6 rDNS'
     ]
     what_completions = [
         'is'
@@ -136,6 +137,14 @@ class PoseidonShell(cmd.Cmd):
     @staticmethod
     def _get_ether_vendor(endpoint):
         return str(endpoint.endpoint_data['ether_vendor'])
+
+    @staticmethod
+    def _get_ipv4_rdns(endpoint):
+        return str(endpoint.endpoint_data['ipv4_rdns'])
+
+    @staticmethod
+    def _get_ipv6_rdns(endpoint):
+        return str(endpoint.endpoint_data['ipv6_rdns'])
 
     @staticmethod
     def _get_ipv6(endpoint):
@@ -290,7 +299,9 @@ class PoseidonShell(cmd.Cmd):
                          'role (confidence)': (PoseidonShell._get_role, 18),
                          'previous roles': (PoseidonShell._get_prev_roles, 19),
                          'behavior': (PoseidonShell._get_behavior, 20),
-                         'previous behaviors': (PoseidonShell._get_prev_behaviors, 21)}
+                         'previous behaviors': (PoseidonShell._get_prev_behaviors, 21),
+                         'ipv4 rdns': (PoseidonShell._get_prev_behaviors, 22),
+                         'ipv6 rdns': (PoseidonShell._get_prev_behaviors, 23)}
         # TODO #971 check if unqiue flag and limit columns (fields)
         # TODO #963 check if nonzero flag and limit rows/columns
         for endpoint in endpoints:
