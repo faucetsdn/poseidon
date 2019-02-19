@@ -32,6 +32,7 @@ from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import Endpoint
 from poseidon.helpers.endpoint import EndpointDecoder
 from poseidon.helpers.log import Logger
+from poseidon.helpers.metadata import get_ether_vendor
 from poseidon.helpers.prometheus import Prometheus
 from poseidon.helpers.rabbit import Rabbit
 
@@ -188,8 +189,13 @@ class SDNConnect(object):
                                             ml_info[mac_info[b'poseidon_hash'].decode('ascii')].decode('ascii'))
                                     if 'decisions' in tmp and 'behavior' in tmp['decisions']:
                                         behavior = tmp['decisions']['behavior']
+                                    if 'ether_vendor' in mac_info[b'endpoint_data']:
+                                        ether_vendor = mac_info[b'endpoint_data']['ether_vendor']
+                                    else:
+                                        ether_vendor = get_ether_vendor(
+                                            mac, '/poseidon/poseidon/metadata/nmap-mac-prefixes.txt')
                                     mac_addresses[mac.decode('ascii')][str(timestamp)] = {
-                                        'labels': labels, 'confidences': confidences, 'behavior': behavior}
+                                        'labels': labels, 'confidences': confidences, 'behavior': behavior, 'ether_vendor': ether_vendor}
                             except Exception as e:  # pragma: no cover
                                 self.logger.error(
                                     'Unable to get existing ML data from Redis because: {0}'.format(str(e)))
