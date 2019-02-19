@@ -189,17 +189,8 @@ class SDNConnect(object):
                                             ml_info[mac_info[b'poseidon_hash'].decode('ascii')].decode('ascii'))
                                     if 'decisions' in tmp and 'behavior' in tmp['decisions']:
                                         behavior = tmp['decisions']['behavior']
-                                    if 'ether_vendor' in mac_info[b'endpoint_data']:
-                                        self.logger.info('ethernet vendor: {0}'.format(
-                                            mac_info[b'endpoint_data']['ether_vendor']))
-                                        ether_vendor = mac_info[b'endpoint_data']['ether_vendor']
-                                    else:
-                                        ether_vendor = get_ether_vendor(
-                                            mac, '/poseidon/poseidon/metadata/nmap-mac-prefixes.txt')
-                                    self.logger.info(
-                                        'ether_vendor: {0}'.format(ether_vendor))
                                     mac_addresses[mac.decode('ascii')][str(timestamp)] = {
-                                        'labels': labels, 'confidences': confidences, 'behavior': behavior, 'ether_vendor': ether_vendor}
+                                        'labels': labels, 'confidences': confidences, 'behavior': behavior}
                             except Exception as e:  # pragma: no cover
                                 self.logger.error(
                                     'Unable to get existing ML data from Redis because: {0}'.format(str(e)))
@@ -430,6 +421,8 @@ class SDNConnect(object):
                 m = Endpoint(h)
                 m.p_prev_states.append((m.state, int(time.time())))
                 m.endpoint_data = deepcopy(machine)
+                m.endpoint_data['ether_vendor'] = get_ether_vendor(
+                    endpoint.endpoint_data['mac'], '/poseidon/poseidon/metadata/nmap-mac-prefixes.txt')
                 self.endpoints.append(m)
 
         self.store_endpoints()

@@ -135,17 +135,7 @@ class PoseidonShell(cmd.Cmd):
 
     @staticmethod
     def _get_ether_vendor(endpoint):
-        result = 'UNDEFINED'
-        endpoint_mac = PoseidonShell._get_mac(endpoint)
-        if 'mac_addresses' in endpoint.metadata and endpoint_mac in endpoint.metadata['mac_addresses']:
-            metadata = endpoint.metadata['mac_addresses'][endpoint_mac]
-            newest = '0'
-            for timestamp in metadata:
-                if timestamp > newest:
-                    newest = timestamp
-            if newest is not '0' and 'ether_vendor' in metadata[newest]:
-                result = metadata[newest]['ether_vendor']
-        return result
+        return str(endpoint.endpoint_data['ether_vendor'])
 
     @staticmethod
     def _get_ipv6(endpoint):
