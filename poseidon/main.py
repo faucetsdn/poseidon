@@ -32,6 +32,8 @@ from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import Endpoint
 from poseidon.helpers.endpoint import EndpointDecoder
 from poseidon.helpers.log import Logger
+from poseidon.helpers.metadata import get_ether_vendor
+from poseidon.helpers.metadata import get_rdns_lookup
 from poseidon.helpers.prometheus import Prometheus
 from poseidon.helpers.rabbit import Rabbit
 
@@ -383,6 +385,10 @@ class SDNConnect(object):
         '''parse switch structure to find new machines added to network
         since last call'''
         for machine in machines:
+            machine['ether_vendor'] = get_ether_vendor(
+                machine['mac'], '/poseidon/poseidon/metadata/nmap-mac-prefixes.txt')
+            machine['ipv4_rdns'] = get_rdns_lookup(machine['ipv4'])
+            machine['ipv6_rdns'] = get_rdns_lookup(machine['ipv6'])
             h = Endpoint.make_hash(machine)
             ep = None
             for endpoint in self.endpoints:
