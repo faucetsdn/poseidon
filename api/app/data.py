@@ -173,7 +173,9 @@ class NetworkFull(object):
                   'next_state': 'UNDEFINED', 'state': 'UNDEFINED',
                   'prev_states': 'UNDEFINED', 'role': 'UNDEFINED',
                   'role_confidence': 0, 'behavior': 0, 'ipv4_os': 'UNDEFINED',
-                  'ipv6_os': 'UNDEFINED', 'source': 'UNDEFINED'}
+                  'ipv6_os': 'UNDEFINED', 'source': 'UNDEFINED',
+                  'ipv4_rdns': 'UNDEFINED', 'ipv6_rdns': 'UNDEFINED',
+                  'ether_vendor': 'UNDEFINED'}
         n = Nodes(fields)
         n.build_nodes()
         return n.nodes
@@ -192,8 +194,13 @@ class Network(object):
 
     @staticmethod
     def get_dataset():
-        fields = {'mac': 0, 'ipv4': 0, 'ipv6': 0, 'ipv4_subnet': 'UNDEFINED', 'ipv6_subnet': 'UNDEFINED', 'tenant': 0, 'active': 0, 'state': 'UNDEFINED',
-                  'role': 'UNDEFINED', 'role_confidence': 0, 'behavior': 0, 'ipv4_os': 'UNDEFINED', 'ipv6_os': 'UNDEFINED', 'source': 'UNDEFINED'}
+        fields = {'mac': 0, 'ipv4': 0, 'ipv6': 0, 'ipv4_subnet': 'UNDEFINED',
+                  'ipv6_subnet': 'UNDEFINED', 'tenant': 0, 'active': 0,
+                  'state': 'UNDEFINED', 'role': 'UNDEFINED',
+                  'role_confidence': 0, 'behavior': 0, 'ipv4_os': 'UNDEFINED',
+                  'ipv6_os': 'UNDEFINED', 'source': 'UNDEFINED',
+                  'ipv4_rdns': 'UNDEFINED', 'ipv6_rdns': 'UNDEFINED',
+                  'ether_vendor': 'UNDEFINED'}
         n = Nodes(fields)
         n.build_nodes()
         return n.nodes
