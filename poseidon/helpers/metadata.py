@@ -26,6 +26,10 @@ def get_rdns_lookup(ip):
     """
     try:
         rdns = socket.gethostbyaddr(ip)
+        if rdns[0] == rdns[2][0]:
+            rdns = 'UNDEFINED'
+        else:
+            rdns = rdns[0]
     except Exception as e:  # pragma: no cover
         rdns = 'UNDEFINED'
     return rdns

@@ -425,9 +425,7 @@ class SDNConnect(object):
                     machine['mac'], '/poseidon/poseidon/metadata/nmap-mac-prefixes.txt')
                 machine['ipv4_rdns'] = get_rdns_lookup(machine['ipv4'])
                 machine['ipv6_rdns'] = get_rdns_lookup(machine['ipv6'])
-                self.logger.info('machine: {0}'.format(machine))
                 m.endpoint_data = deepcopy(machine)
-                self.logger.info('endpoint_data: {0}'.format(m.endpoint_data))
                 self.endpoints.append(m)
 
         self.store_endpoints()
@@ -439,6 +437,8 @@ class SDNConnect(object):
             try:
                 serialized_endpoints = []
                 for endpoint in self.endpoints:
+                    self.logger.info('endpoint_data: {0}'.format(
+                        endpoint.endpoint_data))
                     # set metadata
                     mac_addresses, ipv4_addresses, ipv6_addresses = self.get_stored_metadata(
                         str(endpoint.name))
