@@ -136,15 +136,24 @@ class PoseidonShell(cmd.Cmd):
 
     @staticmethod
     def _get_ether_vendor(endpoint):
-        return str(endpoint.endpoint_data['ether_vendor'])
+        if 'ether_vendor' in endpoint.endpoint_data:
+            return str(endpoint.endpoint_data['ether_vendor'])
+        else:
+            return 'UNDEFINED'
 
     @staticmethod
     def _get_ipv4_rdns(endpoint):
-        return str(endpoint.endpoint_data['ipv4_rdns'])
+        if 'ipv4_rdns' in endpoint.endpoint_data:
+            return str(endpoint.endpoint_data['ipv4_rdns'])
+        else:
+            return 'UNDEFINED'
 
     @staticmethod
     def _get_ipv6_rdns(endpoint):
-        return str(endpoint.endpoint_data['ipv6_rdns'])
+        if 'ipv6_rdns' in endpoint.endpoint_data:
+            return str(endpoint.endpoint_data['ipv6_rdns'])
+        else:
+            return 'UNDEFINED'
 
     @staticmethod
     def _get_ipv6(endpoint):
