@@ -25,7 +25,7 @@ def get_rdns_lookup(ip):
     Takes an IP address adn looks up what the reverse DNS is if it exists.
     """
     try:
-        rdns = socket.gethostbyaddr(ip)[0]
+        rdns = socket.gethostbyaddr(ip)
     except Exception as e:  # pragma: no cover
         rdns = 'UNDEFINED'
     return rdns

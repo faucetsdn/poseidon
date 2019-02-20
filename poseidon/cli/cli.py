@@ -144,7 +144,7 @@ class PoseidonShell(cmd.Cmd):
 
     @staticmethod
     def _get_ipv6_rdns(endpoint):
-        return str(endpoint.endpoint_data['ipv6_rdns'])
+        return str(endpoint.endpoint_data)
 
     @staticmethod
     def _get_ipv6(endpoint):
