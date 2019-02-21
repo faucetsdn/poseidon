@@ -405,7 +405,7 @@ class PoseidonShell(cmd.Cmd):
         sub_cmd.cmdloop()
 
     @exception
-    def do_EOF(self, arg):
+    def do_eof(self, arg):
         return True
 
     @exception
@@ -609,7 +609,8 @@ class PoseidonShell(cmd.Cmd):
         if self.file and 'playback' not in line:
             print(line, file=self.file)
         if '?' in line:
-            print('show help for the line...')
+            line = line.replace('?', '')
+            line += '? ' + line
         return line
 
     def close(self):
