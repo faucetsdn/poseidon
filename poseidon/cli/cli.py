@@ -23,6 +23,10 @@ class ShowInterpreter(cmd.Cmd):
     def do_all(self, args):
         pass
 
+    @exception
+    def do_eof(self, arg):
+        return True
+
 
 class PoseidonShell(cmd.Cmd):
     intro = 'Welcome to the Poseidon shell. Type help or ? to list commands.\n'
@@ -610,7 +614,7 @@ class PoseidonShell(cmd.Cmd):
             print(line, file=self.file)
         if '?' in line:
             line = line.replace('?', '')
-            line += '? ' + line
+            line = '? ' + line
         return line
 
     def close(self):
