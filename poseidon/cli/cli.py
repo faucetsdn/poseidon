@@ -139,11 +139,11 @@ class TaskInterpreter(cmd.Cmd):
 
 class PoseidonShell(cmd.Cmd):
     intro = """Welcome to the Poseidon shell. Type help or ? to list commands.\n\n
-                      _     __\n
-    ____  ____  _____(_)___/ /___  ____\n
-   / __ \/ __ \/ ___/ / __  / __ \/ __ \\n
-  / /_/ / /_/ (__  ) / /_/ / /_/ / / / /\n
- / .___/\____/____/_/\__,_/\____/_/ /_/\n
+                      _     __
+    ____  ____  _____(_)___/ /___  ____
+   / __ \/ __ \/ ___/ / __  / __ \/ __ \\
+  / /_/ / /_/ (__  ) / /_/ / /_/ / / / /
+ / .___/\____/____/_/\__,_/\____/_/ /_/
 /_/                                     \n\n"""
     prompt = '\033[1;32mposeidon$ \033[1;m'
     file = None
