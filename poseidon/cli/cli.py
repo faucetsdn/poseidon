@@ -7,6 +7,7 @@ Created on 14 January 2019
 @author: Charlie Lewis
 """
 import cmd
+import os
 import time
 
 from natural.date import delta
@@ -25,9 +26,102 @@ class ShowInterpreter(cmd.Cmd):
         self.prompt = prompt + '(show) '
         self.cmdqueue = cmdqueue
 
+    def emptyline(self):
+        pass
+
+    @exception
+    def do_shell(self, s):
+        'Execute shell commands inside the Poseidon container'
+        os.system(s)
+
+    @exception
+    def do_help(self, arg):
+        if not arg:
+            print('For help on specific commands: help <command>')
+            print('Commands:')
+            print('  all\t\tShow all devices')
+            print('  behavior\tShow devices matching a particular behavior')
+            print('  exit\t\tGo back to the main prompt')
+            print('  history-of\tFind out the history of something on the network')
+            print('  os\t\tShow devices matching a particular operating system')
+            print('  quit\t\tGo back to the main prompt')
+            print('  role\t\tShow devices matching a particular role')
+            print('  state\t\tShow devices matching a particular state')
+            print('  what-is\tFind out what something is')
+            print('  where-is\tFind out where something is')
+        else:
+            cmd.Cmd.do_help(self, arg)
+
     def do_all(self, args):
         'ALL HELP'
+        # TODO
         print('all')
+
+    @exception
+    def do_exit(self, arg):
+        'Go back to the main prompt:  EXIT'
+        return True
+
+    @exception
+    def do_quit(self, arg):
+        'Go back to the main prompt:  QUIT'
+        return True
+
+    @exception
+    def do_eof(self, arg):
+        return True
+
+    def precmd(self, line):
+        line = line.lower()
+        if self.file and 'playback' not in line:
+            print(line, file=self.file)
+        if '?' in line:
+            line = line.replace('?', '')
+            line = '? ' + line
+        return line
+
+
+class TaskInterpreter(cmd.Cmd):
+
+    def __init__(self, file=None, prompt='', cmdqueue=[]):
+        cmd.Cmd.__init__(self)
+        self.file = file
+        self.prompt = prompt + '(show) '
+        self.cmdqueue = cmdqueue
+
+    def emptyline(self):
+        pass
+
+    @exception
+    def do_shell(self, s):
+        'Execute shell commands inside the Poseidon container'
+        os.system(s)
+
+    @exception
+    def do_help(self, arg):
+        if not arg:
+            print('For help on specific commands: help <command>')
+            print('Commands:')
+            print('  clear\t\tStop ignoring something on the network')
+            print('  collect\tCollect on something on the network for a duration')
+            print('  exit\t\tGo back to the main prompt')
+            print('  ignore\tIgnore something on the network')
+            print('  quit\t\tGo back to the main prompt')
+            print(
+                '  remove\tRemove something on the network until it is seen again')
+            print('  set\t\tSet the state of things on the network')
+        else:
+            cmd.Cmd.do_help(self, arg)
+
+    @exception
+    def do_exit(self, arg):
+        'Go back to the main prompt:  EXIT'
+        return True
+
+    @exception
+    def do_quit(self, arg):
+        'Go back to the main prompt:  QUIT'
+        return True
 
     @exception
     def do_eof(self, arg):
@@ -44,7 +138,13 @@ class ShowInterpreter(cmd.Cmd):
 
 
 class PoseidonShell(cmd.Cmd):
-    intro = 'Welcome to the Poseidon shell. Type help or ? to list commands.\n'
+    intro = ('Welcome to the Poseidon shell. Type help or ? to list commands.\n'
+             '                      _      __                                  '
+             '    ____  ____  _____(_)___ / /___  ____                         '
+             '   / __ \\/ __ \\/ ___/ / __  / __ \\/ __ \\                     '
+             '  / /_/ / /_/ (__  ) / /_/ / /_/ / / / /                         '
+             ' / .___/\\____/____/_/\\__,_/\\____/_/ /_/                       '
+             '/_/                                                              ')
     prompt = '\033[1;32mposeidon$ \033[1;m'
     file = None
 
@@ -59,25 +159,6 @@ class PoseidonShell(cmd.Cmd):
         'Previous IPv4 OSes', 'Previous IPv6 OSes', 'Role', 'Role Confidence',
         'Previous Roles', 'Previous Role Confidences', 'Behavior', 'Previous Behaviors', 'IPv4 rDNS',
         'IPv6 rDNS'
-    ]
-    what_completions = [
-        'is'
-    ]
-    where_completions = [
-        'is'
-    ]
-    history_completions = [
-        'of'
-    ]
-    clear_completions = [
-        'ignored devices'
-    ]
-    ignore_completions = [
-        'inactive devices'
-    ]
-    remove_completions = [
-        'ignored devices',
-        'inactive devices'
     ]
     show_completions = [
         'all devices', 'active devices', 'inactive devices', 'known devices',
@@ -377,23 +458,8 @@ class PoseidonShell(cmd.Cmd):
             print('No results found for that query.')
         return
 
-    def complete_what(self, text, line, begidx, endidx):
-        return PoseidonShell.completion(text, line, self.what_completions)
-
-    def complete_history(self, text, line, begidx, endidx):
-        return PoseidonShell.completion(text, line, self.history_completions)
-
     def complete_show(self, text, line, begidx, endidx):
         return PoseidonShell.completion(text, line, self.show_completions)
-
-    def complete_clear(self, text, line, begidx, endidx):
-        return PoseidonShell.completion(text, line, self.clear_completions)
-
-    def complete_ignore(self, text, line, begidx, endidx):
-        return PoseidonShell.completion(text, line, self.ignore_completions)
-
-    def complete_remove(self, text, line, begidx, endidx):
-        return PoseidonShell.completion(text, line, self.remove_completions)
 
     def _check_flags(self, flags, fields, sort_by=0, max_width=0, unique=False, nonzero=False):
         for flag in flags:
@@ -614,21 +680,22 @@ class PoseidonShell(cmd.Cmd):
         if not arg:
             print('For help on specific commands: help <command>')
             print('Commands:')
-            print('  change\tChange state of things on the network')
-            print('  clear\t\tStop ignoring something on the network')
             print('  exit\t\tStop the shell and exit')
-            print('  history\tFind out the history of something on the network')
-            print('  ignore\tIgnore something on the network')
             print('  playback\tPlayback commands from a file')
             print('  quit\t\tStop the shell and exit')
             print('  record\tSave future commands to a file')
-            print(
-                '  remove\tRemove something on the network until it is seen again')
             print('  show\t\tShow things on the network based on filters')
-            print('  what\t\tFind out what something is')
-            print('  where\t\tFind out where something is')
+            print('  task\t\tPerform a task on things on the network')
         else:
             cmd.Cmd.do_help(self, arg)
+
+    def emptyline(self):
+        pass
+
+    @exception
+    def do_shell(self, s):
+        'Execute shell commands inside the Poseidon container'
+        os.system(s)
 
     @exception
     def do_record(self, arg):
