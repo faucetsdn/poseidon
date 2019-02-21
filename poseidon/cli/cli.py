@@ -17,20 +17,47 @@ from poseidon.cli.commands import Commands
 from poseidon.helpers.exception_decor import exception
 
 
+class ShowInterpreter(cmd.Cmd):
+
+    def __init__(self, file=None, prompt='', cmdqueue=[]):
+        cmd.Cmd.__init__(self)
+        self.file = file
+        self.prompt = prompt + '(show) '
+        self.cmdqueue = cmdqueue
+
+    def do_all(self, args):
+        'ALL HELP'
+        print('all')
+
+    @exception
+    def do_eof(self, arg):
+        return True
+
+    def precmd(self, line):
+        line = line.lower()
+        if self.file and 'playback' not in line:
+            print(line, file=self.file)
+        if '?' in line:
+            line = line.replace('?', '')
+            line = '? ' + line
+        return line
+
+
 class PoseidonShell(cmd.Cmd):
     intro = 'Welcome to the Poseidon shell. Type help or ? to list commands.\n'
     prompt = '\033[1;32mposeidon$ \033[1;m'
     file = None
 
     default_fields = [
-        'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4', 'IPv6'
+        'MAC Address', 'Ethernet Vendor', 'Role', 'IPv4', 'IPv4 OS',
+        'IPv4 rDNS'
     ]
     all_fields = [
         'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4', 'IPv6',
         'Ethernet Vendor', 'Ignored', 'State', 'Next State', 'First Seen',
         'Last Seen', 'Previous States', 'IPv4 OS', 'IPv6 OS',
-        'Previous IPv4 OSes', 'Previous IPv6 OSes', 'Role (Confidence)',
-        'Previous Roles', 'Behavior', 'Previous Behaviors', 'IPv4 rDNS',
+        'Previous IPv4 OSes', 'Previous IPv6 OSes', 'Role', 'Role Confidence',
+        'Previous Roles', 'Previous Role Confidences', 'Behavior', 'Previous Behaviors', 'IPv4 rDNS',
         'IPv6 rDNS'
     ]
     what_completions = [
@@ -101,10 +128,6 @@ class PoseidonShell(cmd.Cmd):
 
     @staticmethod
     def completion(text, line, completions):
-        # TODO handle expectation of '?'
-        if line.endswith('?'):
-            pass
-
         mline = line.partition(' ')[2]
         offs = len(mline) - len(text)
         return [s[offs:] for s in completions if s.lower().startswith(mline.lower())]
@@ -139,21 +162,21 @@ class PoseidonShell(cmd.Cmd):
         if 'ether_vendor' in endpoint.endpoint_data:
             return str(endpoint.endpoint_data['ether_vendor'])
         else:
-            return 'UNDEFINED'
+            return 'NO DATA'
 
     @staticmethod
     def _get_ipv4_rdns(endpoint):
         if 'ipv4_rdns' in endpoint.endpoint_data:
             return str(endpoint.endpoint_data['ipv4_rdns'])
         else:
-            return 'UNDEFINED'
+            return 'NO DATA'
 
     @staticmethod
     def _get_ipv6_rdns(endpoint):
         if 'ipv6_rdns' in endpoint.endpoint_data:
             return str(endpoint.endpoint_data['ipv6_rdns'])
         else:
-            return 'UNDEFINED'
+            return 'NO DATA'
 
     @staticmethod
     def _get_ipv6(endpoint):
@@ -183,7 +206,7 @@ class PoseidonShell(cmd.Cmd):
 
     @staticmethod
     def _get_role(endpoint):
-        result = 'No type identified yet.'
+        result = 'NO DATA'
         endpoint_mac = PoseidonShell._get_mac(endpoint)
         if 'mac_addresses' in endpoint.metadata and endpoint_mac in endpoint.metadata['mac_addresses']:
             metadata = endpoint.metadata['mac_addresses'][endpoint_mac]
@@ -194,13 +217,26 @@ class PoseidonShell(cmd.Cmd):
             if newest is not '0':
                 if 'labels' in metadata[newest]:
                     result = metadata[newest]['labels'][0]
+        return result
+
+    @staticmethod
+    def _get_role_confidence(endpoint):
+        result = 'NO DATA'
+        endpoint_mac = PoseidonShell._get_mac(endpoint)
+        if 'mac_addresses' in endpoint.metadata and endpoint_mac in endpoint.metadata['mac_addresses']:
+            metadata = endpoint.metadata['mac_addresses'][endpoint_mac]
+            newest = '0'
+            for timestamp in metadata:
+                if timestamp > newest:
+                    newest = timestamp
+            if newest is not '0':
                 if 'confidences' in metadata[newest]:
-                    result += ' ('+str(metadata[newest]['confidences'][0])+')'
+                    result = str(metadata[newest]['confidences'][0])
         return result
 
     @staticmethod
     def _get_ipv4_os(endpoint):
-        result = 'No OS identified yet.'
+        result = 'NO DATA'
         endpoint_ip = PoseidonShell._get_ipv4(endpoint)
         if 'ipv4_addresses' in endpoint.metadata and endpoint_ip in endpoint.metadata['ipv4_addresses']:
             metadata = endpoint.metadata['ipv4_addresses'][endpoint_ip]
@@ -210,7 +246,7 @@ class PoseidonShell(cmd.Cmd):
 
     @staticmethod
     def _get_ipv6_os(endpoint):
-        result = 'No OS identified yet.'
+        result = 'NO DATA'
         endpoint_ip = PoseidonShell._get_ipv6(endpoint)
         if 'ipv6_addresses' in endpoint.metadata and endpoint_ip in endpoint.metadata['ipv6_addresses']:
             metadata = endpoint.metadata['ipv6_addresses'][endpoint_ip]
@@ -220,7 +256,7 @@ class PoseidonShell(cmd.Cmd):
 
     @staticmethod
     def _get_behavior(endpoint):
-        result = 'No behavior identified yet.'
+        result = 'NO DATA'
         endpoint_mac = PoseidonShell._get_mac(endpoint)
         if 'mac_addresses' in endpoint.metadata and endpoint_mac in endpoint.metadata['mac_addresses']:
             metadata = endpoint.metadata['mac_addresses'][endpoint_mac]
@@ -235,6 +271,10 @@ class PoseidonShell(cmd.Cmd):
 
     @staticmethod
     def _get_prev_roles(endpoint):
+        # TODO results from ML
+        return
+
+    def _get_prev_role_confidences(endpoint):
         # TODO results from ML
         return
 
@@ -257,7 +297,7 @@ class PoseidonShell(cmd.Cmd):
     def _get_prev_states(endpoint):
         prev_states = endpoint.p_prev_states
         oldest_state = []
-        output = 'None'
+        output = 'NO DATA'
         if len(prev_states) > 1:
             oldest_state = prev_states.pop(0)
             current_state = prev_states.pop()
@@ -305,13 +345,14 @@ class PoseidonShell(cmd.Cmd):
                          'previous ipv4 oses': (PoseidonShell._get_prev_ipv4_oses, 16),
                          'previous ipv6 oses': (PoseidonShell._get_prev_ipv6_oses, 17),
                          'role': (PoseidonShell._get_role, 18),
-                         'role (confidence)': (PoseidonShell._get_role, 18),
-                         'previous roles': (PoseidonShell._get_prev_roles, 19),
-                         'behavior': (PoseidonShell._get_behavior, 20),
-                         'previous behaviors': (PoseidonShell._get_prev_behaviors, 21),
-                         'ipv4 rdns': (PoseidonShell._get_ipv4_rdns, 22),
-                         'ipv6 rdns': (PoseidonShell._get_ipv6_rdns, 23)}
-        # TODO #971 check if unqiue flag and limit columns (fields)
+                         'role confidence': (PoseidonShell._get_role_confidence, 19),
+                         'previous roles': (PoseidonShell._get_prev_roles, 20),
+                         'previous role confidences': (PoseidonShell._get_prev_role_confidences, 21),
+                         'behavior': (PoseidonShell._get_behavior, 22),
+                         'previous behaviors': (PoseidonShell._get_prev_behaviors, 23),
+                         'ipv4 rdns': (PoseidonShell._get_ipv4_rdns, 24),
+                         'ipv6 rdns': (PoseidonShell._get_ipv6_rdns, 25)}
+        # TODO #971 check if unique flag and limit columns (fields)
         # TODO #963 check if nonzero flag and limit rows/columns
         for endpoint in endpoints:
             record = []
@@ -391,6 +432,19 @@ class PoseidonShell(cmd.Cmd):
         # TODO print more info
         self.display_results(Commands().what_is(
             arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
+
+    @exception
+    def do_test(self, arg):
+        if not self.cmdqueue:
+            self.cmdqueue.append(arg)
+        sub_cmd = ShowInterpreter(
+            file=self.file, prompt=self.prompt, cmdqueue=self.cmdqueue)
+        sub_cmd.cmdloop()
+
+    @exception
+    def do_eof(self, arg):
+        self.close()
+        return True
 
     @exception
     def do_history(self, arg):
@@ -592,6 +646,9 @@ class PoseidonShell(cmd.Cmd):
         line = line.lower()
         if self.file and 'playback' not in line:
             print(line, file=self.file)
+        if '?' in line:
+            line = line.replace('?', '')
+            line = '? ' + line
         return line
 
     def close(self):
