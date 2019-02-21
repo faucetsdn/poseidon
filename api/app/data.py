@@ -167,15 +167,15 @@ class NetworkFull(object):
 
     @staticmethod
     def get_dataset():
-        fields = {'mac': 0, 'id': 'UNDEFINED', 'ipv4': 0, 'ipv6': 0,
-                  'ipv4_subnet': 'UNDEFINED', 'ipv6_subnet': 'UNDEFINED',
+        fields = {'mac': 0, 'id': 'NO DATA', 'ipv4': 0, 'ipv6': 0,
+                  'ipv4_subnet': 'NO DATA', 'ipv6_subnet': 'NO DATA',
                   'segment': 0, 'port': 0, 'tenant': 0, 'active': 0,
-                  'next_state': 'UNDEFINED', 'state': 'UNDEFINED',
-                  'prev_states': 'UNDEFINED', 'role': 'UNDEFINED',
-                  'role_confidence': 0, 'behavior': 0, 'ipv4_os': 'UNDEFINED',
-                  'ipv6_os': 'UNDEFINED', 'source': 'UNDEFINED',
-                  'ipv4_rdns': 'UNDEFINED', 'ipv6_rdns': 'UNDEFINED',
-                  'ether_vendor': 'UNDEFINED'}
+                  'next_state': 'NO DATA', 'state': 'NO DATA',
+                  'prev_states': 'NO DATA', 'role': 'NO DATA',
+                  'role_confidence': 0, 'behavior': 0, 'ipv4_os': 'NO DATA',
+                  'ipv6_os': 'NO DATA', 'source': 'NO DATA',
+                  'ipv4_rdns': 'NO DATA', 'ipv6_rdns': 'NO DATA',
+                  'ether_vendor': 'NO DATA'}
         n = Nodes(fields)
         n.build_nodes()
         return n.nodes
@@ -194,13 +194,13 @@ class Network(object):
 
     @staticmethod
     def get_dataset():
-        fields = {'mac': 0, 'ipv4': 0, 'ipv6': 0, 'ipv4_subnet': 'UNDEFINED',
-                  'ipv6_subnet': 'UNDEFINED', 'tenant': 0, 'active': 0,
-                  'state': 'UNDEFINED', 'role': 'UNDEFINED',
-                  'role_confidence': 0, 'behavior': 0, 'ipv4_os': 'UNDEFINED',
-                  'ipv6_os': 'UNDEFINED', 'source': 'UNDEFINED',
-                  'ipv4_rdns': 'UNDEFINED', 'ipv6_rdns': 'UNDEFINED',
-                  'ether_vendor': 'UNDEFINED'}
+        fields = {'mac': 0, 'ipv4': 0, 'ipv6': 0, 'ipv4_subnet': 'NO DATA',
+                  'ipv6_subnet': 'NO DATA', 'tenant': 0, 'active': 0,
+                  'state': 'NO DATA', 'role': 'NO DATA',
+                  'role_confidence': 0, 'behavior': 0, 'ipv4_os': 'NO DATA',
+                  'ipv6_os': 'NO DATA', 'source': 'NO DATA',
+                  'ipv4_rdns': 'NO DATA', 'ipv6_rdns': 'NO DATA',
+                  'ether_vendor': 'NO DATA'}
         n = Nodes(fields)
         n.build_nodes()
         return n.nodes
