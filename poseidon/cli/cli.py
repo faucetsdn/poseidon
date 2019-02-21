@@ -30,8 +30,6 @@ class ShowInterpreter(cmd.Cmd):
 
     def precmd(self, line):
         line = line.lower()
-        if self.file and 'playback' not in line:
-            print(line, file=self.file)
         if '?' in line:
             line = line.replace('?', '')
             line = '? ' + line
