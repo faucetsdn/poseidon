@@ -405,6 +405,10 @@ class PoseidonShell(cmd.Cmd):
         sub_cmd.cmdloop()
 
     @exception
+    def do_EOF(self, arg):
+        return True
+
+    @exception
     def do_history(self, arg):
         '''
         Find out the history of something on the network:
@@ -604,6 +608,8 @@ class PoseidonShell(cmd.Cmd):
         line = line.lower()
         if self.file and 'playback' not in line:
             print(line, file=self.file)
+        if '?' in line:
+            print('show help for the line...')
         return line
 
     def close(self):
