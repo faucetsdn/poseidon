@@ -417,7 +417,7 @@ class PoseidonShell(cmd.Cmd):
     @exception
     def do_test(self, arg):
         if not self.cmdqueue:
-            self.cmdqueue = arg
+            self.cmdqueue.extend(arg)
         sub_cmd = ShowInterpreter(
             file=self.file, prompt=self.prompt, cmdqueue=self.cmdqueue)
         sub_cmd.cmdloop()
