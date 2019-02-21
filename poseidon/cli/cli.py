@@ -49,7 +49,8 @@ class PoseidonShell(cmd.Cmd):
     file = None
 
     default_fields = [
-        'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4', 'IPv6'
+        'MAC Address', 'Ethernet Vendor', 'IPv4', 'Role', 'IPv4 OS',
+        'IPv4 rDNS', 'IPv6', 'IPv6 OS', 'IPv6 rDNS'
     ]
     all_fields = [
         'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4', 'IPv6',
@@ -333,7 +334,7 @@ class PoseidonShell(cmd.Cmd):
                          'previous behaviors': (PoseidonShell._get_prev_behaviors, 21),
                          'ipv4 rdns': (PoseidonShell._get_ipv4_rdns, 22),
                          'ipv6 rdns': (PoseidonShell._get_ipv6_rdns, 23)}
-        # TODO #971 check if unqiue flag and limit columns (fields)
+        # TODO #971 check if unique flag and limit columns (fields)
         # TODO #963 check if nonzero flag and limit rows/columns
         for endpoint in endpoints:
             record = []
