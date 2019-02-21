@@ -23,6 +23,7 @@ class ShowInterpreter(cmd.Cmd):
         cmd.Cmd.__init__(self)
         self.file = file
         self.prompt = prompt + '(show) '
+        print(cmdqueue)
         self.cmdqueue = cmdqueue
 
     def do_all(self, args):
@@ -31,7 +32,6 @@ class ShowInterpreter(cmd.Cmd):
 
     @exception
     def do_eof(self, arg):
-        self.close()
         return True
 
     def precmd(self, line):
@@ -42,11 +42,6 @@ class ShowInterpreter(cmd.Cmd):
             line = line.replace('?', '')
             line = '? ' + line
         return line
-
-    def close(self):
-        if self.file:
-            self.file.close()
-            self.file = None
 
 
 class PoseidonShell(cmd.Cmd):
