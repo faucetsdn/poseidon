@@ -23,12 +23,11 @@ class ShowInterpreter(cmd.Cmd):
         cmd.Cmd.__init__(self)
         self.file = file
         self.prompt = prompt + '(show) '
-        print(cmdqueue)
         self.cmdqueue = cmdqueue
 
     def do_all(self, args):
         'ALL HELP'
-        pass
+        print('all')
 
     @exception
     def do_eof(self, arg):
