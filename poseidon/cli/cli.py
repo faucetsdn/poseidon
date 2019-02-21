@@ -18,14 +18,24 @@ from poseidon.helpers.exception_decor import exception
 
 
 class ShowInterpreter(cmd.Cmd):
-    prompt = '(show) '
+    prompt = '\033[1;32mposeidon$ \033[1;m (show) '
 
     def do_all(self, args):
+        'ALL HELP'
         pass
 
     @exception
     def do_eof(self, arg):
         return True
+
+    def precmd(self, line):
+        line = line.lower()
+        if self.file and 'playback' not in line:
+            print(line, file=self.file)
+        if '?' in line:
+            line = line.replace('?', '')
+            line = '? ' + line
+        return line
 
 
 class PoseidonShell(cmd.Cmd):
@@ -112,10 +122,6 @@ class PoseidonShell(cmd.Cmd):
 
     @staticmethod
     def completion(text, line, completions):
-        # TODO handle expectation of '?'
-        if line.endswith('?'):
-            pass
-
         mline = line.partition(' ')[2]
         offs = len(mline) - len(text)
         return [s[offs:] for s in completions if s.lower().startswith(mline.lower())]
