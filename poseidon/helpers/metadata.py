@@ -17,7 +17,7 @@ def get_ether_vendor(mac, lookup_path):
                 if line.startswith(mac):
                     return line.split()[1].strip()
     except Exception as e:  # pragma: no cover
-        return 'UNDEFINED'
+        return 'NO DATA'
 
 
 def get_rdns_lookup(ip):
@@ -27,9 +27,9 @@ def get_rdns_lookup(ip):
     try:
         rdns = socket.gethostbyaddr(ip)
         if rdns[0] == rdns[2][0]:
-            rdns = 'UNDEFINED'
+            rdns = 'NO DATA'
         else:
             rdns = rdns[0]
     except Exception as e:  # pragma: no cover
-        rdns = 'UNDEFINED'
+        rdns = 'NO DATA'
     return rdns
