@@ -19,7 +19,7 @@ from poseidon.helpers.exception_decor import exception
 
 class ShowInterpreter(cmd.Cmd):
 
-    def __init__(self, file, prompt):
+    def __init__(self, file=file, prompt=prompt, *args, **kwargs):
         self.file = file
         self.prompt = prompt + '(show) '
 
@@ -414,7 +414,7 @@ class PoseidonShell(cmd.Cmd):
 
     @exception
     def do_test(self, arg):
-        sub_cmd = ShowInterpreter(self.file, self.prompt)
+        sub_cmd = ShowInterpreter(file=self.file, prompt=self.prompt)
         sub_cmd.cmdloop()
 
     @exception
