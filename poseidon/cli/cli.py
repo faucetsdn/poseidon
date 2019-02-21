@@ -18,7 +18,10 @@ from poseidon.helpers.exception_decor import exception
 
 
 class ShowInterpreter(cmd.Cmd):
-    prompt = '\033[1;32mposeidon$ \033[1;m (show) '
+
+    def __init__(self, file, prompt):
+        self.file = file
+        self.prompt = prompt + '(show) '
 
     def do_all(self, args):
         'ALL HELP'
@@ -30,6 +33,8 @@ class ShowInterpreter(cmd.Cmd):
 
     def precmd(self, line):
         line = line.lower()
+        if self.file and 'playback' not in line:
+            print(line, file=self.file)
         if '?' in line:
             line = line.replace('?', '')
             line = '? ' + line
@@ -409,7 +414,7 @@ class PoseidonShell(cmd.Cmd):
 
     @exception
     def do_test(self, arg):
-        sub_cmd = ShowInterpreter()
+        sub_cmd = ShowInterpreter(file, prompt)
         sub_cmd.cmdloop()
 
     @exception
