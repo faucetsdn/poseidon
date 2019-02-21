@@ -57,7 +57,7 @@ class PoseidonShell(cmd.Cmd):
         'Ethernet Vendor', 'Ignored', 'State', 'Next State', 'First Seen',
         'Last Seen', 'Previous States', 'IPv4 OS', 'IPv6 OS',
         'Previous IPv4 OSes', 'Previous IPv6 OSes', 'Role', 'Role Confidence',
-        'Previous Roles', 'Behavior', 'Previous Behaviors', 'IPv4 rDNS',
+        'Previous Roles', 'Previous Role Confidences', 'Behavior', 'Previous Behaviors', 'IPv4 rDNS',
         'IPv6 rDNS'
     ]
     what_completions = [
