@@ -17,6 +17,13 @@ from poseidon.cli.commands import Commands
 from poseidon.helpers.exception_decor import exception
 
 
+class ShowInterpreter(cmd.Cmd):
+    prompt = '(show) '
+
+    def do_all(self, args):
+        pass
+
+
 class PoseidonShell(cmd.Cmd):
     intro = 'Welcome to the Poseidon shell. Type help or ? to list commands.\n'
     prompt = '\033[1;32mposeidon$ \033[1;m'
@@ -391,6 +398,11 @@ class PoseidonShell(cmd.Cmd):
         # TODO print more info
         self.display_results(Commands().what_is(
             arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
+
+    @exception
+    def do_test(self, arg):
+        sub_cmd = ShowInterpreter()
+        sub_cmd.cmdloop()
 
     @exception
     def do_history(self, arg):
