@@ -387,7 +387,7 @@ class ShowInterpreter(cmd.Cmd):
             flags, fields)
 
         self.parser.display_results(Commands().show_devices(
-            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
+            'all'), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
     def do_role(self, arg):
@@ -844,6 +844,12 @@ class PoseidonShell(cmd.Cmd):
             line = line.replace('?', '')
             line = '? ' + line
         return line
+
+    def completenames(self, text, *ignored):
+        dotext = 'do_'+text
+        if text in ['eof']:
+            dotext = 'None'
+        return [a[3:] for a in self.get_names() if a.startswith(dotext)]
 
     def close(self):
         if self.file:
