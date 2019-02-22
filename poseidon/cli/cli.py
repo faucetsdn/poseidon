@@ -764,9 +764,9 @@ class PoseidonShell(cmd.Cmd):
 /_/"""
     prompt = '\033[1;32mposeidon$ \033[1;m'
     file = None
-    commands = [
-        'exit', 'playback', 'quit', 'record', 'show', 'task'
-    ]
+
+    def completedefault(self, text, line, begidx, endidx):
+        return ['exit']
 
     @exception
     def do_task(self, arg):
@@ -818,13 +818,6 @@ class PoseidonShell(cmd.Cmd):
             print('  task\t\tPerform a task on things on the network')
         else:
             cmd.Cmd.do_help(self, arg)
-
-    def complete_cmd(self, text, line, start_index, end_index):
-        if text:
-            return [command for command in commands
-                    if command.startswith(text)]
-        else:
-            return commands
 
     def emptyline(self):
         pass
