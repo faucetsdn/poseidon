@@ -379,28 +379,64 @@ class ShowInterpreter(cmd.Cmd):
 
     @exception
     def do_all(self, arg):
-        # TODO
-        print('all')
+        '''Show all things on the network'''
+        fields = self.parser.default_fields
+
+        flags, arg = self.parser.get_flags(arg)
+        fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
+            flags, fields)
+
+        self.parser.display_results(Commands().show_devices(
+            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
     def do_role(self, arg):
-        # TODO
-        print('role')
+        '''Show all things on the network that match a role'''
+        fields = self.parser.default_fields
+
+        flags, arg = self.parser.get_flags(arg)
+        fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
+            flags, fields)
+
+        self.parser.display_results(Commands().show_devices(
+            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
     def do_state(self, arg):
-        # TODO
-        print('state')
+        '''Show all things on the network that match a state'''
+        fields = ['Switch', 'Port', 'State',
+                  'Ethernet Vendor', 'Mac', 'IPv4', 'IPv6']
+
+        flags, arg = self.parser.get_flags(arg)
+        fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
+            flags, fields)
+
+        self.parser.display_results(Commands().show_devices(
+            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
     def do_behavior(self, arg):
-        # TODO
-        print('behavior')
+        '''Show all things on the network that match a behavior'''
+        fields = self.parser.default_fields + ['Behavior']
+
+        flags, arg = self.parser.get_flags(arg)
+        fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
+            flags, fields)
+
+        self.parser.display_results(Commands().show_devices(
+            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
     def do_os(self, arg):
-        # TODO
-        print('os')
+        '''Show all things on the network that match a behavior'''
+        fields = self.parser.default_fields
+
+        flags, arg = self.parser.get_flags(arg)
+        fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
+            flags, fields)
+
+        self.parser.display_results(Commands().show_devices(
+            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
     def do_what(self, arg):
