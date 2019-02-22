@@ -1,7 +1,6 @@
 .circleci
 .gitignore
 .git
-AUTHORS
 CHANGELOG.md
 CODE_OF_CONDUCT.md
 CONTRIBUTING.md
@@ -9,8 +8,6 @@ Dockerfile.docs
 Dockerfile.test
 Dockerfile
 LICENSE
-MAINTAINERS.md
+MAINTAINERS
 Makefile
-README.md
-VERSION
 dist/*
