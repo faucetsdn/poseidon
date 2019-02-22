@@ -18,254 +18,7 @@ from poseidon.cli.commands import Commands
 from poseidon.helpers.exception_decor import exception
 
 
-class ShowInterpreter(cmd.Cmd):
-
-    def __init__(self, file=None, prompt='', cmdqueue=[]):
-        cmd.Cmd.__init__(self)
-        self.file = file
-        self.prompt = prompt + '(show) '
-        self.cmdqueue = cmdqueue
-
-    def emptyline(self):
-        pass
-
-    @exception
-    def do_shell(self, s):
-        '''Execute shell commands inside the Poseidon container'''
-        os.system(s)
-
-    @exception
-    def do_help(self, arg):
-        if not arg:
-            print('For help on specific commands: help <command>')
-            print('Commands:')
-            print('  all\t\tShow all devices')
-            print('  behavior\tShow devices matching a particular behavior')
-            print('  exit\t\tGo back to the main prompt')
-            print('  history\tFind out the history of something on the network')
-            print('  os\t\tShow devices matching a particular operating system')
-            print('  quit\t\tGo back to the main prompt')
-            print('  role\t\tShow devices matching a particular role')
-            print('  state\t\tShow devices matching a particular state')
-            print('  what\tFind out what something is')
-            print('  where\tFind out where something is')
-        else:
-            cmd.Cmd.do_help(self, arg)
-
-    @exception
-    def do_authors(self, arg):
-        print("""\033[1;34m                            The Cyber Reboot Team
-                                      &
-                           Members of the Community\033[1;m
-                           \033[1;31m`-:/+oosyyyyyyyysso+/:-`
-                      .:+oyyyyyyyyyyyyyyyyyyyyyyyyyyo+:.
-                  `:+yyyyyyyyyyyyyyyyyssyyyyyyyyyyyyyyyyy+:`
-               `:oyyyyyyyyyyo+/:-.`        `.-:/+oyyyyyyyyyyo:`
-             -+yyyyyyyys+:.                        .:+syyyyyyyy+-
-           -oyyyyyyyo:.                                .:oyyyyyyys-
-         -oyyyyyys/.                                      `/syyyyyys-
-       `+yyyyyys:`              `.--::::::--.`              `-oyyyyyy+`     ``
-      -syyyyys:            `-/osyyyyyyyyyyyyyys+/-`            :syyyyys-  -syys:
-     /yyyyyy+`          ./oyyyyyyyyyyyyyyyyyyyyyyyyo:.          `/yyyyyy/.yyyyys
-    /yyyyyy-         `-oyyyyyyyyyyyyyysoyyyyyyyyyyyyyyo-      -/+/+yyyyyyyyyyyy:
-   /yyyyys.         :syyyyyyyyyyyyyyyy/`yyyyyyyyyyyyyyyyo-   -yyyyyyyyyyyyyyyyo
-  :yyyyys.        .oyyyyyyyyys+syyyyyy: yyyyyyy+oyyyyyyyyy+` .syyyyyyyyyyyyyyy`
- `yyyyyy.        -syyyyyyyyo:.:syyyyyy: yyyyyyy/-.+yyyyyyyys- `./oyyyyyyyyyyy:
- +yyyyy/        :yyyyyyyys:./syyyyyyyy: yyyyyyyyyo-.+yyyyyyyy-    `:+syyyyyyo
-`yyyyys`       -yyyyyyyyo.-syyyyyyyyyy: yyyyyyyyyyy+`/yyyyyyyy.      `./osyy`
-/yyyyy/       `syyyyyyys`-yyyyyyyyyyyy: yyyyyyyyyyyyo`:yyyyyyyo          `--
-oyyyyy.       :yyyyyyyy-`yyyyyyyyyyyyy: yyyyyyyyyyyyy/ oyyyyyyy-
-syyyyy        oyyyyyyys /yyyyyyyyyyyyy: yyyyyyyyyyyyyy`-yyyyyyy+
-yyyyyy        syyyyyyy+ oyyyyyyyyyyyyy: yyyyyyyyyyyyyy..yyyyyyyo
-yyyyyy        syyyyyyyo +yyyyyyyyyyyyy/`yyyyyyyyyyyyyy`.yyyyyyyo
-oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
-/yyyyy/       :yyyyyyyy/ +yyyyyyyyyyyyyyyyyyyyyyyyyyy..yyyyyyyy.
-`yyyyys`       syyyyyyyy:`+yyyyyyyyyyyyyyyyyyyyyyyys-`syyyyyyyo        :+o+:
- +yyyyy/       .yyyyyyyyy+`:syyyyyyyyyyyyyyyyyyyyy+.-syyyyyyys.       /yyyyy-
- `yyyyyy-       :yyyyyyyyys:.:syyyyyyyyyyyyyyyys+-.+yyyyyyyyy-       .yyyyyy`
-  :yyyyys.       -syyyyyyyyys/.-:+ssyyyyyysso/:.:oyyyyyyyyys.       .syyyyy:
-   /yyyyys.       `oyyyyyyyyyyys+:----------:/oyyyyyyyyyyy+`       .syyyyy/
-    /yyyyyy-        -oyyyyyyyyyyyyyyyssssyyyyyyyyyyyyyyyo-        -yyyyyy/
-     :yyyyyy+`        -oyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy+-        `+yyyyyy/
-      -syyyyys:         .:oyyyyyyyyyyyyyyyyyyyyyyyso:`        `:syyyyys-
-       `+yyyyyys:`         `-/+syyyyyyyyyyyyyys+:-`         `:syyyyyy+`
-         -oyyyyyys/.            `..--::::--.`             ./syyyyyyo-
-           -oyyyyyyyo/.                                .:oyyyyyyyo-
-             -+yyyyyyyys+:.                        .:+syyyyyyyy+-
-               `:oyyyyyyyyyyo+/:-.``      ``.-:/+oyyyyyyyyyyo:`
-                  `:+yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyys+:`
-                      .:/oyyyyyyyyyyyyyyyyyyyyyyyyyyo+:.
-                           `-:/+oossyyyyyyssoo+/:-`\033[1;m""")
-        with open('/poseidon/AUTHORS', 'r') as f:
-            i = 1
-            for line in f:
-                if i > 4:
-                    print(line.strip())
-                i += 1
-
-    def do_all(self, args):
-        # TODO
-        print('all')
-
-    def do_history(self, args):
-        # TODO
-        print('history')
-
-    @exception
-    def do_exit(self, arg):
-        '''Go back to the main prompt:  EXIT'''
-        return True
-
-    @exception
-    def do_quit(self, arg):
-        '''Go back to the main prompt:  QUIT'''
-        return True
-
-    @exception
-    def do_eof(self, arg):
-        return True
-
-    def precmd(self, line):
-        line = line.lower()
-        if self.file and 'playback' not in line:
-            print(line, file=self.file)
-        if '?' in line:
-            line = line.replace('?', '')
-            line = '? ' + line
-        return line
-
-
-class TaskInterpreter(cmd.Cmd):
-
-    def __init__(self, file=None, prompt='', cmdqueue=[]):
-        cmd.Cmd.__init__(self)
-        self.file = file
-        self.prompt = prompt + '(show) '
-        self.cmdqueue = cmdqueue
-
-    def emptyline(self):
-        pass
-
-    @exception
-    def do_shell(self, s):
-        '''Execute shell commands inside the Poseidon container'''
-        os.system(s)
-
-    @exception
-    def do_help(self, arg):
-        if not arg:
-            print('For help on specific commands: help <command>')
-            print('Commands:')
-            print('  clear\t\tStop ignoring something on the network')
-            print('  collect\tCollect on something on the network for a duration')
-            print('  exit\t\tGo back to the main prompt')
-            print('  ignore\tIgnore something on the network')
-            print('  quit\t\tGo back to the main prompt')
-            print(
-                '  remove\tRemove something on the network until it is seen again')
-            print('  set\t\tSet the state of things on the network')
-        else:
-            cmd.Cmd.do_help(self, arg)
-
-    @exception
-    def do_exit(self, arg):
-        '''Go back to the main prompt:  EXIT'''
-        return True
-
-    @exception
-    def do_quit(self, arg):
-        '''Go back to the main prompt:  QUIT'''
-        return True
-
-    @exception
-    def do_eof(self, arg):
-        return True
-
-    def precmd(self, line):
-        line = line.lower()
-        if self.file and 'playback' not in line:
-            print(line, file=self.file)
-        if '?' in line:
-            line = line.replace('?', '')
-            line = '? ' + line
-        return line
-
-
-class PoseidonShell(cmd.Cmd):
-    intro = """Welcome to the Poseidon shell. Type help or ? to list commands.
-                               _      \033[1;31m__\033[1;m
-    ____   ____   \033[1;31m_____\033[1;m ___   (_)\033[1;31m____/ /\033[1;m____   \033[1;31m____\033[1;m
-   / __ \ / __ \ \033[1;31m/ ___/\033[1;m/ _ \ / /\033[1;31m/ __  /\033[1;m/ __ \ \033[1;31m/ __ \\\033[1;m
-  / /_/ // /_/ /\033[1;31m(__  )\033[1;m/  __// /\033[1;31m/ /_/ /\033[1;m/ /_/ /\033[1;31m/ / / /\033[1;m
- / .___/ \____/\033[1;31m/____/\033[1;m \___//_/ \033[1;31m\__,_/\033[1;m \____/\033[1;31m/_/ /_/\033[1;m
-/_/"""
-    prompt = '\033[1;32mposeidon$ \033[1;m'
-    file = None
-
-    default_fields = [
-        'MAC Address', 'Ethernet Vendor', 'Role', 'IPv4', 'IPv4 OS',
-        'IPv4 rDNS'
-    ]
-    all_fields = [
-        'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4', 'IPv6',
-        'Ethernet Vendor', 'Ignored', 'State', 'Next State', 'First Seen',
-        'Last Seen', 'Previous States', 'IPv4 OS', 'IPv6 OS',
-        'Previous IPv4 OSes', 'Previous IPv6 OSes', 'Role', 'Role Confidence',
-        'Previous Roles', 'Previous Role Confidences', 'Behavior', 'Previous Behaviors', 'IPv4 rDNS',
-        'IPv6 rDNS'
-    ]
-    show_completions = [
-        'all devices', 'active devices', 'inactive devices', 'known devices',
-        'unknown devices', 'mirroring devices', 'abnormal devices',
-        'normal devices', 'shutdown devices', 'reinvestigating devices',
-        'queued devices', 'active-directory-controller devices',
-        'administrator-server devices', 'administrator-workstation devices',
-        'business-workstation devices', 'developer-workstation devices',
-        'gpu-laptop devices', 'pki-server devices', 'windows devices',
-        'mac devices', 'linux devices', 'ignored devices'
-    ]
-
-    @staticmethod
-    def get_flags(text):
-        flags = {}
-        not_flags = []
-        # remove boolean flags first
-        words = text.split()
-        other_words = []
-        for word in words:
-            if len(word) > 2 and word[0] == '-' and word[1] != '-':
-                flags[word[1:]] = True
-            else:
-                other_words.append(word)
-        other_words = ' '.join(other_words)
-        first = other_words.split('--')
-        not_flags += first[0].split()
-        first.pop(0)
-        for flag in first:
-            if '=' in flag:
-                command, value = flag.split('=', 1)
-                if '[' in value and ']' in value:
-                    val = value.rsplit(']', 1)[0].split('[', 1)[1]
-                    val = val.split(',')
-                    store_vals = []
-                    for v in val:
-                        store_vals.append(v.strip())
-                    flags[command] = store_vals
-                    not_f = value.rsplit(']', 1)
-                else:
-                    val = value.split(' ', 1)[0]
-                    flags[command] = val
-                    not_f = value.split(' ', 1)
-                not_f.pop(0)
-                if not_f:
-                    not_flags += not_f[0].split()
-        return flags, ' '.join(not_flags)
-
-    @staticmethod
-    def completion(text, line, completions):
-        mline = line.partition(' ')[2]
-        offs = len(mline) - len(text)
-        return [s[offs:] for s in completions if s.lower().startswith(mline.lower())]
+class GetData():
 
     @staticmethod
     def _get_name(endpoint):
@@ -342,7 +95,7 @@ class PoseidonShell(cmd.Cmd):
     @staticmethod
     def _get_role(endpoint):
         result = 'NO DATA'
-        endpoint_mac = PoseidonShell._get_mac(endpoint)
+        endpoint_mac = GetData._get_mac(endpoint)
         if 'mac_addresses' in endpoint.metadata and endpoint_mac in endpoint.metadata['mac_addresses']:
             metadata = endpoint.metadata['mac_addresses'][endpoint_mac]
             newest = '0'
@@ -357,7 +110,7 @@ class PoseidonShell(cmd.Cmd):
     @staticmethod
     def _get_role_confidence(endpoint):
         result = 'NO DATA'
-        endpoint_mac = PoseidonShell._get_mac(endpoint)
+        endpoint_mac = GetData._get_mac(endpoint)
         if 'mac_addresses' in endpoint.metadata and endpoint_mac in endpoint.metadata['mac_addresses']:
             metadata = endpoint.metadata['mac_addresses'][endpoint_mac]
             newest = '0'
@@ -372,7 +125,7 @@ class PoseidonShell(cmd.Cmd):
     @staticmethod
     def _get_ipv4_os(endpoint):
         result = 'NO DATA'
-        endpoint_ip = PoseidonShell._get_ipv4(endpoint)
+        endpoint_ip = GetData._get_ipv4(endpoint)
         if 'ipv4_addresses' in endpoint.metadata and endpoint_ip in endpoint.metadata['ipv4_addresses']:
             metadata = endpoint.metadata['ipv4_addresses'][endpoint_ip]
             if 'os' in metadata:
@@ -382,7 +135,7 @@ class PoseidonShell(cmd.Cmd):
     @staticmethod
     def _get_ipv6_os(endpoint):
         result = 'NO DATA'
-        endpoint_ip = PoseidonShell._get_ipv6(endpoint)
+        endpoint_ip = GetData._get_ipv6(endpoint)
         if 'ipv6_addresses' in endpoint.metadata and endpoint_ip in endpoint.metadata['ipv6_addresses']:
             metadata = endpoint.metadata['ipv6_addresses'][endpoint_ip]
             if 'os' in metadata:
@@ -392,7 +145,7 @@ class PoseidonShell(cmd.Cmd):
     @staticmethod
     def _get_behavior(endpoint):
         result = 'NO DATA'
-        endpoint_mac = PoseidonShell._get_mac(endpoint)
+        endpoint_mac = GetData._get_mac(endpoint)
         if 'mac_addresses' in endpoint.metadata and endpoint_mac in endpoint.metadata['mac_addresses']:
             metadata = endpoint.metadata['mac_addresses'][endpoint_mac]
             newest = '0'
@@ -409,6 +162,7 @@ class PoseidonShell(cmd.Cmd):
         # TODO results from ML
         return
 
+    @staticmethod
     def _get_prev_role_confidences(endpoint):
         # TODO results from ML
         return
@@ -458,35 +212,109 @@ class PoseidonShell(cmd.Cmd):
             current_state[1])) + ' (' + duration(current_state[1]) + ')'
         return output
 
+
+class Parser():
+
+    def __init__(self):
+        self.default_fields = [
+            'IPv4', 'IPv4 rDNS', 'Role', 'IPv4 OS', 'Ethernet Vendor',
+            'MAC Address'
+        ]
+        self.all_fields = [
+            'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4', 'IPv6',
+            'Ethernet Vendor', 'Ignored', 'State', 'Next State', 'First Seen',
+            'Last Seen', 'Previous States', 'IPv4 OS', 'IPv6 OS',
+            'Previous IPv4 OSes', 'Previous IPv6 OSes', 'Role',
+            'Role Confidence', 'Previous Roles', 'Previous Role Confidences',
+            'Behavior', 'Previous Behaviors', 'IPv4 rDNS', 'IPv6 rDNS'
+        ]
+
+    def completion(self, text, line, completions):
+        mline = line.partition(' ')[2]
+        offs = len(mline) - len(text)
+        return [s[offs:] for s in completions if s.lower().startswith(mline.lower())]
+
+    def get_flags(self, text):
+        flags = {}
+        not_flags = []
+        # remove boolean flags first
+        words = text.split()
+        other_words = []
+        for word in words:
+            if len(word) > 2 and word[0] == '-' and word[1] != '-':
+                flags[word[1:]] = True
+            else:
+                other_words.append(word)
+        other_words = ' '.join(other_words)
+        first = other_words.split('--')
+        not_flags += first[0].split()
+        first.pop(0)
+        for flag in first:
+            if '=' in flag:
+                command, value = flag.split('=', 1)
+                if '[' in value and ']' in value:
+                    val = value.rsplit(']', 1)[0].split('[', 1)[1]
+                    val = val.split(',')
+                    store_vals = []
+                    for v in val:
+                        store_vals.append(v.strip())
+                    flags[command] = store_vals
+                    not_f = value.rsplit(']', 1)
+                else:
+                    val = value.split(' ', 1)[0]
+                    flags[command] = val
+                    not_f = value.split(' ', 1)
+                not_f.pop(0)
+                if not_f:
+                    not_flags += not_f[0].split()
+        return flags, ' '.join(not_flags)
+
+    def _check_flags(self, flags, fields, sort_by=0, max_width=0, unique=False, nonzero=False):
+        for flag in flags:
+            if flag == 'fields':
+                if 'all' in flags[flag]:
+                    fields = self.all_fields
+                else:
+                    fields = flags[flag]
+            elif flag == 'sort_by':
+                sort_by = int(flags[flag])
+            elif flag == 'max_width':
+                max_width = int(flags[flag])
+            elif flag == 'unique' and flags[flag] == True:
+                unique = True
+            elif flag == 'nonzero' and flags[flag] == True:
+                nonzero = True
+        return fields, sort_by, max_width, unique, nonzero
+
     def display_results(self, endpoints, fields, sort_by=0, max_width=0, unique=False, nonzero=False):
         matrix = []
-        fields_lookup = {'id': (PoseidonShell._get_name, 0),
-                         'mac': (PoseidonShell._get_mac, 1),
-                         'mac address': (PoseidonShell._get_mac, 1),
-                         'switch': (PoseidonShell._get_switch, 2),
-                         'port': (PoseidonShell._get_port, 3),
-                         'vlan': (PoseidonShell._get_vlan, 4),
-                         'ipv4': (PoseidonShell._get_ipv4, 5),
-                         'ipv6': (PoseidonShell._get_ipv6, 6),
-                         'ethernet vendor': (PoseidonShell._get_ether_vendor, 7),
-                         'ignored': (PoseidonShell._get_ignored, 8),
-                         'state': (PoseidonShell._get_state, 9),
-                         'next state': (PoseidonShell._get_next_state, 10),
-                         'first seen': (PoseidonShell._get_first_seen, 11),
-                         'last seen': (PoseidonShell._get_last_seen, 12),
-                         'previous states': (PoseidonShell._get_prev_states, 13),
-                         'ipv4 os': (PoseidonShell._get_ipv4_os, 14),
-                         'ipv6 os': (PoseidonShell._get_ipv6_os, 15),
-                         'previous ipv4 oses': (PoseidonShell._get_prev_ipv4_oses, 16),
-                         'previous ipv6 oses': (PoseidonShell._get_prev_ipv6_oses, 17),
-                         'role': (PoseidonShell._get_role, 18),
-                         'role confidence': (PoseidonShell._get_role_confidence, 19),
-                         'previous roles': (PoseidonShell._get_prev_roles, 20),
-                         'previous role confidences': (PoseidonShell._get_prev_role_confidences, 21),
-                         'behavior': (PoseidonShell._get_behavior, 22),
-                         'previous behaviors': (PoseidonShell._get_prev_behaviors, 23),
-                         'ipv4 rdns': (PoseidonShell._get_ipv4_rdns, 24),
-                         'ipv6 rdns': (PoseidonShell._get_ipv6_rdns, 25)}
+        fields_lookup = {'id': (GetData._get_name, 0),
+                         'mac': (GetData._get_mac, 1),
+                         'mac address': (GetData._get_mac, 1),
+                         'switch': (GetData._get_switch, 2),
+                         'port': (GetData._get_port, 3),
+                         'vlan': (GetData._get_vlan, 4),
+                         'ipv4': (GetData._get_ipv4, 5),
+                         'ipv6': (GetData._get_ipv6, 6),
+                         'ethernet vendor': (GetData._get_ether_vendor, 7),
+                         'ignored': (GetData._get_ignored, 8),
+                         'state': (GetData._get_state, 9),
+                         'next state': (GetData._get_next_state, 10),
+                         'first seen': (GetData._get_first_seen, 11),
+                         'last seen': (GetData._get_last_seen, 12),
+                         'previous states': (GetData._get_prev_states, 13),
+                         'ipv4 os': (GetData._get_ipv4_os, 14),
+                         'ipv6 os': (GetData._get_ipv6_os, 15),
+                         'previous ipv4 oses': (GetData._get_prev_ipv4_oses, 16),
+                         'previous ipv6 oses': (GetData._get_prev_ipv6_oses, 17),
+                         'role': (GetData._get_role, 18),
+                         'role confidence': (GetData._get_role_confidence, 19),
+                         'previous roles': (GetData._get_prev_roles, 20),
+                         'previous role confidences': (GetData._get_prev_role_confidences, 21),
+                         'behavior': (GetData._get_behavior, 22),
+                         'previous behaviors': (GetData._get_prev_behaviors, 23),
+                         'ipv4 rdns': (GetData._get_ipv4_rdns, 24),
+                         'ipv6 rdns': (GetData._get_ipv6_rdns, 25)}
         # TODO #971 check if unique flag and limit columns (fields)
         # TODO #963 check if nonzero flag and limit rows/columns
         for endpoint in endpoints:
@@ -512,97 +340,264 @@ class PoseidonShell(cmd.Cmd):
             print('No results found for that query.')
         return
 
-    def complete_show(self, text, line, begidx, endidx):
-        return PoseidonShell.completion(text, line, self.show_completions)
 
-    def _check_flags(self, flags, fields, sort_by=0, max_width=0, unique=False, nonzero=False):
-        for flag in flags:
-            if flag == 'fields':
-                if 'all' in flags[flag]:
-                    fields = self.all_fields
-                else:
-                    fields = flags[flag]
-            elif flag == 'sort_by':
-                sort_by = int(flags[flag])
-            elif flag == 'max_width':
-                max_width = int(flags[flag])
-            elif flag == 'unique' and flags[flag] == True:
-                unique = True
-            elif flag == 'nonzero' and flags[flag] == True:
-                nonzero = True
-        return fields, sort_by, max_width, unique, nonzero
+class ShowInterpreter(cmd.Cmd):
+
+    def __init__(self, file=None, prompt='', cmdqueue=[]):
+        cmd.Cmd.__init__(self)
+        self.file = file
+        self.prompt = prompt + '(show) '
+        self.cmdqueue = cmdqueue
+        self.parser = Parser()
+        self.role_completions = [
+            'active-directory-controller', 'administrator-server',
+            'administrator-workstation', 'business-workstation',
+            'developer-workstation', 'gpu-laptop', 'pki-server', 'unknown'
+        ]
+        self.state_completions = [
+            'active', 'inactive', 'known', 'unknown', 'mirroring', 'abnormal',
+            'shutdown', 'reinvestigating', 'queued'
+        ]
+        self.behavior_completions = [
+            'normal', 'abnormal'
+        ]
+        self.os_completions = [
+            'windows', 'freebsd', 'linux', 'mac'
+        ]
+
+    def complete_role(self, text, line, begidx, endidx):
+        return self.parser.completion(text, line, self.role_completions)
+
+    def complete_behavior(self, text, line, begidx, endidx):
+        return self.parser.completion(text, line, self.behavior_completions)
+
+    def complete_os(self, text, line, begidx, endidx):
+        return self.parser.completion(text, line, self.os_completions)
+
+    def complete_state(self, text, line, begidx, endidx):
+        return self.parser.completion(text, line, self.state_completions)
+
+    @exception
+    def do_all(self, arg):
+        # TODO
+        print('all')
+
+    @exception
+    def do_role(self, arg):
+        # TODO
+        print('role')
+
+    @exception
+    def do_state(self, arg):
+        # TODO
+        print('state')
+
+    @exception
+    def do_behavior(self, arg):
+        # TODO
+        print('behavior')
+
+    @exception
+    def do_os(self, arg):
+        # TODO
+        print('os')
 
     @exception
     def do_what(self, arg):
         '''
         Find out what something is:
-        WHAT IS [IP|MAC|ID]
-        WHAT IS 10.0.0.1
-        WHAT IS 18:EF:02:2D:49:00
-        WHAT IS 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
+        WHAT [IP|MAC|ID]
+        WHAT 10.0.0.1
+        WHAT 18:EF:02:2D:49:00
+        WHAT 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
         '''
         # defaults
-        fields = self.default_fields + \
-            ['State', 'Next State', 'First Seen', 'Last Seen']
+        fields = self.parser.all_fields
 
-        flags, arg = PoseidonShell.get_flags(arg)
-        fields, sort_by, max_width, unique, nonzero = self._check_flags(
+        flags, arg = self.parser.get_flags(arg)
+        fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
-        # TODO print more info
-        self.display_results(Commands().what_is(
+        self.parser.display_results(Commands().what_is(
             arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
-
-    @exception
-    def do_test(self, arg):
-        if not self.cmdqueue:
-            self.cmdqueue.append(arg)
-        sub_cmd = ShowInterpreter(
-            file=self.file, prompt=self.prompt, cmdqueue=self.cmdqueue)
-        sub_cmd.cmdloop()
-
-    @exception
-    def do_eof(self, arg):
-        self.close()
-        return True
 
     @exception
     def do_history(self, arg):
         '''
         Find out the history of something on the network:
-        HISTORY OF [IP|MAC|ID]
-        HISTORY OF 10.0.0.1
-        HISTORY OF 18:EF:02:2D:49:00
-        HISTORY OF 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
+        HISTORY [IP|MAC|ID]
+        HISTORY 10.0.0.1
+        HISTORY 18:EF:02:2D:49:00
+        HISTORY 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
         '''
         # defaults
         fields = ['Previous States']
 
-        flags, arg = PoseidonShell.get_flags(arg)
-        fields, sort_by, max_width, unique, nonzero = self._check_flags(
+        flags, arg = self.parser.get_flags(arg)
+        fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
-        self.display_results(
+        self.parser.display_results(
             Commands().history_of(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
     def do_where(self, arg):
         '''
         Find out where something is:
-        WHERE IS [IP|MAC|ID]
-        WHERE IS 10.0.0.1
-        WHERE IS 18:EF:02:2D:49:00
-        WHERE IS 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
+        WHERE [IP|MAC|ID]
+        WHERE 10.0.0.1
+        WHERE 18:EF:02:2D:49:00
+        WHERE 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
         '''
         # defaults
-        fields = ['ID', 'MAC Address', 'Switch', 'Port']
+        fields = ['Switch', 'Port', 'VLAN', 'IPv4', 'IPv6', 'MAC Address']
 
-        flags, arg = PoseidonShell.get_flags(arg)
-        fields, sort_by, max_width, unique, nonzero = self._check_flags(
+        flags, arg = self.parser.get_flags(arg)
+        fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
-        self.display_results(
+        self.parser.display_results(
             Commands().where_is(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
+
+    @exception
+    def do_help(self, arg):
+        if not arg:
+            print('For help on specific commands: help <command>')
+            print('Commands:')
+            print('  all\t\tShow all devices')
+            print('  behavior\tShow devices matching a particular behavior')
+            print('  exit\t\tGo back to the main prompt')
+            print('  history\tFind out the history of something on the network')
+            print('  os\t\tShow devices matching a particular operating system')
+            print('  quit\t\tGo back to the main prompt')
+            print('  role\t\tShow devices matching a particular role')
+            print('  state\t\tShow devices matching a particular state')
+            print('  what\tFind out what something is')
+            print('  where\tFind out where something is')
+        else:
+            cmd.Cmd.do_help(self, arg)
+
+    @exception
+    def do_authors(self, arg):
+        print("""\033[1;34m                            The Cyber Reboot Team
+                                      &
+                           Members of the Community\033[1;m
+                           \033[1;31m`-:/+oosyyyyyyyysso+/:-`
+                      .:+oyyyyyyyyyyyyyyyyyyyyyyyyyyo+:.
+                  `:+yyyyyyyyyyyyyyyyyssyyyyyyyyyyyyyyyyy+:`
+               `:oyyyyyyyyyyo+/:-.`        `.-:/+oyyyyyyyyyyo:`
+             -+yyyyyyyys+:.                        .:+syyyyyyyy+-
+           -oyyyyyyyo:.                                .:oyyyyyyys-
+         -oyyyyyys/.                                      `/syyyyyys-
+       `+yyyyyys:`              `.--::::::--.`              `-oyyyyyy+`     ``
+      -syyyyys:            `-/osyyyyyyyyyyyyyys+/-`            :syyyyys-  -syys:
+     /yyyyyy+`          ./oyyyyyyyyyyyyyyyyyyyyyyyyo:.          `/yyyyyy/.yyyyys
+    /yyyyyy-         `-oyyyyyyyyyyyyyysoyyyyyyyyyyyyyyo-      -/+/+yyyyyyyyyyyy:
+   /yyyyys.         :syyyyyyyyyyyyyyyy/`yyyyyyyyyyyyyyyyo-   -yyyyyyyyyyyyyyyyo
+  :yyyyys.        .oyyyyyyyyys+syyyyyy: yyyyyyy+oyyyyyyyyy+` .syyyyyyyyyyyyyyy`
+ `yyyyyy.        -syyyyyyyyo:.:syyyyyy: yyyyyyy/-.+yyyyyyyys- `./oyyyyyyyyyyy:
+ +yyyyy/        :yyyyyyyys:./syyyyyyyy: yyyyyyyyyo-.+yyyyyyyy-    `:+syyyyyyo
+`yyyyys`       -yyyyyyyyo.-syyyyyyyyyy: yyyyyyyyyyy+`/yyyyyyyy.      `./osyy`
+/yyyyy/       `syyyyyyys`-yyyyyyyyyyyy: yyyyyyyyyyyyo`:yyyyyyyo          `--
+oyyyyy.       :yyyyyyyy-`yyyyyyyyyyyyy: yyyyyyyyyyyyy/ oyyyyyyy-
+syyyyy        oyyyyyyys /yyyyyyyyyyyyy: yyyyyyyyyyyyyy`-yyyyyyy+
+yyyyyy        syyyyyyy+ oyyyyyyyyyyyyy: yyyyyyyyyyyyyy..yyyyyyyo
+yyyyyy        syyyyyyyo +yyyyyyyyyyyyy/`yyyyyyyyyyyyyy`.yyyyyyyo
+oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
+/yyyyy/       :yyyyyyyy/ +yyyyyyyyyyyyyyyyyyyyyyyyyyy..yyyyyyyy.
+`yyyyys`       syyyyyyyy:`+yyyyyyyyyyyyyyyyyyyyyyyys-`syyyyyyyo        :+o+:
+ +yyyyy/       .yyyyyyyyy+`:syyyyyyyyyyyyyyyyyyyyy+.-syyyyyyys.       /yyyyy-
+ `yyyyyy-       :yyyyyyyyys:.:syyyyyyyyyyyyyyyys+-.+yyyyyyyyy-       .yyyyyy`
+  :yyyyys.       -syyyyyyyyys/.-:+ssyyyyyysso/:.:oyyyyyyyyys.       .syyyyy:
+   /yyyyys.       `oyyyyyyyyyyys+:----------:/oyyyyyyyyyyy+`       .syyyyy/
+    /yyyyyy-        -oyyyyyyyyyyyyyyyssssyyyyyyyyyyyyyyyo-        -yyyyyy/
+     :yyyyyy+`        -oyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy+-        `+yyyyyy/
+      -syyyyys:         .:oyyyyyyyyyyyyyyyyyyyyyyyso:`        `:syyyyys-
+       `+yyyyyys:`         `-/+syyyyyyyyyyyyyys+:-`         `:syyyyyy+`
+         -oyyyyyys/.            `..--::::--.`             ./syyyyyyo-
+           -oyyyyyyyo/.                                .:oyyyyyyyo-
+             -+yyyyyyyys+:.                        .:+syyyyyyyy+-
+               `:oyyyyyyyyyyo+/:-.``      ``.-:/+oyyyyyyyyyyo:`
+                  `:+yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyys+:`
+                      .:/oyyyyyyyyyyyyyyyyyyyyyyyyyyo+:.
+                           `-:/+oossyyyyyyssoo+/:-`\033[1;m""")
+        with open('/poseidon/AUTHORS', 'r') as f:
+            i = 1
+            for line in f:
+                if i > 4:
+                    print(line.strip())
+                i += 1
+
+    def emptyline(self):
+        pass
+
+    @exception
+    def do_shell(self, s):
+        '''Execute shell commands inside the Poseidon container'''
+        os.system(s)
+
+    @exception
+    def do_exit(self, arg):
+        '''Go back to the main prompt:  EXIT'''
+        return True
+
+    @exception
+    def do_quit(self, arg):
+        '''Go back to the main prompt:  QUIT'''
+        return True
+
+    @exception
+    def do_eof(self, arg):
+        return True
+
+    def precmd(self, line):
+        line = line.lower()
+        if self.file and 'playback' not in line:
+            print(line, file=self.file)
+        if '?' in line:
+            line = line.replace('?', '')
+            line = '? ' + line
+        return line
+
+
+class TaskInterpreter(cmd.Cmd):
+
+    def __init__(self, file=None, prompt='', cmdqueue=[]):
+        cmd.Cmd.__init__(self)
+        self.file = file
+        self.prompt = prompt + '(task) '
+        self.cmdqueue = cmdqueue
+        self.parser = Parser()
+
+    @exception
+    def do_set(self, arg):
+        '''
+        Set the state of things on the network:
+        SET [IP|MAC|ID] [STATE]
+        SET 10.0.0.1 INACTIVE
+        SET ABNORMAL UNKNOWN (TODO - NOT IMPLEMENTED YET)
+        SET 18:EF:02:2D:49:00 KNOWN
+        SET 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293 SHUTDOWN
+        '''
+        # defaults
+        fields = self.parser.default_fields + ['State', 'Next State']
+
+        flags, arg = self.parser.get_flags(arg)
+        fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
+            flags, fields)
+
+        print('Set the following device states:')
+        self.parser.display_results(Commands().change_devices(
+            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
+
+    @exception
+    def do_collect(self, arg):
+        '''
+        Collect on something on the network for a duration:
+        COLLECT [IP|MAC|ID] [DURATION] (TODO - NOT IMPLEMENTED YET)
+        '''
+        # TODO
+        print('Not implemented yet')
 
     @exception
     def do_ignore(self, arg):
@@ -612,17 +607,17 @@ class PoseidonShell(cmd.Cmd):
         IGNORE 10.0.0.1
         IGNORE 18:EF:02:2D:49:00
         IGNORE 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
-        IGNORE INACTIVE DEVICES
+        IGNORE INACTIVE
         '''
         # defaults
-        fields = self.default_fields
+        fields = self.parser.default_fields
 
-        flags, arg = PoseidonShell.get_flags(arg)
-        fields, sort_by, max_width, unique, nonzero = self._check_flags(
+        flags, arg = self.parser.get_flags(arg)
+        fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
         print('Ignored the following devices:')
-        self.display_results(
+        self.parser.display_results(
             Commands().ignore(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
@@ -633,17 +628,17 @@ class PoseidonShell(cmd.Cmd):
         CLEAR 10.0.0.1
         CLEAR 18:EF:02:2D:49:00
         CLEAR 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
-        CLEAR IGNORED DEVICES
+        CLEAR IGNORED
         '''
         # defaults
-        fields = self.default_fields
+        fields = self.parser.default_fields
 
-        flags, arg = PoseidonShell.get_flags(arg)
-        fields, sort_by, max_width, unique, nonzero = self._check_flags(
+        flags, arg = self.parser.get_flags(arg)
+        fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
         print('Cleared the following devices that were being ignored:')
-        self.display_results(
+        self.parser.display_results(
             Commands().clear_ignored(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
@@ -654,14 +649,14 @@ class PoseidonShell(cmd.Cmd):
         REMOVE 10.0.0.1
         REMOVE 18:EF:02:2D:49:00
         REMOVE 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
-        REMOVE IGNORED DEVICES
-        REMOVE INACTIVE DEVICES
+        REMOVE IGNORED
+        REMOVE INACTIVE
         '''
         # defaults
-        fields = self.default_fields
+        fields = self.parser.default_fields
 
-        flags, arg = PoseidonShell.get_flags(arg)
-        fields, sort_by, max_width, unique, nonzero = self._check_flags(
+        flags, arg = self.parser.get_flags(arg)
+        fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
         endpoints = []
@@ -672,8 +667,79 @@ class PoseidonShell(cmd.Cmd):
         else:
             endpoints = Commands().remove(arg)
         print('Removed the following devices:')
-        self.display_results(
+        self.parser.display_results(
             endpoints, fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
+
+    def emptyline(self):
+        pass
+
+    @exception
+    def do_shell(self, s):
+        '''Execute shell commands inside the Poseidon container'''
+        os.system(s)
+
+    @exception
+    def do_help(self, arg):
+        if not arg:
+            print('For help on specific commands: help <command>')
+            print('Commands:')
+            print('  clear\t\tStop ignoring something on the network')
+            print('  collect\tCollect on something on the network for a duration')
+            print('  exit\t\tGo back to the main prompt')
+            print('  ignore\tIgnore something on the network')
+            print('  quit\t\tGo back to the main prompt')
+            print(
+                '  remove\tRemove something on the network until it is seen again')
+            print('  set\t\tSet the state of things on the network')
+        else:
+            cmd.Cmd.do_help(self, arg)
+
+    @exception
+    def do_exit(self, arg):
+        '''Go back to the main prompt:  EXIT'''
+        return True
+
+    @exception
+    def do_quit(self, arg):
+        '''Go back to the main prompt:  QUIT'''
+        return True
+
+    @exception
+    def do_eof(self, arg):
+        return True
+
+    def precmd(self, line):
+        line = line.lower()
+        if self.file and 'playback' not in line:
+            print(line, file=self.file)
+        if '?' in line:
+            line = line.replace('?', '')
+            line = '? ' + line
+        return line
+
+
+class PoseidonShell(cmd.Cmd):
+    intro = """Welcome to the Poseidon shell. Type help or ? to list commands.
+                               _      \033[1;31m__\033[1;m
+    ____   ____   \033[1;31m_____\033[1;m ___   (_)\033[1;31m____/ /\033[1;m____   \033[1;31m____\033[1;m
+   / __ \ / __ \ \033[1;31m/ ___/\033[1;m/ _ \ / /\033[1;31m/ __  /\033[1;m/ __ \ \033[1;31m/ __ \\\033[1;m
+  / /_/ // /_/ /\033[1;31m(__  )\033[1;m/  __// /\033[1;31m/ /_/ /\033[1;m/ /_/ /\033[1;31m/ / / /\033[1;m
+ / .___/ \____/\033[1;31m/____/\033[1;m \___//_/ \033[1;31m\__,_/\033[1;m \____/\033[1;31m/_/ /_/\033[1;m
+/_/"""
+    prompt = '\033[1;32mposeidon$ \033[1;m'
+    file = None
+    commands = [
+        'exit', 'playback', 'quit', 'record', 'show', 'task'
+    ]
+
+    @exception
+    def do_task(self, arg):
+        '''Perform task to things on the network'''
+        if not self.cmdqueue:
+            self.cmdqueue.append(arg)
+        sub_cmd = TaskInterpreter(
+            file=self.file, prompt=self.prompt, cmdqueue=self.cmdqueue)
+        sub_cmd.cmdloop()
 
     @exception
     def do_show(self, arg):
@@ -685,25 +751,9 @@ class PoseidonShell(cmd.Cmd):
         sub_cmd.cmdloop()
 
     @exception
-    def do_change(self, arg):
-        '''
-        Change state of things on the network:
-        CHANGE [IP|MAC|ID] TO [STATE]
-        CHANGE 10.0.0.1 TO INACTIVE
-        CHANGE ABNORMAL DEVICES TO UNKNOWN (TODO - NOT IMPLEMENTED YET)
-        CHANGE 18:EF:02:2D:49:00 TO KNOWN
-        CHANGE 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293 TO SHUTDOWN
-        '''
-        # defaults
-        fields = self.default_fields + ['State', 'Next State']
-
-        flags, arg = PoseidonShell.get_flags(arg)
-        fields, sort_by, max_width, unique, nonzero = self._check_flags(
-            flags, fields)
-
-        print('Changed the following device states:')
-        self.display_results(Commands().change_devices(
-            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
+    def do_eof(self, arg):
+        self.close()
+        return True
 
     @exception
     def do_quit(self, arg):
@@ -732,6 +782,13 @@ class PoseidonShell(cmd.Cmd):
             print('  task\t\tPerform a task on things on the network')
         else:
             cmd.Cmd.do_help(self, arg)
+
+    def complete_cmd(self, text, line, start_index, end_index):
+        if text:
+            return [command for command in commands
+                    if command.startswith(text)]
+        else:
+            return commands
 
     def emptyline(self):
         pass
