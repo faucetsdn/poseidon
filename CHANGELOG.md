@@ -1,3 +1,20 @@
+# v0.5.4 (2019-02-22)
+
+ - Updated version of prometheus, pytest, redis, texttable
+ - Fixed issues where the shell can crash
+ - Changed 'device type' in CLI to 'role'
+ - Added 'quit' and 'exit' aliases in the CLI
+ - Fixed bug where 'unknown' wasn't getting output correctly in the CLI
+ - Fixed multi-word args in the CLI to not use spaces
+ - Better help summary in the CLI
+ - Add OUI ethernet vendor lookups
+ - Add rDNS lookups
+ - Add '?' functionality in the CLI
+ - Updated the default list of fields in the CLI
+ - Split out role and confidence to different fields in the CLI
+ - Changed 'UNDEFINED' to 'NO DATA'
+ - Updated the CLI commands to have a more intuitive flow
+
 # v0.5.3 (2019-02-08)
 
  - Updated version of httmock, redis, pip, pytest
