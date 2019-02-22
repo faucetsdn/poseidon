@@ -501,7 +501,10 @@ class PoseidonShell(cmd.Cmd):
 
     @exception
     def do_authors(self, arg):
-        print("""\033[1;31m                           `-:/+oosyyyyyyyysso+/:-`
+        print("""\033[1;31m                            The Cyber Reboot Team
+                                      &
+                           Members of the Community
+                           `-:/+oosyyyyyyyysso+/:-`
                       .:+oyyyyyyyyyyyyyyyyyyyyyyyyyyo+:.
                   `:+yyyyyyyyyyyyyyyyyssyyyyyyyyyyyyyyyyy+:`
                `:oyyyyyyyyyyo+/:-.`        `.-:/+oyyyyyyyyyyo:`
