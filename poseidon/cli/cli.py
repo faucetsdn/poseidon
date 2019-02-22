@@ -52,6 +52,57 @@ class ShowInterpreter(cmd.Cmd):
         else:
             cmd.Cmd.do_help(self, arg)
 
+    @exception
+    def do_authors(self, arg):
+        print("""\033[1;31m                            The Cyber Reboot Team
+                                      &
+                           Members of the Community
+                           `-:/+oosyyyyyyyysso+/:-`
+                      .:+oyyyyyyyyyyyyyyyyyyyyyyyyyyo+:.
+                  `:+yyyyyyyyyyyyyyyyyssyyyyyyyyyyyyyyyyy+:`
+               `:oyyyyyyyyyyo+/:-.`        `.-:/+oyyyyyyyyyyo:`
+             -+yyyyyyyys+:.                        .:+syyyyyyyy+-
+           -oyyyyyyyo:.                                .:oyyyyyyys-
+         -oyyyyyys/.                                      `/syyyyyys-
+       `+yyyyyys:`              `.--::::::--.`              `-oyyyyyy+`     ``
+      -syyyyys:            `-/osyyyyyyyyyyyyyys+/-`            :syyyyys-  -syys:
+     /yyyyyy+`          ./oyyyyyyyyyyyyyyyyyyyyyyyyo:.          `/yyyyyy/.yyyyys
+    /yyyyyy-         `-oyyyyyyyyyyyyyysoyyyyyyyyyyyyyyo-      -/+/+yyyyyyyyyyyy:
+   /yyyyys.         :syyyyyyyyyyyyyyyy/`yyyyyyyyyyyyyyyyo-   -yyyyyyyyyyyyyyyyo
+  :yyyyys.        .oyyyyyyyyys+syyyyyy: yyyyyyy+oyyyyyyyyy+` .syyyyyyyyyyyyyyy`
+ `yyyyyy.        -syyyyyyyyo:.:syyyyyy: yyyyyyy/-.+yyyyyyyys- `./oyyyyyyyyyyy:
+ +yyyyy/        :yyyyyyyys:./syyyyyyyy: yyyyyyyyyo-.+yyyyyyyy-    `:+syyyyyyo
+`yyyyys`       -yyyyyyyyo.-syyyyyyyyyy: yyyyyyyyyyy+`/yyyyyyyy.      `./osyy`
+/yyyyy/       `syyyyyyys`-yyyyyyyyyyyy: yyyyyyyyyyyyo`:yyyyyyyo          `--
+oyyyyy.       :yyyyyyyy-`yyyyyyyyyyyyy: yyyyyyyyyyyyy/ oyyyyyyy-
+syyyyy        oyyyyyyys /yyyyyyyyyyyyy: yyyyyyyyyyyyyy`-yyyyyyy+
+yyyyyy        syyyyyyy+ oyyyyyyyyyyyyy: yyyyyyyyyyyyyy..yyyyyyyo
+yyyyyy        syyyyyyyo +yyyyyyyyyyyyy/`yyyyyyyyyyyyyy`.yyyyyyyo
+oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
+/yyyyy/       :yyyyyyyy/ +yyyyyyyyyyyyyyyyyyyyyyyyyyy..yyyyyyyy.
+`yyyyys`       syyyyyyyy:`+yyyyyyyyyyyyyyyyyyyyyyyys-`syyyyyyyo        :+o+:
+ +yyyyy/       .yyyyyyyyy+`:syyyyyyyyyyyyyyyyyyyyy+.-syyyyyyys.       /yyyyy-
+ `yyyyyy-       :yyyyyyyyys:.:syyyyyyyyyyyyyyyys+-.+yyyyyyyyy-       .yyyyyy`
+  :yyyyys.       -syyyyyyyyys/.-:+ssyyyyyysso/:.:oyyyyyyyyys.       .syyyyy:
+   /yyyyys.       `oyyyyyyyyyyys+:----------:/oyyyyyyyyyyy+`       .syyyyy/
+    /yyyyyy-        -oyyyyyyyyyyyyyyyssssyyyyyyyyyyyyyyyo-        -yyyyyy/
+     :yyyyyy+`        -oyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy+-        `+yyyyyy/
+      -syyyyys:         .:oyyyyyyyyyyyyyyyyyyyyyyyso:`        `:syyyyys-
+       `+yyyyyys:`         `-/+syyyyyyyyyyyyyys+:-`         `:syyyyyy+`
+         -oyyyyyys/.            `..--::::--.`             ./syyyyyyo-
+           -oyyyyyyyo/.                                .:oyyyyyyyo-
+             -+yyyyyyyys+:.                        .:+syyyyyyyy+-
+               `:oyyyyyyyyyyo+/:-.``      ``.-:/+oyyyyyyyyyyo:`
+                  `:+yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyys+:`
+                      .:/oyyyyyyyyyyyyyyyyyyyyyyyyyyo+:.
+                           `-:/+oossyyyyyyssoo+/:-`\033[1;m""")
+        with open('/poseidon/AUTHORS', 'r') as f:
+            i = 1
+            for line in f:
+                if i > 4:
+                    print(line.strip())
+                i += 1
+
     def do_all(self, args):
         'ALL HELP'
         # TODO
@@ -498,57 +549,6 @@ class PoseidonShell(cmd.Cmd):
         # TODO print more info
         self.display_results(Commands().what_is(
             arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
-
-    @exception
-    def do_authors(self, arg):
-        print("""\033[1;31m                            The Cyber Reboot Team
-                                      &
-                           Members of the Community
-                           `-:/+oosyyyyyyyysso+/:-`
-                      .:+oyyyyyyyyyyyyyyyyyyyyyyyyyyo+:.
-                  `:+yyyyyyyyyyyyyyyyyssyyyyyyyyyyyyyyyyy+:`
-               `:oyyyyyyyyyyo+/:-.`        `.-:/+oyyyyyyyyyyo:`
-             -+yyyyyyyys+:.                        .:+syyyyyyyy+-
-           -oyyyyyyyo:.                                .:oyyyyyyys-
-         -oyyyyyys/.                                      `/syyyyyys-
-       `+yyyyyys:`              `.--::::::--.`              `-oyyyyyy+`     ``
-      -syyyyys:            `-/osyyyyyyyyyyyyyys+/-`            :syyyyys-  -syys:
-     /yyyyyy+`          ./oyyyyyyyyyyyyyyyyyyyyyyyyo:.          `/yyyyyy/.yyyyys
-    /yyyyyy-         `-oyyyyyyyyyyyyyysoyyyyyyyyyyyyyyo-      -/+/+yyyyyyyyyyyy:
-   /yyyyys.         :syyyyyyyyyyyyyyyy/`yyyyyyyyyyyyyyyyo-   -yyyyyyyyyyyyyyyyo
-  :yyyyys.        .oyyyyyyyyys+syyyyyy: yyyyyyy+oyyyyyyyyy+` .syyyyyyyyyyyyyyy`
- `yyyyyy.        -syyyyyyyyo:.:syyyyyy: yyyyyyy/-.+yyyyyyyys- `./oyyyyyyyyyyy:
- +yyyyy/        :yyyyyyyys:./syyyyyyyy: yyyyyyyyyo-.+yyyyyyyy-    `:+syyyyyyo
-`yyyyys`       -yyyyyyyyo.-syyyyyyyyyy: yyyyyyyyyyy+`/yyyyyyyy.      `./osyy`
-/yyyyy/       `syyyyyyys`-yyyyyyyyyyyy: yyyyyyyyyyyyo`:yyyyyyyo          `--
-oyyyyy.       :yyyyyyyy-`yyyyyyyyyyyyy: yyyyyyyyyyyyy/ oyyyyyyy-
-syyyyy        oyyyyyyys /yyyyyyyyyyyyy: yyyyyyyyyyyyyy`-yyyyyyy+
-yyyyyy        syyyyyyy+ oyyyyyyyyyyyyy: yyyyyyyyyyyyyy..yyyyyyyo
-yyyyyy        syyyyyyyo +yyyyyyyyyyyyy/`yyyyyyyyyyyyyy`.yyyyyyyo
-oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
-/yyyyy/       :yyyyyyyy/ +yyyyyyyyyyyyyyyyyyyyyyyyyyy..yyyyyyyy.
-`yyyyys`       syyyyyyyy:`+yyyyyyyyyyyyyyyyyyyyyyyys-`syyyyyyyo        :+o+:
- +yyyyy/       .yyyyyyyyy+`:syyyyyyyyyyyyyyyyyyyyy+.-syyyyyyys.       /yyyyy-
- `yyyyyy-       :yyyyyyyyys:.:syyyyyyyyyyyyyyyys+-.+yyyyyyyyy-       .yyyyyy`
-  :yyyyys.       -syyyyyyyyys/.-:+ssyyyyyysso/:.:oyyyyyyyyys.       .syyyyy:
-   /yyyyys.       `oyyyyyyyyyyys+:----------:/oyyyyyyyyyyy+`       .syyyyy/
-    /yyyyyy-        -oyyyyyyyyyyyyyyyssssyyyyyyyyyyyyyyyo-        -yyyyyy/
-     :yyyyyy+`        -oyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy+-        `+yyyyyy/
-      -syyyyys:         .:oyyyyyyyyyyyyyyyyyyyyyyyso:`        `:syyyyys-
-       `+yyyyyys:`         `-/+syyyyyyyyyyyyyys+:-`         `:syyyyyy+`
-         -oyyyyyys/.            `..--::::--.`             ./syyyyyyo-
-           -oyyyyyyyo/.                                .:oyyyyyyyo-
-             -+yyyyyyyys+:.                        .:+syyyyyyyy+-
-               `:oyyyyyyyyyyo+/:-.``      ``.-:/+oyyyyyyyyyyo:`
-                  `:+yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyys+:`
-                      .:/oyyyyyyyyyyyyyyyyyyyyyyyyyyo+:.
-                           `-:/+oossyyyyyyssoo+/:-`\033[1;m""")
-        with open('/poseidon/AUTHORS', 'r') as f:
-            i = 1
-            for line in f:
-                if i > 4:
-                    print(line.strip())
-                i += 1
 
     @exception
     def do_test(self, arg):
