@@ -567,6 +567,17 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
     def emptyline(self):
         pass
 
+    def completenames(self, text, *ignored):
+        dotext = 'do_'+text
+        names = [a[3:] for a in self.get_names() if a.startswith(dotext)]
+        if 'eof' in names:
+            names.remove('eof')
+        if 'authors' in names:
+            names.remove('authors')
+        if 'shell' in names:
+            names.remove('shell')
+        return names
+
     @exception
     def do_shell(self, s):
         '''Execute shell commands inside the Poseidon container'''
@@ -730,6 +741,15 @@ class TaskInterpreter(cmd.Cmd):
         else:
             cmd.Cmd.do_help(self, arg)
 
+    def completenames(self, text, *ignored):
+        dotext = 'do_'+text
+        names = [a[3:] for a in self.get_names() if a.startswith(dotext)]
+        if 'eof' in names:
+            names.remove('eof')
+        if 'shell' in names:
+            names.remove('shell')
+        return names
+
     @exception
     def do_exit(self, arg):
         '''Go back to the main prompt:  EXIT'''
@@ -846,13 +866,13 @@ class PoseidonShell(cmd.Cmd):
         return line
 
     def completenames(self, text, *ignored):
-        print('does this work')
         dotext = 'do_'+text
-        if text in ['eof']:
-            dotext = 'None'
-        print('the list: {0}.'.format(
-            [a[3:] for a in self.get_names() if a.startswith(dotext)]))
-        return [a[3:] for a in self.get_names() if a.startswith(dotext)]
+        names = [a[3:] for a in self.get_names() if a.startswith(dotext)]
+        if 'eof' in names:
+            names.remove('eof')
+        if 'shell' in names:
+            names.remove('shell')
+        return names
 
     def close(self):
         if self.file:
