@@ -544,8 +544,11 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                       .:/oyyyyyyyyyyyyyyyyyyyyyyyyyyo+:.
                            `-:/+oossyyyyyyssoo+/:-`\033[1;m""")
         with open('/poseidon/AUTHORS', 'r') as f:
+            i = 1
             for line in f:
-                print(line.strip())
+                if i > 4:
+                    print(line.strip())
+                i += 1
 
     @exception
     def do_test(self, arg):
