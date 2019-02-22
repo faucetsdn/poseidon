@@ -42,13 +42,13 @@ class ShowInterpreter(cmd.Cmd):
             print('  all\t\tShow all devices')
             print('  behavior\tShow devices matching a particular behavior')
             print('  exit\t\tGo back to the main prompt')
-            print('  history-of\tFind out the history of something on the network')
+            print('  history_of\tFind out the history of something on the network')
             print('  os\t\tShow devices matching a particular operating system')
             print('  quit\t\tGo back to the main prompt')
             print('  role\t\tShow devices matching a particular role')
             print('  state\t\tShow devices matching a particular state')
-            print('  what-is\tFind out what something is')
-            print('  where-is\tFind out where something is')
+            print('  what_is\tFind out what something is')
+            print('  where_is\tFind out where something is')
         else:
             cmd.Cmd.do_help(self, arg)
 
@@ -106,6 +106,10 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
     def do_all(self, args):
         # TODO
         print('all')
+
+    def do_history_of(self, args):
+        # TODO
+        print('history_of')
 
     @exception
     def do_exit(self, arg):
