@@ -846,6 +846,7 @@ class PoseidonShell(cmd.Cmd):
         return line
 
     def completenames(self, text, *ignored):
+        print('does this work')
         dotext = 'do_'+text
         if text in ['eof']:
             dotext = 'None'
