@@ -141,7 +141,7 @@ class PoseidonShell(cmd.Cmd):
     intro = """Welcome to the Poseidon shell. Type help or ? to list commands.
                                _      \033[1;31m__\033[1;m
     ____   ____   \033[1;31m_____\033[1;m ___   (_)\033[1;31m____/ /\033[1;m____   \033[1;31m____\033[1;m
-   / __ \ / __ \ /\033[1;31m ___/\033[1;m/ _ \ / /\033[1;31m/ __  /\033[1;m/ __ \ \033[1;31m/ __ \\\033[1;m
+   / __ \ / __ \ \033[1;31m/ ___/\033[1;m/ _ \ / /\033[1;31m/ __  /\033[1;m/ __ \ \033[1;31m/ __ \\\033[1;m
   / /_/ // /_/ /\033[1;31m(__  )\033[1;m/  __// /\033[1;31m/ /_/ /\033[1;m/ /_/ /\033[1;31m/ / / /\033[1;m
  / .___/ \____//\033[1;31m____/\033[1;m \___//_/ \033[1;31m\__,_/\033[1;m \____/\033[1;31m/_/ /_/\033[1;m
 /_/"""
@@ -498,6 +498,51 @@ class PoseidonShell(cmd.Cmd):
         # TODO print more info
         self.display_results(Commands().what_is(
             arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
+
+    @exception
+    def do_authors(self, arg):
+        print("""\033[1;31m                           `-:/+oosyyyyyyyysso+/:-`
+                      .:+oyyyyyyyyyyyyyyyyyyyyyyyyyyo+:.
+                  `:+yyyyyyyyyyyyyyyyyssyyyyyyyyyyyyyyyyy+:`
+               `:oyyyyyyyyyyo+/:-.`        `.-:/+oyyyyyyyyyyo:`
+             -+yyyyyyyys+:.                        .:+syyyyyyyy+-
+           -oyyyyyyyo:.                                .:oyyyyyyys-
+         -oyyyyyys/.                                      `/syyyyyys-
+       `+yyyyyys:`              `.--::::::--.`              `-oyyyyyy+`     ``
+      -syyyyys:            `-/osyyyyyyyyyyyyyys+/-`            :syyyyys-  -syys:
+     /yyyyyy+`          ./oyyyyyyyyyyyyyyyyyyyyyyyyo:.          `/yyyyyy/.yyyyys
+    /yyyyyy-         `-oyyyyyyyyyyyyyysoyyyyyyyyyyyyyyo-      -/+/+yyyyyyyyyyyy:
+   /yyyyys.         :syyyyyyyyyyyyyyyy/`yyyyyyyyyyyyyyyyo-   -yyyyyyyyyyyyyyyyo
+  :yyyyys.        .oyyyyyyyyys+syyyyyy: yyyyyyy+oyyyyyyyyy+` .syyyyyyyyyyyyyyy`
+ `yyyyyy.        -syyyyyyyyo:.:syyyyyy: yyyyyyy/-.+yyyyyyyys- `./oyyyyyyyyyyy:
+ +yyyyy/        :yyyyyyyys:./syyyyyyyy: yyyyyyyyyo-.+yyyyyyyy-    `:+syyyyyyo
+`yyyyys`       -yyyyyyyyo.-syyyyyyyyyy: yyyyyyyyyyy+`/yyyyyyyy.      `./osyy`
+/yyyyy/       `syyyyyyys`-yyyyyyyyyyyy: yyyyyyyyyyyyo`:yyyyyyyo          `--
+oyyyyy.       :yyyyyyyy-`yyyyyyyyyyyyy: yyyyyyyyyyyyy/ oyyyyyyy-
+syyyyy        oyyyyyyys /yyyyyyyyyyyyy: yyyyyyyyyyyyyy`-yyyyyyy+
+yyyyyy        syyyyyyy+ oyyyyyyyyyyyyy: yyyyyyyyyyyyyy..yyyyyyyo
+yyyyyy        syyyyyyyo +yyyyyyyyyyyyy/`yyyyyyyyyyyyyy`.yyyyyyyo
+oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
+/yyyyy/       :yyyyyyyy/ +yyyyyyyyyyyyyyyyyyyyyyyyyyy..yyyyyyyy.
+`yyyyys`       syyyyyyyy:`+yyyyyyyyyyyyyyyyyyyyyyyys-`syyyyyyyo        :+o+:
+ +yyyyy/       .yyyyyyyyy+`:syyyyyyyyyyyyyyyyyyyyy+.-syyyyyyys.       /yyyyy-
+ `yyyyyy-       :yyyyyyyyys:.:syyyyyyyyyyyyyyyys+-.+yyyyyyyyy-       .yyyyyy`
+  :yyyyys.       -syyyyyyyyys/.-:+ssyyyyyysso/:.:oyyyyyyyyys.       .syyyyy:
+   /yyyyys.       `oyyyyyyyyyyys+:----------:/oyyyyyyyyyyy+`       .syyyyy/
+    /yyyyyy-        -oyyyyyyyyyyyyyyyssssyyyyyyyyyyyyyyyo-        -yyyyyy/
+     :yyyyyy+`        -oyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy+-        `+yyyyyy/
+      -syyyyys:         .:oyyyyyyyyyyyyyyyyyyyyyyyso:`        `:syyyyys-
+       `+yyyyyys:`         `-/+syyyyyyyyyyyyyys+:-`         `:syyyyyy+`
+         -oyyyyyys/.            `..--::::--.`             ./syyyyyyo-
+           -oyyyyyyyo/.                                .:oyyyyyyyo-
+             -+yyyyyyyys+:.                        .:+syyyyyyyy+-
+               `:oyyyyyyyyyyo+/:-.``      ``.-:/+oyyyyyyyyyyo:`
+                  `:+yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyys+:`
+                      .:/oyyyyyyyyyyyyyyyyyyyyyyyyyyo+:.
+                           `-:/+oossyyyyyyssoo+/:-`\033[1;m""")
+        with open('/poseidon/AUTHORS/', 'r') as f:
+            for line in f:
+                print(line.strip())
 
     @exception
     def do_test(self, arg):
