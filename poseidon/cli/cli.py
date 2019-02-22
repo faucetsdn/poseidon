@@ -540,7 +540,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                   `:+yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyys+:`
                       .:/oyyyyyyyyyyyyyyyyyyyyyyyyyyo+:.
                            `-:/+oossyyyyyyssoo+/:-`\033[1;m""")
-        with open('/poseidon/AUTHORS/', 'r') as f:
+        with open('/poseidon/AUTHORS', 'r') as f:
             for line in f:
                 print(line.strip())
 
