@@ -850,6 +850,8 @@ class PoseidonShell(cmd.Cmd):
         dotext = 'do_'+text
         if text in ['eof']:
             dotext = 'None'
+        print('the list: {0}.'.format(
+            [a[3:] for a in self.get_names() if a.startswith(dotext)]))
         return [a[3:] for a in self.get_names() if a.startswith(dotext)]
 
     def close(self):
