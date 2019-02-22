@@ -31,7 +31,7 @@ class ShowInterpreter(cmd.Cmd):
 
     @exception
     def do_shell(self, s):
-        'Execute shell commands inside the Poseidon container'
+        '''Execute shell commands inside the Poseidon container'''
         os.system(s)
 
     @exception
@@ -104,18 +104,17 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                 i += 1
 
     def do_all(self, args):
-        'ALL HELP'
         # TODO
         print('all')
 
     @exception
     def do_exit(self, arg):
-        'Go back to the main prompt:  EXIT'
+        '''Go back to the main prompt:  EXIT'''
         return True
 
     @exception
     def do_quit(self, arg):
-        'Go back to the main prompt:  QUIT'
+        '''Go back to the main prompt:  QUIT'''
         return True
 
     @exception
@@ -145,7 +144,7 @@ class TaskInterpreter(cmd.Cmd):
 
     @exception
     def do_shell(self, s):
-        'Execute shell commands inside the Poseidon container'
+        '''Execute shell commands inside the Poseidon container'''
         os.system(s)
 
     @exception
@@ -166,12 +165,12 @@ class TaskInterpreter(cmd.Cmd):
 
     @exception
     def do_exit(self, arg):
-        'Go back to the main prompt:  EXIT'
+        '''Go back to the main prompt:  EXIT'''
         return True
 
     @exception
     def do_quit(self, arg):
-        'Go back to the main prompt:  QUIT'
+        '''Go back to the main prompt:  QUIT'''
         return True
 
     @exception
@@ -674,22 +673,12 @@ class PoseidonShell(cmd.Cmd):
 
     @exception
     def do_show(self, arg):
-        '''
-        Show things on the network based on filters:
-        SHOW ACTIVE DEVICES
-        SHOW INACTIVE DEVICES
-        SHOW WINDOWS DEVICES
-        SHOW ABNORMAL DEVICES
-        '''
-        # defaults
-        fields = self.default_fields + ['State', 'Next State']
-
-        flags, arg = PoseidonShell.get_flags(arg)
-        fields, sort_by, max_width, unique, nonzero = self._check_flags(
-            flags, fields)
-
-        self.display_results(Commands().show_devices(
-            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
+        '''Show things on the network based on filters'''
+        if not self.cmdqueue:
+            self.cmdqueue.append(arg)
+        sub_cmd = ShowInterpreter(
+            file=self.file, prompt=self.prompt, cmdqueue=self.cmdqueue)
+        sub_cmd.cmdloop()
 
     @exception
     def do_change(self, arg):
@@ -714,14 +703,14 @@ class PoseidonShell(cmd.Cmd):
 
     @exception
     def do_quit(self, arg):
-        'Stop the shell and exit:  QUIT'
+        '''Stop the shell and exit:  QUIT'''
         print('Thank you for using Poseidon')
         self.close()
         return True
 
     @exception
     def do_exit(self, arg):
-        'Stop the shell and exit:  EXIT'
+        '''Stop the shell and exit:  EXIT'''
         print('Thank you for using Poseidon')
         self.close()
         return True
@@ -745,17 +734,17 @@ class PoseidonShell(cmd.Cmd):
 
     @exception
     def do_shell(self, s):
-        'Execute shell commands inside the Poseidon container'
+        '''Execute shell commands inside the Poseidon container'''
         os.system(s)
 
     @exception
     def do_record(self, arg):
-        'Save future commands to filename: RECORD poseidon.cmd'
+        '''Save future commands to filename: RECORD poseidon.cmd'''
         self.file = open(arg, 'w')
 
     @exception
     def do_playback(self, arg):
-        'Playback commands from a file: PLAYBACK poseidon.cmd'
+        '''Playback commands from a file: PLAYBACK poseidon.cmd'''
         self.close()
         with open(arg) as f:
             self.cmdqueue.extend(f.read().splitlines())
