@@ -54,10 +54,10 @@ class ShowInterpreter(cmd.Cmd):
 
     @exception
     def do_authors(self, arg):
-        print("""\033[1;31m                            The Cyber Reboot Team
+        print("""\033[1;34m                            The Cyber Reboot Team
                                       &
-                           Members of the Community
-                           `-:/+oosyyyyyyyysso+/:-`
+                           Members of the Community\033[1;m
+                           \033[1;31m`-:/+oosyyyyyyyysso+/:-`
                       .:+oyyyyyyyyyyyyyyyyyyyyyyyyyyo+:.
                   `:+yyyyyyyyyyyyyyyyyssyyyyyyyyyyyyyyyyy+:`
                `:oyyyyyyyyyyo+/:-.`        `.-:/+oyyyyyyyyyyo:`
