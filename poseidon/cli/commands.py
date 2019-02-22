@@ -166,6 +166,8 @@ class Commands:
             all_devices = True
         else:
             type_filter = query
+        print('state: {0}, type_filter: {1}, all_devices: {2}'.format(
+            state, type_filter, all_devices))
         return self.sdnc.show_endpoints(state, type_filter, all_devices)
 
     def change_devices(self, args):

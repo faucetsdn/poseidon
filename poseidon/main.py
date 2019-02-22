@@ -345,6 +345,7 @@ class SDNConnect(object):
                         if 'os' in metadata:
                             if type_filter == metadata['os'].lower():
                                 endpoints.append(endpoint)
+        self.logger.info('endpoints: {0}'.format(endpoints))
         return endpoints
 
     def check_endpoints(self, messages=None):

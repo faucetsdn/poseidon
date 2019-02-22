@@ -765,9 +765,6 @@ class PoseidonShell(cmd.Cmd):
     prompt = '\033[1;32mposeidon$ \033[1;m'
     file = None
 
-    def completedefault(self, text, line, begidx, endidx):
-        return ['exit']
-
     @exception
     def do_task(self, arg):
         '''Perform task to things on the network'''
