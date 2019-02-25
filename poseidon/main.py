@@ -306,45 +306,45 @@ class SDNConnect(object):
         connection.close()
         return
 
-    def show_endpoints(self, state, type_filter, all_devices):
+    def show_endpoints(self, arg, show_type):
         endpoints = []
         for endpoint in self.endpoints:
-            if all_devices:
+            if show_type == 'all':
                 endpoints.append(endpoint)
-            elif state:
-                if endpoint.state == state:
+            elif show_type == 'state':
+                if arg == 'active' and endpoint.state != 'inactive':
                     endpoints.append(endpoint)
-            elif type_filter:
-                if type_filter == 'ignored':
-                    if endpoint.ignore:
-                        endpoints.append(endpoint)
-                else:
-                    # filter by device type or behavior
-                    if 'mac_addresses' in endpoint.metadata and endpoint.endpoint_data['mac'] in endpoint.metadata['mac_addresses']:
-                        timestamps = endpoint.metadata['mac_addresses'][endpoint.endpoint_data['mac']]
-                        newest = '0'
-                        for timestamp in timestamps:
-                            if timestamp > newest:
-                                newest = timestamp
-                        if newest is not '0':
-                            if 'labels' in timestamps[newest]:
-                                if type_filter == timestamps[newest]['labels'][0].lower():
-                                    endpoints.append(endpoint)
-                            if 'behavior' in timestamps[newest]:
-                                if type_filter == timestamps[newest]['behavior'].lower():
-                                    endpoints.append(endpoint)
+                elif arg == 'ignored' and endpoint.ignore:
+                    endpoints.append(endpoint)
+                elif endpoint.state == arg:
+                    endpoints.append(endpoint)
+            elif show_type in ['os', 'behavior', 'role']:
+                # filter by device type or behavior
+                if 'mac_addresses' in endpoint.metadata and endpoint.endpoint_data['mac'] in endpoint.metadata['mac_addresses']:
+                    timestamps = endpoint.metadata['mac_addresses'][endpoint.endpoint_data['mac']]
+                    newest = '0'
+                    for timestamp in timestamps:
+                        if timestamp > newest:
+                            newest = timestamp
+                    if newest is not '0':
+                        if 'labels' in timestamps[newest]:
+                            if arg.replace('-', ' ') == timestamps[newest]['labels'][0].lower():
+                                endpoints.append(endpoint)
+                        if 'behavior' in timestamps[newest]:
+                            if arg == timestamps[newest]['behavior'].lower():
+                                endpoints.append(endpoint)
 
-                    # filter by operating system
-                    if 'ipv4_addresses' in endpoint.metadata and endpoint.endpoint_data['ipv4'] in endpoint.metadata['ipv4_addresses']:
-                        metadata = endpoint.metadata['ipv4_addresses'][endpoint.endpoint_data['ipv4']]
-                        if 'os' in metadata:
-                            if type_filter == metadata['os'].lower():
-                                endpoints.append(endpoint)
-                    if 'ipv6_addresses' in endpoint.metadata and endpoint.endpoint_data['ipv6'] in endpoint.metadata['ipv6_addresses']:
-                        metadata = endpoint.metadata['ipv6_addresses'][endpoint.endpoint_data['ipv6']]
-                        if 'os' in metadata:
-                            if type_filter == metadata['os'].lower():
-                                endpoints.append(endpoint)
+                # filter by operating system
+                if 'ipv4_addresses' in endpoint.metadata and endpoint.endpoint_data['ipv4'] in endpoint.metadata['ipv4_addresses']:
+                    metadata = endpoint.metadata['ipv4_addresses'][endpoint.endpoint_data['ipv4']]
+                    if 'os' in metadata:
+                        if arg == metadata['os'].lower():
+                            endpoints.append(endpoint)
+                if 'ipv6_addresses' in endpoint.metadata and endpoint.endpoint_data['ipv6'] in endpoint.metadata['ipv6_addresses']:
+                    metadata = endpoint.metadata['ipv6_addresses'][endpoint.endpoint_data['ipv6']]
+                    if 'os' in metadata:
+                        if arg == metadata['os'].lower():
+                            endpoints.append(endpoint)
         return endpoints
 
     def check_endpoints(self, messages=None):
