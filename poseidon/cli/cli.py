@@ -236,7 +236,7 @@ class Parser():
     def completion(self, text, line, completions):
         mline = line.partition(' ')[2]
         offs = len(mline) - len(text)
-        return [s[offs:] for s in completions if s.lower().startswith(mline.lower())]
+        return [s[offs:offs+1] for s in completions if s.lower().startswith(mline.lower())]
 
     def get_flags(self, text):
         flags = {}
@@ -356,7 +356,7 @@ class ShowInterpreter(cmd.Cmd):
         self.role_completions = [
             'active-directory-controller', 'administrator-server',
             'administrator-workstation', 'business-workstation',
-            'developer-workstation', 'gpu-laptop', 'pki-server', 'unknown'
+            'developer-workstation', 'gpu-laptop', 'pki-server', 'unknown', 'foo bar'
         ]
         self.state_completions = [
             'active', 'inactive', 'known', 'unknown', 'mirroring', 'abnormal',
@@ -851,14 +851,6 @@ class PoseidonShell(cmd.Cmd):
 
     @exception
     def do_record(self, arg):
-        '''Save future commands to filename: RECORD poseidon.cmd'''
-        self.file = open(arg, 'w')
-
-    def complete_record_test(self, text, line, begidx, endidx):
-        return self.parser.completion(text, line, ['foo', 'bar'])
-
-    @exception
-    def do_record_test(self, arg):
         '''Save future commands to filename: RECORD poseidon.cmd'''
         self.file = open(arg, 'w')
 
