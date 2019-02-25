@@ -8,6 +8,7 @@ Created on 14 January 2019
 """
 import cmd
 import os
+import readline
 import time
 
 from natural.date import delta
@@ -16,6 +17,9 @@ from texttable import Texttable
 
 from poseidon.cli.commands import Commands
 from poseidon.helpers.exception_decor import exception
+
+readline.parse_and_bind('tab: complete')
+readline.parse_and_bind('?: complete')
 
 
 class GetData():
@@ -783,7 +787,6 @@ class PoseidonShell(cmd.Cmd):
  / .___/ \____/\033[1;31m/____/\033[1;m \___//_/ \033[1;31m\__,_/\033[1;m \____/\033[1;31m/_/ /_/\033[1;m
 /_/"""
     prompt = '\033[1;32mposeidon$ \033[1;m'
-    completekey = '?'
     file = None
 
     @exception
