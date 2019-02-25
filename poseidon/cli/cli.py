@@ -783,6 +783,7 @@ class PoseidonShell(cmd.Cmd):
  / .___/ \____/\033[1;31m/____/\033[1;m \___//_/ \033[1;31m\__,_/\033[1;m \____/\033[1;31m/_/ /_/\033[1;m
 /_/"""
     prompt = '\033[1;32mposeidon$ \033[1;m'
+    completekey = '?'
     file = None
 
     @exception
