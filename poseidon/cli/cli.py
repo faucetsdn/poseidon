@@ -350,7 +350,6 @@ class Parser():
 
 
 class PoseidonShell(cmd.Cmd):
-    completekey = 'tab: menu-complete '
     parser = Parser()
     intro = """Welcome to the Poseidon shell. Type 'help' to list commands.
 <TAB> or '?' will autocomplete commands.
@@ -764,4 +763,6 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
 
 
 if __name__ == '__main__':  # pragma: no cover
-    PoseidonShell().cmdloop()
+    p_shell = PoseidonShell()
+    p_shell.completekey = 'tab: menu-complete '
+    p_shell.cmdloop()
