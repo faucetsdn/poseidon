@@ -18,8 +18,8 @@ from texttable import Texttable
 from poseidon.cli.commands import Commands
 from poseidon.helpers.exception_decor import exception
 
-readline.parse_and_bind('tab: complete')
-readline.parse_and_bind('?: complete')
+readline.parse_and_bind('tab: menu-complete')
+readline.parse_and_bind('?: menu-complete')
 
 
 class GetData():
@@ -352,7 +352,8 @@ class Parser():
 
 class PoseidonShell(cmd.Cmd):
     parser = Parser()
-    intro = """Welcome to the Poseidon shell. Type help or ? to list commands.
+    intro = """Welcome to the Poseidon shell. Type 'help' to list commands.
+<TAB> or '?' will autocomplete commands.
                                _      \033[1;31m__\033[1;m
     ____   ____   \033[1;31m_____\033[1;m ___   (_)\033[1;31m____/ /\033[1;m____   \033[1;31m____\033[1;m
    / __ \ / __ \ \033[1;31m/ ___/\033[1;m/ _ \ / /\033[1;31m/ __  /\033[1;m/ __ \ \033[1;31m/ __ \\\033[1;m
