@@ -236,7 +236,12 @@ class Parser():
     def completion(self, text, line, completions):
         mline = line.partition(' ')[2]
         offs = len(mline) - len(text)
-        return [s[offs:offs+1] for s in completions if s.lower().startswith(mline.lower())]
+        words = []
+        completes = [s[offs:]
+                     for s in completions if s.lower().startswith(mline.lower())]
+        for complete in completes:
+            words.append(complete.split(' ', 1)[0])
+        return words
 
     def get_flags(self, text):
         flags = {}
