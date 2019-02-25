@@ -706,6 +706,11 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         if action in func_calls:
             if action == 'all':
                 func_calls[action](arg)
+            elif action in ['history', 'what', 'where']:
+                if len(arg.split()) > 1:
+                    func_calls[action](arg)
+                else:
+                    print(action.upper() + ' <ID|IP|MAC>')
         else:
             print("Unknown command, try 'help show'")
 
@@ -745,7 +750,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                 '  set\t\tApply settings for all future commands in this session - TO BE IMPLEMENTED')
             print('  task\t\tPerform a task on things on the network')
             print()
-            print('Optional flags that can be combined to commands:')
+            print('Optional flags that can be combined with commands:')
             print('  --fields')
             print('  --sort_by')
             print('  --max_width')
