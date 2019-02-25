@@ -779,6 +779,7 @@ class TaskInterpreter(cmd.Cmd):
 
 
 class PoseidonShell(cmd.Cmd):
+    self.parser = Parser()
     intro = """Welcome to the Poseidon shell. Type help or ? to list commands.
                                _      \033[1;31m__\033[1;m
     ____   ____   \033[1;31m_____\033[1;m ___   (_)\033[1;31m____/ /\033[1;m____   \033[1;31m____\033[1;m
@@ -850,6 +851,14 @@ class PoseidonShell(cmd.Cmd):
 
     @exception
     def do_record(self, arg):
+        '''Save future commands to filename: RECORD poseidon.cmd'''
+        self.file = open(arg, 'w')
+
+    def complete_record_test(self, text, line, begidx, endidx):
+        return self.parser.completion(text, line, ['foo', 'bar'])
+
+    @exception
+    def do_record_test(self, arg):
         '''Save future commands to filename: RECORD poseidon.cmd'''
         self.file = open(arg, 'w')
 
