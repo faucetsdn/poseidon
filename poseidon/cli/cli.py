@@ -363,9 +363,17 @@ class PoseidonShell(cmd.Cmd):
     file = None
 
     show_completions = [
-        'show role active-directory-controller', 'show role administrator-server',
-        'show role administrator-workstation', 'show role business-workstation',
-        'show role developer-workstation', 'show role gpu-laptop', 'show role pki-server', 'show role unknown', 'show state active', 'show state inactive', 'show state known', 'show state unknown', 'show state mirroring', 'show state abnormal', 'show state shutdown', 'show state reinvestigating', 'show state queued', 'show state ignored', 'show behavior normal', 'show behavior abnormal', 'show os windows', 'show os freebsd', 'show os linux', 'show os mac'
+        'show role active-directory-controller',
+        'show role administrator-server',
+        'show role administrator-workstation',
+        'show role business-workstation',
+        'show role developer-workstation', 'show role gpu-laptop',
+        'show role pki-server', 'show role unknown', 'show state active',
+        'show state inactive', 'show state known', 'show state unknown',
+        'show state mirroring', 'show state abnormal', 'show state shutdown',
+        'show state reinvestigating', 'show state queued',
+        'show state ignored', 'show behavior normal', 'show behavior abnormal',
+        'show os windows', 'show os freebsd', 'show os linux', 'show os mac'
     ]
 
     task_completions = [
@@ -373,6 +381,7 @@ class PoseidonShell(cmd.Cmd):
     ]
 
     def complete_show(self, text, line, begidx, endidx):
+        print(self.show_completions)
         return self.parser.completion(text, line, self.show_completions)
 
     def complete_task(self, text, line, begidx, endidx):
