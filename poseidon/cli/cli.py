@@ -677,7 +677,16 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
     def do_task(self, arg):
         '''Perform task to things on the network'''
         # TODO
-        print(arg)
+        action = arg.split()[0]
+        func_calls = {'clear': self.task_clear,
+                      'collect': self.task_collect,
+                      'ignore': self.task_ignore,
+                      'remove': self.task_remove,
+                      'set': self.task_set}
+        if action in func_calls:
+            func_calls[action](arg)
+        else:
+            print("Unknown command, try 'help task'")
 
     @exception
     def do_show(self, arg):
@@ -764,5 +773,4 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
 
 if __name__ == '__main__':  # pragma: no cover
     p_shell = PoseidonShell()
-    p_shell.completekey = 'tab: menu-complete '
     p_shell.cmdloop()
