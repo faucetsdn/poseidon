@@ -684,7 +684,10 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                       'remove': self.task_remove,
                       'set': self.task_set}
         if action in func_calls:
-            func_calls[action](arg)
+            if len(arg.split()) > 1:
+                func_calls[action](arg)
+            else:
+                print(action.upper() + ' <ID|IP|MAC>')
         else:
             print("Unknown command, try 'help task'")
 
@@ -738,14 +741,20 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
     @exception
     def do_record(self, arg):
         '''Save future commands to filename: RECORD poseidon.cmd'''
-        self.file = open(arg, 'w')
+        if arg:
+            self.file = open(arg, 'w')
+        else:
+            print('PLAYBACK <FILENAME>')
 
     @exception
     def do_playback(self, arg):
         '''Playback commands from a file: PLAYBACK poseidon.cmd'''
-        self.close()
-        with open(arg) as f:
-            self.cmdqueue.extend(f.read().splitlines())
+        if arg:
+            self.close()
+            with open(arg) as f:
+                self.cmdqueue.extend(f.read().splitlines())
+        else:
+            print('PLAYBACK <FILENAME>')
 
     def precmd(self, line):
         line = line.lower()
