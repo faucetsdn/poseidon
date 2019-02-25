@@ -306,7 +306,8 @@ class SDNConnect(object):
         connection.close()
         return
 
-    def show_endpoints(self, arg, show_type):
+    def show_endpoints(self, arg):
+        show_type, arg = arg.split(' ', 1)
         endpoints = []
         for endpoint in self.endpoints:
             if show_type == 'all':
