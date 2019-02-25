@@ -356,7 +356,7 @@ class ShowInterpreter(cmd.Cmd):
         ]
         self.state_completions = [
             'active', 'inactive', 'known', 'unknown', 'mirroring', 'abnormal',
-            'shutdown', 'reinvestigating', 'queued'
+            'shutdown', 'reinvestigating', 'queued', 'ignored'
         ]
         self.behavior_completions = [
             'normal', 'abnormal'
@@ -387,7 +387,7 @@ class ShowInterpreter(cmd.Cmd):
             flags, fields)
 
         self.parser.display_results(Commands().show_devices(
-            'all'), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
+            arg, 'all'), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
     def do_role(self, arg):
@@ -399,7 +399,7 @@ class ShowInterpreter(cmd.Cmd):
             flags, fields)
 
         self.parser.display_results(Commands().show_devices(
-            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
+            arg, 'role'), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
     def do_state(self, arg):
@@ -412,7 +412,7 @@ class ShowInterpreter(cmd.Cmd):
             flags, fields)
 
         self.parser.display_results(Commands().show_devices(
-            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
+            arg, 'state'), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
     def do_behavior(self, arg):
@@ -424,7 +424,7 @@ class ShowInterpreter(cmd.Cmd):
             flags, fields)
 
         self.parser.display_results(Commands().show_devices(
-            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
+            arg, 'behavior'), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
     def do_os(self, arg):
@@ -436,7 +436,7 @@ class ShowInterpreter(cmd.Cmd):
             flags, fields)
 
         self.parser.display_results(Commands().show_devices(
-            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
+            arg, 'os'), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
     def do_what(self, arg):
