@@ -307,12 +307,13 @@ class SDNConnect(object):
         return
 
     def show_endpoints(self, arg):
-        show_type, arg = arg.split(' ', 1)
         endpoints = []
         for endpoint in self.endpoints:
-            if show_type == 'all':
+            if arg == 'all':
                 endpoints.append(endpoint)
-            elif show_type == 'state':
+            else:
+                show_type, arg = arg.split(' ', 1)
+            if show_type == 'state':
                 if arg == 'active' and endpoint.state != 'inactive':
                     endpoints.append(endpoint)
                 elif arg == 'ignored' and endpoint.ignore:
