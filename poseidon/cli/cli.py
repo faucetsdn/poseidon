@@ -393,7 +393,7 @@ class PoseidonShell(cmd.Cmd):
             flags, fields)
 
         self.parser.display_results(Commands().show_devices(
-            arg, 'all'), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
+            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
     def show_role(self, arg):
@@ -405,7 +405,7 @@ class PoseidonShell(cmd.Cmd):
             flags, fields)
 
         self.parser.display_results(Commands().show_devices(
-            arg, 'role'), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
+            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
     def show_state(self, arg):
@@ -418,7 +418,7 @@ class PoseidonShell(cmd.Cmd):
             flags, fields)
 
         self.parser.display_results(Commands().show_devices(
-            arg, 'state'), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
+            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
     def show_behavior(self, arg):
@@ -430,7 +430,7 @@ class PoseidonShell(cmd.Cmd):
             flags, fields)
 
         self.parser.display_results(Commands().show_devices(
-            arg, 'behavior'), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
+            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
     def show_os(self, arg):
@@ -442,7 +442,7 @@ class PoseidonShell(cmd.Cmd):
             flags, fields)
 
         self.parser.display_results(Commands().show_devices(
-            arg, 'os'), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
+            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
     def show_what(self, arg):
