@@ -368,8 +368,15 @@ class PoseidonShell(cmd.Cmd):
         'show role developer-workstation', 'show role gpu-laptop', 'show role pki-server', 'show role unknown', 'show state active', 'show state inactive', 'show state known', 'show state unknown', 'show state mirroring', 'show state abnormal', 'show state shutdown', 'show state reinvestigating', 'show state queued', 'show state ignored', 'show behavior normal', 'show behavior abnormal', 'show os windows', 'show os freebsd', 'show os linux', 'show os mac'
     ]
 
+    task_completions = [
+        'set', 'ignore', 'remove', 'collect', 'clear'
+    ]
+
     def complete_show(self, text, line, begidx, endidx):
         return self.parser.completion(text, line, self.show_completions)
+
+    def complete_task(self, text, line, begidx, endidx):
+        return self.parser.completion(text, line, self.task_completions)
 
     @exception
     def show_all(self, arg):
@@ -490,20 +497,15 @@ class PoseidonShell(cmd.Cmd):
             Commands().where_is(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
-    def help_show(self, arg):
-        if not arg:
-            print('  all\t\tShow all devices')
-            print('  behavior\tShow devices matching a particular behavior')
-            print('  exit\t\tGo back to the main prompt')
-            print('  history\tFind out the history of something on the network')
-            print('  os\t\tShow devices matching a particular operating system')
-            print('  quit\t\tGo back to the main prompt')
-            print('  role\t\tShow devices matching a particular role')
-            print('  state\t\tShow devices matching a particular state')
-            print('  what\tFind out what something is')
-            print('  where\tFind out where something is')
-        else:
-            cmd.Cmd.do_help(self, arg)
+    def help_show(self):
+        print('  all\t\tShow all devices')
+        print('  behavior\tShow devices matching a particular behavior')
+        print('  history\tFind out the history of something on the network')
+        print('  os\t\tShow devices matching a particular operating system')
+        print('  role\t\tShow devices matching a particular role')
+        print('  state\t\tShow devices matching a particular state')
+        print('  what\tFind out what something is')
+        print('  where\tFind out where something is')
 
     @exception
     def show_authors(self, arg):
@@ -555,8 +557,6 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                 if i > 4:
                     print(line.strip())
                 i += 1
-
-# TODO now under task
 
     @exception
     def task_set(self, arg):
@@ -660,18 +660,13 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
             endpoints, fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
-    def help_task(self, arg):
-        if not arg:
-            print('  clear\t\tStop ignoring something on the network')
-            print('  collect\tCollect on something on the network for a duration')
-            print('  exit\t\tGo back to the main prompt')
-            print('  ignore\tIgnore something on the network')
-            print('  quit\t\tGo back to the main prompt')
-            print(
-                '  remove\tRemove something on the network until it is seen again')
-            print('  set\t\tSet the state of things on the network')
-        else:
-            cmd.Cmd.do_help(self, arg)
+    def help_task(self):
+        print('  clear\t\tStop ignoring something on the network')
+        print('  collect\tCollect on something on the network for a duration')
+        print('  ignore\tIgnore something on the network')
+        print(
+            '  remove\tRemove something on the network until it is seen again')
+        print('  set\t\tSet the state of things on the network')
 
     @exception
     def do_task(self, arg):
