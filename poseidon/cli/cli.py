@@ -370,7 +370,7 @@ class PoseidonShell(cmd.Cmd):
         'state unknown', 'state mirroring', 'state abnormal', 'state shutdown',
         'state reinvestigating', 'state queued', 'state ignored',
         'behavior normal', 'behavior abnormal', 'os windows', 'os freebsd',
-        'os linux', 'os mac'
+        'os linux', 'os mac', 'history', 'what', 'where', 'all'
     ]
 
     task_completions = [
@@ -509,8 +509,8 @@ class PoseidonShell(cmd.Cmd):
         print('  os\t\tShow devices matching a particular operating system')
         print('  role\t\tShow devices matching a particular role')
         print('  state\t\tShow devices matching a particular state')
-        print('  what\tFind out what something is')
-        print('  where\tFind out where something is')
+        print('  what\t\tFind out what something is')
+        print('  where\t\tFind out where something is')
 
     @exception
     def show_authors(self, arg):
