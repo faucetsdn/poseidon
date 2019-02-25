@@ -694,8 +694,20 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
     @exception
     def do_show(self, arg):
         '''Show things on the network based on filters'''
-        # TODO
-        print(arg)
+        action = arg.split()[0]
+        func_calls = {'all': self.show_all,
+                      'behavior': self.show_behavior,
+                      'history': self.show_history,
+                      'os': self.show_os,
+                      'role': self.show_role,
+                      'state': self.show_state,
+                      'what': self.show_what,
+                      'where': self.show_where}
+        if action in func_calls:
+            if action == 'all':
+                func_calls[action](arg)
+        else:
+            print("Unknown command, try 'help show'")
 
     @exception
     def do_eof(self, arg):
@@ -722,11 +734,27 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
             print('For help on specific commands: help <command>')
             print('Commands:')
             print('  exit\t\tStop the shell and exit')
+            print('  fields\tList out all available field names - TO BE IMPLEMENTED')
             print('  playback\tPlayback commands from a file')
             print('  quit\t\tStop the shell and exit')
             print('  record\tSave future commands to a file')
+            print(
+                '  shell\t\tExecutes commands on the shell inside the Poseidon container')
             print('  show\t\tShow things on the network based on filters')
+            print(
+                '  set\t\tApply settings for all future commands in this session - TO BE IMPLEMENTED')
             print('  task\t\tPerform a task on things on the network')
+            print()
+            print('Optional flags that can be combined to commands:')
+            print('  --fields')
+            print('  --sort_by')
+            print('  --max_width')
+            print('  --unique - TO BE IMPLEMENTED')
+            print('  --nonzero - TO BE IMPLEMENTED')
+            print('  --output_format - TO BE IMPLEMENTED')
+            print('  --ipv4_only - TO BE IMPLEMENTED')
+            print('  --ipv6_only - TO BE IMPLEMENTED')
+            print('  --ipv4_and_ipv6 - TO BE IMPLEMENTED')
         else:
             cmd.Cmd.do_help(self, arg)
 
