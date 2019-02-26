@@ -713,8 +713,14 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                     func_calls[action](arg)
                 else:
                     print(action.upper() + ' <ID|IP|MAC>')
-            elif arg in self.show_completions:
-                func_calls[action](arg)
+            else:
+                valid = False
+                for show_comm in self.show_completions:
+                    if arg.startswith(show_comm):
+                        valid = True
+                        func_calls[action](arg)
+                if not valid:
+                    print("Unknown command, try 'help show'")
         else:
             print("Unknown command, try 'help show'")
 
