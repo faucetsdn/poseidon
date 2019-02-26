@@ -8,6 +8,7 @@ Created on 14 January 2019
 """
 import cmd
 import os
+import readline
 import time
 
 from natural.date import delta
@@ -16,6 +17,8 @@ from texttable import Texttable
 
 from poseidon.cli.commands import Commands
 from poseidon.helpers.exception_decor import exception
+
+readline.parse_and_bind('?: complete')
 
 
 class GetData():
@@ -232,7 +235,12 @@ class Parser():
     def completion(self, text, line, completions):
         mline = line.partition(' ')[2]
         offs = len(mline) - len(text)
-        return [s[offs:] for s in completions if s.lower().startswith(mline.lower())]
+        words = []
+        completes = [s[offs:]
+                     for s in completions if s.lower().startswith(mline.lower())]
+        for complete in completes:
+            words.append(complete.split(' ', 1)[0])
+        return words
 
     def get_flags(self, text):
         flags = {}
@@ -341,105 +349,98 @@ class Parser():
         return
 
 
-class ShowInterpreter(cmd.Cmd):
+class PoseidonShell(cmd.Cmd):
+    parser = Parser()
+    intro = """Welcome to the Poseidon shell. Type 'help' to list commands.
+<TAB> or '?' will autocomplete commands.
+                               _      \033[1;31m__\033[1;m
+    ____   ____   \033[1;31m_____\033[1;m ___   (_)\033[1;31m____/ /\033[1;m____   \033[1;31m____\033[1;m
+   / __ \ / __ \ \033[1;31m/ ___/\033[1;m/ _ \ / /\033[1;31m/ __  /\033[1;m/ __ \ \033[1;31m/ __ \\\033[1;m
+  / /_/ // /_/ /\033[1;31m(__  )\033[1;m/  __// /\033[1;31m/ /_/ /\033[1;m/ /_/ /\033[1;31m/ / / /\033[1;m
+ / .___/ \____/\033[1;31m/____/\033[1;m \___//_/ \033[1;31m\__,_/\033[1;m \____/\033[1;31m/_/ /_/\033[1;m
+/_/\n"""
+    prompt = '\033[1;32mposeidon$ \033[1;m'
+    file = None
 
-    def __init__(self, file=None, prompt='', cmdqueue=[]):
-        cmd.Cmd.__init__(self)
-        self.file = file
-        self.prompt = prompt + '(show) '
-        self.cmdqueue = cmdqueue
-        self.parser = Parser()
-        self.role_completions = [
-            'active-directory-controller', 'administrator-server',
-            'administrator-workstation', 'business-workstation',
-            'developer-workstation', 'gpu-laptop', 'pki-server', 'unknown'
-        ]
-        self.state_completions = [
-            'active', 'inactive', 'known', 'unknown', 'mirroring', 'abnormal',
-            'shutdown', 'reinvestigating', 'queued', 'ignored'
-        ]
-        self.behavior_completions = [
-            'normal', 'abnormal'
-        ]
-        self.os_completions = [
-            'windows', 'freebsd', 'linux', 'mac'
-        ]
+    show_completions = [
+        'role active-directory-controller', 'role administrator-server',
+        'role administrator-workstation', 'role business-workstation',
+        'role developer-workstation', 'role gpu-laptop', 'role pki-server',
+        'role unknown', 'state active', 'state inactive', 'state known',
+        'state unknown', 'state mirroring', 'state abnormal', 'state shutdown',
+        'state reinvestigating', 'state queued', 'state ignored',
+        'behavior normal', 'behavior abnormal', 'os windows', 'os freebsd',
+        'os linux', 'os mac', 'history', 'what', 'where', 'all'
+    ]
 
-    def complete_role(self, text, line, begidx, endidx):
-        return self.parser.completion(text, line, self.role_completions)
+    task_completions = [
+        'set', 'ignore', 'remove', 'collect', 'clear'
+    ]
 
-    def complete_behavior(self, text, line, begidx, endidx):
-        return self.parser.completion(text, line, self.behavior_completions)
+    def complete_show(self, text, line, begidx, endidx):
+        return self.parser.completion(text, line, self.show_completions)
 
-    def complete_os(self, text, line, begidx, endidx):
-        return self.parser.completion(text, line, self.os_completions)
-
-    def complete_state(self, text, line, begidx, endidx):
-        return self.parser.completion(text, line, self.state_completions)
+    def complete_task(self, text, line, begidx, endidx):
+        return self.parser.completion(text, line, self.task_completions)
 
     @exception
-    def do_all(self, arg):
+    def show_all(self, arg, flags):
         '''Show all things on the network'''
         fields = self.parser.default_fields
 
-        flags, arg = self.parser.get_flags(arg)
         fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
         self.parser.display_results(Commands().show_devices(
-            arg, 'all'), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
+            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
-    def do_role(self, arg):
+    def show_role(self, arg, flags):
         '''Show all things on the network that match a role'''
         fields = self.parser.default_fields
 
-        flags, arg = self.parser.get_flags(arg)
         fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
         self.parser.display_results(Commands().show_devices(
-            arg, 'role'), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
+            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
-    def do_state(self, arg):
+    def show_state(self, arg, flags):
         '''Show all things on the network that match a state'''
         fields = ['Switch', 'Port', 'State',
                   'Ethernet Vendor', 'Mac', 'IPv4', 'IPv6']
 
-        flags, arg = self.parser.get_flags(arg)
         fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
         self.parser.display_results(Commands().show_devices(
-            arg, 'state'), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
+            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
-    def do_behavior(self, arg):
+    def show_behavior(self, arg, flags):
         '''Show all things on the network that match a behavior'''
         fields = self.parser.default_fields + ['Behavior']
 
-        flags, arg = self.parser.get_flags(arg)
         fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
         self.parser.display_results(Commands().show_devices(
-            arg, 'behavior'), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
+            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
-    def do_os(self, arg):
+    def show_os(self, arg, flags):
         '''Show all things on the network that match a behavior'''
         fields = self.parser.default_fields
 
-        flags, arg = self.parser.get_flags(arg)
         fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
         self.parser.display_results(Commands().show_devices(
-            arg, 'os'), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
+            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
-    def do_what(self, arg):
+    def show_what(self, arg, flags):
         '''
         Find out what something is:
         WHAT [IP|MAC|ID]
@@ -450,7 +451,6 @@ class ShowInterpreter(cmd.Cmd):
         # defaults
         fields = self.parser.all_fields
 
-        flags, arg = self.parser.get_flags(arg)
         fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
@@ -458,7 +458,7 @@ class ShowInterpreter(cmd.Cmd):
             arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
-    def do_history(self, arg):
+    def show_history(self, arg, flags):
         '''
         Find out the history of something on the network:
         HISTORY [IP|MAC|ID]
@@ -469,7 +469,6 @@ class ShowInterpreter(cmd.Cmd):
         # defaults
         fields = ['Previous States']
 
-        flags, arg = self.parser.get_flags(arg)
         fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
@@ -477,7 +476,7 @@ class ShowInterpreter(cmd.Cmd):
             Commands().history_of(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
-    def do_where(self, arg):
+    def show_where(self, arg, flags):
         '''
         Find out where something is:
         WHERE [IP|MAC|ID]
@@ -488,7 +487,6 @@ class ShowInterpreter(cmd.Cmd):
         # defaults
         fields = ['Switch', 'Port', 'VLAN', 'IPv4', 'IPv6', 'MAC Address']
 
-        flags, arg = self.parser.get_flags(arg)
         fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
@@ -496,25 +494,18 @@ class ShowInterpreter(cmd.Cmd):
             Commands().where_is(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
-    def do_help(self, arg):
-        if not arg:
-            print('For help on specific commands: help <command>')
-            print('Commands:')
-            print('  all\t\tShow all devices')
-            print('  behavior\tShow devices matching a particular behavior')
-            print('  exit\t\tGo back to the main prompt')
-            print('  history\tFind out the history of something on the network')
-            print('  os\t\tShow devices matching a particular operating system')
-            print('  quit\t\tGo back to the main prompt')
-            print('  role\t\tShow devices matching a particular role')
-            print('  state\t\tShow devices matching a particular state')
-            print('  what\tFind out what something is')
-            print('  where\tFind out where something is')
-        else:
-            cmd.Cmd.do_help(self, arg)
+    def help_show(self):
+        print('  all\t\tShow all devices')
+        print('  behavior\tShow devices matching a particular behavior')
+        print('  history\tFind out the history of something on the network')
+        print('  os\t\tShow devices matching a particular operating system')
+        print('  role\t\tShow devices matching a particular role')
+        print('  state\t\tShow devices matching a particular state')
+        print('  what\t\tFind out what something is')
+        print('  where\t\tFind out where something is')
 
     @exception
-    def do_authors(self, arg):
+    def show_authors(self, arg, flags):
         print("""\033[1;34m                            The Cyber Reboot Team
                                       &
                            Members of the Community\033[1;m
@@ -564,60 +555,8 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                     print(line.strip())
                 i += 1
 
-    def emptyline(self):
-        pass
-
-    def completenames(self, text, *ignored):
-        dotext = 'do_'+text
-        names = [a[3:] for a in self.get_names() if a.startswith(dotext)]
-        if 'eof' in names:
-            names.remove('eof')
-        if 'authors' in names:
-            names.remove('authors')
-        if 'shell' in names:
-            names.remove('shell')
-        return names
-
     @exception
-    def do_shell(self, s):
-        '''Execute shell commands inside the Poseidon container'''
-        os.system(s)
-
-    @exception
-    def do_exit(self, arg):
-        '''Go back to the main prompt:  EXIT'''
-        return True
-
-    @exception
-    def do_quit(self, arg):
-        '''Go back to the main prompt:  QUIT'''
-        return True
-
-    @exception
-    def do_eof(self, arg):
-        return True
-
-    def precmd(self, line):
-        line = line.lower()
-        if self.file and 'playback' not in line:
-            print(line, file=self.file)
-        if '?' in line:
-            line = line.replace('?', '')
-            line = '? ' + line
-        return line
-
-
-class TaskInterpreter(cmd.Cmd):
-
-    def __init__(self, file=None, prompt='', cmdqueue=[]):
-        cmd.Cmd.__init__(self)
-        self.file = file
-        self.prompt = prompt + '(task) '
-        self.cmdqueue = cmdqueue
-        self.parser = Parser()
-
-    @exception
-    def do_set(self, arg):
+    def task_set(self, arg, flags):
         '''
         Set the state of things on the network:
         SET [IP|MAC|ID] [STATE]
@@ -629,7 +568,6 @@ class TaskInterpreter(cmd.Cmd):
         # defaults
         fields = self.parser.default_fields + ['State', 'Next State']
 
-        flags, arg = self.parser.get_flags(arg)
         fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
@@ -638,7 +576,7 @@ class TaskInterpreter(cmd.Cmd):
             arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
-    def do_collect(self, arg):
+    def task_collect(self, arg, flags):
         '''
         Collect on something on the network for a duration:
         COLLECT [IP|MAC|ID] [DURATION] (TODO - NOT IMPLEMENTED YET)
@@ -647,7 +585,7 @@ class TaskInterpreter(cmd.Cmd):
         print('Not implemented yet')
 
     @exception
-    def do_ignore(self, arg):
+    def task_ignore(self, arg, flags):
         '''
         Ignore something on the network:
         IGNORE [IP|MAC|ID]
@@ -659,7 +597,6 @@ class TaskInterpreter(cmd.Cmd):
         # defaults
         fields = self.parser.default_fields
 
-        flags, arg = self.parser.get_flags(arg)
         fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
@@ -668,7 +605,7 @@ class TaskInterpreter(cmd.Cmd):
             Commands().ignore(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
-    def do_clear(self, arg):
+    def task_clear(self, arg, flags):
         '''
         Stop ignoring something on the network:
         CLEAR [IP|MAC|ID]
@@ -680,7 +617,6 @@ class TaskInterpreter(cmd.Cmd):
         # defaults
         fields = self.parser.default_fields
 
-        flags, arg = self.parser.get_flags(arg)
         fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
@@ -689,7 +625,7 @@ class TaskInterpreter(cmd.Cmd):
             Commands().clear_ignored(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
-    def do_remove(self, arg):
+    def task_remove(self, arg, flags):
         '''
         Remove something on the network until it's seen again:
         REMOVE [IP|MAC|ID]
@@ -702,7 +638,6 @@ class TaskInterpreter(cmd.Cmd):
         # defaults
         fields = self.parser.default_fields
 
-        flags, arg = self.parser.get_flags(arg)
         fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
@@ -717,91 +652,66 @@ class TaskInterpreter(cmd.Cmd):
         self.parser.display_results(
             endpoints, fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
-    def emptyline(self):
-        pass
-
     @exception
-    def do_shell(self, s):
-        '''Execute shell commands inside the Poseidon container'''
-        os.system(s)
-
-    @exception
-    def do_help(self, arg):
-        if not arg:
-            print('For help on specific commands: help <command>')
-            print('Commands:')
-            print('  clear\t\tStop ignoring something on the network')
-            print('  collect\tCollect on something on the network for a duration')
-            print('  exit\t\tGo back to the main prompt')
-            print('  ignore\tIgnore something on the network')
-            print('  quit\t\tGo back to the main prompt')
-            print(
-                '  remove\tRemove something on the network until it is seen again')
-            print('  set\t\tSet the state of things on the network')
-        else:
-            cmd.Cmd.do_help(self, arg)
-
-    def completenames(self, text, *ignored):
-        dotext = 'do_'+text
-        names = [a[3:] for a in self.get_names() if a.startswith(dotext)]
-        if 'eof' in names:
-            names.remove('eof')
-        if 'shell' in names:
-            names.remove('shell')
-        return names
-
-    @exception
-    def do_exit(self, arg):
-        '''Go back to the main prompt:  EXIT'''
-        return True
-
-    @exception
-    def do_quit(self, arg):
-        '''Go back to the main prompt:  QUIT'''
-        return True
-
-    @exception
-    def do_eof(self, arg):
-        return True
-
-    def precmd(self, line):
-        line = line.lower()
-        if self.file and 'playback' not in line:
-            print(line, file=self.file)
-        if '?' in line:
-            line = line.replace('?', '')
-            line = '? ' + line
-        return line
-
-
-class PoseidonShell(cmd.Cmd):
-    intro = """Welcome to the Poseidon shell. Type help or ? to list commands.
-                               _      \033[1;31m__\033[1;m
-    ____   ____   \033[1;31m_____\033[1;m ___   (_)\033[1;31m____/ /\033[1;m____   \033[1;31m____\033[1;m
-   / __ \ / __ \ \033[1;31m/ ___/\033[1;m/ _ \ / /\033[1;31m/ __  /\033[1;m/ __ \ \033[1;31m/ __ \\\033[1;m
-  / /_/ // /_/ /\033[1;31m(__  )\033[1;m/  __// /\033[1;31m/ /_/ /\033[1;m/ /_/ /\033[1;31m/ / / /\033[1;m
- / .___/ \____/\033[1;31m/____/\033[1;m \___//_/ \033[1;31m\__,_/\033[1;m \____/\033[1;31m/_/ /_/\033[1;m
-/_/"""
-    prompt = '\033[1;32mposeidon$ \033[1;m'
-    file = None
+    def help_task(self):
+        print('  clear\t\tStop ignoring something on the network')
+        print('  collect\tCollect on something on the network for a duration')
+        print('  ignore\tIgnore something on the network')
+        print(
+            '  remove\tRemove something on the network until it is seen again')
+        print('  set\t\tSet the state of things on the network')
 
     @exception
     def do_task(self, arg):
         '''Perform task to things on the network'''
-        if not self.cmdqueue:
-            self.cmdqueue.append(arg)
-        sub_cmd = TaskInterpreter(
-            file=self.file, prompt=self.prompt, cmdqueue=self.cmdqueue)
-        sub_cmd.cmdloop()
+        # TODO
+        flags, arg = self.parser.get_flags(arg)
+        action = arg.split()[0]
+        func_calls = {'clear': self.task_clear,
+                      'collect': self.task_collect,
+                      'ignore': self.task_ignore,
+                      'remove': self.task_remove,
+                      'set': self.task_set}
+        if action in func_calls:
+            if len(arg.split()) > 1:
+                func_calls[action](arg, flags)
+            else:
+                print(action.upper() + ' <ID|IP|MAC>')
+        else:
+            print("Unknown command, try 'help task'")
 
     @exception
     def do_show(self, arg):
         '''Show things on the network based on filters'''
-        if not self.cmdqueue:
-            self.cmdqueue.append(arg)
-        sub_cmd = ShowInterpreter(
-            file=self.file, prompt=self.prompt, cmdqueue=self.cmdqueue)
-        sub_cmd.cmdloop()
+        flags, arg = self.parser.get_flags(arg)
+        action = arg.split()[0]
+        func_calls = {'all': self.show_all,
+                      'authors': self.show_authors,
+                      'behavior': self.show_behavior,
+                      'history': self.show_history,
+                      'os': self.show_os,
+                      'role': self.show_role,
+                      'state': self.show_state,
+                      'what': self.show_what,
+                      'where': self.show_where}
+        if action in func_calls:
+            if action in ['all', 'authors']:
+                func_calls[action](arg, flags)
+            elif action in ['history', 'what', 'where']:
+                if len(arg.split()) > 1:
+                    func_calls[action](arg, flags)
+                else:
+                    print(action.upper() + ' <ID|IP|MAC>')
+            else:
+                valid = False
+                for show_comm in self.show_completions:
+                    if arg.startswith(show_comm):
+                        valid = True
+                        func_calls[action](arg, flags)
+                if not valid:
+                    print("Unknown command, try 'help show'")
+        else:
+            print("Unknown command, try 'help show'")
 
     @exception
     def do_eof(self, arg):
@@ -828,11 +738,27 @@ class PoseidonShell(cmd.Cmd):
             print('For help on specific commands: help <command>')
             print('Commands:')
             print('  exit\t\tStop the shell and exit')
+            print('  fields\tList out all available field names - TO BE IMPLEMENTED')
             print('  playback\tPlayback commands from a file')
             print('  quit\t\tStop the shell and exit')
             print('  record\tSave future commands to a file')
+            print(
+                '  shell\t\tExecutes commands on the shell inside the Poseidon container')
             print('  show\t\tShow things on the network based on filters')
+            print(
+                '  set\t\tApply settings for all future commands in this session - TO BE IMPLEMENTED')
             print('  task\t\tPerform a task on things on the network')
+            print()
+            print('Optional flags that can be combined with commands:')
+            print('  --fields')
+            print('  --sort_by')
+            print('  --max_width')
+            print('  --unique - TO BE IMPLEMENTED')
+            print('  --nonzero - TO BE IMPLEMENTED')
+            print('  --output_format - TO BE IMPLEMENTED')
+            print('  --ipv4_only - TO BE IMPLEMENTED')
+            print('  --ipv6_only - TO BE IMPLEMENTED')
+            print('  --ipv4_and_ipv6 - TO BE IMPLEMENTED')
         else:
             cmd.Cmd.do_help(self, arg)
 
@@ -847,14 +773,20 @@ class PoseidonShell(cmd.Cmd):
     @exception
     def do_record(self, arg):
         '''Save future commands to filename: RECORD poseidon.cmd'''
-        self.file = open(arg, 'w')
+        if arg:
+            self.file = open(arg, 'w')
+        else:
+            print('PLAYBACK <FILENAME>')
 
     @exception
     def do_playback(self, arg):
         '''Playback commands from a file: PLAYBACK poseidon.cmd'''
-        self.close()
-        with open(arg) as f:
-            self.cmdqueue.extend(f.read().splitlines())
+        if arg:
+            self.close()
+            with open(arg) as f:
+                self.cmdqueue.extend(f.read().splitlines())
+        else:
+            print('PLAYBACK <FILENAME>')
 
     def precmd(self, line):
         line = line.lower()
@@ -881,4 +813,5 @@ class PoseidonShell(cmd.Cmd):
 
 
 if __name__ == '__main__':  # pragma: no cover
-    PoseidonShell().cmdloop()
+    p_shell = PoseidonShell()
+    p_shell.cmdloop()

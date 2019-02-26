@@ -151,12 +151,12 @@ class Commands:
             'poseidon.action.remove', json.dumps(endpoint_names))
         return endpoints
 
-    def show_devices(self, arg, show_type):
+    def show_devices(self, arg):
         '''
         show all devices that are of a specific filter. i.e. windows,
         developer workstation, abnormal, mirroring, etc.
         '''
-        return self.sdnc.show_endpoints(arg, show_type)
+        return self.sdnc.show_endpoints(arg)
 
     def change_devices(self, args):
         ''' change state of a specific thing '''
