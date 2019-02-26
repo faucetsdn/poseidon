@@ -309,11 +309,12 @@ class SDNConnect(object):
     def show_endpoints(self, arg):
         print('arg show_endpoints: {0}'.format(arg))
         endpoints = []
-        for endpoint in self.endpoints:
-            if arg == 'all':
+        if arg == 'all':
+            for endpoint in self.endpoints:
                 endpoints.append(endpoint)
-            else:
-                show_type, arg = arg.split(' ', 1)
+        else:
+            show_type, arg = arg.split(' ', 1)
+            for endpoint in self.endpoints:
                 if show_type == 'state':
                     if arg == 'active' and endpoint.state != 'inactive':
                         endpoints.append(endpoint)
