@@ -384,11 +384,10 @@ class PoseidonShell(cmd.Cmd):
         return self.parser.completion(text, line, self.task_completions)
 
     @exception
-    def show_all(self, arg):
+    def show_all(self, arg, flags):
         '''Show all things on the network'''
         fields = self.parser.default_fields
 
-        flags, arg = self.parser.get_flags(arg)
         fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
@@ -396,26 +395,22 @@ class PoseidonShell(cmd.Cmd):
             arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
-    def show_role(self, arg):
+    def show_role(self, arg, flags):
         '''Show all things on the network that match a role'''
         fields = self.parser.default_fields
 
-        print('args: {0}'.format(arg))
-        flags, arg = self.parser.get_flags(arg)
         fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
-        print('args after: {0}'.format(arg))
 
         self.parser.display_results(Commands().show_devices(
             arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
-    def show_state(self, arg):
+    def show_state(self, arg, flags):
         '''Show all things on the network that match a state'''
         fields = ['Switch', 'Port', 'State',
                   'Ethernet Vendor', 'Mac', 'IPv4', 'IPv6']
 
-        flags, arg = self.parser.get_flags(arg)
         fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
@@ -423,11 +418,10 @@ class PoseidonShell(cmd.Cmd):
             arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
-    def show_behavior(self, arg):
+    def show_behavior(self, arg, flags):
         '''Show all things on the network that match a behavior'''
         fields = self.parser.default_fields + ['Behavior']
 
-        flags, arg = self.parser.get_flags(arg)
         fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
@@ -435,11 +429,10 @@ class PoseidonShell(cmd.Cmd):
             arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
-    def show_os(self, arg):
+    def show_os(self, arg, flags):
         '''Show all things on the network that match a behavior'''
         fields = self.parser.default_fields
 
-        flags, arg = self.parser.get_flags(arg)
         fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
@@ -447,7 +440,7 @@ class PoseidonShell(cmd.Cmd):
             arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
-    def show_what(self, arg):
+    def show_what(self, arg, flags):
         '''
         Find out what something is:
         WHAT [IP|MAC|ID]
@@ -458,7 +451,6 @@ class PoseidonShell(cmd.Cmd):
         # defaults
         fields = self.parser.all_fields
 
-        flags, arg = self.parser.get_flags(arg)
         fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
@@ -466,7 +458,7 @@ class PoseidonShell(cmd.Cmd):
             arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
-    def show_history(self, arg):
+    def show_history(self, arg, flags):
         '''
         Find out the history of something on the network:
         HISTORY [IP|MAC|ID]
@@ -477,7 +469,6 @@ class PoseidonShell(cmd.Cmd):
         # defaults
         fields = ['Previous States']
 
-        flags, arg = self.parser.get_flags(arg)
         fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
@@ -485,7 +476,7 @@ class PoseidonShell(cmd.Cmd):
             Commands().history_of(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
-    def show_where(self, arg):
+    def show_where(self, arg, flags):
         '''
         Find out where something is:
         WHERE [IP|MAC|ID]
@@ -496,7 +487,6 @@ class PoseidonShell(cmd.Cmd):
         # defaults
         fields = ['Switch', 'Port', 'VLAN', 'IPv4', 'IPv6', 'MAC Address']
 
-        flags, arg = self.parser.get_flags(arg)
         fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
@@ -515,7 +505,7 @@ class PoseidonShell(cmd.Cmd):
         print('  where\t\tFind out where something is')
 
     @exception
-    def show_authors(self, arg):
+    def show_authors(self, arg, flags):
         print("""\033[1;34m                            The Cyber Reboot Team
                                       &
                            Members of the Community\033[1;m
@@ -566,7 +556,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                 i += 1
 
     @exception
-    def task_set(self, arg):
+    def task_set(self, arg, flags):
         '''
         Set the state of things on the network:
         SET [IP|MAC|ID] [STATE]
@@ -578,7 +568,6 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         # defaults
         fields = self.parser.default_fields + ['State', 'Next State']
 
-        flags, arg = self.parser.get_flags(arg)
         fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
@@ -587,7 +576,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
             arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
-    def task_collect(self, arg):
+    def task_collect(self, arg, flags):
         '''
         Collect on something on the network for a duration:
         COLLECT [IP|MAC|ID] [DURATION] (TODO - NOT IMPLEMENTED YET)
@@ -596,7 +585,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         print('Not implemented yet')
 
     @exception
-    def task_ignore(self, arg):
+    def task_ignore(self, arg, flags):
         '''
         Ignore something on the network:
         IGNORE [IP|MAC|ID]
@@ -608,7 +597,6 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         # defaults
         fields = self.parser.default_fields
 
-        flags, arg = self.parser.get_flags(arg)
         fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
@@ -617,7 +605,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
             Commands().ignore(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
-    def task_clear(self, arg):
+    def task_clear(self, arg, flags):
         '''
         Stop ignoring something on the network:
         CLEAR [IP|MAC|ID]
@@ -629,7 +617,6 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         # defaults
         fields = self.parser.default_fields
 
-        flags, arg = self.parser.get_flags(arg)
         fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
@@ -638,7 +625,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
             Commands().clear_ignored(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
 
     @exception
-    def task_remove(self, arg):
+    def task_remove(self, arg, flags):
         '''
         Remove something on the network until it's seen again:
         REMOVE [IP|MAC|ID]
@@ -651,7 +638,6 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         # defaults
         fields = self.parser.default_fields
 
-        flags, arg = self.parser.get_flags(arg)
         fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
 
@@ -679,6 +665,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
     def do_task(self, arg):
         '''Perform task to things on the network'''
         # TODO
+        flags, arg = self.parser.get_flags(arg)
         action = arg.split()[0]
         func_calls = {'clear': self.task_clear,
                       'collect': self.task_collect,
@@ -687,7 +674,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                       'set': self.task_set}
         if action in func_calls:
             if len(arg.split()) > 1:
-                func_calls[action](arg)
+                func_calls[action](arg, flags)
             else:
                 print(action.upper() + ' <ID|IP|MAC>')
         else:
@@ -696,8 +683,10 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
     @exception
     def do_show(self, arg):
         '''Show things on the network based on filters'''
+        flags, arg = self.parser.get_flags(arg)
         action = arg.split()[0]
         func_calls = {'all': self.show_all,
+                      'authors': self.show_authors,
                       'behavior': self.show_behavior,
                       'history': self.show_history,
                       'os': self.show_os,
@@ -706,11 +695,11 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                       'what': self.show_what,
                       'where': self.show_where}
         if action in func_calls:
-            if action == 'all':
-                func_calls[action](arg)
+            if action in ['all', 'authors']:
+                func_calls[action](arg, flags)
             elif action in ['history', 'what', 'where']:
                 if len(arg.split()) > 1:
-                    func_calls[action](arg)
+                    func_calls[action](arg, flags)
                 else:
                     print(action.upper() + ' <ID|IP|MAC>')
             else:
@@ -718,7 +707,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                 for show_comm in self.show_completions:
                     if arg.startswith(show_comm):
                         valid = True
-                        func_calls[action](arg)
+                        func_calls[action](arg, flags)
                 if not valid:
                     print("Unknown command, try 'help show'")
         else:
