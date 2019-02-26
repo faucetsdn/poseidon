@@ -400,9 +400,11 @@ class PoseidonShell(cmd.Cmd):
         '''Show all things on the network that match a role'''
         fields = self.parser.default_fields
 
+        print('args: {0}'.format(arg))
         flags, arg = self.parser.get_flags(arg)
         fields, sort_by, max_width, unique, nonzero = self.parser._check_flags(
             flags, fields)
+        print('args after: {0}'.format(arg))
 
         self.parser.display_results(Commands().show_devices(
             arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero)
