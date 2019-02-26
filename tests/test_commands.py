@@ -11,4 +11,4 @@ def test_commands():
     commands.what_is('foo')
     commands.history_of('foo')
     commands.where_is('foo')
-    commands.show_devices('foo')
+    commands.show_devices('foo', 'bar')
