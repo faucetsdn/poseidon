@@ -166,16 +166,20 @@ class Nodes():
 class NetworkFull(object):
 
     @staticmethod
+    def get_fields():
+        return {'id': 'NO DATA', 'mac': 0, 'id': 'NO DATA', 'ipv4': 0,
+                'ipv6': 0, 'ipv4_subnet': 'NO DATA',
+                'ipv6_subnet': 'NO DATA', 'segment': 0, 'port': 0,
+                'tenant': 0, 'active': 0, 'next_state': 'NO DATA',
+                'state': 'NO DATA', 'prev_states': 'NO DATA',
+                'role': 'NO DATA', 'role_confidence': 0, 'behavior': 0,
+                'ipv4_os': 'NO DATA', 'ipv6_os': 'NO DATA',
+                'source': 'NO DATA', 'ipv4_rdns': 'NO DATA',
+                'ipv6_rdns': 'NO DATA', 'ether_vendor': 'NO DATA'}
+
+    @staticmethod
     def get_dataset():
-        fields = {'id': 'NO DATA', 'mac': 0, 'id': 'NO DATA', 'ipv4': 0, 'ipv6': 0,
-                  'ipv4_subnet': 'NO DATA', 'ipv6_subnet': 'NO DATA',
-                  'segment': 0, 'port': 0, 'tenant': 0, 'active': 0,
-                  'next_state': 'NO DATA', 'state': 'NO DATA',
-                  'prev_states': 'NO DATA', 'role': 'NO DATA',
-                  'role_confidence': 0, 'behavior': 0, 'ipv4_os': 'NO DATA',
-                  'ipv6_os': 'NO DATA', 'source': 'NO DATA',
-                  'ipv4_rdns': 'NO DATA', 'ipv6_rdns': 'NO DATA',
-                  'ether_vendor': 'NO DATA'}
+        fields = NetworkFull.get_fields()
         n = Nodes(fields)
         n.build_nodes()
         return n.nodes
@@ -193,21 +197,42 @@ class NetworkFull(object):
 class Network(object):
 
     @staticmethod
+    def get_fields():
+        return {'id': 'NO DATA', 'mac': 0, 'ipv4': 0, 'ipv6': 0,
+                'ipv4_subnet': 'NO DATA', 'ipv6_subnet': 'NO DATA',
+                'tenant': 0, 'segment': 0, 'port': 0,
+                'state': 'NO DATA', 'ignored': 'False',
+                'first_seen': 'NO DATA', 'last_seen': 'NO DATA',
+                'role': 'NO DATA', 'role_confidence': 0, 'behavior': 0,
+                'ipv4_os': 'NO DATA', 'ipv6_os': 'NO DATA',
+                'ipv4_rdns': 'NO DATA', 'ipv6_rdns': 'NO DATA',
+                'ether_vendor': 'NO DATA'}
+
+    @staticmethod
+    def field_mapping():
+        return {'id': 'ID', 'mac': 'MAC Address', 'segment': 'Switch',
+                'port': 'Port', 'tenant': 'VLAN', 'ipv4': 'IPv4',
+                'ipv4_subnet': 'IPv4 Subnet', 'ipv6_subnet': 'IPv6 Subnet',
+                'ipv6': 'IPv6', 'ignored': 'Ignored', 'state': 'State',
+                'first_seen': 'First Seen', 'last_seen': 'Last Seen',
+                'ipv4_os': 'IPv4 OS', 'ipv6_os': 'IPv6 OS', 'role': 'Role',
+                'role_confidence': 'Role Confidence', 'behavior': 'Behavior',
+                'ipv4_rdns': 'IPv4 rDNS', 'ipv6_rdns': 'IPv6 rDNS',
+                'ether_vendor': 'Ethernet Vendor'}
+
+    @staticmethod
     def get_dataset():
-        fields = {'id': 'NO DATA', 'mac': 0, 'ipv4': 0, 'ipv6': 0, 'ipv4_subnet': 'NO DATA',
-                  'ipv6_subnet': 'NO DATA', 'tenant': 0, 'active': 0,
-                  'state': 'NO DATA', 'role': 'NO DATA',
-                  'role_confidence': 0, 'behavior': 0, 'ipv4_os': 'NO DATA',
-                  'ipv6_os': 'NO DATA', 'source': 'NO DATA',
-                  'ipv4_rdns': 'NO DATA', 'ipv6_rdns': 'NO DATA',
-                  'ether_vendor': 'NO DATA'}
+        fields = Network.get_fields()
         n = Nodes(fields)
         n.build_nodes()
         return n.nodes
 
     @staticmethod
     def get_configuration():
-        configuration = {}
+        configuration = {'fields': []}
+        for field in Network.get_fields():
+            configuration['fields'].append(
+                {'path': [field], 'displayName': Network.field_mapping()[field], 'groupable': 'true'})
         return configuration
 
     def on_get(self, req, resp):
