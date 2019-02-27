@@ -664,7 +664,6 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
     @exception
     def do_task(self, arg):
         '''Perform task to things on the network'''
-        # TODO
         flags, arg = self.parser.get_flags(arg)
         if arg:
             action = arg.split()[0]
