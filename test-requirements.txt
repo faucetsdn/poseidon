@@ -3,7 +3,7 @@ mock==2.0.0
 natural==0.2.0
 pika==0.13.0
 prometheus_client==0.6.0
-pylint==2.2.2
+pylint==2.3.0
 pytest-cov==2.6.1
 pytest==4.3.0
 pyyaml==3.13
