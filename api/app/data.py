@@ -200,7 +200,7 @@ class Network(object):
     def get_fields():
         return {'id': 'NO DATA', 'mac': 0, 'ipv4': 0, 'ipv6': 0,
                 'ipv4_subnet': 'NO DATA', 'ipv6_subnet': 'NO DATA',
-                'tenant': 0, 'active': 0, 'segment': 0, 'port': 0,
+                'tenant': 0, 'segment': 0, 'port': 0,
                 'state': 'NO DATA', 'ignored': 'False',
                 'first_seen': 'NO DATA', 'last_seen': 'NO DATA',
                 'role': 'NO DATA', 'role_confidence': 0, 'behavior': 0,
