@@ -232,7 +232,7 @@ class Network(object):
         configuration = {'fields': []}
         for field in Network.get_fields():
             configuration['fields'].append(
-                {'path': [field], 'displayName': Network.field_mapping[field], groupable: true})
+                {'path': [field], 'displayName': Network.field_mapping()[field], 'groupable': 'true'})
         return configuration
 
     def on_get(self, req, resp):
