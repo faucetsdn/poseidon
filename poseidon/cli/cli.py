@@ -664,54 +664,59 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
     @exception
     def do_task(self, arg):
         '''Perform task to things on the network'''
-        # TODO
         flags, arg = self.parser.get_flags(arg)
-        action = arg.split()[0]
-        func_calls = {'clear': self.task_clear,
-                      'collect': self.task_collect,
-                      'ignore': self.task_ignore,
-                      'remove': self.task_remove,
-                      'set': self.task_set}
-        if action in func_calls:
-            if len(arg.split()) > 1:
-                func_calls[action](arg, flags)
-            else:
-                print(action.upper() + ' <ID|IP|MAC>')
-        else:
-            print("Unknown command, try 'help task'")
-
-    @exception
-    def do_show(self, arg):
-        '''Show things on the network based on filters'''
-        flags, arg = self.parser.get_flags(arg)
-        action = arg.split()[0]
-        func_calls = {'all': self.show_all,
-                      'authors': self.show_authors,
-                      'behavior': self.show_behavior,
-                      'history': self.show_history,
-                      'os': self.show_os,
-                      'role': self.show_role,
-                      'state': self.show_state,
-                      'what': self.show_what,
-                      'where': self.show_where}
-        if action in func_calls:
-            if action in ['all', 'authors']:
-                func_calls[action](arg, flags)
-            elif action in ['history', 'what', 'where']:
+        if arg:
+            action = arg.split()[0]
+            func_calls = {'clear': self.task_clear,
+                          'collect': self.task_collect,
+                          'ignore': self.task_ignore,
+                          'remove': self.task_remove,
+                          'set': self.task_set}
+            if action in func_calls:
                 if len(arg.split()) > 1:
                     func_calls[action](arg, flags)
                 else:
                     print(action.upper() + ' <ID|IP|MAC>')
             else:
-                valid = False
-                for show_comm in self.show_completions:
-                    if arg.startswith(show_comm):
-                        valid = True
-                        func_calls[action](arg, flags)
-                if not valid:
-                    print("Unknown command, try 'help show'")
+                print("Unknown command, try 'help task'")
         else:
-            print("Unknown command, try 'help show'")
+            self.help_task()
+
+    @exception
+    def do_show(self, arg):
+        '''Show things on the network based on filters'''
+        flags, arg = self.parser.get_flags(arg)
+        if arg:
+            action = arg.split()[0]
+            func_calls = {'all': self.show_all,
+                          'authors': self.show_authors,
+                          'behavior': self.show_behavior,
+                          'history': self.show_history,
+                          'os': self.show_os,
+                          'role': self.show_role,
+                          'state': self.show_state,
+                          'what': self.show_what,
+                          'where': self.show_where}
+            if action in func_calls:
+                if action in ['all', 'authors']:
+                    func_calls[action](arg, flags)
+                elif action in ['history', 'what', 'where']:
+                    if len(arg.split()) > 1:
+                        func_calls[action](arg, flags)
+                    else:
+                        print(action.upper() + ' <ID|IP|MAC>')
+                else:
+                    valid = False
+                    for show_comm in self.show_completions:
+                        if arg.startswith(show_comm):
+                            valid = True
+                            func_calls[action](arg, flags)
+                    if not valid:
+                        print("Unknown command, try 'help show'")
+            else:
+                print("Unknown command, try 'help show'")
+        else:
+            self.help_show()
 
     @exception
     def do_eof(self, arg):
