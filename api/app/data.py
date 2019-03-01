@@ -1,10 +1,12 @@
 import ast
 import json
 import os
+import time
 from copy import deepcopy
 
 import falcon
 import redis
+from natural.date import duration
 
 from .routes import paths
 from .routes import version
@@ -91,6 +93,19 @@ class Nodes():
                             if key in poseidon_info:
                                 node[key] = poseidon_info[key]
 
+                        if 'ignored' in node and 'ignore' in poseidon_info:
+                            node['ignored'] = poseidon_info['ignore']
+
+                        if 'prev_states' in poseidon_info:
+                            prev_states = ast.literal_eval(
+                                poseidon_info['prev_states'])
+                            if 'first_seen' in node:
+                                node['first_seen'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
+                                    prev_states[0][1])) + ' (' + duration(prev_states[0][1]) + ')'
+                            if 'last_seen' in node:
+                                node['last_seen'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
+                                    prev_states[-1][1])) + ' (' + duration(prev_states[-1][1]) + ')'
+
                         if 'endpoint_data' in poseidon_info:
                             endpoint_data = ast.literal_eval(
                                 poseidon_info['endpoint_data'])
@@ -106,7 +121,7 @@ class Nodes():
                                                 node['ipv4_subnet'] = '.'.join(
                                                     ipv4.split('.')[:-1])+'.0/24'
                                             else:
-                                                node['ipv4_subnet'] = 'Unknown'
+                                                node['ipv4_subnet'] = 'NO DATA'
                                         ipv4_info = self.r.hgetall(ipv4)
                                         if ipv4_info and 'short_os' in ipv4_info:
                                             node['ipv4_os'] = ipv4_info['short_os']
@@ -122,7 +137,7 @@ class Nodes():
                                                 node['ipv6_subnet'] = ':'.join(
                                                     ipv6.split(':')[0:4])+'::0/64'
                                             else:
-                                                node['ipv6_subnet'] = 'Unknown'
+                                                node['ipv6_subnet'] = 'NO DATA'
                                         ipv6_info = self.r.hgetall(ipv6)
                                         if ipv6_info and 'short_os' in ipv6_info:
                                             node['ipv6_os'] = ipv6_info['short_os']
@@ -172,7 +187,9 @@ class NetworkFull(object):
                 'ipv6_subnet': 'NO DATA', 'segment': 0, 'port': 0,
                 'tenant': 0, 'active': 0, 'next_state': 'NO DATA',
                 'state': 'NO DATA', 'prev_states': 'NO DATA',
-                'role': 'NO DATA', 'role_confidence': 0, 'behavior': 0,
+                'ignored': 'False', 'first_seen': 'NO DATA',
+                'last_seen': 'NO DATA', 'role': 'NO DATA',
+                'role_confidence': 0, 'behavior': 0,
                 'ipv4_os': 'NO DATA', 'ipv6_os': 'NO DATA',
                 'source': 'NO DATA', 'ipv4_rdns': 'NO DATA',
                 'ipv6_rdns': 'NO DATA', 'ether_vendor': 'NO DATA'}
