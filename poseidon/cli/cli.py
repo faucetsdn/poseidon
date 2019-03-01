@@ -234,7 +234,7 @@ class Parser():
 
     def __init__(self):
         self.default_fields = [
-            'IPv4', 'IPv4 rDNS', 'Role', 'IPv4 OS', 'Ethernet Vendor',
+            'IPv4', 'IPv4 rDNS', 'Role\n(PoseidonML)', 'IPv4 OS\n(p0f)', 'Ethernet Vendor',
             'MAC Address'
         ]
         self.all_fields = [
