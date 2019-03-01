@@ -392,6 +392,16 @@ class SDNConnect(object):
                 machine['mac'], '/poseidon/poseidon/metadata/nmap-mac-prefixes.txt')
             machine['ipv4_rdns'] = get_rdns_lookup(machine['ipv4'])
             machine['ipv6_rdns'] = get_rdns_lookup(machine['ipv6'])
+            if machine['ipv4']:
+                md['ipv4_subnet'] = '.'.join(
+                    machine['ipv4'].split('.')[:-1])+'.0/24'
+            else:
+                md['ipv4_subnet'] = 'NO DATA'
+            if machine['ipv6']:
+                md['ipv6_subnet'] = '.'.join(
+                    machine['ipv6'].split(':')[0:4])+'::0/64'
+            else:
+                md['ipv6_subnet'] = 'NO DATA'
             h = Endpoint.make_hash(machine)
             ep = None
             for endpoint in self.endpoints:

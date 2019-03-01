@@ -101,12 +101,6 @@ class Nodes():
                                 try:
                                     ipv4 = endpoint_data['ipv4']
                                     if isinstance(ipv4, str) and ipv4 != 'None':
-                                        if 'ipv4_subnet' in node:
-                                            if '.' in ipv4:
-                                                node['ipv4_subnet'] = '.'.join(
-                                                    ipv4.split('.')[:-1])+'.0/24'
-                                            else:
-                                                node['ipv4_subnet'] = 'Unknown'
                                         ipv4_info = self.r.hgetall(ipv4)
                                         if ipv4_info and 'short_os' in ipv4_info:
                                             node['ipv4_os'] = ipv4_info['short_os']
@@ -117,12 +111,6 @@ class Nodes():
                                 try:
                                     ipv6 = endpoint_data['ipv6']
                                     if isinstance(ipv6, str) and ipv6 != 'None':
-                                        if 'ipv6_subnet' in node:
-                                            if ':' in ipv6:
-                                                node['ipv6_subnet'] = ':'.join(
-                                                    ipv6.split(':')[0:4])+'::0/64'
-                                            else:
-                                                node['ipv6_subnet'] = 'Unknown'
                                         ipv6_info = self.r.hgetall(ipv6)
                                         if ipv6_info and 'short_os' in ipv6_info:
                                             node['ipv6_os'] = ipv6_info['short_os']

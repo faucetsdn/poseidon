@@ -49,6 +49,10 @@ class GetData():
         return str(endpoint.endpoint_data['ipv4'])
 
     @staticmethod
+    def _get_ipv4_subnet(endpoint):
+        return str(endpoint.endpoint_data['ipv4_subnet'])
+
+    @staticmethod
     def _get_ether_vendor(endpoint):
         if 'ether_vendor' in endpoint.endpoint_data:
             return str(endpoint.endpoint_data['ether_vendor'])
@@ -72,6 +76,10 @@ class GetData():
     @staticmethod
     def _get_ipv6(endpoint):
         return str(endpoint.endpoint_data['ipv6'])
+
+    @staticmethod
+    def _get_ipv6_subnet(endpoint):
+        return str(endpoint.endpoint_data['ipv6_subnet'])
 
     @staticmethod
     def _get_ignored(endpoint):
@@ -224,12 +232,13 @@ class Parser():
             'MAC Address'
         ]
         self.all_fields = [
-            'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4', 'IPv6',
-            'Ethernet Vendor', 'Ignored', 'State', 'Next State', 'First Seen',
-            'Last Seen', 'Previous States', 'IPv4 OS', 'IPv6 OS',
-            'Previous IPv4 OSes', 'Previous IPv6 OSes', 'Role',
-            'Role Confidence', 'Previous Roles', 'Previous Role Confidences',
-            'Behavior', 'Previous Behaviors', 'IPv4 rDNS', 'IPv6 rDNS'
+            'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4',
+            'IPv4 Subnet', 'IPv6', 'IPv6 Subnet', 'Ethernet Vendor', 'Ignored',
+            'State', 'Next State', 'First Seen', 'Last Seen',
+            'Previous States', 'IPv4 OS', 'IPv6 OS', 'Previous IPv4 OSes',
+            'Previous IPv6 OSes', 'Role', 'Role Confidence', 'Previous Roles',
+            'Previous Role Confidences', 'Behavior', 'Previous Behaviors',
+            'IPv4 rDNS', 'IPv6 rDNS'
         ]
 
     def completion(self, text, line, completions):
@@ -303,26 +312,28 @@ class Parser():
                          'port': (GetData._get_port, 3),
                          'vlan': (GetData._get_vlan, 4),
                          'ipv4': (GetData._get_ipv4, 5),
-                         'ipv6': (GetData._get_ipv6, 6),
-                         'ethernet vendor': (GetData._get_ether_vendor, 7),
-                         'ignored': (GetData._get_ignored, 8),
-                         'state': (GetData._get_state, 9),
-                         'next state': (GetData._get_next_state, 10),
-                         'first seen': (GetData._get_first_seen, 11),
-                         'last seen': (GetData._get_last_seen, 12),
-                         'previous states': (GetData._get_prev_states, 13),
-                         'ipv4 os': (GetData._get_ipv4_os, 14),
-                         'ipv6 os': (GetData._get_ipv6_os, 15),
-                         'previous ipv4 oses': (GetData._get_prev_ipv4_oses, 16),
-                         'previous ipv6 oses': (GetData._get_prev_ipv6_oses, 17),
-                         'role': (GetData._get_role, 18),
-                         'role confidence': (GetData._get_role_confidence, 19),
-                         'previous roles': (GetData._get_prev_roles, 20),
-                         'previous role confidences': (GetData._get_prev_role_confidences, 21),
-                         'behavior': (GetData._get_behavior, 22),
-                         'previous behaviors': (GetData._get_prev_behaviors, 23),
-                         'ipv4 rdns': (GetData._get_ipv4_rdns, 24),
-                         'ipv6 rdns': (GetData._get_ipv6_rdns, 25)}
+                         'ipv4_subnet': (GetData._get_ipv4_subnet, 6),
+                         'ipv6': (GetData._get_ipv6, 7),
+                         'ipv6_subnet': (GetData._get_ipv6_subnet, 8),
+                         'ethernet vendor': (GetData._get_ether_vendor, 9),
+                         'ignored': (GetData._get_ignored, 10),
+                         'state': (GetData._get_state, 11),
+                         'next state': (GetData._get_next_state, 12),
+                         'first seen': (GetData._get_first_seen, 13),
+                         'last seen': (GetData._get_last_seen, 14),
+                         'previous states': (GetData._get_prev_states, 15),
+                         'ipv4 os': (GetData._get_ipv4_os, 16),
+                         'ipv6 os': (GetData._get_ipv6_os, 17),
+                         'previous ipv4 oses': (GetData._get_prev_ipv4_oses, 18),
+                         'previous ipv6 oses': (GetData._get_prev_ipv6_oses, 19),
+                         'role': (GetData._get_role, 20),
+                         'role confidence': (GetData._get_role_confidence, 21),
+                         'previous roles': (GetData._get_prev_roles, 22),
+                         'previous role confidences': (GetData._get_prev_role_confidences, 23),
+                         'behavior': (GetData._get_behavior, 24),
+                         'previous behaviors': (GetData._get_prev_behaviors, 25),
+                         'ipv4 rdns': (GetData._get_ipv4_rdns, 26),
+                         'ipv6 rdns': (GetData._get_ipv6_rdns, 27)}
         # TODO #971 check if unique flag and limit columns (fields)
         # TODO #963 check if nonzero flag and limit rows/columns
         for endpoint in endpoints:
