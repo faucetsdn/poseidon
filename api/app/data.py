@@ -91,6 +91,10 @@ class Nodes():
                             if key in poseidon_info:
                                 node[key] = poseidon_info[key]
 
+                        if 'ignore' in node:
+                            node['ignored'] = node['ignore']
+                            del node['ignore']
+
                         if 'endpoint_data' in poseidon_info:
                             endpoint_data = ast.literal_eval(
                                 poseidon_info['endpoint_data'])
