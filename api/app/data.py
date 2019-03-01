@@ -97,7 +97,7 @@ class Nodes():
                             del node['ignore']
 
                         if 'prev_states' in node:
-                            prev_states = node['prev_states']
+                            prev_states = node['p_prev_states']
                             print('previous states: {0}'.format(prev_states))
                             node['first_seen'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
                                 prev_states[0][1])) + ' (' + duration(prev_states[0][1]) + ')'
