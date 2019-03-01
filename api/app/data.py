@@ -232,8 +232,8 @@ class Network(object):
                 'ipv4_subnet': 'IPv4 Subnet', 'ipv6_subnet': 'IPv6 Subnet',
                 'ipv6': 'IPv6', 'ignored': 'Ignored', 'state': 'State',
                 'first_seen': 'First Seen', 'last_seen': 'Last Seen',
-                'ipv4_os': 'IPv4 OS', 'ipv6_os': 'IPv6 OS', 'role': 'Role',
-                'role_confidence': 'Role Confidence', 'behavior': 'Behavior',
+                'ipv4_os': 'IPv4 OS (p0f)', 'ipv6_os': 'IPv6 OS (p0f)', 'role': 'Role (PoseidonML)',
+                'role_confidence': 'Role Confidence (PoseidonML)', 'behavior': 'Behavior (PoseidonML)',
                 'ipv4_rdns': 'IPv4 rDNS', 'ipv6_rdns': 'IPv6 rDNS',
                 'ether_vendor': 'Ethernet Vendor'}
 
