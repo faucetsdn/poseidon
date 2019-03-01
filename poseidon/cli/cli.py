@@ -50,7 +50,10 @@ class GetData():
 
     @staticmethod
     def _get_ipv4_subnet(endpoint):
-        return str(endpoint.endpoint_data['ipv4_subnet'])
+        if 'ipv4_subnet' in endpoint.endpoint_data:
+            return str(endpoint.endpoint_data['ipv4_subnet'])
+        else:
+            return 'NO DATA'
 
     @staticmethod
     def _get_ether_vendor(endpoint):
@@ -79,7 +82,10 @@ class GetData():
 
     @staticmethod
     def _get_ipv6_subnet(endpoint):
-        return str(endpoint.endpoint_data['ipv6_subnet'])
+        if 'ipv6_subnet' in endpoint.endpoint_data:
+            return str(endpoint.endpoint_data['ipv6_subnet'])
+        else:
+            return 'NO DATA'
 
     @staticmethod
     def _get_ignored(endpoint):
@@ -312,9 +318,9 @@ class Parser():
                          'port': (GetData._get_port, 3),
                          'vlan': (GetData._get_vlan, 4),
                          'ipv4': (GetData._get_ipv4, 5),
-                         'ipv4_subnet': (GetData._get_ipv4_subnet, 6),
+                         'ipv4 subnet': (GetData._get_ipv4_subnet, 6),
                          'ipv6': (GetData._get_ipv6, 7),
-                         'ipv6_subnet': (GetData._get_ipv6_subnet, 8),
+                         'ipv6 subnet': (GetData._get_ipv6_subnet, 8),
                          'ethernet vendor': (GetData._get_ether_vendor, 9),
                          'ignored': (GetData._get_ignored, 10),
                          'state': (GetData._get_state, 11),
