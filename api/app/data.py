@@ -1,6 +1,7 @@
 import ast
 import json
 import os
+import time
 from copy import deepcopy
 
 import falcon
@@ -94,6 +95,13 @@ class Nodes():
                         if 'ignore' in node:
                             node['ignored'] = node['ignore']
                             del node['ignore']
+
+                        if 'prev_states' in node:
+                            prev_states = ast.literal_eval(node['prev_states'])
+                            node['first_seen'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
+                                prev_states[0][1])) + ' (' + duration(prev_states[0][1]) + ')'
+                            node['last_seen'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
+                                prev_states[-1][1])) + ' (' + duration(prev_states[-1][1]) + ')'
 
                         if 'endpoint_data' in poseidon_info:
                             endpoint_data = ast.literal_eval(
