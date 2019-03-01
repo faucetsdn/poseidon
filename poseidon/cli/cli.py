@@ -234,7 +234,7 @@ class Parser():
 
     def __init__(self):
         self.default_fields = [
-            'IPv4', 'IPv4 rDNS', 'Role\n(PoseidonML)', 'IPv4 OS\n(p0f)', 'Ethernet Vendor',
+            'IPv4', 'IPv4 rDNS', 'Role (PoseidonML)', 'IPv4 OS (p0f)', 'Ethernet Vendor',
             'MAC Address'
         ]
         self.all_fields = [
@@ -329,12 +329,12 @@ class Parser():
                          'last seen': (GetData._get_last_seen, 14),
                          'previous states': (GetData._get_prev_states, 15),
                          'ipv4 os': (GetData._get_ipv4_os, 16),
-                         'ipv4 os\n(p0f)': (GetData._get_ipv4_os, 16),
+                         'ipv4 os (p0f)': (GetData._get_ipv4_os, 16),
                          'ipv6 os': (GetData._get_ipv6_os, 17),
                          'previous ipv4 oses': (GetData._get_prev_ipv4_oses, 18),
                          'previous ipv6 oses': (GetData._get_prev_ipv6_oses, 19),
                          'role': (GetData._get_role, 20),
-                         'role\n(poseidonml)': (GetData._get_role, 20),
+                         'role (poseidonml)': (GetData._get_role, 20),
                          'role confidence': (GetData._get_role_confidence, 21),
                          'previous roles': (GetData._get_prev_roles, 22),
                          'previous role confidences': (GetData._get_prev_role_confidences, 23),
