@@ -241,9 +241,9 @@ class Parser():
             'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4',
             'IPv4 Subnet', 'IPv6', 'IPv6 Subnet', 'Ethernet Vendor', 'Ignored',
             'State', 'Next State', 'First Seen', 'Last Seen',
-            'Previous States', 'IPv4 OS', 'IPv6 OS', 'Previous IPv4 OSes',
-            'Previous IPv6 OSes', 'Role', 'Role Confidence', 'Previous Roles',
-            'Previous Role Confidences', 'Behavior', 'Previous Behaviors',
+            'Previous States', 'IPv4 OS\n(p0f)', 'IPv6 OS\n(p0f)', 'Previous IPv4 OSes\n(p0f)',
+            'Previous IPv6 OSes\n(p0f)', 'Role\n(PoseidonML)', 'Role Confidence\n(PoseidonML)', 'Previous Roles\n(PoseidonML)',
+            'Previous Role Confidences\n(PoseidonML)', 'Behavior\b(PoseidonML)', 'Previous Behaviors\n(PoseidonML)',
             'IPv4 rDNS', 'IPv6 rDNS'
         ]
 
@@ -329,15 +329,25 @@ class Parser():
                          'last seen': (GetData._get_last_seen, 14),
                          'previous states': (GetData._get_prev_states, 15),
                          'ipv4 os': (GetData._get_ipv4_os, 16),
+                         'ipv4 os\n(p0f)': (GetData._get_ipv4_os, 16),
                          'ipv6 os': (GetData._get_ipv6_os, 17),
+                         'ipv6 os\n(p0f)': (GetData._get_ipv6_os, 17),
                          'previous ipv4 oses': (GetData._get_prev_ipv4_oses, 18),
+                         'previous ipv4 oses\n(p0f)': (GetData._get_prev_ipv4_oses, 18),
                          'previous ipv6 oses': (GetData._get_prev_ipv6_oses, 19),
+                         'previous ipv6 oses\n(p0f)': (GetData._get_prev_ipv6_oses, 19),
                          'role': (GetData._get_role, 20),
+                         'role\n(poseidonml)': (GetData._get_role, 20),
                          'role confidence': (GetData._get_role_confidence, 21),
+                         'role confidence\n(poseidonml)': (GetData._get_role_confidence, 21),
                          'previous roles': (GetData._get_prev_roles, 22),
+                         'previous roles\n(poseidonml)': (GetData._get_prev_roles, 22),
                          'previous role confidences': (GetData._get_prev_role_confidences, 23),
+                         'previous role confidences\n(poseidonml)': (GetData._get_prev_role_confidences, 23),
                          'behavior': (GetData._get_behavior, 24),
+                         'behavior\n(posedionml)': (GetData._get_behavior, 24),
                          'previous behaviors': (GetData._get_prev_behaviors, 25),
+                         'previous behaviors\n(poseidonml)': (GetData._get_prev_behaviors, 25),
                          'ipv4 rdns': (GetData._get_ipv4_rdns, 26),
                          'ipv6 rdns': (GetData._get_ipv6_rdns, 27)}
         # TODO #971 check if unique flag and limit columns (fields)
