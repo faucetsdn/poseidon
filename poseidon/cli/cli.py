@@ -309,15 +309,15 @@ class Parser():
                 nonzero = True
             elif flag == 'output_format':
                 output_format = flags[flag]
-            elif flag == 'ipv4_only' and flags[flag] == True:
+            elif flag == '4' and flags[flag] == True:
                 ipv4_only = True
                 ipv6_only = False
                 ipv4_and_ipv6 = False
-            elif flag == 'ipv6_only' and flags[flag] == True:
+            elif flag == '6' and flags[flag] == True:
                 ipv6_only = True
                 ipv4_only = False
                 ipv4_and_ipv6 = False
-            elif flag == 'ipv4_and_ipv6' and flags[flag] == True:
+            elif flag == '4and6' and flags[flag] == True:
                 ipv4_only = False
                 ipv6_only = False
                 ipv4_and_ipv6 = True
@@ -814,14 +814,16 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
             print()
             print('Optional flags that can be combined with commands:')
             print('  --fields')
-            print('  --ipv4_and_ipv6')
-            print('  --ipv4_only')
-            print('  --ipv6_only')
             print('  --max_width')
-            print('  --nonzero - TO BE IMPLEMENTED')
             print('  --output_format - TO BE IMPLEMENTED')
             print('  --sort_by')
-            print('  --unique - TO BE IMPLEMENTED')
+            print()
+            print('Boolean flags that can be combined with commands:')
+            print('  -4and6')
+            print('  -4')
+            print('  -6')
+            print('  -nonzero - TO BE IMPLEMENTED')
+            print('  -unique - TO BE IMPLEMENTED')
         else:
             cmd.Cmd.do_help(self, arg)
 
