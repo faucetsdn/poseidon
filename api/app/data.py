@@ -98,6 +98,7 @@ class Nodes():
 
                         if 'prev_states' in node:
                             prev_states = node['prev_states']
+                            print('previous states: {0}'.format(prev_states))
                             node['first_seen'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
                                 prev_states[0][1])) + ' (' + duration(prev_states[0][1]) + ')'
                             node['last_seen'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
