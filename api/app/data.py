@@ -93,18 +93,18 @@ class Nodes():
                             if key in poseidon_info:
                                 node[key] = poseidon_info[key]
 
-                        if 'ignore' in node:
-                            node['ignored'] = node['ignore']
-                            del node['ignore']
+                        if 'ignored' in node and 'ignore' in poseidon_info:
+                            node['ignored'] = poseidon_info['ignore']
 
-                        if 'prev_states' in node:
-                            prev_states = ast.literal_eval(node['prev_states'])
-                            node['first_seen'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
-                                prev_states[0][1])) + ' (' + duration(prev_states[0][1]) + ')'
-                            print('first seen: {0}'.format(node['first_seen']))
-                            node['last_seen'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
-                                prev_states[-1][1])) + ' (' + duration(prev_states[-1][1]) + ')'
-                            print('last seen: {0}'.format(node['last_seen']))
+                        if 'prev_states' in poseidon_info:
+                            prev_states = ast.literal_eval(
+                                poseidon_info['prev_states'])
+                            if 'first_seen' in node:
+                                node['first_seen'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
+                                    prev_states[0][1])) + ' (' + duration(prev_states[0][1]) + ')'
+                            if 'last_seen' in node:
+                                node['last_seen'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
+                                    prev_states[-1][1])) + ' (' + duration(prev_states[-1][1]) + ')'
 
                         if 'endpoint_data' in poseidon_info:
                             endpoint_data = ast.literal_eval(
@@ -116,6 +116,12 @@ class Nodes():
                                 try:
                                     ipv4 = endpoint_data['ipv4']
                                     if isinstance(ipv4, str) and ipv4 != 'None':
+                                        if 'ipv4_subnet' in node:
+                                            if '.' in ipv4:
+                                                node['ipv4_subnet'] = '.'.join(
+                                                    ipv4.split('.')[:-1])+'.0/24'
+                                            else:
+                                                node['ipv4_subnet'] = 'NO DATA'
                                         ipv4_info = self.r.hgetall(ipv4)
                                         if ipv4_info and 'short_os' in ipv4_info:
                                             node['ipv4_os'] = ipv4_info['short_os']
@@ -126,6 +132,12 @@ class Nodes():
                                 try:
                                     ipv6 = endpoint_data['ipv6']
                                     if isinstance(ipv6, str) and ipv6 != 'None':
+                                        if 'ipv6_subnet' in node:
+                                            if ':' in ipv6:
+                                                node['ipv6_subnet'] = ':'.join(
+                                                    ipv6.split(':')[0:4])+'::0/64'
+                                            else:
+                                                node['ipv6_subnet'] = 'NO DATA'
                                         ipv6_info = self.r.hgetall(ipv6)
                                         if ipv6_info and 'short_os' in ipv6_info:
                                             node['ipv6_os'] = ipv6_info['short_os']
