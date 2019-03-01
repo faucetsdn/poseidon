@@ -101,8 +101,10 @@ class Nodes():
                             prev_states = ast.literal_eval(node['prev_states'])
                             node['first_seen'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
                                 prev_states[0][1])) + ' (' + duration(prev_states[0][1]) + ')'
+                            print('first seen: {0}'.format(node['first_seen']))
                             node['last_seen'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
                                 prev_states[-1][1])) + ' (' + duration(prev_states[-1][1]) + ')'
+                            print('last seen: {0}'.format(node['last_seen']))
 
                         if 'endpoint_data' in poseidon_info:
                             endpoint_data = ast.literal_eval(
