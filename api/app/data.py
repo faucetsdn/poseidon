@@ -187,7 +187,9 @@ class NetworkFull(object):
                 'ipv6_subnet': 'NO DATA', 'segment': 0, 'port': 0,
                 'tenant': 0, 'active': 0, 'next_state': 'NO DATA',
                 'state': 'NO DATA', 'prev_states': 'NO DATA',
-                'role': 'NO DATA', 'role_confidence': 0, 'behavior': 0,
+                'ignored': 'False', 'first_seen': 'NO DATA',
+                'last_seen': 'NO DATA', 'role': 'NO DATA',
+                'role_confidence': 0, 'behavior': 0,
                 'ipv4_os': 'NO DATA', 'ipv6_os': 'NO DATA',
                 'source': 'NO DATA', 'ipv4_rdns': 'NO DATA',
                 'ipv6_rdns': 'NO DATA', 'ether_vendor': 'NO DATA'}
