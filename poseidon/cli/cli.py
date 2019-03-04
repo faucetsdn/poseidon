@@ -606,7 +606,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                   `:+yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyys+:`
                       .:/oyyyyyyyyyyyyyyyyyyyyyyyyyyo+:.
                            `-:/+oossyyyyyyssoo+/:-`\033[1;m""")
-        with open('/poseidon/AUTHORS', 'r') as f:
+        with open('/poseidon/AUTHORS', 'r') as f:  # pragma: no cover
             i = 1
             for line in f:
                 if i > 4:
