@@ -48,6 +48,16 @@ def test_check_flags():
     assert ipv4_and_ipv6 == True
 
 
+def test_display_results():
+    parser = Parser()
+    endpoint = Endpoint('foo')
+    endpoints = [endpoint]
+    parser.display_results(endpoints, [
+                           'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4'], ipv4_only=False, ipv6_only=True)
+    parser.display_results(endpoints, [
+                           'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4'], ipv4_only=False, ipv4_and_ipv6=True)
+
+
 def test_get_flags():
     parser = Parser()
     flags, not_flags = parser.get_flags(
