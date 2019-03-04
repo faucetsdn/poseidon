@@ -161,10 +161,6 @@ def test_format_rabbit_message():
     retval = mockMonitor.format_rabbit_message(message)
     assert retval == {}
 
-    message = ('poseidon.action.change', json.dumps(data))
-    retval = mockMonitor.format_rabbit_message(message)
-    assert retval == {}
-
     message = ('poseidon.action.remove', json.dumps(data))
     retval = mockMonitor.format_rabbit_message(message)
     assert retval == {}
@@ -174,6 +170,11 @@ def test_format_rabbit_message():
     assert retval == {}
 
     message = ('poseidon.action.remove.inactives', json.dumps(data))
+    retval = mockMonitor.format_rabbit_message(message)
+    assert retval == {}
+
+    data = [('foo', 'unknown')]
+    message = ('poseidon.action.change', json.dumps(data))
     retval = mockMonitor.format_rabbit_message(message)
     assert retval == {}
 
