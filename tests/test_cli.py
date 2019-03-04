@@ -33,12 +33,25 @@ def test_check_flags():
         'Previous Role Confidences\n(PoseidonML)', 'Behavior\b(PoseidonML)', 'Previous Behaviors\n(PoseidonML)',
         'IPv4 rDNS', 'IPv6 rDNS'
     ]
+    fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = parser._check_flags({
+                                                                                                                          'fields': 'ID, MAC Address, Switch, Port, VLAN, IPv4', 'sort_by': 1, 'max_width': 100, 'unique': True, 'nonzero': True, 'output_format': 'csv', '4': True, '6': True, '4and6': True}, '')
+    assert fields == [
+        'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4',
+    ]
+    assert sort_by == 1
+    assert max_width == 100
+    assert unique == True
+    assert nonzero == True
+    assert output_format == 'csv'
+    assert ipv4_only == False
+    assert ipv6_only == False
+    assert ipv4_and_ipv6 == True
 
 
 def test_completion():
     parser = Parser()
     words = parser.completion(
-        'this is a test', 'this is a test', ['foo', 'bar'])
+        'this is a test', 'this is a test', ['this'])
     assert words == []
 
 
@@ -208,6 +221,9 @@ def test_get_prev_states():
     endpoint.p_prev_states = [('unknown', 1551711125)]
     GetData._get_prev_states(endpoint)
     endpoint.p_prev_states = [('unknown', 1551711125), ('queued', 1551711126)]
+    GetData._get_prev_states(endpoint)
+    endpoint.p_prev_states = [('unknown', 1551711125), ('queued', 1551711126), (
+        'queued', 1551711126), ('queued', 1551711127), ('queued', 1551811126)]
     GetData._get_prev_states(endpoint)
 
 
