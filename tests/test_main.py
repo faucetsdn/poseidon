@@ -146,7 +146,7 @@ def test_format_rabbit_message():
 
     message = ('FAUCET.Event', json.dumps(data))
     retval = mockMonitor.format_rabbit_message(message)
-    assert retval == data
+    assert retval == {}
 
     message = (None, json.dumps(data))
     retval = mockMonitor.format_rabbit_message(message)
