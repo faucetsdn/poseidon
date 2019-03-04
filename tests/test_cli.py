@@ -4,6 +4,7 @@ Created on 14 Jan 2019
 @author: Charlie Lewis
 """
 from poseidon.cli.cli import GetData
+from poseidon.cli.cli import Parser
 from poseidon.cli.cli import PoseidonShell
 from poseidon.helpers.endpoint import Endpoint
 
@@ -12,10 +13,33 @@ def test_poseidonshell():
     shell = PoseidonShell()
     shell.do_record('foo.txt')
     shell.do_show('foo')
+    shell.do_task('foo')
     shell.do_quit('foo')
     shell.do_playback('foo.txt')
     shell.precmd('foo')
     shell.close()
+
+
+def test_check_flags():
+    parser = Parser()
+    fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = parser._check_flags({
+                                                                                                                          'fields': 'all'}, '')
+    assert fields == [
+        'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4',
+        'IPv4 Subnet', 'IPv6', 'IPv6 Subnet', 'Ethernet Vendor', 'Ignored',
+        'State', 'Next State', 'First Seen', 'Last Seen',
+        'Previous States', 'IPv4 OS\n(p0f)', 'IPv6 OS\n(p0f)', 'Previous IPv4 OSes\n(p0f)',
+        'Previous IPv6 OSes\n(p0f)', 'Role\n(PoseidonML)', 'Role Confidence\n(PoseidonML)', 'Previous Roles\n(PoseidonML)',
+        'Previous Role Confidences\n(PoseidonML)', 'Behavior\b(PoseidonML)', 'Previous Behaviors\n(PoseidonML)',
+        'IPv4 rDNS', 'IPv6 rDNS'
+    ]
+
+
+def test_completion():
+    parser = Parser()
+    words = parser.completion(
+        'this is a test', 'this is a test', ['foo', 'bar'])
+    assert words == []
 
 
 def test_get_name():
@@ -77,6 +101,10 @@ def test_get_ipv6():
 def test_get_ipv4_subnet():
     endpoint = Endpoint('foo')
     endpoint.endpoint_data = {'tenant': 'foo', 'mac': '00:00:00:00:00:00',
+                              'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0'}
+    ipv4_subnet = GetData._get_ipv4_subnet(endpoint)
+    assert ipv4_subnet == 'NO DATA'
+    endpoint.endpoint_data = {'tenant': 'foo', 'mac': '00:00:00:00:00:00',
                               'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv4_subnet': '0.0.0.0/24'}
     ipv4_subnet = GetData._get_ipv4_subnet(endpoint)
     assert ipv4_subnet == '0.0.0.0/24'
@@ -84,6 +112,10 @@ def test_get_ipv4_subnet():
 
 def test_get_ipv6_subnet():
     endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {'tenant': 'foo', 'mac': '00:00:00:00:00:00',
+                              'segment': 'foo', 'port': '1', 'ipv6': '1212::1'}
+    ipv6_subnet = GetData._get_ipv6_subnet(endpoint)
+    assert ipv6_subnet == 'NO DATA'
     endpoint.endpoint_data = {'tenant': 'foo', 'mac': '00:00:00:00:00:00',
                               'segment': 'foo', 'port': '1', 'ipv6': '1212::1', 'ipv6_subnet': '1212::1/64'}
     ipv6_subnet = GetData._get_ipv6_subnet(endpoint)
@@ -164,3 +196,114 @@ def test_get_last_seen():
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
     endpoint.p_prev_states = [('unknown', 1551711125)]
     GetData._get_last_seen(endpoint)
+
+
+def test_get_prev_states():
+    endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+    endpoint.p_prev_states = []
+    prev_states = GetData._get_prev_states(endpoint)
+    assert prev_states == 'NO DATA'
+    endpoint.p_prev_states = [('unknown', 1551711125)]
+    GetData._get_prev_states(endpoint)
+    endpoint.p_prev_states = [('unknown', 1551711125), ('queued', 1551711126)]
+    GetData._get_prev_states(endpoint)
+
+
+def test_get_ipv4_os():
+    endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0'}
+    endpoint.metadata = {'ipv4_addresses': {}}
+    ipv4_os = GetData._get_ipv4_os(endpoint)
+    assert ipv4_os == 'NO DATA'
+    endpoint.metadata = {'ipv4_addresses': {'0.0.0.0': {'os': 'foo'}}}
+    ipv4_os = GetData._get_ipv4_os(endpoint)
+    assert ipv4_os == 'foo'
+
+
+def test_get_ipv6_os():
+    endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv6': '1212::1'}
+    endpoint.metadata = {'ipv6_addresses': {}}
+    ipv6_os = GetData._get_ipv6_os(endpoint)
+    assert ipv6_os == 'NO DATA'
+    endpoint.metadata = {'ipv6_addresses': {'1212::1': {'os': 'foo'}}}
+    ipv6_os = GetData._get_ipv6_os(endpoint)
+    assert ipv6_os == 'foo'
+
+
+def test_get_role():
+    endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+    endpoint.metadata = {'mac_addresses': {}}
+    role = GetData._get_role(endpoint)
+    assert role == 'NO DATA'
+    endpoint.metadata = {'mac_addresses': {
+        '00:00:00:00:00:00': {'1551711125': {'labels': ['foo']}}}}
+    role = GetData._get_role(endpoint)
+    assert role == 'foo'
+
+
+def test_get_role_confidence():
+    endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+    endpoint.metadata = {'mac_addresses': {}}
+    confidence = GetData._get_role_confidence(endpoint)
+    assert confidence == 'NO DATA'
+    endpoint.metadata = {'mac_addresses': {
+        '00:00:00:00:00:00': {'1551711125': {'confidences': [10.0]}}}}
+    confidence = GetData._get_role_confidence(endpoint)
+    assert confidence == '10.0'
+
+
+def test_get_behavior():
+    endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+    endpoint.metadata = {'mac_addresses': {}}
+    behavior = GetData._get_behavior(endpoint)
+    assert behavior == 'NO DATA'
+    endpoint.metadata = {'mac_addresses': {
+        '00:00:00:00:00:00': {'1551711125': {'behavior': 'abnormal'}}}}
+    behavior = GetData._get_behavior(endpoint)
+    assert behavior == 'abnormal'
+
+
+def test_get_prev_roles():
+    endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+    GetData._get_prev_roles(endpoint)
+
+
+def test_get_prev_role_confidences():
+    endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+    GetData._get_prev_role_confidences(endpoint)
+
+
+def test_get_prev_behaviors():
+    endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+    GetData._get_prev_behaviors(endpoint)
+
+
+def test_get_prev_ipv4_oses():
+    endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+    GetData._get_prev_ipv4_oses(endpoint)
+
+
+def test_get_prev_ipv6_oses():
+    endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+    GetData._get_prev_ipv6_oses(endpoint)
