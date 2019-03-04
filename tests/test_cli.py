@@ -15,7 +15,15 @@ def test_poseidonshell():
     shell.do_record('')
     shell.do_help('foo')
     shell.do_show('foo')
+    shell.do_show('all')
+    shell.do_show('history 10')
+    shell.do_show('role')
+    shell.do_show('role developer-workstation')
+    shell.do_show('')
     shell.do_task('foo')
+    shell.do_task('')
+    shell.do_task('clear')
+    shell.do_task('clear 10')
     shell.do_quit('foo')
     shell.do_exit('foo')
     shell.do_playback('foo.txt')
@@ -83,7 +91,9 @@ def test_display_results():
     parser.display_results(endpoints, [
                            'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4', 'IPv6'], ipv4_only=False, ipv6_only=True)
     parser.display_results(endpoints, [
-                           'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4', 'IPv6'], ipv4_only=False, ipv4_and_ipv6=True)
+                           'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv6'], ipv4_only=False, ipv4_and_ipv6=True)
+    parser.display_results(endpoints, [
+                           'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4'], ipv4_only=False, ipv4_and_ipv6=True)
 
 
 def test_get_flags():
