@@ -52,12 +52,12 @@ def test_display_results():
     parser = Parser()
     endpoint = Endpoint('foo')
     endpoint.endpoint_data = {
-        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv6': '1212::1'}
     endpoints = [endpoint]
     parser.display_results(endpoints, [
-                           'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4'], ipv4_only=False, ipv6_only=True)
+                           'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4', 'IPv6'], ipv4_only=False, ipv6_only=True)
     parser.display_results(endpoints, [
-                           'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4'], ipv4_only=False, ipv4_and_ipv6=True)
+                           'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4', 'IPv6'], ipv4_only=False, ipv4_and_ipv6=True)
 
 
 def test_get_flags():
