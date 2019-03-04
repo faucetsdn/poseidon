@@ -20,3 +20,4 @@ def test_commands():
     commands.ignore('foo')
     commands.ignore('inactive')
     commands.remove_inactives('foo')
+    commands.remove_ignored('foo')
