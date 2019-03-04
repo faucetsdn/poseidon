@@ -264,7 +264,7 @@ class Parser():
         words = text.split()
         other_words = []
         for word in words:
-            if len(word) > 2 and word[0] == '-' and word[1] != '-':
+            if len(word) > 1 and word[0] == '-' and word[1] != '-':
                 flags[word[1:]] = True
             else:
                 other_words.append(word)
