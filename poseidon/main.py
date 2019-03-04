@@ -299,11 +299,14 @@ class SDNConnect(object):
 
     @staticmethod
     def publish_action(action, message):
-        channel, exchange, connection = SDNConnect._connect_rabbit()
-        channel.basic_publish(exchange=exchange,
-                              routing_key=action,
-                              body=message)
-        connection.close()
+        try:
+            channel, exchange, connection = SDNConnect._connect_rabbit()
+            channel.basic_publish(exchange=exchange,
+                                  routing_key=action,
+                                  body=message)
+            connection.close()
+        except Exception as e:  # pragma: no cover
+            pass
         return
 
     def show_endpoints(self, arg):
