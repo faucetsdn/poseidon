@@ -34,7 +34,7 @@ def test_check_flags():
         'IPv4 rDNS', 'IPv6 rDNS'
     ]
     fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = parser._check_flags({
-                                                                                                                          'fields': 'ID, MAC Address, Switch, Port, VLAN, IPv4', 'sort_by': 1, 'max_width': 100, 'unique': True, 'nonzero': True, 'output_format': 'csv', '4': True, '6': True, '4and6': True}, '')
+                                                                                                                          'fields': ['ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4'], 'sort_by': 1, 'max_width': 100, 'unique': True, 'nonzero': True, 'output_format': 'csv', '4': True, '6': True, '4and6': True}, '')
     assert fields == [
         'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4',
     ]
