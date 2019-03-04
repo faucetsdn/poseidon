@@ -48,6 +48,14 @@ def test_check_flags():
     assert ipv4_and_ipv6 == True
 
 
+def test_get_flags():
+    parser = Parser()
+    flags, not_flags = parser.get_flags(
+        'show all --fields=[id, mac] --sort_by=2 -4')
+    assert flags == {'fields': ['id', 'mac'], 'sort_by': '2', '4': True}
+    assert not_flags == 'show all'
+
+
 def test_completion():
     parser = Parser()
     words = parser.completion(
