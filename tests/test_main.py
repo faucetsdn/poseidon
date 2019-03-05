@@ -30,24 +30,48 @@ def test_endpoint_by_name():
     s = SDNConnect()
     endpoint = s.endpoint_by_name('foo')
     assert endpoint == None
+    endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+    s.endpoints.append(endpoint)
+    endpoint2 = s.endpoint_by_name('foo')
+    assert endpoint == endpoint2
 
 
 def test_endpoint_by_hash():
     s = SDNConnect()
     endpoint = s.endpoint_by_hash('foo')
     assert endpoint == None
+    endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+    s.endpoints.append(endpoint)
+    endpoint2 = s.endpoint_by_hash('foo')
+    assert endpoint == endpoint2
 
 
 def test_endpoints_by_ip():
     s = SDNConnect()
     endpoints = s.endpoints_by_ip('10.0.0.1')
     assert endpoints == []
+    endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '10.0.0.1', 'ipv6': 'None'}
+    s.endpoints.append(endpoint)
+    endpoint2 = s.endpoints_by_ip('10.0.0.1')
+    assert [endpoint] == endpoint2
 
 
 def test_endpoints_by_mac():
     s = SDNConnect()
     endpoints = s.endpoints_by_mac('00:00:00:00:00:01')
     assert endpoints == []
+    endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+    s.endpoints.append(endpoint)
+    endpoint2 = s.endpoints_by_mac('00:00:00:00:00:00')
+    assert [endpoint] == endpoint2
 
 
 def test_signal_handler():
@@ -357,6 +381,23 @@ def test_process():
     mock_monitor.process()
 
     t1.join()
+
+
+def test_show_endpoints():
+    endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv6': '1212::1'}
+    endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'1551805502': {'labels': ['developer workstation'], 'behavior': 'normal'}}}, 'ipv4_addresses': {
+        '0.0.0.0': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
+    s = SDNConnect()
+    s.endpoints.append(endpoint)
+    s.show_endpoints('all')
+    s.show_endpoints('state active')
+    s.show_endpoints('state ignored')
+    s.show_endpoints('state unknown')
+    s.show_endpoints('os windows')
+    s.show_endpoints('role developer-workstation')
+    s.show_endpoints('behavior normal')
 
 
 def test_schedule_thread_worker():
