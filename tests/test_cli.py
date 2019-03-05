@@ -56,7 +56,7 @@ def test_poseidonshell():
     shell.precmd('foo ?')
     shell.do_eof('foo')
     shell.close()
-    foo = open('test_cli.py', 'w')
+    foo = open('foo.txt', 'w')
     shell.file = foo
     shell.precmd('foo')
 
