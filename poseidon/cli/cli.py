@@ -813,15 +813,18 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
             print('  task\t\tPerform a task on things on the network')
             print()
             print('Optional flags that can be combined with commands:')
-            print('  --fields')
-            print('  --max_width')
+            print(
+                '  --fields\tSpecify which fields to display, i.e. --fields=[id, mac]')
+            print(
+                '  --max_width\tSpecify a max width of characters for output, i.e. --max_width=80')
             print('  --output_format - TO BE IMPLEMENTED')
-            print('  --sort_by')
+            print(
+                '  --sort_by\tSort the output by a specific column index, i.e. --sort_by=0')
             print()
             print('Boolean flags that can be combined with commands:')
-            print('  -4and6')
-            print('  -4')
-            print('  -6')
+            print('  -4and6\tShow fields for both IPv4 and IPv6')
+            print('  -4\t\tShow only IPv4 fields')
+            print('  -6\t\tShow only IPv6 fields')
             print('  -nonzero - TO BE IMPLEMENTED')
             print('  -unique - TO BE IMPLEMENTED')
         else:
