@@ -8,6 +8,11 @@ from poseidon.cli.commands import Commands
 
 def test_commands():
     commands = Commands()
+    endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+    commands.sdnc.endpoints.append(endpoint)
+
     commands.what_is('foo')
     commands.history_of('foo')
     commands.where_is('foo')
