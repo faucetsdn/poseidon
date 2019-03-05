@@ -360,7 +360,7 @@ class Parser():
                          'previous role confidences': (GetData._get_prev_role_confidences, 23),
                          'previous role confidences\n(poseidonml)': (GetData._get_prev_role_confidences, 23),
                          'behavior': (GetData._get_behavior, 24),
-                         'behavior\n(posedionml)': (GetData._get_behavior, 24),
+                         'behavior\n(poseidonml)': (GetData._get_behavior, 24),
                          'previous behaviors': (GetData._get_prev_behaviors, 25),
                          'previous behaviors\n(poseidonml)': (GetData._get_prev_behaviors, 25),
                          'ipv4 rdns': (GetData._get_ipv4_rdns, 26),
