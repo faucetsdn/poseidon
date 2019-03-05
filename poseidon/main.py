@@ -268,7 +268,7 @@ class SDNConnect(object):
     def endpoints_by_ip(self, ip):
         endpoints = []
         for endpoint in self.endpoints:
-            if (('ipv4' in endpoint.endpoint_data and ip in endpoint.endpoint_data['ipv4']) or ('ipv6' in endpoint.endpoint_data and ip in endpoint.endpoint_data['ipv6'])):
+            if (('ipv4' in endpoint.endpoint_data and ip == endpoint.endpoint_data['ipv4']) or ('ipv6' in endpoint.endpoint_data and ip == endpoint.endpoint_data['ipv6'])):
                 endpoints.append(endpoint)
         return endpoints
 
