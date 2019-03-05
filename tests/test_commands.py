@@ -4,6 +4,7 @@ Created on 18 Jan 2019
 @author: Charlie Lewis
 """
 from poseidon.cli.commands import Commands
+from poseidon.helpers.endpoint import Endpoint
 
 
 def test_commands():
