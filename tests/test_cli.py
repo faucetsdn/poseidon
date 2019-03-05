@@ -18,6 +18,7 @@ def test_poseidonshell():
     shell.do_show('foo')
     shell.do_show('all')
     shell.do_show('history 10')
+    shell.do_show('history')
     shell.do_show('role')
     shell.do_show('role developer-workstation')
     shell.do_show('')
@@ -46,6 +47,8 @@ def test_poseidonshell():
     shell.task_ignore('foo', [])
     shell.task_clear('foo', [])
     shell.task_remove('foo', [])
+    shell.task_remove('ignored', [])
+    shell.task_remove('inactive', [])
     shell.help_task()
     shell.emptyline()
     shell.completenames('foo')
@@ -71,7 +74,7 @@ def test_check_flags():
         'State', 'Next State', 'First Seen', 'Last Seen',
         'Previous States', 'IPv4 OS\n(p0f)', 'IPv6 OS\n(p0f)', 'Previous IPv4 OSes\n(p0f)',
         'Previous IPv6 OSes\n(p0f)', 'Role\n(PoseidonML)', 'Role Confidence\n(PoseidonML)', 'Previous Roles\n(PoseidonML)',
-        'Previous Role Confidences\n(PoseidonML)', 'Behavior\b(PoseidonML)', 'Previous Behaviors\n(PoseidonML)',
+        'Previous Role Confidences\n(PoseidonML)', 'Behavior\n(PoseidonML)', 'Previous Behaviors\n(PoseidonML)',
         'IPv4 rDNS', 'IPv6 rDNS'
     ]
     fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = parser._check_flags({
@@ -286,7 +289,7 @@ def test_get_prev_states():
     endpoint.p_prev_states = [('unknown', 1551711125), ('queued', 1551711126)]
     GetData._get_prev_states(endpoint)
     endpoint.p_prev_states = [('unknown', 1551711125), ('queued', 1551711126), (
-        'queued', 1551711126), ('queued', 1551711127), ('queued', 1551811126)]
+        'queued', 1551711126), ('queued', 1551711827), ('queued', 1551811126)]
     GetData._get_prev_states(endpoint)
 
 

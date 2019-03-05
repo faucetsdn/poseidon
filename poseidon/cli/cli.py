@@ -243,7 +243,7 @@ class Parser():
             'State', 'Next State', 'First Seen', 'Last Seen',
             'Previous States', 'IPv4 OS\n(p0f)', 'IPv6 OS\n(p0f)', 'Previous IPv4 OSes\n(p0f)',
             'Previous IPv6 OSes\n(p0f)', 'Role\n(PoseidonML)', 'Role Confidence\n(PoseidonML)', 'Previous Roles\n(PoseidonML)',
-            'Previous Role Confidences\n(PoseidonML)', 'Behavior\b(PoseidonML)', 'Previous Behaviors\n(PoseidonML)',
+            'Previous Role Confidences\n(PoseidonML)', 'Behavior\n(PoseidonML)', 'Previous Behaviors\n(PoseidonML)',
             'IPv4 rDNS', 'IPv6 rDNS'
         ]
 
@@ -360,7 +360,7 @@ class Parser():
                          'previous role confidences': (GetData._get_prev_role_confidences, 23),
                          'previous role confidences\n(poseidonml)': (GetData._get_prev_role_confidences, 23),
                          'behavior': (GetData._get_behavior, 24),
-                         'behavior\n(posedionml)': (GetData._get_behavior, 24),
+                         'behavior\n(poseidonml)': (GetData._get_behavior, 24),
                          'previous behaviors': (GetData._get_prev_behaviors, 25),
                          'previous behaviors\n(poseidonml)': (GetData._get_prev_behaviors, 25),
                          'ipv4 rdns': (GetData._get_ipv4_rdns, 26),
