@@ -14,6 +14,7 @@ def test_poseidonshell():
     shell.do_record('foo.txt')
     shell.do_record('')
     shell.do_help('foo')
+    shell.do_help('')
     shell.do_show('foo')
     shell.do_show('all')
     shell.do_show('history 10')
@@ -48,10 +49,16 @@ def test_poseidonshell():
     shell.help_task()
     shell.emptyline()
     shell.completenames('foo')
+    shell.completenames('eof')
+    shell.completenames('shell')
     shell.do_shell('ls')
     shell.precmd('foo')
+    shell.precmd('foo ?')
     shell.do_eof('foo')
     shell.close()
+    foo = open('test_cli.py', 'w')
+    shell.file = foo
+    shell.precmd('foo')
 
 
 def test_check_flags():
