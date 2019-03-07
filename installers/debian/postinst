@@ -266,12 +266,12 @@ if db_go; then
         docker load -i /opt/poseidon/dist/cyberreboot-crviz.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-poseidonml-deviceclassifier-onelayer.tar ]; then
-        docker pull cyberreboot/poseidonml-deviceclassifier-onelayer:v0.2.9
+        docker pull cyberreboot/poseidonml-deviceclassifier-onelayer:v0.2.8
     else
         docker load -i /opt/poseidon/dist/cyberreboot-poseidonml-deviceclassifier-onelayer.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-poseidon.tar ]; then
-        docker pull cyberreboot/poseidon:v0.5.5
+        docker pull cyberreboot/poseidon:v0.5.4
     else
         docker load -i /opt/poseidon/dist/cyberreboot-poseidon.tar
     fi

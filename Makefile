@@ -65,10 +65,10 @@ build_debian:
 	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-vent-plugins-tcprewrite-dot1q.tar cyberreboot/vent-plugins-tcprewrite-dot1q:v0.1.0
 	docker pull cyberreboot/crviz:v0.2.10
 	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-crviz.tar cyberreboot/crviz:v0.2.10
-	docker pull cyberreboot/poseidonml-deviceclassifier-onelayer:v0.2.9
-	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-poseidonml-deviceclassifier-onelayer.tar cyberreboot/poseidonml-deviceclassifier-onelayer:v0.2.9
-	docker pull cyberreboot/poseidon:v0.5.5
-	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-poseidon.tar cyberreboot/poseidon:v0.5.5
+	docker pull cyberreboot/poseidonml-deviceclassifier-onelayer:v0.2.8
+	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-poseidonml-deviceclassifier-onelayer.tar cyberreboot/poseidonml-deviceclassifier-onelayer:v0.2.8
+	docker pull cyberreboot/poseidon:v0.5.4
+	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-poseidon.tar cyberreboot/poseidon:v0.5.4
 	mkdir -p dist
 	docker build -t poseidon-dpkg -f Dockerfile.dpkg .
 	docker run --rm poseidon-dpkg > dist/$(TAG)-$(VERSION).deb
