@@ -1,6 +1,5 @@
 FROM alpine:3.9
-LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
-      vent.name="poseidon-api"
+LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
 
 COPY requirements.txt requirements.txt
 COPY healthcheck /healthcheck
