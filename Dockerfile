@@ -1,5 +1,6 @@
 FROM alpine:3.9
 LABEL maintainer="clewis@iqt.org"
+      vent.name="poseidon"
 
 COPY requirements.txt requirements.txt
 COPY healthcheck /healthcheck
