@@ -393,14 +393,14 @@ class SDNConnect(object):
         for machine in machines:
             machine['ether_vendor'] = get_ether_vendor(
                 machine['mac'], '/poseidon/poseidon/metadata/nmap-mac-prefixes.txt')
-            if 'ipv4' in machine and machine['ipv4']:
+            if 'ipv4' in machine and machine['ipv4'] and machine['ipv4'] is not 'None':
                 machine['ipv4_rdns'] = get_rdns_lookup(machine['ipv4'])
                 machine['ipv4_subnet'] = '.'.join(
                     machine['ipv4'].split('.')[:-1])+'.0/24'
             else:
                 machine['ipv4_rdns'] = 'NO DATA'
                 machine['ipv4_subnet'] = 'NO DATA'
-            if 'ipv6' in machine and machine['ipv6']:
+            if 'ipv6' in machine and machine['ipv6'] and machine['ipv6'] is not 'None':
                 machine['ipv6_rdns'] = get_rdns_lookup(machine['ipv6'])
                 machine['ipv6_subnet'] = '.'.join(
                     machine['ipv6'].split(':')[0:4])+'::0/64'
