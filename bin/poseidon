@@ -46,8 +46,8 @@ function check_args()
     while :; do
         case $1 in
             -a|api)
-                if [ "$(docker ps -q --filter "name=cyberreboot-poseidon-api-master" | wc -l)" -eq 1 ]; then
-                    port_map=$(docker port cyberreboot-poseidon-api-master 8000/tcp)
+                if [ "$(docker ps -q --filter "label=vent.namespace=cyberreboot/poseidon" --filter "label=vent.name=api" | wc -l)" -eq 1 ]; then
+                    port_map=$(docker port "$(docker ps -q --filter "label=vent.namespace=cyberreboot/poseidon" --filter "label=vent.name=api")" 8000/tcp)
                     port=$(echo "$port_map" | cut -d':' -f2)
                     default_iface=$(ip route list | head -1 | awk '{print $5}')
                     default_ip=$(ip addr show dev "$default_iface" | awk '$1 == "inet" { sub("/.*", "", $2); print $2 }' | head -1)
@@ -97,8 +97,8 @@ function check_args()
                 exit
                 ;;
             -e|shell)
-                if [ "$(docker ps -q --filter "name=cyberreboot-poseidon-master" | wc -l)" -eq 1 ]; then
-                    docker exec -it cyberreboot-poseidon-master python3 /poseidon/poseidon/cli/cli.py
+                if [ "$(docker ps -q --filter "label=vent.namespace=cyberreboot/poseidon" --filter "label=vent.name=" | wc -l)" -eq 1 ]; then
+                    docker exec -it "$(docker ps -q --filter "label=vent.namespace=cyberreboot/poseidon" --filter "label=vent.name=")" python3 /poseidon/poseidon/cli/cli.py
                 else
                     echo "Poseidon isn't running, you must first start Poseidon to use the shell."
                 fi
@@ -135,8 +135,8 @@ function check_args()
                 exit
                 ;;
             -v|viz|visualize)
-                if [ "$(docker ps -q --filter "name=cyberreboot-crviz-master" | wc -l)" -eq 1 ]; then
-                    port_map=$(docker port cyberreboot-crviz-master 5000/tcp)
+                if [ "$(docker ps -q --filter "label=vent.namespace=cyberreboot/crviz" --filter "label=vent.name=" | wc -l)" -eq 1 ]; then
+                    port_map=$(docker port "$(docker ps -q --filter "label=vent.namespace=cyberreboot/crviz" --filter "label=vent.name=")" 5000/tcp)
                     port=$(echo "$port_map" | cut -d':' -f2)
                     default_iface=$(awk '$2 == 00000000 { print $1 }' /proc/net/route)
                     default_ip=$(ip addr show dev "$default_iface" | awk '$1 ~ /^inet/ { sub("/.*", "", $2); print $2 }' | head -1)
