@@ -43,7 +43,7 @@ build_debian:
 	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-vent.tar cyberreboot/vent:v0.8.0
 	docker pull cyberreboot/vent-file-drop:v0.8.0
 	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-vent-file-drop.tar cyberreboot/vent-file-drop:v0.8.0
-	docker pull cyberreboot/vent-network-tap:v.0.8.0
+	docker pull cyberreboot/vent-network-tap:v0.8.0
 	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-vent-network-tap.tar cyberreboot/vent-network-tap:v0.8.0
 	docker pull cyberreboot/vent-rabbitmq:v0.8.0
 	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-vent-rabbitmq.tar cyberreboot/vent-rabbitmq:v0.8.0
