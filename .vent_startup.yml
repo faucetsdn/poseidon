@@ -31,11 +31,11 @@ https://github.com/cyberreboot/vent:
         start: yes
 https://github.com/cyberreboot/poseidon:
     '@':
-        branch: v0.5.4
+        branch: v0.5.5
         build: yes
         start: yes
     api:
-        branch: v0.5.4
+        branch: v0.5.5
         build: yes
         start: yes
 https://github.com/cyberreboot/vent-plugins:
@@ -55,7 +55,7 @@ https://github.com/cyberreboot/crviz:
         start: yes
 https://github.com/cyberreboot/poseidonml:
     onelayer:
-        branch: v0.2.8
+        branch: v0.2.9
         build: yes
 vent.cfg:
     build-options:
