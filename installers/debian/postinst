@@ -196,8 +196,8 @@ if db_go; then
     systemctl stop poseidon || true
 
     # remove previous images
-    docker images --filter "reference=cyberreboot\/*" -q | xargs docker rmi
-    docker images --filter "label=vent" -q | xargs docker rmi
+    docker images --filter "reference=cyberreboot\/*" -q | xargs docker rmi || true
+    docker images --filter "label=vent" -q | xargs docker rmi || true
 
     # load or pull required images
     if [ ! -f /opt/poseidon/dist/cyberreboot-vent.tar ]; then
