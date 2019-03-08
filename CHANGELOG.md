@@ -1,3 +1,14 @@
+# v0.5.5 (2019-03-08)
+
+ - Packaged versions of components, including vent-plugins v0.1.0, posiedonml v0.2.9, and vent v0.8.0
+ - Fixed role bug in CLI
+ - Added more test coverage to get back up to 90%
+ - Updated version of pip, pylint
+ - Fix crashing bugs in the CLI
+ - Made fields and field names consistent in the CLI and the API
+ - Added the tool a particular field came from if it wasn't Poseidon directly
+ - Can now toggle IPv4 and IPv6 in the CLI
+
 # v0.5.4 (2019-02-22)
 
  - Updated version of prometheus, pytest, redis, texttable

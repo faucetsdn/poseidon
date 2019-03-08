@@ -241,7 +241,7 @@ if db_go; then
         docker load -i /opt/poseidon/dist/cyberreboot-vent-syslog.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-poseidon-api.tar ]; then
-        docker pull cyberreboot/poseidon-api:v0.5.4
+        docker pull cyberreboot/poseidon-api:v0.5.5
     else
         docker load -i /opt/poseidon/dist/cyberreboot-poseidon-api.tar
     fi
@@ -266,12 +266,12 @@ if db_go; then
         docker load -i /opt/poseidon/dist/cyberreboot-crviz.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-poseidonml-deviceclassifier-onelayer.tar ]; then
-        docker pull cyberreboot/poseidonml-deviceclassifier-onelayer:v0.2.8
+        docker pull cyberreboot/poseidonml-deviceclassifier-onelayer:v0.2.9
     else
         docker load -i /opt/poseidon/dist/cyberreboot-poseidonml-deviceclassifier-onelayer.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-poseidon.tar ]; then
-        docker pull cyberreboot/poseidon:v0.5.4
+        docker pull cyberreboot/poseidon:v0.5.5
     else
         docker load -i /opt/poseidon/dist/cyberreboot-poseidon.tar
     fi
