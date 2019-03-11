@@ -90,7 +90,7 @@ function check_args()
                 else
                     if [[ -d "$2" ]]; then
                         echo "$2 is a directory"
-                        for line in "$(find $2 -name '*.pcap')"; do
+                        for line in $(find "$2" -name '*.pcap'); do
                             filename=$(echo "$line" | rev | cut -d/ -f1 | rev)
                             cp "$2" /opt/vent_files/trace_"$filename"
                         done
