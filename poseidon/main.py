@@ -802,6 +802,9 @@ def main(skip_rabbit=False):  # pragma: no cover
 
     if isinstance(pmain.s.sdnc, FaucetProxy):
         Parser().clear_mirrors(pmain.controller['CONFIG_FILE'])
+    elif isinstance(pmain.s.sdnc, BcfProxy):
+        # TODO #998
+        pass
     pmain.logger.debug('SHUTTING DOWN')
     pmain.logger.debug('EXITING')
     sys.exit(0)
