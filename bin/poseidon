@@ -90,13 +90,13 @@ function check_args()
                 else
                     if [[ -d "$2" ]]; then
                         echo "$2 is a directory"
-                        for line in $(find $2 -name '*.pcap'); do
+                        for line in "$(find $2 -name '*.pcap')"; do
                             filename=$(echo "$line" | rev | cut -d/ -f1 | rev)
-                            cp "$2" /opt/vent_files/trace_$filename
+                            cp "$2" /opt/vent_files/trace_"$filename"
                         done
                     elif [[ -f "$2" ]]; then
                         filename=$(echo "$2" | rev | cut -d/ -f1 | rev)
-                        cp "$2" /opt/vent_files/trace_$filename
+                        cp "$2" /opt/vent_files/trace_"$filename"
                     else
                         echo "$2 is not a valid path."
                     fi
