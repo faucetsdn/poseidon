@@ -422,3 +422,20 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         self.logger.debug(sout)
 
         return retval
+
+    def remove_filter_rules(
+            self,
+            fabric_span_endpoint="data/controller/applications/bcf/span-fabric[name=\"{0}\"]",
+            **target_kwargs):
+        resource = fabric_span_endpoint.format(self.span_fabric_name)
+        uri = urljoin(self.base_uri, resource)
+        data = self.get_span_fabric()  # first element is vent span rule
+        data['filter'] = []
+        self.logger.debug('remove filter rules put body: {0}'.format(data))
+        r = self.request_resource(method='PUT', url=uri, data=json.dumps(
+            data), verify=(not self.trust_self_signed_cert))
+        retval = BcfProxy.parse_json(r)
+        sout = 'remove filter rules return:{0}'.format(retval)
+        self.logger.debug(sout)
+
+        return retval

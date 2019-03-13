@@ -520,6 +520,12 @@ class Monitor(object):
         # initialize sdnconnect
         self.s = SDNConnect()
 
+        # cleanup any old filters
+        if isinstance(self.s.sdnc, FaucetProxy):
+            Parser().clear_mirrors(self.controller['CONFIG_FILE'])
+        elif isinstance(self.s.sdnc, BcfProxy):
+            self.s.sdnc.remove_filter_rules()
+
         # retrieve endpoints from redis
         self.s.get_stored_endpoints()
         # set all retrieved endpoints to inactive at the start
@@ -803,8 +809,8 @@ def main(skip_rabbit=False):  # pragma: no cover
     if isinstance(pmain.s.sdnc, FaucetProxy):
         Parser().clear_mirrors(pmain.controller['CONFIG_FILE'])
     elif isinstance(pmain.s.sdnc, BcfProxy):
-        # TODO #998
-        pass
+        pmain.s.sdnc.remove_filter_rules()
+
     pmain.logger.debug('SHUTTING DOWN')
     pmain.logger.debug('EXITING')
     sys.exit(0)
