@@ -15,8 +15,11 @@ class JsonMixin:
         Parse JSON from the `text` field of a response.
         """
         logger = logging.getLogger('requests')
-        if response.status_code > 399:
+        if response.status_code > 400:
             logger.error('Request failed: {0} {1} {2}'.format(
+                response.status_code, response.url, response.text))
+        elif response.status_code == 400:
+            logger.debug('Request already existed: {0} {1} {2}'.format(
                 response.status_code, response.url, response.text))
         else:
             logger.debug('Request succeeded: {0} {1}'.format(
