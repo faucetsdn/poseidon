@@ -520,6 +520,12 @@ class Monitor(object):
         # initialize sdnconnect
         self.s = SDNConnect()
 
+        # cleanup any old filters
+        if isinstance(self.s.sdnc, FaucetProxy):
+            Parser().clear_mirrors(self.controller['CONFIG_FILE'])
+        elif isinstance(self.s.sdnc, BcfProxy):
+            self.s.sdnc.remove_filter_rules()
+
         # retrieve endpoints from redis
         self.s.get_stored_endpoints()
         # set all retrieved endpoints to inactive at the start
@@ -720,6 +726,7 @@ class Monitor(object):
                             self.s.investigations -= 1
                             endpoint.p_prev_states.append(
                                 (endpoint.state, int(time.time())))
+        return
 
     def get_q_item(self):
         '''
@@ -745,17 +752,28 @@ class Monitor(object):
     def signal_handler(self, signal, frame):
         ''' hopefully eat a CTRL_C and signal system shutdown '''
         global CTRL_C
+        if isinstance(self.s.sdnc, FaucetProxy):
+            Parser().clear_mirrors(self.controller['CONFIG_FILE'])
+        elif isinstance(self.s.sdnc, BcfProxy):
+            self.logger.debug('removing bcf filter rules')
+            retval = self.s.sdnc.remove_filter_rules()
+            self.logger.debug('removed filter rules: {0}'.format(retval))
+
         CTRL_C['STOP'] = True
-        self.logger.debug('=================CTRLC{0}'.format(CTRL_C))
+        self.logger.debug('CTRL-C: {0}'.format(CTRL_C))
         try:
             for job in self.schedule.jobs:
                 self.logger.debug('CTRLC:{0}'.format(job))
                 self.schedule.cancel_job(job)
             self.rabbit_channel_connection_local.close()
             self.rabbit_channel_connection_local_fa.close()
+
+            self.logger.debug('SHUTTING DOWN')
+            self.logger.debug('EXITING')
             sys.exit()
-        except BaseException:  # pragma: no cover
-            pass
+        except Exception as e:  # pragma: no cover
+            self.logger.error(
+                'Failed to handle signal properly because: {0}'.format(str(e)))
 
 
 def main(skip_rabbit=False):  # pragma: no cover
@@ -803,8 +821,8 @@ def main(skip_rabbit=False):  # pragma: no cover
     if isinstance(pmain.s.sdnc, FaucetProxy):
         Parser().clear_mirrors(pmain.controller['CONFIG_FILE'])
     elif isinstance(pmain.s.sdnc, BcfProxy):
-        # TODO #998
-        pass
+        pmain.s.sdnc.remove_filter_rules()
+
     pmain.logger.debug('SHUTTING DOWN')
     pmain.logger.debug('EXITING')
     sys.exit(0)

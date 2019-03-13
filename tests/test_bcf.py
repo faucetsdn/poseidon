@@ -519,16 +519,6 @@ def test_mirror_mac():
             self.base_uri = None
             self.logger = MockLogger().logger
 
-        def mirror_traffic(
-                self,
-                seq,
-                mirror=True,
-                span_name='SPAN_FABRIC',
-                s_dict=None,
-                fabric_span_endpoint='',
-                **target_kwargs):
-            pass
-
         def get_bymac(self, mac):
             return [{'mac': mac, 'name': 'foo', 'tenant': 'foo', 'segment': 'foo', 'attachment-point': 'foo'}]
 
@@ -579,16 +569,6 @@ def test_unmirror_mac():
             self.logger = MockLogger().logger
             self.trust_self_signed_cert = True
             self.base_uri = None
-
-        def mirror_traffic(
-                self,
-                seq,
-                mirror=True,
-                span_name='SPAN_FABRIC',
-                s_dict=None,
-                fabric_span_endpoint='',
-                **target_kwargs):
-            pass
 
         def get_endpoints(self):
             return self.endpoints
