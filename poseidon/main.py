@@ -752,13 +752,20 @@ class Monitor(object):
         ''' hopefully eat a CTRL_C and signal system shutdown '''
         global CTRL_C
         CTRL_C['STOP'] = True
-        self.logger.debug('=================CTRLC{0}'.format(CTRL_C))
+        self.logger.debug('CTRL-C: {0}'.format(CTRL_C))
         try:
             for job in self.schedule.jobs:
                 self.logger.debug('CTRLC:{0}'.format(job))
                 self.schedule.cancel_job(job)
             self.rabbit_channel_connection_local.close()
             self.rabbit_channel_connection_local_fa.close()
+            if isinstance(self.s.sdnc, FaucetProxy):
+                Parser().clear_mirrors(self.controller['CONFIG_FILE'])
+            elif isinstance(self.s.sdnc, BcfProxy):
+                self.s.sdnc.remove_filter_rules()
+
+            self.logger.debug('SHUTTING DOWN')
+            self.logger.debug('EXITING')
             sys.exit()
         except BaseException:  # pragma: no cover
             pass
