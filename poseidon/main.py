@@ -758,7 +758,9 @@ class Monitor(object):
         if isinstance(self.s.sdnc, FaucetProxy):
             Parser().clear_mirrors(self.controller['CONFIG_FILE'])
         elif isinstance(self.s.sdnc, BcfProxy):
-            self.s.sdnc.remove_filter_rules()
+            self.logger.debug('removing bcf filter rules')
+            retval = self.s.sdnc.remove_filter_rules()
+            self.logger.debug('removed filter rules: {0}'.format(retval))
 
         try:
             for job in self.schedule.jobs:
