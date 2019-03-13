@@ -73,6 +73,7 @@ function check_args()
             -k|kill)
                 # don't call this directly - intended for systemd
                 docker ps -q --filter "label=vent.namespace=cyberreboot/poseidon" --filter "label=vent.name=" | (xargs docker kill --signal=SIGINT > /dev/null 2>&1) || echo "Poseidon is not running."
+                sleep 5
                 docker ps -q --filter "label=vent" | (xargs docker rm -f > /dev/null 2>&1) || echo "Poseidon containers not running."
                 docker rm -f vent > /dev/null 2>&1
                 exit
