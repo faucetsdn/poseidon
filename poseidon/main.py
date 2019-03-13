@@ -758,6 +758,7 @@ class Monitor(object):
             self.logger.debug('removing bcf filter rules')
             retval = self.s.sdnc.remove_filter_rules()
             self.logger.debug('removed filter rules: {0}'.format(retval))
+        time.sleep(5)
 
         CTRL_C['STOP'] = True
         self.logger.debug('CTRL-C: {0}'.format(CTRL_C))

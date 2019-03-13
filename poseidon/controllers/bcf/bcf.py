@@ -418,7 +418,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         r = self.request_resource(method='PUT', url=uri, data=json.dumps(
             data), verify=(not self.trust_self_signed_cert))
         retval = BcfProxy.parse_json(r)
-        sout = 'mirror_traffic return:{0}'.format(retval)
+        sout = 'mirror_traffic return: {0}'.format(retval)
         self.logger.debug(sout)
 
         return retval
@@ -435,7 +435,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         r = self.request_resource(method='PUT', url=uri, data=json.dumps(
             data), verify=(not self.trust_self_signed_cert))
         retval = BcfProxy.parse_json(r)
-        sout = 'remove filter rules return:{0}'.format(retval)
+        sout = 'remove_filter_rules return: {0}'.format(retval)
         self.logger.debug(sout)
 
         return retval
