@@ -621,3 +621,54 @@ def test_unmirror_mac():
     bcf.endpoints = endpoints
     bcf.span_fabric = span_fabric
     ret_val = bcf.unmirror_mac('00:00:00:00:00:01', None, None)
+
+
+def test_remove_filter_rules():
+
+    class MockBcfProxy(BcfProxy):
+
+        def __init__(self):
+            self.endpoints = None
+            self.span_fabric = None
+            self.logger = MockLogger().logger
+            self.trust_self_signed_cert = True
+            self.base_uri = None
+
+        def remove_filter_rules(
+                self,
+                s_dict=None,
+                fabric_span_endpoint='',
+                **target_kwargs):
+            pass
+
+        def get_endpoints(self):
+            return self.endpoints
+
+        def get_span_fabric(self):
+            return self.span_fabric
+
+    bcf = MockBcfProxy()
+
+    filemap = {
+        '/data/controller/applications/bcf/info/fabric/switch': 'sample_switches.json',
+        '/data/controller/applications/bcf/info/endpoint-manager/tenant': 'sample_tenants.json',
+        '/data/controller/applications/bcf/info/endpoint-manager/segment': 'sample_segments.json',
+        '/data/controller/applications/bcf/info/endpoint-manager/endpoint': 'sample_endpoints.json',
+        '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22]': 'sample_span_fabric.json',
+        # %22 = url-encoded double quotes
+        '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22][dest-interface-group=%22INTERFACE_GROUP%22]': 'sample_span_fabric.json',
+    }
+    proxy = None
+    endpoints = None
+    span_fabric = None
+    controller = {'URI': 'http://localhost',
+                  'USER': username, 'PASS': password, 'SPAN_FABRIC_NAME': 'SPAN_FABRIC', 'INTERFACE_GROUP': 'INTERFACE_GROUP', 'TRUST_SELF_SIGNED_CERT': True}
+    with HTTMock(mock_factory(r'.*', filemap)):
+        proxy = BcfProxy(controller, 'login')
+
+        endpoints = proxy.get_endpoints()
+        span_fabric = proxy.get_span_fabric()
+
+    bcf.endpoints = endpoints
+    bcf.span_fabric = span_fabric
+    ret_val = bcf.remove_filter_rules()
