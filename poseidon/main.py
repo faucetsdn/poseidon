@@ -726,6 +726,7 @@ class Monitor(object):
                             self.s.investigations -= 1
                             endpoint.p_prev_states.append(
                                 (endpoint.state, int(time.time())))
+        return
 
     def get_q_item(self):
         '''
@@ -753,6 +754,7 @@ class Monitor(object):
         global CTRL_C
         CTRL_C['STOP'] = True
         self.logger.debug('CTRL-C: {0}'.format(CTRL_C))
+        self.logger.debug('sdnc {0}'.format(self.s.sdnc))
         if isinstance(self.s.sdnc, FaucetProxy):
             Parser().clear_mirrors(self.controller['CONFIG_FILE'])
         elif isinstance(self.s.sdnc, BcfProxy):
