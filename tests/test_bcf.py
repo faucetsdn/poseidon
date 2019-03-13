@@ -610,6 +610,7 @@ def test_remove_filter_rules():
         def __init__(self):
             self.endpoints = None
             self.span_fabric = None
+            self.span_fabric_name = None
             self.logger = MockLogger().logger
             self.trust_self_signed_cert = True
             self.base_uri = None
