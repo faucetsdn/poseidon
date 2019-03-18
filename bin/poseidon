@@ -23,7 +23,7 @@ Options:
     -i,  info/status   display current status of the Poseidon service
     -l,  logs          display the information logs about what Poseidon is doing
     -L,  system-logs   display the system logs related to Poseidon
-    -p,  pcap          process a PCAP file or directory of PCAPs (uses sudo)
+    -p,  pcap          process a PCAP file or directory of PCAPs *EXPERIMENTAL* (uses sudo)
     -R,  reconfig      reconfigures all settings (uses sudo, will restart the Poseidon service)
     -r,  restart       restart the Poseidon service (uses sudo)
     -s,  start         start the Poseidon service (uses sudo)
