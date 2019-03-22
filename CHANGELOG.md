@@ -1,3 +1,11 @@
+# v0.5.6 (2019-03-22)
+
+ - Updated version of redis, pika, pyyaml, scp, pytest
+ - Cleanly shutdown poseidon container on `poseidon stop`
+ - Add an experimental `pcap` option to the poseidon command
+ - Remove BCF filter rules on poseidon stop and remove any previous filters on start
+ - Cleanup BCF response code when calling the API
+
 # v0.5.5 (2019-03-08)
 
  - Packaged versions of components, including vent-plugins v0.1.0, posiedonml v0.2.9, and vent v0.8.0

@@ -201,62 +201,62 @@ if db_go; then
 
     # load or pull required images
     if [ ! -f /opt/poseidon/dist/cyberreboot-vent.tar ]; then
-        docker pull cyberreboot/vent:v0.8.0
+        docker pull cyberreboot/vent:v0.8.1
     else
         docker load -i /opt/poseidon/dist/cyberreboot-vent.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-vent-file-drop.tar ]; then
-        docker pull cyberreboot/vent-file-drop:v0.8.0
+        docker pull cyberreboot/vent-file-drop:v0.8.1
     else
         docker load -i /opt/poseidon/dist/cyberreboot-vent-file-drop.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-vent-network-tap.tar ]; then
-        docker pull cyberreboot/vent-network-tap:v0.8.0
+        docker pull cyberreboot/vent-network-tap:v0.8.1
     else
         docker load -i /opt/poseidon/dist/cyberreboot-vent-network-tap.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-vent-rabbitmq.tar ]; then
-        docker pull cyberreboot/vent-rabbitmq:v0.8.0
+        docker pull cyberreboot/vent-rabbitmq:v0.8.1
     else
         docker load -i /opt/poseidon/dist/cyberreboot-vent-rabbitmq.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-vent-redis.tar ]; then
-        docker pull cyberreboot/vent-redis:v0.8.0
+        docker pull cyberreboot/vent-redis:v0.8.1
     else
         docker load -i /opt/poseidon/dist/cyberreboot-vent-redis.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-vent-rq-dashboard.tar ]; then
-        docker pull cyberreboot/vent-rq-dashboard:v0.8.0
+        docker pull cyberreboot/vent-rq-dashboard:v0.8.1
     else
         docker load -i /opt/poseidon/dist/cyberreboot-vent-rq-dashboard.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-vent-rq-worker.tar ]; then
-        docker pull cyberreboot/vent-rq-worker:v0.8.0
+        docker pull cyberreboot/vent-rq-worker:v0.8.1
     else
         docker load -i /opt/poseidon/dist/cyberreboot-vent-rq-worker.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-vent-syslog.tar ]; then
-        docker pull cyberreboot/vent-syslog:v0.8.0
+        docker pull cyberreboot/vent-syslog:v0.8.1
     else
         docker load -i /opt/poseidon/dist/cyberreboot-vent-syslog.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-poseidon-api.tar ]; then
-        docker pull cyberreboot/poseidon-api:v0.5.5
+        docker pull cyberreboot/poseidon-api:v0.5.6
     else
         docker load -i /opt/poseidon/dist/cyberreboot-poseidon-api.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-vent-plugins-pcap-to-node-pcap.tar ]; then
-        docker pull cyberreboot/vent-plugins-pcap-to-node-pcap:v0.1.0
+        docker pull cyberreboot/vent-plugins-pcap-to-node-pcap:v0.1.1
     else
         docker load -i /opt/poseidon/dist/cyberreboot-vent-plugins-pcap-to-node-pcap.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-vent-plugins-p0f.tar ]; then
-        docker pull cyberreboot/vent-plugins-p0f:v0.1.0
+        docker pull cyberreboot/vent-plugins-p0f:v0.1.1
     else
         docker load -i /opt/poseidon/dist/cyberreboot-vent-plugins-p0f.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-vent-plugins-tcprewrite-dot1q.tar ]; then
-        docker pull cyberreboot/vent-plugins-tcprewrite-dot1q:v0.1.0
+        docker pull cyberreboot/vent-plugins-tcprewrite-dot1q:v0.1.1
     else
         docker load -i /opt/poseidon/dist/cyberreboot-vent-plugins-tcprewrite-dot1q.tar
     fi
@@ -266,12 +266,12 @@ if db_go; then
         docker load -i /opt/poseidon/dist/cyberreboot-crviz.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-poseidonml-deviceclassifier-onelayer.tar ]; then
-        docker pull cyberreboot/poseidonml-deviceclassifier-onelayer:v0.2.9
+        docker pull cyberreboot/poseidonml-deviceclassifier-onelayer:v0.2.10
     else
         docker load -i /opt/poseidon/dist/cyberreboot-poseidonml-deviceclassifier-onelayer.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-poseidon.tar ]; then
-        docker pull cyberreboot/poseidon:v0.5.5
+        docker pull cyberreboot/poseidon:v0.5.6
     else
         docker load -i /opt/poseidon/dist/cyberreboot-poseidon.tar
     fi
