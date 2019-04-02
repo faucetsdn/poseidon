@@ -248,7 +248,7 @@ class SDNConnect(object):
                 self.logger.error(
                     'FaucetProxy could not connect to {0} because {1}'.format(
                         self.controller['URI'], e))
-        elif 'TYPE' in self.controller and self.controller['TYPE'] is None:
+        elif 'TYPE' in self.controller and self.controller['TYPE'] == 'None':
             self.sdnc = None
         else:
             self.logger.error(
