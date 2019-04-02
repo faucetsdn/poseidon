@@ -5,12 +5,6 @@ VERSION=$(shell cat VERSION)
 build_poseidon:
 	docker build -t $(TAG) .
 
-build_docs:
-	docker build -f ./Dockerfile.docs -t $(TAG)-docs .
-
-run_docs: build_docs
-	docker run --rm -it -p 8080 $(TAG)-docs
-
 run_tests: build_poseidon
 	docker kill $(TAG)-redis || true
 	docker build -f ./Dockerfile.test -t $(TAG)-test .
@@ -104,4 +98,4 @@ build_debian_net:
 
 build_installers: build_debian build_debian_net
 
-.PHONY:  build_debian build_installers build_poseidon build_docs run_docs run_tests
+.PHONY:  build_debian build_installers build_poseidon run_tests
