@@ -292,6 +292,11 @@ if db_go; then
             echo "controller_mirror_ports='{\"switch-1\":3}'" >> /etc/poseidon/default.conf
             echo "collector_nic=s1-eth3" >> /etc/poseidon/default.conf
             echo "reinvestigation_frequency=300" >> /etc/poseidon/default.conf
+            db_get poseidon/logging_level
+            if [[ -n "$RET" ]]; then
+                echo "logger_level=$RET" >> /etc/poseidon/default.conf
+            fi
+
 
             mkdir -p /etc/faucet
             touch /etc/faucet/faucet.yaml
