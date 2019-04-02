@@ -251,6 +251,10 @@ class SDNConnect(object):
         elif 'TYPE' in self.controller and self.controller['TYPE'] == 'None':
             self.sdnc = None
         else:
+            self.logger.info('type: {0} {1}'.format(
+                type(self.controller['TYPE']), self.controller['TYPE']))
+            if 'CONTROLLER_PASS' in self.controller:
+                self.controller['CONTROLLER_PASS'] = '********'
             self.logger.error(
                 'Unknown SDN controller config: {0}'.format(
                     self.controller))
