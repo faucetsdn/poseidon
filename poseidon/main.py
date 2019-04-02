@@ -248,6 +248,8 @@ class SDNConnect(object):
                 self.logger.error(
                     'FaucetProxy could not connect to {0} because {1}'.format(
                         self.controller['URI'], e))
+        elif 'TYPE' in self.controller and self.controller['TYPE'] is None:
+            self.sdnc = None
         else:
             self.logger.error(
                 'Unknown SDN controller config: {0}'.format(
@@ -354,6 +356,9 @@ class SDNConnect(object):
         return endpoints
 
     def check_endpoints(self, messages=None):
+        if not self.sdnc:
+            return
+
         retval = {}
         retval['machines'] = None
         retval['resp'] = 'bad'

@@ -145,15 +145,18 @@ NEW: If you have used the .DEB installer previously, it is worth noting that Pos
 After installation you'll have a new command `poseidon` available for looking at the status, logs, changing the configuration, or stopping and starting the service.
 ```
 $ poseidon help
-Poseidon 0.3.6, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of machine learning techniques. For more info visit: https://github.com/CyberReboot/poseidon
+Poseidon 0.5.6, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of machine learning techniques. For more info visit: https://github.com/CyberReboot/poseidon
 
 Usage: poseidon [option]
 Options:
+    -a,  api           get url to the Poseidon API
     -c,  config        display current configuration info
+    -e,  shell         enter into the Poseidon shell, requires Poseidon to already be running
     -h,  help          print this help
     -i,  info/status   display current status of the Poseidon service
     -l,  logs          display the information logs about what Poseidon is doing
     -L,  system-logs   display the system logs related to Poseidon
+    -p,  pcap          process a PCAP file or directory of PCAPs *EXPERIMENTAL* (uses sudo)
     -R,  reconfig      reconfigures all settings (uses sudo, will restart the Poseidon service)
     -r,  restart       restart the Poseidon service (uses sudo)
     -s,  start         start the Poseidon service (uses sudo)
@@ -161,7 +164,6 @@ Options:
     -v,  viz/visualize get url to visualize Poseidon with CRviz
     -V,  version       display the version of Poseidon and exit
     -Z,  reset         reset the configuration (uses sudo)
-
 ```
 
 Poseidon makes heavy use of a sister project, [vent](https://vent.readthedocs.io/en/latest/?badge=latest). With a successful installation you should minimally see a combination of Poseidon and Vent components, to include:
