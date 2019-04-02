@@ -20,3 +20,18 @@ def test_Actions():
     a.mirror_endpoint()
     a.unmirror_endpoint()
     a.shutdown_endpoint()
+
+
+def test_Actions_nosdn():
+    """
+    Tests Actions with no SDN controller
+    """
+    endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {
+        'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+    s = SDNConnect()
+    s.sdnc = None
+    a = Actions(endpoint, s.sdnc)
+    a.mirror_endpoint()
+    a.unmirror_endpoint()
+    a.shutdown_endpoint()
