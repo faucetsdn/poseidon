@@ -10,9 +10,9 @@ import os
 from httmock import HTTMock
 from httmock import response
 from httmock import urlmatch
+from sample_state import span_fabric_state
 
 from poseidon.controllers.bcf.bcf import BcfProxy
-from poseidon.controllers.bcf.sample_state import span_fabric_state
 
 logger = logging.getLogger('test')
 

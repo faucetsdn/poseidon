@@ -8,7 +8,7 @@ import os
 
 from httmock import response
 
-from poseidon.controllers.mixins.jsonmixin import JsonMixin
+from poseidon.controllers.bcf.jsonmixin import JsonMixin
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 

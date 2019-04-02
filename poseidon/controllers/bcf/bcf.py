@@ -7,8 +7,8 @@ import json
 import logging
 from urllib.parse import urljoin
 
-from poseidon.controllers.auth.cookie.cookieauth import CookieAuthControllerProxy
-from poseidon.controllers.mixins.jsonmixin import JsonMixin
+from poseidon.controllers.bcf.cookieauth import CookieAuthControllerProxy
+from poseidon.controllers.bcf.jsonmixin import JsonMixin
 
 
 class BcfProxy(JsonMixin, CookieAuthControllerProxy):
