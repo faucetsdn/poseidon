@@ -3,7 +3,7 @@
 Test module for controllerproxy.
 @author: kylez
 """
-from poseidon.controllers.controllerproxy import ControllerProxy
+from poseidon.controllers.bcf.controllerproxy import ControllerProxy
 
 
 def test_ControllerProxy():

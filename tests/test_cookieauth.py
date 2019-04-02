@@ -10,7 +10,7 @@ from httmock import HTTMock
 from httmock import response
 from httmock import urlmatch
 
-from poseidon.controllers.auth.cookie.cookieauth import CookieAuthControllerProxy
+from poseidon.controllers.bcf.cookieauth import CookieAuthControllerProxy
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 username = 'user'
