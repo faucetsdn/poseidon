@@ -94,14 +94,14 @@ while [ "$STATE" != 0 ] && [ "$STATE" != 13 ]; do
 
     8)
         db_get poseidon/controller_type
-        if [ "$RET" != "Demo" ]; then
+        if [ "$RET" != "Demo" ] && [ "$RET" != "None" ]; then
             db_input critical poseidon/collector_nic || true
         fi
     ;;
 
     9)
         db_get poseidon/controller_type
-        if [ "$RET" != "Demo" ]; then
+        if [ "$RET" != "Demo" ] && [ "$RET" != "None" ]; then
             db_get poseidon/collector_nic
             if [ "$RET" == "Specify your own" ]; then
                 db_input critical poseidon/specify_nic || true
@@ -113,7 +113,7 @@ while [ "$STATE" != 0 ] && [ "$STATE" != 13 ]; do
 
     10)
         db_get poseidon/controller_type
-        if [ "$RET" != "Demo" ]; then
+        if [ "$RET" != "Demo" ] && [ "$RET" != "None" ]; then
             db_input high poseidon/max_concurrent_reinvestigations || true
         fi
     ;;
@@ -127,14 +127,12 @@ while [ "$STATE" != 0 ] && [ "$STATE" != 13 ]; do
 
     12)
         db_get poseidon/controller_type
-        if [ "$RET" != "Demo" ]; then
-            db_input low poseidon/logging_level || true
-        fi
+        db_input low poseidon/logging_level || true
     ;;
 
     13)
         db_get poseidon/controller_type
-        if [ "$RET" != "Demo" ]; then
+        if [ "$RET" != "Demo" ] && [ "$RET" != "None" ]; then
             db_input low poseidon/trust_certs || true
         fi
     ;;

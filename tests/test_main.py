@@ -330,6 +330,8 @@ def test_process():
             self.faucet_event = None
             self.controller = Config().get_config()
             self.s = SDNConnect()
+            self.s.controller['TYPE'] = 'None'
+            self.s.get_sdn_context()
             self.s.controller['TYPE'] = 'bcf'
             self.s.get_sdn_context()
             self.s.controller['TYPE'] = 'faucet'
@@ -425,9 +427,6 @@ def test_schedule_thread_worker():
 
         def __init__(self):
             pass
-
-        # def exit(self):
-        #    pass
 
     sys = mocksys()
     t1 = Thread(target=thread1)

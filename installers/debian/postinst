@@ -15,7 +15,9 @@ if db_go; then
     # read from db to set variables in default.conf
     db_get poseidon/controller_type
     if [[ -n "$RET" ]]; then
-        if [ "$RET" == "Faucet" ]; then
+        if [ "$RET" == "None" ]; then
+            echo "controller_type=None" >> /etc/poseidon/default.conf
+        elif [ "$RET" == "Faucet" ]; then
             echo "controller_type=faucet" >> /etc/poseidon/default.conf
             db_get poseidon/faucet_same_host
             if [ "$RET" == "No" ]; then
@@ -123,9 +125,28 @@ if db_go; then
         failed=true
     fi
 
+    db_get poseidon/logging_level
+    if [[ -n "$RET" ]]; then
+        echo "logger_level=$RET" >> /etc/poseidon/default.conf
+    fi
+
     db_get poseidon/controller_type
     if [[ -n "$RET" ]]; then
         if [ "$RET" != "Demo" ]; then
+            db_get poseidon/learn_public_addresses
+            if [[ -n "$RET" ]]; then
+                if [ "$RET" == "Yes" ]; then
+                    echo "learn_public_addresses=True" >> /etc/poseidon/default.conf
+                else
+                    echo "learn_public_addresses=False" >> /etc/poseidon/default.conf
+                fi
+            fi
+        fi
+    fi
+
+    db_get poseidon/controller_type
+    if [[ -n "$RET" ]]; then
+        if [ "$RET" != "Demo" ] && [ "$RET" != "None" ]; then
             db_get poseidon/collector_nic
             if [[ -n "$RET" ]]; then
                 if [ "$RET" == "Specify your own" ]; then
@@ -163,20 +184,6 @@ if db_go; then
             db_get poseidon/reinvestigation_frequency
             if [[ -n "$RET" ]]; then
                 echo "reinvestigation_frequency=$RET" >> /etc/poseidon/default.conf
-            fi
-
-            db_get poseidon/learn_public_addresses
-            if [[ -n "$RET" ]]; then
-                if [ "$RET" == "Yes" ]; then
-                    echo "learn_public_addresses=True" >> /etc/poseidon/default.conf
-                else
-                    echo "learn_public_addresses=False" >> /etc/poseidon/default.conf
-                fi
-            fi
-
-            db_get poseidon/logging_level
-            if [[ -n "$RET" ]]; then
-                echo "logger_level=$RET" >> /etc/poseidon/default.conf
             fi
 
             db_get poseidon/trust_cert
