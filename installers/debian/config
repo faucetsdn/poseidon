@@ -127,9 +127,7 @@ while [ "$STATE" != 0 ] && [ "$STATE" != 13 ]; do
 
     12)
         db_get poseidon/controller_type
-        if [ "$RET" != "Demo" ]; then
-            db_input low poseidon/logging_level || true
-        fi
+        db_input low poseidon/logging_level || true
     ;;
 
     13)
