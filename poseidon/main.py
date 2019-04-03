@@ -70,6 +70,9 @@ def schedule_job_kickurl(func):
             # send results to prometheus
             hosts = req.json()['dataset']
             func.prom.update_metrics(hosts)
+        except requests.exceptions.ConnectionError as e:
+            func.logger.debug(
+                'Unable to get current state and send it to Prometheus because: {0}'.format(str(e)))
         except Exception as e:  # pragma: no cover
             func.logger.error(
                 'Unable to get current state and send it to Prometheus because: {0}'.format(str(e)))
