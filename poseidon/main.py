@@ -57,24 +57,28 @@ def rabbit_callback(ch, method, properties, body, q=None):
 
 
 def schedule_job_kickurl(func):
+    global CTRL_C
     func.s.check_endpoints(messages=func.faucet_event)
     del func.faucet_event[:]
 
-    try:
-        # get current state
-        req = requests.get(
-            'http://poseidon-api:8000/v1/network_full', timeout=10)
+    if not CTRL_C['STOP']:
+        try:
+            # get current state
+            req = requests.get(
+                'http://poseidon-api:8000/v1/network_full', timeout=10)
 
-        # send results to prometheus
-        hosts = req.json()['dataset']
-        func.prom.update_metrics(hosts)
-    except Exception as e:  # pragma: no cover
-        func.logger.error(
-            'Unable to get current state and send it to Prometheus because: {0}'.format(str(e)))
+            # send results to prometheus
+            hosts = req.json()['dataset']
+            func.prom.update_metrics(hosts)
+        except Exception as e:  # pragma: no cover
+            func.logger.error(
+                'Unable to get current state and send it to Prometheus because: {0}'.format(str(e)))
 
 
 def schedule_job_reinvestigation(func):
     ''' put endpoints into the reinvestigation state if possible '''
+    global CTRL_C
+
     def trigger_reinvestigation(candidates):
         # get random order of things that are known
         for _ in range(func.controller['max_concurrent_reinvestigations'] - func.s.investigations):
@@ -92,19 +96,20 @@ def schedule_job_reinvestigation(func):
                         'Unable to mirror the endpoint: {0}'.format(chosen.name))
         return
 
-    candidates = []
-    for endpoint in func.s.endpoints:
-        # queued endpoints have priority
-        if endpoint.state in ['queued']:
-            candidates.append(endpoint)
-    if len(candidates) == 0:
-        # if no queued endpoints, then known and abnormal are candidates
+    if not CTRL_C['STOP']:
+        candidates = []
         for endpoint in func.s.endpoints:
-            if endpoint.state in ['known', 'abnormal']:
+            # queued endpoints have priority
+            if endpoint.state in ['queued']:
                 candidates.append(endpoint)
-        if len(candidates) > 0:
-            random.shuffle(candidates)
-    trigger_reinvestigation(candidates)
+        if len(candidates) == 0:
+            # if no queued endpoints, then known and abnormal are candidates
+            for endpoint in func.s.endpoints:
+                if endpoint.state in ['known', 'abnormal']:
+                    candidates.append(endpoint)
+            if len(candidates) > 0:
+                random.shuffle(candidates)
+        trigger_reinvestigation(candidates)
 
 
 def schedule_thread_worker(schedule):
@@ -779,7 +784,7 @@ class Monitor(object):
             self.logger.debug('EXITING')
             sys.exit()
         except Exception as e:  # pragma: no cover
-            self.logger.error(
+            self.logger.debug(
                 'Failed to handle signal properly because: {0}'.format(str(e)))
 
 
