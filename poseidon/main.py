@@ -676,7 +676,7 @@ class Monitor(object):
                 extras = deepcopy(ml_returns)
                 # process results from ml output and update impacted endpoints
                 for ep in self.s.endpoints:
-                    if ep.name in ml_returns or ('valid' in ml_returns[ep.name] and ml_returns[ep.name]['valid'] == 'false'):
+                    if ep.name in ml_returns:
                         del extras[ep.name]
                     if ep.name in ml_returns and 'valid' in ml_returns[ep.name] and not ep.ignore:
                         if ep.state in ['mirroring', 'reinvestigating']:
@@ -700,15 +700,16 @@ class Monitor(object):
                             (ep.state, int(time.time())))
                 extra_machines = []
                 for device in extras:
-                    extra_machine = {'mac': extras[device]['source_mac'], 'segment': 'NO DATA',
-                                     'port': 'NO DATA', 'tenant': 'NO DATA', 'active': 0, 'name': device}
-                    if ':' in extras[device]['source_ip']:
-                        extra_machine['ipv6'] = extras[device]['source_ip']
-                        extra_machine['ipv4'] = 0
-                    else:
-                        extra_machine['ipv4'] = extras[device]['source_ip']
-                        extra_machine['ipv6'] = 0
-                    extra_machines.append(extra_machine)
+                    if extras[device]['valid'] == 'true':
+                        extra_machine = {'mac': extras[device]['source_mac'], 'segment': 'NO DATA',
+                                         'port': 'NO DATA', 'tenant': 'NO DATA', 'active': 0, 'name': device}
+                        if ':' in extras[device]['source_ip']:
+                            extra_machine['ipv6'] = extras[device]['source_ip']
+                            extra_machine['ipv4'] = 0
+                        else:
+                            extra_machine['ipv4'] = extras[device]['source_ip']
+                            extra_machine['ipv6'] = 0
+                        extra_machines.append(extra_machine)
                 self.s.find_new_machines(extra_machines)
             # mirror things in the order they got added to the queue
             queued_endpoints = []
