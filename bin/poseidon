@@ -89,7 +89,7 @@ function check_args()
             -p|pcap)
                 if [ -z "$2" ]; then
                     echo "Please supply the path to the PCAP(s) to process."
-                else if [ grep -Fxq "controller_type=None" /etc/poseidon/default.conf ]; then
+                elif [ grep -Fxq "controller_type=None" /etc/poseidon/default.conf ]; then
                     if [[ -d "$2" ]]; then
                         for line in $(find "$2" -name '*.pcap'); do
                             filename=$(echo "$line" | rev | cut -d/ -f1 | rev)
