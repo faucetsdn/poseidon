@@ -703,7 +703,7 @@ class Monitor(object):
                 for device in extras:
                     if extras[device]['valid']:
                         extra_machine = {'mac': extras[device]['source_mac'], 'segment': 'NO DATA',
-                                         'port': 'NO DATA', 'tenant': 'NO DATA', 'active': 0, 'name': device}
+                                         'port': 'NO DATA', 'tenant': 'NO DATA', 'active': 0, 'name': None}
                         if ':' in extras[device]['source_ip']:
                             extra_machine['ipv6'] = extras[device]['source_ip']
                             extra_machine['ipv4'] = 0
