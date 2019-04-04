@@ -711,7 +711,8 @@ class Monitor(object):
                             extra_machine['ipv4'] = extras[device]['source_ip']
                             extra_machine['ipv6'] = 0
                         extra_machines.append(extra_machine)
-                self.s.find_new_machines(extra_machines)
+                if not self.s.sdnc:
+                    self.s.find_new_machines(extra_machines)
             # mirror things in the order they got added to the queue
             queued_endpoints = []
             for endpoint in self.s.endpoints:
