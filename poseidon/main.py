@@ -112,7 +112,8 @@ def schedule_job_reinvestigation(func):
                     candidates.append(endpoint)
             if len(candidates) > 0:
                 random.shuffle(candidates)
-        trigger_reinvestigation(candidates)
+        if func.s.sdnc:
+            trigger_reinvestigation(candidates)
 
 
 def schedule_thread_worker(schedule):
@@ -736,26 +737,29 @@ class Monitor(object):
 
             for endpoint in self.s.endpoints:
                 if not endpoint.ignore:
-                    if endpoint.state == 'unknown':
-                        endpoint.p_next_state = 'mirror'
-                        endpoint.queue()
-                        endpoint.p_prev_states.append(
-                            (endpoint.state, int(time.time())))
-                    elif endpoint.state in ['mirroring', 'reinvestigating']:
-                        cur_time = int(time.time())
-                        # timeout after 2 times the reinvestigation frequency
-                        # in case something didn't report back, put back in an
-                        # unknown state
-                        if cur_time - endpoint.p_prev_states[-1][1] > 2*self.controller['reinvestigation_frequency']:
-                            status = Actions(
-                                endpoint, self.s.sdnc).unmirror_endpoint()
-                            if not status:
-                                self.logger.warning(
-                                    'Unable to unmirror the endpoint: {0}'.format(endpoint.name))
-                            endpoint.unknown()
-                            self.s.investigations -= 1
+                    if self.s.sdnc:
+                        if endpoint.state == 'unknown':
+                            endpoint.p_next_state = 'mirror'
+                            endpoint.queue()
                             endpoint.p_prev_states.append(
                                 (endpoint.state, int(time.time())))
+                        elif endpoint.state in ['mirroring', 'reinvestigating']:
+                            cur_time = int(time.time())
+                            # timeout after 2 times the reinvestigation frequency
+                            # in case something didn't report back, put back in an
+                            # unknown state
+                            if cur_time - endpoint.p_prev_states[-1][1] > 2*self.controller['reinvestigation_frequency']:
+                                status = Actions(
+                                    endpoint, self.s.sdnc).unmirror_endpoint()
+                                if not status:
+                                    self.logger.warning(
+                                        'Unable to unmirror the endpoint: {0}'.format(endpoint.name))
+                                endpoint.unknown()
+                                self.s.investigations -= 1
+                                endpoint.p_prev_states.append(
+                                    (endpoint.state, int(time.time())))
+                    else:
+                        endpoint.known()
         return
 
     def get_q_item(self):
