@@ -112,7 +112,8 @@ def schedule_job_reinvestigation(func):
                     candidates.append(endpoint)
             if len(candidates) > 0:
                 random.shuffle(candidates)
-        trigger_reinvestigation(candidates)
+        if func.s.sdnc:
+            trigger_reinvestigation(candidates)
 
 
 def schedule_thread_worker(schedule):
@@ -578,14 +579,14 @@ class Monitor(object):
             name='st_worker')
 
     def format_rabbit_message(self, item):
-        ''' read a message off the rabbit_q
+        '''
+        read a message off the rabbit_q
         the message should be item = (routing_key,msg)
         '''
         ret_val = {}
 
         routing_key, my_obj = item
         self.logger.debug('rabbit_message:{0}'.format(my_obj))
-        # my_obj: (hash,data)
         my_obj = json.loads(my_obj)
         self.logger.debug('routing_key:{0}'.format(routing_key))
         if routing_key == 'poseidon.algos.decider':
@@ -673,8 +674,11 @@ class Monitor(object):
                 if ml_returns:
                     self.logger.info(
                         'ML results: {0}'.format(ml_returns))
+                extras = deepcopy(ml_returns)
                 # process results from ml output and update impacted endpoints
                 for ep in self.s.endpoints:
+                    if ep.name in ml_returns:
+                        del extras[ep.name]
                     if ep.name in ml_returns and 'valid' in ml_returns[ep.name] and not ep.ignore:
                         if ep.state in ['mirroring', 'reinvestigating']:
                             status = Actions(
@@ -695,7 +699,19 @@ class Monitor(object):
                             ep.unknown()
                         ep.p_prev_states.append(
                             (ep.state, int(time.time())))
-
+                extra_machines = []
+                for device in extras:
+                    if extras[device]['valid']:
+                        extra_machine = {'mac': extras[device]['source_mac'], 'segment': 'NO DATA',
+                                         'port': 'NO DATA', 'tenant': 'NO DATA', 'active': 0, 'name': None}
+                        if ':' in extras[device]['source_ip']:
+                            extra_machine['ipv6'] = extras[device]['source_ip']
+                            extra_machine['ipv4'] = 0
+                        else:
+                            extra_machine['ipv4'] = extras[device]['source_ip']
+                            extra_machine['ipv6'] = 0
+                        extra_machines.append(extra_machine)
+                self.s.find_new_machines(extra_machines)
             # mirror things in the order they got added to the queue
             queued_endpoints = []
             for endpoint in self.s.endpoints:
@@ -721,26 +737,30 @@ class Monitor(object):
 
             for endpoint in self.s.endpoints:
                 if not endpoint.ignore:
-                    if endpoint.state == 'unknown':
-                        endpoint.p_next_state = 'mirror'
-                        endpoint.queue()
-                        endpoint.p_prev_states.append(
-                            (endpoint.state, int(time.time())))
-                    elif endpoint.state in ['mirroring', 'reinvestigating']:
-                        cur_time = int(time.time())
-                        # timeout after 2 times the reinvestigation frequency
-                        # in case something didn't report back, put back in an
-                        # unknown state
-                        if cur_time - endpoint.p_prev_states[-1][1] > 2*self.controller['reinvestigation_frequency']:
-                            status = Actions(
-                                endpoint, self.s.sdnc).unmirror_endpoint()
-                            if not status:
-                                self.logger.warning(
-                                    'Unable to unmirror the endpoint: {0}'.format(endpoint.name))
-                            endpoint.unknown()
-                            self.s.investigations -= 1
+                    if self.s.sdnc:
+                        if endpoint.state == 'unknown':
+                            endpoint.p_next_state = 'mirror'
+                            endpoint.queue()
                             endpoint.p_prev_states.append(
                                 (endpoint.state, int(time.time())))
+                        elif endpoint.state in ['mirroring', 'reinvestigating']:
+                            cur_time = int(time.time())
+                            # timeout after 2 times the reinvestigation frequency
+                            # in case something didn't report back, put back in an
+                            # unknown state
+                            if cur_time - endpoint.p_prev_states[-1][1] > 2*self.controller['reinvestigation_frequency']:
+                                status = Actions(
+                                    endpoint, self.s.sdnc).unmirror_endpoint()
+                                if not status:
+                                    self.logger.warning(
+                                        'Unable to unmirror the endpoint: {0}'.format(endpoint.name))
+                                endpoint.unknown()
+                                self.s.investigations -= 1
+                                endpoint.p_prev_states.append(
+                                    (endpoint.state, int(time.time())))
+                    else:
+                        if endpoint.state != 'known':
+                            endpoint.known()
         return
 
     def get_q_item(self):
