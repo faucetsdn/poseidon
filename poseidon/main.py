@@ -676,7 +676,7 @@ class Monitor(object):
                 extras = deepcopy(ml_returns)
                 # process results from ml output and update impacted endpoints
                 for ep in self.s.endpoints:
-                    if ep.name in ml_returns or ml_returns[ep.name]['valid'] == 'false':
+                    if ep.name in ml_returns or ('valid' in ml_returns[ep.name] and ml_returns[ep.name]['valid'] == 'false'):
                         del extras[ep.name]
                     if ep.name in ml_returns and 'valid' in ml_returns[ep.name] and not ep.ignore:
                         if ep.state in ['mirroring', 'reinvestigating']:
