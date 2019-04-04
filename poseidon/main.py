@@ -700,7 +700,7 @@ class Monitor(object):
                             (ep.state, int(time.time())))
                 extra_machines = []
                 for device in extras:
-                    if extras[device]['valid'] == 'true':
+                    if extras[device]['valid']:
                         extra_machine = {'mac': extras[device]['source_mac'], 'segment': 'NO DATA',
                                          'port': 'NO DATA', 'tenant': 'NO DATA', 'active': 0, 'name': device}
                         if ':' in extras[device]['source_ip']:
