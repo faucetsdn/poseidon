@@ -23,7 +23,7 @@ Options:
     -i,  info/status   display current status of the Poseidon service
     -l,  logs          display the information logs about what Poseidon is doing
     -L,  system-logs   display the system logs related to Poseidon
-    -p,  pcap          process a PCAP file or directory of PCAPs *EXPERIMENTAL* (uses sudo)
+    -p,  pcap          process a PCAP file or directory of PCAPs (uses sudo, can't be used with an SDN controller)
     -R,  reconfig      reconfigures all settings (uses sudo, will restart the Poseidon service)
     -r,  restart       restart the Poseidon service (uses sudo)
     -s,  start         start the Poseidon service (uses sudo)
@@ -89,7 +89,7 @@ function check_args()
             -p|pcap)
                 if [ -z "$2" ]; then
                     echo "Please supply the path to the PCAP(s) to process."
-                else
+                else if [ grep -Fxq "controller_type=None" /etc/poseidon/default.conf ]; then
                     if [[ -d "$2" ]]; then
                         for line in $(find "$2" -name '*.pcap'); do
                             filename=$(echo "$line" | rev | cut -d/ -f1 | rev)
@@ -101,6 +101,8 @@ function check_args()
                     else
                         echo "$2 is not a valid path."
                     fi
+                else
+                    echo "This can only be used when not using an SDN controller. Use 'poseidon reconfig' to set the controller as None"
                 fi
                 exit
                 ;;
