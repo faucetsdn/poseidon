@@ -759,7 +759,8 @@ class Monitor(object):
                                 endpoint.p_prev_states.append(
                                     (endpoint.state, int(time.time())))
                     else:
-                        endpoint.known()
+                        if endpoint.state != 'known':
+                            endpoint.known()
         return
 
     def get_q_item(self):
