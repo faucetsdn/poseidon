@@ -578,14 +578,14 @@ class Monitor(object):
             name='st_worker')
 
     def format_rabbit_message(self, item):
-        ''' read a message off the rabbit_q
+        '''
+        read a message off the rabbit_q
         the message should be item = (routing_key,msg)
         '''
         ret_val = {}
 
         routing_key, my_obj = item
         self.logger.debug('rabbit_message:{0}'.format(my_obj))
-        # my_obj: (hash,data)
         my_obj = json.loads(my_obj)
         self.logger.debug('routing_key:{0}'.format(routing_key))
         if routing_key == 'poseidon.algos.decider':
@@ -676,7 +676,7 @@ class Monitor(object):
                 extras = deepcopy(ml_returns)
                 # process results from ml output and update impacted endpoints
                 for ep in self.s.endpoints:
-                    if ep.name in ml_returns:
+                    if ep.name in ml_returns or ml_returns[ep.name]['valid'] == 'false':
                         del extras[ep.name]
                     if ep.name in ml_returns and 'valid' in ml_returns[ep.name] and not ep.ignore:
                         if ep.state in ['mirroring', 'reinvestigating']:
@@ -700,8 +700,8 @@ class Monitor(object):
                             (ep.state, int(time.time())))
                 extra_machines = []
                 for device in extras:
-                    extra_machine = {'mac': device, 'segment': 'NO DATA',
-                                     'port': 'NO DATA', 'tenant': 'NO DATA', 'active': 0, 'name': None}
+                    extra_machine = {'mac': extras[device]['source_mac'], 'segment': 'NO DATA',
+                                     'port': 'NO DATA', 'tenant': 'NO DATA', 'active': 0, 'name': device}
                     if ':' in extras[device]['source_ip']:
                         extra_machine['ipv6'] = extras[device]['source_ip']
                         extra_machine['ipv4'] = 0
