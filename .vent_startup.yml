@@ -1,41 +1,41 @@
 https://github.com/cyberreboot/vent:
     file_drop:
-        branch: v0.8.1
+        branch: v0.8.2
         build: yes
         start: yes
     network_tap:
-        branch: v0.8.1
+        branch: v0.8.2
         build: yes
         start: yes
     rabbitmq:
-        branch: v0.8.1
+        branch: v0.8.2
         build: yes
         start: yes
     redis:
-        branch: v0.8.1
+        branch: v0.8.2
         build: yes
         start: yes
     rq_dashboard:
-        branch: v0.8.1
+        branch: v0.8.2
         build: yes
         start: yes
     rq_worker:
-        branch: v0.8.1
+        branch: v0.8.2
         build: yes
         start: yes
         settings:
             instances: 4
     syslog:
-        branch: v0.8.1
+        branch: v0.8.2
         build: yes
         start: yes
 https://github.com/cyberreboot/poseidon:
     '@':
-        branch: v0.5.6
+        branch: v0.5.7
         build: yes
         start: yes
     api:
-        branch: v0.5.6
+        branch: v0.5.7
         build: yes
         start: yes
 https://github.com/cyberreboot/vent-plugins:
@@ -54,8 +54,8 @@ https://github.com/cyberreboot/crviz:
         build: yes
         start: yes
 https://github.com/cyberreboot/poseidonml:
-    onelayer:
-        branch: v0.2.10
+    '@':
+        branch: v0.3.0
         build: yes
 vent.cfg:
     build-options:

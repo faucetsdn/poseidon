@@ -1,3 +1,14 @@
+# v0.5.7 (2019-04-04)
+
+ - Packaged versions of components, including vent-plugins v0.1.1, poseidonml v0.3.0, crviz v0.2.10, and vent v0.8.2
+ - New option `poseidon pcap` is now fully operational
+ - Poseidon can now be run without an SDN controller, useful for using the above pcap feature, or looking at an existing Poseidon database
+ - Updated version of pika, pytest
+ - Log level can now we set on any controller mode including Demo
+ - Suppressed error messages on `poseidon stop`
+ - Fixed issue where ipv4 and ipv6 addresses from Faucet were getting set to 0
+ - Fixed issue where ipv6 columns were not showing up when specified in fields in the CLI
+
 # v0.5.6 (2019-03-22)
 
  - Updated version of redis, pika, pyyaml, scp, pytest
@@ -8,7 +19,7 @@
 
 # v0.5.5 (2019-03-08)
 
- - Packaged versions of components, including vent-plugins v0.1.0, posiedonml v0.2.9, and vent v0.8.0
+ - Packaged versions of components, including vent-plugins v0.1.0, poseidonml v0.2.9, and vent v0.8.0
  - Fixed role bug in CLI
  - Added more test coverage to get back up to 90%
  - Updated version of pip, pylint
@@ -54,7 +65,7 @@
  - Action commands in the CLI now work, including changing state and collecting, via changing to say a mirror state
  - Fixed the poseidon shell script to handle if the poseidon-net package was installed
  - Updated Docker images to use alpine 3.9
- - Fixed a serious bug that cause BCF to no longer work with Poseidon due it not being able to create filters by MAC address
+ - Fixed a serious bug that caused BCF to no longer work with Poseidon due it not being able to create filters by MAC address
 
 # v0.5.2 (2019-01-25)
 
