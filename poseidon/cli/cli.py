@@ -322,6 +322,11 @@ class Parser():
                 ipv6_only = False
                 ipv4_and_ipv6 = True
 
+        if 'fields' in flags and not '4' in flags and not '6' in flags and not '4and6' in flags:
+            ipv4_only = False
+            ipv6_only = False
+            ipv4_and_ipv6 = True
+
         return fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6
 
     def display_results(self, endpoints, fields, sort_by=0, max_width=0, unique=False, nonzero=False, output_format='table', ipv4_only=True, ipv6_only=False, ipv4_and_ipv6=False):
