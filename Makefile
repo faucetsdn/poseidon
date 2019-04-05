@@ -60,7 +60,7 @@ build_debian:
 	docker pull cyberreboot/crviz:v0.2.10
 	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-crviz.tar cyberreboot/crviz:v0.2.10
 	docker pull cyberreboot/poseidonml:v0.3.0
-	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-poseidonml.tar cyberreboot/poseidonml:v0.33.0
+	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-poseidonml.tar cyberreboot/poseidonml:v0.3.0
 	docker pull cyberreboot/poseidon:v0.5.7
 	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-poseidon.tar cyberreboot/poseidon:v0.5.7
 	mkdir -p dist
