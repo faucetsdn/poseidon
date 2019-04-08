@@ -63,6 +63,11 @@ Type: string
 Default: 900
 Description: Set the amount of time in seconds to run investigations and reinvestigations on an endpoint:
 
+Template: poseidon/vent_files_delete
+Type: string
+Default: 0
+Description: Set frequency in days old to delete processed PCAP files (if set to 0 it will not delete anything):
+
 Template: poseidon/faucet_controller_mirror_ports
 Type: string
 Description: Set the controller mirror ports:
