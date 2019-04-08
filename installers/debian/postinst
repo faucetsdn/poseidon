@@ -133,7 +133,7 @@ if db_go; then
     db_get poseidon/vent_files_delete
     if [[ -n "$RET" ]]; then
         echo "delete_pcap_files=$RET" >> /etc/poseidon/default.conf
-        $cronfile="/etc/cron.daily/poseidon"
+        cronfile="/etc/cron.daily/poseidon"
         if [ "$RET" == "0" ]; then
             if [ -e $cronfile ]; then
                 rm $cronfile
