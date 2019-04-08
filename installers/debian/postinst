@@ -139,7 +139,7 @@ if db_go; then
                 rm $cronfile
             fi
         else
-            echo "#!/bin/sh\n\nfind /opt/vent_files/* -mtime +$RET -exec rm {} \;" > $cronfile
+            printf "#!/bin/sh\n\nfind /opt/vent_files/* -mtime +%s -exec rm {} \;" "$RET" > $cronfile
             chmod 755 $cronfile
         fi
     fi
