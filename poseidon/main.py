@@ -424,6 +424,9 @@ class SDNConnect(object):
             else:
                 machine['ipv6_rdns'] = 'NO DATA'
                 machine['ipv6_subnet'] = 'NO DATA'
+            if not 'controller_type' in machine:
+                machine['controller_type'] = 'none'
+                machine['controller'] = ''
             h = Endpoint.make_hash(machine)
             ep = None
             for endpoint in self.endpoints:

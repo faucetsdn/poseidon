@@ -112,9 +112,6 @@ class Nodes():
                             for key in node:
                                 if key in endpoint_data:
                                     node[key] = endpoint_data[key]
-                            if not 'controller_type' in node:
-                                node['controller_type'] = 'none'
-                                node['controller'] = ''
                             if 'ipv4' in node:
                                 try:
                                     ipv4 = endpoint_data['ipv4']

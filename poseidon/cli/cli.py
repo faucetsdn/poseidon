@@ -92,14 +92,14 @@ class GetData():
         if 'controller_type' in endpoint.endpoint_data:
             return str(endpoint.endpoint_data['controller_type'])
         else:
-            return 'none'
+            return 'NO DATA'
 
     @staticmethod
     def _get_controller(endpoint):
         if 'controller' in endpoint.endpoint_data:
             return str(endpoint.endpoint_data['controller'])
         else:
-            return ''
+            return 'NO DATA'
 
     @staticmethod
     def _get_ignored(endpoint):
