@@ -49,7 +49,7 @@ class FaucetProxy(Connection, Parser):
         Parser().clear_mirrors(self.config_file)
 
     @staticmethod
-    def format_endpoints(data):
+    def format_endpoints(data, controller):
         '''
         return only the information needed for the application
         '''
@@ -80,6 +80,8 @@ class FaucetProxy(Connection, Parser):
             if 'ip-address' in md:
                 del md['ip-address']
 
+            md['controller_type'] = 'faucet'
+            md['controller'] = controller
             md['name'] = None
             ret_list.append(md)
         return ret_list

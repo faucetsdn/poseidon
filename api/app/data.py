@@ -112,6 +112,9 @@ class Nodes():
                             for key in node:
                                 if key in endpoint_data:
                                     node[key] = endpoint_data[key]
+                            if not 'controller_type' in node:
+                                node['controller_type'] = 'none'
+                                node['controller'] = ''
                             if 'ipv4' in node:
                                 try:
                                     ipv4 = endpoint_data['ipv4']
@@ -192,7 +195,8 @@ class NetworkFull(object):
                 'role_confidence': 0, 'behavior': 0,
                 'ipv4_os': 'NO DATA', 'ipv6_os': 'NO DATA',
                 'source': 'NO DATA', 'ipv4_rdns': 'NO DATA',
-                'ipv6_rdns': 'NO DATA', 'ether_vendor': 'NO DATA'}
+                'ipv6_rdns': 'NO DATA', 'ether_vendor': 'NO DATA',
+                'controller_type': 'NO DATA', 'controller': 'NO DATA'}
 
     @staticmethod
     def get_dataset():
@@ -223,7 +227,8 @@ class Network(object):
                 'role': 'NO DATA', 'role_confidence': 0, 'behavior': 0,
                 'ipv4_os': 'NO DATA', 'ipv6_os': 'NO DATA',
                 'ipv4_rdns': 'NO DATA', 'ipv6_rdns': 'NO DATA',
-                'ether_vendor': 'NO DATA'}
+                'ether_vendor': 'NO DATA', 'controller_type': 'NO DATA',
+                'controller': 'NO DATA'}
 
     @staticmethod
     def field_mapping():
@@ -232,10 +237,13 @@ class Network(object):
                 'ipv4_subnet': 'IPv4 Subnet', 'ipv6_subnet': 'IPv6 Subnet',
                 'ipv6': 'IPv6', 'ignored': 'Ignored', 'state': 'State',
                 'first_seen': 'First Seen', 'last_seen': 'Last Seen',
-                'ipv4_os': 'IPv4 OS (p0f)', 'ipv6_os': 'IPv6 OS (p0f)', 'role': 'Role (PoseidonML)',
-                'role_confidence': 'Role Confidence (PoseidonML)', 'behavior': 'Behavior (PoseidonML)',
-                'ipv4_rdns': 'IPv4 rDNS', 'ipv6_rdns': 'IPv6 rDNS',
-                'ether_vendor': 'Ethernet Vendor'}
+                'ipv4_os': 'IPv4 OS (p0f)', 'ipv6_os': 'IPv6 OS (p0f)',
+                'role': 'Role (PoseidonML)',
+                'role_confidence': 'Role Confidence (PoseidonML)',
+                'behavior': 'Behavior (PoseidonML)', 'ipv4_rdns': 'IPv4 rDNS',
+                'ipv6_rdns': 'IPv6 rDNS', 'ether_vendor': 'Ethernet Vendor',
+                'controller_type': 'SDN Controller Type',
+                'controller': 'SDN Controller URI'}
 
     @staticmethod
     def get_dataset():

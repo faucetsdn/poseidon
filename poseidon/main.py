@@ -379,7 +379,8 @@ class SDNConnect(object):
 
         try:
             current = self.sdnc.get_endpoints(messages=messages)
-            parsed = self.sdnc.format_endpoints(current)
+            parsed = self.sdnc.format_endpoints(
+                current, self.controller['URI'])
             retval['machines'] = parsed
             retval['resp'] = 'ok'
         except BaseException as e:  # pragma: no cover
