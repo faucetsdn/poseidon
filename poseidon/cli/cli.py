@@ -88,6 +88,20 @@ class GetData():
             return 'NO DATA'
 
     @staticmethod
+    def _get_controller_type(endpoint):
+        if 'controller_type' in endpoint.endpoint_data:
+            return str(endpoint.endpoint_data['controller_type'])
+        else:
+            return 'NO DATA'
+
+    @staticmethod
+    def _get_controller(endpoint):
+        if 'controller' in endpoint.endpoint_data:
+            return str(endpoint.endpoint_data['controller'])
+        else:
+            return 'NO DATA'
+
+    @staticmethod
     def _get_ignored(endpoint):
         return str(endpoint.ignore)
 
@@ -244,7 +258,7 @@ class Parser():
             'Previous States', 'IPv4 OS\n(p0f)', 'IPv6 OS\n(p0f)', 'Previous IPv4 OSes\n(p0f)',
             'Previous IPv6 OSes\n(p0f)', 'Role\n(PoseidonML)', 'Role Confidence\n(PoseidonML)', 'Previous Roles\n(PoseidonML)',
             'Previous Role Confidences\n(PoseidonML)', 'Behavior\n(PoseidonML)', 'Previous Behaviors\n(PoseidonML)',
-            'IPv4 rDNS', 'IPv6 rDNS'
+            'IPv4 rDNS', 'IPv6 rDNS', 'SDN Controller Type', 'SDN Controller URI'
         ]
 
     def completion(self, text, line, completions):
@@ -369,7 +383,9 @@ class Parser():
                          'previous behaviors': (GetData._get_prev_behaviors, 25),
                          'previous behaviors\n(poseidonml)': (GetData._get_prev_behaviors, 25),
                          'ipv4 rdns': (GetData._get_ipv4_rdns, 26),
-                         'ipv6 rdns': (GetData._get_ipv6_rdns, 27)}
+                         'ipv6 rdns': (GetData._get_ipv6_rdns, 27),
+                         'sdn controller type': (GetData._get_controller_type, 28),
+                         'sdn controller uri': (GetData._get_controller, 29)}
         # TODO #971 check if unique flag and limit columns (fields)
         # TODO #963 check if nonzero flag and limit rows/columns
         for index, field in enumerate(fields):

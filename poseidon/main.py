@@ -379,7 +379,8 @@ class SDNConnect(object):
 
         try:
             current = self.sdnc.get_endpoints(messages=messages)
-            parsed = self.sdnc.format_endpoints(current)
+            parsed = self.sdnc.format_endpoints(
+                current, self.controller['URI'])
             retval['machines'] = parsed
             retval['resp'] = 'ok'
         except BaseException as e:  # pragma: no cover
@@ -423,6 +424,9 @@ class SDNConnect(object):
             else:
                 machine['ipv6_rdns'] = 'NO DATA'
                 machine['ipv6_subnet'] = 'NO DATA'
+            if not 'controller_type' in machine:
+                machine['controller_type'] = 'none'
+                machine['controller'] = ''
             h = Endpoint.make_hash(machine)
             ep = None
             for endpoint in self.endpoints:

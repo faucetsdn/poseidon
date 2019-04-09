@@ -104,4 +104,4 @@ def test_FaucetProxy():
 def test_format_endpoints():
     data = [[{'ip-state': 'foo'}, {'ip-state': 'bar'}],
             [{'ip-state': 'foo'}, {'ip-state': 'bar'}]]
-    output = FaucetProxy.format_endpoints(data)
+    output = FaucetProxy.format_endpoints(data, 'foo')

@@ -45,7 +45,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         self.get_span_fabric()
 
     @staticmethod
-    def format_endpoints(data):
+    def format_endpoints(data, controller):
         '''
         return only the information needed for the application
         '''
@@ -61,6 +61,8 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
                     md['active'] = 0
                 md['port'] = d.get('interface')
                 md['segment'] = d.get('switch')
+                md['controller_type'] = 'bcf'
+                md['controller'] = controller
                 md.pop('ip-state', None)
                 # get both ipv4 and ipv6 addresses if available
                 # reverse to set the most recent ip last

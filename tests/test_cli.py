@@ -75,7 +75,7 @@ def test_check_flags():
         'Previous States', 'IPv4 OS\n(p0f)', 'IPv6 OS\n(p0f)', 'Previous IPv4 OSes\n(p0f)',
         'Previous IPv6 OSes\n(p0f)', 'Role\n(PoseidonML)', 'Role Confidence\n(PoseidonML)', 'Previous Roles\n(PoseidonML)',
         'Previous Role Confidences\n(PoseidonML)', 'Behavior\n(PoseidonML)', 'Previous Behaviors\n(PoseidonML)',
-        'IPv4 rDNS', 'IPv6 rDNS'
+        'IPv4 rDNS', 'IPv6 rDNS', 'SDN Controller Type', 'SDN Controller URI'
     ]
     fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = parser._check_flags({
                                                                                                                           'fields': ['ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4'], 'sort_by': 1, 'max_width': 100, 'unique': True, 'nonzero': True, 'output_format': 'csv', '4': True, '6': True, '4and6': True}, '')
