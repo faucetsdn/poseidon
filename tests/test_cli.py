@@ -258,7 +258,7 @@ def test_get_next_state():
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
     state = GetData._get_next_state(endpoint)
-    assert state == None
+    assert state == 'None'
 
 
 def test_get_first_seen():

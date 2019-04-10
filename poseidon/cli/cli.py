@@ -111,7 +111,7 @@ class GetData():
 
     @staticmethod
     def _get_next_state(endpoint):
-        return endpoint.p_next_state
+        return str(endpoint.p_next_state)
 
     @staticmethod
     def _get_first_seen(endpoint):
@@ -428,7 +428,8 @@ class Parser():
                 for row in records:
                     del row[val]
                 del fields[val]
-            matrix = records
+            if len(fields) > 0:
+                matrix = records
         if not nonzero and not unique:
             for endpoint in endpoints:
                 record = []
