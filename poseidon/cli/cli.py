@@ -422,6 +422,7 @@ class Parser():
             for val in del_columns:
                 for row in records:
                     del row[val]
+                del fields[val]
             matrix = records
         else:
             for endpoint in endpoints:
