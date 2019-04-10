@@ -867,7 +867,8 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
             print('  -4and6\t\tShow fields for both IPv4 and IPv6')
             print('  -4\t\t\tShow only IPv4 fields')
             print('  -6\t\t\tShow only IPv6 fields')
-            print('  -nonzero\t\tTO BE IMPLEMENTED')
+            print(
+                '  -nonzero\t\tRemoves rows and columns that contain only "0"s or "NO DATA"')
             print('  -unique\t\tTO BE IMPLEMENTED')
         else:
             cmd.Cmd.do_help(self, arg)
