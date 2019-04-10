@@ -111,7 +111,7 @@ class GetData():
 
     @staticmethod
     def _get_next_state(endpoint):
-        return endpoint.p_next_state
+        return str(endpoint.p_next_state)
 
     @staticmethod
     def _get_first_seen(endpoint):
