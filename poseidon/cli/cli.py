@@ -387,7 +387,6 @@ class Parser():
                          'sdn controller type': (GetData._get_controller_type, 28),
                          'sdn controller uri': (GetData._get_controller, 29)}
         # TODO #971 check if unique flag and limit columns (fields)
-        # TODO #963 check if nonzero flag and limit rows/columns
         for index, field in enumerate(fields):
             if ipv4_only:
                 if '6' in field:
@@ -403,6 +402,26 @@ class Parser():
                 if '6' in field:
                     if field.replace('6', '4') not in fields:
                         fields.insert(index + 1, field.replace('6', '4'))
+
+        if nonzero:
+            records = []
+            for endpoint in endpoints:
+                record = []
+                for field in fields:
+                    record.append(fields_lookup[field.lower()][0](endpoint))
+                # remove rows that are all zero or 'NO DATA'
+                if not all(item == '0' or item == 'NO DATA' for item in record):
+                    records.append(record)
+
+            # remove columns that are all zero or 'NO DATA'
+            del_columns = []
+            for i in range(len(fields)):
+                if all(item[i] == '0' or item[i] == 'NO DATA' for item in records):
+                    del_columns.append(i)
+            del_columns.reverse()
+            for val in del_columns:
+                for row in records:
+                    del row[val]
 
         for endpoint in endpoints:
             record = []
