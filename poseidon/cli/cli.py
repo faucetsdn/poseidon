@@ -422,12 +422,13 @@ class Parser():
             for val in del_columns:
                 for row in records:
                     del row[val]
-
-        for endpoint in endpoints:
-            record = []
-            for field in fields:
-                record.append(fields_lookup[field.lower()][0](endpoint))
-            matrix.append(record)
+            matrix = records
+        else:
+            for endpoint in endpoints:
+                record = []
+                for field in fields:
+                    record.append(fields_lookup[field.lower()][0](endpoint))
+                matrix.append(record)
         if len(matrix) > 0:
             matrix = sorted(matrix, key=lambda endpoint: endpoint[sort_by])
             # swap out field names for header
