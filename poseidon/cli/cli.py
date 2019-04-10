@@ -386,7 +386,6 @@ class Parser():
                          'ipv6 rdns': (GetData._get_ipv6_rdns, 27),
                          'sdn controller type': (GetData._get_controller_type, 28),
                          'sdn controller uri': (GetData._get_controller, 29)}
-        # TODO #971 check if unique flag and limit columns (fields)
         for index, field in enumerate(fields):
             if ipv4_only:
                 if '6' in field:
@@ -403,28 +402,34 @@ class Parser():
                     if field.replace('6', '4') not in fields:
                         fields.insert(index + 1, field.replace('6', '4'))
 
-        if nonzero:
+        if nonzero or unique:
             records = []
             for endpoint in endpoints:
                 record = []
                 for field in fields:
                     record.append(fields_lookup[field.lower()][0](endpoint))
                 # remove rows that are all zero or 'NO DATA'
-                if not all(item == '0' or item == 'NO DATA' for item in record):
+                if not nonzero or not all(item == '0' or item == 'NO DATA' for item in record):
                     records.append(record)
 
             # remove columns that are all zero or 'NO DATA'
             del_columns = []
             for i in range(len(fields)):
-                if all(item[i] == '0' or item[i] == 'NO DATA' for item in records):
+                marked = False
+                if nonzero and all(item[i] == '0' or item[i] == 'NO DATA' for item in records):
                     del_columns.append(i)
+                    marked = True
+                if unique and not marked:
+                    column_vals = [item[i] for item in records]
+                    if len(set(column_vals)) == 1:
+                        del_columns.append(i)
             del_columns.reverse()
             for val in del_columns:
                 for row in records:
                     del row[val]
                 del fields[val]
             matrix = records
-        else:
+        if not nonzero and not unique:
             for endpoint in endpoints:
                 record = []
                 for field in fields:
@@ -869,7 +874,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
             print('  -6\t\t\tShow only IPv6 fields')
             print(
                 '  -nonzero\t\tRemoves rows and columns that contain only "0"s or "NO DATA"')
-            print('  -unique\t\tTO BE IMPLEMENTED')
+            print('  -unique\t\tRemoves columns that all contain the same value')
         else:
             cmd.Cmd.do_help(self, arg)
 
