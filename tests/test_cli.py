@@ -173,6 +173,11 @@ def test_get_controller():
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'controller': 'foo'}
     controller = GetData._get_controller(endpoint)
     assert controller == 'foo'
+    endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+    controller = GetData._get_controller(endpoint)
+    assert controller == 'NO DATA'
 
 
 def test_get_controller_type():
@@ -181,6 +186,11 @@ def test_get_controller_type():
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'controller_type': 'foo'}
     controller_type = GetData._get_controller_type(endpoint)
     assert controller_type == 'foo'
+    endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+    controller_type = GetData._get_controller_type(endpoint)
+    assert controller_type == 'NO DATA'
 
 
 def test_get_ipv4():
