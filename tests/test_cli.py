@@ -104,6 +104,12 @@ def test_display_results():
                            'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv6'], ipv4_only=False, ipv4_and_ipv6=True)
     parser.display_results(endpoints, [
                            'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4'], ipv4_only=False, ipv4_and_ipv6=True)
+    parser.display_results(endpoints, [
+                           'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4'], ipv4_only=False, ipv4_and_ipv6=True, unique=True)
+    parser.display_results(endpoints, [
+                           'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4'], ipv4_only=False, ipv4_and_ipv6=True, nonzero=True)
+    parser.display_results(endpoints, [
+                           'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4'], ipv4_only=False, ipv4_and_ipv6=True, nonzero=True, unique=True)
 
 
 def test_get_flags():
@@ -159,6 +165,22 @@ def test_get_vlan():
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
     vlan = GetData._get_vlan(endpoint)
     assert vlan == 'foo'
+
+
+def test_get_controller():
+    endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'controller': 'foo'}
+    controller = GetData._get_controller(endpoint)
+    assert controller == 'foo'
+
+
+def test_get_controller_type():
+    endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'controller_type': 'foo'}
+    controller_type = GetData._get_controller_type(endpoint)
+    assert controller_type == 'foo'
 
 
 def test_get_ipv4():
