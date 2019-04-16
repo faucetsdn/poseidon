@@ -261,6 +261,17 @@ class Parser():
             'Previous Role Confidences\n(PoseidonML)', 'Behavior\n(PoseidonML)', 'Previous Behaviors\n(PoseidonML)',
             'IPv4 rDNS', 'IPv6 rDNS', 'SDN Controller Type', 'SDN Controller URI'
         ]
+        self.p_shell = PoseidonShell()
+        self.func_calls = {'exit': self.p_shell.help_exit,
+                           'fields': self.p_shell.help_fields,
+                           'playback': self.p_shell.help_playback,
+                           'quit': self.p_shell.help_quit,
+                           'record': self.p_shell.help_record,
+                           'shell': self.p_shell.help_shell,
+                           'show': self.p_shell.help_show,
+                           'set': self.p_shell.help_set,
+                           'task': self.p_shell.help_task,
+                           '': self.p_shell.do_help}
 
     def completion(self, text, line, completions):
         firstword, _, mline = line.partition(' ')
@@ -268,23 +279,13 @@ class Parser():
         words = []
 
         if mline == '':
-            func_calls = {'exit': self.help_exit,
-                          'fields': self.help_fields,
-                          'playback': self.help_playback,
-                          'quit': self.help_quit,
-                          'record': self.help_record,
-                          'shell': self.help_shell,
-                          'show': self.help_show,
-                          'set': self.help_set,
-                          'task': self.help_task,
-                          '': self.do_help}
             print(firstword)
-            if firstword in func_calls:
+            if firstword in self.func_calls:
                 print(here)
                 if firstword == '':
-                    func_calls[firstword](mline)
+                    self.func_calls[firstword](mline)
                 else:
-                    func_calls[firstword]()
+                    self.func_calls[firstword]()
         else:
             completes = [s[offs:]
                          for s in completions if s.lower().startswith(mline.lower())]
