@@ -71,7 +71,8 @@ def test_setup_redis():
              'endpoint_data': "{'name': None, \
                                 'prev_states': [], \
                                 'mac': '00:00:00:00:00:01', \
-                                'ip-address': '10.0.0.1', \
+                                'ipv4': '10.0.0.1', \
+                                'ipv6': '', \
                                 'segment': '1', \
                                 'port': '1', \
                                 'tenant': 'VLAN100', \
@@ -84,7 +85,7 @@ def test_setup_redis():
              'endpoint_data': "{'name': None, \
                                 'prev_states': [], \
                                 'mac': '00:00:00:00:00:02', \
-                                'ip-address': 'None', \
+                                'ipv4': 'None', \
                                 'segment': '1', \
                                 'port': '1', \
                                 'tenant': 'VLAN100', \
@@ -97,13 +98,16 @@ def test_setup_redis():
              'endpoint_data': "{'name': None, \
                                 'prev_states': [], \
                                 'mac': '00:00:00:00:00:03', \
-                                'ip-address': '2601:645:8200:a571:18fd:6640:9cd9:10d3', \
+                                'ipv6': '2601:645:8200:a571:18fd:6640:9cd9:10d3', \
+                                'ipv4': '', \
                                 'segment': '1', \
                                 'port': '1', \
                                 'tenant': 'VLAN100', \
                                 'state': 'UNKNOWN', \
                                 'active': 1}",
              'next_state': 'REINVESTIGATING',
+             'ignore': 'False',
+             'prev_states': "[('UNKNOWN', 1527208228)]",
              'state': 'KNOWN'})
 
 
