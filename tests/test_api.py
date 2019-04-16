@@ -107,7 +107,7 @@ def test_setup_redis():
                                 'active': 1}",
              'next_state': 'REINVESTIGATING',
              'ignore': 'False',
-             'prev_states': "[('UNKNOWN', '1527208228')]",
+             'prev_states': "[('UNKNOWN', 1527208228)]",
              'state': 'KNOWN'})
 
 
