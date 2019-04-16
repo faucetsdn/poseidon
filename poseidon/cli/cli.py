@@ -278,7 +278,9 @@ class Parser():
                           'set': self.help_set,
                           'task': self.help_task,
                           '': self.do_help}
+            print(firstword)
             if firstword in func_calls:
+                print(here)
                 if firstword == '':
                     func_calls[firstword](mline)
                 else:
