@@ -18,6 +18,7 @@ from texttable import Texttable
 from poseidon.cli.commands import Commands
 from poseidon.helpers.exception_decor import exception
 
+readline.parse_and_bind('tab: complete')
 readline.parse_and_bind('?: complete')
 
 
@@ -262,6 +263,7 @@ class Parser():
         ]
 
     def completion(self, text, line, completions):
+        print(readline.get_completion_invoking_key())
         mline = line.partition(' ')[2]
         offs = len(mline) - len(text)
         words = []
