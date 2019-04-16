@@ -8,7 +8,6 @@ Created on 14 January 2019
 """
 import cmd
 import os
-import rlcompleter
 import readline
 import time
 
@@ -19,8 +18,39 @@ from texttable import Texttable
 from poseidon.cli.commands import Commands
 from poseidon.helpers.exception_decor import exception
 
-readline.parse_and_bind('tab: complete')
+readline.set_completer(SimpleCompleter(
+    ['start', 'stop', 'list', 'print']).complete)
 readline.parse_and_bind('?: complete')
+
+
+class SimpleCompleter(object):
+
+    def __init__(self, options):
+        self.options = sorted(options)
+        return
+
+    def complete(self, text, state):
+        response = None
+        if state == 0:
+            # This is the first time for this text, so build a match list.
+            if text:
+                self.matches = [s
+                                for s in self.options
+                                if s and s.startswith(text)]
+                print('%s matches: %s', repr(text), self.matches)
+            else:
+                self.matches = self.options[:]
+                print('(empty input) matches: %s', self.matches)
+
+        # Return the state'th item from the match list,
+        # if we have that many.
+        try:
+            response = self.matches[state]
+        except IndexError:
+            response = None
+        print('complete(%s, %s) => %s',
+              repr(text), state, repr(response))
+        return response
 
 
 class GetData():
