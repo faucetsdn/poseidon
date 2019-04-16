@@ -263,6 +263,7 @@ class Parser():
         ]
 
     def completion(self, text, line, completions):
+        print('test')
         mline = line.partition(' ')[2]
         offs = len(mline) - len(text)
         words = []
@@ -458,7 +459,6 @@ class Parser():
 
 class PoseidonShell(cmd.Cmd):
     parser = Parser()
-    use_rawinput = False
     intro = """Welcome to the Poseidon shell. Type 'help' to list commands.
 <TAB> or '?' will autocomplete commands.
                                _      \033[1;31m__\033[1;m
