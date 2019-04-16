@@ -8,6 +8,7 @@ Created on 14 January 2019
 """
 import cmd
 import os
+import rlcompleter
 import readline
 import time
 
@@ -263,7 +264,6 @@ class Parser():
         ]
 
     def completion(self, text, line, completions):
-        print(readline.get_completion_invoking_key())
         mline = line.partition(' ')[2]
         offs = len(mline) - len(text)
         words = []
