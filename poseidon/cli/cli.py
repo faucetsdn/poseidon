@@ -263,14 +263,21 @@ class Parser():
         ]
 
     def completion(self, text, line, completions):
-        print('test')
+        if '?' in line:
+            print('what')
+            return ['foo']
+
+        print('line: "{0}"'.format(line))
         mline = line.partition(' ')[2]
+        print('mline: "{0}"'.format(mline))
         offs = len(mline) - len(text)
+        print('offs: "{0}"'.format(offs))
         words = []
         completes = [s[offs:]
                      for s in completions if s.lower().startswith(mline.lower())]
         for complete in completes:
             words.append(complete.split(' ', 1)[0])
+        print('words: "{0}"'.format(str(words)))
         return words
 
     def get_flags(self, text):
