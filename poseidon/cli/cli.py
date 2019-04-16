@@ -18,10 +18,6 @@ from texttable import Texttable
 from poseidon.cli.commands import Commands
 from poseidon.helpers.exception_decor import exception
 
-readline.set_completer(SimpleCompleter(
-    ['start', 'stop', 'list', 'print']).complete)
-readline.parse_and_bind('?: complete')
-
 
 class SimpleCompleter(object):
 
@@ -51,6 +47,11 @@ class SimpleCompleter(object):
         print('complete(%s, %s) => %s',
               repr(text), state, repr(response))
         return response
+
+
+readline.set_completer(SimpleCompleter(
+    ['start', 'stop', 'list', 'print']).complete)
+readline.parse_and_bind('?: complete')
 
 
 class GetData():
