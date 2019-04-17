@@ -451,9 +451,9 @@ class Parser():
             # make all the column types be text
             table.set_cols_dtype(['t']*len(fields))
             table.add_rows(matrix)
-            self.poutput(table.draw())
+            print(table.draw())
         else:
-            self.poutput('No results found for that query.')
+            print('No results found for that query.')
         return
 
 
@@ -920,7 +920,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
     def precmd(self, line):
         line = line.lower()
         if self.file and 'playback' not in line:
-            self.poutput(line, file=self.file)
+            print(line, file=self.file)
         if '?' in line:
             line = line.replace('?', '')
             line = '? ' + line
