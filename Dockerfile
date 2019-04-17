@@ -1,5 +1,5 @@
 FROM alpine:3.9
-LABEL maintainer="clewis@iqt.org"
+LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
 
 COPY requirements.txt requirements.txt
 COPY healthcheck /healthcheck
@@ -34,8 +34,6 @@ ENV POSEIDON_CONFIG /poseidon/config/poseidon.config
 ENV PYTHONUNBUFFERED 0
 ENV SYS_LOG_HOST NOT_CONFIGURED
 ENV SYS_LOG_PORT 514
-
-VOLUME ["/root"]
 
 EXPOSE 9304
 
