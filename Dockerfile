@@ -35,6 +35,8 @@ ENV PYTHONUNBUFFERED 0
 ENV SYS_LOG_HOST NOT_CONFIGURED
 ENV SYS_LOG_PORT 514
 
+VOLUME ["/root"]
+
 EXPOSE 9304
 
 CMD (flask run > /dev/null 2>&1) & (tini -s -- /usr/bin/python3 /poseidon/poseidon/main.py)

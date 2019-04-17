@@ -6,7 +6,7 @@ The main entrypoint for the Poseidon shell.
 Created on 14 January 2019
 @author: Charlie Lewis
 """
-import cmd
+import cmd2 as cmd
 import os
 import readline
 import time
@@ -458,8 +458,11 @@ class Parser():
 
 
 class PoseidonShell(cmd.Cmd):
-    parser = Parser()
-    intro = """Welcome to the Poseidon shell. Type 'help' to list commands.
+
+    def __init__(self):
+        cmd.Cmd.__init__(self, persistent_history_file='/root/.poseidon_history'_
+        self.parser = Parser()
+        self.intro = """Welcome to the Poseidon shell. Type 'help' to list commands.
 <TAB> or '?' will autocomplete commands.
                                _      \033[1;31m__\033[1;m
     ____   ____   \033[1;31m_____\033[1;m ___   (_)\033[1;31m____/ /\033[1;m____   \033[1;31m____\033[1;m
@@ -467,23 +470,23 @@ class PoseidonShell(cmd.Cmd):
   / /_/ // /_/ /\033[1;31m(__  )\033[1;m/  __// /\033[1;31m/ /_/ /\033[1;m/ /_/ /\033[1;31m/ / / /\033[1;m
  / .___/ \____/\033[1;31m/____/\033[1;m \___//_/ \033[1;31m\__,_/\033[1;m \____/\033[1;31m/_/ /_/\033[1;m
 /_/\n"""
-    prompt = '\033[1;32mposeidon$ \033[1;m'
-    file = None
+        self.prompt = '\033[1;32mposeidon$ \033[1;m'
+        self.file = None
 
-    show_completions = [
-        'role active-directory-controller', 'role administrator-server',
-        'role administrator-workstation', 'role business-workstation',
-        'role developer-workstation', 'role gpu-laptop', 'role pki-server',
-        'role unknown', 'state active', 'state inactive', 'state known',
-        'state unknown', 'state mirroring', 'state abnormal', 'state shutdown',
-        'state reinvestigating', 'state queued', 'state ignored',
-        'behavior normal', 'behavior abnormal', 'os windows', 'os freebsd',
-        'os linux', 'os mac', 'history', 'what', 'where', 'all'
-    ]
+        show_completions = [
+            'role active-directory-controller', 'role administrator-server',
+            'role administrator-workstation', 'role business-workstation',
+            'role developer-workstation', 'role gpu-laptop', 'role pki-server',
+            'role unknown', 'state active', 'state inactive', 'state known',
+            'state unknown', 'state mirroring', 'state abnormal', 'state shutdown',
+            'state reinvestigating', 'state queued', 'state ignored',
+            'behavior normal', 'behavior abnormal', 'os windows', 'os freebsd',
+            'os linux', 'os mac', 'history', 'what', 'where', 'all'
+        ]
 
-    task_completions = [
-        'set', 'ignore', 'remove', 'collect', 'clear'
-    ]
+        self.task_completions = [
+            'set', 'ignore', 'remove', 'collect', 'clear'
+        ]
 
     def complete_show(self, text, line, begidx, endidx):
         return self.parser.completion(text, line, self.show_completions)
