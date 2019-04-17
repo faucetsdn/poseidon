@@ -460,7 +460,7 @@ class Parser():
 class PoseidonShell(cmd.Cmd):
 
     def __init__(self):
-        cmd.Cmd.__init__(self, persistent_history_file='/root/.poseidon_history'_
+        cmd.Cmd.__init__(self, persistent_history_file='/root/.poseidon_history')
         self.parser = Parser()
         self.intro = """Welcome to the Poseidon shell. Type 'help' to list commands.
 <TAB> or '?' will autocomplete commands.
