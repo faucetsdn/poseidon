@@ -275,6 +275,7 @@ class Parser():
         return words
 
     def get_flags(self, text):
+        valid = True
         flags = {}
         not_flags = []
         # remove boolean flags first
@@ -307,11 +308,15 @@ class Parser():
                 not_f.pop(0)
                 if not_f:
                     not_flags += not_f[0].split()
-        return flags, ' '.join(not_flags)
+            else:
+                valid = False
+        return valid, flags, ' '.join(not_flags)
 
     def _check_flags(self, flags, fields, sort_by=0, max_width=0, unique=False, nonzero=False, output_format='table', ipv4_only=True, ipv6_only=False, ipv4_and_ipv6=False):
+        valid = True
         for flag in flags:
             if flag == 'fields':
+                # TODO better validation and error checking needed
                 if 'all' in flags[flag]:
                     fields = self.all_fields
                 else:
@@ -338,13 +343,15 @@ class Parser():
                 ipv4_only = False
                 ipv6_only = False
                 ipv4_and_ipv6 = True
+            else:
+                valid = False
 
         if 'fields' in flags and not '4' in flags and not '6' in flags and not '4and6' in flags:
             ipv4_only = False
             ipv6_only = False
             ipv4_and_ipv6 = False
 
-        return fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6
+        return valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6
 
     def display_results(self, endpoints, fields, sort_by=0, max_width=0, unique=False, nonzero=False, output_format='table', ipv4_only=True, ipv6_only=False, ipv4_and_ipv6=False):
         matrix = []
@@ -504,22 +511,28 @@ class PoseidonShell(cmd2.Cmd):
         '''Show all things on the network'''
         fields = self.parser.default_fields
 
-        fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
+        valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
             flags, fields)
 
-        self.poutput(self.parser.display_results(Commands().show_devices(
-            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
+        if not valid:
+            self.poutput("Unknown flag, try 'help show'")
+        else:
+            self.poutput(self.parser.display_results(Commands().show_devices(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique,
+                                                     nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
     def show_role(self, arg, flags):
         '''Show all things on the network that match a role'''
         fields = self.parser.default_fields
 
-        fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
+        valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
             flags, fields)
 
-        self.poutput(self.parser.display_results(Commands().show_devices(
-            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
+        if not valid:
+            self.poutput("Unknown flag, try 'help show'")
+        else:
+            self.poutput(self.parser.display_results(Commands().show_devices(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique,
+                                                     nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
     def show_state(self, arg, flags):
@@ -527,33 +540,42 @@ class PoseidonShell(cmd2.Cmd):
         fields = ['Switch', 'Port', 'State',
                   'Ethernet Vendor', 'Mac', 'IPv4', 'IPv6']
 
-        fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
+        valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
             flags, fields)
 
-        self.poutput(self.parser.display_results(Commands().show_devices(
-            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
+        if not valid:
+            self.poutput("Unknown flag, try 'help show'")
+        else:
+            self.poutput(self.parser.display_results(Commands().show_devices(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique,
+                                                     nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
     def show_behavior(self, arg, flags):
         '''Show all things on the network that match a behavior'''
         fields = self.parser.default_fields + ['Behavior']
 
-        fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
+        valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
             flags, fields)
 
-        self.poutput(self.parser.display_results(Commands().show_devices(
-            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
+        if not valid:
+            self.poutput("Unknown flag, try 'help show'")
+        else:
+            self.poutput(self.parser.display_results(Commands().show_devices(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique,
+                                                     nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
     def show_os(self, arg, flags):
         '''Show all things on the network that match a behavior'''
         fields = self.parser.default_fields
 
-        fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
+        valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
             flags, fields)
 
-        self.poutput(self.parser.display_results(Commands().show_devices(
-            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
+        if not valid:
+            self.poutput("Unknown flag, try 'help show'")
+        else:
+            self.poutput(self.parser.display_results(Commands().show_devices(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique,
+                                                     nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
     def show_what(self, arg, flags):
@@ -567,11 +589,14 @@ class PoseidonShell(cmd2.Cmd):
         # defaults
         fields = self.parser.all_fields
 
-        fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
+        valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
             flags, fields)
 
-        self.poutput(self.parser.display_results(Commands().what_is(
-            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
+        if not valid:
+            self.poutput("Unknown flag, try 'help show'")
+        else:
+            self.poutput(self.parser.display_results(Commands().what_is(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique,
+                                                     nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
     def show_history(self, arg, flags):
@@ -585,11 +610,14 @@ class PoseidonShell(cmd2.Cmd):
         # defaults
         fields = ['Previous States']
 
-        fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
+        valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
             flags, fields)
 
-        self.poutput(self.parser.display_results(
-            Commands().history_of(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
+        if not valid:
+            self.poutput("Unknown flag, try 'help show'")
+        else:
+            self.poutput(self.parser.display_results(Commands().history_of(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique,
+                                                     nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
     def show_where(self, arg, flags):
@@ -603,11 +631,14 @@ class PoseidonShell(cmd2.Cmd):
         # defaults
         fields = ['Switch', 'Port', 'VLAN', 'IPv4', 'IPv6', 'MAC Address']
 
-        fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
+        valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
             flags, fields)
 
-        self.poutput(self.parser.display_results(
-            Commands().where_is(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
+        if not valid:
+            self.poutput("Unknown flag, try 'help show'")
+        else:
+            self.poutput(self.parser.display_results(Commands().where_is(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique,
+                                                     nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
     def help_show(self):
@@ -686,12 +717,15 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         # defaults
         fields = self.parser.default_fields + ['State', 'Next State']
 
-        fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
+        valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
             flags, fields)
 
-        self.poutput('Set the following device states:')
-        self.poutput(self.parser.display_results(Commands().change_devices(
-            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
+        if not valid:
+            self.poutput("Unknown flag, try 'help task'")
+        else:
+            self.poutput('Set the following device states:')
+            self.poutput(self.parser.display_results(Commands().change_devices(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique,
+                                                     nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
     def task_collect(self, arg, flags):
@@ -715,12 +749,15 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         # defaults
         fields = self.parser.default_fields
 
-        fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
+        valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
             flags, fields)
 
-        self.poutput('Ignored the following devices:')
-        self.poutput(self.parser.display_results(
-            Commands().ignore(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
+        if not valid:
+            self.poutput("Unknown flag, try 'help task'")
+        else:
+            self.poutput('Ignored the following devices:')
+            self.poutput(self.parser.display_results(Commands().ignore(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique,
+                                                     nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
     def task_clear(self, arg, flags):
@@ -735,12 +772,16 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         # defaults
         fields = self.parser.default_fields
 
-        fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
+        valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
             flags, fields)
 
-        self.poutput('Cleared the following devices that were being ignored:')
-        self.poutput(self.parser.display_results(
-            Commands().clear_ignored(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
+        if not valid:
+            self.poutput("Unknown flag, try 'help task'")
+        else:
+            self.poutput(
+                'Cleared the following devices that were being ignored:')
+            self.poutput(self.parser.display_results(Commands().clear_ignored(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique,
+                                                     nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
     def task_remove(self, arg, flags):
@@ -756,19 +797,22 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         # defaults
         fields = self.parser.default_fields
 
-        fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
+        valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
             flags, fields)
 
-        endpoints = []
-        if arg.startswith('ignored'):
-            endpoints = Commands().remove_ignored(arg)
-        elif arg.startswith('inactive'):
-            endpoints = Commands().remove_inactives(arg)
+        if not valid:
+            self.poutput("Unknown flag, try 'help task'")
         else:
-            endpoints = Commands().remove(arg)
-        self.poutput('Removed the following devices:')
-        self.poutput(self.parser.display_results(
-            endpoints, fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
+            endpoints = []
+            if arg.startswith('ignored'):
+                endpoints = Commands().remove_ignored(arg)
+            elif arg.startswith('inactive'):
+                endpoints = Commands().remove_inactives(arg)
+            else:
+                endpoints = Commands().remove(arg)
+            self.poutput('Removed the following devices:')
+            self.poutput(self.parser.display_results(endpoints, fields, sort_by=sort_by, max_width=max_width, unique=unique,
+                                                     nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
     def help_task(self):
@@ -783,59 +827,65 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
     @exception
     def do_task(self, arg):
         '''Perform task to things on the network'''
-        flags, arg = self.parser.get_flags(arg)
-        if arg:
-            action = arg.split()[0]
-            func_calls = {'clear': self.task_clear,
-                          'collect': self.task_collect,
-                          'ignore': self.task_ignore,
-                          'remove': self.task_remove,
-                          'set': self.task_set}
-            if action in func_calls:
-                if len(arg.split()) > 1:
-                    func_calls[action](arg, flags)
-                else:
-                    self.poutput(action.upper() + ' <ID|IP|MAC>')
-            else:
-                self.poutput("Unknown command, try 'help task'")
+        valid, flags, arg = self.parser.get_flags(arg)
+        if not valid:
+            self.poutput("Unknown flag, try 'help task'")
         else:
-            self.help_task()
-
-    @exception
-    def do_show(self, arg):
-        '''Show things on the network based on filters'''
-        flags, arg = self.parser.get_flags(arg)
-        if arg:
-            action = arg.split()[0]
-            func_calls = {'all': self.show_all,
-                          'authors': self.show_authors,
-                          'behavior': self.show_behavior,
-                          'history': self.show_history,
-                          'os': self.show_os,
-                          'role': self.show_role,
-                          'state': self.show_state,
-                          'what': self.show_what,
-                          'where': self.show_where}
-            if action in func_calls:
-                if action in ['all', 'authors']:
-                    func_calls[action](arg, flags)
-                elif action in ['history', 'what', 'where']:
+            if arg:
+                action = arg.split()[0]
+                func_calls = {'clear': self.task_clear,
+                              'collect': self.task_collect,
+                              'ignore': self.task_ignore,
+                              'remove': self.task_remove,
+                              'set': self.task_set}
+                if action in func_calls:
                     if len(arg.split()) > 1:
                         func_calls[action](arg, flags)
                     else:
                         self.poutput(action.upper() + ' <ID|IP|MAC>')
                 else:
-                    valid = False
-                    for show_comm in self.show_completions:
-                        if arg.startswith(show_comm):
-                            valid = True
-                            func_calls[action](arg, flags)
-                    if not valid:
-                        self.poutput("Unknown command, try 'help show'")
+                    self.poutput("Unknown command, try 'help task'")
             else:
-                self.poutput("Unknown command, try 'help show'")
+                self.help_task()
+
+    @exception
+    def do_show(self, arg):
+        '''Show things on the network based on filters'''
+        valid, flags, arg = self.parser.get_flags(arg)
+        if not valid:
+            self.poutput("Unknown flag, try 'help show'")
         else:
-            self.help_show()
+            if arg:
+                action = arg.split()[0]
+                func_calls = {'all': self.show_all,
+                              'authors': self.show_authors,
+                              'behavior': self.show_behavior,
+                              'history': self.show_history,
+                              'os': self.show_os,
+                              'role': self.show_role,
+                              'state': self.show_state,
+                              'what': self.show_what,
+                              'where': self.show_where}
+                if action in func_calls:
+                    if action in ['all', 'authors']:
+                        func_calls[action](arg, flags)
+                    elif action in ['history', 'what', 'where']:
+                        if len(arg.split()) > 1:
+                            func_calls[action](arg, flags)
+                        else:
+                            self.poutput(action.upper() + ' <ID|IP|MAC>')
+                    else:
+                        valid = False
+                        for show_comm in self.show_completions:
+                            if arg.startswith(show_comm):
+                                valid = True
+                                func_calls[action](arg, flags)
+                        if not valid:
+                            self.poutput("Unknown command, try 'help show'")
+                else:
+                    self.poutput("Unknown command, try 'help show'")
+            else:
+                self.help_show()
 
     @exception
     def do_quit(self, arg):
@@ -854,16 +904,22 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         if not arg:
             self.poutput('For help on specific commands: help <command>')
             self.poutput('Commands:')
+            self.poutput('  alias\t\t\tReplace a command with another string')
             self.poutput('  exit\t\t\tStop the shell and exit')
             self.poutput(
                 '  fields\t\tList out all available field names - TO BE IMPLEMENTED')
+            self.poutput('  history\t\tHistory of commands from this session')
+            self.poutput('  load\t\t\tLoad a file of commands to execute')
+            self.poutput(
+                '  macro\t\t\tSimilar to an alias, but it can contain argument placeholders')
             self.poutput('  quit\t\t\tStop the shell and exit')
             self.poutput(
+                '  set\t\t\tApply settings for all future commands in this session - TO BE IMPLEMENTED')
+            self.poutput(
                 '  shell\t\t\tExecutes commands on the shell inside the Poseidon container')
+            self.poutput('  shortcuts\t\tShow existing shortcuts for commands')
             self.poutput(
                 '  show\t\t\tShow things on the network based on filters')
-            self.poutput(
-                '  set\t\t\tApply settings for all future commands in this session - TO BE IMPLEMENTED')
             self.poutput('  task\t\t\tPerform a task on things on the network')
             self.poutput('\n')
             self.poutput('Optional flags that can be combined with commands:')
@@ -888,7 +944,8 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
 
     @exception
     def do_set(self, arg):
-        if arg in ['colors', 'debug', 'echo', 'prompt', 'timing']:
+        comm = arg.partition(' ')[0]
+        if comm in ['colors', 'debug', 'echo', 'prompt', 'timing']:
             cmd2.Cmd.do_set(self, arg)
         else:
             self.poutput('TO DO')
