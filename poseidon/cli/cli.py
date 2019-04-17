@@ -21,7 +21,6 @@ from poseidon.helpers.exception_decor import exception
 
 
 readline.parse_and_bind('?: complete')
-cmd2.set_use_arg_list = False
 
 
 class GetData():
@@ -838,14 +837,12 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
     def do_quit(self, arg):
         '''Stop the shell and exit:  QUIT'''
         self.poutput('Thank you for using Poseidon')
-        self.close()
         return True
 
     @exception
     def do_exit(self, arg):
         '''Stop the shell and exit:  EXIT'''
         self.poutput('Thank you for using Poseidon')
-        self.close()
         return True
 
     @exception

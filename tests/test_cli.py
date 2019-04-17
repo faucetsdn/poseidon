@@ -11,8 +11,6 @@ from poseidon.helpers.endpoint import Endpoint
 
 def test_poseidonshell():
     shell = PoseidonShell()
-    shell.do_record('foo.txt')
-    shell.do_record('')
     shell.do_help('foo')
     shell.do_help('')
     shell.do_show('foo')
@@ -28,8 +26,6 @@ def test_poseidonshell():
     shell.do_task('clear 10')
     shell.do_quit('foo')
     shell.do_exit('foo')
-    shell.do_playback('foo.txt')
-    shell.do_playback('')
     shell.complete_show('foo', 'foo bar', 1, 1)
     shell.complete_task('foo', 'foo bar', 1, 1)
     shell.show_all('foo', [])
@@ -51,17 +47,7 @@ def test_poseidonshell():
     shell.task_remove('inactive', [])
     shell.help_task()
     shell.emptyline()
-    shell.completenames('foo', 'foo', 1, 2)
-    shell.completenames('eof', 'foo', 1, 2)
-    shell.completenames('shell', 'foo', 1, 2)
     shell.do_shell('ls')
-    shell.precmd('foo')
-    shell.precmd('foo ?')
-    shell.do_eof('foo')
-    shell.close()
-    foo = open('foo.txt', 'w')
-    shell.file = foo
-    shell.precmd('foo')
 
 
 def test_check_flags():
