@@ -451,9 +451,9 @@ class Parser():
             # make all the column types be text
             table.set_cols_dtype(['t']*len(fields))
             table.add_rows(matrix)
-            print(table.draw())
+            self.poutput(table.draw())
         else:
-            print('No results found for that query.')
+            self.poutput('No results found for that query.')
         return
 
 
@@ -607,18 +607,20 @@ class PoseidonShell(cmd.Cmd):
 
     @exception
     def help_show(self):
-        print('  all\t\tShow all devices')
-        print('  behavior\tShow devices matching a particular behavior')
-        print('  history\tFind out the history of something on the network')
-        print('  os\t\tShow devices matching a particular operating system')
-        print('  role\t\tShow devices matching a particular role')
-        print('  state\t\tShow devices matching a particular state')
-        print('  what\t\tFind out what something is')
-        print('  where\t\tFind out where something is')
+        self.poutput('  all\t\tShow all devices')
+        self.poutput('  behavior\tShow devices matching a particular behavior')
+        self.poutput(
+            '  history\tFind out the history of something on the network')
+        self.poutput(
+            '  os\t\tShow devices matching a particular operating system')
+        self.poutput('  role\t\tShow devices matching a particular role')
+        self.poutput('  state\t\tShow devices matching a particular state')
+        self.poutput('  what\t\tFind out what something is')
+        self.poutput('  where\t\tFind out where something is')
 
     @exception
     def show_authors(self, arg, flags):
-        print("""\033[1;34m                            The Cyber Reboot Team
+        self.poutput("""\033[1;34m                            The Cyber Reboot Team
                                       &
                            Members of the Community\033[1;m
                            \033[1;31m`-:/+oosyyyyyyyysso+/:-`
@@ -664,7 +666,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
             i = 1
             for line in f:
                 if i > 4:
-                    print(line.strip())
+                    self.poutput(line.strip())
                 i += 1
 
     @exception
@@ -683,7 +685,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
             flags, fields)
 
-        print('Set the following device states:')
+        self.poutput('Set the following device states:')
         self.parser.display_results(Commands().change_devices(
             arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6)
 
@@ -694,7 +696,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         COLLECT [IP|MAC|ID] [DURATION] (TODO - NOT IMPLEMENTED YET)
         '''
         # TODO
-        print('Not implemented yet')
+        self.poutput('Not implemented yet')
 
     @exception
     def task_ignore(self, arg, flags):
@@ -712,7 +714,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
             flags, fields)
 
-        print('Ignored the following devices:')
+        self.poutput('Ignored the following devices:')
         self.parser.display_results(
             Commands().ignore(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6)
 
@@ -732,7 +734,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
             flags, fields)
 
-        print('Cleared the following devices that were being ignored:')
+        self.poutput('Cleared the following devices that were being ignored:')
         self.parser.display_results(
             Commands().clear_ignored(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6)
 
@@ -760,18 +762,19 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
             endpoints = Commands().remove_inactives(arg)
         else:
             endpoints = Commands().remove(arg)
-        print('Removed the following devices:')
+        self.poutput('Removed the following devices:')
         self.parser.display_results(
             endpoints, fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6)
 
     @exception
     def help_task(self):
-        print('  clear\t\tStop ignoring something on the network')
-        print('  collect\tCollect on something on the network for a duration')
-        print('  ignore\tIgnore something on the network')
-        print(
+        self.poutput('  clear\t\tStop ignoring something on the network')
+        self.poutput(
+            '  collect\tCollect on something on the network for a duration')
+        self.poutput('  ignore\tIgnore something on the network')
+        self.poutput(
             '  remove\tRemove something on the network until it is seen again')
-        print('  set\t\tSet the state of things on the network')
+        self.poutput('  set\t\tSet the state of things on the network')
 
     @exception
     def do_task(self, arg):
@@ -788,9 +791,9 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                 if len(arg.split()) > 1:
                     func_calls[action](arg, flags)
                 else:
-                    print(action.upper() + ' <ID|IP|MAC>')
+                    self.poutput(action.upper() + ' <ID|IP|MAC>')
             else:
-                print("Unknown command, try 'help task'")
+                self.poutput("Unknown command, try 'help task'")
         else:
             self.help_task()
 
@@ -816,7 +819,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                     if len(arg.split()) > 1:
                         func_calls[action](arg, flags)
                     else:
-                        print(action.upper() + ' <ID|IP|MAC>')
+                        self.poutput(action.upper() + ' <ID|IP|MAC>')
                 else:
                     valid = False
                     for show_comm in self.show_completions:
@@ -824,9 +827,9 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                             valid = True
                             func_calls[action](arg, flags)
                     if not valid:
-                        print("Unknown command, try 'help show'")
+                        self.poutput("Unknown command, try 'help show'")
             else:
-                print("Unknown command, try 'help show'")
+                self.poutput("Unknown command, try 'help show'")
         else:
             self.help_show()
 
@@ -838,50 +841,53 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
     @exception
     def do_quit(self, arg):
         '''Stop the shell and exit:  QUIT'''
-        print('Thank you for using Poseidon')
+        self.poutput('Thank you for using Poseidon')
         self.close()
         return True
 
     @exception
     def do_exit(self, arg):
         '''Stop the shell and exit:  EXIT'''
-        print('Thank you for using Poseidon')
+        self.poutput('Thank you for using Poseidon')
         self.close()
         return True
 
     @exception
     def do_help(self, arg):
         if not arg:
-            print('For help on specific commands: help <command>')
-            print('Commands:')
-            print('  exit\t\t\tStop the shell and exit')
-            print('  fields\t\tList out all available field names - TO BE IMPLEMENTED')
-            print('  playback\t\tPlayback commands from a file')
-            print('  quit\t\t\tStop the shell and exit')
-            print('  record\t\tSave future commands to a file')
-            print(
+            self.poutput('For help on specific commands: help <command>')
+            self.poutput('Commands:')
+            self.poutput('  exit\t\t\tStop the shell and exit')
+            self.poutput(
+                '  fields\t\tList out all available field names - TO BE IMPLEMENTED')
+            self.poutput('  playback\t\tPlayback commands from a file')
+            self.poutput('  quit\t\t\tStop the shell and exit')
+            self.poutput('  record\t\tSave future commands to a file')
+            self.poutput(
                 '  shell\t\t\tExecutes commands on the shell inside the Poseidon container')
-            print('  show\t\t\tShow things on the network based on filters')
-            print(
+            self.poutput(
+                '  show\t\t\tShow things on the network based on filters')
+            self.poutput(
                 '  set\t\t\tApply settings for all future commands in this session - TO BE IMPLEMENTED')
-            print('  task\t\t\tPerform a task on things on the network')
-            print()
-            print('Optional flags that can be combined with commands:')
-            print(
+            self.poutput('  task\t\t\tPerform a task on things on the network')
+            self.poutput()
+            self.poutput('Optional flags that can be combined with commands:')
+            self.poutput(
                 '  --fields\t\tSpecify which fields to display, i.e. --fields=[id, mac]')
-            print(
+            self.poutput(
                 '  --max_width\t\tSpecify a max width of characters for output, i.e. --max_width=80')
-            print('  --output_format\tTO BE IMPLEMENTED')
-            print(
+            self.poutput('  --output_format\tTO BE IMPLEMENTED')
+            self.poutput(
                 '  --sort_by\t\tSort the output by a specific column index, i.e. --sort_by=0')
-            print()
-            print('Boolean flags that can be combined with commands:')
-            print('  -4and6\t\tShow fields for both IPv4 and IPv6')
-            print('  -4\t\t\tShow only IPv4 fields')
-            print('  -6\t\t\tShow only IPv6 fields')
-            print(
+            self.poutput()
+            self.poutput('Boolean flags that can be combined with commands:')
+            self.poutput('  -4and6\t\tShow fields for both IPv4 and IPv6')
+            self.poutput('  -4\t\t\tShow only IPv4 fields')
+            self.poutput('  -6\t\t\tShow only IPv6 fields')
+            self.poutput(
                 '  -nonzero\t\tRemoves rows and columns that contain only "0"s or "NO DATA"')
-            print('  -unique\t\tRemoves columns that all contain the same value')
+            self.poutput(
+                '  -unique\t\tRemoves columns that all contain the same value')
         else:
             cmd.Cmd.do_help(self, arg)
 
@@ -899,7 +905,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         if arg:
             self.file = open(arg, 'w')
         else:
-            print('PLAYBACK <FILENAME>')
+            self.poutput('PLAYBACK <FILENAME>')
 
     @exception
     def do_playback(self, arg):
@@ -909,12 +915,12 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
             with open(arg) as f:
                 self.cmdqueue.extend(f.read().splitlines())
         else:
-            print('PLAYBACK <FILENAME>')
+            self.poutput('PLAYBACK <FILENAME>')
 
     def precmd(self, line):
         line = line.lower()
         if self.file and 'playback' not in line:
-            print(line, file=self.file)
+            self.poutput(line, file=self.file)
         if '?' in line:
             line = line.replace('?', '')
             line = '? ' + line
