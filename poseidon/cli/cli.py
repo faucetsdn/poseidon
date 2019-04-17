@@ -463,6 +463,10 @@ class PoseidonShell(cmd2.Cmd):
 
     def __init__(self, *args, **kwargs):
         super().__init__(persistent_history_file='/opt/poseidon/.poseidon_history', *args, **kwargs)
+        del cmd2.Cmd.do_edit
+        del cmd2.Cmd.do_py
+        del cmd2.Cmd.do_pyscript
+
         self.parser = Parser()
         self.intro = """Welcome to the Poseidon shell. Type 'help' to list commands.
 <TAB> or '?' will autocomplete commands.
@@ -853,9 +857,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
             self.poutput('  exit\t\t\tStop the shell and exit')
             self.poutput(
                 '  fields\t\tList out all available field names - TO BE IMPLEMENTED')
-            self.poutput('  playback\t\tPlayback commands from a file')
             self.poutput('  quit\t\t\tStop the shell and exit')
-            self.poutput('  record\t\tSave future commands to a file')
             self.poutput(
                 '  shell\t\t\tExecutes commands on the shell inside the Poseidon container')
             self.poutput(
@@ -883,6 +885,13 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                 '  -unique\t\tRemoves columns that all contain the same value')
         else:
             cmd2.Cmd.do_help(self, arg)
+
+    @exception
+    def do_set(self, arg):
+        if arg in ['colors', 'debug', 'echo', 'prompt', 'timing']:
+            cmd2.Cmd.do_set(self, arg)
+        else:
+            self.poutput('TO DO')
 
     def emptyline(self):
         pass
