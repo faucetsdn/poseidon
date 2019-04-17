@@ -439,6 +439,7 @@ class Parser():
                 for field in fields:
                     record.append(fields_lookup[field.lower()][0](endpoint))
                 matrix.append(record)
+        results = ''
         if len(matrix) > 0:
             matrix = sorted(matrix, key=lambda endpoint: endpoint[sort_by])
             # swap out field names for header
@@ -452,10 +453,10 @@ class Parser():
             # make all the column types be text
             table.set_cols_dtype(['t']*len(fields))
             table.add_rows(matrix)
-            print(table.draw())
+            results = table.draw()
         else:
-            print('No results found for that query.')
-        return
+            results = 'No results found for that query.'
+        return results
 
 
 class PoseidonShell(cmd2.Cmd):
@@ -464,7 +465,7 @@ class PoseidonShell(cmd2.Cmd):
         super().__init__(persistent_history_file='/opt/poseidon/.poseidon_history', *args, **kwargs)
         self.parser = Parser()
         self.allow_cli_args = False
-        self.set_use_arg_list = False
+        cmd2.set_use_arg_list = False
         self.intro = """Welcome to the Poseidon shell. Type 'help' to list commands.
 <TAB> or '?' will autocomplete commands.
                                _      \033[1;31m__\033[1;m
@@ -505,8 +506,8 @@ class PoseidonShell(cmd2.Cmd):
         fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
             flags, fields)
 
-        self.parser.display_results(Commands().show_devices(
-            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6)
+        self.poutput(self.parser.display_results(Commands().show_devices(
+            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
     def show_role(self, arg, flags):
@@ -516,8 +517,8 @@ class PoseidonShell(cmd2.Cmd):
         fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
             flags, fields)
 
-        self.parser.display_results(Commands().show_devices(
-            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6)
+        self.poutput(self.parser.display_results(Commands().show_devices(
+            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
     def show_state(self, arg, flags):
@@ -528,8 +529,8 @@ class PoseidonShell(cmd2.Cmd):
         fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
             flags, fields)
 
-        self.parser.display_results(Commands().show_devices(
-            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6)
+        self.poutput(self.parser.display_results(Commands().show_devices(
+            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
     def show_behavior(self, arg, flags):
@@ -539,8 +540,8 @@ class PoseidonShell(cmd2.Cmd):
         fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
             flags, fields)
 
-        self.parser.display_results(Commands().show_devices(
-            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6)
+        self.poutput(self.parser.display_results(Commands().show_devices(
+            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
     def show_os(self, arg, flags):
@@ -550,8 +551,8 @@ class PoseidonShell(cmd2.Cmd):
         fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
             flags, fields)
 
-        self.parser.display_results(Commands().show_devices(
-            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6)
+        self.poutput(self.parser.display_results(Commands().show_devices(
+            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
     def show_what(self, arg, flags):
@@ -568,8 +569,8 @@ class PoseidonShell(cmd2.Cmd):
         fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
             flags, fields)
 
-        self.parser.display_results(Commands().what_is(
-            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6)
+        self.poutput(self.parser.display_results(Commands().what_is(
+            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
     def show_history(self, arg, flags):
@@ -586,8 +587,8 @@ class PoseidonShell(cmd2.Cmd):
         fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
             flags, fields)
 
-        self.parser.display_results(
-            Commands().history_of(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6)
+        self.poutput(self.parser.display_results(
+            Commands().history_of(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
     def show_where(self, arg, flags):
@@ -604,8 +605,8 @@ class PoseidonShell(cmd2.Cmd):
         fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
             flags, fields)
 
-        self.parser.display_results(
-            Commands().where_is(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6)
+        self.poutput(self.parser.display_results(
+            Commands().where_is(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
     def help_show(self):
@@ -688,8 +689,8 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
             flags, fields)
 
         self.poutput('Set the following device states:')
-        self.parser.display_results(Commands().change_devices(
-            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6)
+        self.poutput(self.parser.display_results(Commands().change_devices(
+            arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
     def task_collect(self, arg, flags):
@@ -717,8 +718,8 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
             flags, fields)
 
         self.poutput('Ignored the following devices:')
-        self.parser.display_results(
-            Commands().ignore(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6)
+        self.poutput(self.parser.display_results(
+            Commands().ignore(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
     def task_clear(self, arg, flags):
@@ -737,8 +738,8 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
             flags, fields)
 
         self.poutput('Cleared the following devices that were being ignored:')
-        self.parser.display_results(
-            Commands().clear_ignored(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6)
+        self.poutput(self.parser.display_results(
+            Commands().clear_ignored(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
     def task_remove(self, arg, flags):
@@ -765,8 +766,8 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         else:
             endpoints = Commands().remove(arg)
         self.poutput('Removed the following devices:')
-        self.parser.display_results(
-            endpoints, fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6)
+        self.poutput(self.parser.display_results(
+            endpoints, fields, sort_by=sort_by, max_width=max_width, unique=unique, nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
     def help_task(self):
