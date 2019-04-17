@@ -9,4 +9,4 @@ instances = 1
 environment = ["PYTHONUNBUFFERED=0"]
 ports = {'9304/tcp': ('127.0.0.1', 9304)}
 links = {"RabbitMQ":"RABBIT_SERVER", "NetworkTap":"vent_ip", "PoseidonAPI":"poseidon-api", "Redis":"redis"}
-volumes = {'/var/log/faucet/faucet.log': {'bind': '/var/log/faucet/faucet.log', 'mode': 'ro'}, '/etc/faucet/': {'bind': '/etc/faucet/', 'mode': 'rw'}, '/var/log/poseidon/poseidon.log': {'bind': '/var/log/poseidon/poseidon.log', 'mode': 'rw'}}
+volumes = {'/opt/poseidon/': {'bind': '/opt/poseidon/', 'mode': 'rw'}, '/var/log/faucet/faucet.log': {'bind': '/var/log/faucet/faucet.log', 'mode': 'ro'}, '/etc/faucet/': {'bind': '/etc/faucet/', 'mode': 'rw'}, '/var/log/poseidon/poseidon.log': {'bind': '/var/log/poseidon/poseidon.log', 'mode': 'rw'}}

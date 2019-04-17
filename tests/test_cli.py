@@ -11,8 +11,6 @@ from poseidon.helpers.endpoint import Endpoint
 
 def test_poseidonshell():
     shell = PoseidonShell()
-    shell.do_record('foo.txt')
-    shell.do_record('')
     shell.do_help('foo')
     shell.do_help('')
     shell.do_show('foo')
@@ -28,8 +26,6 @@ def test_poseidonshell():
     shell.do_task('clear 10')
     shell.do_quit('foo')
     shell.do_exit('foo')
-    shell.do_playback('foo.txt')
-    shell.do_playback('')
     shell.complete_show('foo', 'foo bar', 1, 1)
     shell.complete_task('foo', 'foo bar', 1, 1)
     shell.show_all('foo', [])
@@ -51,23 +47,13 @@ def test_poseidonshell():
     shell.task_remove('inactive', [])
     shell.help_task()
     shell.emptyline()
-    shell.completenames('foo')
-    shell.completenames('eof')
-    shell.completenames('shell')
     shell.do_shell('ls')
-    shell.precmd('foo')
-    shell.precmd('foo ?')
-    shell.do_eof('foo')
-    shell.close()
-    foo = open('foo.txt', 'w')
-    shell.file = foo
-    shell.precmd('foo')
 
 
 def test_check_flags():
     parser = Parser()
-    fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = parser._check_flags({
-                                                                                                                          'fields': 'all'}, '')
+    valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = parser._check_flags({
+                                                                                                                                 'fields': 'all'}, '')
     assert fields == [
         'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4',
         'IPv4 Subnet', 'IPv6', 'IPv6 Subnet', 'Ethernet Vendor', 'Ignored',
@@ -77,8 +63,8 @@ def test_check_flags():
         'Previous Role Confidences\n(PoseidonML)', 'Behavior\n(PoseidonML)', 'Previous Behaviors\n(PoseidonML)',
         'IPv4 rDNS', 'IPv6 rDNS', 'SDN Controller Type', 'SDN Controller URI'
     ]
-    fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = parser._check_flags({
-                                                                                                                          'fields': ['ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4'], 'sort_by': 1, 'max_width': 100, 'unique': True, 'nonzero': True, 'output_format': 'csv', '4': True, '6': True, '4and6': True}, '')
+    valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = parser._check_flags(
+        {'fields': ['ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4'], 'sort_by': 1, 'max_width': 100, 'unique': True, 'nonzero': True, 'output_format': 'csv', '4': True, '6': True, '4and6': True}, '')
     assert fields == [
         'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4',
     ]
@@ -114,7 +100,7 @@ def test_display_results():
 
 def test_get_flags():
     parser = Parser()
-    flags, not_flags = parser.get_flags(
+    valid, flags, not_flags = parser.get_flags(
         'show all --fields=[id, mac] --sort_by=2 -4')
     assert flags == {'fields': ['id', 'mac'], 'sort_by': '2', '4': True}
     assert not_flags == 'show all'

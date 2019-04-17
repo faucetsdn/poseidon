@@ -1,3 +1,4 @@
+cmd2==0.9.11
 natural==0.2.0
 pika==1.0.1
 prometheus_client==0.6.0
