@@ -6,11 +6,11 @@ The main entrypoint for the Poseidon shell.
 Created on 14 January 2019
 @author: Charlie Lewis
 """
-import cmd2 as cmd
 import os
 import readline
 import time
 
+import cmd2 as cmd
 from natural.date import delta
 from natural.date import duration
 from texttable import Texttable
@@ -460,7 +460,8 @@ class Parser():
 class PoseidonShell(cmd.Cmd):
 
     def __init__(self):
-        cmd.Cmd.__init__(self, persistent_history_file='/root/.poseidon_history')
+        cmd.Cmd.__init__(
+            self, persistent_history_file='/root/.poseidon_history')
         self.parser = Parser()
         self.intro = """Welcome to the Poseidon shell. Type 'help' to list commands.
 <TAB> or '?' will autocomplete commands.
@@ -473,7 +474,7 @@ class PoseidonShell(cmd.Cmd):
         self.prompt = '\033[1;32mposeidon$ \033[1;m'
         self.file = None
 
-        show_completions = [
+        self.show_completions = [
             'role active-directory-controller', 'role administrator-server',
             'role administrator-workstation', 'role business-workstation',
             'role developer-workstation', 'role gpu-laptop', 'role pki-server',
