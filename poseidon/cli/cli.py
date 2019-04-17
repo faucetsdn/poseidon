@@ -420,7 +420,8 @@ class Parser():
                     record.append(fields_lookup[field.lower()][0](endpoint))
                 # remove rows that are all zero or 'NO DATA'
                 if not nonzero or not all(item == '0' or item == 'NO DATA' for item in record):
-                    records.append(record)
+                    if not (unique and record in records):
+                        records.append(record)
 
             # remove columns that are all zero or 'NO DATA'
             del_columns = []
