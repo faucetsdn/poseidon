@@ -6,11 +6,11 @@ The main entrypoint for the Poseidon shell.
 Created on 14 January 2019
 @author: Charlie Lewis
 """
+import cmd2
 import os
 import readline
 import time
 
-import cmd2 as cmd
 from natural.date import delta
 from natural.date import duration
 from texttable import Texttable
@@ -457,11 +457,10 @@ class Parser():
         return
 
 
-class PoseidonShell(cmd.Cmd):
+class PoseidonShell(cmd2.Cmd):
 
     def __init__(self):
-        cmd.Cmd.__init__(
-            self, persistent_history_file='/root/.poseidon_history')
+        super().__init__(persistent_history_file='/root/.poseidon_history')
         self.parser = Parser()
         self.intro = """Welcome to the Poseidon shell. Type 'help' to list commands.
 <TAB> or '?' will autocomplete commands.
@@ -889,7 +888,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
             self.poutput(
                 '  -unique\t\tRemoves columns that all contain the same value')
         else:
-            cmd.Cmd.do_help(self, arg)
+            cmd2.Cmd.do_help(self, arg)
 
     def emptyline(self):
         pass
