@@ -21,6 +21,7 @@ from poseidon.helpers.exception_decor import exception
 
 
 readline.parse_and_bind('?: complete')
+cmd2.set_use_arg_list = False
 
 
 class GetData():
@@ -464,8 +465,6 @@ class PoseidonShell(cmd2.Cmd):
     def __init__(self, *args, **kwargs):
         super().__init__(persistent_history_file='/opt/poseidon/.poseidon_history', *args, **kwargs)
         self.parser = Parser()
-        self.allow_cli_args = False
-        cmd2.set_use_arg_list = False
         self.intro = """Welcome to the Poseidon shell. Type 'help' to list commands.
 <TAB> or '?' will autocomplete commands.
                                _      \033[1;31m__\033[1;m
