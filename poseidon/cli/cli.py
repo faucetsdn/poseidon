@@ -12,7 +12,6 @@ import sys
 import time
 
 import cmd2
-from cmd2 import with_argument_list
 from natural.date import delta
 from natural.date import duration
 from texttable import Texttable
@@ -475,7 +474,6 @@ class PoseidonShell(cmd2.Cmd):
  / .___/ \____/\033[1;31m/____/\033[1;m \___//_/ \033[1;31m\__,_/\033[1;m \____/\033[1;31m/_/ /_/\033[1;m
 /_/\n"""
         self.prompt = '\033[1;32mposeidon$ \033[1;m'
-        self.file = None
 
         self.show_completions = [
             'role active-directory-controller', 'role administrator-server',
@@ -837,11 +835,6 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
             self.help_show()
 
     @exception
-    def do_eof(self, arg):
-        self.close()
-        return True
-
-    @exception
     def do_quit(self, arg):
         '''Stop the shell and exit:  QUIT'''
         self.poutput('Thank you for using Poseidon')
@@ -898,53 +891,9 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         pass
 
     @exception
-    @with_argument_list
     def do_shell(self, s):
         '''Execute shell commands inside the Poseidon container'''
         os.system(s)
-
-    @exception
-    def do_record(self, arg):
-        '''Save future commands to filename: RECORD poseidon.cmd'''
-        if arg:
-            self.file = open(arg, 'w')
-        else:
-            self.poutput('PLAYBACK <FILENAME>')
-
-    @exception
-    def do_playback(self, arg):
-        '''Playback commands from a file: PLAYBACK poseidon.cmd'''
-        if arg:
-            self.close()
-            with open(arg) as f:
-                self.cmdqueue.extend(f.read().splitlines())
-        else:
-            self.poutput('PLAYBACK <FILENAME>')
-
-    def precmd(self, line):
-        line = line.lower()
-        if self.file and 'playback' not in line:
-            print(line, file=self.file)
-        if '?' in line:
-            line = line.replace('?', '')
-            line = '? ' + line
-        return line
-
-    def completenames(self, text, line, begidx, endidx):
-        dotext = 'do_'+text
-        names = [a[3:] for a in self.get_names() if a.startswith(dotext)]
-        if 'eof' in names:
-            names.remove('eof')
-        if 'pyscript' in names:
-            names.remove('pyscript')
-        if 'py' in names:
-            names.remove('py')
-        return names
-
-    def close(self):
-        if self.file:
-            self.file.close()
-            self.file = None
 
 
 if __name__ == '__main__':  # pragma: no cover
