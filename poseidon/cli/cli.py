@@ -897,6 +897,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         pass
 
     @exception
+    @with_argument_list
     def do_shell(self, s):
         '''Execute shell commands inside the Poseidon container'''
         os.system(s)
