@@ -6,11 +6,11 @@ The main entrypoint for the Poseidon shell.
 Created on 14 January 2019
 @author: Charlie Lewis
 """
-import cmd2
 import os
 import readline
 import time
 
+import cmd2
 from natural.date import delta
 from natural.date import duration
 from texttable import Texttable
@@ -869,7 +869,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
             self.poutput(
                 '  set\t\t\tApply settings for all future commands in this session - TO BE IMPLEMENTED')
             self.poutput('  task\t\t\tPerform a task on things on the network')
-            self.poutput()
+            self.poutput('\n')
             self.poutput('Optional flags that can be combined with commands:')
             self.poutput(
                 '  --fields\t\tSpecify which fields to display, i.e. --fields=[id, mac]')
@@ -878,7 +878,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
             self.poutput('  --output_format\tTO BE IMPLEMENTED')
             self.poutput(
                 '  --sort_by\t\tSort the output by a specific column index, i.e. --sort_by=0')
-            self.poutput()
+            self.poutput('\n')
             self.poutput('Boolean flags that can be combined with commands:')
             self.poutput('  -4and6\t\tShow fields for both IPv4 and IPv6')
             self.poutput('  -4\t\t\tShow only IPv4 fields')
