@@ -119,7 +119,7 @@ function check_args()
                 ;;
             -e|shell)
                 if [ "$(docker ps -q --filter "label=vent.namespace=cyberreboot/poseidon" --filter "label=vent.name=" | wc -l)" -eq 1 ]; then
-                    docker exec -it "$(docker ps -q --filter "label=vent.namespace=cyberreboot/poseidon" --filter "label=vent.name=")" python3 /poseidon/poseidon/cli/cli.py
+                    docker exec -it "$(docker ps -q --filter "label=vent.namespace=cyberreboot/poseidon" --filter "label=vent.name=")" python3 /poseidon/poseidon/cli/cli.py "${@:2}"
                 else
                     echo "Poseidon isn't running, you must first start Poseidon to use the shell."
                 fi
@@ -236,7 +236,7 @@ function check_files()
 
 # entry point
 if [ $# -gt 0 ]; then
-    if [[ ( $# -eq 2 && $1 == "start" ) || ( $# -eq 2 && $1 == "pcap" ) || ( $# -eq 2 && $1 == "-p" ) || ( $# -eq 1 ) ]]; then
+    if [[ ( $# -eq 2 && $1 == "start" ) || ( $# -eq 2 && $1 == "pcap" ) || ( $# -eq 2 && $1 == "-p" ) || ( $# -eq 1 ) || ( $1 == "shell" ) ]]; then
         check_args "$@"
     else
         show_help
