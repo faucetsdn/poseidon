@@ -236,7 +236,7 @@ function check_files()
 
 # entry point
 if [ $# -gt 0 ]; then
-    if [[ ( $# -eq 2 && $1 == "start" ) || ( $# -eq 2 && $1 == "pcap" ) || ( $# -eq 2 && $1 == "-p" ) || ( $# -eq 1 ) || ( $1 == "shell" ) ]]; then
+    if [[ ( $# -eq 2 && $1 == "start" ) || ( $# -eq 2 && $1 == "pcap" ) || ( $# -eq 2 && $1 == "-p" ) || ( $# -eq 1 ) || ( $1 == "shell" ) || ( $1 == "-e" ) ]]; then
         check_args "$@"
     else
         show_help
