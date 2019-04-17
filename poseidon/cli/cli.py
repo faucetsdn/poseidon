@@ -464,6 +464,7 @@ class PoseidonShell(cmd2.Cmd):
         super().__init__(persistent_history_file='/opt/poseidon/.poseidon_history', *args, **kwargs)
         self.parser = Parser()
         self.allow_cli_args = False
+        self.set_use_arg_list = False
         self.intro = """Welcome to the Poseidon shell. Type 'help' to list commands.
 <TAB> or '?' will autocomplete commands.
                                _      \033[1;31m__\033[1;m
@@ -927,13 +928,15 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
             line = '? ' + line
         return line
 
-    def completenames(self, text, *ignored):
+    def completenames(self, text, line, begidx, endidx):
         dotext = 'do_'+text
         names = [a[3:] for a in self.get_names() if a.startswith(dotext)]
         if 'eof' in names:
             names.remove('eof')
         if 'pyscript' in names:
             names.remove('pyscript')
+        if 'py' in names:
+            names.remove('py')
         return names
 
     def close(self):
