@@ -52,8 +52,8 @@ def test_poseidonshell():
 
 def test_check_flags():
     parser = Parser()
-    fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = parser._check_flags({
-                                                                                                                          'fields': 'all'}, '')
+    valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = parser._check_flags({
+                                                                                                                                 'fields': 'all'}, '')
     assert fields == [
         'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4',
         'IPv4 Subnet', 'IPv6', 'IPv6 Subnet', 'Ethernet Vendor', 'Ignored',
@@ -63,8 +63,8 @@ def test_check_flags():
         'Previous Role Confidences\n(PoseidonML)', 'Behavior\n(PoseidonML)', 'Previous Behaviors\n(PoseidonML)',
         'IPv4 rDNS', 'IPv6 rDNS', 'SDN Controller Type', 'SDN Controller URI'
     ]
-    fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = parser._check_flags({
-                                                                                                                          'fields': ['ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4'], 'sort_by': 1, 'max_width': 100, 'unique': True, 'nonzero': True, 'output_format': 'csv', '4': True, '6': True, '4and6': True}, '')
+    valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = parser._check_flags(
+        {'fields': ['ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4'], 'sort_by': 1, 'max_width': 100, 'unique': True, 'nonzero': True, 'output_format': 'csv', '4': True, '6': True, '4and6': True}, '')
     assert fields == [
         'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4',
     ]
@@ -100,7 +100,7 @@ def test_display_results():
 
 def test_get_flags():
     parser = Parser()
-    flags, not_flags = parser.get_flags(
+    valid, flags, not_flags = parser.get_flags(
         'show all --fields=[id, mac] --sort_by=2 -4')
     assert flags == {'fields': ['id', 'mac'], 'sort_by': '2', '4': True}
     assert not_flags == 'show all'
