@@ -31,6 +31,7 @@ build_debian:
 	cp .dockerignore installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
 	cp .plugin_config.yml installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
 	cp .vent_startup.yml installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
+	touch installers/debian/$(TAG)-$(VERSION)/opt/poseidon/.poseidon_history
 	cp -R .git installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
 	cp -R bin/* installers/debian/$(TAG)-$(VERSION)/usr/bin/
 	docker pull cyberreboot/vent:v0.8.2
@@ -87,6 +88,7 @@ build_debian_net:
 	cp .dockerignore installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
 	cp .plugin_config.yml installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
 	cp .vent_startup.yml installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
+	touch installers/debian/$(TAG)-$(VERSION)/opt/poseidon/.poseidon_history
 	cp -R .git installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
 	cp -R bin/* installers/debian/$(TAG)-$(VERSION)/usr/bin/
 	docker pull cyberreboot/vent:v0.8.2

@@ -930,8 +930,8 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         names = [a[3:] for a in self.get_names() if a.startswith(dotext)]
         if 'eof' in names:
             names.remove('eof')
-        if 'shell' in names:
-            names.remove('shell')
+        if 'pyscript' in names:
+            names.remove('pyscript')
         return names
 
     def close(self):
