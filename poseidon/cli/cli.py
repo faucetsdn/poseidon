@@ -8,6 +8,7 @@ Created on 14 January 2019
 """
 import os
 import readline
+import sys
 import time
 
 import cmd2
@@ -460,7 +461,7 @@ class Parser():
 class PoseidonShell(cmd2.Cmd):
 
     def __init__(self):
-        super().__init__(persistent_history_file='/root/.poseidon_history')
+        super().__init__(persistent_history_file='/opt/poseidon/.poseidon_history')
         self.parser = Parser()
         self.intro = """Welcome to the Poseidon shell. Type 'help' to list commands.
 <TAB> or '?' will autocomplete commands.
@@ -942,4 +943,9 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
 
 if __name__ == '__main__':  # pragma: no cover
     p_shell = PoseidonShell()
-    p_shell.cmdloop()
+    if '-c' in sys.argv:
+        while sys.argv.pop(0) != '-c':
+            pass
+        p_shell.onecmd(' '.join(sys.argv))
+    else:
+        p_shell.cmdloop()
