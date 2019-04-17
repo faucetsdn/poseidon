@@ -440,7 +440,8 @@ class Parser():
                 del fields[val]
             if len(fields) > 0:
                 if unique:
-                    matrix = list(set(records))
+                    u_records = set(map(tuple, records))
+                    matrix = map(list, u_records)
                 else:
                     matrix = records
         if not nonzero and not unique:
