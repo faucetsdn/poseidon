@@ -439,7 +439,11 @@ class Parser():
                     del row[val]
                 del fields[val]
             if len(fields) > 0:
-                matrix = records
+                if unique:
+                    u_records = set(map(tuple, records))
+                    matrix = list(map(list, u_records))
+                else:
+                    matrix = records
         if not nonzero and not unique:
             for endpoint in endpoints:
                 record = []
