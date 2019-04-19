@@ -36,10 +36,10 @@ The Poseidon project originally began as an experiment to test the merits of lev
 
 - A dedicated Linux System or Virtual Machine (A Debian-based distribution is preferred - Ubuntu 16.x is ideal)
   - Currently supported versions for the .DEB install are:
-    - Ubuntu 14.04
     - Ubuntu 16.04
     - Ubuntu 18.04
     - Ubuntu 18.10
+    - Ubuntu 19.04
 - [Docker](https://www.docker.com/) - Poseidon and related components run on top of Docker, so understanding the fundamentals will be useful for troubleshooting as well. [A Good Ubuntu Docker Quick-Start](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04)
 - ~10GB of free disk space
 - An SDN Controller - specifically [BigSwitch Cloud Fabric](https://www.bigswitch.com/community-edition) or [Faucet](https://faucet.nz/) - if you want full functionality (this is now optional, if you simply want to replay previously created captures of a network, or don't have an SDN environment available).
@@ -48,9 +48,23 @@ The Poseidon project originally began as an experiment to test the merits of lev
 
 ## Installing
 
-On Ubuntu, this will download and install our `.deb` package from [Cloudsmith](https://cloudsmith.io/~/cyberreboot/repos/poseidon/packages/).
+### Permissions for Docker
+
+To simplify the using commands with Docker, we recommend allowing the user that will be executing Poseidon commands be part of the `docker` group so they can execut Docker commands without `sudo`.  Typically this can be done with:
 ```
 sudo usermod -aG docker $USER
+```
+Followed by closing the existing shell and starting a new one.  If Docker was installed with the Ubuntu Snap system, you'll instead need to do the following to achieve the same thing:
+```
+sudo addgroup --system docker
+sudo adduser $USER docker
+newgrp docker
+sudo snap disable docker
+sudo snap enable docker
+```
+
+On Ubuntu, this will download and install our `.deb` package from [Cloudsmith](https://cloudsmith.io/~/cyberreboot/repos/poseidon/packages/).
+```
 sudo apt-get install -y apt-transport-https curl
 curl -sLf "https://dl.cloudsmith.io/public/cyberreboot/poseidon/cfg/gpg/gpg.F9E23875C98A1F72.key" | sudo apt-key add -
 sudo add-apt-repository "deb [arch=amd64] https://dl.cloudsmith.io/public/cyberreboot/poseidon/deb/ubuntu $(lsb_release -cs) main"
