@@ -40,7 +40,7 @@ The Poseidon project originally began as an experiment to test the merits of lev
     - Ubuntu 18.04
     - Ubuntu 18.10
     - Ubuntu 19.04
-- [Docker](https://www.docker.com/) - Poseidon and related components run on top of Docker, so understanding the fundamentals will be useful for troubleshooting as well. [A Good Ubuntu Docker Quick-Start](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04)
+- [Docker](https://www.docker.com/) - Poseidon and related components run on top of Docker, so understanding the fundamentals will be useful for troubleshooting as well.  Note: installing via Snap is currently unsupported. [A Good Ubuntu Docker Quick-Start](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04)
 - ~10GB of free disk space
 - An SDN Controller - specifically [BigSwitch Cloud Fabric](https://www.bigswitch.com/community-edition) or [Faucet](https://faucet.nz/) - if you want full functionality (this is now optional, if you simply want to replay previously created captures of a network, or don't have an SDN environment available).
 
@@ -54,14 +54,7 @@ To simplify the using commands with Docker, we recommend allowing the user that 
 ```
 sudo usermod -aG docker $USER
 ```
-Followed by closing the existing shell and starting a new one.  If Docker was installed with the Ubuntu Snap system, you'll instead need to do the following to achieve the same thing:
-```
-sudo addgroup --system docker
-sudo adduser $USER docker
-newgrp docker
-sudo snap disable docker
-sudo snap enable docker
-```
+Followed by closing the existing shell and starting a new one.
 
 ### Installing the Debian Package
 On Ubuntu, this will download and install our `.deb` package from [Cloudsmith](https://cloudsmith.io/~/cyberreboot/repos/poseidon/packages/):
