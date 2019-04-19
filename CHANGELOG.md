@@ -1,3 +1,17 @@
+# v0.5.8 (2019-04-19)
+
+ - Packaged new versions of components, including poseidonml v0.3.1 and vent v0.8.3
+ - Added new options for deleting old captures on a schedule `delete_pcap_files` (defaults to not enabled)
+ - Added new fields `controller` and `controller_type`
+ - Added flags to the CLI `-nonzero` and `-unique`
+ - Fixed some type errors in the CLI
+ - Updated versions of pika, pytest, and urllib
+ - Moved the CLI from cmd to cmd2, enabling things like Ctrl-r for searching history
+ - Added persistent history of commands in the CLI across sessions
+ - Added new flag for executing shell commands without going into the shell `poseidon shell -c <command>`
+ - Better error checking for invalid flags being passed into commands in the CLI
+ - Can now redirect or pipe output of commands in the CLI to any linux command on the system, such as `grep`
+
 # v0.5.7 (2019-04-04)
 
  - Packaged versions of components, including vent-plugins v0.1.1, poseidonml v0.3.0, crviz v0.2.10, and vent v0.8.2
