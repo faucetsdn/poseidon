@@ -63,7 +63,8 @@ sudo snap disable docker
 sudo snap enable docker
 ```
 
-On Ubuntu, this will download and install our `.deb` package from [Cloudsmith](https://cloudsmith.io/~/cyberreboot/repos/poseidon/packages/).
+### Installing the Debian Package
+On Ubuntu, this will download and install our `.deb` package from [Cloudsmith](https://cloudsmith.io/~/cyberreboot/repos/poseidon/packages/):
 ```
 sudo apt-get install -y apt-transport-https curl
 curl -sLf "https://dl.cloudsmith.io/public/cyberreboot/poseidon/cfg/gpg/gpg.F9E23875C98A1F72.key" | sudo apt-key add -
