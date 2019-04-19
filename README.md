@@ -42,7 +42,7 @@ The Poseidon project originally began as an experiment to test the merits of lev
     - Ubuntu 18.10
 - [Docker](https://www.docker.com/) - Poseidon and related components run on top of Docker, so understanding the fundamentals will be useful for troubleshooting as well. [A Good Ubuntu Docker Quick-Start](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04)
 - ~10GB of free disk space
-- An SDN Controller - specifically [BigSwitch Cloud Fabric](https://www.bigswitch.com/community-edition) or [Faucet](https://faucet.nz/) - if you want full functionality (this is now optional, if you simply want to replay previously created captures of a network, or don't have an SDN environment availabble).
+- An SDN Controller - specifically [BigSwitch Cloud Fabric](https://www.bigswitch.com/community-edition) or [Faucet](https://faucet.nz/) - if you want full functionality (this is now optional, if you simply want to replay previously created captures of a network, or don't have an SDN environment available).
 
 > Note: Installation on `OS X` is possible but not supported, see the `./helpers/run` file (above) as a starting point.
 
