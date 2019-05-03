@@ -1,3 +1,11 @@
+# v0.5.9 (2019-05-03)
+
+ - Packaged new version of components, including CRviz v0.2.11 and vent v0.9.0
+ - Add support for Ubuntu Disco and removed support for Ubuntu Trusty
+ - Cleanup documentation
+ - Updated version of pip, cmd2, falcon, mock, and pytest-cov
+ - Add new `show version` option in the CLI
+
 # v0.5.8 (2019-04-19)
 
  - Packaged new versions of components, including poseidonml v0.3.1 and vent v0.8.3
