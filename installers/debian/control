@@ -1,5 +1,5 @@
 Package: poseidon
-Version: 0.5.9
+Version: 0.6.0.dev
 Section: base
 Priority: optional
 Architecture: all
