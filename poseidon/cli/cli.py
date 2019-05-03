@@ -455,6 +455,7 @@ class Parser():
             matrix = sorted(matrix, key=lambda endpoint: endpoint[sort_by])
             # swap out field names for header
             fields_header = []
+            print(fields)
             for field in fields:
                 fields_header.append(
                     self.all_fields[fields_lookup[field.lower()][1]])
