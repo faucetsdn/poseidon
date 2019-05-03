@@ -545,7 +545,7 @@ class PoseidonShell(cmd2.Cmd):
                   'Ethernet Vendor', 'Mac', 'IPv4', 'IPv6']
 
         valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
-            flags, fields)
+            flags, fields, ipv4_only=False)
 
         if not valid:
             self.poutput("Unknown flag, try 'help show'")
@@ -636,7 +636,7 @@ class PoseidonShell(cmd2.Cmd):
         fields = ['Switch', 'Port', 'VLAN', 'IPv4', 'IPv6', 'MAC Address']
 
         valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
-            flags, fields)
+            flags, fields, ipv4_only=False)
 
         if not valid:
             self.poutput("Unknown flag, try 'help show'")
