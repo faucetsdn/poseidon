@@ -497,7 +497,7 @@ class PoseidonShell(cmd2.Cmd):
             'state unknown', 'state mirroring', 'state abnormal', 'state shutdown',
             'state reinvestigating', 'state queued', 'state ignored',
             'behavior normal', 'behavior abnormal', 'os windows', 'os freebsd',
-            'os linux', 'os mac', 'history', 'what', 'where', 'all'
+            'os linux', 'os mac', 'history', 'version', 'what', 'where', 'all'
         ]
 
         self.task_completions = [
