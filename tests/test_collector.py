@@ -21,5 +21,5 @@ def test_Collector():
     endpoint = Endpoint('foo')
     endpoint.endpoint_data = {
         'mac': '00:00:00:00:00:00', 'container_id': 'foo'}
-    a = Collector(endpoint)
+    a = Collector(endpoint, 'foo')
     a.stop_vent_collector()
