@@ -26,7 +26,8 @@ class Actions(object):
         status = False
         if self.sdnc:
             if self.sdnc.mirror_mac(self.endpoint.endpoint_data['mac'], self.endpoint.endpoint_data['segment'], self.endpoint.endpoint_data['port']):
-                status = Collector(self.endpoint).start_vent_collector()
+                status = Collector(
+                    self.endpoint, self.endpoint.endpoint_data['segment']).start_vent_collector()
         else:
             status = True
         return status
@@ -36,7 +37,8 @@ class Actions(object):
         status = False
         if self.sdnc:
             if self.sdnc.unmirror_mac(self.endpoint.endpoint_data['mac'], self.endpoint.endpoint_data['segment'], self.endpoint.endpoint_data['port']):
-                status = Collector(self.endpoint).stop_vent_collector()
+                status = Collector(
+                    self.endpoint, self.endpoint.endpoint_data['segment']).stop_vent_collector()
         else:
             status = True
         return status
