@@ -52,6 +52,9 @@ while [ "$STATE" != 0 ] && [ "$STATE" != 13 ]; do
     4)
         db_get poseidon/controller_type
         if [ "$RET" == "Faucet" ]; then
+            db_input low poseidon/ignore_vlans || true
+            db_input low poseidon/ignore_ports || true
+            db_input low poseidon/trunk_ports || true
             db_get poseidon/faucet_same_host
             if [ "$RET" == "No" ]; then
                 db_input critical poseidon/faucet_controller_user || true

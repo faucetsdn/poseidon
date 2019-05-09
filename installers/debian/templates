@@ -27,6 +27,21 @@ Type: string
 Default: false
 Description: Set if there are multiple collector NICs:
 
+Template: poseidon/ignore_vlans
+Type: string
+Default: '[]'
+Description: List of VLAN numbers to ignore endpoints from:
+
+Template: poseidon/ignore_ports
+Type: string
+Default: '{}'
+Description: Dictionary of switch and port numbers to ignore endpoints from:
+
+Template: poseidon/trunk_ports
+Type: string
+Default: '{}'
+Description: Dictionary of switch and port numbers to treat as trunks:
+
 Template: poseidon/faucet_controller_user
 Type: string
 Description: SSH username to connect to Faucet:

@@ -58,6 +58,18 @@ if db_go; then
             fi
             db_get poseidon/faucet_fa_rabbit_enabled
             if [[ -n "$RET" ]]; then
+                db_get poseidon/ignore_vlans
+                if [[ -n "$RET" ]]; then
+                    echo "ignore_vlans=$RET" >> /etc/poseidon/default.conf
+                fi
+                db_get poseidon/ignore_ports
+                if [[ -n "$RET" ]]; then
+                    echo "ignore_ports=$RET" >> /etc/poseidon/default.conf
+                fi
+                db_get poseidon/trunk_ports
+                if [[ -n "$RET" ]]; then
+                    echo "trunk_ports=$RET" >> /etc/poseidon/default.conf
+                fi
                 if [ "$RET" == "Yes" ]; then
                     echo "FA_RABBIT_ENABLED=True" >> /etc/poseidon/default.conf
                     db_get poseidon/faucet_fa_rabbit_host
