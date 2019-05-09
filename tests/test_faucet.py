@@ -60,7 +60,6 @@ def test_get_endpoints():
         f.write('                native_vlan: open')
 
     controller = Config().get_config()
-    print(controller)
     proxy = FaucetProxy(controller)
     proxy.check_connection()
     a = proxy.get_endpoints()
