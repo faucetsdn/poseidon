@@ -115,6 +115,24 @@ class Config():
                     except Exception as e:  # pragma: no cover
                         self.logger.error(
                             'Unable to set configuration option {0} because {1}'.format(key, str(e)))
+                elif key == 'ignore_vlans':
+                    try:
+                        controller['ignore_vlans'] = ast.literal_eval(val)
+                    except Exception as e:  # pragma: no cover
+                        self.logger.error(
+                            'Unable to set configuration option {0} because {1}'.format(key, str(e)))
+                elif key == 'ignore_ports':
+                    try:
+                        controller['ignore_ports'] = ast.literal_eval(val)
+                    except Exception as e:  # pragma: no cover
+                        self.logger.error(
+                            'Unable to set configuration option {0} because {1}'.format(key, str(e)))
+                elif key == 'trunk_ports':
+                    try:
+                        controller['trunk_ports'] = ast.literal_eval(val)
+                    except Exception as e:  # pragma: no cover
+                        self.logger.error(
+                            'Unable to set configuration option {0} because {1}'.format(key, str(e)))
                 else:
                     controller[key] = val
         return controller
