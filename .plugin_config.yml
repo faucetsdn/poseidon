@@ -21,6 +21,9 @@ poseidon:
         vent_port: 8080
 
     Faucet:
+        ignore_vlans: '[]'
+        ignore_ports: '{}'
+        trunk_ports: '{}'
         FA_RABBIT_ENABLED: True
         FA_RABBIT_HOST: RABBIT_SERVER
         FA_RABBIT_PORT: 5672
