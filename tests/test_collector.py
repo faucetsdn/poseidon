@@ -13,7 +13,7 @@ def test_Collector():
     """
     endpoint = Endpoint('foo')
     endpoint.endpoint_data = {'mac': '00:00:00:00:00:00'}
-    a = Collector(endpoint)
+    a = Collector(endpoint, 'foo')
     a.start_vent_collector()
     a.stop_vent_collector()
     a.get_vent_collectors()
