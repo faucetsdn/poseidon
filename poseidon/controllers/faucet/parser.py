@@ -207,7 +207,7 @@ class Parser:
                     self.mac_table[message['L2_LEARN']['eth_src']] = [data]
             else:
                 self.logger.debug(
-                    'ignoring endpoint because it belongs to the ignore_vlans port ignore_ports list')
+                    'ignoring endpoint because it belongs to the ignore_vlans or ignore_ports list')
         elif 'L2_EXPIRE' in message:
             self.logger.debug(
                 'got faucet message for l2_expire: {0}'.format(message))
