@@ -246,14 +246,14 @@ class SDNConnect(object):
         if 'TYPE' in self.controller and self.controller['TYPE'] == 'bcf':
             try:
                 self.sdnc = BcfProxy(self.controller)
-            except BaseException as e:  # pragma: no cover
+            except Exception as e:  # pragma: no cover
                 self.logger.error(
                     'BcfProxy could not connect to {0} because {1}'.format(
                         self.controller['URI'], e))
         elif 'TYPE' in self.controller and self.controller['TYPE'] == 'faucet':
             try:
                 self.sdnc = FaucetProxy(self.controller)
-            except BaseException as e:  # pragma: no cover
+            except Exception as e:  # pragma: no cover
                 self.logger.error(
                     'FaucetProxy could not connect to {0} because {1}'.format(
                         self.controller['URI'], e))
@@ -383,7 +383,7 @@ class SDNConnect(object):
                 current, self.controller['URI'])
             retval['machines'] = parsed
             retval['resp'] = 'ok'
-        except BaseException as e:  # pragma: no cover
+        except Exception as e:  # pragma: no cover
             self.logger.error(
                 'Could not establish connection to {0} because {1}.'.format(
                     self.controller['URI'], e))

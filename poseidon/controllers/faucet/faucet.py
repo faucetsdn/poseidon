@@ -33,9 +33,21 @@ class FaucetProxy(Connection, Parser):
         self.host = controller['URI']
         self.user = controller['USER']
         self.pw = controller['PASS']
-        self.ignore_vlans = controller['ignore_vlans']
-        self.ignore_ports = controller['ignore_ports']
-        self.trunk_ports = controller['trunk_ports']
+        ignore_vlans = controller['ignore_vlans']
+        if isinstance(ignore_vlans, str):
+            self.ignore_vlans = json.loads(ignore_vlans)
+        else:
+            self.ignore_vlans = ignore_vlans
+        ignore_ports = controller['ignore_ports']
+        if isinstance(ignore_ports, str):
+            self.ignore_ports = json.loads(ignore_ports)
+        else:
+            self.ignore_ports = ignore_ports
+        trunk_ports = controller['trunk_ports']
+        if isinstance(trunk_ports, str):
+            self.trunk_ports = json.loads(trunk_ports)
+        else:
+            self.trunk_ports = trunk_ports
         super(FaucetProxy, self).__init__(
             self.host,
             self.user,

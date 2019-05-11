@@ -19,6 +19,18 @@ if db_go; then
             echo "controller_type=None" >> /etc/poseidon/default.conf
         elif [ "$RET" == "Faucet" ]; then
             echo "controller_type=faucet" >> /etc/poseidon/default.conf
+            db_get poseidon/ignore_vlans
+            if [[ -n "$RET" ]]; then
+                echo "ignore_vlans=$RET" >> /etc/poseidon/default.conf
+            fi
+            db_get poseidon/ignore_ports
+            if [[ -n "$RET" ]]; then
+                echo "ignore_ports=$RET" >> /etc/poseidon/default.conf
+            fi
+            db_get poseidon/trunk_ports
+            if [[ -n "$RET" ]]; then
+                echo "trunk_ports=$RET" >> /etc/poseidon/default.conf
+            fi
             db_get poseidon/faucet_same_host
             if [ "$RET" == "No" ]; then
                 db_get poseidon/faucet_controller_uri
@@ -58,18 +70,6 @@ if db_go; then
             fi
             db_get poseidon/faucet_fa_rabbit_enabled
             if [[ -n "$RET" ]]; then
-                db_get poseidon/ignore_vlans
-                if [[ -n "$RET" ]]; then
-                    echo "ignore_vlans=$RET" >> /etc/poseidon/default.conf
-                fi
-                db_get poseidon/ignore_ports
-                if [[ -n "$RET" ]]; then
-                    echo "ignore_ports=$RET" >> /etc/poseidon/default.conf
-                fi
-                db_get poseidon/trunk_ports
-                if [[ -n "$RET" ]]; then
-                    echo "trunk_ports=$RET" >> /etc/poseidon/default.conf
-                fi
                 if [ "$RET" == "Yes" ]; then
                     echo "FA_RABBIT_ENABLED=True" >> /etc/poseidon/default.conf
                     db_get poseidon/faucet_fa_rabbit_host
@@ -173,33 +173,38 @@ if db_go; then
     db_get poseidon/controller_type
     if [[ -n "$RET" ]]; then
         if [ "$RET" != "Demo" ] && [ "$RET" != "None" ]; then
-            db_get poseidon/collector_nic
+            db_get poseidon/collector_nics
             if [[ -n "$RET" ]]; then
-                if [ "$RET" == "Specify your own" ]; then
-                    db_get poseidon/specify_nic
-                    if [[ -n "$RET" ]]; then
-                        echo "collector_nic=$RET" >> /etc/poseidon/default.conf
+                echo "collector_nic=$RET" >> /etc/poseidon/default.conf
+            else
+                db_get poseidon/collector_nic
+                if [[ -n "$RET" ]]; then
+                    if [ "$RET" == "Specify your own" ]; then
+                        db_get poseidon/specify_nic
+                        if [[ -n "$RET" ]]; then
+                            echo "collector_nic=$RET" >> /etc/poseidon/default.conf
+                        else
+                            echo >&2 -e "${red}You need to specify a collector NIC.${endColor}"
+                            db_unregister poseidon/collector_nic
+                            db_unregister poseidon/specify_nic
+                            failed=true
+                        fi
                     else
-                        echo >&2 -e "${red}You need to specify a collector NIC.${endColor}"
-                        db_unregister poseidon/collector_nic
-                        db_unregister poseidon/specify_nic
-                        failed=true
+                        db_get poseidon/available_nics
+                        if [[ -n "$RET" ]]; then
+                            echo "collector_nic=$RET" >> /etc/poseidon/default.conf
+                        else
+                            echo >&2 -e "${red}You need to specify a collector NIC.${endColor}"
+                            db_unregister poseidon/collector_nic
+                            db_unregister poseidon/available_nics
+                            failed=true
+                        fi
                     fi
                 else
-                    db_get poseidon/available_nics
-                    if [[ -n "$RET" ]]; then
-                        echo "collector_nic=$RET" >> /etc/poseidon/default.conf
-                    else
-                        echo >&2 -e "${red}You need to specify a collector NIC.${endColor}"
-                        db_unregister poseidon/collector_nic
-                        db_unregister poseidon/available_nics
-                        failed=true
-                    fi
+                    echo >&2 -e "${red}You need to specify the collector NIC.${endColor}"
+                    db_unregister poseidon/collector_nic
+                    failed=true
                 fi
-            else
-                echo >&2 -e "${red}You need to specify the collector NIC.${endColor}"
-                db_unregister poseidon/collector_nic
-                failed=true
             fi
 
             db_get poseidon/max_concurrent_reinvestigations
