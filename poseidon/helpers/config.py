@@ -75,8 +75,11 @@ class Config():
                 elif key == 'collector_nic':
                     try:
                         controller['collector_nic'] = ast.literal_eval(val)
-                    except Exception as e:  # pragma: no cover
+                    except ValueError:
                         controller['collector_nic'] = val
+                    except Exception as e:  # pragma: no cover
+                        self.logger.error(
+                            'Unable to set configuration option {0} because {1}'.format(key, str(e)))
                 elif key == 'controller_mirror_ports':
                     try:
                         controller['MIRROR_PORTS'] = ast.literal_eval(val)
