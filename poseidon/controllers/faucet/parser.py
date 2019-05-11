@@ -175,6 +175,8 @@ class Parser:
         data = {}
         if 'L2_LEARN' in message:
             ignore = False
+            self.logger.info('ignore_vlans: {0}'.format(self.ignore_vlans)
+            self.logger.info('ignore_ports: {0}'.format(self.ignore_ports)
             if self.ignore_vlans:
                 for vlan in self.ignore_vlans:
                     if vlan == message['L2_LEARN']['vid']:

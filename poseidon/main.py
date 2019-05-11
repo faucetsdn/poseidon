@@ -378,6 +378,7 @@ class SDNConnect(object):
         parsed = None
 
         try:
+            self.logger.info('what')
             current = self.sdnc.get_endpoints(messages=messages)
             self.logger.info('whoa')
             parsed = self.sdnc.format_endpoints(
