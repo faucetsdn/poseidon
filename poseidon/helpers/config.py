@@ -72,6 +72,11 @@ class Config():
                     controller['CONFIG_FILE'] = val
                 elif key == 'controller_log_file':
                     controller['LOG_FILE'] = val
+                elif key == 'collector_nic':
+                    try:
+                        controller['collector_nic'] = ast.literal_eval(val)
+                    except Exception as e:  # pragma: no cover
+                        controller['collector_nic'] = val
                 elif key == 'controller_mirror_ports':
                     try:
                         controller['MIRROR_PORTS'] = ast.literal_eval(val)
