@@ -136,6 +136,11 @@ class SDNConnect(object):
         self.first_time = True
         self.sdnc = None
         self.controller = Config().get_config()
+        trunk_ports = self.controller['trunk_ports']
+        if isinstance(trunk_ports, str):
+            self.trunk_ports = json.loads(trunk_ports)
+        else:
+            self.trunk_ports = trunk_ports
         self.logger = logger
         self.get_sdn_context()
         self.endpoints = []
@@ -427,7 +432,12 @@ class SDNConnect(object):
             if not 'controller_type' in machine:
                 machine['controller_type'] = 'none'
                 machine['controller'] = ''
-            h = Endpoint.make_hash(machine)
+            trunk = False
+            for sw in self.trunk_ports:
+                if sw == machine['segment'] and self.trunk_ports[sw] == machine['port']:
+                    trunk = True
+
+            h = Endpoint.make_hash(machine, trunk)
             ep = None
             for endpoint in self.endpoints:
                 if h == endpoint.name:
