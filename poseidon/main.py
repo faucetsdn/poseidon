@@ -434,6 +434,10 @@ class SDNConnect(object):
                 machine['controller'] = ''
             trunk = False
             for sw in self.trunk_ports:
+                self.logger.info('switch: {0} {1}'.format(
+                    sw, machine['segment']))
+                self.logger.info('port: {0} {1}'.format(
+                    self.trunk_ports[sw], machine['port']))
                 if sw == machine['segment'] and self.trunk_ports[sw] == machine['port']:
                     trunk = True
 
