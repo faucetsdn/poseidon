@@ -181,7 +181,7 @@ class Parser:
                         ignore = True
             if self.ignore_ports:
                 for switch in self.ignore_ports:
-                    if self.ignore_ports[switch] == message['L2_LEARN']['port_no'] and switch == str(message['L2_LEARN']['dp_name']):
+                    if self.ignore_ports[switch] == message['L2_LEARN']['port_no'] and switch == str(message['dp_name']):
                         ignore = True
             self.logger.debug(
                 'got faucet message for l2_learn: {0}'.format(message))
