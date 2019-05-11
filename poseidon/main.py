@@ -378,16 +378,12 @@ class SDNConnect(object):
         parsed = None
 
         try:
-            self.logger.info('what')
             current = self.sdnc.get_endpoints(messages=messages)
-            self.logger.info('whoa')
             parsed = self.sdnc.format_endpoints(
                 current, self.controller['URI'])
-            self.logger.info('whoa2')
             retval['machines'] = parsed
             retval['resp'] = 'ok'
         except Exception as e:  # pragma: no cover
-            self.logger.info('controller: {0}'.format(self.controller))
             self.logger.error(
                 'Could not establish connection to {0} because {1}.'.format(
                     self.controller['URI'], e))

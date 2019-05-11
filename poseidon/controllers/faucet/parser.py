@@ -175,20 +175,14 @@ class Parser:
         data = {}
         if 'L2_LEARN' in message:
             ignore = False
-            self.logger.info('ignore_vlans: {0}, {1}'.format(self.ignore_vlans, type(self.ignore_vlans)))
-            self.logger.info('ignore_ports: {0}, {1}'.format(self.ignore_ports, type(self.ignore_ports)))
             if self.ignore_vlans:
                 for vlan in self.ignore_vlans:
-                    self.logger.info('vlan: {0}'.format(vlan))
                     if vlan == message['L2_LEARN']['vid']:
                         ignore = True
-            self.logger.info('never get here')
             if self.ignore_ports:
                 for switch in self.ignore_ports:
-                    self.logger.info('switch: {0}'.format(switch))
                     if self.ignore_ports[switch] == message['L2_LEARN']['port_no'] and switch == str(message['L2_LEARN']['dp_name']):
                         ignore = True
-            self.logger.info('never get here2')
             self.logger.debug(
                 'got faucet message for l2_learn: {0}'.format(message))
             if not ignore:
