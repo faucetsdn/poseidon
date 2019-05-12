@@ -40,7 +40,8 @@ Description: Dictionary of switch and port numbers to ignore endpoints from:
 Template: poseidon/trunk_ports
 Type: string
 Default: '{}'
-Description: Dictionary of switch and port numbers to treat as trunks:
+Description: Dictionary of switch and mac/port numbers to treat as trunks:
+ For example: '{"switch1":"00:00:00:00:00:01,24"}'
 
 Template: poseidon/faucet_controller_user
 Type: string

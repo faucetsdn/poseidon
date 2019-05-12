@@ -108,12 +108,16 @@ class Endpoint(object):
         return str(json.dumps(endpoint_d))
 
     @staticmethod
-    def make_hash(machine):
+    def make_hash(machine, trunk=False):
         ''' hash the unique metadata parts of an endpoint '''
         h = hashlib.new('ripemd160')
         pre_h = str()
         post_h = None
-        for word in ['tenant', 'mac', 'segment']:
+        words = ['tenant', 'mac', 'segment']
+        if trunk:
+            words.append('ipv4')
+            words.append('ipv6')
+        for word in words:
             pre_h = pre_h + str(machine.get(word, 'missing'))
         h.update(pre_h.encode('utf-8'))
         post_h = h.hexdigest()
