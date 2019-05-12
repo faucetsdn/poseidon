@@ -94,7 +94,13 @@ def schedule_job_reinvestigation(func):
                 chosen.p_prev_states.append(
                     (chosen.state, int(time.time())))
                 status = Actions(chosen, func.s.sdnc).mirror_endpoint()
-                if not status:
+                if status:
+                    try:
+                        func.s.r.hincrby('vent_plugin_counts', 'ncapture')
+                    except Exception as e:  # pragma: no cover
+                        func.logger.error(
+                            'Failed to update count of plugins because: {0}'.format(str(e)))
+                else:
                     func.logger.warning(
                         'Unable to mirror the endpoint: {0}'.format(chosen.name))
         return
@@ -636,7 +642,14 @@ class Monitor(object):
                             if endpoint.state == 'mirroring' or endpoint.state == 'reinvestigating':
                                 status = Actions(
                                     endpoint, self.s.sdnc).mirror_endpoint()
-                                if not status:
+                                if status:
+                                    try:
+                                        self.r.hincrby(
+                                            'vent_plugin_counts', 'ncapture')
+                                    except Exception as e:  # pragma: no cover
+                                        self.logger.error(
+                                            'Failed to update count of plugins because: {0}'.format(str(e)))
+                                else:
                                     self.logger.warning(
                                         'Unable to mirror the endpoint: {0}'.format(endpoint.name))
                         except Exception as e:  # pragma: no cover
@@ -745,7 +758,14 @@ class Monitor(object):
                                 (endpoint.state, int(time.time())))
                             status = Actions(
                                 endpoint, self.s.sdnc).mirror_endpoint()
-                            if not status:
+                            if status:
+                                try:
+                                    self.s.r.hincrby(
+                                        'vent_plugin_counts', 'ncapture')
+                                except Exception as e:  # pragma: no cover
+                                    self.logger.error(
+                                        'Failed to update count of plugins because: {0}'.format(str(e)))
+                            else:
                                 self.logger.warning(
                                     'Unable to mirror the endpoint: {0}'.format(endpoint.name))
 
