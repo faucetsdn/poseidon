@@ -434,7 +434,7 @@ class SDNConnect(object):
                 machine['controller'] = ''
             trunk = False
             for sw in self.trunk_ports:
-                if sw == machine['segment'] and str(self.trunk_ports[sw]) == str(machine['port']):
+                if sw == machine['segment'] and self.trunk_ports[sw].split(',')[1] == str(machine['port']) and self.trunk_ports[sw].split(',')[0] == machine['mac']:
                     trunk = True
 
             h = Endpoint.make_hash(machine, trunk=trunk)

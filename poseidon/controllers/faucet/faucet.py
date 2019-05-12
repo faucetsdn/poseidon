@@ -233,7 +233,7 @@ class FaucetProxy(Connection, Parser):
         if port and switch:
             trunk = False
             for sw in self.trunk_ports:
-                if sw == switch and self.trunk_ports[sw] == port:
+                if sw == switch and self.trunk_ports[sw].split(',')[1] == str(port):
                     trunk = True
             if not trunk:
                 if self.host:
