@@ -227,9 +227,9 @@ def test_get_byip():
         '/data/controller/applications/bcf/info/endpoint-manager/tenant': 'sample_tenants.json',
         '/data/controller/applications/bcf/info/endpoint-manager/segment': 'sample_segments.json',
         '/data/controller/applications/bcf/info/endpoint-manager/endpoint': 'sample_endpoints.json',
-        '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22]': 'sample_span_fabric.json',
+        '/data/controller/applications/bcf/span-fabric%5Bname=%22SPAN_FABRIC%22%5D': 'sample_span_fabric.json',
         # %22 = url-encoded double quotes
-        '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22][dest-interface-group=%22INTERFACE_GROUP%22]': 'sample_span_fabric.json',
+        '/data/controller/applications/bcf/span-fabric%5Bname=%22SPAN_FABRIC%22%5D%5Bdest-interface-group=%22INTERFACE_GROUP%22%5D': 'sample_span_fabric.json',
     }
     proxy = None
     endpoints = None
@@ -269,9 +269,9 @@ def test_get_bymac():
         '/data/controller/applications/bcf/info/endpoint-manager/tenant': 'sample_tenants.json',
         '/data/controller/applications/bcf/info/endpoint-manager/segment': 'sample_segments.json',
         '/data/controller/applications/bcf/info/endpoint-manager/endpoint': 'sample_endpoints.json',
-        '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22]': 'sample_span_fabric.json',
+        '/data/controller/applications/bcf/span-fabric%5Bname=%22SPAN_FABRIC%22%5D': 'sample_span_fabric.json',
         # %22 = url-encoded double quotes
-        '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22][dest-interface-group=%22INTERFACE_GROUP%22]': 'sample_span_fabric.json',
+        '/data/controller/applications/bcf/span-fabric%5Bname=%22SPAN_FABRIC%22%5D%5Bdest-interface-group=%22INTERFACE_GROUP%22%5D': 'sample_span_fabric.json',
     }
     proxy = None
     endpoints = None
@@ -309,9 +309,9 @@ def test_shutdown_ip():
         '/data/controller/applications/bcf/info/endpoint-manager/tenant': 'sample_tenants.json',
         '/data/controller/applications/bcf/info/endpoint-manager/segment': 'sample_segments.json',
         '/data/controller/applications/bcf/info/endpoint-manager/endpoint': 'sample_endpoints.json',
-        '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22]': 'sample_span_fabric.json',
+        '/data/controller/applications/bcf/span-fabric%5Bname=%22SPAN_FABRIC%22%5D': 'sample_span_fabric.json',
         # %22 = url-encoded double quotes
-        '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22][dest-interface-group=%22INTERFACE_GROUP%22]': 'sample_span_fabric.json',
+        '/data/controller/applications/bcf/span-fabric%5Bname=%22SPAN_FABRIC%22%5D%5Bdest-interface-group=%22INTERFACE_GROUP%22%5D': 'sample_span_fabric.json',
     }
     proxy = None
     endpoints = None
@@ -358,9 +358,9 @@ def test_get_highest():
         '/data/controller/applications/bcf/info/endpoint-manager/tenant': 'sample_tenants.json',
         '/data/controller/applications/bcf/info/endpoint-manager/segment': 'sample_segments.json',
         '/data/controller/applications/bcf/info/endpoint-manager/endpoint': 'sample_endpoints.json',
-        '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22]': 'sample_span_fabric.json',
+        '/data/controller/applications/bcf/span-fabric%5Bname=%22SPAN_FABRIC%22%5D': 'sample_span_fabric.json',
         # %22 = url-encoded double quotes
-        '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22][dest-interface-group=%22INTERFACE_GROUP%22]': 'sample_span_fabric.json',
+        '/data/controller/applications/bcf/span-fabric%5Bname=%22SPAN_FABRIC%22%5D%5Bdest-interface-group=%22INTERFACE_GROUP%22%5D': 'sample_span_fabric.json',
     }
     proxy = None
     endpoints = None
@@ -398,9 +398,9 @@ def test_get_highest_no_filter():
         '/data/controller/applications/bcf/info/endpoint-manager/tenant': 'sample_tenants.json',
         '/data/controller/applications/bcf/info/endpoint-manager/segment': 'sample_segments.json',
         '/data/controller/applications/bcf/info/endpoint-manager/endpoint': 'sample_endpoints.json',
-        '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22]': 'sample_span_fabric_empty.json',
+        '/data/controller/applications/bcf/span-fabric%5Bname=%22SPAN_FABRIC%22%5D': 'sample_span_fabric_empty.json',
         # %22 = url-encoded double quotes
-        '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22][dest-interface-group=%22INTERFACE_GROUP%22]': 'sample_span_fabric_empty.json',
+        '/data/controller/applications/bcf/span-fabric%5Bname=%22SPAN_FABRIC%22%5D%5Bdest-interface-group=%22INTERFACE_GROUP%22%5D': 'sample_span_fabric_empty.json',
     }
     proxy = None
     endpoints = None
@@ -442,9 +442,9 @@ def test_get_seq_by_ip():
         '/data/controller/applications/bcf/info/endpoint-manager/tenant': 'sample_tenants.json',
         '/data/controller/applications/bcf/info/endpoint-manager/segment': 'sample_segments.json',
         '/data/controller/applications/bcf/info/endpoint-manager/endpoint': 'sample_endpoints.json',
-        '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22]': 'sample_span_fabric.json',
+        '/data/controller/applications/bcf/span-fabric%5Bname=%22SPAN_FABRIC%22%5D': 'sample_span_fabric.json',
         # %22 = url-encoded double quotes
-        '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22][dest-interface-group=%22INTERFACE_GROUP%22]': 'sample_span_fabric.json',
+        '/data/controller/applications/bcf/span-fabric%5Bname=%22SPAN_FABRIC%22%5D%5Bdest-interface-group=%22INTERFACE_GROUP%22%5D': 'sample_span_fabric.json',
     }
     proxy = None
     endpoints = None
@@ -487,9 +487,9 @@ def test_get_seq_by_mac():
         '/data/controller/applications/bcf/info/endpoint-manager/tenant': 'sample_tenants.json',
         '/data/controller/applications/bcf/info/endpoint-manager/segment': 'sample_segments.json',
         '/data/controller/applications/bcf/info/endpoint-manager/endpoint': 'sample_endpoints.json',
-        '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22]': 'sample_span_fabric.json',
+        '/data/controller/applications/bcf/span-fabric%5Bname=%22SPAN_FABRIC%22%5D': 'sample_span_fabric.json',
         # %22 = url-encoded double quotes
-        '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22][dest-interface-group=%22INTERFACE_GROUP%22]': 'sample_span_fabric.json',
+        '/data/controller/applications/bcf/span-fabric%5Bname=%22SPAN_FABRIC%22%5D%5Bdest-interface-group=%22INTERFACE_GROUP%22%5D': 'sample_span_fabric.json',
     }
     proxy = None
     endpoints = None
@@ -537,9 +537,9 @@ def test_mirror_mac():
         '/data/controller/applications/bcf/info/endpoint-manager/tenant': 'sample_tenants.json',
         '/data/controller/applications/bcf/info/endpoint-manager/segment': 'sample_segments.json',
         '/data/controller/applications/bcf/info/endpoint-manager/endpoint': 'sample_endpoints.json',
-        '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22]': 'sample_span_fabric.json',
+        '/data/controller/applications/bcf/span-fabric%5Bname=%22SPAN_FABRIC%22%5D': 'sample_span_fabric.json',
         # %22 = url-encoded double quotes
-        '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22][dest-interface-group=%22INTERFACE_GROUP%22]': 'sample_span_fabric.json',
+        '/data/controller/applications/bcf/span-fabric%5Bname=%22SPAN_FABRIC%22%5D%5Bdest-interface-group=%22INTERFACE_GROUP%22%5D': 'sample_span_fabric.json',
     }
 
     proxy = None
@@ -585,9 +585,9 @@ def test_unmirror_mac():
         '/data/controller/applications/bcf/info/endpoint-manager/tenant': 'sample_tenants.json',
         '/data/controller/applications/bcf/info/endpoint-manager/segment': 'sample_segments.json',
         '/data/controller/applications/bcf/info/endpoint-manager/endpoint': 'sample_endpoints.json',
-        '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22]': 'sample_span_fabric.json',
+        '/data/controller/applications/bcf/span-fabric%5Bname=%22SPAN_FABRIC%22%5D': 'sample_span_fabric.json',
         # %22 = url-encoded double quotes
-        '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22][dest-interface-group=%22INTERFACE_GROUP%22]': 'sample_span_fabric.json',
+        '/data/controller/applications/bcf/span-fabric%5Bname=%22SPAN_FABRIC%22%5D%5Bdest-interface-group=%22INTERFACE_GROUP%22%5D': 'sample_span_fabric.json',
     }
     proxy = None
     endpoints = None
