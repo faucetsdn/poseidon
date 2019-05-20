@@ -50,7 +50,7 @@ def mock_factory(regex, filemap):
 def mock_factory2(regex):
     @urlmatch(netloc=regex)
     def mock_fn(url, request):
-        if url.path == '/data/controller/applications/bcf/tenant[name=%22TENANT%22]/segment[name=%22SEGMENT%22]/endpoint':
+        if url.path == '/data/controller/applications/bcf/tenant%5Bname=%22TENANT%22%5D/segment%5Bname=%22SEGMENT%22%5D/endpoint':
             with open(os.path.join(cur_dir, 'sample_endpoints2.json')) as f:
                 data = f.read().replace('\n', '')
                 data = json.loads(data)
@@ -61,10 +61,10 @@ def mock_factory2(regex):
                 data[0]['state'] = 'Active'
             data = json.dumps(data)
             r = response(content=data, request=request)
-        elif url.path == '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22][dest-interface-group=%22INTERFACE_GROUP%22]' and request.method == 'GET':
+        elif url.path == '/data/controller/applications/bcf/span-fabric%5Bname=%22SPAN_FABRIC%22%5D%5Bdest-interface-group=%22INTERFACE_GROUP%22%5D' and request.method == 'GET':
             data = json.dumps(span_fabric_state)
             r = response(content=data, request=request)
-        elif url.path == '/data/controller/applications/bcf/span-fabric[name=%22SPAN_FABRIC%22]' and request.method == 'PUT':
+        elif url.path == '/data/controller/applications/bcf/span-fabric%5Bname=%22SPAN_FABRIC%22%5D' and request.method == 'PUT':
             request_body = json.loads(request.body)
             span_fabric_state[0]['filter'] = request_body['filter']
             data = json.dumps(span_fabric_state)
