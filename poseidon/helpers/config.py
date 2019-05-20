@@ -72,6 +72,14 @@ class Config():
                     controller['CONFIG_FILE'] = val
                 elif key == 'controller_log_file':
                     controller['LOG_FILE'] = val
+                elif key == 'collector_nic':
+                    try:
+                        controller['collector_nic'] = ast.literal_eval(val)
+                    except ValueError:
+                        controller['collector_nic'] = val
+                    except Exception as e:  # pragma: no cover
+                        self.logger.error(
+                            'Unable to set configuration option {0} because {1}'.format(key, str(e)))
                 elif key == 'controller_mirror_ports':
                     try:
                         controller['MIRROR_PORTS'] = ast.literal_eval(val)
@@ -112,6 +120,24 @@ class Config():
                     try:
                         controller['max_concurrent_reinvestigations'] = int(
                             val)
+                    except Exception as e:  # pragma: no cover
+                        self.logger.error(
+                            'Unable to set configuration option {0} because {1}'.format(key, str(e)))
+                elif key == 'ignore_vlans':
+                    try:
+                        controller['ignore_vlans'] = ast.literal_eval(val)
+                    except Exception as e:  # pragma: no cover
+                        self.logger.error(
+                            'Unable to set configuration option {0} because {1}'.format(key, str(e)))
+                elif key == 'ignore_ports':
+                    try:
+                        controller['ignore_ports'] = ast.literal_eval(val)
+                    except Exception as e:  # pragma: no cover
+                        self.logger.error(
+                            'Unable to set configuration option {0} because {1}'.format(key, str(e)))
+                elif key == 'trunk_ports':
+                    try:
+                        controller['trunk_ports'] = ast.literal_eval(val)
                     except Exception as e:  # pragma: no cover
                         self.logger.error(
                             'Unable to set configuration option {0} because {1}'.format(key, str(e)))

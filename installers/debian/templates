@@ -22,6 +22,27 @@ Default: 192.168.0.10
 Description: IP or hostname of the Faucet controller:
  Poseidon will use SSH to connect to the Faucet controller if Faucet is running on a different host than Poseidon.
 
+Template: poseidon/multi_nics
+Type: string
+Default: false
+Description: Set if there are multiple collector NICs:
+
+Template: poseidon/ignore_vlans
+Type: string
+Default: '[]'
+Description: List of VLAN numbers to ignore endpoints from:
+
+Template: poseidon/ignore_ports
+Type: string
+Default: '{}'
+Description: Dictionary of switch and port numbers to ignore endpoints from:
+
+Template: poseidon/trunk_ports
+Type: string
+Default: '{}'
+Description: Dictionary of switch and mac/port numbers to treat as trunks:
+ For example: '{"switch1":"00:00:00:00:00:01,24"}'
+
 Template: poseidon/faucet_controller_user
 Type: string
 Description: SSH username to connect to Faucet:
@@ -43,6 +64,11 @@ Type: select
 Choices: List available network interfaces, Specify your own
 Description: Pick how you want to specify the NIC for mirroring:
  Poseidon needs to attach to a NIC that the SDN controller will be mirroring traffic to. This should be a port that will be connected to the switch that the controller is managing.
+
+Template: poseidon/collector_nics
+Type: string
+Description: Set the collector NICs:
+ Poseidon needs to know which NIC is attached to which switch for collection. Should be in the form of '{"switch-name":"nic-name"}'.
 
 Template: poseidon/available_nics
 Type: select

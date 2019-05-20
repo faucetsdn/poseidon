@@ -33,6 +33,21 @@ class FaucetProxy(Connection, Parser):
         self.host = controller['URI']
         self.user = controller['USER']
         self.pw = controller['PASS']
+        ignore_vlans = controller['ignore_vlans']
+        if isinstance(ignore_vlans, str):
+            self.ignore_vlans = json.loads(ignore_vlans)
+        else:
+            self.ignore_vlans = ignore_vlans
+        ignore_ports = controller['ignore_ports']
+        if isinstance(ignore_ports, str):
+            self.ignore_ports = json.loads(ignore_ports)
+        else:
+            self.ignore_ports = ignore_ports
+        trunk_ports = controller['trunk_ports']
+        if isinstance(trunk_ports, str):
+            self.trunk_ports = json.loads(trunk_ports)
+        else:
+            self.trunk_ports = trunk_ports
         super(FaucetProxy, self).__init__(
             self.host,
             self.user,
@@ -43,7 +58,10 @@ class FaucetProxy(Connection, Parser):
             self.rabbit_enabled,
             self.learn_pub_adds,
             self.reinvestigation_frequency,
-            self.max_concurrent_reinvestigations, *args, **kwargs)
+            self.max_concurrent_reinvestigations,
+            self.ignore_vlans,
+            self.ignore_ports,
+            self.trunk_ports, *args, **kwargs)
         self.logger = logging.getLogger('faucet')
         self.mac_table = {}
         Parser().clear_mirrors(self.config_file)
@@ -213,15 +231,22 @@ class FaucetProxy(Connection, Parser):
                 port = self.mac_table[mac][0]['port']
                 switch = self.mac_table[mac][0]['segment']
         if port and switch:
-            if self.host:
-                self.receive_file('config')
-                if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
-                               'unmirror', int(port), switch):
-                    self.send_file('config')
-                    # TODO check if config was successfully updated
-                    status = True
+            trunk = False
+            for sw in self.trunk_ports:
+                if sw == switch and self.trunk_ports[sw].split(',')[1] == str(port):
+                    trunk = True
+            if not trunk:
+                if self.host:
+                    self.receive_file('config')
+                    if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
+                                   'unmirror', int(port), switch):
+                        self.send_file('config')
+                        # TODO check if config was successfully updated
+                        status = True
+                else:
+                    status = self.config(
+                        self.config_file, 'unmirror', int(port), switch)
             else:
-                status = self.config(
-                    self.config_file, 'unmirror', int(port), switch)
+                self.logger.debug('not unmirroring a trunk port')
         self.logger.debug('unmirror status: ' + str(status))
         return status

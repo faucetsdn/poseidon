@@ -52,6 +52,9 @@ while [ "$STATE" != 0 ] && [ "$STATE" != 13 ]; do
     4)
         db_get poseidon/controller_type
         if [ "$RET" == "Faucet" ]; then
+            db_input low poseidon/ignore_vlans || true
+            db_input low poseidon/ignore_ports || true
+            db_input low poseidon/trunk_ports || true
             db_get poseidon/faucet_same_host
             if [ "$RET" == "No" ]; then
                 db_input critical poseidon/faucet_controller_user || true
@@ -95,20 +98,32 @@ while [ "$STATE" != 0 ] && [ "$STATE" != 13 ]; do
     8)
         db_get poseidon/controller_type
         if [ "$RET" != "Demo" ] && [ "$RET" != "None" ]; then
-            db_input critical poseidon/collector_nic || true
+            if [ "$RET" == "Faucet" ]; then
+                db_get poseidon/faucet_controller_mirror_ports
+                if [[ "$RET" == *","* ]]; then
+                    db_input critical poseidon/collector_nics || true
+                else
+                    db_input critical poseidon/collector_nic || true
+                fi
+            else
+                db_input critical poseidon/collector_nic || true
+            fi
         fi
     ;;
 
     9)
         db_get poseidon/controller_type
         if [ "$RET" != "Demo" ] && [ "$RET" != "None" ]; then
-            db_get poseidon/collector_nic
-            if [ "$RET" == "Specify your own" ]; then
-                db_input critical poseidon/specify_nic || true
-            else # list ones available on the install system
-                db_input critical poseidon/available_nics || true
+            db_get poseidon/collector_nics
+            if [[ -z "$RET" ]]; then
+                db_get poseidon/collector_nic
+                if [ "$RET" == "Specify your own" ]; then
+                    db_input critical poseidon/specify_nic || true
+                else # list ones available on the install system
+                    db_input critical poseidon/available_nics || true
+                fi
+            fi
         fi
-    fi
     ;;
 
     10)

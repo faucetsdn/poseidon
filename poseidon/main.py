@@ -94,7 +94,13 @@ def schedule_job_reinvestigation(func):
                 chosen.p_prev_states.append(
                     (chosen.state, int(time.time())))
                 status = Actions(chosen, func.s.sdnc).mirror_endpoint()
-                if not status:
+                if status:
+                    try:
+                        func.s.r.hincrby('vent_plugin_counts', 'ncapture')
+                    except Exception as e:  # pragma: no cover
+                        func.logger.error(
+                            'Failed to update count of plugins because: {0}'.format(str(e)))
+                else:
                     func.logger.warning(
                         'Unable to mirror the endpoint: {0}'.format(chosen.name))
         return
@@ -136,6 +142,11 @@ class SDNConnect(object):
         self.first_time = True
         self.sdnc = None
         self.controller = Config().get_config()
+        trunk_ports = self.controller['trunk_ports']
+        if isinstance(trunk_ports, str):
+            self.trunk_ports = json.loads(trunk_ports)
+        else:
+            self.trunk_ports = trunk_ports
         self.logger = logger
         self.get_sdn_context()
         self.endpoints = []
@@ -246,14 +257,14 @@ class SDNConnect(object):
         if 'TYPE' in self.controller and self.controller['TYPE'] == 'bcf':
             try:
                 self.sdnc = BcfProxy(self.controller)
-            except BaseException as e:  # pragma: no cover
+            except Exception as e:  # pragma: no cover
                 self.logger.error(
                     'BcfProxy could not connect to {0} because {1}'.format(
                         self.controller['URI'], e))
         elif 'TYPE' in self.controller and self.controller['TYPE'] == 'faucet':
             try:
                 self.sdnc = FaucetProxy(self.controller)
-            except BaseException as e:  # pragma: no cover
+            except Exception as e:  # pragma: no cover
                 self.logger.error(
                     'FaucetProxy could not connect to {0} because {1}'.format(
                         self.controller['URI'], e))
@@ -383,7 +394,7 @@ class SDNConnect(object):
                 current, self.controller['URI'])
             retval['machines'] = parsed
             retval['resp'] = 'ok'
-        except BaseException as e:  # pragma: no cover
+        except Exception as e:  # pragma: no cover
             self.logger.error(
                 'Could not establish connection to {0} because {1}.'.format(
                     self.controller['URI'], e))
@@ -427,7 +438,12 @@ class SDNConnect(object):
             if not 'controller_type' in machine:
                 machine['controller_type'] = 'none'
                 machine['controller'] = ''
-            h = Endpoint.make_hash(machine)
+            trunk = False
+            for sw in self.trunk_ports:
+                if sw == machine['segment'] and self.trunk_ports[sw].split(',')[1] == str(machine['port']) and self.trunk_ports[sw].split(',')[0] == machine['mac']:
+                    trunk = True
+
+            h = Endpoint.make_hash(machine, trunk=trunk)
             ep = None
             for endpoint in self.endpoints:
                 if h == endpoint.name:
@@ -626,7 +642,14 @@ class Monitor(object):
                             if endpoint.state == 'mirroring' or endpoint.state == 'reinvestigating':
                                 status = Actions(
                                     endpoint, self.s.sdnc).mirror_endpoint()
-                                if not status:
+                                if status:
+                                    try:
+                                        self.r.hincrby(
+                                            'vent_plugin_counts', 'ncapture')
+                                    except Exception as e:  # pragma: no cover
+                                        self.logger.error(
+                                            'Failed to update count of plugins because: {0}'.format(str(e)))
+                                else:
                                     self.logger.warning(
                                         'Unable to mirror the endpoint: {0}'.format(endpoint.name))
                         except Exception as e:  # pragma: no cover
@@ -735,7 +758,14 @@ class Monitor(object):
                                 (endpoint.state, int(time.time())))
                             status = Actions(
                                 endpoint, self.s.sdnc).mirror_endpoint()
-                            if not status:
+                            if status:
+                                try:
+                                    self.s.r.hincrby(
+                                        'vent_plugin_counts', 'ncapture')
+                                except Exception as e:  # pragma: no cover
+                                    self.logger.error(
+                                        'Failed to update count of plugins because: {0}'.format(str(e)))
+                            else:
                                 self.logger.warning(
                                     'Unable to mirror the endpoint: {0}'.format(endpoint.name))
 

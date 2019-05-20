@@ -19,6 +19,18 @@ if db_go; then
             echo "controller_type=None" >> /etc/poseidon/default.conf
         elif [ "$RET" == "Faucet" ]; then
             echo "controller_type=faucet" >> /etc/poseidon/default.conf
+            db_get poseidon/ignore_vlans
+            if [[ -n "$RET" ]]; then
+                echo "ignore_vlans=$RET" >> /etc/poseidon/default.conf
+            fi
+            db_get poseidon/ignore_ports
+            if [[ -n "$RET" ]]; then
+                echo "ignore_ports=$RET" >> /etc/poseidon/default.conf
+            fi
+            db_get poseidon/trunk_ports
+            if [[ -n "$RET" ]]; then
+                echo "trunk_ports=$RET" >> /etc/poseidon/default.conf
+            fi
             db_get poseidon/faucet_same_host
             if [ "$RET" == "No" ]; then
                 db_get poseidon/faucet_controller_uri
@@ -161,33 +173,38 @@ if db_go; then
     db_get poseidon/controller_type
     if [[ -n "$RET" ]]; then
         if [ "$RET" != "Demo" ] && [ "$RET" != "None" ]; then
-            db_get poseidon/collector_nic
+            db_get poseidon/collector_nics
             if [[ -n "$RET" ]]; then
-                if [ "$RET" == "Specify your own" ]; then
-                    db_get poseidon/specify_nic
-                    if [[ -n "$RET" ]]; then
-                        echo "collector_nic=$RET" >> /etc/poseidon/default.conf
+                echo "collector_nic=$RET" >> /etc/poseidon/default.conf
+            else
+                db_get poseidon/collector_nic
+                if [[ -n "$RET" ]]; then
+                    if [ "$RET" == "Specify your own" ]; then
+                        db_get poseidon/specify_nic
+                        if [[ -n "$RET" ]]; then
+                            echo "collector_nic=$RET" >> /etc/poseidon/default.conf
+                        else
+                            echo >&2 -e "${red}You need to specify a collector NIC.${endColor}"
+                            db_unregister poseidon/collector_nic
+                            db_unregister poseidon/specify_nic
+                            failed=true
+                        fi
                     else
-                        echo >&2 -e "${red}You need to specify a collector NIC.${endColor}"
-                        db_unregister poseidon/collector_nic
-                        db_unregister poseidon/specify_nic
-                        failed=true
+                        db_get poseidon/available_nics
+                        if [[ -n "$RET" ]]; then
+                            echo "collector_nic=$RET" >> /etc/poseidon/default.conf
+                        else
+                            echo >&2 -e "${red}You need to specify a collector NIC.${endColor}"
+                            db_unregister poseidon/collector_nic
+                            db_unregister poseidon/available_nics
+                            failed=true
+                        fi
                     fi
                 else
-                    db_get poseidon/available_nics
-                    if [[ -n "$RET" ]]; then
-                        echo "collector_nic=$RET" >> /etc/poseidon/default.conf
-                    else
-                        echo >&2 -e "${red}You need to specify a collector NIC.${endColor}"
-                        db_unregister poseidon/collector_nic
-                        db_unregister poseidon/available_nics
-                        failed=true
-                    fi
+                    echo >&2 -e "${red}You need to specify the collector NIC.${endColor}"
+                    db_unregister poseidon/collector_nic
+                    failed=true
                 fi
-            else
-                echo >&2 -e "${red}You need to specify the collector NIC.${endColor}"
-                db_unregister poseidon/collector_nic
-                failed=true
             fi
 
             db_get poseidon/max_concurrent_reinvestigations
@@ -222,47 +239,47 @@ if db_go; then
 
     # load or pull required images
     if [ ! -f /opt/poseidon/dist/cyberreboot-vent.tar ]; then
-        docker pull cyberreboot/vent:v0.8.3
+        docker pull cyberreboot/vent:v0.9.1
     else
         docker load -i /opt/poseidon/dist/cyberreboot-vent.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-vent-file-drop.tar ]; then
-        docker pull cyberreboot/vent-file-drop:v0.8.3
+        docker pull cyberreboot/vent-file-drop:v0.9.1
     else
         docker load -i /opt/poseidon/dist/cyberreboot-vent-file-drop.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-vent-network-tap.tar ]; then
-        docker pull cyberreboot/vent-network-tap:v0.8.3
+        docker pull cyberreboot/vent-network-tap:v0.9.1
     else
         docker load -i /opt/poseidon/dist/cyberreboot-vent-network-tap.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-vent-rabbitmq.tar ]; then
-        docker pull cyberreboot/vent-rabbitmq:v0.8.3
+        docker pull cyberreboot/vent-rabbitmq:v0.9.1
     else
         docker load -i /opt/poseidon/dist/cyberreboot-vent-rabbitmq.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-vent-redis.tar ]; then
-        docker pull cyberreboot/vent-redis:v0.8.3
+        docker pull cyberreboot/vent-redis:v0.9.1
     else
         docker load -i /opt/poseidon/dist/cyberreboot-vent-redis.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-vent-rq-dashboard.tar ]; then
-        docker pull cyberreboot/vent-rq-dashboard:v0.8.3
+        docker pull cyberreboot/vent-rq-dashboard:v0.9.1
     else
         docker load -i /opt/poseidon/dist/cyberreboot-vent-rq-dashboard.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-vent-rq-worker.tar ]; then
-        docker pull cyberreboot/vent-rq-worker:v0.8.3
+        docker pull cyberreboot/vent-rq-worker:v0.9.1
     else
         docker load -i /opt/poseidon/dist/cyberreboot-vent-rq-worker.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-vent-syslog.tar ]; then
-        docker pull cyberreboot/vent-syslog:v0.8.3
+        docker pull cyberreboot/vent-syslog:v0.9.1
     else
         docker load -i /opt/poseidon/dist/cyberreboot-vent-syslog.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-poseidon-api.tar ]; then
-        docker pull cyberreboot/poseidon-api:v0.5.8
+        docker pull cyberreboot/poseidon-api:v0.6.0
     else
         docker load -i /opt/poseidon/dist/cyberreboot-poseidon-api.tar
     fi
@@ -282,7 +299,7 @@ if db_go; then
         docker load -i /opt/poseidon/dist/cyberreboot-vent-plugins-tcprewrite-dot1q.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-crviz.tar ]; then
-        docker pull cyberreboot/crviz:v0.2.10
+        docker pull cyberreboot/crviz:v0.2.11
     else
         docker load -i /opt/poseidon/dist/cyberreboot-crviz.tar
     fi
@@ -292,7 +309,7 @@ if db_go; then
         docker load -i /opt/poseidon/dist/cyberreboot-poseidonml.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-poseidon.tar ]; then
-        docker pull cyberreboot/poseidon:v0.5.8
+        docker pull cyberreboot/poseidon:v0.6.0
     else
         docker load -i /opt/poseidon/dist/cyberreboot-poseidon.tar
     fi

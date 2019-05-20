@@ -14,13 +14,22 @@ from poseidon.helpers.config import Config
 
 class Collector(object):
 
-    def __init__(self, endpoint, iterations=1):
+    def __init__(self, endpoint, switch, iterations=1):
         self.logger = logging.getLogger('collector')
         self.controller = Config().get_config()
         self.endpoint = endpoint
         self.id = endpoint.name
         self.mac = endpoint.endpoint_data['mac']
-        self.nic = self.controller['collector_nic']
+        nic = self.controller['collector_nic']
+        try:
+            eval_nic = ast.literal_eval(nic)
+            if switch in eval_nic:
+                self.nic = eval_nic[switch]
+            else:
+                self.logger.error(
+                    'Failed to get collector nic for the switch: {0}'.format(switch))
+        except ValueError:
+            self.nic = nic
         self.interval = str(self.controller['reinvestigation_frequency'])
         self.iterations = str(iterations)
 

@@ -1,3 +1,22 @@
+# v0.6.0 (2019-05-13)
+
+ - Packaged new version of components, including vent v0.9.1
+ - Fixed header in certain cases for IPv4 and IPv6 in the CLI
+ - Updated versions of mock and pytest
+ - Support for multiple collector nics across multiple switches for Faucet
+ - Support for ignoring specific ports or VLANs for Faucet
+ - Support trunk ports behavior for Faucet
+ - Count number of captures triggered in Redis
+ - Add default Grafana dashboard that gives Poseidon Stats from Prometheus
+
+# v0.5.9 (2019-05-03)
+
+ - Packaged new version of components, including CRviz v0.2.11 and vent v0.9.0
+ - Add support for Ubuntu Disco and removed support for Ubuntu Trusty
+ - Cleanup documentation
+ - Updated version of pip, cmd2, falcon, mock, and pytest-cov
+ - Add new `show version` option in the CLI
+
 # v0.5.8 (2019-04-19)
 
  - Packaged new versions of components, including poseidonml v0.3.1 and vent v0.8.3

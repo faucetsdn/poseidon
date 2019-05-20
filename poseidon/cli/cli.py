@@ -497,7 +497,7 @@ class PoseidonShell(cmd2.Cmd):
             'state unknown', 'state mirroring', 'state abnormal', 'state shutdown',
             'state reinvestigating', 'state queued', 'state ignored',
             'behavior normal', 'behavior abnormal', 'os windows', 'os freebsd',
-            'os linux', 'os mac', 'history', 'what', 'where', 'all'
+            'os linux', 'os mac', 'history', 'version', 'what', 'where', 'all'
         ]
 
         self.task_completions = [
@@ -545,7 +545,7 @@ class PoseidonShell(cmd2.Cmd):
                   'Ethernet Vendor', 'Mac', 'IPv4', 'IPv6']
 
         valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
-            flags, fields)
+            flags, fields, ipv4_only=False)
 
         if not valid:
             self.poutput("Unknown flag, try 'help show'")
@@ -636,7 +636,7 @@ class PoseidonShell(cmd2.Cmd):
         fields = ['Switch', 'Port', 'VLAN', 'IPv4', 'IPv6', 'MAC Address']
 
         valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
-            flags, fields)
+            flags, fields, ipv4_only=False)
 
         if not valid:
             self.poutput("Unknown flag, try 'help show'")
@@ -654,6 +654,7 @@ class PoseidonShell(cmd2.Cmd):
             '  os\t\tShow devices matching a particular operating system')
         self.poutput('  role\t\tShow devices matching a particular role')
         self.poutput('  state\t\tShow devices matching a particular state')
+        self.poutput('  version\tShow the version of Poseidon running')
         self.poutput('  what\t\tFind out what something is')
         self.poutput('  where\t\tFind out where something is')
 
@@ -707,6 +708,12 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                 if i > 4:
                     self.poutput(line.strip())
                 i += 1
+
+    @exception
+    def show_version(self, arg, flags):
+        with open('/poseidon/VERSION', 'r') as f:  # pragma: no cover
+            for line in f:
+                self.poutput(line.strip())
 
     @exception
     def task_set(self, arg, flags):
@@ -868,10 +875,11 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                               'os': self.show_os,
                               'role': self.show_role,
                               'state': self.show_state,
+                              'version': self.show_version,
                               'what': self.show_what,
                               'where': self.show_where}
                 if action in func_calls:
-                    if action in ['all', 'authors']:
+                    if action in ['all', 'authors', 'version']:
                         func_calls[action](arg, flags)
                     elif action in ['history', 'what', 'where']:
                         if len(arg.split()) > 1:

@@ -17,11 +17,16 @@ def represent_none(dumper, _):
 
 class Parser:
 
-    def __init__(self, mirror_ports=None, reinvestigation_frequency=None, max_concurrent_reinvestigations=None):
+    def __init__(self,
+                 mirror_ports=None,
+                 reinvestigation_frequency=None,
+                 max_concurrent_reinvestigations=None,
+                 ignore_vlans=None):
         self.logger = logging.getLogger('parser')
         self.mirror_ports = mirror_ports
         self.reinvestigation_frequency = reinvestigation_frequency
         self.max_concurrent_reinvestigations = max_concurrent_reinvestigations
+        self.ignore_vlans = ignore_vlans
 
     @staticmethod
     @exception
@@ -169,25 +174,40 @@ class Parser:
     def event(self, message):
         data = {}
         if 'L2_LEARN' in message:
+            ignore = False
+            if self.ignore_vlans:
+                for vlan in self.ignore_vlans:
+                    if vlan == message['L2_LEARN']['vid']:
+                        ignore = True
+            if self.ignore_ports:
+                for switch in self.ignore_ports:
+                    if self.ignore_ports[switch] == message['L2_LEARN']['port_no'] and switch == str(message['dp_name']):
+                        ignore = True
             self.logger.debug(
                 'got faucet message for l2_learn: {0}'.format(message))
-            data['ip-address'] = message['L2_LEARN']['l3_src_ip']
-            data['ip-state'] = 'L2 learned'
-            data['mac'] = message['L2_LEARN']['eth_src']
-            data['segment'] = str(message['dp_name'])
-            data['port'] = str(message['L2_LEARN']['port_no'])
-            data['tenant'] = 'VLAN'+str(message['L2_LEARN']['vid'])
-            data['active'] = 1
-            if message['L2_LEARN']['eth_src'] in self.mac_table:
-                dup = False
-                for d in self.mac_table[message['L2_LEARN']['eth_src']]:
-                    if data == d:
-                        dup = True
-                if dup:
-                    self.mac_table[message['L2_LEARN']['eth_src']].remove(data)
-                self.mac_table[message['L2_LEARN']['eth_src']].insert(0, data)
+            if not ignore:
+                data['ip-address'] = message['L2_LEARN']['l3_src_ip']
+                data['ip-state'] = 'L2 learned'
+                data['mac'] = message['L2_LEARN']['eth_src']
+                data['segment'] = str(message['dp_name'])
+                data['port'] = str(message['L2_LEARN']['port_no'])
+                data['tenant'] = 'VLAN'+str(message['L2_LEARN']['vid'])
+                data['active'] = 1
+                if message['L2_LEARN']['eth_src'] in self.mac_table:
+                    dup = False
+                    for d in self.mac_table[message['L2_LEARN']['eth_src']]:
+                        if data == d:
+                            dup = True
+                    if dup:
+                        self.mac_table[message['L2_LEARN']
+                                       ['eth_src']].remove(data)
+                    self.mac_table[message['L2_LEARN']
+                                   ['eth_src']].insert(0, data)
+                else:
+                    self.mac_table[message['L2_LEARN']['eth_src']] = [data]
             else:
-                self.mac_table[message['L2_LEARN']['eth_src']] = [data]
+                self.logger.debug(
+                    'ignoring endpoint because it belongs to the ignore_vlans or ignore_ports list')
         elif 'L2_EXPIRE' in message:
             self.logger.debug(
                 'got faucet message for l2_expire: {0}'.format(message))
