@@ -269,3 +269,6 @@ sudo dpkg -i dist/poseidon*.deb
 - [Releases](https://github.com/CyberReboot/poseidon/releases)
 - Tests
 - [Version](VERSION)
+- Videos:
+  - [Analyzing and Visualizing Networks: The Powerful Combination of Poseidon and CRviz](https://www.youtube.com/watch?v=mTe5ajQRNL0)
+  - [Poseidon + Faucet SDN](https://www.youtube.com/watch?v=nOgWze_4HOU)
