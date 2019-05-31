@@ -1,7 +1,7 @@
 # v0.6.1 (2019-05-31)
 
  - Packaged new version of components, including vent v0.9.2, CRviz v0.3.3, and PoseidonML v0.3.2
- - Updated verrsions of urllib3, requests, and flask
+ - Updated versions of urllib3, requests, and flask
  - Fixed a bug where subnet could get set to './24'
 
 # v0.6.0 (2019-05-13)
