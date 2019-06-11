@@ -10,7 +10,7 @@ poseidon:
         controller_user: CONTROLLER_USER
         controller_pass: CONTROLLER_PASS
 
-    PoseidonML:
+    NetworkML:
         rabbit_enabled: True
         rabbit_server: RABBIT_SERVER
         rabbit_port: 5672
