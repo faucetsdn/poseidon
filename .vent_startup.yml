@@ -53,7 +53,7 @@ https://github.com/cyberreboot/crviz:
         branch: v0.3.3
         build: yes
         start: yes
-https://github.com/cyberreboot/poseidonml:
+https://github.com/cyberreboot/networkml:
     '@':
         branch: v0.3.2
         build: yes

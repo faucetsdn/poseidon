@@ -239,7 +239,7 @@ sudo dpkg -i dist/poseidon*.deb
 ## Related Components
 
 - [CRviz](https://github.com/CyberReboot/CRviz)
-- [PoseidonML](https://github.com/CyberReboot/poseidonml)
+- [NetworkML](https://github.com/CyberReboot/NetworkML)
 - [Vent](https://github.com/CyberReboot/vent)
 - [Vent-Plugins](https://github.com/CyberReboot/vent-plugins)
 

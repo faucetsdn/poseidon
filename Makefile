@@ -59,8 +59,8 @@ build_debian:
 	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-vent-plugins-tcprewrite-dot1q.tar cyberreboot/vent-plugins-tcprewrite-dot1q:v0.1.1
 	docker pull cyberreboot/crviz:v0.3.3
 	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-crviz.tar cyberreboot/crviz:v0.3.3
-	docker pull cyberreboot/poseidonml:v0.3.2
-	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-poseidonml.tar cyberreboot/poseidonml:v0.3.2
+	docker pull cyberreboot/networkml:v0.3.2
+	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-networkml.tar cyberreboot/networkml:v0.3.2
 	docker pull cyberreboot/poseidon:v0.6.1
 	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-poseidon.tar cyberreboot/poseidon:v0.6.1
 	mkdir -p dist

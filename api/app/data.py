@@ -235,9 +235,9 @@ class Network(object):
                 'ipv6': 'IPv6', 'ignored': 'Ignored', 'state': 'State',
                 'first_seen': 'First Seen', 'last_seen': 'Last Seen',
                 'ipv4_os': 'IPv4 OS (p0f)', 'ipv6_os': 'IPv6 OS (p0f)',
-                'role': 'Role (PoseidonML)',
-                'role_confidence': 'Role Confidence (PoseidonML)',
-                'behavior': 'Behavior (PoseidonML)', 'ipv4_rdns': 'IPv4 rDNS',
+                'role': 'Role (NetworkML)',
+                'role_confidence': 'Role Confidence (NetworkML)',
+                'behavior': 'Behavior (NetworkML)', 'ipv4_rdns': 'IPv4 rDNS',
                 'ipv6_rdns': 'IPv6 rDNS', 'ether_vendor': 'Ethernet Vendor',
                 'controller_type': 'SDN Controller Type',
                 'controller': 'SDN Controller URI'}

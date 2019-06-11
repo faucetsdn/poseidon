@@ -303,10 +303,10 @@ if db_go; then
     else
         docker load -i /opt/poseidon/dist/cyberreboot-crviz.tar
     fi
-    if [ ! -f /opt/poseidon/dist/cyberreboot-poseidonml.tar ]; then
-        docker pull cyberreboot/poseidonml:v0.3.2
+    if [ ! -f /opt/poseidon/dist/cyberreboot-networkml.tar ]; then
+        docker pull cyberreboot/networkml:v0.3.2
     else
-        docker load -i /opt/poseidon/dist/cyberreboot-poseidonml.tar
+        docker load -i /opt/poseidon/dist/cyberreboot-networkml.tar
     fi
     if [ ! -f /opt/poseidon/dist/cyberreboot-poseidon.tar ]; then
         docker pull cyberreboot/poseidon:v0.6.1
