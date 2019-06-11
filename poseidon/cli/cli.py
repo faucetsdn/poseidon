@@ -43,7 +43,14 @@ class GetData():
 
     @staticmethod
     def _get_vlan(endpoint):
+
         vlan = endpoint.endpoint_data['tenant']
+        if (
+            GetData._get_controller_type(endpoint) == 'BCF' and 
+            'vlan' in  endpoint.endpoint_data
+            ):
+            vlan = endpoint.endpoint_data['vlan']
+        
         return vlan.split('VLAN')[1] if vlan.startswith('VLAN') else vlan
 
     @staticmethod
