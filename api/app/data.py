@@ -218,7 +218,7 @@ class Network(object):
     def get_fields():
         return {'id': 'NO DATA', 'mac': 0, 'ipv4': 0, 'ipv6': 0,
                 'ipv4_subnet': 'NO DATA', 'ipv6_subnet': 'NO DATA',
-                'tenant': 0, 'segment': 0, 'port': 0,
+                'vlan': 0, 'segment': 0, 'port': 0,
                 'state': 'NO DATA', 'ignored': 'False',
                 'first_seen': 'NO DATA', 'last_seen': 'NO DATA',
                 'role': 'NO DATA', 'role_confidence': 0, 'behavior': 0,
@@ -230,7 +230,7 @@ class Network(object):
     @staticmethod
     def field_mapping():
         return {'id': 'ID', 'mac': 'MAC Address', 'segment': 'Switch',
-                'port': 'Port', 'tenant': 'VLAN', 'ipv4': 'IPv4',
+                'port': 'Port', 'vlan': 'VLAN', 'ipv4': 'IPv4',
                 'ipv4_subnet': 'IPv4 Subnet', 'ipv6_subnet': 'IPv6 Subnet',
                 'ipv6': 'IPv6', 'ignored': 'Ignored', 'state': 'State',
                 'first_seen': 'First Seen', 'last_seen': 'Last Seen',
