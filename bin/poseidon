@@ -118,8 +118,8 @@ function check_args()
                 exit
                 ;;
             -e|shell)
-                if [ "$(docker ps -q --filter "label=vent.namespace=cyberreboot/poseidon" --filter "label=vent.name=" | wc -l)" -eq 1 ]; then
-                    docker exec -it "$(docker ps -q --filter "label=vent.namespace=cyberreboot/poseidon" --filter "label=vent.name=")" python3 /poseidon/poseidon/cli/cli.py "${@:2}"
+                if [ "$(docker ps -q --filter "label=poseidon.namespace=primary" --filter "label=vent.name=" | wc -l)" -eq 1 ]; then
+                    docker exec -it "$(docker ps -q --filter "label=poseidon.namespace=primary" --filter "label=vent.name=")" python3 /poseidon/poseidon/cli/cli.py "${@:2}"
                 else
                     echo "Poseidon isn't running, you must first start Poseidon to use the shell."
                 fi
