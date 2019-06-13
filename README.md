@@ -5,7 +5,7 @@
 [![codecov](https://codecov.io/gh/CyberReboot/poseidon/branch/master/graph/badge.svg?token=ORXmFYC3MM)](https://codecov.io/gh/CyberReboot/poseidon)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/e31df16fa65447bf8527e366c6271bf3)](https://www.codacy.com/app/CyberReboot/poseidon?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=CyberReboot/poseidon&amp;utm_campaign=Badge_Grade)
 [![Docker Hub Downloads](https://img.shields.io/docker/pulls/cyberreboot/poseidon.svg)](https://hub.docker.com/r/cyberreboot/poseidon/)
-[![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/badges/version/cyberreboot/poseidon/deb/poseidon/latest/d=ubuntu%252Ftrusty/?render=true)](https://cloudsmith.io/~cyberreboot/repos/poseidon/packages/)
+[![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/badges/version/cyberreboot/poseidon/deb/poseidon/latest/d=ubuntu%252Fbionic/?render=true)](https://cloudsmith.io/~cyberreboot/repos/poseidon/packages/)
 
 > Software Defined Network Situational Awareness
 
