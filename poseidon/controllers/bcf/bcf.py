@@ -61,6 +61,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
                     md['active'] = 0
                 md['port'] = d.get('interface')
                 md['segment'] = d.get('switch')
+                md['vlan'] = d.get('vlan')
                 md['controller_type'] = 'bcf'
                 md['controller'] = controller
                 md.pop('ip-state', None)

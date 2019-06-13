@@ -191,7 +191,7 @@ class Parser:
                 data['mac'] = message['L2_LEARN']['eth_src']
                 data['segment'] = str(message['dp_name'])
                 data['port'] = str(message['L2_LEARN']['port_no'])
-                data['tenant'] = 'VLAN'+str(message['L2_LEARN']['vid'])
+                data['vlan'] = 'VLAN'+str(message['L2_LEARN']['vid'])
                 data['active'] = 1
                 if message['L2_LEARN']['eth_src'] in self.mac_table:
                     dup = False

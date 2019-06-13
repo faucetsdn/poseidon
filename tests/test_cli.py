@@ -82,7 +82,7 @@ def test_display_results():
     parser = Parser()
     endpoint = Endpoint('foo')
     endpoint.endpoint_data = {
-        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv6': '1212::1'}
+        'vlan': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv6': '1212::1'}
     endpoints = [endpoint]
     parser.display_results(endpoints, [
                            'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4', 'IPv6'], ipv4_only=False, ipv6_only=True)
@@ -148,7 +148,7 @@ def test_get_port():
 def test_get_vlan():
     endpoint = Endpoint('foo')
     endpoint.endpoint_data = {
-        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+        'vlan': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
     vlan = GetData._get_vlan(endpoint)
     assert vlan == 'foo'
 
