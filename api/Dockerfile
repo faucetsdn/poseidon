@@ -1,5 +1,6 @@
 FROM alpine:3.9
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
+LABEL poseidon.namespace="api"
 
 COPY requirements.txt requirements.txt
 COPY healthcheck /healthcheck
