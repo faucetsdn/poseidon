@@ -170,37 +170,37 @@ def test_format_rabbit_message():
 
     message = ('FAUCET.Event', json.dumps(data))
     retval = mockMonitor.format_rabbit_message(message)
-    assert retval == {}
+    assert retval == {'Key1': 'Val1'}
 
     message = (None, json.dumps(data))
     retval = mockMonitor.format_rabbit_message(message)
-    assert retval == {}
+    assert retval == {'Key1': 'Val1'}
 
     data = dict({'foo': 'bar'})
     message = ('poseidon.action.ignore', json.dumps(data))
     retval = mockMonitor.format_rabbit_message(message)
-    assert retval == {}
+    assert retval == {'foo': 'bar'}
 
     message = ('poseidon.action.clear.ignored', json.dumps(data))
     retval = mockMonitor.format_rabbit_message(message)
-    assert retval == {}
+    assert retval == {'foo': 'bar'}
 
     message = ('poseidon.action.remove', json.dumps(data))
     retval = mockMonitor.format_rabbit_message(message)
-    assert retval == {}
+    assert retval == {'foo': 'bar'}
 
     message = ('poseidon.action.remove.ignored', json.dumps(data))
     retval = mockMonitor.format_rabbit_message(message)
-    assert retval == {}
+    assert retval == {'foo': 'bar'}
 
     message = ('poseidon.action.remove.inactives', json.dumps(data))
     retval = mockMonitor.format_rabbit_message(message)
-    assert retval == {}
+    assert retval == {'foo': 'bar'}
 
     data = [('foo', 'unknown')]
     message = ('poseidon.action.change', json.dumps(data))
     retval = mockMonitor.format_rabbit_message(message)
-    assert retval == {}
+    assert retval == {'foo': 'bar'}
 
 
 def test_rabbit_callback():
