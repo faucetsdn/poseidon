@@ -1,3 +1,12 @@
+# v0.6.2 (2019-06-14)
+
+ - Updated versions of pytest, prometheus_client, pyyaml
+ - Packaged new version of components, including vent v0.9.3, CRviz v0.3.4, and  NetworkML v0.3.3
+ - Fixed VLAN issue for BCF
+ - Renamed tenant to VLAN
+ - Fixed the namespace label for using a fork of Poseidon
+ - Fixed bug where config differences broke git
+
 # v0.6.1 (2019-05-31)
 
  - Packaged new version of components, including vent v0.9.2, CRviz v0.3.3, and PoseidonML v0.3.2
