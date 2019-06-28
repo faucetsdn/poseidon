@@ -1,3 +1,8 @@
+# v0.6.3 (2019-06-28)
+
+ - Updated versions of cmd2, ubuntu, alpine, prometheus_client
+ - Added sudo for creating log file in the helper script
+
 # v0.6.2 (2019-06-14)
 
  - Updated versions of pytest, prometheus_client, pyyaml
