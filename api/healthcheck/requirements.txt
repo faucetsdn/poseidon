@@ -1,2 +1,2 @@
-flask==1.1.0
+flask==1.1.1
 healthcheck==1.3.3
