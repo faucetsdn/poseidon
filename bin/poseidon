@@ -134,7 +134,7 @@ function check_args()
                     echo "Checking volumes..."
                     check_files
                     echo "Starting Poseidon..."
-                    docker run -dit --rm -v /var/run/docker.sock:/var/run/docker.sock -v /opt/vent_files:/opt/vent_files -v /opt/poseidon/.plugin_config.yml:/root/.plugin_config.yml -v /opt/poseidon/.vent_startup.yml:/root/.vent_startup.yml --env-file /etc/poseidon/default.conf --name vent cyberreboot/vent:v0.9.4
+                    docker run -dit --rm -v /var/run/docker.sock:/var/run/docker.sock -v /opt/vent_files:/opt/vent_files -v /opt/poseidon/.plugin_config.yml:/root/.plugin_config.yml -v /opt/poseidon/.vent_startup.yml:/root/.vent_startup.yml --env-file /etc/poseidon/default.conf --name vent cyberreboot/vent:v0.9.5
                     until [ "$(docker ps -q -f name=-poseidon-)" ] && [ "$(docker ps -q -f name=-poseidon- | head -1 | xargs docker container inspect -f \{\{.State.Health.Status\}\})" = "healthy" ]
                     do
                         # TODO do more checks and be verbose in here
