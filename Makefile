@@ -49,8 +49,8 @@ build_debian:
 	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-vent-rq-worker.tar cyberreboot/vent-rq-worker:v0.9.5
 	docker pull cyberreboot/vent-syslog:v0.9.5
 	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-vent-syslog.tar cyberreboot/vent-syslog:v0.9.5
-	docker pull cyberreboot/poseidon-api:v0.6.3
-	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-poseidon-api.tar cyberreboot/poseidon-api:v0.6.3
+	docker pull cyberreboot/poseidon-api:v0.6.4
+	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-poseidon-api.tar cyberreboot/poseidon-api:v0.6.4
 	docker pull cyberreboot/vent-plugins-pcap-to-node-pcap:v0.1.1
 	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-vent-plugins-pcap-to-node-pcap.tar cyberreboot/vent-plugins-pcap-to-node-pcap:v0.1.1
 	docker pull cyberreboot/vent-plugins-p0f:v0.1.1
