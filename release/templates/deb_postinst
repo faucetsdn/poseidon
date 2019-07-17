@@ -1,0 +1,295 @@
+#!/bin/bash
+
+set -e
+
+. /usr/share/debconf/confmodule
+db_version 2.0
+
+red='\e[0;31m'
+endColor='\e[0m'
+failed=false
+if db_go; then
+    echo "# Generated from debconf - do not edit by hand, to change configuration options run: poseidon reconfig" > /etc/poseidon/default.conf
+    { echo "#"; echo "#"; echo ""; } >> /etc/poseidon/default.conf
+
+    # read from db to set variables in default.conf
+    db_get poseidon/controller_type
+    if [[ -n "$$RET" ]]; then
+        if [ "$$RET" == "None" ]; then
+            echo "controller_type=None" >> /etc/poseidon/default.conf
+        elif [ "$$RET" == "Faucet" ]; then
+            echo "controller_type=faucet" >> /etc/poseidon/default.conf
+            db_get poseidon/ignore_vlans
+            if [[ -n "$$RET" ]]; then
+                echo "ignore_vlans=$$RET" >> /etc/poseidon/default.conf
+            fi
+            db_get poseidon/ignore_ports
+            if [[ -n "$$RET" ]]; then
+                echo "ignore_ports=$$RET" >> /etc/poseidon/default.conf
+            fi
+            db_get poseidon/trunk_ports
+            if [[ -n "$$RET" ]]; then
+                echo "trunk_ports=$$RET" >> /etc/poseidon/default.conf
+            fi
+            db_get poseidon/faucet_same_host
+            if [ "$$RET" == "No" ]; then
+                db_get poseidon/faucet_controller_uri
+                if [[ -n "$$RET" ]]; then
+                    echo "controller_uri=$$RET" >> /etc/poseidon/default.conf
+                else
+                    echo >&2 -e "$${red}You need to specify the IP or hostname of the Faucet controller.$${endColor}"
+                    db_unregister poseidon/faucet_controller_uri
+                    failed=true
+                fi
+                db_get poseidon/faucet_controller_user
+                if [[ -n "$$RET" ]]; then
+                    echo "controller_user=$$RET" >> /etc/poseidon/default.conf
+                else
+                    echo >&2 -e "$${red}You need to specify the username to SSH to the Faucet controller.$${endColor}"
+                    db_unregister poseidon/faucet_controller_user
+                    failed=true
+                fi
+                db_get poseidon/faucet_controller_pass
+                if [[ -n "$$RET" ]]; then
+                    echo "controller_pass=$$RET" >> /etc/poseidon/default.conf
+                else
+                    echo >&2 -e "$${red}You need to specify the password to SSH to the Faucet controller.$${endColor}"
+                    db_unregister poseidon/faucet_controller_pass
+                    failed=true
+                fi
+            elif [ "$$RET" == "Yes" ]; then
+                echo "controller_uri=" >> /etc/poseidon/default.conf
+            fi
+            db_get poseidon/faucet_controller_mirror_ports
+            if [[ -n "$$RET" ]]; then
+                echo "controller_mirror_ports=$$RET" >> /etc/poseidon/default.conf
+            else
+                echo >&2 -e "$${red}You need to specify at least one mirror port.$${endColor}"
+                db_unregister poseidon/faucet_controller_mirror_ports
+                failed=true
+            fi
+            db_get poseidon/faucet_fa_rabbit_enabled
+            if [[ -n "$$RET" ]]; then
+                if [ "$$RET" == "Yes" ]; then
+                    echo "FA_RABBIT_ENABLED=True" >> /etc/poseidon/default.conf
+                    db_get poseidon/faucet_fa_rabbit_host
+                    if [[ -n "$$RET" ]]; then
+                        echo "FA_RABBIT_HOST=$$RET" >> /etc/poseidon/default.conf
+                    fi
+                    db_get poseidon/faucet_fa_rabbit_port
+                    if [[ -n "$$RET" ]]; then
+                        echo "FA_RABBIT_PORT=$$RET" >> /etc/poseidon/default.conf
+                    fi
+                    db_get poseidon/faucet_fa_rabbit_exchange
+                    if [[ -n "$$RET" ]]; then
+                        echo "FA_RABBIT_EXCHANGE=$$RET" >> /etc/poseidon/default.conf
+                    fi
+                    db_get poseidon/faucet_fa_rabbit_exchange_type
+                    if [[ -n "$$RET" ]]; then
+                        echo "FA_RABBIT_EXCHANGE_TYPE=$$RET" >> /etc/poseidon/default.conf
+                    fi
+                    db_get poseidon/faucet_fa_rabbit_routing_key
+                    if [[ -n "$$RET" ]]; then
+                        echo "FA_RABBIT_ROUTING_KEY=$$RET" >> /etc/poseidon/default.conf
+                    fi
+                else
+                    echo "FA_RABBIT_ENABLED=False" >> /etc/poseidon/default.conf
+                fi
+            fi
+        elif [ "$$RET" == "BigSwitch Cloud Fabric" ]; then
+            echo "controller_type=bcf" >> /etc/poseidon/default.conf
+            db_get poseidon/bcf_controller_uri
+            if [[ -n "$$RET" ]]; then
+                echo "controller_uri=https://$$RET/api/v1/" >> /etc/poseidon/default.conf
+            else
+                echo >&2 -e "$${red}You need to specify the IP or hostname of the BigSwitch Cloud Fabric controller.$${endColor}"
+                db_unregister poseidon/bcf_controller_uri
+                failed=true
+            fi
+            db_get poseidon/bcf_controller_user
+            if [[ -n "$$RET" ]]; then
+                echo "controller_user=$$RET" >> /etc/poseidon/default.conf
+            else
+                echo >&2 -e "$${red}You need to specify the username to connect to the BigSwitch Cloud Fabric controller.$${endColor}"
+                db_unregister poseidon/bcf_controller_user
+                failed=true
+            fi
+            db_get poseidon/bcf_controller_pass
+            if [[ -n "$$RET" ]]; then
+                echo "controller_pass=$$RET" >> /etc/poseidon/default.conf
+            else
+                echo >&2 -e "$${red}You need to specify the password to connect to the BigSwitch Cloud Fabric controller.$${endColor}"
+                db_unregister poseidon/bcf_controller_pass
+                failed=true
+            fi
+            db_get poseidon/bcf_controller_interface_group
+            if [[ -n "$$RET" ]]; then
+                echo "controller_interface_group=$$RET" >> /etc/poseidon/default.conf
+            fi
+            db_get poseidon/bcf_controller_span_fabric_name
+            if [[ -n "$$RET" ]]; then
+                echo "controller_span_fabric_name=$$RET" >> /etc/poseidon/default.conf
+            fi
+        fi
+    else
+        echo >&2 -e "$${red}You need to specify the controller type.$${endColor}"
+        db_unregister poseidon/controller_type
+        failed=true
+    fi
+
+    db_get poseidon/logging_level
+    if [[ -n "$$RET" ]]; then
+        echo "logger_level=$$RET" >> /etc/poseidon/default.conf
+    fi
+
+    db_get poseidon/vent_files_delete
+    if [[ -n "$$RET" ]]; then
+        echo "delete_pcap_files=$$RET" >> /etc/poseidon/default.conf
+        cronfile="/etc/cron.daily/poseidon"
+        if [ "$$RET" == "0" ]; then
+            if [ -e $$cronfile ]; then
+                rm $$cronfile
+            fi
+        else
+            printf "#!/bin/sh\n\nfind /opt/vent_files/* -mtime +%s -exec rm -rf {} \;\n" "$$RET" > $$cronfile
+            chmod 755 $$cronfile
+        fi
+    fi
+
+    db_get poseidon/controller_type
+    if [[ -n "$$RET" ]]; then
+        if [ "$$RET" != "Demo" ]; then
+            db_get poseidon/learn_public_addresses
+            if [[ -n "$$RET" ]]; then
+                if [ "$$RET" == "Yes" ]; then
+                    echo "learn_public_addresses=True" >> /etc/poseidon/default.conf
+                else
+                    echo "learn_public_addresses=False" >> /etc/poseidon/default.conf
+                fi
+            fi
+        fi
+    fi
+
+    db_get poseidon/controller_type
+    if [[ -n "$$RET" ]]; then
+        if [ "$$RET" != "Demo" ] && [ "$$RET" != "None" ]; then
+            db_get poseidon/collector_nics
+            if [[ -n "$$RET" ]]; then
+                echo "collector_nic=$$RET" >> /etc/poseidon/default.conf
+            else
+                db_get poseidon/collector_nic
+                if [[ -n "$$RET" ]]; then
+                    if [ "$$RET" == "Specify your own" ]; then
+                        db_get poseidon/specify_nic
+                        if [[ -n "$$RET" ]]; then
+                            echo "collector_nic=$$RET" >> /etc/poseidon/default.conf
+                        else
+                            echo >&2 -e "$${red}You need to specify a collector NIC.$${endColor}"
+                            db_unregister poseidon/collector_nic
+                            db_unregister poseidon/specify_nic
+                            failed=true
+                        fi
+                    else
+                        db_get poseidon/available_nics
+                        if [[ -n "$$RET" ]]; then
+                            echo "collector_nic=$$RET" >> /etc/poseidon/default.conf
+                        else
+                            echo >&2 -e "$${red}You need to specify a collector NIC.$${endColor}"
+                            db_unregister poseidon/collector_nic
+                            db_unregister poseidon/available_nics
+                            failed=true
+                        fi
+                    fi
+                else
+                    echo >&2 -e "$${red}You need to specify the collector NIC.$${endColor}"
+                    db_unregister poseidon/collector_nic
+                    failed=true
+                fi
+            fi
+
+            db_get poseidon/max_concurrent_reinvestigations
+            if [[ -n "$$RET" ]]; then
+                echo "max_concurrent_reinvestigations=$$RET" >> /etc/poseidon/default.conf
+            fi
+
+            db_get poseidon/reinvestigation_frequency
+            if [[ -n "$$RET" ]]; then
+                echo "reinvestigation_frequency=$$RET" >> /etc/poseidon/default.conf
+            fi
+
+            db_get poseidon/trust_cert
+            if [[ -n "$$RET" ]]; then
+                if [ "$$RET" == "Yes" ]; then
+                    echo "trust_self_signed_cert=True" >> /etc/poseidon/default.conf
+                else
+                    echo "trust_self_signed_cert=False" >> /etc/poseidon/default.conf
+                fi
+            fi
+        fi
+    fi
+    if [ "$$failed" == true ]; then
+        exit 1
+    fi
+
+    systemctl stop poseidon || true
+
+    # remove previous images
+    docker images --filter "reference=cyberreboot\/*" -q | (xargs docker rmi > /dev/null 2>&1) || true
+    docker images --filter "label=vent" -q | (xargs docker rmi > /dev/null 2>&1) || true
+
+    # load or pull required images
+    $LOAD_OR_PULL_COMMANDS
+
+    # start poseidon service
+    systemctl enable poseidon
+    systemctl start poseidon
+
+    db_get poseidon/controller_type
+    if [[ -n "$$RET" ]]; then
+        if [ "$$RET" == "Demo" ]; then
+            default_iface=$$(ip route list | head -1 | awk '{print $$5}')
+            default_ip=$$(ip addr show dev "$$default_iface" | awk '$$1 == "inet" { sub("/.*", "", $$2); print $$2 }' | head -1)
+
+            # settings in /etc/poseidon/default.conf
+            echo "controller_type=faucet" >> /etc/poseidon/default.conf
+            echo "controller_uri=" >> /etc/poseidon/default.conf
+            echo "controller_mirror_ports='{\"switch-1\":3}'" >> /etc/poseidon/default.conf
+            echo "collector_nic=s1-eth3" >> /etc/poseidon/default.conf
+            echo "reinvestigation_frequency=300" >> /etc/poseidon/default.conf
+
+            mkdir -p /etc/faucet
+            touch /etc/faucet/faucet.yaml
+            # settings for Faucet
+            echo "dps:" > /etc/faucet/faucet.yaml
+            echo "  switch-1:" >> /etc/faucet/faucet.yaml
+            echo "    dp_id: 1" >> /etc/faucet/faucet.yaml
+            echo "    hardware: Open vSwitch" >> /etc/faucet/faucet.yaml
+            echo "    interfaces:" >> /etc/faucet/faucet.yaml
+            echo "      1:" >> /etc/faucet/faucet.yaml
+            echo "        native_vlan: 8" >> /etc/faucet/faucet.yaml
+            echo "      2:" >> /etc/faucet/faucet.yaml
+            echo "        native_vlan: 8" >> /etc/faucet/faucet.yaml
+            echo "      3:" >> /etc/faucet/faucet.yaml
+            echo "        description: mirror" >> /etc/faucet/faucet.yaml
+            echo "        output_only: true" >> /etc/faucet/faucet.yaml
+            echo "vlans:" >> /etc/faucet/faucet.yaml
+            echo "  8:" >> /etc/faucet/faucet.yaml
+
+            command -v python >/dev/null 2>&1 || { echo >&2 -e "$${red}Python not installed, please install it first: sudo apt-get install python$${endColor}"; db_unregister poseidon/controller_type; exit 1; }
+            command -v mn >/dev/null 2>&1 || { echo >&2 -e "$${red}Mininet not installed, please install it first: sudo apt-get install mininet$${endColor}"; db_unregister poseidon/controller_type; exit 1; }
+            command -v docker-compose >/dev/null 2>&1 || { sudo curl -L https://github.com/docker/compose/releases/download/1.24.0/docker-compose-"$$(uname -s)"-"$$(uname -m)" -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose; }
+            pushd /tmp; (git clone https://github.com/faucetsdn/faucet || true); popd
+            pushd /tmp/faucet && FAUCET_CONFIG_STAT_RELOAD=1 FAUCET_EVENT_SOCK=1 FA_RABBIT_HOST=$$default_ip docker-compose -f docker-compose.yaml -f adapters/vendors/rabbitmq/docker-compose.yaml up --build -d && popd
+            cat /opt/poseidon/docs/demo.txt
+            echo ""
+            echo "To get the instructions again:"
+            echo ""
+            echo "cat /opt/poseidon/docs/demo.txt"
+            echo ""
+            echo ""
+        fi
+    fi
+    exit 0
+else
+    exit 1
+fi
