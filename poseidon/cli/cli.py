@@ -476,7 +476,7 @@ class PoseidonShell(cmd2.Cmd):
         super().__init__(persistent_history_file='/opt/poseidon/.poseidon_history', *args, **kwargs)
         del cmd2.Cmd.do_edit
         del cmd2.Cmd.do_py
-        del cmd2.Cmd.do_pyscript
+        del cmd2.Cmd.do_run_pyscript
 
         self.parser = Parser()
         self.intro = """Welcome to the Poseidon shell. Type 'help' to list commands.
