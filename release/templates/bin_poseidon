@@ -2,17 +2,17 @@
 
 function logging()
 {
-    docker logs -f "$(docker ps | grep "\-syslog\-" | awk '{print $1}')" | \
+    docker logs -f "$$(docker ps | grep "\-syslog\-" | awk '{print $$1}')" | \
     while read -r line ; do
-        echo "$line" | grep -v 'poseidon-api' | grep -i 'poseidon' | awk '{$1=$2=$3=""; print $0}' | sed -e 's/^[ \t]*//'
+        echo "$$line" | grep -v 'poseidon-api' | grep -i 'poseidon' | awk '{$$1=$$2=$$3=""; print $$0}' | sed -e 's/^[ \t]*//'
     done
 }
 
 function show_help()
 {
     local version
-    version=$( (dpkg -s poseidon || dpkg -s poseidon-net) | grep '^Version:' | cut -d' ' -f2-)
-    echo "Poseidon $version, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of machine learning techniques. For more info visit: https://github.com/CyberReboot/poseidon
+    version=$$( (dpkg -s poseidon || dpkg -s poseidon-net) | grep '^Version:' | cut -d' ' -f2-)
+    echo "Poseidon $$version, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of machine learning techniques. For more info visit: https://github.com/CyberReboot/poseidon
 
 Usage: poseidon [option]
 Options:
@@ -35,7 +35,7 @@ Options:
 
 function die()
 {
-    printf '%s\n' "$1" >&2
+    printf '%s\n' "$$1" >&2
     exit 1
 }
 
@@ -45,14 +45,14 @@ function check_args()
     version=
 
     while :; do
-        case $1 in
+        case $$1 in
             -a|api)
-                if [ "$(docker ps -q --filter "label=vent.namespace=cyberreboot/poseidon" --filter "label=vent.name=api" | wc -l)" -eq 1 ]; then
-                    port_map=$(docker port "$(docker ps -q --filter "label=vent.namespace=cyberreboot/poseidon" --filter "label=vent.name=api")" 8000/tcp)
-                    port=$(echo "$port_map" | cut -d':' -f2)
-                    default_iface=$(ip route list | head -1 | awk '{print $5}')
-                    default_ip=$(ip addr show dev "$default_iface" | awk '$1 == "inet" { sub("/.*", "", $2); print $2 }' | head -1)
-                    echo "Poseidon API endpoints are accessible here: http://$default_ip:$port/v1"
+                if [ "$$(docker ps -q --filter "label=vent.namespace=cyberreboot/poseidon" --filter "label=vent.name=api" | wc -l)" -eq 1 ]; then
+                    port_map=$$(docker port "$$(docker ps -q --filter "label=vent.namespace=cyberreboot/poseidon" --filter "label=vent.name=api")" 8000/tcp)
+                    port=$$(echo "$$port_map" | cut -d':' -f2)
+                    default_iface=$$(ip route list | head -1 | awk '{print $$5}')
+                    default_ip=$$(ip addr show dev "$$default_iface" | awk '$$1 == "inet" { sub("/.*", "", $$2); print $$2 }' | head -1)
+                    echo "Poseidon API endpoints are accessible here: http://$$default_ip:$$port/v1"
                 else
                     echo "Poseidon API is not running."
                 fi
@@ -87,19 +87,19 @@ function check_args()
                 exit
                 ;;
             -p|pcap)
-                if [ -z "$2" ]; then
+                if [ -z "$$2" ]; then
                     echo "Please supply the path to the PCAP(s) to process."
                 else
-                    if [[ -d "$2" ]]; then
-                        for line in $(find "$2" -name '*.pcap'); do
-                            filename=$(echo "$line" | rev | cut -d/ -f1 | rev)
-                            sudo cp "$line" /opt/vent_files/trace_"$filename"
+                    if [[ -d "$$2" ]]; then
+                        for line in $$(find "$$2" -name '*.pcap'); do
+                            filename=$$(echo "$$line" | rev | cut -d/ -f1 | rev)
+                            sudo cp "$$line" /opt/vent_files/trace_"$$filename"
                         done
-                    elif [[ -f "$2" ]]; then
-                        filename=$(echo "$2" | rev | cut -d/ -f1 | rev)
-                        sudo cp "$2" /opt/vent_files/trace_"$filename"
+                    elif [[ -f "$$2" ]]; then
+                        filename=$$(echo "$$2" | rev | cut -d/ -f1 | rev)
+                        sudo cp "$$2" /opt/vent_files/trace_"$$filename"
                     else
-                        echo "$2 is not a valid path."
+                        echo "$$2 is not a valid path."
                     fi
                 fi
                 exit
@@ -118,28 +118,28 @@ function check_args()
                 exit
                 ;;
             -e|shell)
-                if [ "$(docker ps -q --filter "label=poseidon.namespace=primary" --filter "label=vent.name=" | wc -l)" -eq 1 ]; then
-                    docker exec -it "$(docker ps -q --filter "label=poseidon.namespace=primary" --filter "label=vent.name=")" python3 /poseidon/poseidon/cli/cli.py "${@:2}"
+                if [ "$$(docker ps -q --filter "label=poseidon.namespace=primary" --filter "label=vent.name=" | wc -l)" -eq 1 ]; then
+                    docker exec -it "$$(docker ps -q --filter "label=poseidon.namespace=primary" --filter "label=vent.name=")" python3 /poseidon/poseidon/cli/cli.py "$${@:2}"
                 else
                     echo "Poseidon isn't running, you must first start Poseidon to use the shell."
                 fi
                 exit
                 ;;
             -s|start)
-                if [ "$(docker ps -q --filter "name=vent" | wc -l)" -eq 1 ]; then
+                if [ "$$(docker ps -q --filter "name=vent" | wc -l)" -eq 1 ]; then
                    echo "Found at least part of Poseidon already running, cleaning up first."
                    sudo systemctl stop poseidon || sudo systemctl stop poseidon-net
                 fi
-                if [ "$2" = "-D" ]; then
+                if [ "$$2" = "-D" ]; then
                     echo "Checking volumes..."
                     check_files
                     echo "Starting Poseidon..."
-                    docker run -dit --rm -v /var/run/docker.sock:/var/run/docker.sock -v /opt/vent_files:/opt/vent_files -v /opt/poseidon/.plugin_config.yml:/root/.plugin_config.yml -v /opt/poseidon/.vent_startup.yml:/root/.vent_startup.yml --env-file /etc/poseidon/default.conf --name vent cyberreboot/vent:v0.9.6
-                    until [ "$(docker ps -q -f name=-poseidon-)" ] && [ "$(docker ps -q -f name=-poseidon- | head -1 | xargs docker container inspect -f \{\{.State.Health.Status\}\})" = "healthy" ]
+                    docker run -dit --rm -v /var/run/docker.sock:/var/run/docker.sock -v /opt/vent_files:/opt/vent_files -v /opt/poseidon/.plugin_config.yml:/root/.plugin_config.yml -v /opt/poseidon/.vent_startup.yml:/root/.vent_startup.yml --env-file /etc/poseidon/default.conf --name vent $VENT_SLUG
+                    until [ "$$(docker ps -q -f name=-poseidon-)" ] && [ "$$(docker ps -q -f name=-poseidon- | head -1 | xargs docker container inspect -f \{\{.State.Health.Status\}\})" = "healthy" ]
                     do
                         # TODO do more checks and be verbose in here
-                        count=$(docker ps -q --filter "label=vent" | wc -l)
-                        echo "Waiting for Poseidon containers to become healthy...$count/13"
+                        count=$$(docker ps -q --filter "label=vent" | wc -l)
+                        echo "Waiting for Poseidon containers to become healthy...$$count/13"
                         sleep 15
                     done
                     echo "Poseidon successfully started, capturing logs..."
@@ -156,12 +156,12 @@ function check_args()
                 exit
                 ;;
             -v|viz|visualize)
-                if [ "$(docker ps -q --filter "label=vent.namespace=cyberreboot/crviz" --filter "label=vent.name=" | wc -l)" -eq 1 ]; then
-                    port_map=$(docker port "$(docker ps -q --filter "label=vent.namespace=cyberreboot/crviz" --filter "label=vent.name=")" 5000/tcp)
-                    port=$(echo "$port_map" | cut -d':' -f2)
-                    default_iface=$(awk '$2 == 00000000 { print $1 }' /proc/net/route)
-                    default_ip=$(ip addr show dev "$default_iface" | awk '$1 ~ /^inet/ { sub("/.*", "", $2); print $2 }' | head -1)
-                    echo "CRviz is connected to Poseidon and accessible here: http://$default_ip:$port/"
+                if [ "$$(docker ps -q --filter "label=vent.namespace=cyberreboot/crviz" --filter "label=vent.name=" | wc -l)" -eq 1 ]; then
+                    port_map=$$(docker port "$$(docker ps -q --filter "label=vent.namespace=cyberreboot/crviz" --filter "label=vent.name=")" 5000/tcp)
+                    port=$$(echo "$$port_map" | cut -d':' -f2)
+                    default_iface=$$(awk '$$2 == 00000000 { print $$1 }' /proc/net/route)
+                    default_ip=$$(ip addr show dev "$$default_iface" | awk '$$1 ~ /^inet/ { sub("/.*", "", $$2); print $$2 }' | head -1)
+                    echo "CRviz is connected to Poseidon and accessible here: http://$$default_ip:$$port/"
                     echo "In the Dataset dropdown, select Poseidon Network."
                 else
                     echo "CRviz is not running."
@@ -169,8 +169,8 @@ function check_args()
                 exit
                 ;;
             -V|version)
-                version=$( (dpkg -s poseidon || dpkg -s poseidon-net) | grep '^Version:' | cut -d' ' -f2-)
-                echo "Poseidon $version"
+                version=$$( (dpkg -s poseidon || dpkg -s poseidon-net) | grep '^Version:' | cut -d' ' -f2-)
+                echo "Poseidon $$version"
                 exit
                 ;;
             -Z|reset)
@@ -185,7 +185,7 @@ function check_args()
                 exit
                 ;;
             ?*)
-                printf 'WARN: Unknown option (ignored): %s\n' "$1" >&2
+                printf 'WARN: Unknown option (ignored): %s\n' "$$1" >&2
                 ;;
             *)
                 break
@@ -235,9 +235,9 @@ function check_files()
 }
 
 # entry point
-if [ $# -gt 0 ]; then
-    if [[ ( $# -eq 2 && $1 == "start" ) || ( $# -eq 2 && $1 == "pcap" ) || ( $# -eq 2 && $1 == "-p" ) || ( $# -eq 1 ) || ( $1 == "shell" ) || ( $1 == "-e" ) ]]; then
-        check_args "$@"
+if [ $$# -gt 0 ]; then
+    if [[ ( $$# -eq 2 && $$1 == "start" ) || ( $$# -eq 2 && $$1 == "pcap" ) || ( $$# -eq 2 && $$1 == "-p" ) || ( $$# -eq 1 ) || ( $$1 == "shell" ) || ( $$1 == "-e" ) ]]; then
+        check_args "$$@"
     else
         show_help
     fi

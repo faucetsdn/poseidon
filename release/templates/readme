@@ -52,7 +52,7 @@ The Poseidon project originally began as an experiment to test the merits of lev
 
 To simplify the using commands with Docker, we recommend allowing the user that will be executing Poseidon commands be part of the `docker` group so they can execut Docker commands without `sudo`.  Typically this can be done with:
 ```
-sudo usermod -aG docker $USER
+sudo usermod -aG docker $$USER
 ```
 Followed by closing the existing shell and starting a new one.
 
@@ -61,7 +61,7 @@ On Ubuntu, this will download and install our `.deb` package from [Cloudsmith](h
 ```
 sudo apt-get install -y apt-transport-https curl
 curl -sLf "https://dl.cloudsmith.io/public/cyberreboot/poseidon/cfg/gpg/gpg.F9E23875C98A1F72.key" | sudo apt-key add -
-sudo add-apt-repository "deb [arch=amd64] https://dl.cloudsmith.io/public/cyberreboot/poseidon/deb/ubuntu $(lsb_release -cs) main"
+sudo add-apt-repository "deb [arch=amd64] https://dl.cloudsmith.io/public/cyberreboot/poseidon/deb/ubuntu $$(lsb_release -cs) main"
 sudo apt-get update
 sudo apt-get install poseidon
 ```
@@ -152,8 +152,8 @@ NEW: If you have used the .DEB installer previously, it is worth noting that Pos
 
 After installation you'll have a new command `poseidon` available for looking at the status, logs, changing the configuration, or stopping and starting the service.
 ```
-$ poseidon help
-Poseidon 0.6.5, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of machine learning techniques. For more info visit: https://github.com/CyberReboot/poseidon
+$$ poseidon help
+Poseidon $POSEIDON_VERSION, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of machine learning techniques. For more info visit: https://github.com/CyberReboot/poseidon
 
 Usage: poseidon [option]
 Options:
