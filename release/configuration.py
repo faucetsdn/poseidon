@@ -34,9 +34,9 @@ def parse_cfg_from_yml(yml_dict):
 
                 # take the version of the 
                 if repo == "vent" and not "vent" in cfg_dict:
-                    cfg_dict["vent"] = {'repo': 'cyberreboot', 'version': branch}
+                    cfg_dict["vent"] = {'owner': owner, 'repo': 'vent', 'version': branch}
 
-                cfg_dict[tool] = {'repo': repo, 'version': branch}
+                cfg_dict[tool] = {'owner': owner, 'repo': repo, 'version': branch}
 
                 
 
@@ -44,14 +44,14 @@ def parse_cfg_from_yml(yml_dict):
 
 def generate_makefile(cfg_dict):
     vent = cfg_dict["vent"]
-    vent_cmd = "docker pull {0}/{1}:{2}\n\t".format(vent["repo"], "vent", vent["version"])
-    vent_cmd += "docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/{0}-{1}.tar {0}/{1}:{2}\n\t".format(vent["repo"], "vent", vent["version"])
+    vent_cmd = "docker pull {0}/{1}:{2}\n\t".format(vent["owner"], "vent", vent["version"])
+    vent_cmd += "docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/{0}-{1}.tar {0}/{1}:{2}\n\t".format(vent["owner"], "vent", vent["version"])
 
     tool_cmd = ""
     for key in list(cfg_dict.keys())[1:]:
         value = cfg_dict[key]
-        tool_cmd += "docker pull {0}/{1}:{2}\n\t".format(value["repo"], key, value["version"])
-        tool_cmd += "docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/{0}-{1}.tar {0}/{1}:{2}\n\t".format(value["repo"], key, value["version"])
+        tool_cmd += "docker pull {0}/{1}:{2}\n\t".format(value["owner"], key, value["version"])
+        tool_cmd += "docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/{0}-{1}.tar {0}/{1}:{2}\n\t".format(value["owner"], key, value["version"])
     cmds = vent_cmd + tool_cmd
     with open("./release/templates/make", "r") as tf:
         temp_str = tf.read()
@@ -65,10 +65,10 @@ def generate_deb_postinst(cfg_dict):
     tool_cmd = ""
     for key in cfg_dict.keys():
         value = cfg_dict[key]
-        tool_cmd += "    if [ ! -f /opt/poseidon/dist/{0}-{1}.tar ]; then\n".format(value["repo"], key)
-        tool_cmd += "        docker pull {0}/{1}:{2}\n".format(value["repo"], key, value["version"])
+        tool_cmd += "    if [ ! -f /opt/poseidon/dist/{0}-{1}.tar ]; then\n".format(value["owner"], key)
+        tool_cmd += "        docker pull {0}/{1}:{2}\n".format(value["owner"], key, value["version"])
         tool_cmd += "    else\n"
-        tool_cmd += "        docker load -i /opt/poseidon/dist/{0}-{1}.tar\n".format(value["repo"], key)
+        tool_cmd += "        docker load -i /opt/poseidon/dist/{0}-{1}.tar\n".format(value["owner"], key)
         tool_cmd += "    fi\n"
 
     with open("./release/templates/deb_postinst", "r") as dp:
@@ -102,7 +102,7 @@ def generate_readme(poseidon_version):
         rf.write(replaced)
 
 def generate_bin_poseidon(vent_data):
-    vent_slug = "{0}/{1}:{2}".format(vent_data["repo"], "vent", vent_data["version"])
+    vent_slug = "{0}/{1}:{2}".format(vent_data["owner"], "vent", vent_data["version"])
     with open("./release/templates/bin_poseidon", "r") as bp:
         temp_str = bp.read()
         template = Template(temp_str)
