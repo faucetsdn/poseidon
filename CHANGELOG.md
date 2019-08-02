@@ -1,3 +1,8 @@
+# v0.6.5 (2019-08-02)
+
+ - Updated versions of cmd2, pika, redis, and pyyaml
+ - introduced release scripts
+
 # v0.6.4 (2019-07-12)
 
  - Updated versions of cmd2, pytest, flask, and texttable

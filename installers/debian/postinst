@@ -238,81 +238,82 @@ if db_go; then
     docker images --filter "label=vent" -q | (xargs docker rmi > /dev/null 2>&1) || true
 
     # load or pull required images
-    if [ ! -f /opt/poseidon/dist/cyberreboot-vent.tar ]; then
-        docker pull cyberreboot/vent:v0.9.5
+        if [ ! -f /opt/poseidon/dist/cyberreboot-vent.tar ]; then
+        docker pull cyberreboot/vent:v0.9.6
     else
         docker load -i /opt/poseidon/dist/cyberreboot-vent.tar
     fi
-    if [ ! -f /opt/poseidon/dist/cyberreboot-vent-file-drop.tar ]; then
-        docker pull cyberreboot/vent-file-drop:v0.9.5
+    if [ ! -f /opt/poseidon/dist/poseidon-poseidon.tar ]; then
+        docker pull poseidon/poseidon:v0.6.5
     else
-        docker load -i /opt/poseidon/dist/cyberreboot-vent-file-drop.tar
+        docker load -i /opt/poseidon/dist/poseidon-poseidon.tar
     fi
-    if [ ! -f /opt/poseidon/dist/cyberreboot-vent-network-tap.tar ]; then
-        docker pull cyberreboot/vent-network-tap:v0.9.5
+    if [ ! -f /opt/poseidon/dist/networkml-networkml.tar ]; then
+        docker pull networkml/networkml:v0.3.5
     else
-        docker load -i /opt/poseidon/dist/cyberreboot-vent-network-tap.tar
+        docker load -i /opt/poseidon/dist/networkml-networkml.tar
     fi
-    if [ ! -f /opt/poseidon/dist/cyberreboot-vent-rabbitmq.tar ]; then
-        docker pull cyberreboot/vent-rabbitmq:v0.9.5
+    if [ ! -f /opt/poseidon/dist/vent-vent-file-drop.tar ]; then
+        docker pull vent/vent-file-drop:v0.9.6
     else
-        docker load -i /opt/poseidon/dist/cyberreboot-vent-rabbitmq.tar
+        docker load -i /opt/poseidon/dist/vent-vent-file-drop.tar
     fi
-    if [ ! -f /opt/poseidon/dist/cyberreboot-vent-redis.tar ]; then
-        docker pull cyberreboot/vent-redis:v0.9.5
+    if [ ! -f /opt/poseidon/dist/vent-vent-rabbitmq.tar ]; then
+        docker pull vent/vent-rabbitmq:v0.9.6
     else
-        docker load -i /opt/poseidon/dist/cyberreboot-vent-redis.tar
+        docker load -i /opt/poseidon/dist/vent-vent-rabbitmq.tar
     fi
-    if [ ! -f /opt/poseidon/dist/cyberreboot-vent-rq-dashboard.tar ]; then
-        docker pull cyberreboot/vent-rq-dashboard:v0.9.5
+    if [ ! -f /opt/poseidon/dist/vent-vent-syslog.tar ]; then
+        docker pull vent/vent-syslog:v0.9.6
     else
-        docker load -i /opt/poseidon/dist/cyberreboot-vent-rq-dashboard.tar
+        docker load -i /opt/poseidon/dist/vent-vent-syslog.tar
     fi
-    if [ ! -f /opt/poseidon/dist/cyberreboot-vent-rq-worker.tar ]; then
-        docker pull cyberreboot/vent-rq-worker:v0.9.5
+    if [ ! -f /opt/poseidon/dist/vent-plugins-vent-plugins-pcap-to-node-pcap.tar ]; then
+        docker pull vent-plugins/vent-plugins-pcap-to-node-pcap:v0.1.2
     else
-        docker load -i /opt/poseidon/dist/cyberreboot-vent-rq-worker.tar
+        docker load -i /opt/poseidon/dist/vent-plugins-vent-plugins-pcap-to-node-pcap.tar
     fi
-    if [ ! -f /opt/poseidon/dist/cyberreboot-vent-syslog.tar ]; then
-        docker pull cyberreboot/vent-syslog:v0.9.5
+    if [ ! -f /opt/poseidon/dist/vent-vent-rq-worker.tar ]; then
+        docker pull vent/vent-rq-worker:v0.9.6
     else
-        docker load -i /opt/poseidon/dist/cyberreboot-vent-syslog.tar
+        docker load -i /opt/poseidon/dist/vent-vent-rq-worker.tar
     fi
-    if [ ! -f /opt/poseidon/dist/cyberreboot-poseidon-api.tar ]; then
-        docker pull cyberreboot/poseidon-api:v0.6.4
+    if [ ! -f /opt/poseidon/dist/vent-vent-network-tap.tar ]; then
+        docker pull vent/vent-network-tap:v0.9.6
     else
-        docker load -i /opt/poseidon/dist/cyberreboot-poseidon-api.tar
+        docker load -i /opt/poseidon/dist/vent-vent-network-tap.tar
     fi
-    if [ ! -f /opt/poseidon/dist/cyberreboot-vent-plugins-pcap-to-node-pcap.tar ]; then
-        docker pull cyberreboot/vent-plugins-pcap-to-node-pcap:v0.1.1
+    if [ ! -f /opt/poseidon/dist/crviz-crviz.tar ]; then
+        docker pull crviz/crviz:v0.3.8
     else
-        docker load -i /opt/poseidon/dist/cyberreboot-vent-plugins-pcap-to-node-pcap.tar
+        docker load -i /opt/poseidon/dist/crviz-crviz.tar
     fi
-    if [ ! -f /opt/poseidon/dist/cyberreboot-vent-plugins-p0f.tar ]; then
-        docker pull cyberreboot/vent-plugins-p0f:v0.1.1
+    if [ ! -f /opt/poseidon/dist/poseidon-poseidon-api.tar ]; then
+        docker pull poseidon/poseidon-api:v0.6.5
     else
-        docker load -i /opt/poseidon/dist/cyberreboot-vent-plugins-p0f.tar
+        docker load -i /opt/poseidon/dist/poseidon-poseidon-api.tar
     fi
-    if [ ! -f /opt/poseidon/dist/cyberreboot-vent-plugins-tcprewrite-dot1q.tar ]; then
-        docker pull cyberreboot/vent-plugins-tcprewrite-dot1q:v0.1.1
+    if [ ! -f /opt/poseidon/dist/vent-plugins-vent-plugins-tcprewrite-dot1q.tar ]; then
+        docker pull vent-plugins/vent-plugins-tcprewrite-dot1q:v0.1.2
     else
-        docker load -i /opt/poseidon/dist/cyberreboot-vent-plugins-tcprewrite-dot1q.tar
+        docker load -i /opt/poseidon/dist/vent-plugins-vent-plugins-tcprewrite-dot1q.tar
     fi
-    if [ ! -f /opt/poseidon/dist/cyberreboot-crviz.tar ]; then
-        docker pull cyberreboot/crviz:v0.3.6
+    if [ ! -f /opt/poseidon/dist/vent-vent-redis.tar ]; then
+        docker pull vent/vent-redis:v0.9.6
     else
-        docker load -i /opt/poseidon/dist/cyberreboot-crviz.tar
+        docker load -i /opt/poseidon/dist/vent-vent-redis.tar
     fi
-    if [ ! -f /opt/poseidon/dist/cyberreboot-networkml.tar ]; then
-        docker pull cyberreboot/networkml:v0.3.4
+    if [ ! -f /opt/poseidon/dist/vent-vent-rq-dashboard.tar ]; then
+        docker pull vent/vent-rq-dashboard:v0.9.6
     else
-        docker load -i /opt/poseidon/dist/cyberreboot-networkml.tar
+        docker load -i /opt/poseidon/dist/vent-vent-rq-dashboard.tar
     fi
-    if [ ! -f /opt/poseidon/dist/cyberreboot-poseidon.tar ]; then
-        docker pull cyberreboot/poseidon:v0.6.4
+    if [ ! -f /opt/poseidon/dist/vent-plugins-vent-plugins-p0f.tar ]; then
+        docker pull vent-plugins/vent-plugins-p0f:v0.1.2
     else
-        docker load -i /opt/poseidon/dist/cyberreboot-poseidon.tar
+        docker load -i /opt/poseidon/dist/vent-plugins-vent-plugins-p0f.tar
     fi
+
 
     # start poseidon service
     systemctl enable poseidon
