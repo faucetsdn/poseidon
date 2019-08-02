@@ -238,7 +238,7 @@ if db_go; then
     docker images --filter "label=vent" -q | (xargs docker rmi > /dev/null 2>&1) || true
 
     # load or pull required images
-    $LOAD_OR_PULL_COMMANDS
+$LOAD_OR_PULL_COMMANDS
 
     # start poseidon service
     systemctl enable poseidon
