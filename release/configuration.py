@@ -34,7 +34,7 @@ def parse_cfg_from_yml(yml_dict):
 
                 # take the version of the 
                 if repo == "vent" and not "vent" in cfg_dict:
-                    cfg_dict["vent"] = {'repo': 'vent', 'version': branch}
+                    cfg_dict["vent"] = {'repo': 'cyberreboot', 'version': branch}
 
                 cfg_dict[tool] = {'repo': repo, 'version': branch}
 
@@ -131,7 +131,7 @@ def main(startup_file):
             print("configuration could not be parsed from yml supplied by {0}. exiting...".format(startup_file))
             exit(1)
 
-        poseidon_version = cfg["poseidon"]["version"]
+        poseidon_version = cfg["poseidon"]["version"][1:]
         vent_version = cfg["vent"]["version"]
 
         print("Generating release files for Poseion version: {0}".format(poseidon_version))
