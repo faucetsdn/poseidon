@@ -238,7 +238,7 @@ if db_go; then
     docker images --filter "label=vent" -q | (xargs docker rmi > /dev/null 2>&1) || true
 
     # load or pull required images
-        if [ ! -f /opt/poseidon/dist/cyberreboot-vent.tar ]; then
+    if [ ! -f /opt/poseidon/dist/cyberreboot-vent.tar ]; then
         docker pull cyberreboot/vent:v0.9.6
     else
         docker load -i /opt/poseidon/dist/cyberreboot-vent.tar
