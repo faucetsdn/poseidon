@@ -3,7 +3,7 @@ natural==0.2.0
 pika==1.1.0
 prometheus_client==0.7.1
 pyyaml==5.1.2
-redis==3.3.4
+redis==3.3.6
 requests==2.22.0
 schedule==0.6.0
 scp==0.13.2
