@@ -364,10 +364,10 @@ def test_process():
             self.s.get_stored_endpoints()
 
         def get_q_item(self):
-            return (True, ('foo', {}))
+            return (True, ('foo', {'data': {}}))
 
         def bad_get_q_item(self):
-            return (False, ('bar', {}))
+            return (False, ('bar', {'data': {}}))
 
         def format_rabbit_message(self, item):
             return {}
