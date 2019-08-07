@@ -370,7 +370,7 @@ def test_process():
             return (False, ('bar', {'data': {}}))
 
         def format_rabbit_message(self, item):
-            return {}
+            return {'data': {}}
 
     mock_monitor = MockMonitor()
 
