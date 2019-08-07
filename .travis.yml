@@ -4,8 +4,9 @@ services:
   - redis
 language: python
 python:
-  - "3.6"
+  - "3.7"
 install:
+  - pip install -U pip
   - pip install codecov
   - wget "https://storage.googleapis.com/shellcheck/shellcheck-stable.linux.x86_64.tar.xz"
   - tar --xz -xvf "shellcheck-stable.linux.x86_64.tar.xz"
@@ -17,7 +18,7 @@ jobs:
   include:
   - stage: test
     script: /bin/bash --version && /bin/bash -n installers/debian/postinst installers/debian/preinst installers/debian/prerm installers/debian/postrm installers/debian/config bin/poseidon helpers/run && shellcheck -x -e SC2119 -e SC2129 -e SC2001 -e SC2044 installers/debian/postinst installers/debian/preinst installers/debian/prerm installers/debian/postrm installers/debian/config bin/poseidon helpers/run
-  - script: pip3 install -r test-requirements.txt && pip3 install -r api/requirements.txt && py.test -v -vv --cov-report term-missing --cov=. -c .coveragerc
+  - script: pip install -r test-requirements.txt && pip install -r api/requirements.txt && py.test -v -vv --cov-report term-missing --cov=. -c .coveragerc
 before_install:
   - sudo apt-get update
   - sudo apt-get install docker-ce
