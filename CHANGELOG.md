@@ -1,3 +1,9 @@
+# v0.6.6 (2019-08-02)
+
+ - Updated versions of cmd2, redis, pip, and pytest
+ - updated for new NetworkML message format
+ - Removed Support for Ubuntu 18.10 (Cosmic Cuttlefish)
+
 # v0.6.5 (2019-08-02)
 
  - Updated versions of cmd2, pika, redis, and pyyaml
