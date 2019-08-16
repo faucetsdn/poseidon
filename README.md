@@ -38,7 +38,6 @@ The Poseidon project originally began as an experiment to test the merits of lev
   - Currently supported versions for the .DEB install are:
     - Ubuntu 16.04
     - Ubuntu 18.04
-    - Ubuntu 18.10
     - Ubuntu 19.04
 - [Docker](https://www.docker.com/) - Poseidon and related components run on top of Docker, so understanding the fundamentals will be useful for troubleshooting as well.  Note: installing via Snap is currently unsupported. [A Good Ubuntu Docker Quick-Start](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04)
 - ~10GB of free disk space
