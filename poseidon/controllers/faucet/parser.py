@@ -73,6 +73,18 @@ class Parser:
                 return Parser().yaml_out(config_file, obj_doc)
         return False
 
+    def apply_acl():
+        pass
+
+    def remove_acl():
+        pass
+
+    def apply_route():
+        pass
+
+    def remove_route():
+        pass
+
     def config(self, config_file, action, port, switch):
         switch_found = None
         config_file = Parser().get_config_file(config_file)
