@@ -38,7 +38,6 @@ The Poseidon project originally began as an experiment to test the merits of lev
   - Currently supported versions for the .DEB install are:
     - Ubuntu 16.04
     - Ubuntu 18.04
-    - Ubuntu 18.10
     - Ubuntu 19.04
 - [Docker](https://www.docker.com/) - Poseidon and related components run on top of Docker, so understanding the fundamentals will be useful for troubleshooting as well.  Note: installing via Snap is currently unsupported. [A Good Ubuntu Docker Quick-Start](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04)
 - ~10GB of free disk space
@@ -153,7 +152,7 @@ NEW: If you have used the .DEB installer previously, it is worth noting that Pos
 After installation you'll have a new command `poseidon` available for looking at the status, logs, changing the configuration, or stopping and starting the service.
 ```
 $ poseidon help
-Poseidon 0.6.5, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of machine learning techniques. For more info visit: https://github.com/CyberReboot/poseidon
+Poseidon 0.6.6, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of machine learning techniques. For more info visit: https://github.com/CyberReboot/poseidon
 
 Usage: poseidon [option]
 Options:
