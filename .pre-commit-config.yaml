@@ -4,19 +4,19 @@ repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.3.0
     hooks:
-    #-   id: trailing-whitespace
-    #-   id: end-of-file-fixer
-    #-   id: check-case-conflict
+    -   id: trailing-whitespace
+    -   id: end-of-file-fixer
+    -   id: check-case-conflict
     -   id: check-json
     -   id: pretty-format-json
         args: ['--autofix']
     -   id: double-quote-string-fixer
     -   id: check-yaml
 -   repo: https://github.com/asottile/reorder_python_imports
-    rev: v1.3.4
+    rev: v1.6.1
     hooks:
     -   id: reorder-python-imports
 -   repo: https://github.com/pre-commit/mirrors-autopep8
-    rev: v1.4.3
+    rev: v1.4.4
     hooks:
     -   id: autopep8
