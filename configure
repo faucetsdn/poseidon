@@ -1,9 +1,9 @@
 #! /bin/sh
 # Script to generate a series of files necessary for Poseidon
-# release with a general goal of conforming to the 
+# release with a general goal of conforming to the
 # `./configure && make` convention. The generated files should be
-# committed to the repo and should only be regenerated when 
-# performing a release. 
+# committed to the repo and should only be regenerated when
+# performing a release
 #
 
 echo "Making the release script executable"
