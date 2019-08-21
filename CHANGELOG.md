@@ -1,3 +1,8 @@
+# v0.6.7 (2019-08-21)
+
+ - Updated versions of redis, transitions, and pytest
+ - Packaged new version of vent v0.9.8
+
 # v0.6.6 (2019-08-02)
 
  - Updated versions of cmd2, redis, pip, and pytest
