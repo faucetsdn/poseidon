@@ -65,7 +65,7 @@ def schedule_job_kickurl(func):
         try:
             # get current state
             req = requests.get(
-                'http://poseidon-api:8000/v1/network_full', timeout=10)
+                'http://poseidon-api:8000/v1/network_full', timeout=60)
 
             # send results to prometheus
             hosts = req.json()['dataset']
