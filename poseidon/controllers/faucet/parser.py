@@ -97,6 +97,12 @@ class Parser:
         # TODO
         return obj_doc
 
+    @staticmethod
+    def parse_rules(config_file):
+        config_file = Parser().get_config_file(config_file)
+        obj_doc = Parser().yaml_in(config_file)
+        print(obj_doc)
+
     def config(self, config_file, action, port, switch, acl_name=None, acl_obj=None, route_obj=None):
         switch_found = None
         config_file = Parser().get_config_file(config_file)
@@ -172,17 +178,18 @@ class Parser:
         elif action == 'shutdown':
             # TODO
             pass
-        elif action == 'add_acl':
+        elif action == 'add_acls':
             obj_doc = self.add_acl(obj_doc, acl_obj)
-        elif action == 'remove_acl':
+        elif action == 'remove_acls':
             obj_doc = self.remove_acl(obj_doc, acl_name)
-        elif action == 'apply_acl':
+        elif action == 'apply_acls':
+            Parser().parse_rules('/opt/poseidon/rules.yaml')
             obj_doc = self.apply_acl(obj_doc, acl_name, port, switch)
-        elif action == 'detach_acl':
+        elif action == 'detach_acls':
             obj_doc = self.detach_acl(obj_doc, acl_name, port, switch)
-        elif action == 'apply_route':
+        elif action == 'apply_routes':
             obj_doc = self.apply_route(obj_doc, route_obj, vlan)
-        elif action == 'detach_route':
+        elif action == 'detach_routes':
             obj_doc = self.detach_route(obj_doc, route_obj, vlan)
         else:
             self.logger.warning('Unknown action: {0}'.format(action))

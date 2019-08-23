@@ -1,0 +1,18 @@
+include:
+    - acls.yaml
+
+rules:
+    rule-name-1:
+        - rule:
+            device_key: os
+            value: osx
+            acls: [office-vlan-protect, foo]
+        - rule:
+            device_key: role
+            value: printer
+            acls: [no-external]
+    rule-name-2:
+        - rule:
+            device_key: behavior
+            value: abnormal
+            acls: [no-internal]
