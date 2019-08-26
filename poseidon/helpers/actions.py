@@ -45,7 +45,6 @@ class Actions(object):
 
     def update_acls(self, rules_file=None, endpoints=None):
         ''' tell the controller what ACLs to dynamically change '''
-        print('do we get here?')
         status = False
         if self.sdnc:
             self.sdnc.update_acls(rules_file=rules_file, endpoints=endpoints)

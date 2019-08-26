@@ -143,8 +143,19 @@ class FaucetProxy(Connection, Parser):
                     retval.append(self.mac_table[mac])
         return retval
 
-    def update_acls(self, rules_file=None, endpoints=None):
+    def update_acls(self, rules_file=None, endpoints=None, messages=None):
         self.logger.debug('updating acls')
+        if messages:
+            self.logger.debug('faucet messages: {0}'.format(messages))
+            for message in messages:
+                if 'L2_LEARN' in message:
+                    self.logger.debug(
+                        'l2 faucet message: {0}'.format(message))
+                    self.event(message)
+        elif not self.rabbit_enabled:
+            if self.host:
+                self.receive_file('log')
+            self.log(self.log_file)
         status = None
         if self.host:
             self.receive_file('config')

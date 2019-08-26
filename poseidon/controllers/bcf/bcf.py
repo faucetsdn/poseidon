@@ -218,7 +218,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
                 match_list.append(record)
         return match_list
 
-    def update_acls(self, rules_file=None, endpoints=None):
+    def update_acls(self, rules_file=None, endpoints=None, messages=None):
         # TODO
         return True
 
