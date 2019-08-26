@@ -483,8 +483,10 @@ class SDNConnect(object):
                 self.endpoints.append(m)
 
         self.store_endpoints()
+        self.logger.info('what {0}'.format(self.controller['RULES_FILE']))
         status = Actions(endpoint, self.s.sdnc).update_acls(
             rules_file=self.controller['RULES_FILE'], endpoints=self.endpoints)
+        self.logger.info('ok')
 
         return
 
