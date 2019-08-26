@@ -171,25 +171,28 @@ class Parser:
             obj_doc = self.apply_route(obj_doc, route_obj, vlan)
         else:
             self.logger.warning('Unknown action: {0}'.format(action))
-        try:
-            if len(obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']) == 0:
-                del obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']
-                # TODO make this smarter about more complex configurations (backup original values, etc)
-                if 'timeout' in obj_doc['dps'][switch_found]:
-                    del obj_doc['dps'][switch_found]['timeout']
-                if 'arp_neighbor_timeout' in obj_doc['dps'][switch_found]:
-                    del obj_doc['dps'][switch_found]['arp_neighbor_timeout']
-            else:
-                ports = []
-                for p in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']:
-                    if p:
-                        ports.append(p)
-                obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]
-                                                           ]['mirror'] = ports
-        except Exception as e:
-            self.logger.warning(
-                'Unable to remove empty mirror list because: {0}'.format(str(e)))
 
+        if switch_found:
+            try:
+                if len(obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']) == 0:
+                    del obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']
+                    # TODO make this smarter about more complex configurations (backup original values, etc)
+                    if 'timeout' in obj_doc['dps'][switch_found]:
+                        del obj_doc['dps'][switch_found]['timeout']
+                    if 'arp_neighbor_timeout' in obj_doc['dps'][switch_found]:
+                        del obj_doc['dps'][switch_found]['arp_neighbor_timeout']
+                else:
+                    ports = []
+                    for p in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']:
+                        if p:
+                            ports.append(p)
+                    obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]
+                                                               ]['mirror'] = ports
+            except Exception as e:
+                self.logger.warning(
+                    'Unable to remove empty mirror list because: {0}'.format(str(e)))
+
+        self.logger.info('end of config')
         return Parser().yaml_out(config_file, obj_doc)
 
     def event(self, message):
