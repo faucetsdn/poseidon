@@ -218,7 +218,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
                 match_list.append(record)
         return match_list
 
-    def update_acls(self, rules_file=None, endpoints=None, messages=None):
+    def update_acls(self, rules_file=None, endpoints=None):
         # TODO
         return True
 
@@ -321,7 +321,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
                             retval.append(f.get('seq'))
         return retval
 
-    def mirror_mac(self, mac, switch, port, messages=None):
+    def mirror_mac(self, mac, switch, port):
         my_start = self.get_highest(self.get_span_fabric())
         status = None
         retval = self.get_bymac(mac)
@@ -343,7 +343,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             status = False
         return status
 
-    def unmirror_mac(self, mac, switch, port, messages=None):
+    def unmirror_mac(self, mac, switch, port):
         status = None
         kill_list = self.get_seq_by_mac(mac)
         if not kill_list:

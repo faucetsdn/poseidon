@@ -143,19 +143,8 @@ class FaucetProxy(Connection, Parser):
                     retval.append(self.mac_table[mac])
         return retval
 
-    def update_acls(self, rules_file=None, endpoints=None, messages=None):
+    def update_acls(self, rules_file=None, endpoints=None):
         self.logger.info('updating acls')
-        if messages:
-            self.logger.debug('faucet messages: {0}'.format(messages))
-            for message in messages:
-                if 'L2_LEARN' in message:
-                    self.logger.debug(
-                        'l2 faucet message: {0}'.format(message))
-                    self.event(message)
-        elif not self.rabbit_enabled:
-            if self.host:
-                self.receive_file('log')
-            self.log(self.log_file)
         status = None
         if self.host:
             self.receive_file('config')
@@ -196,19 +185,8 @@ class FaucetProxy(Connection, Parser):
             self.config(self.config_file, 'shutdown', int(port), switch)
         # TODO check if config was successfully updated
 
-    def mirror_mac(self, my_mac, my_switch, my_port, messages=None):
+    def mirror_mac(self, my_mac, my_switch, my_port):
         self.logger.debug('mirroring mac')
-        if messages:
-            self.logger.debug('faucet messages: {0}'.format(messages))
-            for message in messages:
-                if 'L2_LEARN' in message:
-                    self.logger.debug(
-                        'l2 faucet message: {0}'.format(message))
-                    self.event(message)
-        elif not self.rabbit_enabled:
-            if self.host:
-                self.receive_file('log')
-            self.log(self.log_file)
         port = None
         switch = None
         status = None
@@ -232,18 +210,7 @@ class FaucetProxy(Connection, Parser):
         self.logger.debug('mirror status: ' + str(status))
         return status
 
-    def unmirror_mac(self, my_mac, my_switch, my_port, messages=None):
-        if messages:
-            self.logger.debug('faucet messages: {0}'.format(messages))
-            for message in messages:
-                if 'L2_LEARN' in message:
-                    self.logger.debug(
-                        'l2 faucet message: {0}'.format(message))
-                    self.event(message)
-        elif not self.rabbit_enabled:
-            if self.host:
-                self.receive_file('log')
-            self.log(self.log_file)
+    def unmirror_mac(self, my_mac, my_switch, my_port):
         port = 0
         switch = None
         status = None
