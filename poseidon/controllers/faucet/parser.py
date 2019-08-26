@@ -85,7 +85,7 @@ class Parser:
     def parse_rules(config_file):
         config_file = Parser().get_config_file(config_file)
         obj_doc = Parser().yaml_in(config_file)
-        print(obj_doc)
+        return obj_doc
 
     def config(self, config_file, action, port, switch, rules_file=None, endpoints=None):
         switch_found = None
@@ -165,7 +165,8 @@ class Parser:
         elif action == 'apply_acls':
             self.logger.info('endpoints: {0}'.format(endpoints))
             self.logger.info('rules file: {0}'.format(rules_file))
-            Parser().parse_rules(rules_file)
+            rules_doc = Parser().parse_rules(rules_file)
+            self.logger.info('rules: {0}'.format(rules_doc))
             obj_doc = self.apply_acl(obj_doc, acl_name, port, switch)
         elif action == 'apply_routes':
             obj_doc = self.apply_route(obj_doc, route_obj, vlan)
