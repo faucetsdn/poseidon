@@ -32,6 +32,7 @@ class Config():
                       'INTERFACE_GROUP': 'ig1',
                       'CONFIG_FILE': None,
                       'LOG_FILE': None,
+                      'RULES_FILE': None,
                       'MIRROR_PORTS': None,
                       'RABBIT_ENABLED': False,
                       'LEARN_PUBLIC_ADDRESSES': False,
@@ -72,6 +73,8 @@ class Config():
                     controller['CONFIG_FILE'] = val
                 elif key == 'controller_log_file':
                     controller['LOG_FILE'] = val
+                elif key == 'rules_file':
+                    controller['RULES_FILE'] = val
                 elif key == 'collector_nic':
                     try:
                         controller['collector_nic'] = ast.literal_eval(val)

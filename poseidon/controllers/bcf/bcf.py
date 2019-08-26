@@ -218,6 +218,10 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
                 match_list.append(record)
         return match_list
 
+    def update_acls(self, rules_file=None, endpoints=None):
+        # TODO
+        return True
+
     def shutdown_ip(self, ip_addr, shutdown=True, mac_addr=None):
         if mac_addr is None:
             records = self.get_byip(ip_addr)

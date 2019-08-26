@@ -73,27 +73,11 @@ class Parser:
                 return Parser().yaml_out(config_file, obj_doc)
         return False
 
-    def add_acl(self, obj_doc, acl_obj):
-        # TODO
-        return obj_doc
-
-    def remove_acl(self, obj_doc, acl_name):
-        # TODO
-        return obj_doc
-
     def apply_acl(self, obj_doc, acl_name, port, switch):
         # TODO
         return obj_doc
 
-    def detach_acl(self, obj_doc, acl_name, port, switch):
-        # TODO
-        return obj_doc
-
     def apply_route(self, obj_doc, route_obj, vlan):
-        # TODO
-        return obj_doc
-
-    def detach_route(self, obj_doc, route_obj, vlan):
         # TODO
         return obj_doc
 
@@ -103,7 +87,7 @@ class Parser:
         obj_doc = Parser().yaml_in(config_file)
         print(obj_doc)
 
-    def config(self, config_file, action, port, switch, acl_name=None, acl_obj=None, route_obj=None):
+    def config(self, config_file, action, port, switch, rules_file=None, endpoints=None):
         switch_found = None
         config_file = Parser().get_config_file(config_file)
         obj_doc = Parser().yaml_in(config_file)
@@ -178,19 +162,13 @@ class Parser:
         elif action == 'shutdown':
             # TODO
             pass
-        elif action == 'add_acls':
-            obj_doc = self.add_acl(obj_doc, acl_obj)
-        elif action == 'remove_acls':
-            obj_doc = self.remove_acl(obj_doc, acl_name)
         elif action == 'apply_acls':
-            Parser().parse_rules('/opt/poseidon/rules.yaml')
+            self.logger.info('endpoints: {0}'.format(endpoints))
+            self.logger.info('rules file: {0}'.format(rules_file))
+            Parser().parse_rules(rules_file)
             obj_doc = self.apply_acl(obj_doc, acl_name, port, switch)
-        elif action == 'detach_acls':
-            obj_doc = self.detach_acl(obj_doc, acl_name, port, switch)
         elif action == 'apply_routes':
             obj_doc = self.apply_route(obj_doc, route_obj, vlan)
-        elif action == 'detach_routes':
-            obj_doc = self.detach_route(obj_doc, route_obj, vlan)
         else:
             self.logger.warning('Unknown action: {0}'.format(action))
         try:

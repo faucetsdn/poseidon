@@ -10,6 +10,7 @@ rules:
         - rule:
             device_key: role
             value: printer
+            min_confidence: 50
             acls: [no-external]
     rule-name-2:
         - rule:
