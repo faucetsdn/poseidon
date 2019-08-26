@@ -166,7 +166,7 @@ class Parser:
             self.logger.info('rules file: {0}'.format(rules_file))
             rules_doc = Parser().parse_rules(rules_file)
             self.logger.info('rules: {0}'.format(rules_doc))
-            obj_doc = self.apply_acl(obj_doc, acl_name, port, switch)
+            #obj_doc = self.apply_acl(obj_doc, acl_name, port, switch)
         elif action == 'apply_routes':
             obj_doc = self.apply_route(obj_doc, route_obj, vlan)
         else:
