@@ -163,7 +163,6 @@ class Parser:
             # TODO
             pass
         elif action == 'apply_acls':
-            self.logger.info('endpoints: {0}'.format(endpoints))
             self.logger.info('rules file: {0}'.format(rules_file))
             rules_doc = Parser().parse_rules(rules_file)
             self.logger.info('rules: {0}'.format(rules_doc))
