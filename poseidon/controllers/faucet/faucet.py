@@ -149,12 +149,12 @@ class FaucetProxy(Connection, Parser):
         if self.host:
             self.receive_file('config')
             if self.config(self.config_file,
-                           'apply_acls', int(port), switch, rules_file=rules_file, endpoints=endpoints):
+                           'apply_acls', None, None, rules_file=rules_file, endpoints=endpoints):
                 self.send_file('config')
                 status = True
         else:
-            status = self.config(self.config_file, 'apply_acls', int(
-                port), switch, rules_file=rules_file, endpoints=endpoints)
+            status = self.config(self.config_file, 'apply_acls',
+                                 None, None, rules_file=rules_file, endpoints=endpoints)
         # TODO check if config was successfully updated
         return status
 
