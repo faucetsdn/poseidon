@@ -74,6 +74,7 @@ class Parser:
         return False
 
     def apply_acl(self, obj_doc, acl_name, port, switch):
+        self.logger.info('obj_doc: {0}'.format(obj_doc))
         # TODO
         return obj_doc
 
@@ -166,7 +167,8 @@ class Parser:
             self.logger.info('rules file: {0}'.format(rules_file))
             rules_doc = Parser().parse_rules(rules_file)
             self.logger.info('rules: {0}'.format(rules_doc))
-            #obj_doc = self.apply_acl(obj_doc, acl_name, port, switch)
+            obj_doc = self.apply_acl(obj_doc, acl_name, port, switch)
+            return True
         elif action == 'apply_routes':
             obj_doc = self.apply_route(obj_doc, route_obj, vlan)
         else:
@@ -192,7 +194,6 @@ class Parser:
                 self.logger.warning(
                     'Unable to remove empty mirror list because: {0}'.format(str(e)))
 
-        self.logger.info('end of config')
         return Parser().yaml_out(config_file, obj_doc)
 
     def event(self, message):

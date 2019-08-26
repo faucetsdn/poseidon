@@ -418,6 +418,7 @@ class SDNConnect(object):
     def find_new_machines(self, machines):
         '''parse switch structure to find new machines added to network
         since last call'''
+        change_acls = False
         for machine in machines:
             machine['ether_vendor'] = get_ether_vendor(
                 machine['mac'], '/poseidon/poseidon/metadata/nmap-mac-prefixes.txt')
@@ -451,6 +452,7 @@ class SDNConnect(object):
             if ep is not None and ep.endpoint_data != machine and not ep.ignore:
                 self.logger.info(
                     'Endpoint changed: {0}:{1}'.format(h, machine))
+                change_acls = True
                 ep.endpoint_data = deepcopy(machine)
                 if ep.state == 'inactive' and machine['active'] == 1:
                     if ep.p_next_state in ['known', 'abnormal']:
@@ -477,14 +479,16 @@ class SDNConnect(object):
             elif ep is None:
                 self.logger.info(
                     'Detected new endpoint: {0}:{1}'.format(h, machine))
+                change_acls = True
                 m = Endpoint(h)
                 m.p_prev_states.append((m.state, int(time.time())))
                 m.endpoint_data = deepcopy(machine)
                 self.endpoints.append(m)
 
         self.store_endpoints()
-        status = Actions(None, self.sdnc).update_acls(
-            rules_file=self.controller['RULES_FILE'], endpoints=self.endpoints)
+        if change_acls:
+            status = Actions(None, self.sdnc).update_acls(
+                rules_file=self.controller['RULES_FILE'], endpoints=self.endpoints)
         self.logger.info('status: {0}'.format(status))
 
         return
