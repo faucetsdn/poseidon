@@ -163,6 +163,7 @@ class Parser:
             self.logger.info('faucet config: {0}'.format(obj_doc))
             # TODO get acls file and add to faucet.yaml if not already there - check relative paths, etc.
             if 'include' in rules_doc:
+                self.logger.info('include')
                 files = rules_doc['include']
                 rules_path = rules_file.rsplit('/', 1)[0]
                 config_path = config_file.rsplit('/', 1)[0]
@@ -192,6 +193,7 @@ class Parser:
                         pass
             # TODO check that acls in rules exist in the included acls file or already included files/acls from faucet
             if 'rules' in rules_doc:
+                self.logger.info('rules')
                 acls = []
                 rules = rules_doc['rules']
                 # for endpoint in endpoints:
@@ -213,7 +215,8 @@ class Parser:
             # TODO update faucet.yaml and apply acls
             return True
         elif action == 'apply_routes':
-            obj_doc = self.apply_route(obj_doc, route_obj, vlan)
+            # TODO
+            pass
         else:
             self.logger.warning('Unknown action: {0}'.format(action))
 
