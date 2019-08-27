@@ -58,7 +58,7 @@ def rabbit_callback(ch, method, properties, body, q=None):
 
 def schedule_job_kickurl(func):
     global CTRL_C
-    self.logger.info('kick start')
+    func.logger.info('kick start')
     func.s.check_endpoints(messages=func.faucet_event)
     del func.faucet_event[:]
 
@@ -77,7 +77,7 @@ def schedule_job_kickurl(func):
         except Exception as e:  # pragma: no cover
             func.logger.error(
                 'Unable to get current state and send it to Prometheus because: {0}'.format(str(e)))
-    self.logger.info('kick stop')
+    func.logger.info('kick stop')
 
 
 def schedule_job_reinvestigation(func):
