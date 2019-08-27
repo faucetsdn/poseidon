@@ -132,6 +132,7 @@ class FaucetProxy(Connection, Parser):
             if self.host:
                 self.receive_file('log')
             self.log(self.log_file)
+        self.logger.info('processed messages')
         for mac in self.mac_table:
             if self.learn_pub_adds:
                 retval.append(self.mac_table[mac])
@@ -141,6 +142,7 @@ class FaucetProxy(Connection, Parser):
                                                                self.mac_table[mac][0]['ip-address'] == None or
                                                                not ipaddress.ip_address(self.mac_table[mac][0]['ip-address']).is_global):
                     retval.append(self.mac_table[mac])
+        self.logger.info('updated mac table')
         return retval
 
     def update_acls(self, rules_file=None, endpoints=None):

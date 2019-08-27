@@ -60,6 +60,7 @@ def schedule_job_kickurl(func):
     global CTRL_C
     func.logger.info('kick start')
     func.s.check_endpoints(messages=func.faucet_event)
+    func.logger.info('kick middle')
     del func.faucet_event[:]
 
     if not CTRL_C['STOP']:
@@ -67,10 +68,12 @@ def schedule_job_kickurl(func):
             # get current state
             req = requests.get(
                 'http://poseidon-api:8000/v1/network_full', timeout=10)
+            func.logger.info('got req')
 
             # send results to prometheus
             hosts = req.json()['dataset']
             func.prom.update_metrics(hosts)
+            func.logger.info('updated prom')
         except requests.exceptions.ConnectionError as e:
             func.logger.debug(
                 'Unable to get current state and send it to Prometheus because: {0}'.format(str(e)))
