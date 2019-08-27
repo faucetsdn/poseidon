@@ -489,7 +489,8 @@ class SDNConnect(object):
         if change_acls:
             status = Actions(None, self.sdnc).update_acls(
                 rules_file=self.controller['RULES_FILE'], endpoints=self.endpoints)
-            self.logger.info('status: {0}'.format(status))
+            # TODO add endpoint metadata about acl history
+            # TODO update prometheus with stats too
 
         return
 
@@ -803,6 +804,7 @@ class Monitor(object):
                     else:
                         if endpoint.state != 'known':
                             endpoint.known()
+        self.store_endpoints()
         return
 
     def get_q_item(self):

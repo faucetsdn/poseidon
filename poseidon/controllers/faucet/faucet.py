@@ -119,7 +119,7 @@ class FaucetProxy(Connection, Parser):
         retval = []
 
         if messages:
-            self.logger.info('faucet messages: {0}'.format(messages))
+            self.logger.debug('faucet messages: {0}'.format(messages))
             for message in messages:
                 if 'L2_LEARN' in message or 'L2_EXPIRE' in message or 'PORT_CHANGE' in message:
                     self.logger.debug(
@@ -132,7 +132,6 @@ class FaucetProxy(Connection, Parser):
             if self.host:
                 self.receive_file('log')
             self.log(self.log_file)
-        self.logger.info('processed messages')
         for mac in self.mac_table:
             if self.learn_pub_adds:
                 retval.append(self.mac_table[mac])
@@ -142,11 +141,10 @@ class FaucetProxy(Connection, Parser):
                                                                self.mac_table[mac][0]['ip-address'] == None or
                                                                not ipaddress.ip_address(self.mac_table[mac][0]['ip-address']).is_global):
                     retval.append(self.mac_table[mac])
-        self.logger.info('updated mac table')
         return retval
 
     def update_acls(self, rules_file=None, endpoints=None):
-        self.logger.info('updating acls')
+        self.logger.debug('updating acls')
         status = None
         if self.host:
             self.receive_file('config')
