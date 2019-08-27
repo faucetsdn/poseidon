@@ -702,7 +702,7 @@ class Monitor(object):
 
             if found_work and item[0] == self.controller['FA_RABBIT_ROUTING_KEY']:
                 self.faucet_event.append(self.format_rabbit_message(item))
-                self.logger.debug(
+                self.logger.info(
                     'Faucet event: {0}'.format(self.faucet_event))
             elif found_work:
                 ml_returns = self.format_rabbit_message(item)['data']
