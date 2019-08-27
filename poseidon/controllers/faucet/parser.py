@@ -172,7 +172,7 @@ class Parser:
             # TODO check endpoints to see if any of them apply
             # TODO check already applied acls and remove if endpoint no longer applies
             # TODO update faucet.yaml and apply acls
-            obj_doc = self.apply_acl(obj_doc, acl_name, port, switch)
+            #obj_doc = self.apply_acl(obj_doc, acl_name, port, switch)
             return True
         elif action == 'apply_routes':
             obj_doc = self.apply_route(obj_doc, route_obj, vlan)
