@@ -201,8 +201,7 @@ class Parser:
                 #    self.logger.info('endpoint data: {0}'.format(
                 #        endpoint.endpoint_data))
                 for rule in rules:
-                    self.logger.info('rule: {0}'.format(rule))
-                    #acls += rule['acls']
+                    acls += rules[rule]['acls']
                 self.logger.info('acls: {0}'.format(acls))
             else:
                 return True
