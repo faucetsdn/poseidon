@@ -158,7 +158,6 @@ class FaucetProxy(Connection, Parser):
             status = self.config(self.config_file, 'apply_acls',
                                  None, None, rules_file=rules_file, endpoints=endpoints)
         # TODO check if config was successfully updated
-        self.logger.info('end of updating acls')
         return status
 
     def shutdown_ip(self, ip_addr, shutdown=True, mac_addr=None):
