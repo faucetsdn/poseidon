@@ -155,14 +155,60 @@ class Parser:
             # TODO
             pass
         elif action == 'apply_acls':
+            if not endpoints:
+                return True
             self.logger.info('rules file: {0}'.format(rules_file))
             rules_doc = Parser().parse_rules(rules_file)
             self.logger.info('rules: {0}'.format(rules_doc))
             self.logger.info('faucet config: {0}'.format(obj_doc))
             # TODO get acls file and add to faucet.yaml if not already there - check relative paths, etc.
-            # TODO check that acls in rules exist in the included acls file
-            # TODO check endpoints to see if any of them apply
+            if 'include' in rules_doc:
+                files = rules_doc['include']
+                rules_path = rules_file.rsplit('/', 1)[0]
+                config_path = config_file.rsplit('/', 1)[0]
+                conf_files = []
+                if 'include' in obj_doc:
+                    conf_files = obj_doc['include']
+                    for conf_file in conf_files:
+                        if f.startswith('/'):
+                            # absolute
+                            # TODO
+                            pass
+                        else:
+                            # relative
+                            # TODO
+                            pass
+                else:
+                    # TODO
+                    pass
+                for f in files:
+                    if f.startswith('/'):
+                        # absolute
+                        # TODO
+                        pass
+                    else:
+                        # relative
+                        # TODO
+                        pass
+            # TODO check that acls in rules exist in the included acls file or already included files/acls from faucet
+            if 'rules' in rules_doc:
+                acls = []
+                rules = rules_doc['rules']
+                for endpoint in endpoints:
+                    self.logger.info('metadata: {0}'.format(endpoint.metadata))
+                    self.logger.info('endpoint data: {0}'.format(
+                        endpoint.endpoint_data))
+                for rule in rules:
+                    acls += rule['acls']
+            else:
+                return True
+
+            # TODO check endpoints to see if any of them apply, only change acls on devices that have rules (leave other acls alone)
             # TODO check already applied acls and remove if endpoint no longer applies
+
+            # TODO acl by port - potentially later update rules in acls to be mac/ip specific
+            # TODO ignore trunk ports?
+
             # TODO update faucet.yaml and apply acls
             return True
         elif action == 'apply_routes':
