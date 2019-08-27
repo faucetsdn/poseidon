@@ -9,7 +9,7 @@ poseidon:
         controller_uri: https://CONTROLLER_IP:8443/api/v1/
         controller_user: CONTROLLER_USER
         controller_pass: CONTROLLER_PASS
-        automated_acls: False
+        automated_acls: True
         rules_file: /opt/poseidon/rules.yaml
 
 
