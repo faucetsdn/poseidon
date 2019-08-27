@@ -167,6 +167,11 @@ class Parser:
             self.logger.info('rules file: {0}'.format(rules_file))
             rules_doc = Parser().parse_rules(rules_file)
             self.logger.info('rules: {0}'.format(rules_doc))
+            # TODO get acls file and add to faucet.yaml if not already there - check relative paths, etc.
+            # TODO check that acls in rules exist in the included acls file
+            # TODO check endpoints to see if any of them apply
+            # TODO check already applied acls and remove if endpoint no longer applies
+            # TODO update faucet.yaml and apply acls
             obj_doc = self.apply_acl(obj_doc, acl_name, port, switch)
             return True
         elif action == 'apply_routes':

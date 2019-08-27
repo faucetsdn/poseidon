@@ -119,7 +119,7 @@ class FaucetProxy(Connection, Parser):
         retval = []
 
         if messages:
-            self.logger.debug('faucet messages: {0}'.format(messages))
+            self.logger.info('faucet messages: {0}'.format(messages))
             for message in messages:
                 if 'L2_LEARN' in message or 'L2_EXPIRE' in message or 'PORT_CHANGE' in message:
                     self.logger.debug(
