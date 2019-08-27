@@ -73,15 +73,6 @@ class Parser:
                 return Parser().yaml_out(config_file, obj_doc)
         return False
 
-    def apply_acl(self, obj_doc, acl_name, port, switch):
-        self.logger.info('obj_doc: {0}'.format(obj_doc))
-        # TODO
-        return obj_doc
-
-    def apply_route(self, obj_doc, route_obj, vlan):
-        # TODO
-        return obj_doc
-
     @staticmethod
     def parse_rules(config_file):
         config_file = Parser().get_config_file(config_file)
@@ -167,12 +158,12 @@ class Parser:
             self.logger.info('rules file: {0}'.format(rules_file))
             rules_doc = Parser().parse_rules(rules_file)
             self.logger.info('rules: {0}'.format(rules_doc))
+            self.logger.info('faucet config: {0}'.format(obj_doc))
             # TODO get acls file and add to faucet.yaml if not already there - check relative paths, etc.
             # TODO check that acls in rules exist in the included acls file
             # TODO check endpoints to see if any of them apply
             # TODO check already applied acls and remove if endpoint no longer applies
             # TODO update faucet.yaml and apply acls
-            #obj_doc = self.apply_acl(obj_doc, acl_name, port, switch)
             return True
         elif action == 'apply_routes':
             obj_doc = self.apply_route(obj_doc, route_obj, vlan)

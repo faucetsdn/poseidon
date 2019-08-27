@@ -34,6 +34,7 @@ class Config():
                       'LOG_FILE': None,
                       'RULES_FILE': None,
                       'MIRROR_PORTS': None,
+                      'AUTOMATED_ACLS': False,
                       'RABBIT_ENABLED': False,
                       'LEARN_PUBLIC_ADDRESSES': False,
                       'reinvestigation_frequency': 900,
@@ -86,6 +87,12 @@ class Config():
                 elif key == 'controller_mirror_ports':
                     try:
                         controller['MIRROR_PORTS'] = ast.literal_eval(val)
+                    except Exception as e:  # pragma: no cover
+                        self.logger.error(
+                            'Unable to set configuration option {0} because {1}'.format(key, str(e)))
+                elif key == 'automated_acls':
+                    try:
+                        controller['AUTOMATED_ACLS'] = ast.literal_eval(val)
                     except Exception as e:  # pragma: no cover
                         self.logger.error(
                             'Unable to set configuration option {0} because {1}'.format(key, str(e)))
