@@ -372,6 +372,9 @@ def test_process():
         def format_rabbit_message(self, item):
             return {'data': {}}
 
+        def store_endpoints(self):
+            return
+
     mock_monitor = MockMonitor()
 
     t1 = Thread(target=thread1)
