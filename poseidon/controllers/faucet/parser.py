@@ -196,13 +196,14 @@ class Parser:
                 self.logger.info('rules')
                 acls = []
                 rules = rules_doc['rules']
-                # for endpoint in endpoints:
-                #    self.logger.info('metadata: {0}'.format(endpoint.metadata))
-                #    self.logger.info('endpoint data: {0}'.format(
-                #        endpoint.endpoint_data))
+                for endpoint in endpoints:
+                    self.logger.info('metadata: {0}'.format(endpoint.metadata))
+                    self.logger.info('endpoint data: {0}'.format(
+                        endpoint.endpoint_data))
                 for rule in rules:
                     for r in rules[rule]:
                         acls += r['rule']['acls']
+                acls = list(set(acls))
                 self.logger.info('acls: {0}'.format(acls))
             else:
                 return True
