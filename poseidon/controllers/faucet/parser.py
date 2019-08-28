@@ -271,6 +271,9 @@ class Parser:
                                     endpoint.endpoint_data['port'])]['acls_in'] = []
                             obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
                                 endpoint.endpoint_data['port'])]['acls_in'] += rule_acls
+                            obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
+                                endpoint.endpoint_data['port'])]['acls_in'] = list(set(obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
+                                    endpoint.endpoint_data['port'])]['acls_in']))
             else:
                 return True
 
