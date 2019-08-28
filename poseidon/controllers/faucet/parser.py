@@ -247,8 +247,9 @@ class Parser:
                                 for mac in endpoint.metadata['mac_addresses']:
                                     most_recent = 0
                                     for record in endpoint.metadata['mac_addresses'][mac]:
-                                        if record > most_recent:
-                                            most_recent = record
+                                        if float(record) > most_recent:
+                                            most_recent = float(record)
+                                    most_recent = str(most_recent)
                                     if 'behavior' in endpoint.metadata['mac_addresses'][mac][most_recent] and endpoint.metadata['mac_addresses'][mac][most_recent]['behavior'] == r['rule']['value']:
                                         self.logger.info('behavior match: {0} {1}, rule: {2}'.format(
                                             mac, r['rule']['value'], rule))
