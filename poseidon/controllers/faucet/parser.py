@@ -268,13 +268,13 @@ class Parser:
                                     endpoint.endpoint_data['port'])] = {}
                             if 'acls_in' not in obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(endpoint.endpoint_data['port'])]:
                                 obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
-                                    endpoint.endpoint_data['port'])]['acls_in'] = rules_acls
+                                    endpoint.endpoint_data['port'])]['acls_in'] = rule_acls
                             else:
-                                rules_acls += obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
+                                rule_acls += obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
                                     endpoint.endpoint_data['port'])]['acls_in']
                                 rule_acls = list(set(rule_acls))
                                 obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
-                                    endpoint.endpoint_data['port'])]['acls_in'] = rules_acls
+                                    endpoint.endpoint_data['port'])]['acls_in'] = rule_acls
             else:
                 return True
 
