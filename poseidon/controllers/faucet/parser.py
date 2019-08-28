@@ -283,7 +283,6 @@ class Parser:
             # TODO ignore trunk ports?
 
             # TODO update faucet.yaml and apply acls
-            return True
         elif action == 'apply_routes':
             # TODO
             pass
