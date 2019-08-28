@@ -170,7 +170,7 @@ class Parser:
                 if 'include' in obj_doc:
                     conf_files = obj_doc['include']
                     for conf_file in conf_files:
-                        if f.startswith('/'):
+                        if conf_file.startswith('/'):
                             # absolute
                             # TODO
                             pass
