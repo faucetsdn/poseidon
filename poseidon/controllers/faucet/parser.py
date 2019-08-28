@@ -257,6 +257,8 @@ class Parser:
                                 if match:
                                     matches += 1
                         if matches == len(rules[rule]):
+                            self.logger.info('all rules met for: {0} on switch: {1} and port: {2}; applying ACL: {3}'.format(
+                                endpoint.endpoint_data['mac'], endpoint.endpoint_data['segment'], endpoint.endpoint_data['port'], rule))
                             rule_acls = []
                             for r in rules[rule]:
                                 rule_acls += r['rule']['acls']
@@ -269,10 +271,6 @@ class Parser:
                                     endpoint.endpoint_data['port'])]['acls_in'] = []
                             obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
                                 endpoint.endpoint_data['port'])]['acls_in'] += rule_acls
-                            self.logger.info('obj_doc: {0}'.format(obj_doc))
-                    #self.logger.info('metadata: {0}'.format(endpoint.metadata))
-                    # self.logger.info('endpoint data: {0}'.format(
-                    #    endpoint.endpoint_data))
             else:
                 return True
 
