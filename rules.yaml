@@ -5,11 +5,11 @@ rules:
     rule-name-1:
         - rule:
             device_key: os
-            value: osx
+            value: Mac
             acls: [office-vlan-protect, foo]
         - rule:
             device_key: role
-            value: printer
+            value: Printer
             min_confidence: 50
             acls: [no-external]
     rule-name-2:
