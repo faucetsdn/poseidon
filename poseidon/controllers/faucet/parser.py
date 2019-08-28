@@ -259,9 +259,9 @@ class Parser:
                         if matches == len(rules[rule]):
                             # TODO apply acls for that rule and endpoint
                             pass
-                    #self.logger.info('metadata: {0}'.format(endpoint.metadata))
-                    # self.logger.info('endpoint data: {0}'.format(
-                    #    endpoint.endpoint_data))
+                    self.logger.info('metadata: {0}'.format(endpoint.metadata))
+                    self.logger.info('endpoint data: {0}'.format(
+                        endpoint.endpoint_data))
             else:
                 return True
 
