@@ -257,11 +257,21 @@ class Parser:
                                 if match:
                                     matches += 1
                         if matches == len(rules[rule]):
-                            # TODO apply acls for that rule and endpoint
-                            pass
-                    self.logger.info('metadata: {0}'.format(endpoint.metadata))
-                    self.logger.info('endpoint data: {0}'.format(
-                        endpoint.endpoint_data))
+                            rule_acls = []
+                            for r in rules[rule]:
+                                rule_acls += r['rule']['acls']
+                            rule_acls = list(set(rule_acls))
+                            if int(endpoint.endpoint_data['port']) not in obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces']:
+                                obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
+                                    endpoint.endpoint_data['port'])] = {}
+                            if 'acls_in' not in obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(endpoint.endpoint_data['port'])]:
+                                obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
+                                    endpoint.endpoint_data['port'])]['acls_in'] = []
+                            obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
+                                endpoint.endpoint_data['port'])]['acls_in'] += rule_acls
+                    #self.logger.info('metadata: {0}'.format(endpoint.metadata))
+                    # self.logger.info('endpoint data: {0}'.format(
+                    #    endpoint.endpoint_data))
             else:
                 return True
 
