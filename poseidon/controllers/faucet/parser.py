@@ -256,8 +256,6 @@ class Parser:
                                         match = True
                                 if match:
                                     matches += 1
-                        self.logger.info('matches: {0}, rules: {1}'.format(
-                            matches, len(rules[rule])))
                         if matches == len(rules[rule]):
                             rule_acls = []
                             for r in rules[rule]:
@@ -271,6 +269,7 @@ class Parser:
                                     endpoint.endpoint_data['port'])]['acls_in'] = []
                             obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
                                 endpoint.endpoint_data['port'])]['acls_in'] += rule_acls
+                            self.logger.info('obj_doc: {0}'.format(obj_doc))
                     #self.logger.info('metadata: {0}'.format(endpoint.metadata))
                     # self.logger.info('endpoint data: {0}'.format(
                     #    endpoint.endpoint_data))
