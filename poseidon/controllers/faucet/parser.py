@@ -224,8 +224,9 @@ class Parser:
                                 for mac in endpoint.metadata['mac_addresses']:
                                     most_recent = 0
                                     for record in endpoint.metadata['mac_addresses'][mac]:
-                                        if record > most_recent:
-                                            most_recent = record
+                                        if float(record) > most_recent:
+                                            most_recent = float(record)
+                                    most_recent = str(most_recent)
                                     if 'labels' in endpoint.metadata['mac_addresses'][mac][most_recent] and 'confidences' in endpoint.metadata['mac_addresses'][mac][most_recent]:
                                         # check top three
                                         for i in range(3):
