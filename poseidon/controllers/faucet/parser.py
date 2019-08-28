@@ -163,7 +163,6 @@ class Parser:
             self.logger.info('faucet config: {0}'.format(obj_doc))
             # TODO get acls file and add to faucet.yaml if not already there - check relative paths, etc.
             if 'include' in rules_doc:
-                self.logger.info('include')
                 files = rules_doc['include']
                 rules_path = rules_file.rsplit('/', 1)[0]
                 config_path = config_file.rsplit('/', 1)[0]
@@ -193,18 +192,74 @@ class Parser:
                         pass
             # TODO check that acls in rules exist in the included acls file or already included files/acls from faucet
             if 'rules' in rules_doc:
-                self.logger.info('rules')
                 acls = []
                 rules = rules_doc['rules']
-                for endpoint in endpoints:
-                    self.logger.info('metadata: {0}'.format(endpoint.metadata))
-                    self.logger.info('endpoint data: {0}'.format(
-                        endpoint.endpoint_data))
+
                 for rule in rules:
                     for r in rules[rule]:
                         acls += r['rule']['acls']
                 acls = list(set(acls))
                 self.logger.info('acls: {0}'.format(acls))
+
+                for endpoint in endpoints:
+                    for rule in rules:
+                        matches = 0
+                        for r in rules[rule]:
+                            if r['rule']['device_key'] == 'os':
+                                match = False
+                                for ip in endpoint.metadata['ipv4_addresses']:
+                                    if 'os' in endpoint.metadata['ipv4_addresses'][ip] and endpoint.metadata['ipv4_addresses'][ip]['os'] == r['rule']['value']:
+                                        self.logger.info('ipv4 os match: {0} {1}, rule: {2}'.format(
+                                            ip, r['rule']['value'], rule))
+                                        match = True
+                                for ip in endpoint.metadata['ipv6_addresses']:
+                                    if 'os' in endpoint.metadata['ipv6_addresses'][ip] and endpoint.metadata['ipv6_addresses'][ip]['os'] == r['rule']['value']:
+                                        self.logger.info('ipv6 os match: {0} {1}, rule: {2}'.format(
+                                            ip, r['rule']['value'], rule))
+                                        match = True
+                                if match:
+                                    matches += 1
+                            elif r['rule']['device_key'] == 'role':
+                                match = False
+                                for mac in endpoint.metadata['mac_addresses']:
+                                    most_recent = 0
+                                    for record in endpoint.metadata['mac_addresses'][mac]:
+                                        if record > most_recent:
+                                            most_recent = record
+                                    if 'labels' in endpoint.metadata['mac_addresses'][mac][most_recent] and 'confidences' in endpoint.metadata['mac_addresses'][mac][most_recent]:
+                                        # check top three
+                                        for i in range(3):
+                                            if endpoint.metadata['mac_addresses'][mac][most_recent]['labels'][i] == r['rule']['value']:
+                                                if 'min_confidence' in r['rule']['value']:
+                                                    if float(endpoint.metadata['mac_addresses'][mac][most_recent]['confidences'][i])*100 >= r['rule']['min_confidence']:
+                                                        self.logger.info('confidence match: {0} {1}, rule: {2}'.format(mac, float(
+                                                            endpoint.metadata['mac_addresses'][mac][most_recent]['confidences'][i])*100, rule))
+                                                        match = True
+                                                else:
+                                                    self.logger.info('role match: {0} {1}, rule: {2}'.format(
+                                                        mac, r['rule']['value'], rule))
+                                                    match = True
+                                if match:
+                                    matches += 1
+                            elif r['rule']['device_key'] == 'behavior':
+                                match = False
+                                for mac in endpoint.metadata['mac_addresses']:
+                                    most_recent = 0
+                                    for record in endpoint.metadata['mac_addresses'][mac]:
+                                        if record > most_recent:
+                                            most_recent = record
+                                    if 'behavior' in endpoint.metadata['mac_addresses'][mac][most_recent] and endpoint.metadata['mac_addresses'][mac][most_recent]['behavior'] == r['rule']['value']:
+                                        self.logger.info('behavior match: {0} {1}, rule: {2}'.format(
+                                            mac, r['rule']['value'], rule))
+                                        match = True
+                                if match:
+                                    matches += 1
+                        if matches == len(rules[rule]):
+                            # TODO apply acls for that rule and endpoint
+                            pass
+                    #self.logger.info('metadata: {0}'.format(endpoint.metadata))
+                    # self.logger.info('endpoint data: {0}'.format(
+                    #    endpoint.endpoint_data))
             else:
                 return True
 
