@@ -257,12 +257,12 @@ class Parser:
                                     matches += 1
                         if matches == len(rules[rule]):
                             # TODO only log this when something actually changes, not just matching
-                            self.logger.info('all rules met for: {0} on switch: {1} and port: {2}; applying ACLs: {3}'.format(
-                                endpoint.endpoint_data['mac'], endpoint.endpoint_data['segment'], endpoint.endpoint_data['port'], rules[rule]['rule']['acls']))
                             rule_acls = []
                             for r in rules[rule]:
                                 rule_acls += r['rule']['acls']
                             rule_acls = list(set(rule_acls))
+                            self.logger.info('all rules met for: {0} on switch: {1} and port: {2}; applying ACLs: {3}'.format(
+                                endpoint.endpoint_data['mac'], endpoint.endpoint_data['segment'], endpoint.endpoint_data['port'], rule_acls))
                             if int(endpoint.endpoint_data['port']) not in obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces']:
                                 obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
                                     endpoint.endpoint_data['port'])] = {}
