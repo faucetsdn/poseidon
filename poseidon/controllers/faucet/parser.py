@@ -199,7 +199,6 @@ class Parser:
                     for r in rules[rule]:
                         acls += r['rule']['acls']
                 acls = list(set(acls))
-                self.logger.info('acls: {0}'.format(acls))
 
                 for endpoint in endpoints:
                     for rule in rules:
@@ -257,8 +256,9 @@ class Parser:
                                 if match:
                                     matches += 1
                         if matches == len(rules[rule]):
-                            self.logger.info('all rules met for: {0} on switch: {1} and port: {2}; applying ACL: {3}'.format(
-                                endpoint.endpoint_data['mac'], endpoint.endpoint_data['segment'], endpoint.endpoint_data['port'], rule))
+                            # TODO only log this when something actually changes, not just matching
+                            self.logger.info('all rules met for: {0} on switch: {1} and port: {2}; applying ACLs: {3}'.format(
+                                endpoint.endpoint_data['mac'], endpoint.endpoint_data['segment'], endpoint.endpoint_data['port'], rules[rule]['rule']['acls']))
                             rule_acls = []
                             for r in rules[rule]:
                                 rule_acls += r['rule']['acls']
@@ -270,6 +270,17 @@ class Parser:
                                 obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
                                     endpoint.endpoint_data['port'])]['acls_in'] = rule_acls
                             else:
+                                # TODO check if any changes are necessary first
+                                # remove ACLs that were previously applied
+                                existing_acls = obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
+                                    endpoint.endpoint_data['port'])]['acls_in']
+                                for acl in existing_acls:
+                                    if acl in acls:
+                                        obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
+                                            endpoint.endpoint_data['port'])]['acls_in'].remove(acl)
+                                        self.logger.info('removing no longer needed ACL: {0} for: {1} on switch: {2} and port: {3}'.format(
+                                            acl, endpoint.endpoint_data['mac'], endpoint.endpoint_data['segment'], endpoint.endpoint_data['port']))
+                                # add new ACLs
                                 rule_acls += obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
                                     endpoint.endpoint_data['port'])]['acls_in']
                                 rule_acls = list(set(rule_acls))
