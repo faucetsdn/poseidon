@@ -256,6 +256,8 @@ class Parser:
                                         match = True
                                 if match:
                                     matches += 1
+                        self.logger.info('matches: {0}, rules: {1}'.format(
+                            matches, len(rules[rule])))
                         if matches == len(rules[rule]):
                             rule_acls = []
                             for r in rules[rule]:
