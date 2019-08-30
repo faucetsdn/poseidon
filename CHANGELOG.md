@@ -1,3 +1,8 @@
+# v0.7.0 (2019-08-30)
+
+ - Added experimental support for automated ACL changes with Faucet
+ - Added two new fields for the config: automated_acls and rules_file
+
 # v0.6.7 (2019-08-21)
 
  - Updated versions of redis, transitions, and pytest
