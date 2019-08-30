@@ -73,31 +73,13 @@ class Parser:
                 return Parser().yaml_out(config_file, obj_doc)
         return False
 
-    def add_acl(self, obj_doc, acl_obj):
-        # TODO
+    @staticmethod
+    def parse_rules(config_file):
+        config_file = Parser().get_config_file(config_file)
+        obj_doc = Parser().yaml_in(config_file)
         return obj_doc
 
-    def remove_acl(self, obj_doc, acl_name):
-        # TODO
-        return obj_doc
-
-    def apply_acl(self, obj_doc, acl_name, port, switch):
-        # TODO
-        return obj_doc
-
-    def detach_acl(self, obj_doc, acl_name, port, switch):
-        # TODO
-        return obj_doc
-
-    def apply_route(self, obj_doc, route_obj, vlan):
-        # TODO
-        return obj_doc
-
-    def detach_route(self, obj_doc, route_obj, vlan):
-        # TODO
-        return obj_doc
-
-    def config(self, config_file, action, port, switch, acl_name=None, acl_obj=None, route_obj=None):
+    def config(self, config_file, action, port, switch, rules_file=None, endpoints=None):
         switch_found = None
         config_file = Parser().get_config_file(config_file)
         obj_doc = Parser().yaml_in(config_file)
@@ -172,38 +154,173 @@ class Parser:
         elif action == 'shutdown':
             # TODO
             pass
-        elif action == 'add_acl':
-            obj_doc = self.add_acl(obj_doc, acl_obj)
-        elif action == 'remove_acl':
-            obj_doc = self.remove_acl(obj_doc, acl_name)
-        elif action == 'apply_acl':
-            obj_doc = self.apply_acl(obj_doc, acl_name, port, switch)
-        elif action == 'detach_acl':
-            obj_doc = self.detach_acl(obj_doc, acl_name, port, switch)
-        elif action == 'apply_route':
-            obj_doc = self.apply_route(obj_doc, route_obj, vlan)
-        elif action == 'detach_route':
-            obj_doc = self.detach_route(obj_doc, route_obj, vlan)
+        elif action == 'apply_acls':
+            if not endpoints:
+                return True
+            self.logger.info('rules file: {0}'.format(rules_file))
+            rules_doc = Parser().parse_rules(rules_file)
+            self.logger.info('rules: {0}'.format(rules_doc))
+            self.logger.info('faucet config: {0}'.format(obj_doc))
+            # TODO get acls file and add to faucet.yaml if not already there - check relative paths, etc.
+            if 'include' in rules_doc:
+                files = rules_doc['include']
+                rules_path = rules_file.rsplit('/', 1)[0]
+                config_path = config_file.rsplit('/', 1)[0]
+                conf_files = []
+                if 'include' in obj_doc:
+                    conf_files = obj_doc['include']
+                    for conf_file in conf_files:
+                        if conf_file.startswith('/'):
+                            # absolute
+                            # TODO
+                            pass
+                        else:
+                            # relative
+                            # TODO
+                            pass
+                else:
+                    # TODO
+                    pass
+                for f in files:
+                    if f.startswith('/'):
+                        # absolute
+                        # TODO
+                        pass
+                    else:
+                        # relative
+                        # TODO
+                        pass
+            # TODO check that acls in rules exist in the included acls file or already included files/acls from faucet
+            if 'rules' in rules_doc:
+                acls = []
+                rules = rules_doc['rules']
+
+                for rule in rules:
+                    for r in rules[rule]:
+                        acls += r['rule']['acls']
+                acls = list(set(acls))
+
+                for endpoint in endpoints:
+                    for rule in rules:
+                        matches = 0
+                        for r in rules[rule]:
+                            if r['rule']['device_key'] == 'os':
+                                match = False
+                                for ip in endpoint.metadata['ipv4_addresses']:
+                                    if 'os' in endpoint.metadata['ipv4_addresses'][ip] and endpoint.metadata['ipv4_addresses'][ip]['os'] == r['rule']['value']:
+                                        self.logger.info('ipv4 os match: {0} {1}, rule: {2}'.format(
+                                            ip, r['rule']['value'], rule))
+                                        match = True
+                                for ip in endpoint.metadata['ipv6_addresses']:
+                                    if 'os' in endpoint.metadata['ipv6_addresses'][ip] and endpoint.metadata['ipv6_addresses'][ip]['os'] == r['rule']['value']:
+                                        self.logger.info('ipv6 os match: {0} {1}, rule: {2}'.format(
+                                            ip, r['rule']['value'], rule))
+                                        match = True
+                                if match:
+                                    matches += 1
+                            elif r['rule']['device_key'] == 'role':
+                                match = False
+                                for mac in endpoint.metadata['mac_addresses']:
+                                    most_recent = 0
+                                    for record in endpoint.metadata['mac_addresses'][mac]:
+                                        if float(record) > most_recent:
+                                            most_recent = float(record)
+                                    most_recent = str(most_recent)
+                                    if most_recent != '0' and 'labels' in endpoint.metadata['mac_addresses'][mac][most_recent] and 'confidences' in endpoint.metadata['mac_addresses'][mac][most_recent]:
+                                        # check top three
+                                        for i in range(3):
+                                            if endpoint.metadata['mac_addresses'][mac][most_recent]['labels'][i] == r['rule']['value']:
+                                                if 'min_confidence' in r['rule']['value']:
+                                                    if float(endpoint.metadata['mac_addresses'][mac][most_recent]['confidences'][i])*100 >= r['rule']['min_confidence']:
+                                                        self.logger.info('confidence match: {0} {1}, rule: {2}'.format(mac, float(
+                                                            endpoint.metadata['mac_addresses'][mac][most_recent]['confidences'][i])*100, rule))
+                                                        match = True
+                                                else:
+                                                    self.logger.info('role match: {0} {1}, rule: {2}'.format(
+                                                        mac, r['rule']['value'], rule))
+                                                    match = True
+                                if match:
+                                    matches += 1
+                            elif r['rule']['device_key'] == 'behavior':
+                                match = False
+                                for mac in endpoint.metadata['mac_addresses']:
+                                    most_recent = 0
+                                    for record in endpoint.metadata['mac_addresses'][mac]:
+                                        if float(record) > most_recent:
+                                            most_recent = float(record)
+                                    most_recent = str(most_recent)
+                                    if most_recent != '0' and 'behavior' in endpoint.metadata['mac_addresses'][mac][most_recent] and endpoint.metadata['mac_addresses'][mac][most_recent]['behavior'] == r['rule']['value']:
+                                        self.logger.info('behavior match: {0} {1}, rule: {2}'.format(
+                                            mac, r['rule']['value'], rule))
+                                        match = True
+                                if match:
+                                    matches += 1
+                        if matches == len(rules[rule]):
+                            # TODO only log this when something actually changes, not just matching
+                            rule_acls = []
+                            for r in rules[rule]:
+                                rule_acls += r['rule']['acls']
+                            rule_acls = list(set(rule_acls))
+                            self.logger.info('all rules met for: {0} on switch: {1} and port: {2}; applying ACLs: {3}'.format(
+                                endpoint.endpoint_data['mac'], endpoint.endpoint_data['segment'], endpoint.endpoint_data['port'], rule_acls))
+                            if int(endpoint.endpoint_data['port']) not in obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces']:
+                                obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
+                                    endpoint.endpoint_data['port'])] = {}
+                            if 'acls_in' not in obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(endpoint.endpoint_data['port'])]:
+                                obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
+                                    endpoint.endpoint_data['port'])]['acls_in'] = rule_acls
+                            else:
+                                # TODO check if any changes are necessary first
+                                # remove ACLs that were previously applied
+                                existing_acls = obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
+                                    endpoint.endpoint_data['port'])]['acls_in']
+                                for acl in existing_acls:
+                                    if acl in acls:
+                                        obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
+                                            endpoint.endpoint_data['port'])]['acls_in'].remove(acl)
+                                        self.logger.info('removing no longer needed ACL: {0} for: {1} on switch: {2} and port: {3}'.format(
+                                            acl, endpoint.endpoint_data['mac'], endpoint.endpoint_data['segment'], endpoint.endpoint_data['port']))
+                                # add new ACLs
+                                rule_acls += obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
+                                    endpoint.endpoint_data['port'])]['acls_in']
+                                rule_acls = list(set(rule_acls))
+                                obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
+                                    endpoint.endpoint_data['port'])]['acls_in'] = rule_acls
+            else:
+                return True
+
+            # TODO check endpoints to see if any of them apply, only change acls on devices that have rules (leave other acls alone)
+            # TODO check already applied acls and remove if endpoint no longer applies
+
+            # TODO acl by port - potentially later update rules in acls to be mac/ip specific
+            # TODO ignore trunk ports?
+
+            # TODO update faucet.yaml and apply acls
+        elif action == 'apply_routes':
+            # TODO
+            pass
         else:
             self.logger.warning('Unknown action: {0}'.format(action))
-        try:
-            if len(obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']) == 0:
-                del obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']
-                # TODO make this smarter about more complex configurations (backup original values, etc)
-                if 'timeout' in obj_doc['dps'][switch_found]:
-                    del obj_doc['dps'][switch_found]['timeout']
-                if 'arp_neighbor_timeout' in obj_doc['dps'][switch_found]:
-                    del obj_doc['dps'][switch_found]['arp_neighbor_timeout']
-            else:
-                ports = []
-                for p in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']:
-                    if p:
-                        ports.append(p)
-                obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]
-                                                           ]['mirror'] = ports
-        except Exception as e:
-            self.logger.warning(
-                'Unable to remove empty mirror list because: {0}'.format(str(e)))
+
+        if switch_found:
+            try:
+                if len(obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']) == 0:
+                    del obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']
+                    # TODO make this smarter about more complex configurations (backup original values, etc)
+                    if 'timeout' in obj_doc['dps'][switch_found]:
+                        del obj_doc['dps'][switch_found]['timeout']
+                    if 'arp_neighbor_timeout' in obj_doc['dps'][switch_found]:
+                        del obj_doc['dps'][switch_found]['arp_neighbor_timeout']
+                else:
+                    ports = []
+                    for p in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']:
+                        if p:
+                            ports.append(p)
+                    obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]
+                                                               ]['mirror'] = ports
+            except Exception as e:
+                self.logger.warning(
+                    'Unable to remove empty mirror list because: {0}'.format(str(e)))
 
         return Parser().yaml_out(config_file, obj_doc)
 

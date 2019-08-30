@@ -131,9 +131,7 @@ class FaucetProxy(Connection, Parser):
         elif not self.rabbit_enabled:
             if self.host:
                 self.receive_file('log')
-                self.log(os.path.join(self.log_dir, 'faucet.log'))
-            else:
-                self.log(self.log_file)
+            self.log(self.log_file)
         for mac in self.mac_table:
             if self.learn_pub_adds:
                 retval.append(self.mac_table[mac])
@@ -145,13 +143,28 @@ class FaucetProxy(Connection, Parser):
                     retval.append(self.mac_table[mac])
         return retval
 
+    def update_acls(self, rules_file=None, endpoints=None):
+        self.logger.debug('updating acls')
+        status = None
+        if self.host:
+            self.receive_file('config')
+            if self.config(self.config_file,
+                           'apply_acls', None, None, rules_file=rules_file, endpoints=endpoints):
+                self.send_file('config')
+                status = True
+        else:
+            status = self.config(self.config_file, 'apply_acls',
+                                 None, None, rules_file=rules_file, endpoints=endpoints)
+        # TODO check if config was successfully updated
+        return status
+
     def shutdown_ip(self, ip_addr, shutdown=True, mac_addr=None):
         shutdowns = []
         port = 0
         switch = None
         if self.host:
             self.receive_file('config')
-            if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
+            if self.config(self.config_file,
                            'shutdown', int(port), switch):
                 self.send_file('config')
         else:
@@ -164,28 +177,15 @@ class FaucetProxy(Connection, Parser):
         switch = None
         if self.host:
             self.receive_file('config')
-            if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
+            if self.config(self.config_file,
                            'shutdown', int(port), switch):
                 self.send_file('config')
         else:
             self.config(self.config_file, 'shutdown', int(port), switch)
         # TODO check if config was successfully updated
 
-    def mirror_mac(self, my_mac, my_switch, my_port, messages=None):
+    def mirror_mac(self, my_mac, my_switch, my_port):
         self.logger.debug('mirroring mac')
-        if messages:
-            self.logger.debug('faucet messages: {0}'.format(messages))
-            for message in messages:
-                if 'L2_LEARN' in message:
-                    self.logger.debug(
-                        'l2 faucet message: {0}'.format(message))
-                    self.event(message)
-        elif not self.rabbit_enabled:
-            if self.host:
-                self.receive_file('log')
-                self.log(os.path.join(self.log_dir, 'faucet.log'))
-            else:
-                self.log(self.log_file)
         port = None
         switch = None
         status = None
@@ -196,7 +196,7 @@ class FaucetProxy(Connection, Parser):
         if port and switch:
             if self.host:
                 self.receive_file('config')
-                if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
+                if self.config(self.config_file,
                                'mirror', int(port), switch):
                     self.send_file('config')
                     # TODO check if this is actually True
@@ -209,20 +209,7 @@ class FaucetProxy(Connection, Parser):
         self.logger.debug('mirror status: ' + str(status))
         return status
 
-    def unmirror_mac(self, my_mac, my_switch, my_port, messages=None):
-        if messages:
-            self.logger.debug('faucet messages: {0}'.format(messages))
-            for message in messages:
-                if 'L2_LEARN' in message:
-                    self.logger.debug(
-                        'l2 faucet message: {0}'.format(message))
-                    self.event(message)
-        elif not self.rabbit_enabled:
-            if self.host:
-                self.receive_file('log')
-                self.log(os.path.join(self.log_dir, 'faucet.log'))
-            else:
-                self.log(self.log_file)
+    def unmirror_mac(self, my_mac, my_switch, my_port):
         port = 0
         switch = None
         status = None
@@ -238,7 +225,7 @@ class FaucetProxy(Connection, Parser):
             if not trunk:
                 if self.host:
                     self.receive_file('config')
-                    if self.config(os.path.join(self.config_dir, 'faucet.yaml'),
+                    if self.config(self.config_file,
                                    'unmirror', int(port), switch):
                         self.send_file('config')
                         # TODO check if config was successfully updated

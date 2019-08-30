@@ -65,7 +65,7 @@ def schedule_job_kickurl(func):
         try:
             # get current state
             req = requests.get(
-                'http://poseidon-api:8000/v1/network_full', timeout=60)
+                'http://poseidon-api:8000/v1/network_full', timeout=10)
 
             # send results to prometheus
             hosts = req.json()['dataset']
@@ -418,6 +418,7 @@ class SDNConnect(object):
     def find_new_machines(self, machines):
         '''parse switch structure to find new machines added to network
         since last call'''
+        change_acls = False
         for machine in machines:
             machine['ether_vendor'] = get_ether_vendor(
                 machine['mac'], '/poseidon/poseidon/metadata/nmap-mac-prefixes.txt')
@@ -451,6 +452,7 @@ class SDNConnect(object):
             if ep is not None and ep.endpoint_data != machine and not ep.ignore:
                 self.logger.info(
                     'Endpoint changed: {0}:{1}'.format(h, machine))
+                change_acls = True
                 ep.endpoint_data = deepcopy(machine)
                 if ep.state == 'inactive' and machine['active'] == 1:
                     if ep.p_next_state in ['known', 'abnormal']:
@@ -477,12 +479,19 @@ class SDNConnect(object):
             elif ep is None:
                 self.logger.info(
                     'Detected new endpoint: {0}:{1}'.format(h, machine))
+                change_acls = True
                 m = Endpoint(h)
                 m.p_prev_states.append((m.state, int(time.time())))
                 m.endpoint_data = deepcopy(machine)
                 self.endpoints.append(m)
 
         self.store_endpoints()
+        if change_acls and self.controller['AUTOMATED_ACLS']:
+            status = Actions(None, self.sdnc).update_acls(
+                rules_file=self.controller['RULES_FILE'], endpoints=self.endpoints)
+            # TODO add endpoint metadata about acl history
+            # TODO update prometheus with stats too
+
         return
 
     def store_endpoints(self):
@@ -795,6 +804,7 @@ class Monitor(object):
                     else:
                         if endpoint.state != 'known':
                             endpoint.known()
+        self.store_endpoints()
         return
 
     def get_q_item(self):
