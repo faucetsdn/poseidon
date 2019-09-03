@@ -155,6 +155,7 @@ class Parser:
             # TODO
             pass
         elif action == 'apply_acls':
+            rewrite = False
             if not endpoints:
                 return True
             self.logger.info('rules file: {0}'.format(rules_file))
@@ -256,46 +257,53 @@ class Parser:
                                 if match:
                                     matches += 1
                         if matches == len(rules[rule]):
-                            # TODO only log this when something actually changes, not just matching
                             rule_acls = []
                             for r in rules[rule]:
                                 rule_acls += r['rule']['acls']
                             rule_acls = list(set(rule_acls))
-                            self.logger.info('all rules met for: {0} on switch: {1} and port: {2}; applying ACLs: {3}'.format(
-                                endpoint.endpoint_data['mac'], endpoint.endpoint_data['segment'], endpoint.endpoint_data['port'], rule_acls))
-                            if int(endpoint.endpoint_data['port']) not in obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces']:
-                                obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
-                                    endpoint.endpoint_data['port'])] = {}
-                            if 'acls_in' not in obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(endpoint.endpoint_data['port'])]:
-                                obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
-                                    endpoint.endpoint_data['port'])]['acls_in'] = rule_acls
+                            if rule_acls:
+                                if int(endpoint.endpoint_data['port']) not in obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces']:
+                                    obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
+                                        endpoint.endpoint_data['port'])] = {}
+                                if 'acls_in' not in obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(endpoint.endpoint_data['port'])]:
+                                    if obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
+                                            endpoint.endpoint_data['port'])]['acls_in'] != rule_acls:
+                                        self.logger.info('all rules met for: {0} on switch: {1} and port: {2}; applying ACLs: {3}'.format(
+                                            endpoint.endpoint_data['mac'], endpoint.endpoint_data['segment'], endpoint.endpoint_data['port'], rule_acls))
+                                        obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
+                                            endpoint.endpoint_data['port'])]['acls_in'] = rule_acls
+                                        rewrite = True
                             else:
-                                # TODO check if any changes are necessary first
                                 # remove ACLs that were previously applied
                                 existing_acls = obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
                                     endpoint.endpoint_data['port'])]['acls_in']
                                 for acl in existing_acls:
-                                    if acl in acls:
+                                    if acl in acls and acl not in rule_acls:
                                         obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
                                             endpoint.endpoint_data['port'])]['acls_in'].remove(acl)
                                         self.logger.info('removing no longer needed ACL: {0} for: {1} on switch: {2} and port: {3}'.format(
                                             acl, endpoint.endpoint_data['mac'], endpoint.endpoint_data['segment'], endpoint.endpoint_data['port']))
+                                        rewrite = True
                                 # add new ACLs
                                 rule_acls += obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
                                     endpoint.endpoint_data['port'])]['acls_in']
                                 rule_acls = list(set(rule_acls))
-                                obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
-                                    endpoint.endpoint_data['port'])]['acls_in'] = rule_acls
+                                if obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
+                                        endpoint.endpoint_data['port'])]['acls_in'] != rule_acls:
+                                    obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
+                                        endpoint.endpoint_data['port'])]['acls_in'] = rule_acls
+                                    self.logger.info('all rules met for: {0} on switch: {1} and port: {2}; applying ACLs: {3}'.format(
+                                        endpoint.endpoint_data['mac'], endpoint.endpoint_data['segment'], endpoint.endpoint_data['port'], rule_acls))
+                                    rewrite = True
             else:
                 return True
 
-            # TODO check endpoints to see if any of them apply, only change acls on devices that have rules (leave other acls alone)
-            # TODO check already applied acls and remove if endpoint no longer applies
+            if not rewrite:
+                return True
 
             # TODO acl by port - potentially later update rules in acls to be mac/ip specific
-            # TODO ignore trunk ports?
+            # TODO ignore trunk ports/stacking ports?
 
-            # TODO update faucet.yaml and apply acls
         elif action == 'apply_routes':
             # TODO
             pass
