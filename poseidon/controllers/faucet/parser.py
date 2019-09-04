@@ -235,12 +235,12 @@ class Parser:
                                 match = False
                                 for ip in endpoint.metadata['ipv4_addresses']:
                                     if 'os' in endpoint.metadata['ipv4_addresses'][ip] and endpoint.metadata['ipv4_addresses'][ip]['os'] == r['rule']['value']:
-                                        self.logger.info('ipv4 os match: {0} {1}, rule: {2}'.format(
+                                        self.logger.info('IPv4 os match: {0} {1}, rule: {2}'.format(
                                             ip, r['rule']['value'], rule))
                                         match = True
                                 for ip in endpoint.metadata['ipv6_addresses']:
                                     if 'os' in endpoint.metadata['ipv6_addresses'][ip] and endpoint.metadata['ipv6_addresses'][ip]['os'] == r['rule']['value']:
-                                        self.logger.info('ipv6 os match: {0} {1}, rule: {2}'.format(
+                                        self.logger.info('IPv6 os match: {0} {1}, rule: {2}'.format(
                                             ip, r['rule']['value'], rule))
                                         match = True
                                 if match:
@@ -259,11 +259,11 @@ class Parser:
                                             if endpoint.metadata['mac_addresses'][mac][most_recent]['labels'][i] == r['rule']['value']:
                                                 if 'min_confidence' in r['rule']['value']:
                                                     if float(endpoint.metadata['mac_addresses'][mac][most_recent]['confidences'][i])*100 >= r['rule']['min_confidence']:
-                                                        self.logger.info('confidence match: {0} {1}, rule: {2}'.format(mac, float(
+                                                        self.logger.info('Confidence match: {0} {1}, rule: {2}'.format(mac, float(
                                                             endpoint.metadata['mac_addresses'][mac][most_recent]['confidences'][i])*100, rule))
                                                         match = True
                                                 else:
-                                                    self.logger.info('role match: {0} {1}, rule: {2}'.format(
+                                                    self.logger.info('Role match: {0} {1}, rule: {2}'.format(
                                                         mac, r['rule']['value'], rule))
                                                     match = True
                                 if match:
@@ -277,7 +277,7 @@ class Parser:
                                             most_recent = float(record)
                                     most_recent = str(most_recent)
                                     if most_recent != '0' and 'behavior' in endpoint.metadata['mac_addresses'][mac][most_recent] and endpoint.metadata['mac_addresses'][mac][most_recent]['behavior'] == r['rule']['value']:
-                                        self.logger.info('behavior match: {0} {1}, rule: {2}'.format(
+                                        self.logger.info('Behavior match: {0} {1}, rule: {2}'.format(
                                             mac, r['rule']['value'], rule))
                                         match = True
                                 if match:
