@@ -80,6 +80,7 @@ class Parser:
         return obj_doc
 
     def config(self, config_file, action, port, switch, rules_file=None, endpoints=None):
+        status = [True, []]
         switch_found = None
         config_file = Parser().get_config_file(config_file)
         obj_doc = Parser().yaml_in(config_file)
@@ -235,12 +236,12 @@ class Parser:
                                 match = False
                                 for ip in endpoint.metadata['ipv4_addresses']:
                                     if 'os' in endpoint.metadata['ipv4_addresses'][ip] and endpoint.metadata['ipv4_addresses'][ip]['os'] == r['rule']['value']:
-                                        self.logger.info('ipv4 os match: {0} {1}, rule: {2}'.format(
+                                        self.logger.info('IPv4 os match: {0} {1}, rule: {2}'.format(
                                             ip, r['rule']['value'], rule))
                                         match = True
                                 for ip in endpoint.metadata['ipv6_addresses']:
                                     if 'os' in endpoint.metadata['ipv6_addresses'][ip] and endpoint.metadata['ipv6_addresses'][ip]['os'] == r['rule']['value']:
-                                        self.logger.info('ipv6 os match: {0} {1}, rule: {2}'.format(
+                                        self.logger.info('IPv6 os match: {0} {1}, rule: {2}'.format(
                                             ip, r['rule']['value'], rule))
                                         match = True
                                 if match:
@@ -259,11 +260,11 @@ class Parser:
                                             if endpoint.metadata['mac_addresses'][mac][most_recent]['labels'][i] == r['rule']['value']:
                                                 if 'min_confidence' in r['rule']['value']:
                                                     if float(endpoint.metadata['mac_addresses'][mac][most_recent]['confidences'][i])*100 >= r['rule']['min_confidence']:
-                                                        self.logger.info('confidence match: {0} {1}, rule: {2}'.format(mac, float(
+                                                        self.logger.info('Confidence match: {0} {1}, rule: {2}'.format(mac, float(
                                                             endpoint.metadata['mac_addresses'][mac][most_recent]['confidences'][i])*100, rule))
                                                         match = True
                                                 else:
-                                                    self.logger.info('role match: {0} {1}, rule: {2}'.format(
+                                                    self.logger.info('Role match: {0} {1}, rule: {2}'.format(
                                                         mac, r['rule']['value'], rule))
                                                     match = True
                                 if match:
@@ -277,7 +278,7 @@ class Parser:
                                             most_recent = float(record)
                                     most_recent = str(most_recent)
                                     if most_recent != '0' and 'behavior' in endpoint.metadata['mac_addresses'][mac][most_recent] and endpoint.metadata['mac_addresses'][mac][most_recent]['behavior'] == r['rule']['value']:
-                                        self.logger.info('behavior match: {0} {1}, rule: {2}'.format(
+                                        self.logger.info('Behavior match: {0} {1}, rule: {2}'.format(
                                             mac, r['rule']['value'], rule))
                                         match = True
                                 if match:
@@ -298,19 +299,27 @@ class Parser:
                                             endpoint.endpoint_data['mac'], endpoint.endpoint_data['segment'], endpoint.endpoint_data['port'], rule_acls))
                                         obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
                                             endpoint.endpoint_data['port'])]['acls_in'] = rule_acls
+                                        status[1].append('added acls', endpoint.endpoint_data['mac'],
+                                                         endpoint.endpoint_data['segment'], endpoint.endpoint_data['port'], rule_acls, rule)
                                         rewrite = True
                             else:
                                 # remove ACLs that were previously applied
                                 existing_acls = obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
                                     endpoint.endpoint_data['port'])]['acls_in']
+                                removed_acls = []
                                 for acl in existing_acls:
                                     if acl in acls and acl not in rule_acls:
                                         obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
                                             endpoint.endpoint_data['port'])]['acls_in'].remove(acl)
                                         self.logger.info('Removing no longer needed ACL: {0} for: {1} on switch: {2} and port: {3}'.format(
                                             acl, endpoint.endpoint_data['mac'], endpoint.endpoint_data['segment'], endpoint.endpoint_data['port']))
+                                        removed_acls.append(acl)
                                         rewrite = True
+                                if removed_acls:
+                                    status[1].append('removed acls', endpoint.endpoint_data['mac'],
+                                                     endpoint.endpoint_data['segment'], endpoint.endpoint_data['port'], removed_acls, rule)
                                 # add new ACLs
+                                orig_rule_acls = rule_acls
                                 rule_acls += obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
                                     endpoint.endpoint_data['port'])]['acls_in']
                                 rule_acls = list(set(rule_acls))
@@ -319,7 +328,9 @@ class Parser:
                                     obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
                                         endpoint.endpoint_data['port'])]['acls_in'] = rule_acls
                                     self.logger.info('All rules met for: {0} on switch: {1} and port: {2}; applying ACLs: {3}'.format(
-                                        endpoint.endpoint_data['mac'], endpoint.endpoint_data['segment'], endpoint.endpoint_data['port'], rule_acls))
+                                        endpoint.endpoint_data['mac'], endpoint.endpoint_data['segment'], endpoint.endpoint_data['port'], orig_rule_acls))
+                                    status[1].append('added acls', endpoint.endpoint_data['mac'],
+                                                     endpoint.endpoint_data['segment'], endpoint.endpoint_data['port'], orig_rule_acls, rule)
                                     rewrite = True
 
             if not rewrite:
@@ -358,8 +369,8 @@ class Parser:
                 self.logger.warning(
                     'Unable to remove empty mirror list because: {0}'.format(str(e)))
 
-        status = Parser().yaml_out(config_file, obj_doc)
-        return
+        Parser().yaml_out(config_file, obj_doc)
+        return status
 
     def event(self, message):
         data = {}

@@ -489,6 +489,9 @@ class SDNConnect(object):
         if change_acls and self.controller['AUTOMATED_ACLS']:
             status = Actions(None, self.sdnc).update_acls(
                 rules_file=self.controller['RULES_FILE'], endpoints=self.endpoints)
+            if isinstance(status, list):
+                self.logger.info(
+                    'Automated ACLs did the following: {0}'.format(status[1]))
             # TODO add endpoint metadata about acl history
             # TODO update prometheus with stats too
 
