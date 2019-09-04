@@ -162,12 +162,14 @@ class Parser:
             rules_doc = Parser().parse_rules(rules_file)
             self.logger.info('rules: {0}'.format(rules_doc))
             self.logger.info('faucet config: {0}'.format(obj_doc))
+
             # TODO get acls file and add to faucet.yaml if not already there - check relative paths, etc.
             if 'include' in rules_doc:
                 files = rules_doc['include']
                 rules_path = rules_file.rsplit('/', 1)[0]
                 config_path = config_file.rsplit('/', 1)[0]
                 conf_files = []
+                acl_names = []
                 if 'include' in obj_doc:
                     conf_files = obj_doc['include']
                     for conf_file in conf_files:
@@ -182,7 +184,14 @@ class Parser:
                 else:
                     # TODO
                     pass
+
                 for f in files:
+                    # get defined ACL names from included files
+                    acl_doc = Parser().yaml_in(f)
+                    if 'acls' in acl_doc:
+                        for acl in acl_doc['acls']:
+                            acl_names.append(acl)
+
                     if f.startswith('/'):
                         # absolute
                         # TODO
@@ -191,7 +200,7 @@ class Parser:
                         # relative
                         # TODO
                         pass
-            # TODO check that acls in rules exist in the included acls file or already included files/acls from faucet
+
             if 'rules' in rules_doc:
                 acls = []
                 rules = rules_doc['rules']
@@ -200,6 +209,12 @@ class Parser:
                     for r in rules[rule]:
                         acls += r['rule']['acls']
                 acls = list(set(acls))
+
+                # check that acls in rules exist in the included acls file
+                for acl in acls:
+                    if not acl in acl_names:
+                        self.logger.info(
+                            'Using named ACL: {0}, but it was not found in included ACL files, assuming ACL name exists in Faucet config'.format(acl))
 
                 for endpoint in endpoints:
                     for rule in rules:
@@ -268,7 +283,7 @@ class Parser:
                                 if 'acls_in' not in obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(endpoint.endpoint_data['port'])]:
                                     if obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
                                             endpoint.endpoint_data['port'])]['acls_in'] != rule_acls:
-                                        self.logger.info('all rules met for: {0} on switch: {1} and port: {2}; applying ACLs: {3}'.format(
+                                        self.logger.info('All rules met for: {0} on switch: {1} and port: {2}; applying ACLs: {3}'.format(
                                             endpoint.endpoint_data['mac'], endpoint.endpoint_data['segment'], endpoint.endpoint_data['port'], rule_acls))
                                         obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
                                             endpoint.endpoint_data['port'])]['acls_in'] = rule_acls
@@ -281,7 +296,7 @@ class Parser:
                                     if acl in acls and acl not in rule_acls:
                                         obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
                                             endpoint.endpoint_data['port'])]['acls_in'].remove(acl)
-                                        self.logger.info('removing no longer needed ACL: {0} for: {1} on switch: {2} and port: {3}'.format(
+                                        self.logger.info('Removing no longer needed ACL: {0} for: {1} on switch: {2} and port: {3}'.format(
                                             acl, endpoint.endpoint_data['mac'], endpoint.endpoint_data['segment'], endpoint.endpoint_data['port']))
                                         rewrite = True
                                 # add new ACLs
@@ -292,7 +307,7 @@ class Parser:
                                         endpoint.endpoint_data['port'])]['acls_in'] != rule_acls:
                                     obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
                                         endpoint.endpoint_data['port'])]['acls_in'] = rule_acls
-                                    self.logger.info('all rules met for: {0} on switch: {1} and port: {2}; applying ACLs: {3}'.format(
+                                    self.logger.info('All rules met for: {0} on switch: {1} and port: {2}; applying ACLs: {3}'.format(
                                         endpoint.endpoint_data['mac'], endpoint.endpoint_data['segment'], endpoint.endpoint_data['port'], rule_acls))
                                     rewrite = True
             else:
@@ -300,6 +315,10 @@ class Parser:
 
             if not rewrite:
                 return True
+            else:
+                if not 'include' in rules_doc:
+                    self.logger.info(
+                        'No included ACLs files in the rules file, using ACLs that Faucet already knows about')
 
             # TODO acl by port - potentially later update rules in acls to be mac/ip specific
             # TODO ignore trunk ports/stacking ports?
