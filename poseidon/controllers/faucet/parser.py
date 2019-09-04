@@ -163,7 +163,7 @@ class Parser:
             self.logger.info('rules: {0}'.format(rules_doc))
             self.logger.info('faucet config: {0}'.format(obj_doc))
 
-            # TODO get acls file and add to faucet.yaml if not already there - check relative paths, etc.
+            # get acls file and add to faucet.yaml if not already there
             if 'include' in rules_doc:
                 files = rules_doc['include']
                 rules_path = rules_file.rsplit('/', 1)[0]
@@ -172,18 +172,26 @@ class Parser:
                 acl_names = []
                 if 'include' in obj_doc:
                     conf_files = obj_doc['include']
-                    for conf_file in conf_files:
-                        if conf_file.startswith('/'):
-                            # absolute
-                            # TODO
-                            pass
-                        else:
-                            # relative
-                            # TODO
-                            pass
+                    for f in files:
+                        acls_path, acls_filename = f.rsplit('/', 1)
+                        if not 'poseidon_'+acls_filename in conf_files:
+                            obj_doc['include'] = ['poseidon_'+acls_filename]
+                            if f.startswith('/'):
+                                acls_doc = Parser().yaml_in(f)
+                            else:
+                                acls_doc = Parser().yaml_in(rules_path+'/'+f)
+                            Parser().yaml_out(config_path+'/poseidon_'+acls_filename, acls_doc)
+                            rewrite = True
                 else:
-                    # TODO
-                    pass
+                    for f in files:
+                        acls_path, acls_filename = f.rsplit('/', 1)
+                        obj_doc['include'] = ['poseidon_'+acls_filename]
+                        if f.startswith('/'):
+                            acls_doc = Parser().yaml_in(f)
+                        else:
+                            acls_doc = Parser().yaml_in(rules_path+'/'+f)
+                        Parser().yaml_out(config_path+'/poseidon_'+acls_filename, acls_doc)
+                        rewrite = True
 
                 for f in files:
                     # get defined ACL names from included files
@@ -191,15 +199,6 @@ class Parser:
                     if 'acls' in acl_doc:
                         for acl in acl_doc['acls']:
                             acl_names.append(acl)
-
-                    if f.startswith('/'):
-                        # absolute
-                        # TODO
-                        pass
-                    else:
-                        # relative
-                        # TODO
-                        pass
 
             if 'rules' in rules_doc:
                 acls = []
@@ -211,10 +210,11 @@ class Parser:
                 acls = list(set(acls))
 
                 # check that acls in rules exist in the included acls file
-                for acl in acls:
-                    if not acl in acl_names:
-                        self.logger.info(
-                            'Using named ACL: {0}, but it was not found in included ACL files, assuming ACL name exists in Faucet config'.format(acl))
+                if 'include' in rules_doc:
+                    for acl in acls:
+                        if not acl in acl_names:
+                            self.logger.info(
+                                'Using named ACL: {0}, but it was not found in included ACL files, assuming ACL name exists in Faucet config'.format(acl))
 
                 for endpoint in endpoints:
                     for rule in rules:
