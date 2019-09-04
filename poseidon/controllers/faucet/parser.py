@@ -158,10 +158,7 @@ class Parser:
             rewrite = False
             if not endpoints:
                 return True
-            self.logger.info('rules file: {0}'.format(rules_file))
             rules_doc = Parser().parse_rules(rules_file)
-            self.logger.info('rules: {0}'.format(rules_doc))
-            self.logger.info('faucet config: {0}'.format(obj_doc))
 
             # get acls file and add to faucet.yaml if not already there
             if 'include' in rules_doc:
@@ -172,16 +169,28 @@ class Parser:
                 acl_names = []
                 if 'include' in obj_doc:
                     conf_files = obj_doc['include']
+                    acls_filenames = []
+                    for f in files:
+                        acls_filenames.append(f.rsplit('/', 1)[1])
+                    for conf_file in conf_files:
+                        if conf_file.startswith('poseidon') and not conf_file in acls_filenames:
+                            obj_doc['include'].remove(conf_file)
+                            rewrite = True
+                            self.logger.info(
+                                'Removing {0} from config'.format(acls_filename))
                     for f in files:
                         acls_path, acls_filename = f.rsplit('/', 1)
                         if not 'poseidon_'+acls_filename in conf_files:
-                            obj_doc['include'] = ['poseidon_'+acls_filename]
+                            obj_doc['include'].append(
+                                'poseidon_'+acls_filename)
                             if f.startswith('/'):
                                 acls_doc = Parser().yaml_in(f)
                             else:
                                 acls_doc = Parser().yaml_in(rules_path+'/'+f)
                             Parser().yaml_out(config_path+'/poseidon_'+acls_filename, acls_doc)
                             rewrite = True
+                            self.logger.info(
+                                'Adding {0} to config'.format(acls_filename))
                 else:
                     for f in files:
                         acls_path, acls_filename = f.rsplit('/', 1)
@@ -192,9 +201,11 @@ class Parser:
                             acls_doc = Parser().yaml_in(rules_path+'/'+f)
                         Parser().yaml_out(config_path+'/poseidon_'+acls_filename, acls_doc)
                         rewrite = True
+                        self.logger.info(
+                            'Adding {0} to config'.format(acls_filename))
 
+                # get defined ACL names from included files
                 for f in files:
-                    # get defined ACL names from included files
                     acl_doc = Parser().yaml_in(f)
                     if 'acls' in acl_doc:
                         for acl in acl_doc['acls']:
@@ -310,15 +321,13 @@ class Parser:
                                     self.logger.info('All rules met for: {0} on switch: {1} and port: {2}; applying ACLs: {3}'.format(
                                         endpoint.endpoint_data['mac'], endpoint.endpoint_data['segment'], endpoint.endpoint_data['port'], rule_acls))
                                     rewrite = True
-            else:
-                return True
 
             if not rewrite:
                 return True
-            else:
-                if not 'include' in rules_doc:
-                    self.logger.info(
-                        'No included ACLs files in the rules file, using ACLs that Faucet already knows about')
+
+            if not 'include' in rules_doc:
+                self.logger.info(
+                    'No included ACLs files in the rules file, using ACLs that Faucet already knows about')
 
             # TODO acl by port - potentially later update rules in acls to be mac/ip specific
             # TODO ignore trunk ports/stacking ports?
@@ -349,7 +358,8 @@ class Parser:
                 self.logger.warning(
                     'Unable to remove empty mirror list because: {0}'.format(str(e)))
 
-        return Parser().yaml_out(config_file, obj_doc)
+        status = Parser().yaml_out(config_file, obj_doc)
+        return
 
     def event(self, message):
         data = {}
