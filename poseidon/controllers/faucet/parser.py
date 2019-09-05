@@ -172,7 +172,10 @@ class Parser:
                     conf_files = obj_doc['include']
                     acls_filenames = []
                     for f in files:
-                        acls_filenames.append(f.rsplit('/', 1)[1])
+                        if '/' in f:
+                            acls_filenames.append(f.rsplit('/', 1)[1])
+                        else:
+                            acls_filenames.append(f)
                     for conf_file in conf_files:
                         if conf_file.startswith('poseidon') and not conf_file in acls_filenames:
                             obj_doc['include'].remove(conf_file)
@@ -180,7 +183,11 @@ class Parser:
                             self.logger.info(
                                 'Removing {0} from config'.format(acls_filename))
                     for f in files:
-                        acls_path, acls_filename = f.rsplit('/', 1)
+                        if '/' in f:
+                            acls_path, acls_filename = f.rsplit('/', 1)
+                        else:
+                            acls_path = ''
+                            acls_filename = f
                         if not 'poseidon_'+acls_filename in conf_files:
                             obj_doc['include'].append(
                                 'poseidon_'+acls_filename)
@@ -194,7 +201,11 @@ class Parser:
                                 'Adding {0} to config'.format(acls_filename))
                 else:
                     for f in files:
-                        acls_path, acls_filename = f.rsplit('/', 1)
+                        if '/' in f:
+                            acls_path, acls_filename = f.rsplit('/', 1)
+                        else:
+                            acls_path = ''
+                            acls_filename = f
                         obj_doc['include'] = ['poseidon_'+acls_filename]
                         if f.startswith('/'):
                             acls_doc = Parser().yaml_in(f)
