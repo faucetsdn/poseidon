@@ -213,7 +213,7 @@ class Parser:
                             acls_doc = Parser().yaml_in(f)
                         else:
                             acls_doc = Parser().yaml_in(rules_path+'/'+f)
-                        if isinstance(acl_doc, bool):
+                        if isinstance(acls_doc, bool):
                             self.logger.warn(
                                 'Include file {0} was not found, ACLs may not be working as expected'.format(f))
                         else:
