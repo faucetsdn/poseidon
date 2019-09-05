@@ -209,15 +209,19 @@ class Parser:
                         else:
                             acls_path = ''
                             acls_filename = f
-                        obj_doc['include'] = ['poseidon_'+acls_filename]
                         if f.startswith('/'):
                             acls_doc = Parser().yaml_in(f)
                         else:
                             acls_doc = Parser().yaml_in(rules_path+'/'+f)
-                        Parser().yaml_out(config_path+'/poseidon_'+acls_filename, acls_doc)
-                        rewrite = True
-                        self.logger.info(
-                            'Adding {0} to config'.format(acls_filename))
+                        if isinstance(acl_doc, bool):
+                            self.logger.warn(
+                                'Include file {0} was not found, ACLs may not be working as expected'.format(f))
+                        else:
+                            obj_doc['include'] = ['poseidon_'+acls_filename]
+                            Parser().yaml_out(config_path+'/poseidon_'+acls_filename, acls_doc)
+                            rewrite = True
+                            self.logger.info(
+                                'Adding {0} to config'.format(acls_filename))
 
                 # get defined ACL names from included files
                 for f in files:
