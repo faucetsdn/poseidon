@@ -40,9 +40,12 @@ class Parser:
     @staticmethod
     @exception
     def yaml_in(config_file):
-        stream = open(config_file, 'r')
-        obj_doc = yaml.safe_load(stream)
-        stream.close()
+        try:
+            stream = open(config_file, 'r')
+            obj_doc = yaml.safe_load(stream)
+            stream.close()
+        except Exception as e:  # pragma: no cover
+            return False
         return obj_doc
 
     @staticmethod
@@ -219,9 +222,13 @@ class Parser:
                 # get defined ACL names from included files
                 for f in files:
                     acl_doc = Parser().yaml_in(f)
-                    if 'acls' in acl_doc:
-                        for acl in acl_doc['acls']:
-                            acl_names.append(acl)
+                    if isinstance(acl_doc, bool):
+                        self.logger.warn(
+                            'Include file {0} was not found, ACLs may not be working as expected'.format(f))
+                    else:
+                        if 'acls' in acl_doc:
+                            for acl in acl_doc['acls']:
+                                acl_names.append(acl)
 
             if 'rules' in rules_doc:
                 acls = []
