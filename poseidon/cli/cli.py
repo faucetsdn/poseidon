@@ -7,10 +7,10 @@ Created on 14 January 2019
 @author: Charlie Lewis
 """
 import csv
+import io
 import json
 import os
 import readline
-import StringIO
 import sys
 import time
 
@@ -466,9 +466,9 @@ class Parser():
             # set the header
             matrix.insert(0, fields_header)
             if output_format == 'csv':
-                results = display_csv(matrix)
+                results = self.display_csv(matrix)
             else:
-                results = display_table(column_count = len(fields), max_width=max_width, matrix=matrix)
+                results = self.display_table(len(fields), max_width, matrix)
         else:
             results = 'No results found for that query.'
         return results
@@ -483,7 +483,7 @@ class Parser():
     def display_csv(self, matrix):
         #use StringIO to create a file like object as a string so that we can use the
         #built in csv contructs so as to properly handle edge/corner cases
-        csv_str = StringIO.StringIO()
+        csv_str = io.StringIO()
         csv_wr = csv.writer(csv_str)
         for row in matrix:
             csv_wr.writerow(row)

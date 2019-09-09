@@ -96,13 +96,16 @@ def test_display_results():
                            'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4'], ipv4_only=False, ipv4_and_ipv6=True, nonzero=True)
     parser.display_results(endpoints, [
                            'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4'], ipv4_only=False, ipv4_and_ipv6=True, nonzero=True, unique=True)
-
+    parser.display_results(endpoints, [
+                           'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4'], ipv4_only=False, ipv4_and_ipv6=True, nonzero=True, unique=True, output_format="csv")
+    parser.display_results(endpoints, [
+                           'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4'], ipv4_only=False, ipv4_and_ipv6=True, nonzero=True, unique=True, output_format="json")
 
 def test_get_flags():
     parser = Parser()
     valid, flags, not_flags = parser.get_flags(
-        'show all --fields=[id, mac] --sort_by=2 -4')
-    assert flags == {'fields': ['id', 'mac'], 'sort_by': '2', '4': True}
+        'show all --fields=[id, mac] --sort_by=2 -4 --output_format=csv')
+    assert flags == {'fields': ['id', 'mac'], 'sort_by': '2', '4': True, 'output_format':'csv'}
     assert not_flags == 'show all'
 
 
