@@ -6,8 +6,11 @@ The main entrypoint for the Poseidon shell.
 Created on 14 January 2019
 @author: Charlie Lewis
 """
+import csv
+import json
 import os
 import readline
+import StringIO
 import sys
 import time
 
@@ -451,7 +454,9 @@ class Parser():
                     record.append(fields_lookup[field.lower()][0](endpoint))
                 matrix.append(record)
         results = ''
-        if len(matrix) > 0:
+        if output_format == 'json'
+            results = json.dumps(records, indent="\t")
+        elif len(matrix) > 0:
             matrix = sorted(matrix, key=lambda endpoint: endpoint[sort_by])
             # swap out field names for header
             fields_header = []
@@ -460,15 +465,30 @@ class Parser():
                     self.all_fields[fields_lookup[field.lower()][1]])
             # set the header
             matrix.insert(0, fields_header)
-            table = Texttable(max_width=max_width)
-            # make all the column types be text
-            table.set_cols_dtype(['t']*len(fields))
-            table.add_rows(matrix)
-            results = table.draw()
+            if output_format == 'csv':
+                results = display_csv(matrix)
+            else:
+                results = display_table(column_count = len(fields), max_width=max_width, matrix=matrix)
         else:
             results = 'No results found for that query.'
         return results
 
+    def display_table(self, column_count, max_width, matrix):
+        table = Texttable(max_width=max_width)
+        # make all the column types be text
+        table.set_cols_dtype(['t']*column_count)
+        table.add_rows(matrix)
+        return table.draw()
+
+    def display_csv(self, matrix):
+        #use StringIO to create a file like object as a string so that we can use the
+        #built in csv contructs so as to properly handle edge/corner cases
+        csv_str = StringIO.StringIO()
+        csv_wr = csv.writer(csv_str)
+        for row in matrix:
+            csv_wr.writerow(row)
+
+        return csv_str.get_output()
 
 class PoseidonShell(cmd2.Cmd):
 
@@ -939,7 +959,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                 '  --fields\t\tSpecify which fields to display, i.e. --fields=[id, mac]')
             self.poutput(
                 '  --max_width\t\tSpecify a max width of characters for output, i.e. --max_width=80')
-            self.poutput('  --output_format\tTO BE IMPLEMENTED')
+            self.poutput('  --output_format\t\tValid values are table, csv, and json')
             self.poutput(
                 '  --sort_by\t\tSort the output by a specific column index, i.e. --sort_by=0')
             self.poutput('\n')
