@@ -454,7 +454,7 @@ class Parser():
                     record.append(fields_lookup[field.lower()][0](endpoint))
                 matrix.append(record)
         results = ''
-        if output_format == 'json'
+        if output_format == 'json':
             results = json.dumps(records, indent="\t")
         elif len(matrix) > 0:
             matrix = sorted(matrix, key=lambda endpoint: endpoint[sort_by])
