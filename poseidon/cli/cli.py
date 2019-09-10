@@ -444,6 +444,7 @@ class Parser():
             if len(fields) > 0:
                 if unique:
                     u_records = set(map(tuple, records))
+                    records = u_records
                     matrix = list(map(list, u_records))
                 else:
                     matrix = records
@@ -452,6 +453,7 @@ class Parser():
                 record = []
                 for field in fields:
                     record.append(fields_lookup[field.lower()][0](endpoint))
+                    records.append(record)
                 matrix.append(record)
         results = ''
         if output_format == 'json':
