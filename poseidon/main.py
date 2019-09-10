@@ -790,11 +790,15 @@ class Monitor(object):
                             endpoint.p_prev_states.append(
                                 (endpoint.state, int(time.time())))
                         elif endpoint.state in ['mirroring', 'reinvestigating']:
+                            self.logger.debug(
+                                'checking timeout: {0}'.format(endpoint.name))
                             cur_time = int(time.time())
                             # timeout after 2 times the reinvestigation frequency
                             # in case something didn't report back, put back in an
                             # unknown state
                             if cur_time - endpoint.p_prev_states[-1][1] > 2*self.controller['reinvestigation_frequency']:
+                                self.logger.debug(
+                                    'timing out: {0} and setting to unknown'.format(endpoint.name))
                                 status = Actions(
                                     endpoint, self.s.sdnc).unmirror_endpoint()
                                 if not status:
