@@ -24,10 +24,18 @@ h2 echo -n "GET / HTTP/1.0" | nc 10.0.0.1 8000
 At this point it is worth watching the Faucet logs, which can be tailed like so: `tail /var/log/faucet/faucet.log`.
 Faucet logs will show L2 learned records like the following:
 
-Jul 12 16:00:11 faucet.valve INFO     DPID 1 (0x1) switch-1 L2 learned 00:00:00:00:00:02 (L2 type 0x0800, L3 src None, L3 dst None) on Port 2 on VLAN 8 (1 hosts total)
-Jul 12 16:00:11 faucet.valve INFO     DPID 1 (0x1) switch-1 L2 learned 00:00:00:00:00:01 (L2 type 0x0800, L3 src None, L3 dst None) on Port 1 on VLAN 8 (2 hosts total)
+Sep 05 15:42:25 faucet.valve INFO     DPID 1 (0x1) switch-1 L2 learned 00:00:00:00:00:01 (L2 type 0x86dd, L2 dst 33:33:00:00:00:16, L3 src None, L3 dst None) Port 1 VLAN 8 (1 hosts total)
+Sep 05 15:42:26 faucet.valve INFO     DPID 1 (0x1) switch-1 L2 learned 00:00:00:00:00:02 (L2 type 0x86dd, L2 dst 33:33:00:00:00:16, L3 src None, L3 dst None) Port 2 VLAN 8 (2 hosts total)
+
 
 The Poseidon logs should start picking up the 2 hosts and begin capturing traffic. Once the hosts are moved into the mirroring section of the Poseidon logs you can look at the faucet.yaml file again and see that it got updated to start mirroring traffic. Additionally if you do `docker ps` you still start to see ncapture containers running which are creating the PCAP files of the mirrored traffic.  You can find those PCAP files in '/opt/vent_files'. Eventually after the captures have been processed and analyzed by the machine learning portion of Poseidon (about 5 minutes), you'll see results of the machine learning classification in the poseidon logs.
+
+2019-09-05 15:42:26,268 [INFO] main - Detected new endpoint: 841c5478b964b8e4050a2074617f8c35bef788e5:{'mac': '00:00:00:00:00:01', 'segment': 'switch-1', 'port': '1', 'vlan': 'VLAN8', 'active': 1, 'ipv4': 'None', 'ipv6': 0, 'controller_type': 'faucet', 'controller': '', 'name': None, 'ether_vendor': 'Xerox', 'ipv4_rdns': 'a23-217-138-108.deploy.static.akamaitechnologies.com', 'ipv4_subnet': '.0/24', 'ipv6_rdns': 'NO DATA', 'ipv6_subnet': 'NO DATA'}
+2019-09-05 15:42:26,556 [INFO] transitions.core - 841c5478 Exited state unknown
+2019-09-05 15:42:26,556 [INFO] transitions.core - 841c5478 Entered state queued
+2019-09-05 15:42:27,559 [INFO] transitions.core - 841c5478 Exited state queued
+2019-09-05 15:42:27,559 [INFO] transitions.core - 841c5478 Entered state mirroring
+2019-09-05 15:42:28,263 [INFO] collector - Successfully started the vent collector for: 841c5478b964b8e4050a2074617f8c35bef788e5
 
 While Poseidon is capturing, you'll want to generate some meaningful traffic. To do this, we'll download a large file from the webserver like so:
 
@@ -35,10 +43,7 @@ h2 echo -n "GET /opt/poseidon/dist/cyberreboot-vent.tar HTTP/1.0" | nc 10.0.0.1 
 
 After the capture is done you'll see output of the devices learned with `poseidon logs` like the following:
 
-Jul 12 12:45:59 box poseidon[29288]: 2018-07-12T12:45:59+00:00 172.17.0.1 wizardly_knuth/310e22c438ee/pcap[1302]: INFO:__main__:Unknown : 0.996
-Jul 12 12:45:59 box poseidon[29288]: 2018-07-12T12:45:59+00:00 172.17.0.1 wizardly_knuth/310e22c438ee/pcap[1302]: INFO:__main__:Developer workstation : 0.003
-Jul 12 12:45:59 box poseidon[29288]: 2018-07-12T12:45:59+00:00 172.17.0.1 wizardly_knuth/310e22c438ee/pcap[1302]: INFO:__main__:VPN client : 0.0
-Jul 12 12:45:59 box poseidon[29288]: 2018-07-12T12:45:59+00:00 172.17.0.1 wizardly_knuth/310e22c438ee/pcap[1302]: INFO:__main__:Message: {"230e8a577f2eda0811825808b1619b979ba51641": {"timestamp": 1531424281.774556, "decisions": {"behavior": "normal", "investigate": true}, "valid": true, "classification": {"confidences": [0.9956208918271187, 0.0032885507438741735, 0.0003972138701585738], "labels": ["Unknown", "Developer workstation", "VPN client"]}}}
+2019-09-10 17:06:18,363 [INFO] main - ML results: {'217663efa0bca5521e4e7d33de93711d33a7d824': {'decisions': {'behavior': 'normal', 'investigate': False}, 'classification': {'labels': ['Developer workstation', 'Business workstation', 'Unknown'], 'confidences': [0.8229662347423514, 0.0892798588297606, 0.05688044658908546]}, 'timestamp': 1568134971.099849, 'valid': True, 'source_ip': '192.168.0.7', 'source_mac': '68:5b:35:c9:76:15'}, 'pcap': 'trace_217663efa0bca5521e4e7d33de93711d33a7d824_2019-09-10_16_48_01-client-ip-192-168-0-7.pcap'}
 
 Finally, you can visualize the network that Poseidon sees using CRviz, which can be accessed with `poseidon visualize`.
 

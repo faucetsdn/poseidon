@@ -7,22 +7,26 @@ default_ip=$(ip addr show dev "$default_iface" | awk '$1 == "inet" { sub("/.*", 
 # get grafana json files
 if [[ -z "${FAUCET_PREFIX}" ]]; then
     # clone faucet
-    cd /opt && git clone https://github.com/faucetsdn/faucet
+    rm -rf /opt/faucet
+    pushd `pwd` && cd /opt; git clone https://github.com/faucetsdn/faucet; popd
 
     # copy over compose and prometheus files
     cp docker-compose.yaml /opt/faucet/docker-compose.yaml
     cp prometheus-docker-compose.yml /opt/faucet/etc/prometheus/prometheus-docker-compose.yml
 
     # ensure gauge config is there
+    mkdir -p /etc/faucet
     cp gauge.yaml /etc/faucet/gauge.yaml
 
     # copy over dashboards for grafana
+    mkdir -p /opt/grafana/provisioning/dashboards
+    mkdir -p /opt/grafana/dashboards
     cp dashboards.yaml /opt/grafana/provisioning/dashboards/dashboards.yaml
     cp ../../docs/poseidon_stats.json /opt/grafana/dashboards/poseidon_stats.json
-    curl -K https://docs.faucet.nz/en/latest/_static/grafana-dashboards/faucet_instrumentation.json -o /opt/grafana/dashboards/faucet_instrumentation.json
-    curl -K https://docs.faucet.nz/en/latest/_static/grafana-dashboards/faucet_inventory.json -o /opt/grafana/dashboards/faucet_inventory.json
-    curl -K https://docs.faucet.nz/en/latest/_static/grafana-dashboards/faucet_port_statistics.json -o /opt/grafana/dashboards/faucet_port_statistics.json
+    wget -O /opt/grafana/dashboards/faucet_instrumentation.json https://docs.faucet.nz/en/latest/_static/grafana-dashboards/faucet_instrumentation.json
+    wget -O /opt/grafana/dashboards/faucet_inventory.json https://docs.faucet.nz/en/latest/_static/grafana-dashboards/faucet_inventory.json
+    wget -O /opt/grafana/dashboards/faucet_port_statistics.json https://docs.faucet.nz/en/latest/_static/grafana-dashboards/faucet_port_statistics.json
 
-    cd /opt/faucet && FAUCET_EVENT_SOCK=1 FAUCET_CONFIG_STAT_RELOAD=1 FA_RABBIT_HOST=$default_ip docker-compose -f docker-compose.yaml -f adapters/vendors/rabbitmq/docker-compose.yaml up --build -d && popd
+    pushd `pwd` && cd /opt/faucet; FAUCET_EVENT_SOCK=1 FAUCET_CONFIG_STAT_RELOAD=1 FA_RABBIT_HOST=$default_ip docker-compose -f docker-compose.yaml -f adapters/vendors/rabbitmq/docker-compose.yaml up --build -d; popd
     poseidon restart
 fi
