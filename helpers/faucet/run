@@ -29,4 +29,6 @@ if [[ -z "${FAUCET_PREFIX}" ]]; then
 
     pushd `pwd` && cd /opt/faucet; FAUCET_EVENT_SOCK=1 FAUCET_CONFIG_STAT_RELOAD=1 FA_RABBIT_HOST=$default_ip docker-compose -f docker-compose.yaml -f adapters/vendors/rabbitmq/docker-compose.yaml up --build -d; popd
     poseidon restart
+    wget -O- --auth-no-challenge --post-data='{"name":"${DS_PROMETHEUS}","type":"prometheus","access":"proxy","url":"http://prometheus:9090","basicAuth":false,"isDefault":true}' --header="Content-Type: application/json;charset=UTF-8charset=UTF-8" 'http://admin:admin@192.168.0.8:3000/api/datasources'
+
 fi
