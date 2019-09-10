@@ -415,8 +415,8 @@ class Parser():
                     if field.replace('6', '4') not in fields:
                         fields.insert(index + 1, field.replace('6', '4'))
 
+        records = []
         if nonzero or unique:
-            records = []
             for endpoint in endpoints:
                 record = []
                 for field in fields:
@@ -488,7 +488,7 @@ class Parser():
         for row in matrix:
             csv_wr.writerow(row)
 
-        return csv_str.get_output()
+        return csv_str.getvalue()
 
 class PoseidonShell(cmd2.Cmd):
 
