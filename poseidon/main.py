@@ -703,7 +703,6 @@ class Monitor(object):
         signal.signal(signal.SIGINT, partial(self.signal_handler))
         while not CTRL_C['STOP']:
             time.sleep(1)
-            self.logger.debug('what')
 
             found_work, item = self.get_q_item()
             ml_returns = {}
@@ -795,8 +794,6 @@ class Monitor(object):
                             endpoint.p_prev_states.append(
                                 (endpoint.state, int(time.time())))
                         elif endpoint.state in ['mirroring', 'reinvestigating']:
-                            self.logger.debug(
-                                'checking timeout: {0}'.format(endpoint.name))
                             cur_time = int(time.time())
                             # timeout after 2 times the reinvestigation frequency
                             # in case something didn't report back, put back in an
