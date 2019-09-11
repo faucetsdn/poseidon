@@ -314,16 +314,14 @@ class Parser:
                                 if int(endpoint.endpoint_data['port']) not in obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces']:
                                     obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
                                         endpoint.endpoint_data['port'])] = {}
-                                if 'acls_in' not in obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(endpoint.endpoint_data['port'])]:
-                                    if obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
-                                            endpoint.endpoint_data['port'])]['acls_in'] != rule_acls:
-                                        self.logger.info('All rules met for: {0} on switch: {1} and port: {2}; applying ACLs: {3}'.format(
-                                            endpoint.endpoint_data['mac'], endpoint.endpoint_data['segment'], endpoint.endpoint_data['port'], rule_acls))
-                                        obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
-                                            endpoint.endpoint_data['port'])]['acls_in'] = rule_acls
-                                        status[1].append('added acls', endpoint.endpoint_data['mac'],
-                                                         endpoint.endpoint_data['segment'], endpoint.endpoint_data['port'], rule_acls, rule)
-                                        rewrite = True
+                            if 'acls_in' not in obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(endpoint.endpoint_data['port'])]:
+                                self.logger.info('All rules met for: {0} on switch: {1} and port: {2}; applying ACLs: {3}'.format(
+                                    endpoint.endpoint_data['mac'], endpoint.endpoint_data['segment'], endpoint.endpoint_data['port'], rule_acls))
+                                obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
+                                    endpoint.endpoint_data['port'])]['acls_in'] = rule_acls
+                                status[1].append('added acls', endpoint.endpoint_data['mac'],
+                                                 endpoint.endpoint_data['segment'], endpoint.endpoint_data['port'], rule_acls, rule)
+                                rewrite = True
                             else:
                                 # remove ACLs that were previously applied
                                 existing_acls = obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
