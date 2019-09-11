@@ -740,6 +740,7 @@ class Monitor(object):
                         ep.p_prev_states.append(
                             (ep.state, int(time.time())))
                 extra_machines = []
+                self.logger.debug('extra devices: {0}'.format(extras))
                 for device in extras:
                     if device['valid']:
                         extra_machine = {'mac': device['source_mac'], 'segment': 'NO DATA',
