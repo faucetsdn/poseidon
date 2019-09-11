@@ -495,6 +495,8 @@ class SDNConnect(object):
                     'Automated ACLs did the following: {0}'.format(status[1]))
             # TODO add endpoint metadata about acl history
             # TODO update prometheus with stats too
+        self.store_endpoints()
+        self.get_stored_endpoints()
 
         return
 
