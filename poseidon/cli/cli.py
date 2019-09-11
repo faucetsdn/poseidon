@@ -50,6 +50,11 @@ class GetData():
         return vlan.split('VLAN')[1] if vlan.startswith('VLAN') else vlan
 
     @staticmethod
+    def _get_acls(endpoint):
+        # TODO
+        return str('')
+
+    @staticmethod
     def _get_ipv4(endpoint):
         return str(endpoint.endpoint_data['ipv4'])
 
@@ -457,7 +462,7 @@ class Parser():
                 matrix.append(record)
         results = ''
         if output_format == 'json':
-            results = json.dumps(records, indent="\t")
+            results = json.dumps(records, indent='\t')
         elif len(matrix) > 0:
             matrix = sorted(matrix, key=lambda endpoint: endpoint[sort_by])
             # swap out field names for header
@@ -483,14 +488,15 @@ class Parser():
         return table.draw()
 
     def display_csv(self, matrix):
-        #use StringIO to create a file like object as a string so that we can use the
-        #built in csv contructs so as to properly handle edge/corner cases
+        # use StringIO to create a file like object as a string so that we can use the
+        # built in csv contructs so as to properly handle edge/corner cases
         csv_str = io.StringIO()
         csv_wr = csv.writer(csv_str)
         for row in matrix:
             csv_wr.writerow(row)
 
         return csv_str.getvalue()
+
 
 class PoseidonShell(cmd2.Cmd):
 
@@ -961,7 +967,8 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                 '  --fields\t\tSpecify which fields to display, i.e. --fields=[id, mac]')
             self.poutput(
                 '  --max_width\t\tSpecify a max width of characters for output, i.e. --max_width=80')
-            self.poutput('  --output_format\t\tValid values are table, csv, and json')
+            self.poutput(
+                '  --output_format\tValid values are table, csv, and json')
             self.poutput(
                 '  --sort_by\t\tSort the output by a specific column index, i.e. --sort_by=0')
             self.poutput('\n')

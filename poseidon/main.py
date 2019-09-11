@@ -486,6 +486,7 @@ class SDNConnect(object):
                 self.endpoints.append(m)
 
         self.store_endpoints()
+        self.get_stored_endpoints()
         if change_acls and self.controller['AUTOMATED_ACLS']:
             status = Actions(None, self.sdnc).update_acls(
                 rules_file=self.controller['RULES_FILE'], endpoints=self.endpoints)
@@ -494,6 +495,8 @@ class SDNConnect(object):
                     'Automated ACLs did the following: {0}'.format(status[1]))
             # TODO add endpoint metadata about acl history
             # TODO update prometheus with stats too
+        self.store_endpoints()
+        self.get_stored_endpoints()
 
         return
 
@@ -739,15 +742,16 @@ class Monitor(object):
                         ep.p_prev_states.append(
                             (ep.state, int(time.time())))
                 extra_machines = []
+                self.logger.debug('extra devices: {0}'.format(extras))
                 for device in extras:
-                    if extras[device]['valid']:
-                        extra_machine = {'mac': extras[device]['source_mac'], 'segment': 'NO DATA',
+                    if device['valid']:
+                        extra_machine = {'mac': device['source_mac'], 'segment': 'NO DATA',
                                          'port': 'NO DATA', 'tenant': 'NO DATA', 'active': 0, 'name': None}
-                        if ':' in extras[device]['source_ip']:
-                            extra_machine['ipv6'] = extras[device]['source_ip']
+                        if ':' in device['source_ip']:
+                            extra_machine['ipv6'] = device['source_ip']
                             extra_machine['ipv4'] = 0
                         else:
-                            extra_machine['ipv4'] = extras[device]['source_ip']
+                            extra_machine['ipv4'] = device['source_ip']
                             extra_machine['ipv6'] = 0
                         extra_machines.append(extra_machine)
                 self.s.find_new_machines(extra_machines)
@@ -795,6 +799,8 @@ class Monitor(object):
                             # in case something didn't report back, put back in an
                             # unknown state
                             if cur_time - endpoint.p_prev_states[-1][1] > 2*self.controller['reinvestigation_frequency']:
+                                self.logger.debug(
+                                    'timing out: {0} and setting to unknown'.format(endpoint.name))
                                 status = Actions(
                                     endpoint, self.s.sdnc).unmirror_endpoint()
                                 if not status:
