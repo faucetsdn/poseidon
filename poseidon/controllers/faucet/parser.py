@@ -346,7 +346,7 @@ class Parser:
                                                       endpoint.endpoint_data['segment'], endpoint.endpoint_data['port'], orig_rule_acls, rule])
                                     rewrite = True
                         # remove ACLs that were previously applied
-                        all_rule_acls = list(set(rule_acls))
+                        all_rule_acls = list(set(all_rule_acls))
                         removed_acls = []
                         for acl in existing_acls:
                             if acl in acls and acl not in all_rule_acls:
