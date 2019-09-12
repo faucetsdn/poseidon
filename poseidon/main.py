@@ -526,17 +526,22 @@ class SDNConnect(object):
                     self.r.hmset(endpoint.name, redis_endpoint_data)
                     mac = endpoint.endpoint_data['mac']
                     self.r.hmset(mac, {'poseidon_hash': str(endpoint.name)})
-                    self.r.sadd('mac_addresses', mac)
+                    if not self.r.sismember('mac_addresses', mac):
+                        self.r.sadd('mac_addresses', mac)
                     if 'ipv4' in endpoint.endpoint_data and endpoint.endpoint_data['ipv4'] != 'None' and endpoint.endpoint_data['ipv4']:
                         self.r.hmset(endpoint.endpoint_data['ipv4'],
                                      {'poseidon_hash': str(endpoint.name)})
-                        self.r.sadd('ip_addresses',
-                                    endpoint.endpoint_data['ipv4'])
+                        if not self.r.sismember('ip_addresses',
+                                                endpoint.endpoint_data['ipv4']):
+                            self.r.sadd('ip_addresses',
+                                        endpoint.endpoint_data['ipv4'])
                     if 'ipv6' in endpoint.endpoint_data and endpoint.endpoint_data['ipv6'] != 'None' and endpoint.endpoint_data['ipv6']:
                         self.r.hmset(endpoint.endpoint_data['ipv6'],
                                      {'poseidon_hash': str(endpoint.name)})
-                        self.r.sadd('ip_addresses',
-                                    endpoint.endpoint_data['ipv6'])
+                        if not self.r.sismember('ip_addresses',
+                                                endpoint.endpoint_data['ipv6']):
+                            self.r.sadd('ip_addresses',
+                                        endpoint.endpoint_data['ipv6'])
                     serialized_endpoints.append(endpoint.encode())
                 self.r.set('p_endpoints', str(serialized_endpoints))
             except Exception as e:  # pragma: no cover
