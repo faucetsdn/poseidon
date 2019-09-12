@@ -277,7 +277,7 @@ class Parser():
             'Previous States', 'IPv4 OS\n(p0f)', 'IPv6 OS\n(p0f)', 'Previous IPv4 OSes\n(p0f)',
             'Previous IPv6 OSes\n(p0f)', 'Role\n(NetworkML)', 'Role Confidence\n(NetworkML)', 'Previous Roles\n(NetworkML)',
             'Previous Role Confidences\n(NetworkML)', 'Behavior\n(NetworkML)', 'Previous Behaviors\n(NetworkML)',
-            'IPv4 rDNS', 'IPv6 rDNS', 'SDN Controller Type', 'SDN Controller URI'
+            'IPv4 rDNS', 'IPv6 rDNS', 'SDN Controller Type', 'SDN Controller URI', 'History',
         ]
 
     def completion(self, text, line, completions):
@@ -650,7 +650,7 @@ class PoseidonShell(cmd2.Cmd):
         HISTORY 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
         '''
         # defaults
-        fields = ['history']
+        fields = ['History']
 
         valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
             flags, fields)
