@@ -7,8 +7,17 @@ import hashlib
 import json
 import time
 
+from enum import Enum, auto
 from transitions import Machine
 
+class HistoryTypes(Enum):
+    STATE_CHANGE = auto()
+    ACL_CHANGE = auto()
+
+    def describe(self):
+        return self.name
+    def __str__(self):
+        return self.name
 
 class EndpointDecoder(object):
 
@@ -40,8 +49,6 @@ class EndpointDecoder(object):
 
 
 class Endpoint(object):
-
-    history_types = ['STATE_CHANGE', 'ACL_CHANGE']
 
     states = ['known', 'unknown', 'mirroring', 'inactive', 'abnormal',
               'shutdown', 'reinvestigating', 'queued']
@@ -94,7 +101,7 @@ class Endpoint(object):
     def __init__(self, hashed_val):
         # Initialize the state machine
         self.machine = Machine(model=self, states=Endpoint.states,
-                               transitions=Endpoint.transitions, initial='unknown')
+                               transitions=Endpoint.transitions, initial='unknown', send_event=True)
         self.machine.name = hashed_val[:8]+' '
         self.name = hashed_val
         self.ignore = False
@@ -120,7 +127,7 @@ class Endpoint(object):
         self.history.append({'type':entry_type, 'timestamp': timestamp, 'message': message})
 
     def update_state_history(self, event_data):
-        self._add_history_entry(history_types.STATE_CHANGE, time.time(), 
+        self._add_history_entry(HistoryTypes.STATE_CHANGE, time.time(), 
             "State changed from {0} to {1}".format(event_data.transition.source, event_data.transition.dest))
 
     @staticmethod
