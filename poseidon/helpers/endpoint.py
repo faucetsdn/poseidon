@@ -10,14 +10,9 @@ import time
 from enum import Enum, auto
 from transitions import Machine
 
-class HistoryTypes(Enum):
-    STATE_CHANGE = auto()
-    ACL_CHANGE = auto()
-
-    def describe(self):
-        return self.name
-    def __str__(self):
-        return self.name
+class HistoryTypes():
+    STATE_CHANGE = 'State Change'
+    ACL_CHANGE = 'ACL Change'
 
 class EndpointDecoder(object):
 
