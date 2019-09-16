@@ -769,7 +769,7 @@ class Monitor(object):
             queued_endpoints = sorted(queued_endpoints, key=lambda x: x[1])
             for ep in queued_endpoints:
                 for endpoint in self.s.endpoints:
-                    if ep[0] == endpoint.name:
+                    if ep[0] == endpoint.name and endpoint.p_next_state != 'inactive':
                         if self.s.investigations < self.controller['max_concurrent_reinvestigations']:
                             self.s.investigations += 1
                             endpoint.trigger(endpoint.p_next_state)
