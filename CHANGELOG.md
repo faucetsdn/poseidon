@@ -1,3 +1,13 @@
+# v0.7.1 (2019-09-13)
+
+ - Updated versions of pytest and transitions
+ - Fixed error where VLAN wasn't getting properly stored
+ - Updated demo.txt to match current output
+ - CLI can now output in CSV, JSON, and table formats
+ - Updated CRviz integration URL
+ - Slightly improved state transitions
+ - Fix several bugs in the automated ACLs
+
 # v0.7.0 (2019-08-30)
 
  - Added experimental support for automated ACL changes with Faucet

@@ -133,18 +133,15 @@ BCF is now configured and ready for use with Poseidon.
 <img src="/docs/img/faucet.png" width="190" height="100">
 Poseidon requires at least Faucet version 1.8.6 or higher.
 
-* If Poseidon and Faucet are running on the same host and Poseidon has filesystem access to Faucet's configuration, then Poseidon can manage Faucet's configuration directly - no management configuration is required.  Skip the following step.
+Unless Poseidon and Faucet are running on the same host, Poseidon will connect to Faucet using SSH.  So you'll need to create an account that can SSH to the machine running Faucet and that has rights to modify the configuration file `faucet.yaml` (currently Poseidon expects it to be in the default `/etc/faucet/faucet.yaml` location and `dps` must all be defined in `faucet.yaml` for Poseidon to update the network posture correctly).
 
-* If Poseidon and Faucet are running on different hosts, Poseidon will use SSH to manage Faucet's configuration.  You'll need to create an account that can SSH to the machine running Faucet and that has rights to modify the configuration file `faucet.yaml` (currently Poseidon expects it to be in the default `/etc/faucet/faucet.yaml` location and `dps` must all be defined in `faucet.yaml` for Poseidon to update the network posture correctly).
-
-* Faucet needs to be started with the following environment variables set (which will allow Faucet to automatically apply new configuration changes when Poseidon makes them):
-
+Faucet needs to be started with the following environment variables set:
 ```
 export FAUCET_EVENT_SOCK=1
 export FAUCET_CONFIG_STAT_RELOAD=1
 ```
 
-* Poseidon requires the [RabbitMQ adapter for Faucet](https://github.com/faucetsdn/faucet/tree/master/adapters/vendors/rabbitmq) to receive Faucet network events - export `FA_RABBIT_HOST` to the IP address of the host where Poseidon is running.
+If using the [RabbitMQ adapter for Faucet](https://github.com/faucetsdn/faucet/tree/master/adapters/vendors/rabbitmq) (recommended) make sure to also export `FA_RABBIT_HOST` to the IP address of the host where Poseidon is running.
 
 Faucet is now configured and ready for use with Poseidon.
 
@@ -155,7 +152,7 @@ NEW: If you have used the .DEB installer previously, it is worth noting that Pos
 After installation you'll have a new command `poseidon` available for looking at the status, logs, changing the configuration, or stopping and starting the service.
 ```
 $ poseidon help
-Poseidon 0.7.0, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of machine learning techniques. For more info visit: https://github.com/CyberReboot/poseidon
+Poseidon 0.7.1, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of machine learning techniques. For more info visit: https://github.com/CyberReboot/poseidon
 
 Usage: poseidon [option]
 Options:

@@ -134,7 +134,7 @@ function check_args()
                     echo "Checking volumes..."
                     check_files
                     echo "Starting Poseidon..."
-                    docker run -dit --rm -v /var/run/docker.sock:/var/run/docker.sock -v /opt/vent_files:/opt/vent_files -v /opt/poseidon/.plugin_config.yml:/root/.plugin_config.yml -v /opt/poseidon/.vent_startup.yml:/root/.vent_startup.yml --env-file /etc/poseidon/default.conf --name vent cyberreboot/vent:v0.9.9
+                    docker run -dit --rm -v /var/run/docker.sock:/var/run/docker.sock -v /opt/vent_files:/opt/vent_files -v /opt/poseidon/.plugin_config.yml:/root/.plugin_config.yml -v /opt/poseidon/.vent_startup.yml:/root/.vent_startup.yml --env-file /etc/poseidon/default.conf --name vent cyberreboot/vent:v0.9.10
                     until [ "$(docker ps -q -f name=-poseidon-)" ] && [ "$(docker ps -q -f name=-poseidon- | head -1 | xargs docker container inspect -f \{\{.State.Health.Status\}\})" = "healthy" ]
                     do
                         # TODO do more checks and be verbose in here
@@ -158,13 +158,11 @@ function check_args()
             -v|viz|visualize)
                 if [ "$(docker ps -q --filter "label=vent.namespace=cyberreboot/crviz" --filter "label=vent.name=" | wc -l)" -eq 1 ]; then
                     port_map=$(docker port "$(docker ps -q --filter "label=vent.namespace=cyberreboot/crviz" --filter "label=vent.name=")" 5000/tcp)
-                    api_port_map=$(docker port "$(docker ps -q --filter "label=vent.namespace=cyberreboot/poseidon" --filter "label=vent.name=api")" 8000/tcp)
                     port=$(echo "$port_map" | cut -d':' -f2)
-                    api_port=$(echo "$api_port_map" | cut -d':' -f2)
                     default_iface=$(awk '$2 == 00000000 { print $1 }' /proc/net/route)
                     default_ip=$(ip addr show dev "$default_iface" | awk '$1 ~ /^inet/ { sub("/.*", "", $2); print $2 }' | head -1)
-                    echo "CRviz is connected to Poseidon and accessible here:"
-                    echo "http://$default_ip:$port/?dataSourceName=Poseidon Network&dataSourceUrl=http://$default_ip:$api_port/v1/network"
+                    echo "CRviz is connected to Poseidon and accessible here: http://$default_ip:$port/"
+                    echo "In the Dataset dropdown, select Poseidon Network."
                 else
                     echo "CRviz is not running."
                 fi
