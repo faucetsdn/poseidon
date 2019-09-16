@@ -61,7 +61,7 @@ def test_check_flags():
         'Previous States', 'IPv4 OS\n(p0f)', 'IPv6 OS\n(p0f)', 'Previous IPv4 OSes\n(p0f)',
         'Previous IPv6 OSes\n(p0f)', 'Role\n(NetworkML)', 'Role Confidence\n(NetworkML)', 'Previous Roles\n(NetworkML)',
         'Previous Role Confidences\n(NetworkML)', 'Behavior\n(NetworkML)', 'Previous Behaviors\n(NetworkML)',
-        'IPv4 rDNS', 'IPv6 rDNS', 'SDN Controller Type', 'SDN Controller URI'
+        'IPv4 rDNS', 'IPv6 rDNS', 'SDN Controller Type', 'SDN Controller URI', 'History',
     ]
     valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = parser._check_flags(
         {'fields': ['ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4'], 'sort_by': 1, 'max_width': 100, 'unique': True, 'nonzero': True, 'output_format': 'csv', '4': True, '6': True, '4and6': True}, '')
@@ -313,6 +313,17 @@ def test_get_prev_states():
         'queued', 1551711126), ('queued', 1551711827), ('queued', 1551811126)]
     GetData._get_prev_states(endpoint)
 
+def test_get_history():
+    endpoint = Endpoint('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+    history = GetData._get_history(endpoint)
+    assert history == "No history recorded yet."
+    endpoint.trigger('mirror')
+    endpoint.trigger('known')
+    endpoint.trigger('inactive')
+    history = GetData._get_history(endpoint)
+    assert history != "No history recorded yet."
 
 def test_get_ipv4_os():
     endpoint = Endpoint('foo')

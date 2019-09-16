@@ -5,9 +5,14 @@ Created on 3 December 2018
 """
 import hashlib
 import json
+import time
 
+from enum import Enum, auto
 from transitions import Machine
 
+class HistoryTypes():
+    STATE_CHANGE = 'State Change'
+    ACL_CHANGE = 'ACL Change'
 
 class EndpointDecoder(object):
 
@@ -26,6 +31,10 @@ class EndpointDecoder(object):
             self.endpoint.metadata = e['metadata']
         else:
             self.endpoint.metadata = {}
+        if 'history' in e:
+            self.endpoint.history = e['history']
+        else:
+            self.endpoint.history = []
         self.endpoint.endpoint_data = e['endpoint_data']
         self.endpoint.p_next_state = e['p_next_state']
         self.endpoint.p_prev_states = e['p_prev_states']
@@ -40,54 +49,54 @@ class Endpoint(object):
               'shutdown', 'reinvestigating', 'queued']
 
     transitions = [
-        {'trigger': 'mirror', 'source': 'unknown', 'dest': 'mirroring'},
-        {'trigger': 'queue', 'source': 'unknown', 'dest': 'queued'},
-        {'trigger': 'reinvestigate', 'source': 'known', 'dest': 'reinvestigating'},
-        {'trigger': 'queue', 'source': 'known', 'dest': 'queued'},
-        {'trigger': 'shutdown', 'source': 'abnormal', 'dest': 'shutdown'},
-        {'trigger': 'reinvestigate', 'source': 'abnormal', 'dest': 'reinvestigating'},
-        {'trigger': 'queue', 'source': 'abnormal', 'dest': 'queued'},
-        {'trigger': 'mirror', 'source': 'queued', 'dest': 'mirroring'},
-        {'trigger': 'reinvestigate', 'source': 'queued', 'dest': 'reinvestigating'},
+        {'trigger': 'mirror', 'source': 'unknown', 'dest': 'mirroring', 'before':'update_state_history'},
+        {'trigger': 'queue', 'source': 'unknown', 'dest': 'queued', 'before':'update_state_history'},
+        {'trigger': 'reinvestigate', 'source': 'known', 'dest': 'reinvestigating', 'before':'update_state_history'},
+        {'trigger': 'queue', 'source': 'known', 'dest': 'queued', 'before':'update_state_history'},
+        {'trigger': 'shutdown', 'source': 'abnormal', 'dest': 'shutdown', 'before':'update_state_history'},
+        {'trigger': 'reinvestigate', 'source': 'abnormal', 'dest': 'reinvestigating', 'before':'update_state_history'},
+        {'trigger': 'queue', 'source': 'abnormal', 'dest': 'queued', 'before':'update_state_history'},
+        {'trigger': 'mirror', 'source': 'queued', 'dest': 'mirroring', 'before':'update_state_history'},
+        {'trigger': 'reinvestigate', 'source': 'queued', 'dest': 'reinvestigating', 'before':'update_state_history'},
         # check all states and put into known/unknown/abnormal/inactive to account for external updates
-        {'trigger': 'known', 'source': 'known', 'dest': 'known'},
-        {'trigger': 'unknown', 'source': 'known', 'dest': 'unknown'},
-        {'trigger': 'abnormal', 'source': 'known', 'dest': 'abnormal'},
-        {'trigger': 'inactive', 'source': 'known', 'dest': 'inactive'},
-        {'trigger': 'known', 'source': 'unknown', 'dest': 'known'},
-        {'trigger': 'unknown', 'source': 'unknown', 'dest': 'unknown'},
-        {'trigger': 'abnormal', 'source': 'unknown', 'dest': 'abnormal'},
-        {'trigger': 'inactive', 'source': 'unknown', 'dest': 'inactive'},
-        {'trigger': 'known', 'source': 'mirroring', 'dest': 'known'},
-        {'trigger': 'unknown', 'source': 'mirroring', 'dest': 'unknown'},
-        {'trigger': 'abnormal', 'source': 'mirroring', 'dest': 'abnormal'},
-        {'trigger': 'inactive', 'source': 'mirroring', 'dest': 'inactive'},
-        {'trigger': 'known', 'source': 'inactive', 'dest': 'known'},
-        {'trigger': 'unknown', 'source': 'inactive', 'dest': 'unknown'},
-        {'trigger': 'abnormal', 'source': 'inactive', 'dest': 'abnormal'},
-        {'trigger': 'inactive', 'source': 'inactive', 'dest': 'inactive'},
-        {'trigger': 'known', 'source': 'abnormal', 'dest': 'known'},
-        {'trigger': 'unknown', 'source': 'abnormal', 'dest': 'unknown'},
-        {'trigger': 'abnormal', 'source': 'abnormal', 'dest': 'abnormal'},
-        {'trigger': 'inactive', 'source': 'abnormal', 'dest': 'inactive'},
-        {'trigger': 'known', 'source': 'shutdown', 'dest': 'known'},
-        {'trigger': 'unknown', 'source': 'shutdown', 'dest': 'unknown'},
-        {'trigger': 'abnormal', 'source': 'shutdown', 'dest': 'abnormal'},
-        {'trigger': 'inactive', 'source': 'shutdown', 'dest': 'inactive'},
-        {'trigger': 'known', 'source': 'reinvestigating', 'dest': 'known'},
-        {'trigger': 'unknown', 'source': 'reinvestigating', 'dest': 'unknown'},
-        {'trigger': 'abnormal', 'source': 'reinvestigating', 'dest': 'abnormal'},
-        {'trigger': 'inactive', 'source': 'reinvestigating', 'dest': 'inactive'},
-        {'trigger': 'known', 'source': 'queued', 'dest': 'known'},
-        {'trigger': 'unknown', 'source': 'queued', 'dest': 'unknown'},
-        {'trigger': 'abnormal', 'source': 'queued', 'dest': 'abnormal'},
-        {'trigger': 'inactive', 'source': 'queued', 'dest': 'inactive'}
+        {'trigger': 'known', 'source': 'known', 'dest': 'known', 'before':'update_state_history'},
+        {'trigger': 'unknown', 'source': 'known', 'dest': 'unknown', 'before':'update_state_history'},
+        {'trigger': 'abnormal', 'source': 'known', 'dest': 'abnormal', 'before':'update_state_history'},
+        {'trigger': 'inactive', 'source': 'known', 'dest': 'inactive', 'before':'update_state_history'},
+        {'trigger': 'known', 'source': 'unknown', 'dest': 'known', 'before':'update_state_history'},
+        {'trigger': 'unknown', 'source': 'unknown', 'dest': 'unknown', 'before':'update_state_history'},
+        {'trigger': 'abnormal', 'source': 'unknown', 'dest': 'abnormal', 'before':'update_state_history'},
+        {'trigger': 'inactive', 'source': 'unknown', 'dest': 'inactive', 'before':'update_state_history'},
+        {'trigger': 'known', 'source': 'mirroring', 'dest': 'known', 'before':'update_state_history'},
+        {'trigger': 'unknown', 'source': 'mirroring', 'dest': 'unknown', 'before':'update_state_history'},
+        {'trigger': 'abnormal', 'source': 'mirroring', 'dest': 'abnormal', 'before':'update_state_history'},
+        {'trigger': 'inactive', 'source': 'mirroring', 'dest': 'inactive', 'before':'update_state_history'},
+        {'trigger': 'known', 'source': 'inactive', 'dest': 'known', 'before':'update_state_history'},
+        {'trigger': 'unknown', 'source': 'inactive', 'dest': 'unknown', 'before':'update_state_history'},
+        {'trigger': 'abnormal', 'source': 'inactive', 'dest': 'abnormal', 'before':'update_state_history'},
+        {'trigger': 'inactive', 'source': 'inactive', 'dest': 'inactive', 'before':'update_state_history'},
+        {'trigger': 'known', 'source': 'abnormal', 'dest': 'known', 'before':'update_state_history'},
+        {'trigger': 'unknown', 'source': 'abnormal', 'dest': 'unknown', 'before':'update_state_history'},
+        {'trigger': 'abnormal', 'source': 'abnormal', 'dest': 'abnormal', 'before':'update_state_history'},
+        {'trigger': 'inactive', 'source': 'abnormal', 'dest': 'inactive', 'before':'update_state_history'},
+        {'trigger': 'known', 'source': 'shutdown', 'dest': 'known', 'before':'update_state_history'},
+        {'trigger': 'unknown', 'source': 'shutdown', 'dest': 'unknown', 'before':'update_state_history'},
+        {'trigger': 'abnormal', 'source': 'shutdown', 'dest': 'abnormal', 'before':'update_state_history'},
+        {'trigger': 'inactive', 'source': 'shutdown', 'dest': 'inactive', 'before':'update_state_history'},
+        {'trigger': 'known', 'source': 'reinvestigating', 'dest': 'known', 'before':'update_state_history'},
+        {'trigger': 'unknown', 'source': 'reinvestigating', 'dest': 'unknown', 'before':'update_state_history'},
+        {'trigger': 'abnormal', 'source': 'reinvestigating', 'dest': 'abnormal', 'before':'update_state_history'},
+        {'trigger': 'inactive', 'source': 'reinvestigating', 'dest': 'inactive', 'before':'update_state_history'},
+        {'trigger': 'known', 'source': 'queued', 'dest': 'known', 'before':'update_state_history'},
+        {'trigger': 'unknown', 'source': 'queued', 'dest': 'unknown', 'before':'update_state_history'},
+        {'trigger': 'abnormal', 'source': 'queued', 'dest': 'abnormal', 'before':'update_state_history'},
+        {'trigger': 'inactive', 'source': 'queued', 'dest': 'inactive', 'before':'update_state_history'}
     ]
 
     def __init__(self, hashed_val):
         # Initialize the state machine
         self.machine = Machine(model=self, states=Endpoint.states,
-                               transitions=Endpoint.transitions, initial='unknown')
+                               transitions=Endpoint.transitions, initial='unknown', send_event=True)
         self.machine.name = hashed_val[:8]+' '
         self.name = hashed_val
         self.ignore = False
@@ -95,6 +104,7 @@ class Endpoint(object):
         self.p_next_state = None
         self.p_prev_states = []
         self.metadata = {}
+        self.history = []
 
     def encode(self):
         endpoint_d = {}
@@ -105,7 +115,15 @@ class Endpoint(object):
         endpoint_d['p_next_state'] = self.p_next_state
         endpoint_d['p_prev_states'] = self.p_prev_states
         endpoint_d['metadata'] = self.metadata
+        endpoint_d['history'] = self.history
         return str(json.dumps(endpoint_d))
+
+    def _add_history_entry(self, entry_type, timestamp, message):
+        self.history.append({'type':entry_type, 'timestamp': timestamp, 'message': message})
+
+    def update_state_history(self, event_data):
+        self._add_history_entry(HistoryTypes.STATE_CHANGE, time.time(), 
+            "State changed from {0} to {1}".format(event_data.transition.source, event_data.transition.dest))
 
     @staticmethod
     def make_hash(machine, trunk=False):
