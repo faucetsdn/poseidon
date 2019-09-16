@@ -253,6 +253,15 @@ class GetData():
             current_state[1])) + ' (' + duration(current_state[1]) + ')'
         return output
 
+    @staticmethod
+    def _get_history(endpoint):
+        hist = ''
+        if len(endpoint.history) > 0 :
+            for entry in endpoint.history:
+                hist += "{0} - {1} : {2} \r\n".format(entry['type'], time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(entry['timestamp'])), entry['message'])
+        else :
+            hist = "No history recorded yet."
+        return hist
 
 class Parser():
 
@@ -268,7 +277,7 @@ class Parser():
             'Previous States', 'IPv4 OS\n(p0f)', 'IPv6 OS\n(p0f)', 'Previous IPv4 OSes\n(p0f)',
             'Previous IPv6 OSes\n(p0f)', 'Role\n(NetworkML)', 'Role Confidence\n(NetworkML)', 'Previous Roles\n(NetworkML)',
             'Previous Role Confidences\n(NetworkML)', 'Behavior\n(NetworkML)', 'Previous Behaviors\n(NetworkML)',
-            'IPv4 rDNS', 'IPv6 rDNS', 'SDN Controller Type', 'SDN Controller URI'
+            'IPv4 rDNS', 'IPv6 rDNS', 'SDN Controller Type', 'SDN Controller URI', 'History',
         ]
 
     def completion(self, text, line, completions):
@@ -403,7 +412,8 @@ class Parser():
                          'ipv4 rdns': (GetData._get_ipv4_rdns, 26),
                          'ipv6 rdns': (GetData._get_ipv6_rdns, 27),
                          'sdn controller type': (GetData._get_controller_type, 28),
-                         'sdn controller uri': (GetData._get_controller, 29)}
+                         'sdn controller uri': (GetData._get_controller, 29),
+                         'history': (GetData._get_history, 30)}
         for index, field in enumerate(fields):
             if ipv4_only:
                 if '6' in field:
@@ -640,7 +650,7 @@ class PoseidonShell(cmd2.Cmd):
         HISTORY 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
         '''
         # defaults
-        fields = ['Previous States']
+        fields = ['History']
 
         valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
             flags, fields)
