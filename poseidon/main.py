@@ -485,8 +485,6 @@ class SDNConnect(object):
                 m.endpoint_data = deepcopy(machine)
                 self.endpoints.append(m)
 
-        self.store_endpoints()
-        self.get_stored_endpoints()
         if change_acls and self.controller['AUTOMATED_ACLS']:
             status = Actions(None, self.sdnc).update_acls(
                 rules_file=self.controller['RULES_FILE'], endpoints=self.endpoints)
