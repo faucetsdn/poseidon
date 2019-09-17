@@ -1,3 +1,11 @@
+# v0.7.2 (2019-09-17)
+
+ - Added type entries to history
+ - Fixed an issue where queue was being triggered on inactive endpoints
+ - Fixed the IP for the `run` helper Faucet script
+ - Fixed some instances of the wrong member being called in main
+ - Force triggering a transition when ncaptures complete
+
 # v0.7.1 (2019-09-13)
 
  - Updated versions of pytest and transitions
