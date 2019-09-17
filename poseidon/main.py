@@ -628,9 +628,20 @@ class Monitor(object):
         self.logger.debug('routing_key:{0}'.format(routing_key))
         if routing_key == 'poseidon.algos.decider':
             self.logger.debug('decider value:{0}'.format(my_obj))
-            # TODO if valid response then send along otherwise nothing
-            for key in my_obj:
-                ret_val[key] = my_obj[key]
+            if 'plugin' in my_obj and my_obj['plugin'] == 'ncapture':
+                if 'file' in my_obj:
+                    file_id = my_obj['file'].split('_')[1]
+                    for endpoint in self.s.endpoints:
+                        if file_id == endpoint.name:
+                            endpoint.trigger('unknown')
+                            endpoint.p_next_state = None
+                            endpoint.p_prev_states.append(
+                                (endpoint.state, int(time.time())))
+            if 'valid' in my_obj and my_obj['valid'] == False:
+                ret_val = None
+            else:
+                for key in my_obj:
+                    ret_val[key] = my_obj[key]
         elif routing_key == 'poseidon.action.ignore':
             for name in my_obj:
                 for endpoint in self.s.endpoints:
