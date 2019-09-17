@@ -125,6 +125,24 @@ class Endpoint(object):
         self._add_history_entry(HistoryTypes.STATE_CHANGE, time.time(), 
             "State changed from {0} to {1}".format(event_data.transition.source, event_data.transition.dest))
 
+    def update_acl_history(self, added_acls, removed_acls):
+        message = ""
+        if added_acls and len(added_acls) > 0:
+            message += "Added the following ACLs: " + ", ".join(added_acls) + "\r\n"
+        if len(message) > 0:
+            message += "and r"
+        if removed_acls and len(removed_acls) > 0:
+            message += "R" if len(message) == 0 else ""
+            message += "emoved the following ACLs:" + ", ".join(removed_acls)
+
+
+        self._add_history_entry(HistoryTypes.ACL_CHANGE, time.time(), 
+            "State changed from {0} to {1}".format(event_data.transition.source, event_data.transition.dest))
+
+    def update_property_history(self, entry_type, field_name, old_value, new_value):
+        self._add_history_entry(entry_type, time.time(), 
+            "Property {0} changed from {1} to {2}".format(field_name, old_value, new_value))
+
     @staticmethod
     def make_hash(machine, trunk=False):
         ''' hash the unique metadata parts of an endpoint '''
