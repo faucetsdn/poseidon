@@ -661,7 +661,7 @@ class Monitor(object):
                                     endpoint, self.s.sdnc).mirror_endpoint()
                                 if status:
                                     try:
-                                        self.r.hincrby(
+                                        self.s.r.hincrby(
                                             'vent_plugin_counts', 'ncapture')
                                     except Exception as e:  # pragma: no cover
                                         self.logger.error(
@@ -815,7 +815,7 @@ class Monitor(object):
                     else:
                         if endpoint.state != 'known':
                             endpoint.known()
-        self.store_endpoints()
+        self.s.store_endpoints()
         return
 
     def get_q_item(self):
