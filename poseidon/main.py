@@ -725,7 +725,9 @@ class Monitor(object):
                 self.logger.debug(
                     'Faucet event: {0}'.format(self.faucet_event))
             elif found_work:
-                ml_returns = self.format_rabbit_message(item)['data']
+                msg = self.format_rabbit_message(item)
+                if 'data' in msg:
+                    ml_returns = msg['data']
                 if ml_returns:
                     self.logger.info(
                         'ML results: {0}'.format(ml_returns))
