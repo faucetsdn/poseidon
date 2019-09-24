@@ -28,7 +28,7 @@ if [[ -z "${FAUCET_PREFIX}" ]]; then
     wget -O /opt/grafana/dashboards/faucet_inventory.json https://docs.faucet.nz/en/latest/_static/grafana-dashboards/faucet_inventory.json
     wget -O /opt/grafana/dashboards/faucet_port_statistics.json https://docs.faucet.nz/en/latest/_static/grafana-dashboards/faucet_port_statistics.json
 
-    pushd `pwd` && cd /opt/faucet; docker-compose down; FAUCET_EVENT_SOCK=1 FAUCET_CONFIG_STAT_RELOAD=1 FA_RABBIT_HOST=$default_ip docker-compose -f docker-compose.yaml -f adapters/vendors/rabbitmq/docker-compose.yaml up --build -d; popd
+    pushd `pwd` && cd /opt/faucet; docker-compose down; FAUCET_EVENT_SOCK=1 FAUCET_CONFIG_STAT_RELOAD=1 FAUCET_CONFIG_AUTO_REVERT=1 FA_RABBIT_HOST=$default_ip docker-compose -f docker-compose.yaml -f adapters/vendors/rabbitmq/docker-compose.yaml up --build -d; popd
     poseidon restart
     wget -O- --auth-no-challenge --post-data='{"name":"${DS_PROMETHEUS}","type":"prometheus","access":"proxy","url":"http://prometheus:9090","basicAuth":false,"isDefault":true}' --header="Content-Type: application/json;charset=UTF-8charset=UTF-8" 'http://admin:admin@0.0.0.0:3000/api/datasources'
 
