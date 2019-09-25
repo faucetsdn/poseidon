@@ -31,6 +31,7 @@ from poseidon.helpers.actions import Actions
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import Endpoint
 from poseidon.helpers.endpoint import EndpointDecoder
+from poseidon.helpers.endpoint import HistoryTypes
 from poseidon.helpers.log import Logger
 from poseidon.helpers.metadata import get_ether_vendor
 from poseidon.helpers.metadata import get_rdns_lookup
@@ -511,9 +512,9 @@ class SDNConnect(object):
 
                     #list of fields to make history entries for, along with entry type for that field
                     fields = [
-                        {'field_name': 'behavior', 'entry_type':'PROPERTY_CHANGE'},
-                        {'field_name': 'ipv4_OS', 'entry_type':'PROPERTY_CHANGE'},
-                        {'field_name': 'ipv6_OS', 'entry_type':'PROPERTY_CHANGE'},
+                        {'field_name': 'behavior', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
+                        {'field_name': 'ipv4_OS', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
+                        {'field_name': 'ipv6_OS', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
                     ]
                     #make history entries for any changed prop
                     for field in fields:
@@ -535,6 +536,7 @@ class SDNConnect(object):
                     redis_endpoint_data['prev_states'] = str(
                         endpoint.p_prev_states)
                     redis_endpoint_data['metadata'] = str(endpoint.metadata)
+                    redis_endpoint_data['history'] = str(endpoint.history)
                     self.r.hmset(endpoint.name, redis_endpoint_data)
                     mac = endpoint.endpoint_data['mac']
                     self.r.hmset(mac, {'poseidon_hash': str(endpoint.name)})

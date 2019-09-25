@@ -13,6 +13,7 @@ from transitions import Machine
 class HistoryTypes():
     STATE_CHANGE = 'State Change'
     ACL_CHANGE = 'ACL Change'
+    PROPERTY_CHANGE = 'Property Change'
 
 class EndpointDecoder(object):
 
