@@ -770,35 +770,33 @@ class Monitor(object):
                             extra_machine['ipv6'] = 0
                         extra_machines.append(extra_machine)
                 self.s.find_new_machines(extra_machines)
+
+            queued_endpoints = [
+                endpoint for endpoint in self.s.endpoints
+                if not endpoint.ignore and endpoint.state == 'queued' and endpoint.p_next_state != 'inactive']
             # mirror things in the order they got added to the queue
-            queued_endpoints = []
-            for endpoint in self.s.endpoints:
-                if not endpoint.ignore:
-                    if endpoint.state == 'queued':
-                        queued_endpoints.append(
-                            (endpoint.name, endpoint.p_prev_states[-1][1]))
-            queued_endpoints = sorted(queued_endpoints, key=lambda x: x[1])
-            for ep in queued_endpoints:
-                for endpoint in self.s.endpoints:
-                    if ep[0] == endpoint.name and endpoint.p_next_state != 'inactive':
-                        if self.s.investigations < self.controller['max_concurrent_reinvestigations']:
-                            self.s.investigations += 1
-                            endpoint.trigger(endpoint.p_next_state)
-                            endpoint.p_next_state = None
-                            endpoint.p_prev_states.append(
-                                (endpoint.state, int(time.time())))
-                            status = Actions(
-                                endpoint, self.s.sdnc).mirror_endpoint()
-                            if status:
-                                try:
-                                    self.s.r.hincrby(
-                                        'vent_plugin_counts', 'ncapture')
-                                except Exception as e:  # pragma: no cover
-                                    self.logger.error(
-                                        'Failed to update count of plugins because: {0}'.format(str(e)))
-                            else:
-                                self.logger.warning(
-                                    'Unable to mirror the endpoint: {0}'.format(endpoint.name))
+            queued_endpoints = sorted(queued_endpoints, key=lambda x: x.p_prev_states[-1][1])
+            investigation_budget = max(
+                self.controller['max_concurrent_reinvestigations'] - self.s.investigations,
+                0)
+            for endpoint in queued_endpoints[:investigation_budget]:
+                self.s.investigations += 1
+                endpoint.trigger(endpoint.p_next_state)
+                endpoint.p_next_state = None
+                endpoint.p_prev_states.append(
+                    (endpoint.state, int(time.time())))
+                status = Actions(
+                    endpoint, self.s.sdnc).mirror_endpoint()
+                if status:
+                    try:
+                        self.s.r.hincrby(
+                            'vent_plugin_counts', 'ncapture')
+                    except Exception as e:  # pragma: no cover
+                        self.logger.error(
+                            'Failed to update count of plugins because: {0}'.format(str(e)))
+                else:
+                    self.logger.warning(
+                        'Unable to mirror the endpoint: {0}'.format(endpoint.name))
 
             for endpoint in self.s.endpoints:
                 if not endpoint.ignore:
