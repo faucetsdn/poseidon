@@ -15,7 +15,7 @@ services:
 
     grafana:
         restart: always
-        image: 'grafana/grafana:6.3.5'
+        image: 'grafana/grafana:6.3.6'
         user: 'root'
         ports:
             - '3000:3000'
@@ -47,6 +47,7 @@ services:
         environment:
             FAUCET_CONFIG_STAT_RELOAD: '${FAUCET_CONFIG_STAT_RELOAD}'
             FAUCET_EVENT_SOCK: '${FAUCET_EVENT_SOCK}'
+            FAUCET_CONFIG_AUTO_REVERT: '${FAUCET_CONFIG_AUTO_REVERT}'
 networks:
     default:
         external:

@@ -486,8 +486,6 @@ class SDNConnect(object):
                 m.endpoint_data = deepcopy(machine)
                 self.endpoints.append(m)
 
-        self.store_endpoints()
-        self.get_stored_endpoints()
         if change_acls and self.controller['AUTOMATED_ACLS']:
             status = Actions(None, self.sdnc).update_acls(
                 rules_file=self.controller['RULES_FILE'], endpoints=self.endpoints)
@@ -645,9 +643,20 @@ class Monitor(object):
         self.logger.debug('routing_key:{0}'.format(routing_key))
         if routing_key == 'poseidon.algos.decider':
             self.logger.debug('decider value:{0}'.format(my_obj))
-            # TODO if valid response then send along otherwise nothing
-            for key in my_obj:
-                ret_val[key] = my_obj[key]
+            if 'plugin' in my_obj and my_obj['plugin'] == 'ncapture':
+                if 'file' in my_obj:
+                    file_id = my_obj['file'].split('_')[1]
+                    for endpoint in self.s.endpoints:
+                        if file_id == endpoint.name:
+                            endpoint.trigger('unknown')
+                            endpoint.p_next_state = None
+                            endpoint.p_prev_states.append(
+                                (endpoint.state, int(time.time())))
+            if 'valid' in my_obj and my_obj['valid'] == False:
+                ret_val = None
+            else:
+                for key in my_obj:
+                    ret_val[key] = my_obj[key]
         elif routing_key == 'poseidon.action.ignore':
             for name in my_obj:
                 for endpoint in self.s.endpoints:
@@ -678,7 +687,7 @@ class Monitor(object):
                                     endpoint, self.s.sdnc).mirror_endpoint()
                                 if status:
                                     try:
-                                        self.r.hincrby(
+                                        self.s.r.hincrby(
                                             'vent_plugin_counts', 'ncapture')
                                     except Exception as e:  # pragma: no cover
                                         self.logger.error(
@@ -731,7 +740,9 @@ class Monitor(object):
                 self.logger.debug(
                     'Faucet event: {0}'.format(self.faucet_event))
             elif found_work:
-                ml_returns = self.format_rabbit_message(item)['data']
+                msg = self.format_rabbit_message(item)
+                if 'data' in msg:
+                    ml_returns = msg['data']
                 if ml_returns:
                     self.logger.info(
                         'ML results: {0}'.format(ml_returns))
@@ -774,35 +785,33 @@ class Monitor(object):
                             extra_machine['ipv6'] = 0
                         extra_machines.append(extra_machine)
                 self.s.find_new_machines(extra_machines)
+
+            queued_endpoints = [
+                endpoint for endpoint in self.s.endpoints
+                if not endpoint.ignore and endpoint.state == 'queued' and endpoint.p_next_state != 'inactive']
             # mirror things in the order they got added to the queue
-            queued_endpoints = []
-            for endpoint in self.s.endpoints:
-                if not endpoint.ignore:
-                    if endpoint.state == 'queued':
-                        queued_endpoints.append(
-                            (endpoint.name, endpoint.p_prev_states[-1][1]))
-            queued_endpoints = sorted(queued_endpoints, key=lambda x: x[1])
-            for ep in queued_endpoints:
-                for endpoint in self.s.endpoints:
-                    if ep[0] == endpoint.name and endpoint.p_next_state != 'inactive':
-                        if self.s.investigations < self.controller['max_concurrent_reinvestigations']:
-                            self.s.investigations += 1
-                            endpoint.trigger(endpoint.p_next_state)
-                            endpoint.p_next_state = None
-                            endpoint.p_prev_states.append(
-                                (endpoint.state, int(time.time())))
-                            status = Actions(
-                                endpoint, self.s.sdnc).mirror_endpoint()
-                            if status:
-                                try:
-                                    self.s.r.hincrby(
-                                        'vent_plugin_counts', 'ncapture')
-                                except Exception as e:  # pragma: no cover
-                                    self.logger.error(
-                                        'Failed to update count of plugins because: {0}'.format(str(e)))
-                            else:
-                                self.logger.warning(
-                                    'Unable to mirror the endpoint: {0}'.format(endpoint.name))
+            queued_endpoints = sorted(queued_endpoints, key=lambda x: x.p_prev_states[-1][1])
+            investigation_budget = max(
+                self.controller['max_concurrent_reinvestigations'] - self.s.investigations,
+                0)
+            for endpoint in queued_endpoints[:investigation_budget]:
+                self.s.investigations += 1
+                endpoint.trigger(endpoint.p_next_state)
+                endpoint.p_next_state = None
+                endpoint.p_prev_states.append(
+                    (endpoint.state, int(time.time())))
+                status = Actions(
+                    endpoint, self.s.sdnc).mirror_endpoint()
+                if status:
+                    try:
+                        self.s.r.hincrby(
+                            'vent_plugin_counts', 'ncapture')
+                    except Exception as e:  # pragma: no cover
+                        self.logger.error(
+                            'Failed to update count of plugins because: {0}'.format(str(e)))
+                else:
+                    self.logger.warning(
+                        'Unable to mirror the endpoint: {0}'.format(endpoint.name))
 
             for endpoint in self.s.endpoints:
                 if not endpoint.ignore:
@@ -832,7 +841,7 @@ class Monitor(object):
                     else:
                         if endpoint.state != 'known':
                             endpoint.known()
-        self.store_endpoints()
+        self.s.store_endpoints()
         return
 
     def get_q_item(self):
