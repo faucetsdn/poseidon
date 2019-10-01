@@ -12,7 +12,7 @@ def test_commands():
     endpoint = Endpoint('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
-    commands.sdnc.endpoints.append(endpoint)
+    commands.sdnc.endpoints[endpoint.name] = endpoint
 
     commands.what_is('foo')
     commands.history_of('foo')

@@ -33,7 +33,7 @@ def test_endpoint_by_name():
     endpoint = Endpoint('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
-    s.endpoints.append(endpoint)
+    s.endpoints[endpoint.name] = endpoint
     endpoint2 = s.endpoint_by_name('foo')
     assert endpoint == endpoint2
 
@@ -45,7 +45,7 @@ def test_endpoint_by_hash():
     endpoint = Endpoint('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
-    s.endpoints.append(endpoint)
+    s.endpoints[endpoint.name] = endpoint
     endpoint2 = s.endpoint_by_hash('foo')
     assert endpoint == endpoint2
 
@@ -57,7 +57,7 @@ def test_endpoints_by_ip():
     endpoint = Endpoint('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '10.0.0.1', 'ipv6': 'None'}
-    s.endpoints.append(endpoint)
+    s.endpoints[endpoint.name] = endpoint
     endpoint2 = s.endpoints_by_ip('10.0.0.1')
     assert [endpoint] == endpoint2
 
@@ -69,7 +69,7 @@ def test_endpoints_by_mac():
     endpoint = Endpoint('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
-    s.endpoints.append(endpoint)
+    s.endpoints[endpoint.name] = endpoint
     endpoint2 = s.endpoints_by_mac('00:00:00:00:00:00')
     assert [endpoint] == endpoint2
 
@@ -270,13 +270,13 @@ def test_schedule_job_reinvestigation():
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
             endpoint.mirror()
             endpoint.known()
-            self.s.endpoints.append(endpoint)
+            self.s.endpoints[endpoint.name] = endpoint
             endpoint = Endpoint('foo2')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
             endpoint.mirror()
             endpoint.known()
-            self.s.endpoints.append(endpoint)
+            self.s.endpoints[endpoint.name] = endpoint
             self.s.store_endpoints()
             self.s.get_stored_endpoints()
 
@@ -347,7 +347,7 @@ def test_process():
             endpoint.mirror()
             endpoint.p_prev_states.append(
                 (endpoint.state, int(time.time())))
-            self.s.endpoints.append(endpoint)
+            self.s.endpoints[endpoint.name] = endpoint
             endpoint = Endpoint('foo2')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
@@ -355,11 +355,11 @@ def test_process():
             endpoint.queue()
             endpoint.p_prev_states.append(
                 (endpoint.state, int(time.time())))
-            self.s.endpoints.append(endpoint)
+            self.s.endpoints[endpoint.name] = endpoint
             endpoint = Endpoint('foo3')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
-            self.s.endpoints.append(endpoint)
+            self.s.endpoints[endpoint.name] = endpoint
             self.s.store_endpoints()
             self.s.get_stored_endpoints()
 
@@ -399,7 +399,7 @@ def test_show_endpoints():
     endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'1551805502': {'labels': ['developer workstation'], 'behavior': 'normal'}}}, 'ipv4_addresses': {
         '0.0.0.0': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
     s = SDNConnect()
-    s.endpoints.append(endpoint)
+    s.endpoints[endpoint.name] = endpoint
     s.show_endpoints('all')
     s.show_endpoints('state active')
     s.show_endpoints('state ignored')
