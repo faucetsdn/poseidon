@@ -132,6 +132,7 @@ while [ "$STATE" != 0 ] && [ "$STATE" != 13 ]; do
         db_get poseidon/controller_type
         if [ "$RET" != "Demo" ] && [ "$RET" != "None" ]; then
             db_input high poseidon/max_concurrent_reinvestigations || true
+            db_input high poseidon/reinvestigation_frequency || true
         fi
     ;;
 
