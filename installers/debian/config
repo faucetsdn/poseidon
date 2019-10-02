@@ -104,9 +104,11 @@ while [ "$STATE" != 0 ] && [ "$STATE" != 13 ]; do
                     db_input critical poseidon/collector_nics || true
                 else
                     db_input critical poseidon/collector_nic || true
+                    db_reset poseidon/collector_nics || true
                 fi
             else
                 db_input critical poseidon/collector_nic || true
+                db_reset poseidon/collector_nics || true
             fi
         fi
     ;;
