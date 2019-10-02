@@ -166,7 +166,7 @@ def test_format_rabbit_message():
     data = dict({'Key1': 'Val1'})
     message = ('poseidon.algos.decider', json.dumps(data))
     retval = mockMonitor.format_rabbit_message(message)
-    assert retval == data
+    assert retval == {}
 
     message = ('FAUCET.Event', json.dumps(data))
     retval = mockMonitor.format_rabbit_message(message)
