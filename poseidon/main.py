@@ -90,7 +90,6 @@ def schedule_job_reinvestigation(func):
                 func.logger.info('Starting reinvestigation on: {0} {1}'.format(
                     chosen.name, chosen.state))
                 chosen.reinvestigate()
-                func.s.investigations += 1
                 chosen.p_prev_states.append(
                     (chosen.state, int(time.time())))
                 status = Actions(chosen, func.s.sdnc).mirror_endpoint()
@@ -455,7 +454,6 @@ class SDNConnect(object):
                         if not status:
                             self.logger.warning(
                                 'Unable to unmirror the endpoint: {0}'.format(ep.name))
-                        self.investigations -= 1
                         if ep.state == 'mirroring':
                             ep.p_next_state = 'mirror'
                         elif ep.state == 'reinvestigating':
@@ -619,7 +617,6 @@ class Monitor(object):
                     endpoint.p_next_state = None
                     endpoint.p_prev_states.append(
                         (endpoint.state, int(time.time())))
-                    self.s.investigations -= 1
                     if message.get('valid', False):
                         ret_val.update(my_obj)
                     else:
@@ -712,7 +709,6 @@ class Monitor(object):
                             if not status:
                                 self.logger.warning(
                                     'Unable to unmirror the endpoint: {0}'.format(ep.name))
-                            self.s.investigations -= 1
                         if ml_returns[ep.name]['valid']:
                             ml_decision = None
                             if 'decisions' in ml_returns[ep.name] and 'behavior' in ml_returns[ep.name]['decisions']:
@@ -743,13 +739,19 @@ class Monitor(object):
             queued_endpoints = [
                 endpoint for endpoint in self.s.endpoints.values()
                 if not endpoint.ignore and endpoint.state == 'queued' and endpoint.p_next_state != 'inactive']
+            self.s.investigations = len([
+                endpoint for endpoint in self.s.endpoints.values()
+                if endpoint.state in ['mirroring', 'reinvestigating']])
             # mirror things in the order they got added to the queue
             queued_endpoints = sorted(queued_endpoints, key=lambda x: x.p_prev_states[-1][1])
+
             investigation_budget = max(
                 self.controller['max_concurrent_reinvestigations'] - self.s.investigations,
                 0)
+            logger.debug('investigations {0}, budget {1}, queued {2}'.format(
+                str(self.s.investigations), str(investigation_budget), str(len(queued_endpoints))))
+
             for endpoint in queued_endpoints[:investigation_budget]:
-                self.s.investigations += 1
                 endpoint.trigger(endpoint.p_next_state)
                 endpoint.p_next_state = None
                 endpoint.p_prev_states.append(
@@ -789,7 +791,6 @@ class Monitor(object):
                                     self.logger.warning(
                                         'Unable to unmirror the endpoint: {0}'.format(endpoint.name))
                                 endpoint.unknown()
-                                self.s.investigations -= 1
                                 endpoint.p_prev_states.append(
                                     (endpoint.state, int(time.time())))
                     else:
