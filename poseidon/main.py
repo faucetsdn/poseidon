@@ -511,12 +511,14 @@ class SDNConnect(object):
                         self.r.sadd('mac_addresses', mac)
                     ipv4 = endpoint.endpoint_data.get('ipv4', None)
                     if ipv4 is not None:
-                        self.r.hmset(ipv4, {'poseidon_hash': str(endpoint.name)})
+                        self.r.hmset(
+                            ipv4, {'poseidon_hash': str(endpoint.name)})
                         if not self.r.sismember('ip_addresses', ipv4):
                             self.r.sadd('ip_addresses', ipv4)
                     ipv6 = endpoint.endpoint_data.get('ipv6', None)
                     if ipv6 is not None:
-                        self.r.hmset(ipv6, {'poseidon_hash': str(endpoint.name)})
+                        self.r.hmset(
+                            ipv6, {'poseidon_hash': str(endpoint.name)})
                         if not self.r.sismember('ip_addresses', ipv6):
                             self.r.sadd('ip_addresses', ipv6)
                     serialized_endpoints.append(endpoint.encode())
@@ -666,9 +668,11 @@ class Monitor(object):
         elif routing_key == 'poseidon.action.remove':
             remove_list = [name for name in my_obj]
         elif routing_key == 'poseidon.action.remove.ignored':
-            remove_list = [endpoint.name for endpoint in self.s.endpoints.values() if endpoint.ignore]
+            remove_list = [
+                endpoint.name for endpoint in self.s.endpoints.values() if endpoint.ignore]
         elif routing_key == 'poseidon.action.remove.inactives':
-            remove_list = [endpoint.name for endpoint in self.s.endpoints.values() if endpoint.state == 'inactive']
+            remove_list = [endpoint.name for endpoint in self.s.endpoints.values(
+            ) if endpoint.state == 'inactive']
         elif routing_key == self.controller['FA_RABBIT_ROUTING_KEY']:
             self.logger.debug('FAUCET Event:{0}'.format(my_obj))
             ret_val.update(my_obj)
@@ -743,12 +747,14 @@ class Monitor(object):
                 endpoint for endpoint in self.s.endpoints.values()
                 if endpoint.state in ['mirroring', 'reinvestigating']])
             # mirror things in the order they got added to the queue
-            queued_endpoints = sorted(queued_endpoints, key=lambda x: x.p_prev_states[-1][1])
+            queued_endpoints = sorted(
+                queued_endpoints, key=lambda x: x.p_prev_states[-1][1])
 
             investigation_budget = max(
-                self.controller['max_concurrent_reinvestigations'] - self.s.investigations,
+                self.controller['max_concurrent_reinvestigations'] -
+                self.s.investigations,
                 0)
-            logger.debug('investigations {0}, budget {1}, queued {2}'.format(
+            self.logger.debug('investigations {0}, budget {1}, queued {2}'.format(
                 str(self.s.investigations), str(investigation_budget), str(len(queued_endpoints))))
 
             for endpoint in queued_endpoints[:investigation_budget]:
