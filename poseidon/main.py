@@ -90,7 +90,6 @@ def schedule_job_reinvestigation(func):
                 func.logger.info('Starting reinvestigation on: {0} {1}'.format(
                     chosen.name, chosen.state))
                 chosen.reinvestigate()
-                func.s.investigations += 1
                 chosen.p_prev_states.append(
                     (chosen.state, int(time.time())))
                 status = Actions(chosen, func.s.sdnc).mirror_endpoint()
@@ -106,16 +105,14 @@ def schedule_job_reinvestigation(func):
         return
 
     if not CTRL_C['STOP']:
-        candidates = []
-        for endpoint in func.s.endpoints:
-            # queued endpoints have priority
-            if endpoint.state in ['queued']:
-                candidates.append(endpoint)
+        candidates = [
+            endpoint for endpoint in func.s.endpoints.values()
+            if endpoint.state in ['queued']]
         if len(candidates) == 0:
             # if no queued endpoints, then known and abnormal are candidates
-            for endpoint in func.s.endpoints:
-                if endpoint.state in ['known', 'abnormal']:
-                    candidates.append(endpoint)
+            candidates = [
+                endpoint for endpoint in func.s.endpoints.values()
+                if endpoint.state in ['known', 'abnormal']]
             if len(candidates) > 0:
                 random.shuffle(candidates)
         if func.s.sdnc:
@@ -149,24 +146,25 @@ class SDNConnect(object):
             self.trunk_ports = trunk_ports
         self.logger = logger
         self.get_sdn_context()
-        self.endpoints = []
+        self.endpoints = {}
         self.investigations = 0
         self.connect_redis()
 
     def get_stored_endpoints(self):
         # load existing endpoints if any
+        endpoints = {}
         if self.r:
             try:
                 p_endpoints = self.r.get('p_endpoints')
                 if p_endpoints:
                     p_endpoints = ast.literal_eval(p_endpoints.decode('ascii'))
-                    self.endpoints = []
-                    for endpoint in p_endpoints:
-                        self.endpoints.append(
-                            EndpointDecoder(endpoint).get_endpoint())
+                    for p_endpoint in p_endpoints:
+                        endpoint = EndpointDecoder(p_endpoint).get_endpoint()
+                        endpoints[endpoint.name] = endpoint
             except Exception as e:  # pragma: no cover
                 self.logger.error(
                     'Unable to get existing endpoints from Redis because {0}'.format(str(e)))
+        self.endpoints = endpoints
         return
 
     def get_stored_metadata(self, hash_id):
@@ -278,29 +276,22 @@ class SDNConnect(object):
                     self.controller))
 
     def endpoint_by_name(self, name):
-        for endpoint in self.endpoints:
-            if endpoint.machine.name.strip() == name:
-                return endpoint
-        return None
+        return self.endpoints.get(name, None)
 
     def endpoint_by_hash(self, hash_id):
-        for endpoint in self.endpoints:
-            if endpoint.name == hash_id:
-                return endpoint
-        return None
+        return self.endpoint_by_name(hash_id)
 
     def endpoints_by_ip(self, ip):
-        endpoints = []
-        for endpoint in self.endpoints:
-            if (('ipv4' in endpoint.endpoint_data and ip == endpoint.endpoint_data['ipv4']) or ('ipv6' in endpoint.endpoint_data and ip == endpoint.endpoint_data['ipv6'])):
-                endpoints.append(endpoint)
+        endpoints = [
+            endpoint for endpoint in self.endpoints.values()
+            if ip == endpoint.endpoint_data.get('ipv4', None) or
+            ip == endpoint.endpoint_data.get('ipv6', None)]
         return endpoints
 
     def endpoints_by_mac(self, mac):
-        endpoints = []
-        for endpoint in self.endpoints:
-            if mac == endpoint.endpoint_data['mac']:
-                endpoints.append(endpoint)
+        endpoints = [
+            endpoint for endpoint in self.endpoints.values()
+            if mac == endpoint.endpoint_data['mac']]
         return endpoints
 
     @staticmethod
@@ -336,11 +327,10 @@ class SDNConnect(object):
     def show_endpoints(self, arg):
         endpoints = []
         if arg == 'all':
-            for endpoint in self.endpoints:
-                endpoints.append(endpoint)
+            endpoints = list(self.endpoints.values())
         else:
             show_type, arg = arg.split(' ', 1)
-            for endpoint in self.endpoints:
+            for endpoint in self.endpoints.values():
                 if show_type == 'state':
                     if arg == 'active' and endpoint.state != 'inactive':
                         endpoints.append(endpoint)
@@ -445,10 +435,7 @@ class SDNConnect(object):
                     trunk = True
 
             h = Endpoint.make_hash(machine, trunk=trunk)
-            ep = None
-            for endpoint in self.endpoints:
-                if h == endpoint.name:
-                    ep = endpoint
+            ep = self.endpoints.get(h, None)
             if ep is not None and ep.endpoint_data != machine and not ep.ignore:
                 self.logger.info(
                     'Endpoint changed: {0}:{1}'.format(h, machine))
@@ -467,7 +454,6 @@ class SDNConnect(object):
                         if not status:
                             self.logger.warning(
                                 'Unable to unmirror the endpoint: {0}'.format(ep.name))
-                        self.investigations -= 1
                         if ep.state == 'mirroring':
                             ep.p_next_state = 'mirror'
                         elif ep.state == 'reinvestigating':
@@ -483,18 +469,18 @@ class SDNConnect(object):
                 m = Endpoint(h)
                 m.p_prev_states.append((m.state, int(time.time())))
                 m.endpoint_data = deepcopy(machine)
-                self.endpoints.append(m)
+                self.endpoints[m.name] = m
 
         if change_acls and self.controller['AUTOMATED_ACLS']:
             status = Actions(None, self.sdnc).update_acls(
-                rules_file=self.controller['RULES_FILE'], endpoints=self.endpoints)
+                rules_file=self.controller['RULES_FILE'],
+                endpoints=self.endpoints.values())
             if isinstance(status, list):
                 self.logger.info(
                     'Automated ACLs did the following: {0}'.format(status[1]))
             # TODO add endpoint metadata about acl history, API, CLI
         self.store_endpoints()
         self.get_stored_endpoints()
-
         return
 
     def store_endpoints(self):
@@ -502,43 +488,37 @@ class SDNConnect(object):
         if self.r:
             try:
                 serialized_endpoints = []
-                for endpoint in self.endpoints:
+                for endpoint in self.endpoints.values():
                     # set metadata
                     mac_addresses, ipv4_addresses, ipv6_addresses = self.get_stored_metadata(
                         str(endpoint.name))
                     endpoint.metadata = {'mac_addresses': mac_addresses,
                                          'ipv4_addresses': ipv4_addresses,
                                          'ipv6_addresses': ipv6_addresses}
-                    redis_endpoint_data = {}
-                    redis_endpoint_data['name'] = str(endpoint.name)
-                    redis_endpoint_data['state'] = str(endpoint.state)
-                    redis_endpoint_data['ignore'] = str(endpoint.ignore)
-                    redis_endpoint_data['endpoint_data'] = str(
-                        endpoint.endpoint_data)
-                    redis_endpoint_data['next_state'] = str(
-                        endpoint.p_next_state)
-                    redis_endpoint_data['prev_states'] = str(
-                        endpoint.p_prev_states)
-                    redis_endpoint_data['metadata'] = str(endpoint.metadata)
+                    redis_endpoint_data = {
+                        'name': str(endpoint.name),
+                        'state': str(endpoint.state),
+                        'ignore': str(endpoint.ignore),
+                        'endpoint_data': str(endpoint.endpoint_data),
+                        'next_state': str(endpoint.p_next_state),
+                        'prev_states': str(endpoint.p_prev_states),
+                        'metadata': str(endpoint.metadata),
+                    }
                     self.r.hmset(endpoint.name, redis_endpoint_data)
                     mac = endpoint.endpoint_data['mac']
                     self.r.hmset(mac, {'poseidon_hash': str(endpoint.name)})
                     if not self.r.sismember('mac_addresses', mac):
                         self.r.sadd('mac_addresses', mac)
-                    if 'ipv4' in endpoint.endpoint_data and endpoint.endpoint_data['ipv4'] != 'None' and endpoint.endpoint_data['ipv4']:
-                        self.r.hmset(endpoint.endpoint_data['ipv4'],
-                                     {'poseidon_hash': str(endpoint.name)})
-                        if not self.r.sismember('ip_addresses',
-                                                endpoint.endpoint_data['ipv4']):
-                            self.r.sadd('ip_addresses',
-                                        endpoint.endpoint_data['ipv4'])
-                    if 'ipv6' in endpoint.endpoint_data and endpoint.endpoint_data['ipv6'] != 'None' and endpoint.endpoint_data['ipv6']:
-                        self.r.hmset(endpoint.endpoint_data['ipv6'],
-                                     {'poseidon_hash': str(endpoint.name)})
-                        if not self.r.sismember('ip_addresses',
-                                                endpoint.endpoint_data['ipv6']):
-                            self.r.sadd('ip_addresses',
-                                        endpoint.endpoint_data['ipv6'])
+                    ipv4 = endpoint.endpoint_data.get('ipv4', None)
+                    if ipv4 is not None:
+                        self.r.hmset(ipv4, {'poseidon_hash': str(endpoint.name)})
+                        if not self.r.sismember('ip_addresses', ipv4):
+                            self.r.sadd('ip_addresses', ipv4)
+                    ipv6 = endpoint.endpoint_data.get('ipv6', None)
+                    if ipv6 is not None:
+                        self.r.hmset(ipv6, {'poseidon_hash': str(endpoint.name)})
+                        if not self.r.sismember('ip_addresses', ipv6):
+                            self.r.sadd('ip_addresses', ipv6)
                     serialized_endpoints.append(endpoint.encode())
                 self.r.set('p_endpoints', str(serialized_endpoints))
             except Exception as e:  # pragma: no cover
@@ -582,7 +562,7 @@ class Monitor(object):
         # retrieve endpoints from redis
         self.s.get_stored_endpoints()
         # set all retrieved endpoints to inactive at the start
-        for endpoint in self.s.endpoints:
+        for endpoint in self.s.endpoints.values():
             if not endpoint.ignore:
                 if endpoint.state != 'inactive':
                     if endpoint.state == 'mirroring':
@@ -626,89 +606,75 @@ class Monitor(object):
         self.logger.debug('rabbit_message:{0}'.format(my_obj))
         my_obj = json.loads(my_obj)
         self.logger.debug('routing_key:{0}'.format(routing_key))
+        remove_list = []
+
         if routing_key == 'poseidon.algos.decider':
             self.logger.debug('decider value:{0}'.format(my_obj))
-            if 'plugin' in my_obj and my_obj['plugin'] == 'ncapture':
-                if 'file' in my_obj:
-                    file_id = my_obj['file'].split('_')[1]
-                    for endpoint in self.s.endpoints:
-                        if file_id == endpoint.name:
-                            endpoint.trigger('unknown')
-                            endpoint.p_next_state = None
-                            endpoint.p_prev_states.append(
-                                (endpoint.state, int(time.time())))
-            if 'valid' in my_obj and my_obj['valid'] == False:
-                ret_val = None
-            else:
-                for key in my_obj:
-                    ret_val[key] = my_obj[key]
+            for name, message in my_obj.items():
+                endpoint = self.s.endpoints.get(name, None)
+                if endpoint and message.get('plugin', None) == 'ncapture':
+                    endpoint.trigger('unknown')
+                    endpoint.p_next_state = None
+                    endpoint.p_prev_states.append(
+                        (endpoint.state, int(time.time())))
+                    if message.get('valid', False):
+                        ret_val.update(my_obj)
+                    else:
+                        ret_val = None
+                        break
         elif routing_key == 'poseidon.action.ignore':
             for name in my_obj:
-                for endpoint in self.s.endpoints:
-                    if name == endpoint.name:
-                        endpoint.ignore = True
+                endpoint = self.s.endpoints.get(name, None)
+                if endpoint:
+                    endpoint.ignore = True
         elif routing_key == 'poseidon.action.clear.ignored':
             for name in my_obj:
-                for endpoint in self.s.endpoints:
-                    if name == endpoint.name:
-                        endpoint.ignore = False
+                endpoint = self.s.endpoints.get(name, None)
+                if endpoint:
+                    endpoint.ignore = False
         elif routing_key == 'poseidon.action.change':
             for name, state in my_obj:
-                for endpoint in self.s.endpoints:
-                    if name == endpoint.name:
-                        try:
-                            if state != 'mirror' and state != 'reinvestigate' and (endpoint.state == 'mirroring' or endpoint.state == 'reinvestigating'):
-                                status = Actions(
-                                    endpoint, self.s.sdnc).unmirror_endpoint()
-                                if not status:
-                                    self.logger.warning(
-                                        'Unable to unmirror the endpoint: {0}'.format(endpoint.name))
-                            endpoint.trigger(state)
-                            endpoint.p_next_state = None
-                            endpoint.p_prev_states.append(
-                                (endpoint.state, int(time.time())))
-                            if endpoint.state == 'mirroring' or endpoint.state == 'reinvestigating':
-                                status = Actions(
-                                    endpoint, self.s.sdnc).mirror_endpoint()
-                                if status:
-                                    try:
-                                        self.s.r.hincrby(
-                                            'vent_plugin_counts', 'ncapture')
-                                    except Exception as e:  # pragma: no cover
-                                        self.logger.error(
-                                            'Failed to update count of plugins because: {0}'.format(str(e)))
-                                else:
-                                    self.logger.warning(
-                                        'Unable to mirror the endpoint: {0}'.format(endpoint.name))
-                        except Exception as e:  # pragma: no cover
-                            self.logger.error(
-                                'Unable to change endpoint {0} because: {1}'.format(endpoint.name, str(e)))
+                endpoint = self.s.endpoints.get(name, None)
+                if endpoint:
+                    try:
+                        if state != 'mirror' and state != 'reinvestigate' and (endpoint.state == 'mirroring' or endpoint.state == 'reinvestigating'):
+                            status = Actions(
+                                endpoint, self.s.sdnc).unmirror_endpoint()
+                            if not status:
+                                self.logger.warning(
+                                    'Unable to unmirror the endpoint: {0}'.format(endpoint.name))
+                        endpoint.trigger(state)
+                        endpoint.p_next_state = None
+                        endpoint.p_prev_states.append(
+                            (endpoint.state, int(time.time())))
+                        if endpoint.state == 'mirroring' or endpoint.state == 'reinvestigating':
+                            status = Actions(
+                                endpoint, self.s.sdnc).mirror_endpoint()
+                            if status:
+                                try:
+                                    self.s.r.hincrby(
+                                        'vent_plugin_counts', 'ncapture')
+                                except Exception as e:  # pragma: no cover
+                                    self.logger.error(
+                                        'Failed to update count of plugins because: {0}'.format(str(e)))
+                            else:
+                                self.logger.warning(
+                                    'Unable to mirror the endpoint: {0}'.format(endpoint.name))
+                    except Exception as e:  # pragma: no cover
+                        self.logger.error(
+                            'Unable to change endpoint {0} because: {1}'.format(endpoint.name, str(e)))
         elif routing_key == 'poseidon.action.remove':
-            remove_list = []
-            for name in my_obj:
-                for endpoint in self.s.endpoints:
-                    if name == endpoint.name:
-                        remove_list.append(endpoint)
-            for endpoint in remove_list:
-                self.s.endpoints.remove(endpoint)
+            remove_list = [name for name in my_obj]
         elif routing_key == 'poseidon.action.remove.ignored':
-            remove_list = []
-            for endpoint in self.s.endpoints:
-                if endpoint.ignore:
-                    remove_list.append(endpoint)
-            for endpoint in remove_list:
-                self.s.endpoints.remove(endpoint)
+            remove_list = [endpoint.name for endpoint in self.s.endpoints.values() if endpoint.ignore]
         elif routing_key == 'poseidon.action.remove.inactives':
-            remove_list = []
-            for endpoint in self.s.endpoints:
-                if endpoint.state == 'inactive':
-                    remove_list.append(endpoint)
-            for endpoint in remove_list:
-                self.s.endpoints.remove(endpoint)
+            remove_list = [endpoint.name for endpoint in self.s.endpoints.values() if endpoint.state == 'inactive']
         elif routing_key == self.controller['FA_RABBIT_ROUTING_KEY']:
             self.logger.debug('FAUCET Event:{0}'.format(my_obj))
-            for key in my_obj:
-                ret_val[key] = my_obj[key]
+            ret_val.update(my_obj)
+        for endpoint_name in remove_list:
+            if endpoint_name in self.s.endpoints:
+                del self.s.endpoints[endpoint_name]
         return ret_val
 
     def process(self):
@@ -733,7 +699,7 @@ class Monitor(object):
                         'ML results: {0}'.format(ml_returns))
                 extras = deepcopy(ml_returns)
                 # process results from ml output and update impacted endpoints
-                for ep in self.s.endpoints:
+                for ep in self.s.endpoints.values():
                     if ep.name in ml_returns:
                         del extras[ep.name]
                     if ep.name in ml_returns and 'valid' in ml_returns[ep.name] and not ep.ignore:
@@ -743,7 +709,6 @@ class Monitor(object):
                             if not status:
                                 self.logger.warning(
                                     'Unable to unmirror the endpoint: {0}'.format(ep.name))
-                            self.s.investigations -= 1
                         if ml_returns[ep.name]['valid']:
                             ml_decision = None
                             if 'decisions' in ml_returns[ep.name] and 'behavior' in ml_returns[ep.name]['decisions']:
@@ -772,15 +737,21 @@ class Monitor(object):
                 self.s.find_new_machines(extra_machines)
 
             queued_endpoints = [
-                endpoint for endpoint in self.s.endpoints
+                endpoint for endpoint in self.s.endpoints.values()
                 if not endpoint.ignore and endpoint.state == 'queued' and endpoint.p_next_state != 'inactive']
+            self.s.investigations = len([
+                endpoint for endpoint in self.s.endpoints.values()
+                if endpoint.state in ['mirroring', 'reinvestigating']])
             # mirror things in the order they got added to the queue
             queued_endpoints = sorted(queued_endpoints, key=lambda x: x.p_prev_states[-1][1])
+
             investigation_budget = max(
                 self.controller['max_concurrent_reinvestigations'] - self.s.investigations,
                 0)
+            logger.debug('investigations {0}, budget {1}, queued {2}'.format(
+                str(self.s.investigations), str(investigation_budget), str(len(queued_endpoints))))
+
             for endpoint in queued_endpoints[:investigation_budget]:
-                self.s.investigations += 1
                 endpoint.trigger(endpoint.p_next_state)
                 endpoint.p_next_state = None
                 endpoint.p_prev_states.append(
@@ -798,7 +769,7 @@ class Monitor(object):
                     self.logger.warning(
                         'Unable to mirror the endpoint: {0}'.format(endpoint.name))
 
-            for endpoint in self.s.endpoints:
+            for endpoint in self.s.endpoints.values():
                 if not endpoint.ignore:
                     if self.s.sdnc:
                         if endpoint.state == 'unknown':
@@ -820,7 +791,6 @@ class Monitor(object):
                                     self.logger.warning(
                                         'Unable to unmirror the endpoint: {0}'.format(endpoint.name))
                                 endpoint.unknown()
-                                self.s.investigations -= 1
                                 endpoint.p_prev_states.append(
                                     (endpoint.state, int(time.time())))
                     else:

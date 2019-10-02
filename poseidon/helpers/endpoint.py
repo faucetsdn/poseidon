@@ -98,7 +98,7 @@ class Endpoint(object):
         self.machine = Machine(model=self, states=Endpoint.states,
                                transitions=Endpoint.transitions, initial='unknown', send_event=True)
         self.machine.name = hashed_val[:8]+' '
-        self.name = hashed_val
+        self.name = hashed_val.strip()
         self.ignore = False
         self.endpoint_data = None
         self.p_next_state = None
@@ -107,15 +107,16 @@ class Endpoint(object):
         self.history = []
 
     def encode(self):
-        endpoint_d = {}
-        endpoint_d['name'] = self.name
-        endpoint_d['state'] = self.state
-        endpoint_d['ignore'] = self.ignore
-        endpoint_d['endpoint_data'] = self.endpoint_data
-        endpoint_d['p_next_state'] = self.p_next_state
-        endpoint_d['p_prev_states'] = self.p_prev_states
-        endpoint_d['metadata'] = self.metadata
-        endpoint_d['history'] = self.history
+        endpoint_d = {
+            'name': self.name,
+            'state': self.state,
+            'ignore': self.ignore,
+            'endpoint_data': self.endpoint_data,
+            'p_next_state': self.p_next_state,
+            'p_prev_states': self.p_prev_states,
+            'metadata': self.metadata,
+            'history': self.history,
+        }
         return str(json.dumps(endpoint_d))
 
     def _add_history_entry(self, entry_type, timestamp, message):
@@ -129,14 +130,11 @@ class Endpoint(object):
     def make_hash(machine, trunk=False):
         ''' hash the unique metadata parts of an endpoint '''
         h = hashlib.new('ripemd160')
-        pre_h = str()
-        post_h = None
         words = ['tenant', 'mac', 'segment']
         if trunk:
             words.append('ipv4')
             words.append('ipv6')
-        for word in words:
-            pre_h = pre_h + str(machine.get(word, 'missing'))
+        pre_h = ''.join([str(machine.get(word, 'missing')) for word in words])
         h.update(pre_h.encode('utf-8'))
         post_h = h.hexdigest()
         return post_h
