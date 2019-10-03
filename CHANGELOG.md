@@ -1,3 +1,7 @@
+# v0.7.4 (2019-10-03)
+
+- Fix key checks for automated ACLs
+
 # v0.7.3 (2019-10-03)
 
 - Updated versions of urllib3, pytest, grafana, cmd2, and pylint
