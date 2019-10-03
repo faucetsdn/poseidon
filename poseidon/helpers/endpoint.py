@@ -14,6 +14,7 @@ class HistoryTypes():
     STATE_CHANGE = 'State Change'
     ACL_CHANGE = 'ACL Change'
 
+
 class EndpointDecoder(object):
 
     def __init__(self, endpoint):

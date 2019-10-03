@@ -8,6 +8,7 @@ Created on 3 December 2018
 @author: Charlie Lewis
 """
 import ast
+import difflib
 import json
 import logging
 import queue
@@ -405,27 +406,44 @@ class SDNConnect(object):
                 'Failed connect to Redis because: {0}'.format(str(e)))
         return
 
+    @staticmethod
+    def _diff_machine(machine_a, machine_b):
+
+        def _machine_strlines(machine):
+            return str(json.dumps(machine, indent=2)).splitlines()
+
+        machine_a_strlines = _machine_strlines(machine_a)
+        machine_b_strlines = _machine_strlines(machine_b)
+        return '\n'.join(difflib.unified_diff(
+            machine_a_strlines, machine_b_strlines, n=1))
+
     def find_new_machines(self, machines):
         '''parse switch structure to find new machines added to network
         since last call'''
         change_acls = False
+        ip_fields = {
+            'ipv4': ('ipv4_rdns', 'ipv4_subnet'),
+            'ipv6': ('ipv6_rdns', 'ipv6_subnet')}
+
         for machine in machines:
             machine['ether_vendor'] = get_ether_vendor(
                 machine['mac'], '/poseidon/poseidon/metadata/nmap-mac-prefixes.txt')
-            if 'ipv4' in machine and machine['ipv4'] and machine['ipv4'] is not 'None' and machine['ipv4'] is not '0':
-                machine['ipv4_rdns'] = get_rdns_lookup(machine['ipv4'])
-                machine['ipv4_subnet'] = '.'.join(
-                    machine['ipv4'].split('.')[:-1])+'.0/24'
-            else:
-                machine['ipv4_rdns'] = 'NO DATA'
-                machine['ipv4_subnet'] = 'NO DATA'
-            if 'ipv6' in machine and machine['ipv6'] and machine['ipv6'] is not 'None' and machine['ipv6'] is not '0':
-                machine['ipv6_rdns'] = get_rdns_lookup(machine['ipv6'])
-                machine['ipv6_subnet'] = '.'.join(
-                    machine['ipv6'].split(':')[0:4])+'::0/64'
-            else:
-                machine['ipv6_rdns'] = 'NO DATA'
-                machine['ipv6_subnet'] = 'NO DATA'
+            ipv4 = machine.get('ipv4', None)
+            if ipv4 and ipv4 not in ('0', 'None'):
+                machine.update({
+                    'ipv4_rdns': get_rdns_lookup(ipv4),
+                    'ipv4_subnet': '.'.join(str(ipv4).split('.')[:-1])+'.0/24',
+                })
+            ipv6 = machine.get('ipv6', None)
+            if ipv6 and ipv6 not in ('0', 'None'):
+                machine.update({
+                    'ipv6_rdns': get_rdns_lookup(ipv6),
+                    'ipv6_subnet': '.'.join(str(ipv6).split(':')[0:4])+'::0/64',
+                })
+            for _, fields in ip_fields.items():
+                for field in fields:
+                    if field not in machine:
+                        machine[field] = 'NO DATA'
             if not 'controller_type' in machine:
                 machine['controller_type'] = 'none'
                 machine['controller'] = ''
@@ -436,9 +454,31 @@ class SDNConnect(object):
 
             h = Endpoint.make_hash(machine, trunk=trunk)
             ep = self.endpoints.get(h, None)
-            if ep is not None and ep.endpoint_data != machine and not ep.ignore:
+            if ep is None:
                 self.logger.info(
-                    'Endpoint changed: {0}:{1}'.format(h, machine))
+                    'Detected new endpoint: {0}:{1}'.format(h, machine))
+                change_acls = True
+                m = Endpoint(h)
+                m.p_prev_states.append((m.state, int(time.time())))
+                m.endpoint_data = deepcopy(machine)
+                self.endpoints[m.name] = m
+            else:
+                # Merge IP fields from existing endpoint,
+                # if "new" endpoint doesn't have them.
+                for ip_field, fields in ip_fields.items():
+                    ip = machine.get(ip_field, None)
+                    if ip and ip != '0':
+                        continue
+                    old_ip = ep.endpoint_data.get(ip_field, None)
+                    if old_ip and old_ip != '0':
+                        machine[ip_field] = ip
+                        for field in fields:
+                            machine[field] = ep.endpoint_data[field]
+
+            if ep and ep.endpoint_data != machine and not ep.ignore:
+                diff_txt = self._diff_machine(ep.endpoint_data, machine)
+                self.logger.info(
+                    'Endpoint changed: {0}:{1}'.format(h, diff_txt))
                 change_acls = True
                 ep.endpoint_data = deepcopy(machine)
                 if ep.state == 'inactive' and machine['active'] == 1:
@@ -462,14 +502,6 @@ class SDNConnect(object):
                         ep.p_next_state = ep.state
                     ep.inactive()
                     ep.p_prev_states.append((ep.state, int(time.time())))
-            elif ep is None:
-                self.logger.info(
-                    'Detected new endpoint: {0}:{1}'.format(h, machine))
-                change_acls = True
-                m = Endpoint(h)
-                m.p_prev_states.append((m.state, int(time.time())))
-                m.endpoint_data = deepcopy(machine)
-                self.endpoints[m.name] = m
 
         if change_acls and self.controller['AUTOMATED_ACLS']:
             status = Actions(None, self.sdnc).update_acls(
@@ -622,7 +654,7 @@ class Monitor(object):
                     if message.get('valid', False):
                         ret_val.update(my_obj)
                     else:
-                        ret_val = None
+                        ret_val = {}
                         break
         elif routing_key == 'poseidon.action.ignore':
             for name in my_obj:
@@ -893,7 +925,10 @@ def main(skip_rabbit=False):  # pragma: no cover
     pmain.schedule_thread.start()
 
     # loop here until told not to
-    pmain.process()
+    try:
+        pmain.process()
+    except Exception as e:
+        logger.error('process() exception: {0}'.format(str(e)))
 
     if isinstance(pmain.s.sdnc, FaucetProxy):
         Parser().clear_mirrors(pmain.controller['CONFIG_FILE'])
