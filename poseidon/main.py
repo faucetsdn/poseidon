@@ -414,18 +414,8 @@ class SDNConnect(object):
 
         machine_a_strlines = _machine_strlines(machine_a)
         machine_b_strlines = _machine_strlines(machine_b)
-        differ = difflib.Differ()
-        difflines = []
-        last_line = None
-        for line in differ.compare(machine_a_strlines, machine_b_strlines):
-            if line.startswith(('+', '-')):
-                difflines.append(line)
-            elif line.startswith('?'):
-                if last_line:
-                    difflines.append(last_line)
-                    difflines.append(line)
-            last_line = line
-        return '\n'.join(difflines)
+        return '\n'.join(difflib.unified_diff(
+            machine_a_strlines, machine_b_strlines, n=1))
 
     def find_new_machines(self, machines):
         '''parse switch structure to find new machines added to network
