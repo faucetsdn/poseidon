@@ -406,7 +406,8 @@ class SDNConnect(object):
                 'Failed connect to Redis because: {0}'.format(str(e)))
         return
 
-    def _diff_machine(self, machine_a, machine_b):
+    @staticmethod
+    def _diff_machine(machine_a, machine_b):
 
         def _machine_strlines(machine):
             return str(json.dumps(machine, indent=2)).splitlines()
