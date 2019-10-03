@@ -1,3 +1,16 @@
+# v0.7.3 (2019-10-03)
+
+- Updated versions of urllib3, pytest, grafana, cmd2, and pylint
+- Now uses the auto revert feature of Faucet when using the helper run script
+- Endpoints are now a dictionary instead of a list to prevent duplicates
+- Fixed an issue where messages from ncapture weren't being handled correctly
+- Fixed an issue where the investigations count could be wrong
+- Resets the debconf response for collector_nics when not in use
+- Debconf option for setting the reinvestigation frequency
+- Fixed viz command for Poseidon script
+- Handle IP addresses being None
+- Better diff of when endpoints change
+
 # v0.7.2 (2019-09-17)
 
  - Added type entries to history
