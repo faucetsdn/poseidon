@@ -11,7 +11,7 @@ from enum import Enum, auto
 from transitions import Machine
 
 
-NO_DATA = 'NO_DATA'
+NO_DATA = 'NO DATA'
 MACHINE_IP_FIELDS = {
     'ipv4': ('ipv4_rdns', 'ipv4_subnet'),
     'ipv6': ('ipv6_rdns', 'ipv6_subnet')}
