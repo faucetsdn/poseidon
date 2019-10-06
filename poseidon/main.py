@@ -353,8 +353,8 @@ class SDNConnect(object):
                         ip_addresses_field = '_'.join((ip_field, 'addresses'))
                         ip_addresses = endpoint.metadata.get(ip_addresses_field, None)
                         machine_ip = endpoint.endpoint_data.get(ip_field, None)
-                        if machine_ip and ip_addresses:
-                            metadata = endpoint.metadata[ip_addresses_field][machine_ip]
+                        if machine_ip and ip_addresses and machine_ip in ip_addresses:
+                            metadata = ip_addresses[machine_ip]
                             os = metadata.get('os', None)
                             if os and os.lower() == arg:
                                 endpoints.append(endpoint)
