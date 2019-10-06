@@ -10,6 +10,14 @@ import time
 from enum import Enum, auto
 from transitions import Machine
 
+
+MACHINE_IP_FIELDS = {
+    'ipv4': ('ipv4_rdns', 'ipv4_subnet'),
+    'ipv6': ('ipv6_rdns', 'ipv6_subnet')}
+MACHINE_IP_PREFIXES = {
+    'ipv4': 24, 'ipv6': 64}
+
+
 class HistoryTypes():
     STATE_CHANGE = 'State Change'
     ACL_CHANGE = 'ACL Change'

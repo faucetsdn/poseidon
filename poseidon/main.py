@@ -9,6 +9,7 @@ Created on 3 December 2018
 """
 import ast
 import difflib
+import ipaddress
 import json
 import logging
 import queue
@@ -30,7 +31,7 @@ from poseidon.controllers.faucet.faucet import FaucetProxy
 from poseidon.controllers.faucet.parser import Parser
 from poseidon.helpers.actions import Actions
 from poseidon.helpers.config import Config
-from poseidon.helpers.endpoint import Endpoint
+from poseidon.helpers.endpoint import Endpoint, MACHINE_IP_FIELDS, MACHINE_IP_PREFIXES
 from poseidon.helpers.endpoint import EndpointDecoder
 from poseidon.helpers.log import Logger
 from poseidon.helpers.metadata import get_ether_vendor
@@ -417,36 +418,52 @@ class SDNConnect(object):
         return '\n'.join(difflib.unified_diff(
             machine_a_strlines, machine_b_strlines, n=1))
 
+    @staticmethod
+    def _parse_machine_ip(machine):
+        machine_ip_data = {}
+        for ip_field, fields in MACHINE_IP_FIELDS.items():
+            try:
+                raw_field = machine.get(ip_field, None)
+                machine_ip = ipaddress.ip_address(raw_field)
+                machine_subnet = ipaddress.ip_network(machine_ip).supernet(
+                    new_prefix=MACHINE_IP_PREFIXES[ip_field])
+            except ValueError:
+                machine_ip = None
+                machine_subnet = None
+            machine_ip_data[ip_field] = ''
+            if machine_ip:
+                machine_ip_data.update({
+                    ip_field: str(machine_ip),
+                    '_'.join((ip_field, 'rdns')): get_rdns_lookup(machine_ip),
+                    '_'.join((ip_field, 'subnet')): str(machine_subnet)})
+            for field in fields:
+                if field not in machine_ip_data:
+                    machine_ip_data[field] = 'NO DATA'
+        return machine_ip_data
+
+    @staticmethod
+    def _merge_machine_ip(old_machine, new_machine):
+        for ip_field, fields in MACHINE_IP_FIELDS.items():
+            ip = new_machine.get(ip_field, None)
+            old_ip = old_machine.get(ip_field, None)
+            if not ip and old_ip:
+                new_machine[ip_field] = ip
+                for field in fields:
+                    new_machine[field] = old_machine[field]
+
     def find_new_machines(self, machines):
         '''parse switch structure to find new machines added to network
         since last call'''
         change_acls = False
-        ip_fields = {
-            'ipv4': ('ipv4_rdns', 'ipv4_subnet'),
-            'ipv6': ('ipv6_rdns', 'ipv6_subnet')}
 
         for machine in machines:
             machine['ether_vendor'] = get_ether_vendor(
                 machine['mac'], '/poseidon/poseidon/metadata/nmap-mac-prefixes.txt')
-            ipv4 = machine.get('ipv4', None)
-            if ipv4 and ipv4 not in ('0', 'None'):
-                machine.update({
-                    'ipv4_rdns': get_rdns_lookup(ipv4),
-                    'ipv4_subnet': '.'.join(str(ipv4).split('.')[:-1])+'.0/24',
-                })
-            ipv6 = machine.get('ipv6', None)
-            if ipv6 and ipv6 not in ('0', 'None'):
-                machine.update({
-                    'ipv6_rdns': get_rdns_lookup(ipv6),
-                    'ipv6_subnet': '.'.join(str(ipv6).split(':')[0:4])+'::0/64',
-                })
-            for _, fields in ip_fields.items():
-                for field in fields:
-                    if field not in machine:
-                        machine[field] = 'NO DATA'
+            machine.update(self._parse_machine_ip(machine))
             if not 'controller_type' in machine:
-                machine['controller_type'] = 'none'
-                machine['controller'] = ''
+                machine.update({
+                    'controller_type': 'none',
+                    'controller': ''})
             trunk = False
             for sw in self.trunk_ports:
                 if sw == machine['segment'] and self.trunk_ports[sw].split(',')[1] == str(machine['port']) and self.trunk_ports[sw].split(',')[0] == machine['mac']:
@@ -455,25 +472,15 @@ class SDNConnect(object):
             h = Endpoint.make_hash(machine, trunk=trunk)
             ep = self.endpoints.get(h, None)
             if ep is None:
-                self.logger.info(
-                    'Detected new endpoint: {0}:{1}'.format(h, machine))
                 change_acls = True
                 m = Endpoint(h)
                 m.p_prev_states.append((m.state, int(time.time())))
                 m.endpoint_data = deepcopy(machine)
                 self.endpoints[m.name] = m
+                self.logger.info(
+                    'Detected new endpoint: {0}:{1}'.format(m.name, machine))
             else:
-                # Merge IP fields from existing endpoint,
-                # if "new" endpoint doesn't have them.
-                for ip_field, fields in ip_fields.items():
-                    ip = machine.get(ip_field, None)
-                    if ip and ip != '0':
-                        continue
-                    old_ip = ep.endpoint_data.get(ip_field, None)
-                    if old_ip and old_ip != '0':
-                        machine[ip_field] = ip
-                        for field in fields:
-                            machine[field] = ep.endpoint_data[field]
+                self._merge_machine_ip(ep.endpoint_data, machine)
 
             if ep and ep.endpoint_data != machine and not ep.ignore:
                 diff_txt = self._diff_machine(ep.endpoint_data, machine)
@@ -541,18 +548,16 @@ class SDNConnect(object):
                     self.r.hmset(mac, {'poseidon_hash': str(endpoint.name)})
                     if not self.r.sismember('mac_addresses', mac):
                         self.r.sadd('mac_addresses', mac)
-                    ipv4 = endpoint.endpoint_data.get('ipv4', None)
-                    if ipv4 is not None:
-                        self.r.hmset(
-                            ipv4, {'poseidon_hash': str(endpoint.name)})
-                        if not self.r.sismember('ip_addresses', ipv4):
-                            self.r.sadd('ip_addresses', ipv4)
-                    ipv6 = endpoint.endpoint_data.get('ipv6', None)
-                    if ipv6 is not None:
-                        self.r.hmset(
-                            ipv6, {'poseidon_hash': str(endpoint.name)})
-                        if not self.r.sismember('ip_addresses', ipv6):
-                            self.r.sadd('ip_addresses', ipv6)
+                    for ip_field in MACHINE_IP_FIELDS:
+                        try:
+                            machine_ip = ipaddress.ip_address(endpoint.endpoint_data.get(ip_field, None))
+                        except ValueError:
+                            machine_ip = None
+                        if machine_ip:
+                            self.r.hmset(
+                                str(machine_ip), {'poseidon_hash': str(endpoint.name)})
+                            if not self.r.sismember('ip_addresses', str(machine_ip)):
+                                self.r.sadd('ip_addresses', str(machine_ip))
                     serialized_endpoints.append(endpoint.encode())
                 self.r.set('p_endpoints', str(serialized_endpoints))
             except Exception as e:  # pragma: no cover
@@ -763,12 +768,12 @@ class Monitor(object):
                     if device['valid']:
                         extra_machine = {'mac': device['source_mac'], 'segment': 'NO DATA',
                                          'port': 'NO DATA', 'tenant': 'NO DATA', 'active': 0, 'name': None}
-                        if ':' in device['source_ip']:
-                            extra_machine['ipv6'] = device['source_ip']
-                            extra_machine['ipv4'] = 0
+                        try:
+                            source_ip = ipaddress.ip_address(device['source_ip'])
                         else:
-                            extra_machine['ipv4'] = device['source_ip']
-                            extra_machine['ipv6'] = 0
+                            source_ip = None
+                        if source_ip:
+                            extra_machine['ipv%u' % source_ip.version] = str(source_ip)
                         extra_machines.append(extra_machine)
                 self.s.find_new_machines(extra_machines)
 
