@@ -31,7 +31,7 @@ from poseidon.controllers.faucet.faucet import FaucetProxy
 from poseidon.controllers.faucet.parser import Parser
 from poseidon.helpers.actions import Actions
 from poseidon.helpers.config import Config
-from poseidon.helpers.endpoint import Endpoint, MACHINE_IP_FIELDS, MACHINE_IP_PREFIXES
+from poseidon.helpers.endpoint import Endpoint, MACHINE_IP_FIELDS, MACHINE_IP_PREFIXES, NO_DATA
 from poseidon.helpers.endpoint import EndpointDecoder
 from poseidon.helpers.log import Logger
 from poseidon.helpers.metadata import get_ether_vendor
@@ -171,8 +171,8 @@ class SDNConnect(object):
 
     def get_stored_metadata(self, hash_id):
         mac_addresses = {}
-        ipv4_addresses = {}
-        ipv6_addresses = {}
+        ip_addresses = {ip_field: {} for ip_field in MACHINE_IP_FIELDS}
+
         if self.r:
             macs = []
             try:
@@ -221,37 +221,29 @@ class SDNConnect(object):
                             if b'endpoint_data' in poseidon_info:
                                 endpoint_data = ast.literal_eval(
                                     poseidon_info[b'endpoint_data'].decode('ascii'))
-                                if 'ipv4' in endpoint_data and endpoint_data['ipv4'] not in ['None', 0]:
+                                for ip_field in MACHINE_IP_FIELDS:
                                     try:
-                                        ipv4_info = self.r.hgetall(
-                                            endpoint_data['ipv4'])
-                                        ipv4_addresses[endpoint_data['ipv4']] = {
-                                        }
-                                        if ipv4_info and b'short_os' in ipv4_info:
-                                            ipv4_addresses[endpoint_data['ipv4']
-                                                           ]['os'] = ipv4_info[b'short_os'].decode('ascii')
-                                    except Exception as e:  # pragma: no cover
-                                        self.logger.error(
-                                            'Unable to get existing ipv4 data from Redis because: {0}'.format(str(e)))
-                                if 'ipv6' in endpoint_data and endpoint_data['ipv6'] not in ['None', 0]:
-                                    try:
-                                        ipv6_info = self.r.hgetall(
-                                            endpoint_data['ipv6'])
-                                        ipv6_addresses[endpoint_data['ipv6']] = {
-                                        }
-                                        if ipv6_info and b'short_os' in ipv6_info:
-                                            ipv6_addresses[endpoint_data['ipv6']
-                                                           ]['os'] = ipv6_info[b'short_os'].decode('ascii')
-                                    except Exception as e:  # pragma: no cover
-                                        self.logger.error(
-                                            'Unable to get existing ipv6 data from Redis because: {0}'.format(str(e)))
+                                        raw_field = endpoint_data.get(ip_field, None)
+                                        machine_ip = ipaddress.ip_address(raw_field)
+                                    except ValueError:
+                                        machine_ip = ''
+                                    if machine_ip:
+                                        try:
+                                            ip_info = self.r.hgetall(raw_field)
+                                            short_os = ip_info.get(b'short_os', None)
+                                            ip_addresses[ip_field][raw_field] = {}
+                                            if short_os:
+                                                ip_addresses[ip_field][raw_field]['os'] = short_os.decode('ascii')
+                                        except Exception as e:  # pragma: no cover
+                                            self.logger.error(
+                                                'Unable to get existing {0} data from Redis because: {1}'.format(ip_field, str(e)))
                         except Exception as e:  # pragma: no cover
                             self.logger.error(
                                 'Unable to get existing endpoint data from Redis because: {0}'.format(str(e)))
                 except Exception as e:  # pragma: no cover
                     self.logger.error(
                         'Unable to get existing metadata for {0} from Redis because: {1}'.format(mac, str(e)))
-        return mac_addresses, ipv4_addresses, ipv6_addresses
+        return mac_addresses, ip_addresses['ipv4'], ip_addresses['ipv6']
 
     def get_sdn_context(self):
         if 'TYPE' in self.controller and self.controller['TYPE'] == 'bcf':
@@ -357,15 +349,14 @@ class SDNConnect(object):
                                     endpoints.append(endpoint)
 
                     # filter by operating system
-                    if 'ipv4_addresses' in endpoint.metadata and endpoint.endpoint_data['ipv4'] in endpoint.metadata['ipv4_addresses']:
-                        metadata = endpoint.metadata['ipv4_addresses'][endpoint.endpoint_data['ipv4']]
-                        if 'os' in metadata:
-                            if arg == metadata['os'].lower():
-                                endpoints.append(endpoint)
-                    if 'ipv6_addresses' in endpoint.metadata and endpoint.endpoint_data['ipv6'] in endpoint.metadata['ipv6_addresses']:
-                        metadata = endpoint.metadata['ipv6_addresses'][endpoint.endpoint_data['ipv6']]
-                        if 'os' in metadata:
-                            if arg == metadata['os'].lower():
+                    for ip_field in MACHINE_IP_FIELDS:
+                        ip_addresses_field = '_'.join((ip_field, 'addresses'))
+                        ip_addresses = endpoint.metadata.get(ip_addresses_field, None)
+                        machine_ip = endpoint.endpoint_data.get(ip_field, None)
+                        if machine_ip and ip_addresses:
+                            metadata = endpoint.metadata[ip_addresses_field][machine_ip]
+                            os = metadata.get('os', None)
+                            if os and os.lower() == arg:
                                 endpoints.append(endpoint)
         return endpoints
 
@@ -438,7 +429,7 @@ class SDNConnect(object):
                     '_'.join((ip_field, 'subnet')): str(machine_subnet)})
             for field in fields:
                 if field not in machine_ip_data:
-                    machine_ip_data[field] = 'NO DATA'
+                    machine_ip_data[field] = NO_DATA
         return machine_ip_data
 
     @staticmethod
@@ -531,9 +522,10 @@ class SDNConnect(object):
                     # set metadata
                     mac_addresses, ipv4_addresses, ipv6_addresses = self.get_stored_metadata(
                         str(endpoint.name))
-                    endpoint.metadata = {'mac_addresses': mac_addresses,
-                                         'ipv4_addresses': ipv4_addresses,
-                                         'ipv6_addresses': ipv6_addresses}
+                    endpoint.metadata = {
+                        'mac_addresses': mac_addresses,
+                        'ipv4_addresses': ipv4_addresses,
+                        'ipv6_addresses': ipv6_addresses}
                     redis_endpoint_data = {
                         'name': str(endpoint.name),
                         'state': str(endpoint.state),
@@ -766,11 +758,16 @@ class Monitor(object):
                 self.logger.debug('extra devices: {0}'.format(extras))
                 for device in extras:
                     if device['valid']:
-                        extra_machine = {'mac': device['source_mac'], 'segment': 'NO DATA',
-                                         'port': 'NO DATA', 'tenant': 'NO DATA', 'active': 0, 'name': None}
+                        extra_machine = {
+                            'mac': device['source_mac'],
+                            'segment': NO_DATA,
+                            'port': NO_DATA,
+                            'tenant': NO_DATA,
+                            'active': 0,
+                            'name': None}
                         try:
                             source_ip = ipaddress.ip_address(device['source_ip'])
-                        else:
+                        except ValueError:
                             source_ip = None
                         if source_ip:
                             extra_machine['ipv%u' % source_ip.version] = str(source_ip)
