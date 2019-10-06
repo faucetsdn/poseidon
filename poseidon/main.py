@@ -433,14 +433,15 @@ class SDNConnect(object):
         return machine_ip_data
 
     @staticmethod
-    def _merge_machine_ip(old_machine, new_machine):
+    def merge_machine_ip(old_machine, new_machine):
         for ip_field, fields in MACHINE_IP_FIELDS.items():
             ip = new_machine.get(ip_field, None)
             old_ip = old_machine.get(ip_field, None)
             if not ip and old_ip:
-                new_machine[ip_field] = ip
+                new_machine[ip_field] = old_ip
                 for field in fields:
-                    new_machine[field] = old_machine[field]
+                    if field in old_machine:
+                        new_machine[field] = old_machine[field]
 
     def find_new_machines(self, machines):
         '''parse switch structure to find new machines added to network
@@ -471,7 +472,7 @@ class SDNConnect(object):
                 self.logger.info(
                     'Detected new endpoint: {0}:{1}'.format(m.name, machine))
             else:
-                self._merge_machine_ip(ep.endpoint_data, machine)
+                self.merge_machine_ip(ep.endpoint_data, machine)
 
             if ep and ep.endpoint_data != machine and not ep.ignore:
                 diff_txt = self._diff_machine(ep.endpoint_data, machine)
