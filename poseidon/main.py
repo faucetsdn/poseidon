@@ -425,7 +425,7 @@ class SDNConnect(object):
             if machine_ip:
                 machine_ip_data.update({
                     ip_field: str(machine_ip),
-                    '_'.join((ip_field, 'rdns')): get_rdns_lookup(machine_ip),
+                    '_'.join((ip_field, 'rdns')): get_rdns_lookup(str(machine_ip)),
                     '_'.join((ip_field, 'subnet')): str(machine_subnet)})
             for field in fields:
                 if field not in machine_ip_data:
