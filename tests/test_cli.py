@@ -166,7 +166,7 @@ def test_get_controller():
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
     controller = GetData._get_controller(endpoint)
-    assert controller == 'NO DATA'
+    assert controller == NO_DATA
 
 
 def test_get_controller_type():
@@ -179,7 +179,7 @@ def test_get_controller_type():
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
     controller_type = GetData._get_controller_type(endpoint)
-    assert controller_type == 'NO DATA'
+    assert controller_type == NO_DATA
 
 
 def test_get_ipv4():
@@ -203,7 +203,7 @@ def test_get_ipv4_subnet():
     endpoint.endpoint_data = {'tenant': 'foo', 'mac': '00:00:00:00:00:00',
                               'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0'}
     ipv4_subnet = GetData._get_ipv4_subnet(endpoint)
-    assert ipv4_subnet == 'NO DATA'
+    assert ipv4_subnet == NO_DATA
     endpoint.endpoint_data = {'tenant': 'foo', 'mac': '00:00:00:00:00:00',
                               'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv4_subnet': '0.0.0.0/24'}
     ipv4_subnet = GetData._get_ipv4_subnet(endpoint)
@@ -215,7 +215,7 @@ def test_get_ipv6_subnet():
     endpoint.endpoint_data = {'tenant': 'foo', 'mac': '00:00:00:00:00:00',
                               'segment': 'foo', 'port': '1', 'ipv6': '1212::1'}
     ipv6_subnet = GetData._get_ipv6_subnet(endpoint)
-    assert ipv6_subnet == 'NO DATA'
+    assert ipv6_subnet == NO_DATA
     endpoint.endpoint_data = {'tenant': 'foo', 'mac': '00:00:00:00:00:00',
                               'segment': 'foo', 'port': '1', 'ipv6': '1212::1', 'ipv6_subnet': '1212::1/64'}
     ipv6_subnet = GetData._get_ipv6_subnet(endpoint)
@@ -227,7 +227,7 @@ def test_get_ether_vendor():
     endpoint.endpoint_data = {'tenant': 'foo', 'mac': '00:00:00:00:00:00',
                               'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv4_subnet': '0.0.0.0/24'}
     ether_vendor = GetData._get_ether_vendor(endpoint)
-    assert ether_vendor == 'NO DATA'
+    assert ether_vendor == NO_DATA
     endpoint.endpoint_data = {'ether_vendor': 'VENDOR', 'tenant': 'foo', 'mac': '00:00:00:00:00:00',
                               'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv4_subnet': '0.0.0.0/24'}
     ether_vendor = GetData._get_ether_vendor(endpoint)
@@ -239,7 +239,7 @@ def test_get_ipv4_rdns():
     endpoint.endpoint_data = {'tenant': 'foo', 'mac': '00:00:00:00:00:00',
                               'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv4_subnet': '0.0.0.0/24'}
     ipv4_rdns = GetData._get_ipv4_rdns(endpoint)
-    assert ipv4_rdns == 'NO DATA'
+    assert ipv4_rdns == NO_DATA
     endpoint.endpoint_data = {'ipv4_rdns': 'foo.internal', 'tenant': 'foo', 'mac': '00:00:00:00:00:00',
                               'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv4_subnet': '0.0.0.0/24'}
     ipv4_rdns = GetData._get_ipv4_rdns(endpoint)
@@ -251,7 +251,7 @@ def test_get_ipv6_rdns():
     endpoint.endpoint_data = {'tenant': 'foo', 'mac': '00:00:00:00:00:00',
                               'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv4_subnet': '0.0.0.0/24'}
     ipv6_rdns = GetData._get_ipv6_rdns(endpoint)
-    assert ipv6_rdns == 'NO DATA'
+    assert ipv6_rdns == NO_DATA
     endpoint.endpoint_data = {'ipv6_rdns': 'foo.internal', 'tenant': 'foo', 'mac': '00:00:00:00:00:00',
                               'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv4_subnet': '0.0.0.0/24'}
     ipv6_rdns = GetData._get_ipv6_rdns(endpoint)
@@ -304,7 +304,7 @@ def test_get_prev_states():
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
     endpoint.p_prev_states = []
     prev_states = GetData._get_prev_states(endpoint)
-    assert prev_states == 'NO DATA'
+    assert prev_states == NO_DATA
     endpoint.p_prev_states = [('unknown', 1551711125)]
     GetData._get_prev_states(endpoint)
     endpoint.p_prev_states = [('unknown', 1551711125), ('queued', 1551711126)]
@@ -331,7 +331,7 @@ def test_get_ipv4_os():
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0'}
     endpoint.metadata = {'ipv4_addresses': {}}
     ipv4_os = GetData._get_ipv4_os(endpoint)
-    assert ipv4_os == 'NO DATA'
+    assert ipv4_os == NO_DATA
     endpoint.metadata = {'ipv4_addresses': {'0.0.0.0': {'os': 'foo'}}}
     ipv4_os = GetData._get_ipv4_os(endpoint)
     assert ipv4_os == 'foo'
@@ -343,7 +343,7 @@ def test_get_ipv6_os():
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv6': '1212::1'}
     endpoint.metadata = {'ipv6_addresses': {}}
     ipv6_os = GetData._get_ipv6_os(endpoint)
-    assert ipv6_os == 'NO DATA'
+    assert ipv6_os == NO_DATA
     endpoint.metadata = {'ipv6_addresses': {'1212::1': {'os': 'foo'}}}
     ipv6_os = GetData._get_ipv6_os(endpoint)
     assert ipv6_os == 'foo'
@@ -355,7 +355,7 @@ def test_get_role():
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
     endpoint.metadata = {'mac_addresses': {}}
     role = GetData._get_role(endpoint)
-    assert role == 'NO DATA'
+    assert role == NO_DATA
     endpoint.metadata = {'mac_addresses': {
         '00:00:00:00:00:00': {'1551711125': {'labels': ['foo']}}}}
     role = GetData._get_role(endpoint)
@@ -368,7 +368,7 @@ def test_get_role_confidence():
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
     endpoint.metadata = {'mac_addresses': {}}
     confidence = GetData._get_role_confidence(endpoint)
-    assert confidence == 'NO DATA'
+    assert confidence == NO_DATA
     endpoint.metadata = {'mac_addresses': {
         '00:00:00:00:00:00': {'1551711125': {'confidences': [10.0]}}}}
     confidence = GetData._get_role_confidence(endpoint)
@@ -381,7 +381,7 @@ def test_get_behavior():
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
     endpoint.metadata = {'mac_addresses': {}}
     behavior = GetData._get_behavior(endpoint)
-    assert behavior == 'NO DATA'
+    assert behavior == NO_DATA
     endpoint.metadata = {'mac_addresses': {
         '00:00:00:00:00:00': {'1551711125': {'behavior': 'abnormal'}}}}
     behavior = GetData._get_behavior(endpoint)

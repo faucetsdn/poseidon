@@ -26,12 +26,13 @@ import requests
 import schedule
 from redis import StrictRedis
 
+from poseidon.constants import NO_DATA
 from poseidon.controllers.bcf.bcf import BcfProxy
 from poseidon.controllers.faucet.faucet import FaucetProxy
 from poseidon.controllers.faucet.parser import Parser
 from poseidon.helpers.actions import Actions
 from poseidon.helpers.config import Config
-from poseidon.helpers.endpoint import Endpoint, MACHINE_IP_FIELDS, MACHINE_IP_PREFIXES, NO_DATA
+from poseidon.helpers.endpoint import Endpoint, MACHINE_IP_FIELDS, MACHINE_IP_PREFIXES
 from poseidon.helpers.endpoint import EndpointDecoder
 from poseidon.helpers.log import Logger
 from poseidon.helpers.metadata import get_ether_vendor

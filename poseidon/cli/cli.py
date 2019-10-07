@@ -20,6 +20,7 @@ from natural.date import duration
 from texttable import Texttable
 
 from poseidon.cli.commands import Commands
+from poseidon.constants imoprt NO_DATA
 from poseidon.helpers.exception_decor import exception
 
 
@@ -62,29 +63,25 @@ class GetData():
     def _get_ipv4_subnet(endpoint):
         if 'ipv4_subnet' in endpoint.endpoint_data:
             return str(endpoint.endpoint_data['ipv4_subnet'])
-        else:
-            return 'NO DATA'
+        return NO_DATA
 
     @staticmethod
     def _get_ether_vendor(endpoint):
         if 'ether_vendor' in endpoint.endpoint_data:
             return str(endpoint.endpoint_data['ether_vendor'])
-        else:
-            return 'NO DATA'
+        return NO_DATA
 
     @staticmethod
     def _get_ipv4_rdns(endpoint):
         if 'ipv4_rdns' in endpoint.endpoint_data:
             return str(endpoint.endpoint_data['ipv4_rdns'])
-        else:
-            return 'NO DATA'
+        return NO_DATA
 
     @staticmethod
     def _get_ipv6_rdns(endpoint):
         if 'ipv6_rdns' in endpoint.endpoint_data:
             return str(endpoint.endpoint_data['ipv6_rdns'])
-        else:
-            return 'NO DATA'
+        return NO_DATA
 
     @staticmethod
     def _get_ipv6(endpoint):
@@ -94,22 +91,19 @@ class GetData():
     def _get_ipv6_subnet(endpoint):
         if 'ipv6_subnet' in endpoint.endpoint_data:
             return str(endpoint.endpoint_data['ipv6_subnet'])
-        else:
-            return 'NO DATA'
+        return NO_DATA
 
     @staticmethod
     def _get_controller_type(endpoint):
         if 'controller_type' in endpoint.endpoint_data:
             return str(endpoint.endpoint_data['controller_type'])
-        else:
-            return 'NO DATA'
+        return NO_DATA
 
     @staticmethod
     def _get_controller(endpoint):
         if 'controller' in endpoint.endpoint_data:
             return str(endpoint.endpoint_data['controller'])
-        else:
-            return 'NO DATA'
+        return NO_DATA
 
     @staticmethod
     def _get_ignored(endpoint):
@@ -135,7 +129,7 @@ class GetData():
 
     @staticmethod
     def _get_role(endpoint):
-        result = 'NO DATA'
+        result = NO_DATA
         endpoint_mac = GetData._get_mac(endpoint)
         if 'mac_addresses' in endpoint.metadata and endpoint_mac in endpoint.metadata['mac_addresses']:
             metadata = endpoint.metadata['mac_addresses'][endpoint_mac]
@@ -150,7 +144,7 @@ class GetData():
 
     @staticmethod
     def _get_role_confidence(endpoint):
-        result = 'NO DATA'
+        result = NO_DATA
         endpoint_mac = GetData._get_mac(endpoint)
         if 'mac_addresses' in endpoint.metadata and endpoint_mac in endpoint.metadata['mac_addresses']:
             metadata = endpoint.metadata['mac_addresses'][endpoint_mac]
@@ -165,7 +159,7 @@ class GetData():
 
     @staticmethod
     def _get_ipv4_os(endpoint):
-        result = 'NO DATA'
+        result = NO_DATA
         endpoint_ip = GetData._get_ipv4(endpoint)
         if 'ipv4_addresses' in endpoint.metadata and endpoint_ip in endpoint.metadata['ipv4_addresses']:
             metadata = endpoint.metadata['ipv4_addresses'][endpoint_ip]
@@ -175,7 +169,7 @@ class GetData():
 
     @staticmethod
     def _get_ipv6_os(endpoint):
-        result = 'NO DATA'
+        result = NO_DATA
         endpoint_ip = GetData._get_ipv6(endpoint)
         if 'ipv6_addresses' in endpoint.metadata and endpoint_ip in endpoint.metadata['ipv6_addresses']:
             metadata = endpoint.metadata['ipv6_addresses'][endpoint_ip]
@@ -185,7 +179,7 @@ class GetData():
 
     @staticmethod
     def _get_behavior(endpoint):
-        result = 'NO DATA'
+        result = NO_DATA
         endpoint_mac = GetData._get_mac(endpoint)
         if 'mac_addresses' in endpoint.metadata and endpoint_mac in endpoint.metadata['mac_addresses']:
             metadata = endpoint.metadata['mac_addresses'][endpoint_mac]
@@ -227,7 +221,7 @@ class GetData():
     def _get_prev_states(endpoint):
         prev_states = endpoint.p_prev_states
         oldest_state = []
-        output = 'NO DATA'
+        output = NO_DATA
         if len(prev_states) > 1:
             oldest_state = prev_states.pop(0)
             current_state = prev_states.pop()
@@ -437,14 +431,14 @@ class Parser():
                 for field in fields:
                     record.append(fields_lookup[field.lower()][0](endpoint))
                 # remove rows that are all zero or 'NO DATA'
-                if not nonzero or not all(item == '0' or item == 'NO DATA' for item in record):
+                if not nonzero or not all(item == '0' or item == NO_DATA for item in record):
                     records.append(record)
 
             # remove columns that are all zero or 'NO DATA'
             del_columns = []
             for i in range(len(fields)):
                 marked = False
-                if nonzero and all(item[i] == '0' or item[i] == 'NO DATA' for item in records):
+                if nonzero and all(item[i] == '0' or item[i] == NO_DATA for item in records):
                     del_columns.append(i)
                     marked = True
                 if unique and not marked:

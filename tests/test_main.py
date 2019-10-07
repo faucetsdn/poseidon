@@ -13,6 +13,7 @@ import time
 import redis
 from prometheus_client import Gauge
 
+from poseidon.constants import NO_DATA
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import Endpoint
 from poseidon.main import CTRL_C

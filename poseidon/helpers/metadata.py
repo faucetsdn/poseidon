@@ -5,6 +5,8 @@ Created on 19 February 2019
 """
 import socket
 
+from poseidon.constants import NO_DATA
+
 
 def get_ether_vendor(mac, lookup_path):
     """
@@ -17,7 +19,7 @@ def get_ether_vendor(mac, lookup_path):
                 if line.startswith(mac):
                     return line.split()[1].strip()
     except Exception as e:  # pragma: no cover
-        return 'NO DATA'
+        return NO_DATA
 
 
 def get_rdns_lookup(ip):
@@ -27,9 +29,9 @@ def get_rdns_lookup(ip):
     try:
         rdns = socket.gethostbyaddr(ip)
         if rdns[0] == rdns[2][0]:
-            rdns = 'NO DATA'
+            rdns = NO_DATA
         else:
             rdns = rdns[0]
     except Exception as e:  # pragma: no cover
-        rdns = 'NO DATA'
+        return NO_DATA
     return rdns

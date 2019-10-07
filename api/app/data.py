@@ -11,6 +11,8 @@ from natural.date import duration
 from .routes import paths
 from .routes import version
 
+from poseidon.constants import NO_DATA
+
 
 class Endpoints(object):
 
@@ -121,7 +123,7 @@ class Nodes():
                                                 node['ipv4_subnet'] = '.'.join(
                                                     ipv4.split('.')[:-1])+'.0/24'
                                             else:
-                                                node['ipv4_subnet'] = 'NO DATA'
+                                                node['ipv4_subnet'] = NO_DATA
                                         ipv4_info = self.r.hgetall(ipv4)
                                         if ipv4_info and 'short_os' in ipv4_info:
                                             node['ipv4_os'] = ipv4_info['short_os']
@@ -137,7 +139,7 @@ class Nodes():
                                                 node['ipv6_subnet'] = ':'.join(
                                                     ipv6.split(':')[0:4])+'::0/64'
                                             else:
-                                                node['ipv6_subnet'] = 'NO DATA'
+                                                node['ipv6_subnet'] = NO_DATA
                                         ipv6_info = self.r.hgetall(ipv6)
                                         if ipv6_info and 'short_os' in ipv6_info:
                                             node['ipv6_os'] = ipv6_info['short_os']
@@ -182,18 +184,18 @@ class NetworkFull(object):
 
     @staticmethod
     def get_fields():
-        return {'id': 'NO DATA', 'mac': 0, 'ipv4': 0,
-                'ipv6': 0, 'ipv4_subnet': 'NO DATA',
-                'ipv6_subnet': 'NO DATA', 'segment': 0, 'port': 0,
-                'tenant': 0, 'active': 0, 'next_state': 'NO DATA',
-                'state': 'NO DATA', 'prev_states': 'NO DATA',
-                'ignored': 'False', 'first_seen': 'NO DATA',
-                'last_seen': 'NO DATA', 'role': 'NO DATA',
+        return {'id': NO_DATA, 'mac': 0, 'ipv4': 0,
+                'ipv6': 0, 'ipv4_subnet': NO_DATA,
+                'ipv6_subnet': NO_DATA, 'segment': 0, 'port': 0,
+                'tenant': 0, 'active': 0, 'next_state': NO_DATA,
+                'state': NO_DATA, 'prev_states': NO_DATA,
+                'ignored': 'False', 'first_seen': NO_DATA,
+                'last_seen': NO_DATA, 'role': NO_DATA,
                 'role_confidence': 0, 'behavior': 0,
-                'ipv4_os': 'NO DATA', 'ipv6_os': 'NO DATA',
-                'source': 'NO DATA', 'ipv4_rdns': 'NO DATA',
-                'ipv6_rdns': 'NO DATA', 'ether_vendor': 'NO DATA',
-                'controller_type': 'NO DATA', 'controller': 'NO DATA'}
+                'ipv4_os': NO_DATA, 'ipv6_os': NO_DATA,
+                'source': NO_DATA, 'ipv4_rdns': NO_DATA,
+                'ipv6_rdns': NO_DATA, 'ether_vendor': NO_DATA,
+                'controller_type': NO_DATA, 'controller': NO_DATA}
 
     @staticmethod
     def get_dataset():
@@ -216,16 +218,16 @@ class Network(object):
 
     @staticmethod
     def get_fields():
-        return {'id': 'NO DATA', 'mac': 0, 'ipv4': 0, 'ipv6': 0,
-                'ipv4_subnet': 'NO DATA', 'ipv6_subnet': 'NO DATA',
+        return {'id': NO_DATA, 'mac': 0, 'ipv4': 0, 'ipv6': 0,
+                'ipv4_subnet': NO_DATA, 'ipv6_subnet': NO_DATA,
                 'vlan': 0, 'segment': 0, 'port': 0,
-                'state': 'NO DATA', 'ignored': 'False',
-                'first_seen': 'NO DATA', 'last_seen': 'NO DATA',
-                'role': 'NO DATA', 'role_confidence': 0, 'behavior': 0,
-                'ipv4_os': 'NO DATA', 'ipv6_os': 'NO DATA',
-                'ipv4_rdns': 'NO DATA', 'ipv6_rdns': 'NO DATA',
-                'ether_vendor': 'NO DATA', 'controller_type': 'NO DATA',
-                'controller': 'NO DATA'}
+                'state': NO_DATA, 'ignored': 'False',
+                'first_seen': NO_DATA, 'last_seen': NO_DATA,
+                'role': NO_DATA, 'role_confidence': 0, 'behavior': 0,
+                'ipv4_os': NO_DATA, 'ipv6_os': NO_DATA,
+                'ipv4_rdns': NO_DATA, 'ipv6_rdns': NO_DATA,
+                'ether_vendor': NO_DATA, 'controller_type': NO_DATA,
+                'controller': NO_DATA}
 
     @staticmethod
     def field_mapping():
