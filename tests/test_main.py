@@ -28,7 +28,8 @@ logger = logging.getLogger('test')
 
 
 def test_endpoint_by_name():
-    s = SDNConnect()
+    controller = Config().get_config()
+    s = SDNConnect(controller)
     endpoint = s.endpoint_by_name('foo')
     assert endpoint == None
     endpoint = Endpoint('foo')
@@ -40,7 +41,8 @@ def test_endpoint_by_name():
 
 
 def test_endpoint_by_hash():
-    s = SDNConnect()
+    controller = Config().get_config()
+    s = SDNConnect(controller)
     endpoint = s.endpoint_by_hash('foo')
     assert endpoint == None
     endpoint = Endpoint('foo')
@@ -52,7 +54,8 @@ def test_endpoint_by_hash():
 
 
 def test_endpoints_by_ip():
-    s = SDNConnect()
+    controller = Config().get_config()
+    s = SDNConnect(controller)
     endpoints = s.endpoints_by_ip('10.0.0.1')
     assert endpoints == []
     endpoint = Endpoint('foo')
@@ -64,7 +67,8 @@ def test_endpoints_by_ip():
 
 
 def test_endpoints_by_mac():
-    s = SDNConnect()
+    controller = Config().get_config()
+    s = SDNConnect(controller)
     endpoints = s.endpoints_by_mac('00:00:00:00:00:01')
     assert endpoints == []
     endpoint = Endpoint('foo')
@@ -93,7 +97,7 @@ def test_signal_handler():
         def __init__(self):
             self.logger = logger
             self.controller = Config().get_config()
-            self.s = SDNConnect()
+            self.s = SDNConnect(self.controller)
 
     class MockSchedule:
         call_log = []
@@ -135,7 +139,7 @@ def test_get_q_item():
         def __init__(self):
             self.logger = logger
             self.controller = Config().get_config()
-            self.s = SDNConnect()
+            self.s = SDNConnect(self.controller)
 
     mock_monitor = MockMonitor()
     mock_monitor.m_queue = MockMQueue()
@@ -159,7 +163,7 @@ def test_format_rabbit_message():
             self.fa_rabbit_routing_key = 'foo'
             self.logger = logger
             self.controller = Config().get_config()
-            self.s = SDNConnect()
+            self.s = SDNConnect(self.controller)
 
     mockMonitor = MockMonitor()
     mockMonitor.logger = MockLogger().logger
@@ -246,7 +250,8 @@ def test_schedule_job_kickurl():
         def __init__(self):
             self.logger = logger
             self.faucet_event = []
-            self.s = SDNConnect()
+            self.controller = Config().get_config()
+            self.s = SDNConnect(self.controller)
 
     schedule_job_kickurl(func())
 
@@ -260,7 +265,7 @@ def test_schedule_job_reinvestigation():
             self.faucet_event = []
             self.controller = Config().get_config()
             self.controller['max_concurrent_reinvestigations'] = 10
-            self.s = SDNConnect()
+            self.s = SDNConnect(self.controller)
             if 'POSEIDON_TRAVIS' in os.environ:
                 self.s.r = redis.StrictRedis(host='localhost',
                                              port=6379,
@@ -285,7 +290,8 @@ def test_schedule_job_reinvestigation():
 
 
 def test_find_new_machines():
-    s = SDNConnect()
+    controller = Config().get_config()
+    s = SDNConnect(controller)
     machines = [{'active': 0, 'source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'ipv4_os': 'unknown', 'tenant': 'vlan1', 'port': 1, 'segment': 'switch1', 'ipv4': '123.123.123.123', 'mac': '00:00:00:00:00:00', 'id': 'foo1', 'behavior': 1, 'ipv6': '0'},
                 {'active': 1, 'source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'ipv4_os': 'unknown', 'tenant': 'vlan1',
                     'port': 1, 'segment': 'switch1', 'ipv4': '123.123.123.123', 'mac': '00:00:00:00:00:00', 'id': 'foo2', 'behavior': 1, 'ipv6': '0'},
@@ -330,7 +336,7 @@ def test_process():
             self.fa_rabbit_routing_key = 'FAUCET.Event'
             self.faucet_event = None
             self.controller = Config().get_config()
-            self.s = SDNConnect()
+            self.s = SDNConnect(self.controller)
             self.s.controller['TYPE'] = 'None'
             self.s.get_sdn_context()
             self.s.controller['TYPE'] = 'bcf'
@@ -399,7 +405,8 @@ def test_show_endpoints():
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv6': '1212::1'}
     endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'1551805502': {'labels': ['developer workstation'], 'behavior': 'normal'}}}, 'ipv4_addresses': {
         '0.0.0.0': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
-    s = SDNConnect()
+    controller = Config().get_config()
+    s = SDNConnect(controller)
     s.endpoints[endpoint.name] = endpoint
     s.show_endpoints('all')
     s.show_endpoints('state active')
@@ -411,7 +418,8 @@ def test_show_endpoints():
 
 
 def test_merge_machine():
-    s = SDNConnect()
+    controller = Config().get_config()
+    s = SDNConnect(controller)
     old_machine = {'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv6': '1212::1'}
     new_machine = {'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '', 'ipv6': ''}
     s.merge_machine_ip(old_machine, new_machine)

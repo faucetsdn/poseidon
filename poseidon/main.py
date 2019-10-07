@@ -139,11 +139,11 @@ def schedule_thread_worker(schedule):
 
 class SDNConnect(object):
 
-    def __init__(self):
+    def __init__(self, controller):
+        self.controller = controller
         self.r = None
         self.first_time = True
         self.sdnc = None
-        self.controller = Config().get_config()
         trunk_ports = self.controller['trunk_ports']
         if isinstance(trunk_ports, str):
             self.trunk_ports = json.loads(trunk_ports)
@@ -153,8 +153,39 @@ class SDNConnect(object):
         self.get_sdn_context()
         self.endpoints = {}
         self.investigations = 0
+        self.clear_filters()
         self.redis_lock = threading.Lock()
         self.connect_redis()
+        self.default_endpoints()
+
+    def clear_filters(self):
+        ''' clear any exisiting filters. '''
+        if isinstance(self.sdnc, FaucetProxy):
+            Parser().clear_mirrors(self.controller['CONFIG_FILE'])
+        elif isinstance(self.sdnc, BcfProxy):
+            self.logger.debug('removing bcf filter rules')
+            retval = self.sdnc.remove_filter_rules()
+            self.logger.debug('removed filter rules: {0}'.format(retval))
+
+    def default_endpoints(self):
+        ''' set endpoints to default state. '''
+        self.get_stored_endpoints()
+        for endpoint in self.endpoints.values():
+            if not endpoint.ignore:
+                if endpoint.state != 'inactive':
+                    if endpoint.state == 'mirroring':
+                        endpoint.p_next_state = 'mirror'
+                    elif endpoint.state == 'reinvestigating':
+                        endpoint.p_next_state = 'reinvestigate'
+                    elif endpoint.state == 'queued':
+                        endpoint.p_next_state = 'queue'
+                    elif endpoint.state in ['known', 'abnormal']:
+                        endpoint.p_next_state = endpoint.state
+                    endpoint.endpoint_data['active'] = 0
+                    endpoint.inactive()
+                    endpoint.p_prev_states.append(
+                        (endpoint.state, int(time.time())))
+        self.store_endpoints()
 
     def get_stored_endpoints(self):
         ''' load existing endpoints from Redis. '''
@@ -602,34 +633,7 @@ class Monitor(object):
         Prometheus.start()
 
         # initialize sdnconnect
-        self.s = SDNConnect()
-
-        # cleanup any old filters
-        if isinstance(self.s.sdnc, FaucetProxy):
-            Parser().clear_mirrors(self.controller['CONFIG_FILE'])
-        elif isinstance(self.s.sdnc, BcfProxy):
-            self.s.sdnc.remove_filter_rules()
-
-        # retrieve endpoints from redis
-        self.s.get_stored_endpoints()
-        # set all retrieved endpoints to inactive at the start
-        for endpoint in self.s.endpoints.values():
-            if not endpoint.ignore:
-                if endpoint.state != 'inactive':
-                    if endpoint.state == 'mirroring':
-                        endpoint.p_next_state = 'mirror'
-                    elif endpoint.state == 'reinvestigating':
-                        endpoint.p_next_state = 'reinvestigate'
-                    elif endpoint.state == 'queued':
-                        endpoint.p_next_state = 'queue'
-                    elif endpoint.state in ['known', 'abnormal']:
-                        endpoint.p_next_state = endpoint.state
-                    endpoint.endpoint_data['active'] = 0
-                    endpoint.inactive()
-                    endpoint.p_prev_states.append(
-                        (endpoint.state, int(time.time())))
-        # store changes to state
-        self.s.store_endpoints()
+        self.s = SDNConnect(self.controller)
 
         # schedule periodic scan of endpoints thread
         self.schedule.every(self.controller['scan_frequency']).seconds.do(
@@ -882,28 +886,25 @@ class Monitor(object):
 
         return (found_work, item)
 
+    def shutdown(self):
+        ''' gracefully shut down. '''
+        self.s.clear_filters()
+        for job in self.schedule.jobs:
+            self.logger.debug('shutdown :{0}'.format(job))
+            self.schedule.cancel_job(job)
+        self.rabbit_channel_connection_local.close()
+        self.rabbit_channel_connection_local_fa.close()
+        self.logger.debug('SHUTTING DOWN')
+        self.logger.debug('EXITING')
+        sys.exit()
+
     def signal_handler(self, signal, frame):
         ''' hopefully eat a CTRL_C and signal system shutdown '''
         global CTRL_C
-        if isinstance(self.s.sdnc, FaucetProxy):
-            Parser().clear_mirrors(self.controller['CONFIG_FILE'])
-        elif isinstance(self.s.sdnc, BcfProxy):
-            self.logger.debug('removing bcf filter rules')
-            retval = self.s.sdnc.remove_filter_rules()
-            self.logger.debug('removed filter rules: {0}'.format(retval))
-
         CTRL_C['STOP'] = True
         self.logger.debug('CTRL-C: {0}'.format(CTRL_C))
         try:
-            for job in self.schedule.jobs:
-                self.logger.debug('CTRLC:{0}'.format(job))
-                self.schedule.cancel_job(job)
-            self.rabbit_channel_connection_local.close()
-            self.rabbit_channel_connection_local_fa.close()
-
-            self.logger.debug('SHUTTING DOWN')
-            self.logger.debug('EXITING')
-            sys.exit()
+            self.shutdown()
         except Exception as e:  # pragma: no cover
             self.logger.debug(
                 'Failed to handle signal properly because: {0}'.format(str(e)))
@@ -954,14 +955,7 @@ def main(skip_rabbit=False):  # pragma: no cover
     except Exception as e:
         logger.error('process() exception: {0}'.format(str(e)))
 
-    if isinstance(pmain.s.sdnc, FaucetProxy):
-        Parser().clear_mirrors(pmain.controller['CONFIG_FILE'])
-    elif isinstance(pmain.s.sdnc, BcfProxy):
-        pmain.s.sdnc.remove_filter_rules()
-
-    pmain.logger.debug('SHUTTING DOWN')
-    pmain.logger.debug('EXITING')
-    sys.exit(0)
+    pmain.shutdown()
 
 
 if __name__ == '__main__':  # pragma: no cover
