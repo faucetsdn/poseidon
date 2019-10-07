@@ -13,6 +13,7 @@ import time
 import redis
 from prometheus_client import Gauge
 
+from poseidon.constants import NO_DATA
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import Endpoint
 from poseidon.main import CTRL_C
@@ -407,6 +408,15 @@ def test_show_endpoints():
     s.show_endpoints('os windows')
     s.show_endpoints('role developer-workstation')
     s.show_endpoints('behavior normal')
+
+
+def test_merge_machine():
+    s = SDNConnect()
+    old_machine = {'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv6': '1212::1'}
+    new_machine = {'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '', 'ipv6': ''}
+    s.merge_machine_ip(old_machine, new_machine)
+    assert old_machine['ipv4'] == new_machine['ipv4']
+    assert new_machine['ipv6'] == new_machine['ipv6']
 
 
 def test_schedule_thread_worker():

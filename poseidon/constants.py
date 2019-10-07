@@ -1,0 +1,2 @@
+
+NO_DATA = 'NO DATA'
