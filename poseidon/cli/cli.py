@@ -20,7 +20,7 @@ from natural.date import duration
 from texttable import Texttable
 
 from poseidon.cli.commands import Commands
-from poseidon.constants imoprt NO_DATA
+from poseidon.constants import NO_DATA
 from poseidon.helpers.exception_decor import exception
 
 
