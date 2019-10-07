@@ -165,7 +165,7 @@ class Endpoint(object):
             'endpoint_data': self.endpoint_data,
             'p_next_state': self.p_next_state,
             'p_prev_states': self.p_prev_states,
-            'alc_history': self.acl_data,
+            'acl_data': self.acl_data,
             'metadata': self.metadata,
             'history': self.history,
         }
