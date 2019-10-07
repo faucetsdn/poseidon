@@ -6,6 +6,8 @@ Created on 14 Jan 2019
 from poseidon.cli.cli import GetData
 from poseidon.cli.cli import Parser
 from poseidon.cli.cli import PoseidonShell
+
+from poseidon.constants import NO_DATA
 from poseidon.helpers.endpoint import Endpoint
 
 
