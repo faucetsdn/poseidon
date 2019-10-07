@@ -153,23 +153,25 @@ class SDNConnect(object):
         self.get_sdn_context()
         self.endpoints = {}
         self.investigations = 0
+        self.redis_lock = threading.Lock()
         self.connect_redis()
 
     def get_stored_endpoints(self):
-        # load existing endpoints if any
-        endpoints = {}
-        if self.r:
-            try:
-                p_endpoints = self.r.get('p_endpoints')
-                if p_endpoints:
-                    p_endpoints = ast.literal_eval(p_endpoints.decode('ascii'))
-                    for p_endpoint in p_endpoints:
-                        endpoint = EndpointDecoder(p_endpoint).get_endpoint()
-                        endpoints[endpoint.name] = endpoint
-            except Exception as e:  # pragma: no cover
-                self.logger.error(
-                    'Unable to get existing endpoints from Redis because {0}'.format(str(e)))
-        self.endpoints = endpoints
+        ''' load existing endpoints from Redis. '''
+        with self.redis_lock:
+            endpoints = {}
+            if self.r:
+                try:
+                    p_endpoints = self.r.get('p_endpoints')
+                    if p_endpoints:
+                        p_endpoints = ast.literal_eval(p_endpoints.decode('ascii'))
+                        for p_endpoint in p_endpoints:
+                            endpoint = EndpointDecoder(p_endpoint).get_endpoint()
+                            endpoints[endpoint.name] = endpoint
+                except Exception as e:  # pragma: no cover
+                    self.logger.error(
+                        'Unable to get existing endpoints from Redis because {0}'.format(str(e)))
+            self.endpoints = endpoints
         return
 
     def get_stored_metadata(self, hash_id):
@@ -528,53 +530,52 @@ class SDNConnect(object):
                             (item[0], item[4], item[5]), int(time.time()))
         self.store_endpoints()
         self.get_stored_endpoints()
-        return
 
     def store_endpoints(self):
-        # store latest version of endpoints in redis
-        if self.r:
-            try:
-                serialized_endpoints = []
-                for endpoint in self.endpoints.values():
-                    # set metadata
-                    mac_addresses, ipv4_addresses, ipv6_addresses = self.get_stored_metadata(
-                        str(endpoint.name))
-                    endpoint.metadata = {
-                        'mac_addresses': mac_addresses,
-                        'ipv4_addresses': ipv4_addresses,
-                        'ipv6_addresses': ipv6_addresses}
-                    redis_endpoint_data = {
-                        'name': str(endpoint.name),
-                        'state': str(endpoint.state),
-                        'ignore': str(endpoint.ignore),
-                        'endpoint_data': str(endpoint.endpoint_data),
-                        'next_state': str(endpoint.p_next_state),
-                        'prev_states': str(endpoint.p_prev_states),
-                        'acl_data': str(endpoint.acl_data),
-                        'metadata': str(endpoint.metadata),
-                    }
-                    self.r.hmset(endpoint.name, redis_endpoint_data)
-                    mac = endpoint.endpoint_data['mac']
-                    self.r.hmset(mac, {'poseidon_hash': str(endpoint.name)})
-                    if not self.r.sismember('mac_addresses', mac):
-                        self.r.sadd('mac_addresses', mac)
-                    for ip_field in MACHINE_IP_FIELDS:
-                        try:
-                            machine_ip = ipaddress.ip_address(
-                                endpoint.endpoint_data.get(ip_field, None))
-                        except ValueError:
-                            machine_ip = None
-                        if machine_ip:
-                            self.r.hmset(
-                                str(machine_ip), {'poseidon_hash': str(endpoint.name)})
-                            if not self.r.sismember('ip_addresses', str(machine_ip)):
-                                self.r.sadd('ip_addresses', str(machine_ip))
-                    serialized_endpoints.append(endpoint.encode())
-                self.r.set('p_endpoints', str(serialized_endpoints))
-            except Exception as e:  # pragma: no cover
-                self.logger.error(
-                    'Unable to store endpoints in Redis because {0}'.format(str(e)))
-        return
+        ''' store current endpoints in Redis. '''
+        with self.redis_lock:
+            if self.r:
+                try:
+                    serialized_endpoints = []
+                    for endpoint in self.endpoints.values():
+                        # set metadata
+                        mac_addresses, ipv4_addresses, ipv6_addresses = self.get_stored_metadata(
+                            str(endpoint.name))
+                        endpoint.metadata = {
+                            'mac_addresses': mac_addresses,
+                            'ipv4_addresses': ipv4_addresses,
+                            'ipv6_addresses': ipv6_addresses}
+                        redis_endpoint_data = {
+                            'name': str(endpoint.name),
+                            'state': str(endpoint.state),
+                            'ignore': str(endpoint.ignore),
+                            'endpoint_data': str(endpoint.endpoint_data),
+                            'next_state': str(endpoint.p_next_state),
+                            'prev_states': str(endpoint.p_prev_states),
+                            'acl_data': str(endpoint.acl_data),
+                            'metadata': str(endpoint.metadata),
+                        }
+                        self.r.hmset(endpoint.name, redis_endpoint_data)
+                        mac = endpoint.endpoint_data['mac']
+                        self.r.hmset(mac, {'poseidon_hash': str(endpoint.name)})
+                        if not self.r.sismember('mac_addresses', mac):
+                            self.r.sadd('mac_addresses', mac)
+                        for ip_field in MACHINE_IP_FIELDS:
+                            try:
+                                machine_ip = ipaddress.ip_address(
+                                    endpoint.endpoint_data.get(ip_field, None))
+                            except ValueError:
+                                machine_ip = None
+                            if machine_ip:
+                                self.r.hmset(
+                                    str(machine_ip), {'poseidon_hash': str(endpoint.name)})
+                                if not self.r.sismember('ip_addresses', str(machine_ip)):
+                                    self.r.sadd('ip_addresses', str(machine_ip))
+                        serialized_endpoints.append(endpoint.encode())
+                    self.r.set('p_endpoints', str(serialized_endpoints))
+                except Exception as e:  # pragma: no cover
+                    self.logger.error(
+                        'Unable to store endpoints in Redis because {0}'.format(str(e)))
 
 
 class Monitor(object):
