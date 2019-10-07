@@ -32,8 +32,10 @@ from poseidon.controllers.faucet.faucet import FaucetProxy
 from poseidon.controllers.faucet.parser import Parser
 from poseidon.helpers.actions import Actions
 from poseidon.helpers.config import Config
-from poseidon.helpers.endpoint import Endpoint, MACHINE_IP_FIELDS, MACHINE_IP_PREFIXES
+from poseidon.helpers.endpoint import Endpoint
 from poseidon.helpers.endpoint import EndpointDecoder
+from poseidon.helpers.endpoint import MACHINE_IP_FIELDS
+from poseidon.helpers.endpoint import MACHINE_IP_PREFIXES
 from poseidon.helpers.log import Logger
 from poseidon.helpers.metadata import get_ether_vendor
 from poseidon.helpers.metadata import get_rdns_lookup
@@ -224,17 +226,22 @@ class SDNConnect(object):
                                     poseidon_info[b'endpoint_data'].decode('ascii'))
                                 for ip_field in MACHINE_IP_FIELDS:
                                     try:
-                                        raw_field = endpoint_data.get(ip_field, None)
-                                        machine_ip = ipaddress.ip_address(raw_field)
+                                        raw_field = endpoint_data.get(
+                                            ip_field, None)
+                                        machine_ip = ipaddress.ip_address(
+                                            raw_field)
                                     except ValueError:
                                         machine_ip = ''
                                     if machine_ip:
                                         try:
                                             ip_info = self.r.hgetall(raw_field)
-                                            short_os = ip_info.get(b'short_os', None)
-                                            ip_addresses[ip_field][raw_field] = {}
+                                            short_os = ip_info.get(
+                                                b'short_os', None)
+                                            ip_addresses[ip_field][raw_field] = {
+                                            }
                                             if short_os:
-                                                ip_addresses[ip_field][raw_field]['os'] = short_os.decode('ascii')
+                                                ip_addresses[ip_field][raw_field]['os'] = short_os.decode(
+                                                    'ascii')
                                         except Exception as e:  # pragma: no cover
                                             self.logger.error(
                                                 'Unable to get existing {0} data from Redis because: {1}'.format(ip_field, str(e)))
@@ -352,7 +359,8 @@ class SDNConnect(object):
                     # filter by operating system
                     for ip_field in MACHINE_IP_FIELDS:
                         ip_addresses_field = '_'.join((ip_field, 'addresses'))
-                        ip_addresses = endpoint.metadata.get(ip_addresses_field, None)
+                        ip_addresses = endpoint.metadata.get(
+                            ip_addresses_field, None)
                         machine_ip = endpoint.endpoint_data.get(ip_field, None)
                         if machine_ip and ip_addresses and machine_ip in ip_addresses:
                             metadata = ip_addresses[machine_ip]
@@ -510,7 +518,14 @@ class SDNConnect(object):
             if isinstance(status, list):
                 self.logger.info(
                     'Automated ACLs did the following: {0}'.format(status[1]))
-            # TODO add endpoint metadata about acl history, API, CLI
+                for item in status[1]:
+                    machine = {'mac': item[1],
+                               'segment': item[2], 'port': item[3]}
+                    h = Endpoint.make_hash(machine)
+                    ep = self.endpoints.get(h, None)
+                    if ep:
+                        ep.acl_data.append(
+                            (item[0], item[4], item[5]), int(time.time()))
         self.store_endpoints()
         self.get_stored_endpoints()
         return
@@ -535,6 +550,7 @@ class SDNConnect(object):
                         'endpoint_data': str(endpoint.endpoint_data),
                         'next_state': str(endpoint.p_next_state),
                         'prev_states': str(endpoint.p_prev_states),
+                        'acl_data': str(endpoint.acl_data),
                         'metadata': str(endpoint.metadata),
                     }
                     self.r.hmset(endpoint.name, redis_endpoint_data)
@@ -544,7 +560,8 @@ class SDNConnect(object):
                         self.r.sadd('mac_addresses', mac)
                     for ip_field in MACHINE_IP_FIELDS:
                         try:
-                            machine_ip = ipaddress.ip_address(endpoint.endpoint_data.get(ip_field, None))
+                            machine_ip = ipaddress.ip_address(
+                                endpoint.endpoint_data.get(ip_field, None))
                         except ValueError:
                             machine_ip = None
                         if machine_ip:
@@ -768,11 +785,13 @@ class Monitor(object):
                             'active': 0,
                             'name': None}
                         try:
-                            source_ip = ipaddress.ip_address(device['source_ip'])
+                            source_ip = ipaddress.ip_address(
+                                device['source_ip'])
                         except ValueError:
                             source_ip = None
                         if source_ip:
-                            extra_machine['ipv%u' % source_ip.version] = str(source_ip)
+                            extra_machine['ipv%u' %
+                                          source_ip.version] = str(source_ip)
                         extra_machines.append(extra_machine)
                 self.s.find_new_machines(extra_machines)
 

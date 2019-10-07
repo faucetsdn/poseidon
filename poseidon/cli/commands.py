@@ -35,7 +35,8 @@ class Commands:
             match = match_func(device)
             if match:
                 if isinstance(match, list):
-                    endpoints.update({endpoint.name: endpoint for endpoint in match})
+                    endpoints.update(
+                        {endpoint.name: endpoint for endpoint in match})
                 else:
                     endpoints[match.name] = match
                 if not match_all:
@@ -60,6 +61,10 @@ class Commands:
         ''' history of a specific thing '''
         return self._get_endpoints(args, -1)
 
+    def acls_of(self, args):
+        ''' ACL history of a specific thing '''
+        return self._get_endpoints(args, -1)
+
     def where_is(self, args):
         ''' where topologically is a specific thing '''
         return self._get_endpoints(args, -1)
@@ -68,7 +73,8 @@ class Commands:
         ''' remove all inactive devices '''
         endpoints = self._inactive_endpoints()
         endpoint_names = [endpoint.name for endpoint in endpoints]
-        self._publish_action('poseidon.action.remove.inactives', endpoint_names)
+        self._publish_action(
+            'poseidon.action.remove.inactives', endpoint_names)
         return endpoints
 
     def remove_ignored(self, args):
