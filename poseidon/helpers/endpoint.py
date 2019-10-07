@@ -6,8 +6,6 @@ Created on 3 December 2018
 import hashlib
 import json
 import time
-from enum import auto
-from enum import Enum
 
 from transitions import Machine
 
