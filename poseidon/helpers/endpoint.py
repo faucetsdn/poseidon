@@ -43,10 +43,13 @@ class EndpointDecoder(object):
             self.endpoint.history = e['history']
         else:
             self.endpoint.history = []
+        if 'acl_data' in e:
+            self.endpoint.acl_data = e['acl_data']
+        else:
+            self.endpoint.acl_data = []
         self.endpoint.endpoint_data = e['endpoint_data']
         self.endpoint.p_next_state = e['p_next_state']
         self.endpoint.p_prev_states = e['p_prev_states']
-        self.endpoint.acl_data = e['acl_data']
 
     def get_endpoint(self):
         return self.endpoint
