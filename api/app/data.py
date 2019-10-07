@@ -10,7 +10,6 @@ from natural.date import duration
 
 from .routes import paths
 from .routes import version
-
 from poseidon.constants import NO_DATA
 
 
@@ -29,7 +28,7 @@ class Endpoints(object):
 class Info(object):
 
     def on_get(self, req, resp):
-        resp.body = json.dumps({'version': 'v0.1.1'})
+        resp.body = json.dumps({'version': 'v0.1.2'})
         resp.content_type = falcon.MEDIA_TEXT
         resp.status = falcon.HTTP_200
 
@@ -195,7 +194,8 @@ class NetworkFull(object):
                 'ipv4_os': NO_DATA, 'ipv6_os': NO_DATA,
                 'source': NO_DATA, 'ipv4_rdns': NO_DATA,
                 'ipv6_rdns': NO_DATA, 'ether_vendor': NO_DATA,
-                'controller_type': NO_DATA, 'controller': NO_DATA}
+                'controller_type': NO_DATA, 'controller': NO_DATA,
+                'acl_data': NO_DATA}
 
     @staticmethod
     def get_dataset():
@@ -227,7 +227,7 @@ class Network(object):
                 'ipv4_os': NO_DATA, 'ipv6_os': NO_DATA,
                 'ipv4_rdns': NO_DATA, 'ipv6_rdns': NO_DATA,
                 'ether_vendor': NO_DATA, 'controller_type': NO_DATA,
-                'controller': NO_DATA}
+                'controller': NO_DATA, 'acl_data': NO_DATA}
 
     @staticmethod
     def field_mapping():
@@ -242,7 +242,7 @@ class Network(object):
                 'behavior': 'Behavior (NetworkML)', 'ipv4_rdns': 'IPv4 rDNS',
                 'ipv6_rdns': 'IPv6 rDNS', 'ether_vendor': 'Ethernet Vendor',
                 'controller_type': 'SDN Controller Type',
-                'controller': 'SDN Controller URI'}
+                'controller': 'SDN Controller URI', 'acl_data': 'ACL History'}
 
     @staticmethod
     def get_dataset():

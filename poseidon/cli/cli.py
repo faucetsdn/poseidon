@@ -52,8 +52,7 @@ class GetData():
 
     @staticmethod
     def _get_acls(endpoint):
-        # TODO
-        return str('')
+        return str(endpoint.acl_data)
 
     @staticmethod
     def _get_ipv4(endpoint):
@@ -250,12 +249,14 @@ class GetData():
     @staticmethod
     def _get_history(endpoint):
         hist = ''
-        if len(endpoint.history) > 0 :
+        if len(endpoint.history) > 0:
             for entry in endpoint.history:
-                hist += "{0} - {1} : {2} \r\n".format(entry['type'], time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(entry['timestamp'])), entry['message'])
-        else :
-            hist = "No history recorded yet."
+                hist += '{0} - {1} : {2} \r\n'.format(entry['type'], time.strftime(
+                    '%Y-%m-%d %H:%M:%S', time.localtime(entry['timestamp'])), entry['message'])
+        else:
+            hist = 'No history recorded yet.'
         return hist
+
 
 class Parser():
 
@@ -271,7 +272,7 @@ class Parser():
             'Previous States', 'IPv4 OS\n(p0f)', 'IPv6 OS\n(p0f)', 'Previous IPv4 OSes\n(p0f)',
             'Previous IPv6 OSes\n(p0f)', 'Role\n(NetworkML)', 'Role Confidence\n(NetworkML)', 'Previous Roles\n(NetworkML)',
             'Previous Role Confidences\n(NetworkML)', 'Behavior\n(NetworkML)', 'Previous Behaviors\n(NetworkML)',
-            'IPv4 rDNS', 'IPv6 rDNS', 'SDN Controller Type', 'SDN Controller URI', 'History',
+            'IPv4 rDNS', 'IPv6 rDNS', 'SDN Controller Type', 'SDN Controller URI', 'History', 'ACL History',
         ]
 
     def completion(self, text, line, completions):
@@ -407,7 +408,8 @@ class Parser():
                          'ipv6 rdns': (GetData._get_ipv6_rdns, 27),
                          'sdn controller type': (GetData._get_controller_type, 28),
                          'sdn controller uri': (GetData._get_controller, 29),
-                         'history': (GetData._get_history, 30)}
+                         'history': (GetData._get_history, 30),
+                         'acl history': (GetData._get_acls, 31)}
         for index, field in enumerate(fields):
             if ipv4_only:
                 if '6' in field:
@@ -656,6 +658,27 @@ class PoseidonShell(cmd2.Cmd):
                                                      nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
+    def show_acls(self, arg, flags):
+        '''
+        Find out the history of ACLs of something on the network:
+        ACLS [IP|MAC|ID]
+        ACLS 10.0.0.1
+        ACLS 18:EF:02:2D:49:00
+        ACLS 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
+        '''
+        # defaults
+        fields = ['ACL History']
+
+        valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
+            flags, fields)
+
+        if not valid:
+            self.poutput("Unknown flag, try 'help show'")
+        else:
+            self.poutput(self.parser.display_results(Commands().acls_of(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique,
+                                                     nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
+
+    @exception
     def show_where(self, arg, flags):
         '''
         Find out where something is:
@@ -678,6 +701,7 @@ class PoseidonShell(cmd2.Cmd):
 
     @exception
     def help_show(self):
+        self.poutput('  acls\t\tShow ACL history of something on the network')
         self.poutput('  all\t\tShow all devices')
         self.poutput('  behavior\tShow devices matching a particular behavior')
         self.poutput(
@@ -900,7 +924,8 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         else:
             if arg:
                 action = arg.split()[0]
-                func_calls = {'all': self.show_all,
+                func_calls = {'acls': self.show_acls,
+                              'all': self.show_all,
                               'authors': self.show_authors,
                               'behavior': self.show_behavior,
                               'history': self.show_history,
@@ -913,7 +938,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                 if action in func_calls:
                     if action in ['all', 'authors', 'version']:
                         func_calls[action](arg, flags)
-                    elif action in ['history', 'what', 'where']:
+                    elif action in ['acl', 'history', 'what', 'where']:
                         if len(arg.split()) > 1:
                             func_calls[action](arg, flags)
                         else:
