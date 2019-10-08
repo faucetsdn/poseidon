@@ -365,8 +365,27 @@ class Parser():
 
         return valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6
 
+    @staticmethod
+    def display_ip_filter(fields, ipv4_only, ipv6_only, ipv4_and_ipv6):
+        IPV4_FIELD = 'ipv4'
+        IPV6_FIELD = 'ipv6'
+        IP_FIELDS = {IPV4_FIELD, IPV6_FIELD}
+        filtered_fields = []
+        ip_fields_filter = set()
+        if ipv4_only or ipv4_and_ipv6:
+            ip_fields_filter.add(IPV4_FIELD)
+        if ipv6_only or ipv4_and_ipv6:
+            ip_fields_filter.add(IPV6_FIELD)
+        for field in fields:
+            ip_fields = {ip_field for ip_field in IP_FIELDS if ip_field in field}
+            if ip_fields and not ip_fields.is_subset(ip_fields_filter):
+                continue
+            filtered_fields.append(field)
+        return filtered_fields
+
     def display_results(self, endpoints, fields, sort_by=0, max_width=0, unique=False, nonzero=False, output_format='table', ipv4_only=True, ipv6_only=False, ipv4_and_ipv6=False):
         matrix = []
+        fields = self.display_ip_filter(fields, ipv4_only, ipv6_only, ipv4_and_ipv6)
         fields_lookup = {'id': (GetData._get_name, 0),
                          'mac': (GetData._get_mac, 1),
                          'mac address': (GetData._get_mac, 1),
@@ -410,21 +429,6 @@ class Parser():
                          'sdn controller uri': (GetData._get_controller, 29),
                          'history': (GetData._get_history, 30),
                          'acl history': (GetData._get_acls, 31)}
-        for index, field in enumerate(fields):
-            if ipv4_only:
-                if '6' in field:
-                    fields[index] = field.replace('6', '4')
-            if ipv6_only:
-                if '4' in field:
-                    fields[index] = field.replace('4', '6')
-        if ipv4_and_ipv6:
-            for index, field in enumerate(fields):
-                if '4' in field:
-                    if field.replace('4', '6') not in fields:
-                        fields.insert(index + 1, field.replace('4', '6'))
-                if '6' in field:
-                    if field.replace('6', '4') not in fields:
-                        fields.insert(index + 1, field.replace('6', '4'))
 
         records = []
         if nonzero or unique:
