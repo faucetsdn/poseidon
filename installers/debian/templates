@@ -87,7 +87,7 @@ Description: Set the maximum number of endpoint investigations to run at the sam
 Template: poseidon/reinvestigation_frequency
 Type: string
 Default: 900
-Description: Set the amount of time in seconds to run investigations and reinvestigations on an endpoint:
+Description: Set the amount of time in seconds to run investigations and reinvestigations on an endpoint (max: 32767):
 
 Template: poseidon/vent_files_delete
 Type: string
