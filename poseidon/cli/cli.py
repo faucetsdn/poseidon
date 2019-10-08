@@ -434,34 +434,32 @@ class Parser():
 
         records = []
         if nonzero or unique:
+            raw_records = []
+            all_fields_with_data = set()
+
             for endpoint in endpoints:
-                record = []
-                for field in fields:
-                    record.append(fields_lookup[field.lower()][0](endpoint))
+                raw_record = {
+                    field: fields_lookup[field.lower()][0](endpoint)
+                    for field in fields}
+                fields_with_data = {
+                    field for field, value in raw_record.items() if value and value != NO_DATA}
+                all_fields_with_data.update(fields_with_data)
+                raw_records.append((raw_record, fields_with_data))
+
+            # delete columns with no data
+            all_fields_with_no_data = set(fields) - all_fields_with_data
+            for raw_record, fields_with_data in raw_records:
+                for field in all_fields_with_no_data:
+                    del raw_record[field]
                 # remove rows that are all zero or 'NO DATA'
-                if not nonzero or not all(item == '0' or item == NO_DATA for item in record):
+                if not nonzero or fields_with_data:
+                    record = [raw_record[field] for field in fields]
                     records.append(record)
 
-            # remove columns that are all zero or 'NO DATA'
-            del_columns = []
-            for i in range(len(fields)):
-                marked = False
-                if nonzero and all(item[i] == '0' or item[i] == NO_DATA for item in records):
-                    del_columns.append(i)
-                    marked = True
-                if unique and not marked:
-                    column_vals = [item[i] for item in records]
-                    if len(set(column_vals)) == 1:
-                        del_columns.append(i)
-            del_columns.reverse()
-            for val in del_columns:
-                for row in records:
-                    del row[val]
-                del fields[val]
             if len(fields) > 0:
                 if unique:
                     u_records = set(map(tuple, records))
-                    records = u_records
+                    records = list(u_records)
                     matrix = list(map(list, u_records))
                 else:
                     matrix = records
