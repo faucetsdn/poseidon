@@ -119,6 +119,14 @@ def test_completion():
     assert words == []
 
 
+def test_display_ip():
+    parser = Parser()
+    fields = ['foo', 'bar', 'IPv4', 'IPv6']
+    assert ['foo', 'bar', 'IPv4'] == parser.display_ip_filter(fields, True, False, False)
+    assert ['foo', 'bar', 'IPv6'] == parser.display_ip_filter(fields, False, True, False)
+    assert fields == parser.display_ip_filter(fields, False, False, True)
+
+
 def test_get_name():
     endpoint = Endpoint('foo')
     endpoint.endpoint_data = {
