@@ -10,7 +10,7 @@ from natural.date import duration
 
 from .routes import paths
 from .routes import version
-from poseidon.constants import NO_DATA
+from .constants import NO_DATA
 
 
 class Endpoints(object):

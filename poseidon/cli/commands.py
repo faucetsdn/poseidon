@@ -8,6 +8,7 @@ Created on 18 January 2019
 """
 import json
 
+from poseidon.helpers.config import Config
 from poseidon.main import SDNConnect
 
 
@@ -16,7 +17,8 @@ class Commands:
     def __init__(self):
         self.states = ['active', 'inactive', 'known', 'unknown',
                        'mirroring', 'abnormal', 'shutdown', 'reinvestigating', 'queued']
-        self.sdnc = SDNConnect()
+        self.controller = Config().get_config()
+        self.sdnc = SDNConnect(self.controller)
         self.sdnc.get_stored_endpoints()
 
     def _publish_action(self, address, payload):

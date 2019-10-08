@@ -4,6 +4,7 @@ Test module for actions
 @author: Charlie Lewis
 """
 from poseidon.helpers.actions import Actions
+from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import Endpoint
 from poseidon.main import SDNConnect
 
@@ -15,7 +16,8 @@ def test_Actions():
     endpoint = Endpoint('foo')
     endpoint.endpoint_data = {
         'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
-    s = SDNConnect()
+    controller = Config().get_config()
+    s = SDNConnect(controller)
     a = Actions(endpoint, s.sdnc)
     a.mirror_endpoint()
     a.unmirror_endpoint()
@@ -29,7 +31,8 @@ def test_Actions_nosdn():
     endpoint = Endpoint('foo')
     endpoint.endpoint_data = {
         'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
-    s = SDNConnect()
+    controller = Config().get_config()
+    s = SDNConnect(controller)
     s.sdnc = None
     a = Actions(endpoint, s.sdnc)
     a.mirror_endpoint()
