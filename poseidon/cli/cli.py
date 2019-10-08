@@ -367,6 +367,8 @@ class Parser():
 
     @staticmethod
     def display_ip_filter(fields, ipv4_only, ipv6_only, ipv4_and_ipv6):
+        if not ipv4_only and not ipv6_only and not ipv4_and_ipv6:
+            return fields
         IPV4_FIELD = 'ipv4'
         IPV6_FIELD = 'ipv6'
         IP_FIELDS = {IPV4_FIELD, IPV6_FIELD}
