@@ -444,17 +444,17 @@ class Parser():
                 fields_with_data = {
                     field for field, value in raw_record.items() if value and value != NO_DATA}
                 all_fields_with_data.update(fields_with_data)
-                raw_records.append((raw_record, fields_with_data))
+                # remove rows that are all zero or 'NO DATA'
+                if fields_with_data:
+                    raw_records.append(raw_record)
 
             # delete columns with no data
             all_fields_with_no_data = set(fields) - all_fields_with_data
-            for raw_record, fields_with_data in raw_records:
+            fields = [field for field in fields if field in all_fields_with_data]
+            for raw_record in raw_records:
                 for field in all_fields_with_no_data:
                     del raw_record[field]
-                # remove rows that are all zero or 'NO DATA'
-                if not nonzero or fields_with_data:
-                    record = [raw_record[field] for field in fields]
-                    records.append(record)
+                records.append([raw_record[field] for field in fields])
 
             if len(fields) > 0:
                 if unique:
@@ -467,8 +467,9 @@ class Parser():
             for endpoint in endpoints:
                 record = []
                 for field in fields:
-                    record.append(fields_lookup[field.lower()][0](endpoint))
-                    records.append(record)
+                    if field.lower() in fields_lookup:
+                        record.append(fields_lookup[field.lower()][0](endpoint))
+                        records.append(record)
                 matrix.append(record)
         results = ''
         if output_format == 'json':
