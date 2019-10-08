@@ -121,9 +121,9 @@ def test_completion():
 
 def test_display_ip():
     parser = Parser()
-    fields = ['foo', 'bar', 'ipv4 stuff', 'ipv6 stuff']
-    assert ['foo', 'bar', 'ipv4 stuff'] == parser.display_ip_filter(fields, True, False, False)
-    assert ['foo', 'bar', 'ipv6 stuff'] == parser.display_ip_filter(fields, False, True, False)
+    fields = ['foo', 'bar', 'IPv4', 'IPv6']
+    assert ['foo', 'bar', 'IPv4'] == parser.display_ip_filter(fields, True, False, False)
+    assert ['foo', 'bar', 'IPv6'] == parser.display_ip_filter(fields, False, True, False)
     assert fields == parser.display_ip_filter(fields, False, False, True)
 
 

@@ -379,7 +379,7 @@ class Parser():
         if ipv6_only or ipv4_and_ipv6:
             ip_fields_filter.add(IPV6_FIELD)
         for field in fields:
-            ip_fields = {ip_field for ip_field in IP_FIELDS if ip_field in field}
+            ip_fields = {ip_field for ip_field in IP_FIELDS if ip_field in field.lower()}
             if ip_fields and not ip_fields.issubset(ip_fields_filter):
                 continue
             filtered_fields.append(field)
