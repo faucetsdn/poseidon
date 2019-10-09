@@ -5,7 +5,7 @@ Test module for actions
 """
 from poseidon.helpers.actions import Actions
 from poseidon.helpers.config import Config
-from poseidon.helpers.endpoint import Endpoint
+from poseidon.helpers.endpoint import endpoint_factory
 from poseidon.main import SDNConnect
 
 
