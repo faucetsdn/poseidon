@@ -5,15 +5,15 @@ Test module for endpoints.
 """
 import os
 
-from poseidon.helpers.endpoint import Endpoint
-from poseidon.helpers.endpoint import EndpointDecoder
+from poseidon.helpers.endpoint import endpoint_factory
+from poseidon.helpers.endpoint import Endpoint, EndpointDecoder
 
 
 def test_Endpoint():
     """
     Tests Endpoint
     """
-    endpoint = Endpoint('foo')
+    endpoint = endpoint_factory('foo')
     b = endpoint.encode()
     c = EndpointDecoder(b).get_endpoint()
     a = {'tenant': 'foo', 'mac': '00:00:00:00:00:00'}

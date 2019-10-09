@@ -5,7 +5,7 @@ Test module for actions
 """
 from poseidon.helpers.actions import Actions
 from poseidon.helpers.config import Config
-from poseidon.helpers.endpoint import Endpoint
+from poseidon.helpers.endpoint import endpoint_factory
 from poseidon.main import SDNConnect
 
 
@@ -13,7 +13,7 @@ def test_Actions():
     """
     Tests Actions
     """
-    endpoint = Endpoint('foo')
+    endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
     controller = Config().get_config()
@@ -28,7 +28,7 @@ def test_Actions_nosdn():
     """
     Tests Actions with no SDN controller
     """
-    endpoint = Endpoint('foo')
+    endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
     controller = Config().get_config()
