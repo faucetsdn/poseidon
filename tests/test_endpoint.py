@@ -13,8 +13,8 @@ def test_Endpoint():
     """
     Tests Endpoint
     """
-    endpoint = Endpoint('foo')
+    endpoint = endpoint_factory('foo')
     b = endpoint.encode()
-    c = EndpointDecoder(b).get_endpoint()
+    c = endpoint_factoryDecoder(b).get_endpoint()
     a = {'tenant': 'foo', 'mac': '00:00:00:00:00:00'}
-    hashed_val = Endpoint.make_hash(a)
+    hashed_val = endpoint_factory.make_hash(a)

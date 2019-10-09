@@ -11,6 +11,6 @@ RUN apk upgrade --no-cache && \
     CXXFLAGS="-D_BSD_SOURCE" pip3 install --no-cache-dir ninja && \
     pip3 install --no-cache-dir -r test-requirements.txt && \
     pip3 install --no-cache-dir -r api/requirements.txt
-CMD pytype api/app/app.py poseidon/main.py && \
+CMD pytype --protocols api/app/app.py poseidon/main.py && \
     ./tests/api_smoke_test.sh && \
     py.test -v -vv --cov-report term-missing --cov=. -c .coveragerc

@@ -168,7 +168,9 @@ def endpoint_factory(hashed_val):
         transitions=Endpoint.transitions,
         initial='unknown',
         send_event=True)
-    return machine
+    machine.name = endpoint.name[:8]+' '
+    endpoint.machine = machine
+    return endpoint
 
 
 class EndpointDecoder:
