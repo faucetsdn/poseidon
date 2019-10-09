@@ -4,7 +4,7 @@ Test module for vent collector.
 @author: Charlie Lewis
 """
 from poseidon.helpers.collector import Collector
-from poseidon.helpers.endpoint import Endpoint
+from poseidon.helpers.endpoint import endpoint_factory
 
 
 def test_Collector():
