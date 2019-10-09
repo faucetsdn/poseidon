@@ -32,10 +32,8 @@ from poseidon.controllers.faucet.faucet import FaucetProxy
 from poseidon.controllers.faucet.parser import Parser
 from poseidon.helpers.actions import Actions
 from poseidon.helpers.config import Config
-from poseidon.helpers.endpoint import Endpoint
-from poseidon.helpers.endpoint import EndpointDecoder
-from poseidon.helpers.endpoint import MACHINE_IP_FIELDS
-from poseidon.helpers.endpoint import MACHINE_IP_PREFIXES
+from poseidon.helpers.endpoint import Endpoint, EndpointDecoder, endpoint_factory
+from poseidon.helpers.endpoint import MACHINE_IP_FIELDS, MACHINE_IP_PREFIXES
 from poseidon.helpers.log import Logger
 from poseidon.helpers.metadata import get_ether_vendor
 from poseidon.helpers.metadata import get_rdns_lookup
@@ -61,10 +59,10 @@ def rabbit_callback(ch, method, properties, body, q=None):
         logger.debug('poseidonMain workQueue is None')
 
 
-def schedule_job_kickurl(func):
+def schedule_job_kickurl(schedule_func):
     global CTRL_C
-    func.s.check_endpoints(messages=func.faucet_event)
-    del func.faucet_event[:]
+    schedule_func.s.check_endpoints(messages=schedule_func.faucet_event)
+    del schedule_func.faucet_event[:]
 
     if not CTRL_C['STOP']:
         try:
@@ -74,53 +72,53 @@ def schedule_job_kickurl(func):
 
             # send results to prometheus
             hosts = req.json()['dataset']
-            func.prom.update_metrics(hosts)
+            schedule_func.prom.update_metrics(hosts)
         except requests.exceptions.ConnectionError as e:
-            func.logger.debug(
+            schedule_func.logger.debug(
                 'Unable to get current state and send it to Prometheus because: {0}'.format(str(e)))
         except Exception as e:  # pragma: no cover
-            func.logger.error(
+            schedule_func.logger.error(
                 'Unable to get current state and send it to Prometheus because: {0}'.format(str(e)))
 
 
-def schedule_job_reinvestigation(func):
+def schedule_job_reinvestigation(schedule_func):
     ''' put endpoints into the reinvestigation state if possible '''
     global CTRL_C
 
     def trigger_reinvestigation(candidates):
         # get random order of things that are known
-        for _ in range(func.controller['max_concurrent_reinvestigations'] - func.s.investigations):
+        for _ in range(schedule_func.controller['max_concurrent_reinvestigations'] - schedule_func.s.investigations):
             if len(candidates) > 0:
                 chosen = candidates.pop()
-                func.logger.info('Starting reinvestigation on: {0} {1}'.format(
+                schedule_func.logger.info('Starting reinvestigation on: {0} {1}'.format(
                     chosen.name, chosen.state))
                 chosen.reinvestigate()
                 chosen.p_prev_states.append(
                     (chosen.state, int(time.time())))
-                status = Actions(chosen, func.s.sdnc).mirror_endpoint()
+                status = Actions(chosen, schedule_func.s.sdnc).mirror_endpoint()
                 if status:
                     try:
-                        func.s.r.hincrby('vent_plugin_counts', 'ncapture')
+                        schedule_func.s.r.hincrby('vent_plugin_counts', 'ncapture')
                     except Exception as e:  # pragma: no cover
-                        func.logger.error(
+                        schedule_func.logger.error(
                             'Failed to update count of plugins because: {0}'.format(str(e)))
                 else:
-                    func.logger.warning(
+                    schedule_func.logger.warning(
                         'Unable to mirror the endpoint: {0}'.format(chosen.name))
         return
 
     if not CTRL_C['STOP']:
         candidates = [
-            endpoint for endpoint in func.s.endpoints.values()
+            endpoint for endpoint in schedule_func.s.endpoints.values()
             if endpoint.state in ['queued']]
         if len(candidates) == 0:
             # if no queued endpoints, then known and abnormal are candidates
             candidates = [
-                endpoint for endpoint in func.s.endpoints.values()
+                endpoint for endpoint in schedule_func.s.endpoints.values()
                 if endpoint.state in ['known', 'abnormal']]
             if len(candidates) > 0:
                 random.shuffle(candidates)
-        if func.s.sdnc:
+        if schedule_func.s.sdnc:
             trigger_reinvestigation(candidates)
 
 
@@ -507,7 +505,7 @@ class SDNConnect(object):
             ep = self.endpoints.get(h, None)
             if ep is None:
                 change_acls = True
-                m = Endpoint(h)
+                m = endpoint_factory(h)
                 m.p_prev_states.append((m.state, int(time.time())))
                 m.endpoint_data = deepcopy(machine)
                 self.endpoints[m.name] = m
@@ -616,6 +614,8 @@ class Monitor(object):
         self.m_queue = queue.Queue()
         self.skip_rabbit = skip_rabbit
         self.logger = logger
+        self.rabbit_channel_connection_local = None
+        self.rabbit_channel_connection_local_fa = None
 
         # get config options
         self.controller = Config().get_config()
@@ -637,11 +637,11 @@ class Monitor(object):
 
         # schedule periodic scan of endpoints thread
         self.schedule.every(self.controller['scan_frequency']).seconds.do(
-            partial(schedule_job_kickurl, func=self))
+            partial(schedule_job_kickurl, schedule_func=self))
 
         # schedule periodic reinvestigations thread
         self.schedule.every(self.controller['reinvestigation_frequency']).seconds.do(
-            partial(schedule_job_reinvestigation, func=self))
+            partial(schedule_job_reinvestigation, schedule_func=self))
 
         # schedule all threads
         self.schedule_thread = threading.Thread(
@@ -826,8 +826,8 @@ class Monitor(object):
                     endpoint, self.s.sdnc).mirror_endpoint()
                 if status:
                     try:
-                        self.s.r.hincrby(
-                            'vent_plugin_counts', 'ncapture')
+                        if self.s.r:
+                            self.s.r.hincrby('vent_plugin_counts', 'ncapture')
                     except Exception as e:  # pragma: no cover
                         self.logger.error(
                             'Failed to update count of plugins because: {0}'.format(str(e)))
@@ -892,8 +892,10 @@ class Monitor(object):
         for job in self.schedule.jobs:
             self.logger.debug('shutdown :{0}'.format(job))
             self.schedule.cancel_job(job)
-        self.rabbit_channel_connection_local.close()
-        self.rabbit_channel_connection_local_fa.close()
+        if self.rabbit_channel_connection_local:
+            self.rabbit_channel_connection_local.close()
+        if self.rabbit_channel_connection_local_fa:
+            self.rabbit_channel_connection_local_fa.close()
         self.logger.debug('SHUTTING DOWN')
         self.logger.debug('EXITING')
         sys.exit()

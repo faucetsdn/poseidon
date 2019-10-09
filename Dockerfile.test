@@ -1,11 +1,15 @@
 FROM redis:latest
 FROM poseidon:latest
+# TODO: remove workaround for broken ninja build (https://github.com/scikit-build/ninja-python-distributions/issues/22)
 RUN apk upgrade --no-cache && \
     apk add --no-cache \
     build-base \
+    cmake \
     python3-dev \
     yaml-dev && \
+    pip3 install --no-cache-dir scikit-build && \
+    CXXFLAGS="-D_BSD_SOURCE" pip3 install --no-cache-dir ninja && \
     pip3 install --no-cache-dir -r test-requirements.txt && \
     pip3 install --no-cache-dir -r api/requirements.txt
-CMD ./tests/api_smoke_test.sh
-CMD py.test -v -vv --cov-report term-missing --cov=. -c .coveragerc
+CMD pytype api/app/app.py poseidon/main.py
+CMD ./tests/api_smoke_test.sh && py.test -v -vv --cov-report term-missing --cov=. -c .coveragerc
