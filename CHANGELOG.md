@@ -1,3 +1,13 @@
+# v0.7.5 (2019-10-11)
+
+- Updated versions of prometheus, pytest-cov, pytest, grafana, and redis
+- Fixed some typos in the documentation
+- Added a warning about max time between investigations
+- Added ACLs to the CLI and the API
+- Using ipaddress library for ip addresses now
+- Added pytype checks
+- Fixed filtering for ipv4/ipv6 in the CLI
+
 # v0.7.4 (2019-10-03)
 
 - Fix key checks for automated ACLs
