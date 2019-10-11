@@ -1,0 +1,57 @@
+################
+# INSTRUCTIONS #
+################
+
+This demo will be using Faucet and Mininet with an Open vSwitch to demonstrate Poseidon working with a virtual SDN network.
+
+Poseidon has been installed along with all of the dependencies needed for this demo. It is set to start up automatically by default and can take a few minutes to finish initializing. You can check on the progress with `poseidon status`
+Once the service shows Active as 'active' and the logs show that it is no longer "waiting for Poseidon containers to become healthy", you can check the Poseidon logs with `poseidon logs` and the system logs with `poseidon system-logs`
+
+In another terminal you can start mininet with the following:
+
+sudo mn --topo single,3 --mac --switch ovsk --controller=remote,ip=127.0.0.1:6653
+
+Mininet will have created an OVS switch, attached 3 hosts (h1-h3) on ports 1-3, respectively, and connected to Faucet using OpenFlow over the default port of 6653. We will generate some traffic between h1 and h2, and use our 3rd interface as our mirror port.  See '/etc/faucet/faucet.yaml' for the configuration.
+
+At the mininet prompt start a simple webserver on h1:
+
+h1 cd / && python3 -m http.server &
+
+Now connect to the webserver from h2 using netcat:
+
+h2 echo -n "GET / HTTP/1.0" | nc 10.0.0.1 8000
+
+At this point it is worth watching the Faucet logs, which can be tailed like so: `tail /var/log/faucet/faucet.log`.
+Faucet logs will show L2 learned records like the following:
+
+Sep 05 15:42:25 faucet.valve INFO     DPID 1 (0x1) switch-1 L2 learned 00:00:00:00:00:01 (L2 type 0x86dd, L2 dst 33:33:00:00:00:16, L3 src None, L3 dst None) Port 1 VLAN 8 (1 hosts total)
+Sep 05 15:42:26 faucet.valve INFO     DPID 1 (0x1) switch-1 L2 learned 00:00:00:00:00:02 (L2 type 0x86dd, L2 dst 33:33:00:00:00:16, L3 src None, L3 dst None) Port 2 VLAN 8 (2 hosts total)
+
+
+The Poseidon logs should start picking up the 2 hosts and begin capturing traffic. Once the hosts are moved into the mirroring section of the Poseidon logs you can look at the faucet.yaml file again and see that it got updated to start mirroring traffic. Additionally if you do `docker ps` you still start to see ncapture containers running which are creating the PCAP files of the mirrored traffic.  You can find those PCAP files in '/opt/vent_files'. Eventually after the captures have been processed and analyzed by the machine learning portion of Poseidon (about 5 minutes), you'll see results of the machine learning classification in the poseidon logs.
+
+2019-09-05 15:42:26,268 [INFO] main - Detected new endpoint: 841c5478b964b8e4050a2074617f8c35bef788e5:{'mac': '00:00:00:00:00:01', 'segment': 'switch-1', 'port': '1', 'vlan': 'VLAN8', 'active': 1, 'ipv4': 'None', 'ipv6': 0, 'controller_type': 'faucet', 'controller': '', 'name': None, 'ether_vendor': 'Xerox', 'ipv4_rdns': 'a23-217-138-108.deploy.static.akamaitechnologies.com', 'ipv4_subnet': '.0/24', 'ipv6_rdns': 'NO DATA', 'ipv6_subnet': 'NO DATA'}
+2019-09-05 15:42:26,556 [INFO] transitions.core - 841c5478 Exited state unknown
+2019-09-05 15:42:26,556 [INFO] transitions.core - 841c5478 Entered state queued
+2019-09-05 15:42:27,559 [INFO] transitions.core - 841c5478 Exited state queued
+2019-09-05 15:42:27,559 [INFO] transitions.core - 841c5478 Entered state mirroring
+2019-09-05 15:42:28,263 [INFO] collector - Successfully started the vent collector for: 841c5478b964b8e4050a2074617f8c35bef788e5
+
+While Poseidon is capturing, you'll want to generate some meaningful traffic. To do this, we'll download a large file from the webserver like so:
+
+h2 echo -n "GET /opt/poseidon/dist/cyberreboot-vent.tar HTTP/1.0" | nc 10.0.0.1 8000 > vent.tar
+
+After the capture is done you'll see output of the devices learned with `poseidon logs` like the following:
+
+2019-09-10 17:06:18,363 [INFO] main - ML results: {'217663efa0bca5521e4e7d33de93711d33a7d824': {'decisions': {'behavior': 'normal', 'investigate': False}, 'classification': {'labels': ['Developer workstation', 'Business workstation', 'Unknown'], 'confidences': [0.8229662347423514, 0.0892798588297606, 0.05688044658908546]}, 'timestamp': 1568134971.099849, 'valid': True, 'source_ip': '192.168.0.7', 'source_mac': '68:5b:35:c9:76:15'}, 'pcap': 'trace_217663efa0bca5521e4e7d33de93711d33a7d824_2019-09-10_16_48_01-client-ip-192-168-0-7.pcap'}
+
+Finally, you can visualize the network that Poseidon sees using CRviz, which can be accessed with `poseidon visualize`.
+
+When you're done with the demo, you can use 'poseidon reset' (note: Faucet will still be running in Docker containers).
+
+###############################################################################
+# If you're reading this you've successfully completed the demo instructions! #
+# Otherwise, scroll up to the INSTRUCTIONS header and start there.            #
+# These instructions can also be retrieved here:                              #
+# https://raw.githubusercontent.com/CyberReboot/poseidon/master/docs/demo.txt #
+###############################################################################

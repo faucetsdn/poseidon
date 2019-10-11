@@ -1,0 +1,116 @@
+#!/bin/bash
+set -e
+
+declare controller_uri
+declare controller_user
+declare controller_pass
+declare controller_type
+declare collector_nic
+declare controller_log_file
+declare controller_config_file
+declare controller_mirror_ports
+declare controller_span_fabric_name
+declare controller_interface_group
+declare rabbit_enabled
+declare learn_public_addresses
+declare trust_self_signed_cert
+declare FA_RABBIT_ENABLED
+declare FA_RABBIT_HOST
+declare FA_RABBIT_EXCHANGE
+declare FA_RABBIT_ROUTING_KEY
+declare FA_RABBIT_PORT
+declare max_concurrent_reinvestigations
+
+sudo mkdir -p /var/log/poseidon
+sudo chmod -R 755 /var/log/poseidon
+sudo touch /var/log/poseidon/poseidon.log
+
+d_comm="docker run -dit -v /var/run/docker.sock:/var/run/docker.sock -v /opt/vent_files:/opt/vent_files -v $(pwd)/.plugin_config.yml:/root/.plugin_config.yml -v $(pwd)/.vent_startup.yml:/root/.vent_startup.yml "
+if [[ -n "${controller_uri}" ]]; then
+	d_comm+="-e controller_uri=$controller_uri "
+fi
+if [[ -n "${controller_user}" ]]; then
+	d_comm+="-e controller_user=$controller_user "
+fi
+if [[ -n "${controller_pass}" ]]; then
+	d_comm+="-e controller_pass=$controller_pass "
+fi
+if [[ -n "${controller_type}" ]]; then
+	d_comm+="-e controller_type=$controller_type "
+	if [ "$controller_type" == "faucet" ]; then
+		if [ ! -f /etc/faucet/faucet.yaml ]; then
+			sudo mkdir -p /etc/faucet && sudo touch /etc/faucet/faucet.yaml
+		fi
+		if [ ! -f /var/log/faucet/faucet.log ]; then
+			sudo mkdir -p /var/log/faucet && sudo touch /var/log/faucet/faucet.log
+		fi
+	fi
+fi
+if [[ -n "${collector_nic}" ]]; then
+	d_comm+="-e collector_nic=$collector_nic "
+fi
+if [[ -n "${controller_log_file}" ]]; then
+	d_comm+="-e controller_log_file=$controller_log_file "
+fi
+if [[ -n "${controller_config_file}" ]]; then
+	d_comm+="-e controller_config_file=$controller_config_file "
+fi
+if [[ -n "${controller_mirror_ports}" ]]; then
+	d_comm+="-e controller_mirror_ports=$controller_mirror_ports "
+fi
+if [[ -n "${controller_span_fabric_name}" ]]; then
+	d_comm+="-e controller_span_fabric_name=$controller_span_fabric_name "
+fi
+if [[ -n "${controller_interface_group}" ]]; then
+	d_comm+="-e controller_interface_group=$controller_interface_group "
+fi
+if [[ -n "${rabbit_enabled}" ]]; then
+	d_comm+="-e rabbit_enabled=$rabbit_enabled "
+fi
+if [[ -n "${learn_public_addresses}" ]]; then
+	d_comm+="-e learn_public_addresses=$learn_public_addresses "
+fi
+if [[ -n "${trust_self_signed_cert}" ]]; then
+	d_comm+="-e trust_self_signed_cert=$trust_self_signed_cert "
+fi
+if [[ -n "${FA_RABBIT_ENABLED}" ]]; then
+	d_comm+="-e FA_RABBIT_ENABLED=$FA_RABBIT_ENABLED "
+fi
+if [[ -n "${FA_RABBIT_HOST}" ]]; then
+	d_comm+="-e FA_RABBIT_HOST=$FA_RABBIT_HOST "
+fi
+if [[ -n "${FA_RABBIT_EXCHANGE}" ]]; then
+	d_comm+="-e FA_RABBIT_EXCHANGE=$FA_RABBIT_EXCHANGE "
+fi
+if [[ -n "${FA_RABBIT_ROUTING_KEY}" ]]; then
+	d_comm+="-e FA_RABBIT_ROUTING_KEY=$FA_RABBIT_ROUTING_KEY "
+fi
+if [[ -n "${FA_RABBIT_PORT}" ]]; then
+	d_comm+="-e FA_RABBIT_PORT=$FA_RABBIT_PORT "
+fi
+if [[ -n "${max_concurrent_reinvestigations}" ]]; then
+	d_comm+="-e max_concurrent_reinvestigations=$max_concurrent_reinvestigations "
+fi
+d_comm+="--name vent cyberreboot/vent"
+$d_comm
+
+echo -n "waiting for required containers to build and start (this might take a little while)..."
+until [ "$(docker ps -q -f name=cyberreboot-vent-syslog-master)" ] && [ "$(docker container inspect -f \{\{.State.Running\}\} cyberreboot-vent-syslog-master)" = "true" ]
+do
+	echo -n "\\"
+	echo -en "\\b"
+	sleep 0.3
+	echo -n "|"
+	echo -en "\\b"
+	sleep 0.3
+	echo -n "/"
+	echo -en "\\b"
+	sleep 0.3
+	echo -n "-"
+	echo -en "\\b"
+	sleep 0.3
+done
+
+echo "done."
+
+docker logs -f cyberreboot-vent-syslog-master

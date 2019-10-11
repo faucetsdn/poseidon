@@ -1,16 +1,22 @@
--   repo: git@github.com:pre-commit/pre-commit-hooks
-    sha: 3fa02652357ff0dbb42b5bc78c673b7bc105fcf3
+default_language_version:
+    python: python3
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
     hooks:
     -   id: trailing-whitespace
     -   id: end-of-file-fixer
-    -   id: autopep8-wrapper
     -   id: check-case-conflict
     -   id: check-json
     -   id: pretty-format-json
         args: ['--autofix']
     -   id: double-quote-string-fixer
     -   id: check-yaml
--   repo: git@github.com:asottile/reorder_python_imports
-    sha: v0.3.0
+-   repo: https://github.com/asottile/reorder_python_imports
+    rev: v1.6.1
     hooks:
     -   id: reorder-python-imports
+-   repo: https://github.com/pre-commit/mirrors-autopep8
+    rev: v1.4.4
+    hooks:
+    -   id: autopep8

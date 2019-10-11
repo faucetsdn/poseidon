@@ -1,0 +1,43 @@
+poseidon:
+    Poseidon:
+        logger_level: INFO
+        reinvestigation_frequency: 900
+        max_concurrent_reinvestigations: 2
+        scan_frequency: 5
+        learn_public_addresses: False
+        controller_type: bcf
+        controller_uri: https://CONTROLLER_IP:8443/api/v1/
+        controller_user: CONTROLLER_USER
+        controller_pass: CONTROLLER_PASS
+        automated_acls: False
+        rules_file: /opt/poseidon/rules.yaml
+
+
+    NetworkML:
+        rabbit_enabled: True
+        rabbit_server: RABBIT_SERVER
+        rabbit_port: 5672
+
+    Vent:
+        collector_nic: enp7s0f0
+        vent_ip: vent_ip
+        vent_port: 8080
+
+    Faucet:
+        ignore_vlans: []
+        ignore_ports: {}
+        trunk_ports: {}
+        FA_RABBIT_ENABLED: True
+        FA_RABBIT_HOST: RABBIT_SERVER
+        FA_RABBIT_PORT: 5672
+        FA_RABBIT_EXCHANGE: 'topic_recs'
+        FA_RABBIT_EXCHANGE_TYPE: 'topic'
+        FA_RABBIT_ROUTING_KEY: 'FAUCET.Event'
+        controller_log_file: /var/log/faucet/faucet.log
+        controller_config_file: /etc/faucet/faucet.yaml
+        controller_mirror_ports: {}
+
+    Bcf:
+        controller_span_fabric_name: vent
+        controller_interface_group: ig1
+        trust_self_signed_cert: True
