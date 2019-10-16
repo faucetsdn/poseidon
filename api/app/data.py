@@ -276,7 +276,7 @@ class Network(object):
         resp.status = falcon.HTTP_200
 
 
-class NetworkByIp(Network):
+class NetworkByIp(object):
 
     @staticmethod
     def get_dataset(ip):
