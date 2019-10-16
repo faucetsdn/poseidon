@@ -40,6 +40,7 @@ services:
         image: 'faucet/faucet:latest'
         volumes:
             - '${FAUCET_PREFIX}/var/log/faucet:/var/log/faucet'
+            - '${FAUCET_PREFIX}/var/run/faucet:/var/run/faucet'
             - '${FAUCET_PREFIX}/etc/faucet:/etc/faucet'
         ports:
             - '6653:6653'
