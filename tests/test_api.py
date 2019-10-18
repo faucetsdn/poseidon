@@ -121,6 +121,11 @@ def test_network(client):
     assert len(response.json) == 2
     assert response.status == falcon.HTTP_OK
 
+def test_network_by_ip(client):
+    response = client.simulate_get('/v1/network/10.0.0.1')
+    assert len(response.json['dataset']) == 1
+    assert response.status == falcon.HTTP_OK
+
 
 def test_network_full(client):
     response = client.simulate_get('/v1/network_full')

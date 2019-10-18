@@ -35,9 +35,10 @@ class Info(object):
 
 class Nodes():
 
-    def __init__(self, fields):
+    def __init__(self, fields, ip=None):
         self.nodes = []
         self.node = {}
+        self.ip = ip
         for field in fields:
             self.node[field] = fields[field]
 
@@ -82,6 +83,7 @@ class Nodes():
                     print(
                         'Unable to retrieve endpoint metadata because: {0}'.format(str(e)))
 
+                should_append = self.ip == None
                 # grab from endpoint data
                 if 'poseidon_hash' in mac_info:
                     if 'id' in node:
@@ -116,6 +118,7 @@ class Nodes():
                             if 'ipv4' in node:
                                 try:
                                     ipv4 = endpoint_data['ipv4']
+                                    should_append = ipv4 == self.ip or should_append
                                     if isinstance(ipv4, str) and ipv4 != 'None':
                                         if 'ipv4_subnet' in node:
                                             if '.' in ipv4:
@@ -131,7 +134,7 @@ class Nodes():
                                         'Failed to set IPv4 info because: {0}'.format(str(e)))
                             if 'ipv6' in node:
                                 try:
-                                    ipv6 = endpoint_data['ipv6']
+                                    should_append = ipv6 == self.ip or should_append
                                     if isinstance(ipv6, str) and ipv6 != 'None':
                                         if 'ipv6_subnet' in node:
                                             if ':' in ipv6:
@@ -175,7 +178,9 @@ class Nodes():
                         except Exception as e:  # pragma: no cover
                             print(
                                 'Failed to set all ML info because: {0}'.format(str(e)))
-                self.nodes.append(node)
+                if should_append:
+                    self.nodes.append(node)
+
         return
 
 
@@ -263,6 +268,35 @@ class Network(object):
         network = {}
         dataset = Network.get_dataset()
         configuration = Network.get_configuration()
+
+        network['dataset'] = dataset
+        network['configuration'] = configuration
+        resp.body = json.dumps(network, indent=2)
+        resp.content_type = falcon.MEDIA_JSON
+        resp.status = falcon.HTTP_200
+
+
+class NetworkByIp(object):
+
+    @staticmethod
+    def get_dataset(ip):
+        fields = Network.get_fields()
+        n = Nodes(fields, ip)
+        n.build_nodes()
+        return n.nodes
+
+    @staticmethod
+    def get_configuration():
+        configuration = {'fields': []}
+        for field in Network.get_fields():
+            configuration['fields'].append(
+                {'path': [field], 'displayName': Network.field_mapping()[field], 'groupable': 'true'})
+        return configuration
+
+    def on_get(self, req, resp, ip):
+        network = {}
+        dataset = NetworkByIp.get_dataset(ip)
+        configuration = NetworkByIp.get_configuration()
 
         network['dataset'] = dataset
         network['configuration'] = configuration
