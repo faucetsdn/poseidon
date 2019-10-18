@@ -48,5 +48,5 @@ class Actions(object):
         status = False
         if self.sdnc:
             status = self.sdnc.update_acls(
-                rules_file=rules_file, endpoints=endpoints, force_apply_rules)
+                rules_file=rules_file, endpoints=endpoints, force_apply_rules=force_apply_rules)
         return status
