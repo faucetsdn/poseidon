@@ -718,6 +718,19 @@ class Monitor(object):
                     except Exception as e:  # pragma: no cover
                         self.logger.error(
                             'Unable to change endpoint {0} because: {1}'.format(endpoint.name, str(e)))
+        elif routing_key == 'poseidon.action.update_acls':
+            for ip, rules in my_obj:
+                endpoint = self.s.endpoints.get(name, None)
+                if endpoint:
+                    try:
+                        status = Actions(
+                            endpoint, self.s.sdnc).update_acls(rules_file=self.controller['rules_file'], endpoints=endpoint, force_apply_rules=rules)
+                        if not status:
+                            self.logger.warning(
+                                'Unable to apply rules: {0} to endpoint: {1}'.format(rules, endpoint.name))
+                    except:
+                        self.logger.error(
+                                'Unable to apply rules: {0} to endpoint: {1} because {2}'.format(rules, endpoint.name, str(e)))
         elif routing_key == 'poseidon.action.remove':
             remove_list = [name for name in my_obj]
         elif routing_key == 'poseidon.action.remove.ignored':

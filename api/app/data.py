@@ -279,6 +279,35 @@ class Network(object):
 class NetworkByIp(object):
 
     @staticmethod
+    def get_dataset(ip=None):
+        fields = Network.get_fields()
+        n = Nodes(fields, ip)
+        n.build_nodes()
+        return n.nodes
+
+    @staticmethod
+    def get_configuration():
+        configuration = {'fields': []}
+        for field in Network.get_fields():
+            configuration['fields'].append(
+                {'path': [field], 'displayName': Network.field_mapping()[field], 'groupable': 'true'})
+        return configuration
+
+    def on_get(self, req, resp, ip):
+        network = {}
+        dataset = NetworkByIp.get_dataset(ip)
+        configuration = NetworkByIp.get_configuration()
+
+        network['dataset'] = dataset
+        network['configuration'] = configuration
+        resp.body = json.dumps(network, indent=2)
+        resp.content_type = falcon.MEDIA_JSON
+        resp.status = falcon.HTTP_200
+
+
+class NetworkByIp(object):
+
+    @staticmethod
     def get_dataset(ip):
         fields = Network.get_fields()
         n = Nodes(fields, ip)

@@ -82,7 +82,7 @@ class Parser:
         obj_doc = Parser().yaml_in(config_file)
         return obj_doc
 
-    def config(self, config_file, action, port, switch, rules_file=None, endpoints=None):
+    def config(self, config_file, action, port, switch, rules_file=None, endpoints=None, force_apply_rules=None):
         status = [True, []]
         switch_found = None
         config_file = Parser().get_config_file(config_file)
@@ -316,7 +316,7 @@ class Parser:
                                             match = True
                                 if match:
                                     matches += 1
-                        if matches == len(rules[rule]):
+                        if matches == len(rules[rule]) or rule in force_apply_rules:
                             rule_acls = []
                             for r in rules[rule]:
                                 rule_acls += r['rule']['acls']
