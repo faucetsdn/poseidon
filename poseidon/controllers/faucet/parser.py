@@ -82,7 +82,7 @@ class Parser:
         obj_doc = Parser().yaml_in(config_file)
         return obj_doc
 
-    def config(self, config_file, action, port, switch, rules_file=None, endpoints=None):
+    def config(self, config_file, action, port, switch, rules_file=None, endpoints=None, force_apply_rules=None):
         status = [True, []]
         switch_found = None
         config_file = Parser().get_config_file(config_file)
@@ -261,7 +261,8 @@ class Parser:
                     for rule in rules:
                         matches = 0
                         for r in rules[rule]:
-                            if r['rule']['device_key'] == 'os':
+                            if('rule' in r and 'device_key' in r['rule'] and
+                                r['rule']['device_key'] == 'os'):
                                 match = False
                                 if 'ipv4_addresses' in endpoint.metadata:
                                     for ip in endpoint.metadata['ipv4_addresses']:
@@ -277,7 +278,8 @@ class Parser:
                                             match = True
                                 if match:
                                     matches += 1
-                            elif r['rule']['device_key'] == 'role':
+                            elif('rule' in r and 'device_key' in r['rule'] and
+                                r['rule']['device_key'] == 'role'):
                                 match = False
                                 if 'mac_addresses' in endpoint.metadata:
                                     for mac in endpoint.metadata['mac_addresses']:
@@ -301,7 +303,8 @@ class Parser:
                                                         match = True
                                 if match:
                                     matches += 1
-                            elif r['rule']['device_key'] == 'behavior':
+                            elif('rule' in r and 'device_key' in r['rule'] and
+                                r['rule']['device_key'] == 'behavior'):
                                 match = False
                                 if 'mac_addresses' in endpoint.metadata:
                                     for mac in endpoint.metadata['mac_addresses']:
@@ -316,7 +319,7 @@ class Parser:
                                             match = True
                                 if match:
                                     matches += 1
-                        if matches == len(rules[rule]):
+                        if matches == len(rules[rule]) or rule in force_apply_rules:
                             rule_acls = []
                             for r in rules[rule]:
                                 rule_acls += r['rule']['acls']

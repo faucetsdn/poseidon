@@ -22,40 +22,7 @@ class HistoryTypes():
     ACL_CHANGE = 'ACL Change'
 
 
-class EndpointDecoder(object):
-
-    def __init__(self, endpoint):
-        e = json.loads(endpoint)
-        self.endpoint = Endpoint(e['name'])
-        self.endpoint.state = e['state']
-        if 'ignore' in e:
-            if e['ignore']:
-                self.endpoint.ignore = True
-            else:
-                self.endpoint.ignore = False
-        else:
-            self.endpoint.ignore = False
-        if 'metadata' in e:
-            self.endpoint.metadata = e['metadata']
-        else:
-            self.endpoint.metadata = {}
-        if 'history' in e:
-            self.endpoint.history = e['history']
-        else:
-            self.endpoint.history = []
-        if 'acl_data' in e:
-            self.endpoint.acl_data = e['acl_data']
-        else:
-            self.endpoint.acl_data = []
-        self.endpoint.endpoint_data = e['endpoint_data']
-        self.endpoint.p_next_state = e['p_next_state']
-        self.endpoint.p_prev_states = e['p_prev_states']
-
-    def get_endpoint(self):
-        return self.endpoint
-
-
-class Endpoint(object):
+class Endpoint:
 
     states = ['known', 'unknown', 'mirroring', 'inactive', 'abnormal',
               'shutdown', 'reinvestigating', 'queued']
@@ -147,10 +114,6 @@ class Endpoint(object):
     ]
 
     def __init__(self, hashed_val):
-        # Initialize the state machine
-        self.machine = Machine(model=self, states=Endpoint.states,
-                               transitions=Endpoint.transitions, initial='unknown', send_event=True)
-        self.machine.name = hashed_val[:8]+' '
         self.name = hashed_val.strip()
         self.ignore = False
         self.endpoint_data = None
@@ -179,8 +142,9 @@ class Endpoint(object):
             {'type': entry_type, 'timestamp': timestamp, 'message': message})
 
     def update_state_history(self, event_data):
-        self._add_history_entry(HistoryTypes.STATE_CHANGE, time.time(),
-                                'State changed from {0} to {1}'.format(event_data.transition.source, event_data.transition.dest))
+        self._add_history_entry(
+            HistoryTypes.STATE_CHANGE, time.time(),
+            'State changed from {0} to {1}'.format(event_data.transition.source, event_data.transition.dest))
 
     @staticmethod
     def make_hash(machine, trunk=False):
@@ -194,3 +158,49 @@ class Endpoint(object):
         h.update(pre_h.encode('utf-8'))
         post_h = h.hexdigest()
         return post_h
+
+
+def endpoint_factory(hashed_val):
+    endpoint = Endpoint(hashed_val)
+    machine = Machine(
+        model=endpoint,
+        states=Endpoint.states,
+        transitions=Endpoint.transitions,
+        initial='unknown',
+        send_event=True)
+    machine.name = endpoint.name[:8]+' '
+    endpoint.machine = machine
+    return endpoint
+
+
+class EndpointDecoder:
+
+    def __init__(self, endpoint):
+        e = json.loads(endpoint)
+        self.endpoint = endpoint_factory(e['name'])
+        self.endpoint.state = e['state']
+        if 'ignore' in e:
+            if e['ignore']:
+                self.endpoint.ignore = True
+            else:
+                self.endpoint.ignore = False
+        else:
+            self.endpoint.ignore = False
+        if 'metadata' in e:
+            self.endpoint.metadata = e['metadata']
+        else:
+            self.endpoint.metadata = {}
+        if 'history' in e:
+            self.endpoint.history = e['history']
+        else:
+            self.endpoint.history = []
+        if 'acl_data' in e:
+            self.endpoint.acl_data = e['acl_data']
+        else:
+            self.endpoint.acl_data = []
+        self.endpoint.endpoint_data = e['endpoint_data']
+        self.endpoint.p_next_state = e['p_next_state']
+        self.endpoint.p_prev_states = e['p_prev_states']
+
+    def get_endpoint(self):
+        return self.endpoint

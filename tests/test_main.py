@@ -15,7 +15,7 @@ from prometheus_client import Gauge
 
 from poseidon.constants import NO_DATA
 from poseidon.helpers.config import Config
-from poseidon.helpers.endpoint import Endpoint
+from poseidon.helpers.endpoint import endpoint_factory
 from poseidon.main import CTRL_C
 from poseidon.main import Monitor
 from poseidon.main import rabbit_callback
@@ -32,7 +32,7 @@ def test_endpoint_by_name():
     s = SDNConnect(controller)
     endpoint = s.endpoint_by_name('foo')
     assert endpoint == None
-    endpoint = Endpoint('foo')
+    endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
     s.endpoints[endpoint.name] = endpoint
@@ -45,7 +45,7 @@ def test_endpoint_by_hash():
     s = SDNConnect(controller)
     endpoint = s.endpoint_by_hash('foo')
     assert endpoint == None
-    endpoint = Endpoint('foo')
+    endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
     s.endpoints[endpoint.name] = endpoint
@@ -58,7 +58,7 @@ def test_endpoints_by_ip():
     s = SDNConnect(controller)
     endpoints = s.endpoints_by_ip('10.0.0.1')
     assert endpoints == []
-    endpoint = Endpoint('foo')
+    endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '10.0.0.1', 'ipv6': 'None'}
     s.endpoints[endpoint.name] = endpoint
@@ -71,7 +71,7 @@ def test_endpoints_by_mac():
     s = SDNConnect(controller)
     endpoints = s.endpoints_by_mac('00:00:00:00:00:01')
     assert endpoints == []
-    endpoint = Endpoint('foo')
+    endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
     s.endpoints[endpoint.name] = endpoint
@@ -202,6 +202,11 @@ def test_format_rabbit_message():
     retval = mockMonitor.format_rabbit_message(message)
     assert retval == {}
 
+    ip_data = dict({'10.0.01':['rule1']})
+    message = ('poseidon.action.update_acls', json.dumps(ip_data))
+    retval = mockMonitor.format_rabbit_message(message)
+    assert retval == {}
+
     data = [('foo', 'unknown')]
     message = ('poseidon.action.change', json.dumps(data))
     retval = mockMonitor.format_rabbit_message(message)
@@ -271,13 +276,13 @@ def test_schedule_job_reinvestigation():
                                              port=6379,
                                              db=0,
                                              decode_responses=True)
-            endpoint = Endpoint('foo')
+            endpoint = endpoint_factory('foo')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
             endpoint.mirror()
             endpoint.known()
             self.s.endpoints[endpoint.name] = endpoint
-            endpoint = Endpoint('foo2')
+            endpoint = endpoint_factory('foo2')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
             endpoint.mirror()
@@ -348,14 +353,14 @@ def test_process():
                                              port=6379,
                                              db=0,
                                              decode_responses=True)
-            endpoint = Endpoint('foo')
+            endpoint = endpoint_factory('foo')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
             endpoint.mirror()
             endpoint.p_prev_states.append(
                 (endpoint.state, int(time.time())))
             self.s.endpoints[endpoint.name] = endpoint
-            endpoint = Endpoint('foo2')
+            endpoint = endpoint_factory('foo2')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
             endpoint.p_next_state = 'mirror'
@@ -363,7 +368,7 @@ def test_process():
             endpoint.p_prev_states.append(
                 (endpoint.state, int(time.time())))
             self.s.endpoints[endpoint.name] = endpoint
-            endpoint = Endpoint('foo3')
+            endpoint = endpoint_factory('foo3')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
             self.s.endpoints[endpoint.name] = endpoint
@@ -400,7 +405,7 @@ def test_process():
 
 
 def test_show_endpoints():
-    endpoint = Endpoint('foo')
+    endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv6': '1212::1'}
     endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'1551805502': {'labels': ['developer workstation'], 'behavior': 'normal'}}}, 'ipv4_addresses': {

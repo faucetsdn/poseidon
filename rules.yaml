@@ -17,3 +17,7 @@ rules:
             device_key: behavior
             value: abnormal
             acls: [no-internal]
+    no-internal:
+        -rule:
+            acls: [no-internal]
+            
