@@ -202,6 +202,10 @@ def test_format_rabbit_message():
     retval = mockMonitor.format_rabbit_message(message)
     assert retval == {}
 
+    message = ('poseidon.action.remove.update_acls', json.dumps(data))
+    retval = mockMonitor.format_rabbit_message(message)
+    assert retval == {}
+
     data = [('foo', 'unknown')]
     message = ('poseidon.action.change', json.dumps(data))
     retval = mockMonitor.format_rabbit_message(message)
