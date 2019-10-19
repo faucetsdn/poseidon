@@ -18,6 +18,5 @@ rules:
             value: abnormal
             acls: [no-internal]
     no-internal:
-        -rule:
+        - rule:
             acls: [no-internal]
-            
