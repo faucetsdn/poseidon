@@ -719,7 +719,8 @@ class Monitor(object):
                         self.logger.error(
                             'Unable to change endpoint {0} because: {1}'.format(endpoint.name, str(e)))
         elif routing_key == 'poseidon.action.update_acls':
-            for ip, rules in my_obj:
+            for ip in my_obj:
+                rules = my_obj[ip]
                 endpoint = self.s.endpoints_by_ip(ip)
                 if endpoint:
                     try:
