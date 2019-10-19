@@ -202,6 +202,7 @@ def test_format_rabbit_message():
     retval = mockMonitor.format_rabbit_message(message)
     assert retval == {}
 
+    ip_data = dict({'ip':'10.0.01', 'rules':['rule1']})
     message = ('poseidon.action.update_acls', json.dumps(data))
     retval = mockMonitor.format_rabbit_message(message)
     assert retval == {}
