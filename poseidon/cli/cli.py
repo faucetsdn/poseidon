@@ -47,7 +47,7 @@ class GetData():
 
     @staticmethod
     def _get_vlan(endpoint):
-        vlan = endpoint.endpoint_data['vlan']
+        vlan = str(endpoint.endpoint_data['vlan'])
         return vlan.split('VLAN')[1] if vlan.startswith('VLAN') else vlan
 
     @staticmethod
