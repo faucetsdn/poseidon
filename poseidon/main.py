@@ -723,7 +723,7 @@ class Monitor(object):
                 rules = my_obj[ip]
                 endpoints = self.s.endpoints_by_ip(ip)
                 if endpoints:
-                    endpoints = endpoints[0]
+                    endpoint = endpoints[0]
                     try:
                         status = Actions(
                             endpoint, self.s.sdnc).update_acls(rules_file=self.controller['rules_file'], endpoints=endpoint, force_apply_rules=rules)
