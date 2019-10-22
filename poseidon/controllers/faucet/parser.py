@@ -319,7 +319,7 @@ class Parser:
                                             match = True
                                 if match:
                                     matches += 1
-                        if matches == len(rules[rule]) or rule in force_apply_rules:
+                        if matches == len(rules[rule]) or (force_apply_rules and rule in force_apply_rules):
                             rule_acls = []
                             for r in rules[rule]:
                                 rule_acls += r['rule']['acls']
