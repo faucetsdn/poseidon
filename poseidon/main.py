@@ -719,10 +719,11 @@ class Monitor(object):
                         self.logger.error(
                             'Unable to change endpoint {0} because: {1}'.format(endpoint.name, str(e)))
         elif routing_key == 'poseidon.action.update_acls':
-            for name in my_obj:
-                rules = my_obj[name]
-                endpoint = self.s.endpoints.get(name, None)
-                if endpoint:
+            for ip in my_obj:
+                rules = my_obj[ip]
+                endpoints = self.s.endpoints_by_ip(ip)
+                if endpoints:
+                    endpoints = endpoints[0]
                     try:
                         status = Actions(
                             endpoint, self.s.sdnc).update_acls(rules_file=self.controller['rules_file'], endpoints=endpoint, force_apply_rules=rules)
