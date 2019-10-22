@@ -726,7 +726,7 @@ class Monitor(object):
                     endpoint = endpoints[0]
                     try:
                         status = Actions(
-                            endpoint, self.s.sdnc).update_acls(rules_file=self.controller['rules_file'], endpoints=endpoint, force_apply_rules=rules)
+                            endpoint, self.s.sdnc).update_acls(rules_file=self.controller['RULES_FILE'], endpoints=endpoint, force_apply_rules=rules)
                         if not status:
                             self.logger.warning(
                                 'Unable to apply rules: {0} to endpoint: {1}'.format(rules, endpoint.name))
