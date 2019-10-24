@@ -28,7 +28,6 @@ build_debian:
 	cp installers/debian/poseidon.service installers/debian/$(TAG)-$(VERSION)/etc/systemd/system/
 	cp installers/debian/default.conf installers/debian/$(TAG)-$(VERSION)/etc/poseidon/
 	cp -R !(installers|dist) installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
-	cp .dockerignore installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
 	cp .plugin_config.yml installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
 	cp .vent_startup.yml installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
 	cp -R .git installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
@@ -66,6 +65,7 @@ build_debian:
 	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-networkml.tar cyberreboot/networkml:v0.3.9
 
 	mkdir -p dist
+	rm -rf dist/*
 	docker build -t poseidon-dpkg -f Dockerfile.dpkg .
 	docker run --rm poseidon-dpkg > dist/$(TAG)-$(VERSION).deb
 	rm -rf installers/debian/$(TAG)-$(VERSION)
@@ -86,7 +86,6 @@ build_debian_net:
 	cp installers/debian/poseidon.service installers/debian/$(TAG)-$(VERSION)/etc/systemd/system/
 	cp installers/debian/default.conf installers/debian/$(TAG)-$(VERSION)/etc/poseidon/
 	cp -R !(installers|dist) installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
-	cp .dockerignore installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
 	cp .plugin_config.yml installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
 	cp .vent_startup.yml installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
 	cp -R .git installers/debian/$(TAG)-$(VERSION)/opt/poseidon/
