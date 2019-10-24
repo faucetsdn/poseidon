@@ -721,11 +721,12 @@ class Monitor(object):
         elif routing_key == 'poseidon.action.update_acls':
             for ip in my_obj:
                 rules = my_obj[ip]
-                endpoint = self.s.endpoints_by_ip(ip)
-                if endpoint:
+                endpoints = self.s.endpoints_by_ip(ip)
+                if endpoints:
+                    endpoint = endpoints[0]
                     try:
                         status = Actions(
-                            endpoint, self.s.sdnc).update_acls(rules_file=self.controller['rules_file'], endpoints=endpoint, force_apply_rules=rules)
+                            endpoint, self.s.sdnc).update_acls(rules_file=self.controller['RULES_FILE'], endpoints=endpoints, force_apply_rules=rules)
                         if not status:
                             self.logger.warning(
                                 'Unable to apply rules: {0} to endpoint: {1}'.format(rules, endpoint.name))

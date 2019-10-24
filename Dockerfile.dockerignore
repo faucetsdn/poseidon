@@ -10,6 +10,7 @@ CHANGELOG.md
 CODE_OF_CONDUCT.md
 CONTRIBUTING.md
 Dockerfile.docs
+Dockerfile.dpkg
 Dockerfile.test
 Dockerfile
 LICENSE
