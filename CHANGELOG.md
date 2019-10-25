@@ -1,3 +1,13 @@
+# v0.7.6 (2019-10-25)
+
+- Updated versions of redis, pytest, cmd2, grafana, prometheus, pylint, and pytype
+- Added volume for Faucet UDS
+- Added more files to ignore in Docker container
+- Added API endpoint to retrieve data by IP
+- Added ability to apply ACLs with RabbitMQ message
+- Ensure VLAN is a string
+- Persist Vent info in a volume
+
 # v0.7.5 (2019-10-11)
 
 - Updated versions of prometheus, pytest-cov, pytest, grafana, and redis
