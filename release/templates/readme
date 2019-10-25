@@ -49,7 +49,7 @@ The Poseidon project originally began as an experiment to test the merits of lev
 
 ### Permissions for Docker
 
-To simplify the using commands with Docker, we recommend allowing the user that will be executing Poseidon commands be part of the `docker` group so they can execut Docker commands without `sudo`.  Typically this can be done with:
+To simplify the using commands with Docker, we recommend allowing the user that will be executing Poseidon commands be part of the `docker` group so they can execute Docker commands without `sudo`.  Typically, this can be done with:
 ```
 sudo usermod -aG docker $$USER
 ```
@@ -60,14 +60,14 @@ On Ubuntu, this will download and install our `.deb` package from [Cloudsmith](h
 ```
 sudo apt-get install -y apt-transport-https curl
 curl -sLf "https://dl.cloudsmith.io/public/cyberreboot/poseidon/cfg/gpg/gpg.F9E23875C98A1F72.key" | sudo apt-key add -
-sudo add-apt-repository "deb [arch=amd64] https://dl.cloudsmith.io/public/cyberreboot/poseidon/deb/ubuntu $$(lsb_release -cs) main"
+sudo add-apt-repository "deb [arch=amd64] https://dl.cloudsmith.io/public/cyberreboot/poseidon/deb/ubuntu $(lsb_release -cs) main"
 sudo apt-get update
 sudo apt-get install poseidon
 ```
 
 If you prefer a lightweight package that downloads the images from the latest build at install time, you can alternatively install: `sudo apt-get install poseidon-net`
 
-> Note: The installer has a `Demo` option in the installation wizard that will deploy and configure the full Poseidon package, the Faucet SDN contoller (and related components like Grafana and Prometheus), mininet, and openvswitch.  We suggest the demo install as a starting point if much of this is new to you.
+> Note: The installer has a `Demo` option in the installation wizard that will deploy and configure the full Poseidon package, the Faucet controller  (and related components like Grafana and Prometheus), mininet, and openvswitch.  We suggest the demo install as a starting point if much of this is new to you.
 
 
 ## SDN Controller Configuration
@@ -103,7 +103,7 @@ interface-group <interface-group>
   member switch YOUR_LEAF_SWITCH interface YOUR_INTERFACE_WHERE_VENT_WILL_RECORD_TRAFFIC_FROM
 ```
 
-Poseidon will connect to the BCF controller using its REST API, so you will also need the BCF API hostname or IP address and credentials for the controller. If your controller is an HA pair and has a virtual IP address, we recommend using that virtual address. Also, because Poseidon will be making dynamic `filter` rule changes we will need an account that has administrative priveleges.  (Poseidon only modifies the filter rules of the defined span-fabric, but until BigSwitch has more granular access control options this means admin privs!) Bringing the above configuration requirements together, below is an example of what the relevant parts of your BCF configuration could look like where the span-fabric is called 'poseidon', the user 'poseidon' is defined for API access, and the egress interface is interface '48' on switch 'leaf04' and labelled as interface group 'ig1':
+Poseidon will connect to the BCF controller using its REST API, so you will also need the BCF API hostname or IP address and credentials for the controller. If your controller is an HA pair and has a virtual IP address, we recommend using that virtual address. Also, because Poseidon will be making dynamic `filter` rule changes we will need an account that has administrative privileges.  (Poseidon only modifies the filter rules of the defined span-fabric, but until BigSwitch has more granular access control options this means admin privs!) Bringing the above configuration requirements together, below is an example of what the relevant parts of your BCF configuration could look like where the span-fabric is called 'poseidon', the user 'poseidon' is defined for API access, and the egress interface is interface '48' on switch 'leaf04' and labelled as interface group 'ig1':
 
 ```
 ! user
