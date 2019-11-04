@@ -9,7 +9,7 @@
 
 > Software Defined Network Situational Awareness
 
-<img src="/docs/img/poseidon-logo.png" width="67" height="93" hspace="20"/><a href="https://www.blackducksoftware.com/open-source-rookies-2016" ><img src="/docs/img/Rookies16Badge_1.png" width="100" alt="POSEIDON is now BlackDuck 2016 OpenSource Rookie of the year" hspace="20"></a>
+<img src="/docs/img/poseidon-logo.png" width="67" height="93" hspace="20"/><a href="https://web.archive.org/web/20170316012151/https://www.blackducksoftware.com/open-source-rookies-2016" ><img src="/docs/img/Rookies16Badge_1.png" width="100" alt="POSEIDON is now BlackDuck 2016 OpenSource Rookie of the year" hspace="20"></a>
 
 Poseidon began as a joint effort between two of the IQT Labs: [Cyber Reboot](https://www.cyberreboot.org/) and [Lab41](http://www.lab41.org/). The project's goal is to explore approaches to better identify what nodes are on a given (computer) network and understand what they are doing.  The project utilizes Software Defined Networking and machine learning to automatically capture network traffic, extract relevant features from that traffic, perform classifications through trained models, convey results, and provide mechanisms to take further action. While the project works best leveraging modern SDNs, parts of it can still be used with little more than packet capture (pcap) files.
 
@@ -39,6 +39,7 @@ The Poseidon project originally began as an experiment to test the merits of lev
     - Ubuntu 16.04
     - Ubuntu 18.04
     - Ubuntu 19.04
+    - Ubuntu 19.10
 - [Docker](https://www.docker.com/) - Poseidon and related components run on top of Docker, so understanding the fundamentals will be useful for troubleshooting as well.  Note: installing via Snap is currently unsupported. [A Good Ubuntu Docker Quick-Start](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04)
 - ~10GB of free disk space
 - An SDN Controller - specifically [BigSwitch Cloud Fabric](https://www.bigswitch.com/community-edition) or [Faucet](https://faucet.nz/) - if you want full functionality (this is now optional, if you simply want to replay previously created captures of a network, or don't have an SDN environment available).
@@ -49,7 +50,7 @@ The Poseidon project originally began as an experiment to test the merits of lev
 
 ### Permissions for Docker
 
-To simplify the using commands with Docker, we recommend allowing the user that will be executing Poseidon commands be part of the `docker` group so they can execut Docker commands without `sudo`.  Typically this can be done with:
+To simplify the using commands with Docker, we recommend allowing the user that will be executing Poseidon commands be part of the `docker` group so they can execute Docker commands without `sudo`.  Typically, this can be done with:
 ```
 sudo usermod -aG docker $USER
 ```
@@ -67,7 +68,7 @@ sudo apt-get install poseidon
 
 If you prefer a lightweight package that downloads the images from the latest build at install time, you can alternatively install: `sudo apt-get install poseidon-net`
 
-> Note: The installer has a `Demo` option in the installation wizard that will deploy and configure the full Poseidon package, the Faucet SDN contoller (and related components like Grafana and Prometheus), mininet, and openvswitch.  We suggest the demo install as a starting point if much of this is new to you.
+> Note: The installer has a `Demo` option in the installation wizard that will deploy and configure the full Poseidon package, the Faucet controller  (and related components like Grafana and Prometheus), mininet, and openvswitch.  We suggest the demo install as a starting point if much of this is new to you.
 
 
 ## SDN Controller Configuration
@@ -103,7 +104,7 @@ interface-group <interface-group>
   member switch YOUR_LEAF_SWITCH interface YOUR_INTERFACE_WHERE_VENT_WILL_RECORD_TRAFFIC_FROM
 ```
 
-Poseidon will connect to the BCF controller using its REST API, so you will also need the BCF API hostname or IP address and credentials for the controller. If your controller is an HA pair and has a virtual IP address, we recommend using that virtual address. Also, because Poseidon will be making dynamic `filter` rule changes we will need an account that has administrative priveleges.  (Poseidon only modifies the filter rules of the defined span-fabric, but until BigSwitch has more granular access control options this means admin privs!) Bringing the above configuration requirements together, below is an example of what the relevant parts of your BCF configuration could look like where the span-fabric is called 'poseidon', the user 'poseidon' is defined for API access, and the egress interface is interface '48' on switch 'leaf04' and labelled as interface group 'ig1':
+Poseidon will connect to the BCF controller using its REST API, so you will also need the BCF API hostname or IP address and credentials for the controller. If your controller is an HA pair and has a virtual IP address, we recommend using that virtual address. Also, because Poseidon will be making dynamic `filter` rule changes we will need an account that has administrative privileges.  (Poseidon only modifies the filter rules of the defined span-fabric, but until BigSwitch has more granular access control options this means admin privs!) Bringing the above configuration requirements together, below is an example of what the relevant parts of your BCF configuration could look like where the span-fabric is called 'poseidon', the user 'poseidon' is defined for API access, and the egress interface is interface '48' on switch 'leaf04' and labelled as interface group 'ig1':
 
 ```
 ! user
@@ -152,7 +153,7 @@ NEW: If you have used the .DEB installer previously, it is worth noting that Pos
 After installation you'll have a new command `poseidon` available for looking at the status, logs, changing the configuration, or stopping and starting the service.
 ```
 $ poseidon help
-Poseidon 0.7.2, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of machine learning techniques. For more info visit: https://github.com/CyberReboot/poseidon
+Poseidon 0.7.5, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of machine learning techniques. For more info visit: https://github.com/CyberReboot/poseidon
 
 Usage: poseidon [option]
 Options:

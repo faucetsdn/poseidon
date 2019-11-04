@@ -13,8 +13,9 @@ import time
 import redis
 from prometheus_client import Gauge
 
+from poseidon.constants import NO_DATA
 from poseidon.helpers.config import Config
-from poseidon.helpers.endpoint import Endpoint
+from poseidon.helpers.endpoint import endpoint_factory
 from poseidon.main import CTRL_C
 from poseidon.main import Monitor
 from poseidon.main import rabbit_callback
@@ -27,49 +28,53 @@ logger = logging.getLogger('test')
 
 
 def test_endpoint_by_name():
-    s = SDNConnect()
+    controller = Config().get_config()
+    s = SDNConnect(controller)
     endpoint = s.endpoint_by_name('foo')
     assert endpoint == None
-    endpoint = Endpoint('foo')
+    endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
-    s.endpoints.append(endpoint)
+    s.endpoints[endpoint.name] = endpoint
     endpoint2 = s.endpoint_by_name('foo')
     assert endpoint == endpoint2
 
 
 def test_endpoint_by_hash():
-    s = SDNConnect()
+    controller = Config().get_config()
+    s = SDNConnect(controller)
     endpoint = s.endpoint_by_hash('foo')
     assert endpoint == None
-    endpoint = Endpoint('foo')
+    endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
-    s.endpoints.append(endpoint)
+    s.endpoints[endpoint.name] = endpoint
     endpoint2 = s.endpoint_by_hash('foo')
     assert endpoint == endpoint2
 
 
 def test_endpoints_by_ip():
-    s = SDNConnect()
+    controller = Config().get_config()
+    s = SDNConnect(controller)
     endpoints = s.endpoints_by_ip('10.0.0.1')
     assert endpoints == []
-    endpoint = Endpoint('foo')
+    endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '10.0.0.1', 'ipv6': 'None'}
-    s.endpoints.append(endpoint)
+    s.endpoints[endpoint.name] = endpoint
     endpoint2 = s.endpoints_by_ip('10.0.0.1')
     assert [endpoint] == endpoint2
 
 
 def test_endpoints_by_mac():
-    s = SDNConnect()
+    controller = Config().get_config()
+    s = SDNConnect(controller)
     endpoints = s.endpoints_by_mac('00:00:00:00:00:01')
     assert endpoints == []
-    endpoint = Endpoint('foo')
+    endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
-    s.endpoints.append(endpoint)
+    s.endpoints[endpoint.name] = endpoint
     endpoint2 = s.endpoints_by_mac('00:00:00:00:00:00')
     assert [endpoint] == endpoint2
 
@@ -92,7 +97,7 @@ def test_signal_handler():
         def __init__(self):
             self.logger = logger
             self.controller = Config().get_config()
-            self.s = SDNConnect()
+            self.s = SDNConnect(self.controller)
 
     class MockSchedule:
         call_log = []
@@ -134,7 +139,7 @@ def test_get_q_item():
         def __init__(self):
             self.logger = logger
             self.controller = Config().get_config()
-            self.s = SDNConnect()
+            self.s = SDNConnect(self.controller)
 
     mock_monitor = MockMonitor()
     mock_monitor.m_queue = MockMQueue()
@@ -158,7 +163,7 @@ def test_format_rabbit_message():
             self.fa_rabbit_routing_key = 'foo'
             self.logger = logger
             self.controller = Config().get_config()
-            self.s = SDNConnect()
+            self.s = SDNConnect(self.controller)
 
     mockMonitor = MockMonitor()
     mockMonitor.logger = MockLogger().logger
@@ -166,7 +171,7 @@ def test_format_rabbit_message():
     data = dict({'Key1': 'Val1'})
     message = ('poseidon.algos.decider', json.dumps(data))
     retval = mockMonitor.format_rabbit_message(message)
-    assert retval == data
+    assert retval == {}
 
     message = ('FAUCET.Event', json.dumps(data))
     retval = mockMonitor.format_rabbit_message(message)
@@ -194,6 +199,11 @@ def test_format_rabbit_message():
     assert retval == {}
 
     message = ('poseidon.action.remove.inactives', json.dumps(data))
+    retval = mockMonitor.format_rabbit_message(message)
+    assert retval == {}
+
+    ip_data = dict({'10.0.0.1':['rule1']})
+    message = ('poseidon.action.update_acls', json.dumps(ip_data))
     retval = mockMonitor.format_rabbit_message(message)
     assert retval == {}
 
@@ -245,7 +255,8 @@ def test_schedule_job_kickurl():
         def __init__(self):
             self.logger = logger
             self.faucet_event = []
-            self.s = SDNConnect()
+            self.controller = Config().get_config()
+            self.s = SDNConnect(self.controller)
 
     schedule_job_kickurl(func())
 
@@ -259,24 +270,24 @@ def test_schedule_job_reinvestigation():
             self.faucet_event = []
             self.controller = Config().get_config()
             self.controller['max_concurrent_reinvestigations'] = 10
-            self.s = SDNConnect()
+            self.s = SDNConnect(self.controller)
             if 'POSEIDON_TRAVIS' in os.environ:
                 self.s.r = redis.StrictRedis(host='localhost',
                                              port=6379,
                                              db=0,
                                              decode_responses=True)
-            endpoint = Endpoint('foo')
+            endpoint = endpoint_factory('foo')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
             endpoint.mirror()
             endpoint.known()
-            self.s.endpoints.append(endpoint)
-            endpoint = Endpoint('foo2')
+            self.s.endpoints[endpoint.name] = endpoint
+            endpoint = endpoint_factory('foo2')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
             endpoint.mirror()
             endpoint.known()
-            self.s.endpoints.append(endpoint)
+            self.s.endpoints[endpoint.name] = endpoint
             self.s.store_endpoints()
             self.s.get_stored_endpoints()
 
@@ -284,7 +295,8 @@ def test_schedule_job_reinvestigation():
 
 
 def test_find_new_machines():
-    s = SDNConnect()
+    controller = Config().get_config()
+    s = SDNConnect(controller)
     machines = [{'active': 0, 'source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'ipv4_os': 'unknown', 'tenant': 'vlan1', 'port': 1, 'segment': 'switch1', 'ipv4': '123.123.123.123', 'mac': '00:00:00:00:00:00', 'id': 'foo1', 'behavior': 1, 'ipv6': '0'},
                 {'active': 1, 'source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'ipv4_os': 'unknown', 'tenant': 'vlan1',
                     'port': 1, 'segment': 'switch1', 'ipv4': '123.123.123.123', 'mac': '00:00:00:00:00:00', 'id': 'foo2', 'behavior': 1, 'ipv6': '0'},
@@ -329,7 +341,7 @@ def test_process():
             self.fa_rabbit_routing_key = 'FAUCET.Event'
             self.faucet_event = None
             self.controller = Config().get_config()
-            self.s = SDNConnect()
+            self.s = SDNConnect(self.controller)
             self.s.controller['TYPE'] = 'None'
             self.s.get_sdn_context()
             self.s.controller['TYPE'] = 'bcf'
@@ -341,25 +353,25 @@ def test_process():
                                              port=6379,
                                              db=0,
                                              decode_responses=True)
-            endpoint = Endpoint('foo')
+            endpoint = endpoint_factory('foo')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
             endpoint.mirror()
             endpoint.p_prev_states.append(
                 (endpoint.state, int(time.time())))
-            self.s.endpoints.append(endpoint)
-            endpoint = Endpoint('foo2')
+            self.s.endpoints[endpoint.name] = endpoint
+            endpoint = endpoint_factory('foo2')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
             endpoint.p_next_state = 'mirror'
             endpoint.queue()
             endpoint.p_prev_states.append(
                 (endpoint.state, int(time.time())))
-            self.s.endpoints.append(endpoint)
-            endpoint = Endpoint('foo3')
+            self.s.endpoints[endpoint.name] = endpoint
+            endpoint = endpoint_factory('foo3')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
-            self.s.endpoints.append(endpoint)
+            self.s.endpoints[endpoint.name] = endpoint
             self.s.store_endpoints()
             self.s.get_stored_endpoints()
 
@@ -393,13 +405,14 @@ def test_process():
 
 
 def test_show_endpoints():
-    endpoint = Endpoint('foo')
+    endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv6': '1212::1'}
     endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'1551805502': {'labels': ['developer workstation'], 'behavior': 'normal'}}}, 'ipv4_addresses': {
         '0.0.0.0': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
-    s = SDNConnect()
-    s.endpoints.append(endpoint)
+    controller = Config().get_config()
+    s = SDNConnect(controller)
+    s.endpoints[endpoint.name] = endpoint
     s.show_endpoints('all')
     s.show_endpoints('state active')
     s.show_endpoints('state ignored')
@@ -407,6 +420,16 @@ def test_show_endpoints():
     s.show_endpoints('os windows')
     s.show_endpoints('role developer-workstation')
     s.show_endpoints('behavior normal')
+
+
+def test_merge_machine():
+    controller = Config().get_config()
+    s = SDNConnect(controller)
+    old_machine = {'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv6': '1212::1'}
+    new_machine = {'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '', 'ipv6': ''}
+    s.merge_machine_ip(old_machine, new_machine)
+    assert old_machine['ipv4'] == new_machine['ipv4']
+    assert new_machine['ipv6'] == new_machine['ipv6']
 
 
 def test_schedule_thread_worker():

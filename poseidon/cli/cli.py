@@ -20,6 +20,7 @@ from natural.date import duration
 from texttable import Texttable
 
 from poseidon.cli.commands import Commands
+from poseidon.constants import NO_DATA
 from poseidon.helpers.exception_decor import exception
 
 
@@ -46,13 +47,12 @@ class GetData():
 
     @staticmethod
     def _get_vlan(endpoint):
-        vlan = endpoint.endpoint_data['vlan']
+        vlan = str(endpoint.endpoint_data['vlan'])
         return vlan.split('VLAN')[1] if vlan.startswith('VLAN') else vlan
 
     @staticmethod
     def _get_acls(endpoint):
-        # TODO
-        return str('')
+        return str(endpoint.acl_data)
 
     @staticmethod
     def _get_ipv4(endpoint):
@@ -62,29 +62,25 @@ class GetData():
     def _get_ipv4_subnet(endpoint):
         if 'ipv4_subnet' in endpoint.endpoint_data:
             return str(endpoint.endpoint_data['ipv4_subnet'])
-        else:
-            return 'NO DATA'
+        return NO_DATA
 
     @staticmethod
     def _get_ether_vendor(endpoint):
         if 'ether_vendor' in endpoint.endpoint_data:
             return str(endpoint.endpoint_data['ether_vendor'])
-        else:
-            return 'NO DATA'
+        return NO_DATA
 
     @staticmethod
     def _get_ipv4_rdns(endpoint):
         if 'ipv4_rdns' in endpoint.endpoint_data:
             return str(endpoint.endpoint_data['ipv4_rdns'])
-        else:
-            return 'NO DATA'
+        return NO_DATA
 
     @staticmethod
     def _get_ipv6_rdns(endpoint):
         if 'ipv6_rdns' in endpoint.endpoint_data:
             return str(endpoint.endpoint_data['ipv6_rdns'])
-        else:
-            return 'NO DATA'
+        return NO_DATA
 
     @staticmethod
     def _get_ipv6(endpoint):
@@ -94,22 +90,19 @@ class GetData():
     def _get_ipv6_subnet(endpoint):
         if 'ipv6_subnet' in endpoint.endpoint_data:
             return str(endpoint.endpoint_data['ipv6_subnet'])
-        else:
-            return 'NO DATA'
+        return NO_DATA
 
     @staticmethod
     def _get_controller_type(endpoint):
         if 'controller_type' in endpoint.endpoint_data:
             return str(endpoint.endpoint_data['controller_type'])
-        else:
-            return 'NO DATA'
+        return NO_DATA
 
     @staticmethod
     def _get_controller(endpoint):
         if 'controller' in endpoint.endpoint_data:
             return str(endpoint.endpoint_data['controller'])
-        else:
-            return 'NO DATA'
+        return NO_DATA
 
     @staticmethod
     def _get_ignored(endpoint):
@@ -135,7 +128,7 @@ class GetData():
 
     @staticmethod
     def _get_role(endpoint):
-        result = 'NO DATA'
+        result = NO_DATA
         endpoint_mac = GetData._get_mac(endpoint)
         if 'mac_addresses' in endpoint.metadata and endpoint_mac in endpoint.metadata['mac_addresses']:
             metadata = endpoint.metadata['mac_addresses'][endpoint_mac]
@@ -150,7 +143,7 @@ class GetData():
 
     @staticmethod
     def _get_role_confidence(endpoint):
-        result = 'NO DATA'
+        result = NO_DATA
         endpoint_mac = GetData._get_mac(endpoint)
         if 'mac_addresses' in endpoint.metadata and endpoint_mac in endpoint.metadata['mac_addresses']:
             metadata = endpoint.metadata['mac_addresses'][endpoint_mac]
@@ -165,7 +158,7 @@ class GetData():
 
     @staticmethod
     def _get_ipv4_os(endpoint):
-        result = 'NO DATA'
+        result = NO_DATA
         endpoint_ip = GetData._get_ipv4(endpoint)
         if 'ipv4_addresses' in endpoint.metadata and endpoint_ip in endpoint.metadata['ipv4_addresses']:
             metadata = endpoint.metadata['ipv4_addresses'][endpoint_ip]
@@ -175,7 +168,7 @@ class GetData():
 
     @staticmethod
     def _get_ipv6_os(endpoint):
-        result = 'NO DATA'
+        result = NO_DATA
         endpoint_ip = GetData._get_ipv6(endpoint)
         if 'ipv6_addresses' in endpoint.metadata and endpoint_ip in endpoint.metadata['ipv6_addresses']:
             metadata = endpoint.metadata['ipv6_addresses'][endpoint_ip]
@@ -185,7 +178,7 @@ class GetData():
 
     @staticmethod
     def _get_behavior(endpoint):
-        result = 'NO DATA'
+        result = NO_DATA
         endpoint_mac = GetData._get_mac(endpoint)
         if 'mac_addresses' in endpoint.metadata and endpoint_mac in endpoint.metadata['mac_addresses']:
             metadata = endpoint.metadata['mac_addresses'][endpoint_mac]
@@ -227,7 +220,7 @@ class GetData():
     def _get_prev_states(endpoint):
         prev_states = endpoint.p_prev_states
         oldest_state = []
-        output = 'NO DATA'
+        output = NO_DATA
         if len(prev_states) > 1:
             oldest_state = prev_states.pop(0)
             current_state = prev_states.pop()
@@ -258,10 +251,12 @@ class GetData():
         hist = ''
         if len(endpoint.history) > 0:
             for entry in endpoint.history:
-                hist += "{0} - {1} : {2} \r\n".format(entry['type'], time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(entry['timestamp'])), entry['message'])
+                hist += '{0} - {1} : {2} \r\n'.format(entry['type'], time.strftime(
+                    '%Y-%m-%d %H:%M:%S', time.localtime(entry['timestamp'])), entry['message'])
         else:
-            hist = "No history recorded yet."
+            hist = 'No history recorded yet.'
         return hist
+
 
 class Parser():
 
@@ -277,7 +272,7 @@ class Parser():
             'Previous States', 'IPv4 OS\n(p0f)', 'IPv6 OS\n(p0f)', 'Previous IPv4 OSes\n(p0f)',
             'Previous IPv6 OSes\n(p0f)', 'Role\n(NetworkML)', 'Role Confidence\n(NetworkML)', 'Previous Roles\n(NetworkML)',
             'Previous Role Confidences\n(NetworkML)', 'Behavior\n(NetworkML)', 'Previous Behaviors\n(NetworkML)',
-            'IPv4 rDNS', 'IPv6 rDNS', 'SDN Controller Type', 'SDN Controller URI', 'History',
+            'IPv4 rDNS', 'IPv6 rDNS', 'SDN Controller Type', 'SDN Controller URI', 'History', 'ACL History',
         ]
 
     def completion(self, text, line, completions):
@@ -370,8 +365,29 @@ class Parser():
 
         return valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6
 
+    @staticmethod
+    def display_ip_filter(fields, ipv4_only, ipv6_only, ipv4_and_ipv6):
+        if not ipv4_only and not ipv6_only and not ipv4_and_ipv6:
+            return fields
+        IPV4_FIELD = 'ipv4'
+        IPV6_FIELD = 'ipv6'
+        IP_FIELDS = {IPV4_FIELD, IPV6_FIELD}
+        filtered_fields = []
+        ip_fields_filter = set()
+        if ipv4_only or ipv4_and_ipv6:
+            ip_fields_filter.add(IPV4_FIELD)
+        if ipv6_only or ipv4_and_ipv6:
+            ip_fields_filter.add(IPV6_FIELD)
+        for field in fields:
+            ip_fields = {ip_field for ip_field in IP_FIELDS if ip_field in field.lower()}
+            if ip_fields and not ip_fields.issubset(ip_fields_filter):
+                continue
+            filtered_fields.append(field)
+        return filtered_fields
+
     def display_results(self, endpoints, fields, sort_by=0, max_width=0, unique=False, nonzero=False, output_format='table', ipv4_only=True, ipv6_only=False, ipv4_and_ipv6=False):
         matrix = []
+        fields = self.display_ip_filter(fields, ipv4_only, ipv6_only, ipv4_and_ipv6)
         fields_lookup = {'id': (GetData._get_name, 0),
                          'mac': (GetData._get_mac, 1),
                          'mac address': (GetData._get_mac, 1),
@@ -413,53 +429,37 @@ class Parser():
                          'ipv6 rdns': (GetData._get_ipv6_rdns, 27),
                          'sdn controller type': (GetData._get_controller_type, 28),
                          'sdn controller uri': (GetData._get_controller, 29),
-                         'history': (GetData._get_history, 30)}
-        for index, field in enumerate(fields):
-            if ipv4_only:
-                if '6' in field:
-                    fields[index] = field.replace('6', '4')
-            if ipv6_only:
-                if '4' in field:
-                    fields[index] = field.replace('4', '6')
-        if ipv4_and_ipv6:
-            for index, field in enumerate(fields):
-                if '4' in field:
-                    if field.replace('4', '6') not in fields:
-                        fields.insert(index + 1, field.replace('4', '6'))
-                if '6' in field:
-                    if field.replace('6', '4') not in fields:
-                        fields.insert(index + 1, field.replace('6', '4'))
+                         'history': (GetData._get_history, 30),
+                         'acl history': (GetData._get_acls, 31)}
 
         records = []
         if nonzero or unique:
-            for endpoint in endpoints:
-                record = []
-                for field in fields:
-                    record.append(fields_lookup[field.lower()][0](endpoint))
-                # remove rows that are all zero or 'NO DATA'
-                if not nonzero or not all(item == '0' or item == 'NO DATA' for item in record):
-                    records.append(record)
+            raw_records = []
+            all_fields_with_data = set()
 
-            # remove columns that are all zero or 'NO DATA'
-            del_columns = []
-            for i in range(len(fields)):
-                marked = False
-                if nonzero and all(item[i] == '0' or item[i] == 'NO DATA' for item in records):
-                    del_columns.append(i)
-                    marked = True
-                if unique and not marked:
-                    column_vals = [item[i] for item in records]
-                    if len(set(column_vals)) == 1:
-                        del_columns.append(i)
-            del_columns.reverse()
-            for val in del_columns:
-                for row in records:
-                    del row[val]
-                del fields[val]
+            for endpoint in endpoints:
+                raw_record = {
+                    field: fields_lookup[field.lower()][0](endpoint)
+                    for field in fields}
+                fields_with_data = {
+                    field for field, value in raw_record.items() if value and value != NO_DATA}
+                all_fields_with_data.update(fields_with_data)
+                # remove rows that are all zero or 'NO DATA'
+                if fields_with_data:
+                    raw_records.append(raw_record)
+
+            # delete columns with no data
+            all_fields_with_no_data = set(fields) - all_fields_with_data
+            fields = [field for field in fields if field in all_fields_with_data]
+            for raw_record in raw_records:
+                for field in all_fields_with_no_data:
+                    del raw_record[field]
+                records.append([raw_record[field] for field in fields])
+
             if len(fields) > 0:
                 if unique:
                     u_records = set(map(tuple, records))
-                    records = u_records
+                    records = list(u_records)
                     matrix = list(map(list, u_records))
                 else:
                     matrix = records
@@ -467,8 +467,9 @@ class Parser():
             for endpoint in endpoints:
                 record = []
                 for field in fields:
-                    record.append(fields_lookup[field.lower()][0](endpoint))
-                    records.append(record)
+                    if field.lower() in fields_lookup:
+                        record.append(fields_lookup[field.lower()][0](endpoint))
+                        records.append(record)
                 matrix.append(record)
         results = ''
         if output_format == 'json':
@@ -662,6 +663,27 @@ class PoseidonShell(cmd2.Cmd):
                                                      nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
+    def show_acls(self, arg, flags):
+        '''
+        Find out the history of ACLs of something on the network:
+        ACLS [IP|MAC|ID]
+        ACLS 10.0.0.1
+        ACLS 18:EF:02:2D:49:00
+        ACLS 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
+        '''
+        # defaults
+        fields = ['ACL History']
+
+        valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
+            flags, fields)
+
+        if not valid:
+            self.poutput("Unknown flag, try 'help show'")
+        else:
+            self.poutput(self.parser.display_results(Commands().acls_of(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique,
+                                                     nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
+
+    @exception
     def show_where(self, arg, flags):
         '''
         Find out where something is:
@@ -684,6 +706,7 @@ class PoseidonShell(cmd2.Cmd):
 
     @exception
     def help_show(self):
+        self.poutput('  acls\t\tShow ACL history of something on the network')
         self.poutput('  all\t\tShow all devices')
         self.poutput('  behavior\tShow devices matching a particular behavior')
         self.poutput(
@@ -906,7 +929,8 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         else:
             if arg:
                 action = arg.split()[0]
-                func_calls = {'all': self.show_all,
+                func_calls = {'acls': self.show_acls,
+                              'all': self.show_all,
                               'authors': self.show_authors,
                               'behavior': self.show_behavior,
                               'history': self.show_history,
@@ -919,7 +943,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                 if action in func_calls:
                     if action in ['all', 'authors', 'version']:
                         func_calls[action](arg, flags)
-                    elif action in ['history', 'what', 'where']:
+                    elif action in ['acl', 'history', 'what', 'where']:
                         if len(arg.split()) > 1:
                             func_calls[action](arg, flags)
                         else:

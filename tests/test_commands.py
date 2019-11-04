@@ -4,15 +4,15 @@ Created on 18 Jan 2019
 @author: Charlie Lewis
 """
 from poseidon.cli.commands import Commands
-from poseidon.helpers.endpoint import Endpoint
+from poseidon.helpers.endpoint import Endpoint, endpoint_factory
 
 
 def test_commands():
     commands = Commands()
-    endpoint = Endpoint('foo')
+    endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
-    commands.sdnc.endpoints.append(endpoint)
+    commands.sdnc.endpoints[endpoint.name] = endpoint
 
     commands.what_is('foo')
     commands.history_of('foo')

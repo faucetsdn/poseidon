@@ -10,6 +10,7 @@ from natural.date import duration
 
 from .routes import paths
 from .routes import version
+from .constants import NO_DATA
 
 
 class Endpoints(object):
@@ -27,16 +28,17 @@ class Endpoints(object):
 class Info(object):
 
     def on_get(self, req, resp):
-        resp.body = json.dumps({'version': 'v0.1.1'})
+        resp.body = json.dumps({'version': 'v0.1.2'})
         resp.content_type = falcon.MEDIA_TEXT
         resp.status = falcon.HTTP_200
 
 
 class Nodes():
 
-    def __init__(self, fields):
+    def __init__(self, fields, ip=None):
         self.nodes = []
         self.node = {}
+        self.ip = ip
         for field in fields:
             self.node[field] = fields[field]
 
@@ -81,6 +83,7 @@ class Nodes():
                     print(
                         'Unable to retrieve endpoint metadata because: {0}'.format(str(e)))
 
+                should_append = self.ip == None
                 # grab from endpoint data
                 if 'poseidon_hash' in mac_info:
                     if 'id' in node:
@@ -115,13 +118,14 @@ class Nodes():
                             if 'ipv4' in node:
                                 try:
                                     ipv4 = endpoint_data['ipv4']
+                                    should_append = ipv4 == self.ip or should_append
                                     if isinstance(ipv4, str) and ipv4 != 'None':
                                         if 'ipv4_subnet' in node:
                                             if '.' in ipv4:
                                                 node['ipv4_subnet'] = '.'.join(
                                                     ipv4.split('.')[:-1])+'.0/24'
                                             else:
-                                                node['ipv4_subnet'] = 'NO DATA'
+                                                node['ipv4_subnet'] = NO_DATA
                                         ipv4_info = self.r.hgetall(ipv4)
                                         if ipv4_info and 'short_os' in ipv4_info:
                                             node['ipv4_os'] = ipv4_info['short_os']
@@ -130,14 +134,14 @@ class Nodes():
                                         'Failed to set IPv4 info because: {0}'.format(str(e)))
                             if 'ipv6' in node:
                                 try:
-                                    ipv6 = endpoint_data['ipv6']
+                                    should_append = ipv6 == self.ip or should_append
                                     if isinstance(ipv6, str) and ipv6 != 'None':
                                         if 'ipv6_subnet' in node:
                                             if ':' in ipv6:
                                                 node['ipv6_subnet'] = ':'.join(
                                                     ipv6.split(':')[0:4])+'::0/64'
                                             else:
-                                                node['ipv6_subnet'] = 'NO DATA'
+                                                node['ipv6_subnet'] = NO_DATA
                                         ipv6_info = self.r.hgetall(ipv6)
                                         if ipv6_info and 'short_os' in ipv6_info:
                                             node['ipv6_os'] = ipv6_info['short_os']
@@ -174,7 +178,9 @@ class Nodes():
                         except Exception as e:  # pragma: no cover
                             print(
                                 'Failed to set all ML info because: {0}'.format(str(e)))
-                self.nodes.append(node)
+                if should_append:
+                    self.nodes.append(node)
+
         return
 
 
@@ -182,18 +188,19 @@ class NetworkFull(object):
 
     @staticmethod
     def get_fields():
-        return {'id': 'NO DATA', 'mac': 0, 'ipv4': 0,
-                'ipv6': 0, 'ipv4_subnet': 'NO DATA',
-                'ipv6_subnet': 'NO DATA', 'segment': 0, 'port': 0,
-                'tenant': 0, 'active': 0, 'next_state': 'NO DATA',
-                'state': 'NO DATA', 'prev_states': 'NO DATA',
-                'ignored': 'False', 'first_seen': 'NO DATA',
-                'last_seen': 'NO DATA', 'role': 'NO DATA',
+        return {'id': NO_DATA, 'mac': 0, 'ipv4': 0,
+                'ipv6': 0, 'ipv4_subnet': NO_DATA,
+                'ipv6_subnet': NO_DATA, 'segment': 0, 'port': 0,
+                'tenant': 0, 'active': 0, 'next_state': NO_DATA,
+                'state': NO_DATA, 'prev_states': NO_DATA,
+                'ignored': 'False', 'first_seen': NO_DATA,
+                'last_seen': NO_DATA, 'role': NO_DATA,
                 'role_confidence': 0, 'behavior': 0,
-                'ipv4_os': 'NO DATA', 'ipv6_os': 'NO DATA',
-                'source': 'NO DATA', 'ipv4_rdns': 'NO DATA',
-                'ipv6_rdns': 'NO DATA', 'ether_vendor': 'NO DATA',
-                'controller_type': 'NO DATA', 'controller': 'NO DATA'}
+                'ipv4_os': NO_DATA, 'ipv6_os': NO_DATA,
+                'source': NO_DATA, 'ipv4_rdns': NO_DATA,
+                'ipv6_rdns': NO_DATA, 'ether_vendor': NO_DATA,
+                'controller_type': NO_DATA, 'controller': NO_DATA,
+                'acl_data': NO_DATA}
 
     @staticmethod
     def get_dataset():
@@ -216,16 +223,16 @@ class Network(object):
 
     @staticmethod
     def get_fields():
-        return {'id': 'NO DATA', 'mac': 0, 'ipv4': 0, 'ipv6': 0,
-                'ipv4_subnet': 'NO DATA', 'ipv6_subnet': 'NO DATA',
+        return {'id': NO_DATA, 'mac': 0, 'ipv4': 0, 'ipv6': 0,
+                'ipv4_subnet': NO_DATA, 'ipv6_subnet': NO_DATA,
                 'vlan': 0, 'segment': 0, 'port': 0,
-                'state': 'NO DATA', 'ignored': 'False',
-                'first_seen': 'NO DATA', 'last_seen': 'NO DATA',
-                'role': 'NO DATA', 'role_confidence': 0, 'behavior': 0,
-                'ipv4_os': 'NO DATA', 'ipv6_os': 'NO DATA',
-                'ipv4_rdns': 'NO DATA', 'ipv6_rdns': 'NO DATA',
-                'ether_vendor': 'NO DATA', 'controller_type': 'NO DATA',
-                'controller': 'NO DATA'}
+                'state': NO_DATA, 'ignored': 'False',
+                'first_seen': NO_DATA, 'last_seen': NO_DATA,
+                'role': NO_DATA, 'role_confidence': 0, 'behavior': 0,
+                'ipv4_os': NO_DATA, 'ipv6_os': NO_DATA,
+                'ipv4_rdns': NO_DATA, 'ipv6_rdns': NO_DATA,
+                'ether_vendor': NO_DATA, 'controller_type': NO_DATA,
+                'controller': NO_DATA, 'acl_data': NO_DATA}
 
     @staticmethod
     def field_mapping():
@@ -240,7 +247,7 @@ class Network(object):
                 'behavior': 'Behavior (NetworkML)', 'ipv4_rdns': 'IPv4 rDNS',
                 'ipv6_rdns': 'IPv6 rDNS', 'ether_vendor': 'Ethernet Vendor',
                 'controller_type': 'SDN Controller Type',
-                'controller': 'SDN Controller URI'}
+                'controller': 'SDN Controller URI', 'acl_data': 'ACL History'}
 
     @staticmethod
     def get_dataset():
@@ -261,6 +268,64 @@ class Network(object):
         network = {}
         dataset = Network.get_dataset()
         configuration = Network.get_configuration()
+
+        network['dataset'] = dataset
+        network['configuration'] = configuration
+        resp.body = json.dumps(network, indent=2)
+        resp.content_type = falcon.MEDIA_JSON
+        resp.status = falcon.HTTP_200
+
+
+class NetworkByIp(object):
+
+    @staticmethod
+    def get_dataset(ip=None):
+        fields = Network.get_fields()
+        n = Nodes(fields, ip)
+        n.build_nodes()
+        return n.nodes
+
+    @staticmethod
+    def get_configuration():
+        configuration = {'fields': []}
+        for field in Network.get_fields():
+            configuration['fields'].append(
+                {'path': [field], 'displayName': Network.field_mapping()[field], 'groupable': 'true'})
+        return configuration
+
+    def on_get(self, req, resp, ip):
+        network = {}
+        dataset = NetworkByIp.get_dataset(ip)
+        configuration = NetworkByIp.get_configuration()
+
+        network['dataset'] = dataset
+        network['configuration'] = configuration
+        resp.body = json.dumps(network, indent=2)
+        resp.content_type = falcon.MEDIA_JSON
+        resp.status = falcon.HTTP_200
+
+
+class NetworkByIp(object):
+
+    @staticmethod
+    def get_dataset(ip):
+        fields = Network.get_fields()
+        n = Nodes(fields, ip)
+        n.build_nodes()
+        return n.nodes
+
+    @staticmethod
+    def get_configuration():
+        configuration = {'fields': []}
+        for field in Network.get_fields():
+            configuration['fields'].append(
+                {'path': [field], 'displayName': Network.field_mapping()[field], 'groupable': 'true'})
+        return configuration
+
+    def on_get(self, req, resp, ip):
+        network = {}
+        dataset = NetworkByIp.get_dataset(ip)
+        configuration = NetworkByIp.get_configuration()
 
         network['dataset'] = dataset
         network['configuration'] = configuration

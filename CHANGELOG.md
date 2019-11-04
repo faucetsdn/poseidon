@@ -1,3 +1,40 @@
+# v0.7.6 (2019-10-25)
+
+- Updated versions of redis, pytest, cmd2, grafana, prometheus, pylint, and pytype
+- Added volume for Faucet UDS
+- Added more files to ignore in Docker container
+- Added API endpoint to retrieve data by IP
+- Added ability to apply ACLs with RabbitMQ message
+- Ensure VLAN is a string
+- Persist Vent info in a volume
+
+# v0.7.5 (2019-10-11)
+
+- Updated versions of prometheus, pytest-cov, pytest, grafana, and redis
+- Fixed some typos in the documentation
+- Added a warning about max time between investigations
+- Added ACLs to the CLI and the API
+- Using ipaddress library for ip addresses now
+- Added pytype checks
+- Fixed filtering for ipv4/ipv6 in the CLI
+
+# v0.7.4 (2019-10-03)
+
+- Fix key checks for automated ACLs
+
+# v0.7.3 (2019-10-03)
+
+- Updated versions of urllib3, pytest, grafana, cmd2, and pylint
+- Now uses the auto revert feature of Faucet when using the helper run script
+- Endpoints are now a dictionary instead of a list to prevent duplicates
+- Fixed an issue where messages from ncapture weren't being handled correctly
+- Fixed an issue where the investigations count could be wrong
+- Resets the debconf response for collector_nics when not in use
+- Debconf option for setting the reinvestigation frequency
+- Fixed viz command for Poseidon script
+- Handle IP addresses being None
+- Better diff of when endpoints change
+
 # v0.7.2 (2019-09-17)
 
  - Added type entries to history

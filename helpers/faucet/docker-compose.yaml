@@ -2,7 +2,7 @@ version: '2.0'
 services:
     prometheus:
         restart: always
-        image: 'prom/prometheus:v2.12.0'
+        image: 'prom/prometheus:v2.13.1'
         user: 'root'
         ports:
             - '9090:9090'
@@ -15,7 +15,7 @@ services:
 
     grafana:
         restart: always
-        image: 'grafana/grafana:6.3.6'
+        image: 'grafana/grafana:6.4.3'
         user: 'root'
         ports:
             - '3000:3000'
@@ -40,6 +40,7 @@ services:
         image: 'faucet/faucet:latest'
         volumes:
             - '${FAUCET_PREFIX}/var/log/faucet:/var/log/faucet'
+            - '${FAUCET_PREFIX}/var/run/faucet:/var/run/faucet'
             - '${FAUCET_PREFIX}/etc/faucet:/etc/faucet'
         ports:
             - '6653:6653'
