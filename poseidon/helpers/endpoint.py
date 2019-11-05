@@ -9,11 +9,6 @@ import time
 
 from transitions import Machine
 
-class HistoryTypes():
-    STATE_CHANGE = 'State Change'
-    ACL_CHANGE = 'ACL Change'
-    PROPERTY_CHANGE = 'Property Change'
-
 MACHINE_IP_FIELDS = {
     'ipv4': ('ipv4_rdns', 'ipv4_subnet'),
     'ipv6': ('ipv6_rdns', 'ipv6_subnet')}
@@ -24,6 +19,7 @@ MACHINE_IP_PREFIXES = {
 class HistoryTypes():
     STATE_CHANGE = 'State Change'
     ACL_CHANGE = 'ACL Change'
+    PROPERTY_CHANGE = 'Property Change'
 
 
 class Endpoint:
