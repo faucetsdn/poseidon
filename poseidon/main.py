@@ -579,11 +579,12 @@ class SDNConnect(object):
                             {'field_name': 'ipv4_OS', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
                             {'field_name': 'ipv6_OS', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
                         ]
+                        self.logger.debug("{0}".format(json.dumps(mac_addresses, indent=2)))
                         #make history entries for any changed prop
                         for field in fields:
-                            if field.field_name in mac_addresses and endpoint.endpoint_data.mac_addresses[field_name] != mac_addresses[field_name]:
-                                endpoint.update_property_history(field.entry_type, field.field_name, endpoint.endpoint_data.mac_addresses[field_name],
-                                    mac_addresses[field_name])
+                            if field['field_name'] in mac_addresses and endpoint.endpoint_data.mac_addresses['field_name'] != mac_addresses['field_name']:
+                                endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.mac_addresses['field_name'],
+                                    mac_addresses[field['field_name']])
 
                         endpoint.metadata = {
                             'mac_addresses': mac_addresses,
