@@ -2,6 +2,22 @@
 
 set -e
 
+valid_json_obj () {
+    # Must be nonzero
+    if [ -n "$1" ] ; then
+	# Must be single quoted
+	DEQ=$(echo "$1"|tr -d "\'")
+	if [ "$DEQ" != "$1" ] ; then
+	    # Must be a JSON object.
+	    JQ_OUT=$(echo "$DEQ"|jq 'type')
+            if [ "$JQ_OUT" == '"object"' ] ; then
+                return 0
+	    fi
+        fi
+    fi
+    return 1
+}
+
 . /usr/share/debconf/confmodule
 db_version 2.0
 
@@ -66,7 +82,13 @@ while [ "$STATE" != 0 ] && [ "$STATE" != 13 ]; do
     5)
         db_get poseidon/controller_type
         if [ "$RET" == "Faucet" ]; then
-            db_input critical poseidon/faucet_controller_mirror_ports || true
+		MIRROR_PORTS=""
+		until valid_json_obj "$MIRROR_PORTS" ; do
+			db_input critical poseidon/faucet_controller_mirror_ports || true
+			db_go || true
+			db_get poseidon/faucet_controller_mirror_ports
+			MIRROR_PORTS=$RET
+		done
         elif [ "$RET" == "BigSwitch Cloud Fabric" ]; then
             db_input critical poseidon/bcf_controller_interface_group || true
         fi
