@@ -6,10 +6,10 @@ valid_json_obj () {
     # Must be nonzero
     if [ -n "$1" ] ; then
 	# Must be single quoted
-	DEQ=`echo $1|sed s/\\'//g`
+	DEQ=$(echo "$1"|tr -d "\'")
 	if [ "$DEQ" != "$1" ] ; then
 	    # Must be a JSON object.
-            JQ_OUT=`echo $DEQ|jq 'type'`
+	    JQ_OUT=$(echo "$DEQ"|jq 'type')
             if [ "$JQ_OUT" == '"object"' ] ; then
                 return 0
 	    fi
