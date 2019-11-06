@@ -122,6 +122,7 @@ class Endpoint:
         self.acl_data = []
         self.metadata = {}
         self.history = []
+        self.state = None
 
     def encode(self):
         endpoint_d = {
