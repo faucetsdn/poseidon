@@ -160,8 +160,8 @@ class Endpoint:
         self._add_history_entry(HistoryTypes.ACL_CHANGE, time.time(), 
             "State changed from {0} to {1}".format(event_data.transition.source, event_data.transition.dest))
 
-    def update_property_history(self, entry_type, field_name, old_value, new_value):
-        self._add_history_entry(entry_type, time.time(), 
+    def update_property_history(self, entry_type, timestamp, field_name, old_value, new_value):
+        self._add_history_entry(entry_type, timestamp, 
             "Property {0} changed from {1} to {2}".format(field_name, old_value, new_value))
 
     @staticmethod
