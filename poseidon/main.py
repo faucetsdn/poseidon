@@ -34,6 +34,7 @@ from poseidon.helpers.actions import Actions
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import Endpoint, EndpointDecoder, endpoint_factory
 from poseidon.helpers.endpoint import MACHINE_IP_FIELDS, MACHINE_IP_PREFIXES
+from poseidon.helpers.endpoint import HistoryTypes
 from poseidon.helpers.log import Logger
 from poseidon.helpers.metadata import get_ether_vendor
 from poseidon.helpers.metadata import get_rdns_lookup
@@ -561,6 +562,7 @@ class SDNConnect(object):
         self.get_stored_endpoints()
 
     def store_endpoints(self):
+
         ''' store current endpoints in Redis. '''
         with self.redis_lock:
             if self.r:
@@ -570,6 +572,45 @@ class SDNConnect(object):
                         # set metadata
                         mac_addresses, ipv4_addresses, ipv6_addresses = self.get_stored_metadata(
                             str(endpoint.name))
+
+                        #list of fields to make history entries for, along with entry type for that field
+                        fields = [
+                            {'field_name': 'behavior', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
+                            {'field_name': 'ipv4_OS', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
+                            {'field_name': 'ipv6_OS', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
+                        ]
+                        
+                        #make history entries for any changed prop
+                        prior = None
+                        for timestamp in mac_addresses:
+                            for field in fields:
+                                record = mac_addresses[timestamp]
+                                if field['field_name'] in record and prior and field['field_name'] in prior and \
+                                   prior[field['field_name']] != record[field['field_name']]:
+                                    endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.mac_addresses['field_name'],
+                                        record[field['field_name']])
+                                prior = record
+
+                        prior = None
+                        for timestamp in ipv4_addresses:
+                            for field in fields:
+                                record = ipv4_addresses[timestamp]
+                                if field['field_name'] in record and prior and field['field_name'] in prior and \
+                                   prior[field['field_name']] != record[field['field_name']]:
+                                    endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.ipv4_addresses['field_name'],
+                                        record[field['field_name']])
+                                prior = record
+
+                        prior = None
+                        for timestamp in ipv6_addresses:
+                            for field in fields:
+                                record = ipv6_addresses[timestamp]
+                                if field['field_name'] in record and prior and field['field_name'] in prior and \
+                                   prior[field['field_name']] != record[field['field_name']]:
+                                    endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.ipv6_addresses['field_name'],
+                                        record[field['field_name']])
+                                prior = record
+
                         endpoint.metadata = {
                             'mac_addresses': mac_addresses,
                             'ipv4_addresses': ipv4_addresses,
@@ -605,7 +646,6 @@ class SDNConnect(object):
                 except Exception as e:  # pragma: no cover
                     self.logger.error(
                         'Unable to store endpoints in Redis because {0}'.format(str(e)))
-
 
 class Monitor(object):
 
