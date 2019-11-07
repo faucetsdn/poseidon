@@ -9,7 +9,6 @@ import time
 
 from transitions import Machine
 
-
 MACHINE_IP_FIELDS = {
     'ipv4': ('ipv4_rdns', 'ipv4_subnet'),
     'ipv6': ('ipv6_rdns', 'ipv6_subnet')}
@@ -20,6 +19,7 @@ MACHINE_IP_PREFIXES = {
 class HistoryTypes():
     STATE_CHANGE = 'State Change'
     ACL_CHANGE = 'ACL Change'
+    PROPERTY_CHANGE = 'Property Change'
 
 
 class Endpoint:
@@ -122,6 +122,7 @@ class Endpoint:
         self.acl_data = []
         self.metadata = {}
         self.history = []
+        self.state = None
 
     def encode(self):
         endpoint_d = {
@@ -145,6 +146,24 @@ class Endpoint:
         self._add_history_entry(
             HistoryTypes.STATE_CHANGE, time.time(),
             'State changed from {0} to {1}'.format(event_data.transition.source, event_data.transition.dest))
+
+    def update_acl_history(self, added_acls, removed_acls):
+        message = ""
+        if added_acls and len(added_acls) > 0:
+            message += "Added the following ACLs: " + ", ".join(added_acls) + "\r\n"
+        if len(message) > 0:
+            message += "and r"
+        if removed_acls and len(removed_acls) > 0:
+            message += "R" if len(message) == 0 else ""
+            message += "emoved the following ACLs:" + ", ".join(removed_acls)
+
+
+        self._add_history_entry(HistoryTypes.ACL_CHANGE, time.time(), 
+            "State changed from {0} to {1}".format(event_data.transition.source, event_data.transition.dest))
+
+    def update_property_history(self, entry_type, timestamp, field_name, old_value, new_value):
+        self._add_history_entry(entry_type, timestamp, 
+            "Property {0} changed from {1} to {2}".format(field_name, old_value, new_value))
 
     @staticmethod
     def make_hash(machine, trunk=False):

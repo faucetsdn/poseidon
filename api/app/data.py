@@ -39,6 +39,7 @@ class Nodes():
         self.nodes = []
         self.node = {}
         self.ip = ip
+        self.r = None
         for field in fields:
             self.node[field] = fields[field]
 
@@ -134,6 +135,7 @@ class Nodes():
                                         'Failed to set IPv4 info because: {0}'.format(str(e)))
                             if 'ipv6' in node:
                                 try:
+                                    ipv6 = endpoint_data['ipv6']
                                     should_append = ipv6 == self.ip or should_append
                                     if isinstance(ipv6, str) and ipv6 != 'None':
                                         if 'ipv6_subnet' in node:

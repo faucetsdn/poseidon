@@ -56,7 +56,7 @@ class Rabbit(object):
         if wait:
             do_rabbit = False
 
-        if isinstance(keys, list) and not wait:
+        if rabbit_channel is not None and isinstance(keys, list) and not wait:
             for key in keys:
                 self.logger.debug(
                     'array adding key:{0} to rabbitmq channel'.format(key))
