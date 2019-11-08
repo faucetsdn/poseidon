@@ -1,3 +1,10 @@
+# v0.7.7 (2019-11-08)
+
+- Updated versions grafana/grafana Docker tag
+- Added property audit logging for behavior and OS
+- Fixed pytype checks
+- Added mirror port checks
+
 # v0.7.6 (2019-10-25)
 
 - Updated versions of redis, pytest, cmd2, grafana, prometheus, pylint, and pytype
