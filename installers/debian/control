@@ -3,7 +3,8 @@ Version: 0.7.8.dev
 Section: base
 Priority: optional
 Architecture: all
-Depends: debconf (>= 1.5.0), mininet (>= 2.2.1), netcat-openbsd, jq
+Pre-Depends: jq
+Depends: debconf (>= 1.5.0), mininet (>= 2.2.1), netcat-openbsd
 Maintainer: Charlie Lewis <clewis@iqt.org>
 Description: Poseidon
  Poseidon is a python-based application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of machine learning techniques. The machine learning algorithms classify and predict both the type of device and if the device is acting normally or abnormally.
