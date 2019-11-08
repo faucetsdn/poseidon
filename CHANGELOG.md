@@ -1,3 +1,7 @@
+# v0.7.8 (2019-11-08)
+
+- Fix bug where jq wasn't already on the system installing the deb
+
 # v0.7.7 (2019-11-08)
 
 - Updated versions grafana/grafana Docker tag
