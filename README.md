@@ -57,12 +57,17 @@ sudo usermod -aG docker $USER
 Followed by closing the existing shell and starting a new one.
 
 ### Installing the Debian Package
+
 On Ubuntu, this will download and install our `.deb` package from [Cloudsmith](https://cloudsmith.io/~/cyberreboot/repos/poseidon/packages/):
+
+NOTE: jq must be installed before Poseidon; this requirement will be removed in future.
+
 ```
 sudo apt-get install -y apt-transport-https curl
 curl -sLf "https://dl.cloudsmith.io/public/cyberreboot/poseidon/cfg/gpg/gpg.F9E23875C98A1F72.key" | sudo apt-key add -
 sudo add-apt-repository "deb [arch=amd64] https://dl.cloudsmith.io/public/cyberreboot/poseidon/deb/ubuntu $(lsb_release -cs) main"
 sudo apt-get update
+sudo apt-get jq
 sudo apt-get install poseidon
 ```
 
