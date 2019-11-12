@@ -147,7 +147,7 @@ class Endpoint:
             HistoryTypes.STATE_CHANGE, time.time(),
             'State changed from {0} to {1}'.format(event_data.transition.source, event_data.transition.dest))
 
-    def update_acl_history(self, added_acls, removed_acls):
+    def update_acl_history(self, event_data, added_acls, removed_acls):
         message = ""
         if added_acls and len(added_acls) > 0:
             message += "Added the following ACLs: " + ", ".join(added_acls) + "\r\n"

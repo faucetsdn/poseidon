@@ -96,17 +96,7 @@ def schedule_job_reinvestigation(schedule_func):
                 chosen.reinvestigate()
                 chosen.p_prev_states.append(
                     (chosen.state, int(time.time())))
-                status = Actions(chosen, schedule_func.s.sdnc).mirror_endpoint()
-                if status:
-                    try:
-                        schedule_func.s.r.hincrby('vent_plugin_counts', 'ncapture')
-                    except Exception as e:  # pragma: no cover
-                        schedule_func.logger.error(
-                            'Failed to update count of plugins because: {0}'.format(str(e)))
-                else:
-                    schedule_func.logger.warning(
-                        'Unable to mirror the endpoint: {0}'.format(chosen.name))
-        return
+                schedule_func.s.mirror_endpoint(chosen)
 
     if not CTRL_C['STOP']:
         candidates = [
@@ -157,6 +147,26 @@ class SDNConnect(object):
         self.connect_redis()
         self.default_endpoints()
 
+    def mirror_endpoint(self, endpoint):
+        ''' mirror an endpoint. '''
+        status = Actions(endpoint, self.sdnc).mirror_endpoint()
+        if status:
+            try:
+                self.r.hincrby('vent_plugin_counts', 'ncapture')
+            except Exception as e:  # pragma: no cover
+                self.logger.error(
+                    'Failed to update count of plugins because: {0}'.format(str(e)))
+        else:
+            self.logger.warning(
+                'Unable to mirror the endpoint: {0}'.format(endpoint.name))
+
+    def unmirror_endpoint(self, endpoint):
+        ''' unmirror an endpoint. '''
+        status = Actions(endpoint, self.sdnc).unmirror_endpoint()
+        if not status:
+            self.logger.warning(
+                'Unable to unmirror the endpoint: {0}'.format(endpoint.name))
+
     def clear_filters(self):
         ''' clear any exisiting filters. '''
         if isinstance(self.sdnc, FaucetProxy):
@@ -202,7 +212,6 @@ class SDNConnect(object):
                     self.logger.error(
                         'Unable to get existing endpoints from Redis because {0}'.format(str(e)))
             self.endpoints = endpoints
-        return
 
     def get_stored_metadata(self, hash_id):
         mac_addresses = {}
@@ -286,21 +295,22 @@ class SDNConnect(object):
         return mac_addresses, ip_addresses['ipv4'], ip_addresses['ipv6']
 
     def get_sdn_context(self):
-        if 'TYPE' in self.controller and self.controller['TYPE'] == 'bcf':
+        controller_type = self.controller.get('TYPE', None)
+        if controller_type == 'bcf':
             try:
                 self.sdnc = BcfProxy(self.controller)
             except Exception as e:  # pragma: no cover
                 self.logger.error(
                     'BcfProxy could not connect to {0} because {1}'.format(
                         self.controller['URI'], e))
-        elif 'TYPE' in self.controller and self.controller['TYPE'] == 'faucet':
+        elif controller_type == 'faucet':
             try:
                 self.sdnc = FaucetProxy(self.controller)
             except Exception as e:  # pragma: no cover
                 self.logger.error(
                     'FaucetProxy could not connect to {0} because {1}'.format(
                         self.controller['URI'], e))
-        elif 'TYPE' in self.controller and self.controller['TYPE'] == 'None':
+        elif controller_type == 'None':
             self.sdnc = None
         else:
             if 'CONTROLLER_PASS' in self.controller:
@@ -356,7 +366,6 @@ class SDNConnect(object):
             connection.close()
         except Exception as e:  # pragma: no cover
             pass
-        return
 
     def show_endpoints(self, arg):
         endpoints = []
@@ -376,11 +385,11 @@ class SDNConnect(object):
                     # filter by device type or behavior
                     if 'mac_addresses' in endpoint.metadata and endpoint.endpoint_data['mac'] in endpoint.metadata['mac_addresses']:
                         timestamps = endpoint.metadata['mac_addresses'][endpoint.endpoint_data['mac']]
-                        newest = '0'
-                        for timestamp in timestamps:
-                            if timestamp > newest:
-                                newest = timestamp
-                        if newest is not '0':
+                        try:
+                            newest = str(max([int(i) for i in timestamps]))
+                        except ValueError:
+                            newest = None
+                        if newest is not None:
                             if 'labels' in timestamps[newest]:
                                 if arg.replace('-', ' ') == timestamps[newest]['labels'][0].lower():
                                     endpoints.append(endpoint)
@@ -427,8 +436,6 @@ class SDNConnect(object):
 
         self.find_new_machines(parsed)
 
-        return
-
     def connect_redis(self, host='redis', port=6379, db=0):
         self.r = None
         try:
@@ -437,7 +444,6 @@ class SDNConnect(object):
         except Exception as e:  # pragma: no cover
             self.logger.error(
                 'Failed connect to Redis because: {0}'.format(str(e)))
-        return
 
     @staticmethod
     def _diff_machine(machine_a, machine_b):
@@ -529,11 +535,7 @@ class SDNConnect(object):
                     ep.p_prev_states.append((ep.state, int(time.time())))
                 elif ep.state != 'inactive' and machine['active'] == 0:
                     if ep.state in ['mirroring', 'reinvestigating']:
-                        status = Actions(
-                            ep, self.sdnc).unmirror_endpoint()
-                        if not status:
-                            self.logger.warning(
-                                'Unable to unmirror the endpoint: {0}'.format(ep.name))
+                        self.unmirror_endpoint(ep)
                         if ep.state == 'mirroring':
                             ep.p_next_state = 'mirror'
                         elif ep.state == 'reinvestigating':
@@ -557,7 +559,7 @@ class SDNConnect(object):
                     ep = self.endpoints.get(h, None)
                     if ep:
                         ep.acl_data.append(
-                            (item[0], item[4], item[5]), int(time.time()))
+                            ((item[0], item[4], item[5]), int(time.time())))
         self.store_endpoints()
         self.get_stored_endpoints()
 
@@ -647,7 +649,7 @@ class SDNConnect(object):
                     self.logger.error(
                         'Unable to store endpoints in Redis because {0}'.format(str(e)))
 
-class Monitor(object):
+class Monitor:
 
     def __init__(self, skip_rabbit):
         self.faucet_event = []
@@ -733,28 +735,13 @@ class Monitor(object):
                 if endpoint:
                     try:
                         if state != 'mirror' and state != 'reinvestigate' and (endpoint.state == 'mirroring' or endpoint.state == 'reinvestigating'):
-                            status = Actions(
-                                endpoint, self.s.sdnc).unmirror_endpoint()
-                            if not status:
-                                self.logger.warning(
-                                    'Unable to unmirror the endpoint: {0}'.format(endpoint.name))
+                            self.s.unmirror_endpoint(endpoint)
                         endpoint.trigger(state)
                         endpoint.p_next_state = None
                         endpoint.p_prev_states.append(
                             (endpoint.state, int(time.time())))
                         if endpoint.state == 'mirroring' or endpoint.state == 'reinvestigating':
-                            status = Actions(
-                                endpoint, self.s.sdnc).mirror_endpoint()
-                            if status:
-                                try:
-                                    self.s.r.hincrby(
-                                        'vent_plugin_counts', 'ncapture')
-                                except Exception as e:  # pragma: no cover
-                                    self.logger.error(
-                                        'Failed to update count of plugins because: {0}'.format(str(e)))
-                            else:
-                                self.logger.warning(
-                                    'Unable to mirror the endpoint: {0}'.format(endpoint.name))
+                            self.s.mirror_endpoint(endpoint)
                     except Exception as e:  # pragma: no cover
                         self.logger.error(
                             'Unable to change endpoint {0} because: {1}'.format(endpoint.name, str(e)))
@@ -816,11 +803,7 @@ class Monitor(object):
                         del extras[ep.name]
                     if ep.name in ml_returns and 'valid' in ml_returns[ep.name] and not ep.ignore:
                         if ep.state in ['mirroring', 'reinvestigating']:
-                            status = Actions(
-                                ep, self.s.sdnc).unmirror_endpoint()
-                            if not status:
-                                self.logger.warning(
-                                    'Unable to unmirror the endpoint: {0}'.format(ep.name))
+                            self.s.unmirror_endpoint(ep)
                         if ml_returns[ep.name]['valid']:
                             ml_decision = None
                             if 'decisions' in ml_returns[ep.name] and 'behavior' in ml_returns[ep.name]['decisions']:
@@ -877,18 +860,7 @@ class Monitor(object):
                 endpoint.p_next_state = None
                 endpoint.p_prev_states.append(
                     (endpoint.state, int(time.time())))
-                status = Actions(
-                    endpoint, self.s.sdnc).mirror_endpoint()
-                if status:
-                    try:
-                        if self.s.r:
-                            self.s.r.hincrby('vent_plugin_counts', 'ncapture')
-                    except Exception as e:  # pragma: no cover
-                        self.logger.error(
-                            'Failed to update count of plugins because: {0}'.format(str(e)))
-                else:
-                    self.logger.warning(
-                        'Unable to mirror the endpoint: {0}'.format(endpoint.name))
+                self.s.mirror_endpoint(endpoint)
 
             for endpoint in self.s.endpoints.values():
                 if not endpoint.ignore:
@@ -906,11 +878,7 @@ class Monitor(object):
                             if cur_time - endpoint.p_prev_states[-1][1] > 2*self.controller['reinvestigation_frequency']:
                                 self.logger.debug(
                                     'timing out: {0} and setting to unknown'.format(endpoint.name))
-                                status = Actions(
-                                    endpoint, self.s.sdnc).unmirror_endpoint()
-                                if not status:
-                                    self.logger.warning(
-                                        'Unable to unmirror the endpoint: {0}'.format(endpoint.name))
+                                self.s.unmirror_endpoint(endpoint)
                                 endpoint.unknown()
                                 endpoint.p_prev_states.append(
                                     (endpoint.state, int(time.time())))
