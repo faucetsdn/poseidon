@@ -385,11 +385,11 @@ class SDNConnect(object):
                     # filter by device type or behavior
                     if 'mac_addresses' in endpoint.metadata and endpoint.endpoint_data['mac'] in endpoint.metadata['mac_addresses']:
                         timestamps = endpoint.metadata['mac_addresses'][endpoint.endpoint_data['mac']]
-                        newest = '0'
-                        for timestamp in timestamps:
-                            if timestamp > newest:
-                                newest = timestamp
-                        if newest is not '0':
+                        try:
+                            newest = str(max([int(i) for i in timestamps]))
+                        except ValueError:
+                            newest = None
+                        if newest is not None:
                             if 'labels' in timestamps[newest]:
                                 if arg.replace('-', ' ') == timestamps[newest]['labels'][0].lower():
                                     endpoints.append(endpoint)
