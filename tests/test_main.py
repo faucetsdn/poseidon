@@ -164,52 +164,60 @@ def test_format_rabbit_message():
             self.logger = logger
             self.controller = Config().get_config()
             self.s = SDNConnect(self.controller)
+            self.faucet_event = []
+
+        def update_routing_key_time(self, routing_key):
+            return
 
     mockMonitor = MockMonitor()
     mockMonitor.logger = MockLogger().logger
 
     data = dict({'Key1': 'Val1'})
     message = ('poseidon.algos.decider', json.dumps(data))
-    retval = mockMonitor.format_rabbit_message(message)
+    retval, msg_valid = mockMonitor.format_rabbit_message(message)
     assert retval == {}
+    assert msg_valid
 
     message = ('FAUCET.Event', json.dumps(data))
-    retval = mockMonitor.format_rabbit_message(message)
+    retval, msg_valid = mockMonitor.format_rabbit_message(message)
     assert retval == {'Key1': 'Val1'}
+    assert msg_valid
+    assert mockMonitor.faucet_event == [{'Key1': 'Val1'}]
 
     message = (None, json.dumps(data))
-    retval = mockMonitor.format_rabbit_message(message)
+    retval, msg_valid = mockMonitor.format_rabbit_message(message)
     assert retval == {}
+    assert not msg_valid
 
     data = dict({'foo': 'bar'})
     message = ('poseidon.action.ignore', json.dumps(data))
-    retval = mockMonitor.format_rabbit_message(message)
+    retval, msg_valid = mockMonitor.format_rabbit_message(message)
     assert retval == {}
 
     message = ('poseidon.action.clear.ignored', json.dumps(data))
-    retval = mockMonitor.format_rabbit_message(message)
+    retval, msg_valid = mockMonitor.format_rabbit_message(message)
     assert retval == {}
 
     message = ('poseidon.action.remove', json.dumps(data))
-    retval = mockMonitor.format_rabbit_message(message)
+    retval, msg_valid = mockMonitor.format_rabbit_message(message)
     assert retval == {}
 
     message = ('poseidon.action.remove.ignored', json.dumps(data))
-    retval = mockMonitor.format_rabbit_message(message)
+    retval, msg_valid = mockMonitor.format_rabbit_message(message)
     assert retval == {}
 
     message = ('poseidon.action.remove.inactives', json.dumps(data))
-    retval = mockMonitor.format_rabbit_message(message)
+    retval, msg_valid = mockMonitor.format_rabbit_message(message)
     assert retval == {}
 
     ip_data = dict({'10.0.0.1':['rule1']})
     message = ('poseidon.action.update_acls', json.dumps(ip_data))
-    retval = mockMonitor.format_rabbit_message(message)
+    retval, msg_valid = mockMonitor.format_rabbit_message(message)
     assert retval == {}
 
     data = [('foo', 'unknown')]
     message = ('poseidon.action.change', json.dumps(data))
-    retval = mockMonitor.format_rabbit_message(message)
+    retval, msg_valid = mockMonitor.format_rabbit_message(message)
     assert retval == {}
 
 
@@ -382,9 +390,12 @@ def test_process():
             return (False, ('bar', {'data': {}}))
 
         def format_rabbit_message(self, item):
-            return {'data': {}}
+            return ({'data': {}}, False)
 
         def store_endpoints(self):
+            return
+
+        def update_routing_key_time(self, routing_key):
             return
 
     mock_monitor = MockMonitor()

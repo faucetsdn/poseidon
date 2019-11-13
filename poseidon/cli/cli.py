@@ -127,69 +127,68 @@ class GetData():
             endpoint.p_prev_states[-1][1])) + ' (' + duration(endpoint.p_prev_states[-1][1]) + ')'
 
     @staticmethod
+    def _get_newest_metadata(metadata):
+        try:
+            newest = str(max([int(i) for i in metadata]))
+            return metadata[newest]
+        except (ValueError, KeyError):
+            return None
+
+    @staticmethod
     def _get_role(endpoint):
-        result = NO_DATA
         endpoint_mac = GetData._get_mac(endpoint)
-        if 'mac_addresses' in endpoint.metadata and endpoint_mac in endpoint.metadata['mac_addresses']:
-            metadata = endpoint.metadata['mac_addresses'][endpoint_mac]
-            newest = '0'
-            for timestamp in metadata:
-                if timestamp > newest:
-                    newest = timestamp
-            if newest is not '0':
-                if 'labels' in metadata[newest]:
-                    result = metadata[newest]['labels'][0]
-        return result
+        mac_addresses = endpoint.metadata.get('mac_addresses', None)
+        if endpoint_mac and mac_addresses and endpoint_mac in mac_addresses:
+            metadata = mac_addresses[endpoint_mac]
+            newest = GetData._get_newest_metadata(metadata)
+            if newest:
+                if 'labels' in newest:
+                    return newest['labels'][0]
+        return NO_DATA
 
     @staticmethod
     def _get_role_confidence(endpoint):
-        result = NO_DATA
         endpoint_mac = GetData._get_mac(endpoint)
-        if 'mac_addresses' in endpoint.metadata and endpoint_mac in endpoint.metadata['mac_addresses']:
-            metadata = endpoint.metadata['mac_addresses'][endpoint_mac]
-            newest = '0'
-            for timestamp in metadata:
-                if timestamp > newest:
-                    newest = timestamp
-            if newest is not '0':
-                if 'confidences' in metadata[newest]:
-                    result = str(metadata[newest]['confidences'][0])
-        return result
+        mac_addresses = endpoint.metadata.get('mac_addresses', None)
+        if endpoint_mac and mac_addresses and endpoint_mac in mac_addresses:
+            metadata = mac_addresses[endpoint_mac]
+            newest = GetData._get_newest_metadata(metadata)
+            if newest:
+                if 'confidences' in newest:
+                    return str(newest['confidences'][0])
+        return NO_DATA
 
     @staticmethod
     def _get_ipv4_os(endpoint):
-        result = NO_DATA
         endpoint_ip = GetData._get_ipv4(endpoint)
-        if 'ipv4_addresses' in endpoint.metadata and endpoint_ip in endpoint.metadata['ipv4_addresses']:
-            metadata = endpoint.metadata['ipv4_addresses'][endpoint_ip]
+        ipv4_addresses = endpoint.metadata.get('ipv4_addresses', None)
+        if endpoint_ip and ipv4_addresses and endpoint_ip in ipv4_addresses:
+            metadata = ipv4_addresses[endpoint_ip]
             if 'os' in metadata:
-                result = metadata['os']
-        return result
+                return metadata['os']
+        return NO_DATA
 
     @staticmethod
     def _get_ipv6_os(endpoint):
-        result = NO_DATA
         endpoint_ip = GetData._get_ipv6(endpoint)
-        if 'ipv6_addresses' in endpoint.metadata and endpoint_ip in endpoint.metadata['ipv6_addresses']:
-            metadata = endpoint.metadata['ipv6_addresses'][endpoint_ip]
+        ipv6_addresses = endpoint.metadata.get('ipv6_addresses', None)
+        if endpoint_ip and ipv6_addresses and endpoint_ip in ipv6_addresses:
+            metadata = ipv6_addresses[endpoint_ip]
             if 'os' in metadata:
-                result = metadata['os']
-        return result
+                return metadata['os']
+        return NO_DATA
 
     @staticmethod
     def _get_behavior(endpoint):
-        result = NO_DATA
         endpoint_mac = GetData._get_mac(endpoint)
-        if 'mac_addresses' in endpoint.metadata and endpoint_mac in endpoint.metadata['mac_addresses']:
-            metadata = endpoint.metadata['mac_addresses'][endpoint_mac]
-            newest = '0'
-            for timestamp in metadata:
-                if timestamp > newest:
-                    newest = timestamp
-            if newest is not '0':
-                if 'behavior' in metadata[newest]:
-                    result = metadata[newest]['behavior']
-        return result
+        mac_addresses = endpoint.metadata.get('mac_addresses', None)
+        if endpoint_mac and mac_addresses and endpoint_mac in mac_addresses:
+            metadata = mac_addresses[endpoint_mac]
+            newest = GetData._get_newest_metadata(metadata)
+            if newest:
+                if 'behavior' in newest:
+                    return newest['behavior']
+        return NO_DATA
 
     @staticmethod
     def _get_prev_roles(endpoint):
@@ -263,7 +262,7 @@ class Parser():
     def __init__(self):
         self.default_fields = [
             'IPv4', 'IPv4 rDNS', 'Role', 'IPv4 OS', 'Ethernet Vendor',
-            'MAC Address'
+            'MAC Address',
         ]
         self.all_fields = [
             'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4',
