@@ -68,6 +68,9 @@ class Prometheus():
         self.prom_metrics['port_hosts'] = Gauge('poseidon_endpoint_port_hosts',
                                                 'Number of hosts by port',
                                                 ['port'])
+        self.prom_metrics['last_rabbitmq_routing_key_time'] = Gauge('last_rabbitmq_routing_key_time',
+                                                                    'Epoch time when last received a RabbitMQ message',
+                                                                    ['routing_key'])
 
     @staticmethod
     def get_metrics():

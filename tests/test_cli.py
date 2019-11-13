@@ -64,11 +64,10 @@ def test_check_flags():
         'Previous Role Confidences\n(NetworkML)', 'Behavior\n(NetworkML)', 'Previous Behaviors\n(NetworkML)',
         'IPv4 rDNS', 'IPv6 rDNS', 'SDN Controller Type', 'SDN Controller URI', 'History', 'ACL History',
     ]
+    expected_fields = ['ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4']
     valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = parser._check_flags(
-        {'fields': ['ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4'], 'sort_by': 1, 'max_width': 100, 'unique': True, 'nonzero': True, 'output_format': 'csv', '4': True, '6': True, '4and6': True}, '')
-    assert fields == [
-        'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4',
-    ]
+        {'fields': expected_fields, 'sort_by': 1, 'max_width': 100, 'unique': True, 'nonzero': True, 'output_format': 'csv', '4': True, '6': True, '4and6': True}, '')
+    assert fields == expected_fields
     assert sort_by == 1
     assert max_width == 100
     assert unique == True
