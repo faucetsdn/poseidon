@@ -126,7 +126,7 @@ def schedule_thread_worker(schedule):
     sys.exit()
 
 
-class SDNConnect(object):
+class SDNConnect:
 
     def __init__(self, controller):
         self.controller = controller
@@ -365,7 +365,7 @@ class SDNConnect(object):
                                   body=message)
             connection.close()
         except Exception as e:  # pragma: no cover
-            pass
+            print(str(e))
 
     def show_endpoints(self, arg):
         endpoints = []
@@ -581,7 +581,6 @@ class SDNConnect(object):
                             {'field_name': 'ipv4_OS', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
                             {'field_name': 'ipv6_OS', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
                         ]
-                        
                         #make history entries for any changed prop
                         prior = None
                         for timestamp in mac_addresses:
@@ -774,13 +773,13 @@ class Monitor:
             remove_list = [name for name in my_obj]
             return ({}, remove_list)
 
-        def handler_action_remove_ignored(my_obj):
+        def handler_action_remove_ignored(_my_obj):
             remove_list = [
                 endpoint.name for endpoint in self.s.endpoints.values()
                 if endpoint.ignore]
             return ({}, remove_list)
 
-        def handler_action_remove_inactives(my_obj):
+        def handler_action_remove_inactives(_my_obj):
             remove_list = [
                 endpoint.name for endpoint in self.s.endpoints.values()
                 if endpoint.state == 'inactive']
@@ -966,7 +965,7 @@ class Monitor:
         self.logger.debug('EXITING')
         sys.exit()
 
-    def signal_handler(self, signal, frame):
+    def signal_handler(self, _signal, _frame):
         ''' hopefully eat a CTRL_C and signal system shutdown '''
         global CTRL_C
         CTRL_C['STOP'] = True
