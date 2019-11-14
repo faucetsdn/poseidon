@@ -234,16 +234,18 @@ class SDNConnect:
                                 timestamps = ast.literal_eval(
                                     mac_info[b'timestamps'].decode('ascii'))
                                 for timestamp in timestamps:
+                                    metadata = {}
                                     ml_info = self.r.hgetall(
                                         mac.decode('ascii')+'_'+str(timestamp))
-                                    labels = []
-                                    if b'labels' in ml_info:
-                                        labels = ast.literal_eval(
-                                            ml_info[b'labels'].decode('ascii'))
-                                    confidences = []
-                                    if b'confidences' in ml_info:
-                                        confidences = ast.literal_eval(
-                                            ml_info[b'confidences'].decode('ascii'))
+                                    for ml_field, ml_field_default in (
+                                            (b'labels', []),
+                                            (b'confidences', []),
+                                            (b'pcap_labels', 'None')):
+                                        if ml_field in ml_info:
+                                            content = ast.literal_eval(ml_info[ml_field]).decode('ascii')
+                                        else:
+                                            content = ml_field_default
+                                        metadata[ml_field] = content
                                     behavior = 'None'
                                     tmp = []
                                     if mac_info[b'poseidon_hash'] in ml_info:
@@ -252,10 +254,11 @@ class SDNConnect:
                                     elif mac_info[b'poseidon_hash'].decode('ascii') in ml_info:
                                         tmp = ast.literal_eval(
                                             ml_info[mac_info[b'poseidon_hash'].decode('ascii')].decode('ascii'))
-                                    if 'decisions' in tmp and 'behavior' in tmp['decisions']:
-                                        behavior = tmp['decisions']['behavior']
-                                    mac_addresses[mac.decode('ascii')][str(timestamp)] = {
-                                        'labels': labels, 'confidences': confidences, 'behavior': behavior}
+                                    if 'decisions' in tmp:
+                                        if 'behavior' in tmp['decisions']:
+                                            behavior = tmp['decisions']['behavior']
+                                    metadata['behavior'] = behavior
+                                    mac_addresses[mac.decode('ascii')][str(timestamp)] = metadata
                             except Exception as e:  # pragma: no cover
                                 self.logger.error(
                                     'Unable to get existing ML data from Redis because: {0}'.format(str(e)))
@@ -292,6 +295,7 @@ class SDNConnect:
                 except Exception as e:  # pragma: no cover
                     self.logger.error(
                         'Unable to get existing metadata for {0} from Redis because: {1}'.format(mac, str(e)))
+        self.logger.info(str(mac_addresses))
         return mac_addresses, ip_addresses['ipv4'], ip_addresses['ipv6']
 
     def get_sdn_context(self):
@@ -382,19 +386,21 @@ class SDNConnect:
                     elif endpoint.state == arg:
                         endpoints.append(endpoint)
                 elif show_type in ['os', 'behavior', 'role']:
-                    # filter by device type or behavior
-                    if 'mac_addresses' in endpoint.metadata and endpoint.endpoint_data['mac'] in endpoint.metadata['mac_addresses']:
-                        timestamps = endpoint.metadata['mac_addresses'][endpoint.endpoint_data['mac']]
+                    mac_addresses = endpoint.metadata.get('mac_addresses', None)
+                    endpoint_mac = endpoint.endpoint_data['mac']
+                    if endpoint_mac and mac_addresses and endpoint_mac in mac_addresses:
+                        timestamps = mac_addresses[endpoint_mac]
                         try:
-                            newest = str(max([int(i) for i in timestamps]))
-                        except ValueError:
+                            newest = sorted([timestamp for timestamp in timestamps])[-1]
+                            newest = timestamps[newest]
+                        except IndexError:
                             newest = None
-                        if newest is not None:
-                            if 'labels' in timestamps[newest]:
-                                if arg.replace('-', ' ') == timestamps[newest]['labels'][0].lower():
+                        if newest:
+                            if 'labels' in newest:
+                                if arg.replace('-', ' ') == newest['labels'][0].lower():
                                     endpoints.append(endpoint)
-                            if 'behavior' in timestamps[newest]:
-                                if arg == timestamps[newest]['behavior'].lower():
+                            if 'behavior' in newest:
+                                if arg == newest['behavior'].lower():
                                     endpoints.append(endpoint)
 
                     # filter by operating system
