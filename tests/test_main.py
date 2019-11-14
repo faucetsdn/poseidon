@@ -150,6 +150,19 @@ def test_get_q_item():
     assert (False, None) == mock_monitor.get_q_item()
 
 
+def test_update_history():
+    endpoint = endpoint_factory('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv6': '1212::1'}
+    endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'1551805502': {'labels': ['developer workstation'], 'behavior': 'normal'}}}, 'ipv4_addresses': {
+        '0.0.0.0': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
+    controller = Config().get_config()
+    s = SDNConnect(controller)
+    s.endpoints[endpoint.name] = endpoint
+    metadata = {123: {'behavior': 'normal'}}
+    s.update_history(endpoint, {'00:00:00:00:00:00': metadata}, {'0.0.0.0': metadata}, {'1212::1': metadata})
+
+
 def test_format_rabbit_message():
     CTRL_C['STOP'] = False
 
@@ -193,32 +206,39 @@ def test_format_rabbit_message():
     message = ('poseidon.action.ignore', json.dumps(data))
     retval, msg_valid = mockMonitor.format_rabbit_message(message)
     assert retval == {}
+    assert msg_valid
 
     message = ('poseidon.action.clear.ignored', json.dumps(data))
     retval, msg_valid = mockMonitor.format_rabbit_message(message)
     assert retval == {}
+    assert msg_valid
 
     message = ('poseidon.action.remove', json.dumps(data))
     retval, msg_valid = mockMonitor.format_rabbit_message(message)
     assert retval == {}
+    assert msg_valid
 
     message = ('poseidon.action.remove.ignored', json.dumps(data))
     retval, msg_valid = mockMonitor.format_rabbit_message(message)
     assert retval == {}
+    assert msg_valid
 
     message = ('poseidon.action.remove.inactives', json.dumps(data))
     retval, msg_valid = mockMonitor.format_rabbit_message(message)
     assert retval == {}
+    assert msg_valid
 
     ip_data = dict({'10.0.0.1':['rule1']})
     message = ('poseidon.action.update_acls', json.dumps(ip_data))
     retval, msg_valid = mockMonitor.format_rabbit_message(message)
     assert retval == {}
+    assert msg_valid
 
     data = [('foo', 'unknown')]
     message = ('poseidon.action.change', json.dumps(data))
     retval, msg_valid = mockMonitor.format_rabbit_message(message)
     assert retval == {}
+    assert msg_valid
 
 
 def test_rabbit_callback():

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+0#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 The main entrypoint for Poseidon, schedules the threads, connects to SDN
@@ -199,19 +199,19 @@ class SDNConnect:
     def get_stored_endpoints(self):
         ''' load existing endpoints from Redis. '''
         with self.redis_lock:
-            endpoints = {}
             if self.r:
                 try:
                     p_endpoints = self.r.get('p_endpoints')
                     if p_endpoints:
+                        new_endpoints = {}
                         p_endpoints = ast.literal_eval(p_endpoints.decode('ascii'))
                         for p_endpoint in p_endpoints:
                             endpoint = EndpointDecoder(p_endpoint).get_endpoint()
                             endpoints[endpoint.name] = endpoint
+                        self.endpoints = new_endpoints
                 except Exception as e:  # pragma: no cover
                     self.logger.error(
                         'Unable to get existing endpoints from Redis because {0}'.format(str(e)))
-            self.endpoints = endpoints
 
     def get_stored_metadata(self, hash_id):
         mac_addresses = {}
@@ -569,6 +569,42 @@ class SDNConnect:
         self.store_endpoints()
         self.get_stored_endpoints()
 
+    def update_history(self, endpoint, mac_addresses, ipv4_addresses, ipv6_addresses):
+        #list of fields to make history entries for, along with entry type for that field
+        fields = [
+            {'field_name': 'behavior', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
+            {'field_name': 'ipv4_OS', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
+            {'field_name': 'ipv6_OS', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
+        ]
+        #make history entries for any changed prop
+        prior = None
+        for timestamp, record in mac_addresses.items():
+            for field in fields:
+                if field['field_name'] in record and prior and field['field_name'] in prior and \
+                   prior[field['field_name']] != record[field['field_name']]:
+                    endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.mac_addresses['field_name'],
+                        record[field['field_name']])
+                prior = record
+
+        # TODO: history for IP address changes isn't accumulated yet.
+        prior = None
+        for timestamp, record in ipv4_addresses.items():
+            for field in fields:
+                if field['field_name'] in record and prior and field['field_name'] in prior and \
+                   prior[field['field_name']] != record[field['field_name']]:
+                    endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.ipv4_addresses['field_name'],
+                        record[field['field_name']])
+                prior = record
+
+        prior = None
+        for timestamp, record in ipv6_addresses.items():
+            for field in fields:
+                if field['field_name'] in record and prior and field['field_name'] in prior and \
+                   prior[field['field_name']] != record[field['field_name']]:
+                    endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.ipv6_addresses['field_name'],
+                        record[field['field_name']])
+                prior = record
+
     def store_endpoints(self):
 
         ''' store current endpoints in Redis. '''
@@ -580,44 +616,7 @@ class SDNConnect:
                         # set metadata
                         mac_addresses, ipv4_addresses, ipv6_addresses = self.get_stored_metadata(
                             str(endpoint.name))
-
-                        #list of fields to make history entries for, along with entry type for that field
-                        fields = [
-                            {'field_name': 'behavior', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
-                            {'field_name': 'ipv4_OS', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
-                            {'field_name': 'ipv6_OS', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
-                        ]
-                        #make history entries for any changed prop
-                        prior = None
-                        for timestamp in mac_addresses:
-                            for field in fields:
-                                record = mac_addresses[timestamp]
-                                if field['field_name'] in record and prior and field['field_name'] in prior and \
-                                   prior[field['field_name']] != record[field['field_name']]:
-                                    endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.mac_addresses['field_name'],
-                                        record[field['field_name']])
-                                prior = record
-
-                        prior = None
-                        for timestamp in ipv4_addresses:
-                            for field in fields:
-                                record = ipv4_addresses[timestamp]
-                                if field['field_name'] in record and prior and field['field_name'] in prior and \
-                                   prior[field['field_name']] != record[field['field_name']]:
-                                    endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.ipv4_addresses['field_name'],
-                                        record[field['field_name']])
-                                prior = record
-
-                        prior = None
-                        for timestamp in ipv6_addresses:
-                            for field in fields:
-                                record = ipv6_addresses[timestamp]
-                                if field['field_name'] in record and prior and field['field_name'] in prior and \
-                                   prior[field['field_name']] != record[field['field_name']]:
-                                    endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.ipv6_addresses['field_name'],
-                                        record[field['field_name']])
-                                prior = record
-
+                        self.update_history(endpoint, mac_addresses, ipv4_addresses, ipv6_addresses)
                         endpoint.metadata = {
                             'mac_addresses': mac_addresses,
                             'ipv4_addresses': ipv4_addresses,
