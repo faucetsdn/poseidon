@@ -62,7 +62,7 @@ def test_check_flags():
         'Previous States', 'IPv4 OS\n(p0f)', 'IPv6 OS\n(p0f)', 'Previous IPv4 OSes\n(p0f)',
         'Previous IPv6 OSes\n(p0f)', 'Role\n(NetworkML)', 'Role Confidence\n(NetworkML)', 'Previous Roles\n(NetworkML)',
         'Previous Role Confidences\n(NetworkML)', 'Behavior\n(NetworkML)', 'Previous Behaviors\n(NetworkML)',
-        'IPv4 rDNS', 'IPv6 rDNS', 'SDN Controller Type', 'SDN Controller URI', 'History', 'ACL History',
+        'IPv4 rDNS', 'IPv6 rDNS', 'SDN Controller Type', 'SDN Controller URI', 'History', 'ACL History', 'Pcap labels',
     ]
     expected_fields = ['ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4']
     valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = parser._check_flags(
@@ -369,6 +369,17 @@ def test_get_ipv6_os():
     ipv6_os = GetData._get_ipv6_os(endpoint)
     assert ipv6_os == 'foo'
 
+def test_get_pcap_labels():
+    endpoint = endpoint_factory('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+    endpoint.metadata = {'mac_addresses': {}}
+    pcap_labels = GetData._get_pcap_labels(endpoint)
+    assert pcap_labels == NO_DATA
+    endpoint.metadata = {'mac_addresses': {
+        '00:00:00:00:00:00': {'1551711125': {'pcap_labels': 'foo'}}}}
+    pcap_labels = GetData._get_pcap_labels(endpoint)
+    assert pcap_labels == 'foo'
 
 def test_get_role():
     endpoint = endpoint_factory('foo')

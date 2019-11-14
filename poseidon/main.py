@@ -199,19 +199,19 @@ class SDNConnect:
     def get_stored_endpoints(self):
         ''' load existing endpoints from Redis. '''
         with self.redis_lock:
-            endpoints = {}
             if self.r:
                 try:
                     p_endpoints = self.r.get('p_endpoints')
                     if p_endpoints:
+                        new_endpoints = {}
                         p_endpoints = ast.literal_eval(p_endpoints.decode('ascii'))
                         for p_endpoint in p_endpoints:
                             endpoint = EndpointDecoder(p_endpoint).get_endpoint()
-                            endpoints[endpoint.name] = endpoint
+                            new_endpoints[endpoint.name] = endpoint
+                        self.endpoints = new_endpoints
                 except Exception as e:  # pragma: no cover
                     self.logger.error(
                         'Unable to get existing endpoints from Redis because {0}'.format(str(e)))
-            self.endpoints = endpoints
 
     def get_stored_metadata(self, hash_id):
         mac_addresses = {}
@@ -234,16 +234,18 @@ class SDNConnect:
                                 timestamps = ast.literal_eval(
                                     mac_info[b'timestamps'].decode('ascii'))
                                 for timestamp in timestamps:
+                                    metadata = {}
                                     ml_info = self.r.hgetall(
                                         mac.decode('ascii')+'_'+str(timestamp))
-                                    labels = []
-                                    if b'labels' in ml_info:
-                                        labels = ast.literal_eval(
-                                            ml_info[b'labels'].decode('ascii'))
-                                    confidences = []
-                                    if b'confidences' in ml_info:
-                                        confidences = ast.literal_eval(
-                                            ml_info[b'confidences'].decode('ascii'))
+                                    for ml_field, ml_field_default in (
+                                            (b'labels', []),
+                                            (b'confidences', []),
+                                            (b'pcap_labels', 'None')):
+                                        if ml_field in ml_info:
+                                            content = ast.literal_eval(ml_info[ml_field]).decode('ascii')
+                                        else:
+                                            content = ml_field_default
+                                        metadata[ml_field] = content
                                     behavior = 'None'
                                     tmp = []
                                     if mac_info[b'poseidon_hash'] in ml_info:
@@ -252,10 +254,11 @@ class SDNConnect:
                                     elif mac_info[b'poseidon_hash'].decode('ascii') in ml_info:
                                         tmp = ast.literal_eval(
                                             ml_info[mac_info[b'poseidon_hash'].decode('ascii')].decode('ascii'))
-                                    if 'decisions' in tmp and 'behavior' in tmp['decisions']:
-                                        behavior = tmp['decisions']['behavior']
-                                    mac_addresses[mac.decode('ascii')][str(timestamp)] = {
-                                        'labels': labels, 'confidences': confidences, 'behavior': behavior}
+                                    if 'decisions' in tmp:
+                                        if 'behavior' in tmp['decisions']:
+                                            behavior = tmp['decisions']['behavior']
+                                    metadata['behavior'] = behavior
+                                    mac_addresses[mac.decode('ascii')][str(timestamp)] = metadata
                             except Exception as e:  # pragma: no cover
                                 self.logger.error(
                                     'Unable to get existing ML data from Redis because: {0}'.format(str(e)))
@@ -382,19 +385,21 @@ class SDNConnect:
                     elif endpoint.state == arg:
                         endpoints.append(endpoint)
                 elif show_type in ['os', 'behavior', 'role']:
-                    # filter by device type or behavior
-                    if 'mac_addresses' in endpoint.metadata and endpoint.endpoint_data['mac'] in endpoint.metadata['mac_addresses']:
-                        timestamps = endpoint.metadata['mac_addresses'][endpoint.endpoint_data['mac']]
+                    mac_addresses = endpoint.metadata.get('mac_addresses', None)
+                    endpoint_mac = endpoint.endpoint_data['mac']
+                    if endpoint_mac and mac_addresses and endpoint_mac in mac_addresses:
+                        timestamps = mac_addresses[endpoint_mac]
                         try:
-                            newest = str(max([int(i) for i in timestamps]))
-                        except ValueError:
+                            newest = sorted([timestamp for timestamp in timestamps])[-1]
+                            newest = timestamps[newest]
+                        except IndexError:
                             newest = None
-                        if newest is not None:
-                            if 'labels' in timestamps[newest]:
-                                if arg.replace('-', ' ') == timestamps[newest]['labels'][0].lower():
+                        if newest:
+                            if 'labels' in newest:
+                                if arg.replace('-', ' ') == newest['labels'][0].lower():
                                     endpoints.append(endpoint)
-                            if 'behavior' in timestamps[newest]:
-                                if arg == timestamps[newest]['behavior'].lower():
+                            if 'behavior' in newest:
+                                if arg == newest['behavior'].lower():
                                     endpoints.append(endpoint)
 
                     # filter by operating system
@@ -563,6 +568,43 @@ class SDNConnect:
         self.store_endpoints()
         self.get_stored_endpoints()
 
+    @staticmethod
+    def update_history(endpoint, mac_addresses, ipv4_addresses, ipv6_addresses):
+        #list of fields to make history entries for, along with entry type for that field
+        fields = [
+            {'field_name': 'behavior', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
+            {'field_name': 'ipv4_OS', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
+            {'field_name': 'ipv6_OS', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
+        ]
+        #make history entries for any changed prop
+        prior = None
+        for record in mac_addresses.values():
+            for field in fields:
+                if field['field_name'] in record and prior and field['field_name'] in prior and \
+                   prior[field['field_name']] != record[field['field_name']]:
+                    endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.mac_addresses['field_name'],
+                        record[field['field_name']])
+                prior = record
+
+        # TODO: history for IP address changes isn't accumulated yet (see get_stored_metadata()).
+        prior = None
+        for record in ipv4_addresses.values():
+            for field in fields:
+                if field['field_name'] in record and prior and field['field_name'] in prior and \
+                   prior[field['field_name']] != record[field['field_name']]:
+                    endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.ipv4_addresses['field_name'],
+                        record[field['field_name']])
+                prior = record
+
+        prior = None
+        for record in ipv6_addresses.values():
+            for field in fields:
+                if field['field_name'] in record and prior and field['field_name'] in prior and \
+                   prior[field['field_name']] != record[field['field_name']]:
+                    endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.ipv6_addresses['field_name'],
+                        record[field['field_name']])
+                prior = record
+
     def store_endpoints(self):
 
         ''' store current endpoints in Redis. '''
@@ -574,44 +616,7 @@ class SDNConnect:
                         # set metadata
                         mac_addresses, ipv4_addresses, ipv6_addresses = self.get_stored_metadata(
                             str(endpoint.name))
-
-                        #list of fields to make history entries for, along with entry type for that field
-                        fields = [
-                            {'field_name': 'behavior', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
-                            {'field_name': 'ipv4_OS', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
-                            {'field_name': 'ipv6_OS', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
-                        ]
-                        #make history entries for any changed prop
-                        prior = None
-                        for timestamp in mac_addresses:
-                            for field in fields:
-                                record = mac_addresses[timestamp]
-                                if field['field_name'] in record and prior and field['field_name'] in prior and \
-                                   prior[field['field_name']] != record[field['field_name']]:
-                                    endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.mac_addresses['field_name'],
-                                        record[field['field_name']])
-                                prior = record
-
-                        prior = None
-                        for timestamp in ipv4_addresses:
-                            for field in fields:
-                                record = ipv4_addresses[timestamp]
-                                if field['field_name'] in record and prior and field['field_name'] in prior and \
-                                   prior[field['field_name']] != record[field['field_name']]:
-                                    endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.ipv4_addresses['field_name'],
-                                        record[field['field_name']])
-                                prior = record
-
-                        prior = None
-                        for timestamp in ipv6_addresses:
-                            for field in fields:
-                                record = ipv6_addresses[timestamp]
-                                if field['field_name'] in record and prior and field['field_name'] in prior and \
-                                   prior[field['field_name']] != record[field['field_name']]:
-                                    endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.ipv6_addresses['field_name'],
-                                        record[field['field_name']])
-                                prior = record
-
+                        self.update_history(endpoint, mac_addresses, ipv4_addresses, ipv6_addresses)
                         endpoint.metadata = {
                             'mac_addresses': mac_addresses,
                             'ipv4_addresses': ipv4_addresses,

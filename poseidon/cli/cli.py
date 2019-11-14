@@ -129,9 +129,9 @@ class GetData():
     @staticmethod
     def _get_newest_metadata(metadata):
         try:
-            newest = str(max([int(i) for i in metadata]))
+            newest = sorted([timestamp for timestamp in metadata])[-1]
             return metadata[newest]
-        except (ValueError, KeyError):
+        except IndexError:
             return None
 
     @staticmethod
@@ -159,6 +159,30 @@ class GetData():
         return NO_DATA
 
     @staticmethod
+    def _get_behavior(endpoint):
+        endpoint_mac = GetData._get_mac(endpoint)
+        mac_addresses = endpoint.metadata.get('mac_addresses', None)
+        if endpoint_mac and mac_addresses and endpoint_mac in mac_addresses:
+            metadata = mac_addresses[endpoint_mac]
+            newest = GetData._get_newest_metadata(metadata)
+            if newest:
+                if 'behavior' in newest:
+                    return newest['behavior']
+        return NO_DATA
+
+    @staticmethod
+    def _get_pcap_labels(endpoint):
+        endpoint_mac = GetData._get_mac(endpoint)
+        mac_addresses = endpoint.metadata.get('mac_addresses', None)
+        if endpoint_mac and mac_addresses and endpoint_mac in mac_addresses:
+            metadata = mac_addresses[endpoint_mac]
+            newest = GetData._get_newest_metadata(metadata)
+            if newest:
+                if 'pcap_labels' in newest:
+                    return newest['pcap_labels']
+        return NO_DATA
+
+    @staticmethod
     def _get_ipv4_os(endpoint):
         endpoint_ip = GetData._get_ipv4(endpoint)
         ipv4_addresses = endpoint.metadata.get('ipv4_addresses', None)
@@ -179,39 +203,27 @@ class GetData():
         return NO_DATA
 
     @staticmethod
-    def _get_behavior(endpoint):
-        endpoint_mac = GetData._get_mac(endpoint)
-        mac_addresses = endpoint.metadata.get('mac_addresses', None)
-        if endpoint_mac and mac_addresses and endpoint_mac in mac_addresses:
-            metadata = mac_addresses[endpoint_mac]
-            newest = GetData._get_newest_metadata(metadata)
-            if newest:
-                if 'behavior' in newest:
-                    return newest['behavior']
-        return NO_DATA
-
-    @staticmethod
-    def _get_prev_roles(endpoint):
+    def _get_prev_roles(_endpoint):
         # TODO results from ML
         return
 
     @staticmethod
-    def _get_prev_role_confidences(endpoint):
+    def _get_prev_role_confidences(_endpoint):
         # TODO results from ML
         return
 
     @staticmethod
-    def _get_prev_behaviors(endpoint):
+    def _get_prev_behaviors(_endpoint):
         # TODO results from ML
         return
 
     @staticmethod
-    def _get_prev_ipv4_oses(endpoint):
+    def _get_prev_ipv4_oses(_endpoint):
         # TODO results from p0f
         return
 
     @staticmethod
-    def _get_prev_ipv6_oses(endpoint):
+    def _get_prev_ipv6_oses(_endpoint):
         # TODO results from p0f
         return
 
@@ -261,8 +273,7 @@ class Parser():
 
     def __init__(self):
         self.default_fields = [
-            'IPv4', 'IPv4 rDNS', 'Role', 'IPv4 OS', 'Ethernet Vendor',
-            'MAC Address',
+            'IPv4', 'IPv4 rDNS', 'Role', 'IPv4 OS', 'Ethernet Vendor', 'MAC Address', 'Pcap labels',
         ]
         self.all_fields = [
             'ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4',
@@ -272,10 +283,12 @@ class Parser():
             'Previous IPv6 OSes\n(p0f)', 'Role\n(NetworkML)', 'Role Confidence\n(NetworkML)', 'Previous Roles\n(NetworkML)',
             'Previous Role Confidences\n(NetworkML)', 'Behavior\n(NetworkML)', 'Previous Behaviors\n(NetworkML)',
             'IPv4 rDNS', 'IPv6 rDNS', 'SDN Controller Type', 'SDN Controller URI', 'History', 'ACL History',
+            'Pcap labels'
         ]
 
-    def completion(self, text, line, completions):
-        firstword, _, mline = line.partition(' ')
+    @staticmethod
+    def completion(text, line, completions):
+        _, _, mline = line.partition(' ')
         offs = len(mline) - len(text)
         words = []
 
@@ -285,7 +298,8 @@ class Parser():
             words.append(complete.split(' ', 1)[0])
         return words
 
-    def get_flags(self, text):
+    @staticmethod
+    def get_flags(text):
         valid = True
         flags = {}
         not_flags = []
@@ -429,7 +443,8 @@ class Parser():
                          'sdn controller type': (GetData._get_controller_type, 28),
                          'sdn controller uri': (GetData._get_controller, 29),
                          'history': (GetData._get_history, 30),
-                         'acl history': (GetData._get_acls, 31)}
+                         'acl history': (GetData._get_acls, 31),
+                         'pcap labels': (GetData._get_pcap_labels, 32)}
 
         records = []
         if nonzero or unique:
@@ -490,14 +505,16 @@ class Parser():
             results = 'No results found for that query.'
         return results
 
-    def display_table(self, column_count, max_width, matrix):
+    @staticmethod
+    def display_table(column_count, max_width, matrix):
         table = Texttable(max_width=max_width)
         # make all the column types be text
         table.set_cols_dtype(['t']*column_count)
         table.add_rows(matrix)
         return table.draw()
 
-    def display_csv(self, matrix):
+    @staticmethod
+    def display_csv(matrix):
         # use StringIO to create a file like object as a string so that we can use the
         # built in csv contructs so as to properly handle edge/corner cases
         csv_str = io.StringIO()
@@ -542,10 +559,10 @@ class PoseidonShell(cmd2.Cmd):
             'set', 'ignore', 'remove', 'collect', 'clear'
         ]
 
-    def complete_show(self, text, line, begidx, endidx):
+    def complete_show(self, text, line, _begidx, _endidx):
         return self.parser.completion(text, line, self.show_completions)
 
-    def complete_task(self, text, line, begidx, endidx):
+    def complete_task(self, text, line, _begidx, _endidx):
         return self.parser.completion(text, line, self.task_completions)
 
     @exception
@@ -719,7 +736,7 @@ class PoseidonShell(cmd2.Cmd):
         self.poutput('  where\t\tFind out where something is')
 
     @exception
-    def show_authors(self, arg, flags):
+    def show_authors(self, _arg, _flags):
         self.poutput("""\033[1;34m                            The Cyber Reboot Team
                                       &
                            Members of the Community\033[1;m
@@ -770,7 +787,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                 i += 1
 
     @exception
-    def show_version(self, arg, flags):
+    def show_version(self, _arg, _flags):
         with open('/poseidon/VERSION', 'r') as f:  # pragma: no cover
             for line in f:
                 self.poutput(line.strip())
@@ -799,7 +816,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                                                      nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
-    def task_collect(self, arg, flags):
+    def task_collect(self, _arg, _flags):
         '''
         Collect on something on the network for a duration:
         COLLECT [IP|MAC|ID] [DURATION] (TODO - NOT IMPLEMENTED YET)
@@ -961,13 +978,13 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                 self.help_show()
 
     @exception
-    def do_quit(self, arg):
+    def do_quit(self, _arg):
         '''Stop the shell and exit:  QUIT'''
         self.poutput('Thank you for using Poseidon')
         return True
 
     @exception
-    def do_exit(self, arg):
+    def do_exit(self, _arg):
         '''Stop the shell and exit:  EXIT'''
         self.poutput('Thank you for using Poseidon')
         return True
