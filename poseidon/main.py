@@ -96,17 +96,7 @@ def schedule_job_reinvestigation(schedule_func):
                 chosen.reinvestigate()
                 chosen.p_prev_states.append(
                     (chosen.state, int(time.time())))
-                status = Actions(chosen, schedule_func.s.sdnc).mirror_endpoint()
-                if status:
-                    try:
-                        schedule_func.s.r.hincrby('vent_plugin_counts', 'ncapture')
-                    except Exception as e:  # pragma: no cover
-                        schedule_func.logger.error(
-                            'Failed to update count of plugins because: {0}'.format(str(e)))
-                else:
-                    schedule_func.logger.warning(
-                        'Unable to mirror the endpoint: {0}'.format(chosen.name))
-        return
+                schedule_func.s.mirror_endpoint(chosen)
 
     if not CTRL_C['STOP']:
         candidates = [
@@ -136,7 +126,7 @@ def schedule_thread_worker(schedule):
     sys.exit()
 
 
-class SDNConnect(object):
+class SDNConnect:
 
     def __init__(self, controller):
         self.controller = controller
@@ -156,6 +146,26 @@ class SDNConnect(object):
         self.redis_lock = threading.Lock()
         self.connect_redis()
         self.default_endpoints()
+
+    def mirror_endpoint(self, endpoint):
+        ''' mirror an endpoint. '''
+        status = Actions(endpoint, self.sdnc).mirror_endpoint()
+        if status:
+            try:
+                self.r.hincrby('vent_plugin_counts', 'ncapture')
+            except Exception as e:  # pragma: no cover
+                self.logger.error(
+                    'Failed to update count of plugins because: {0}'.format(str(e)))
+        else:
+            self.logger.warning(
+                'Unable to mirror the endpoint: {0}'.format(endpoint.name))
+
+    def unmirror_endpoint(self, endpoint):
+        ''' unmirror an endpoint. '''
+        status = Actions(endpoint, self.sdnc).unmirror_endpoint()
+        if not status:
+            self.logger.warning(
+                'Unable to unmirror the endpoint: {0}'.format(endpoint.name))
 
     def clear_filters(self):
         ''' clear any exisiting filters. '''
@@ -202,7 +212,6 @@ class SDNConnect(object):
                     self.logger.error(
                         'Unable to get existing endpoints from Redis because {0}'.format(str(e)))
             self.endpoints = endpoints
-        return
 
     def get_stored_metadata(self, hash_id):
         mac_addresses = {}
@@ -286,21 +295,22 @@ class SDNConnect(object):
         return mac_addresses, ip_addresses['ipv4'], ip_addresses['ipv6']
 
     def get_sdn_context(self):
-        if 'TYPE' in self.controller and self.controller['TYPE'] == 'bcf':
+        controller_type = self.controller.get('TYPE', None)
+        if controller_type == 'bcf':
             try:
                 self.sdnc = BcfProxy(self.controller)
             except Exception as e:  # pragma: no cover
                 self.logger.error(
                     'BcfProxy could not connect to {0} because {1}'.format(
                         self.controller['URI'], e))
-        elif 'TYPE' in self.controller and self.controller['TYPE'] == 'faucet':
+        elif controller_type == 'faucet':
             try:
                 self.sdnc = FaucetProxy(self.controller)
             except Exception as e:  # pragma: no cover
                 self.logger.error(
                     'FaucetProxy could not connect to {0} because {1}'.format(
                         self.controller['URI'], e))
-        elif 'TYPE' in self.controller and self.controller['TYPE'] == 'None':
+        elif controller_type == 'None':
             self.sdnc = None
         else:
             if 'CONTROLLER_PASS' in self.controller:
@@ -355,8 +365,7 @@ class SDNConnect(object):
                                   body=message)
             connection.close()
         except Exception as e:  # pragma: no cover
-            pass
-        return
+            print(str(e))
 
     def show_endpoints(self, arg):
         endpoints = []
@@ -376,11 +385,11 @@ class SDNConnect(object):
                     # filter by device type or behavior
                     if 'mac_addresses' in endpoint.metadata and endpoint.endpoint_data['mac'] in endpoint.metadata['mac_addresses']:
                         timestamps = endpoint.metadata['mac_addresses'][endpoint.endpoint_data['mac']]
-                        newest = '0'
-                        for timestamp in timestamps:
-                            if timestamp > newest:
-                                newest = timestamp
-                        if newest is not '0':
+                        try:
+                            newest = str(max([int(i) for i in timestamps]))
+                        except ValueError:
+                            newest = None
+                        if newest is not None:
                             if 'labels' in timestamps[newest]:
                                 if arg.replace('-', ' ') == timestamps[newest]['labels'][0].lower():
                                     endpoints.append(endpoint)
@@ -427,8 +436,6 @@ class SDNConnect(object):
 
         self.find_new_machines(parsed)
 
-        return
-
     def connect_redis(self, host='redis', port=6379, db=0):
         self.r = None
         try:
@@ -437,7 +444,6 @@ class SDNConnect(object):
         except Exception as e:  # pragma: no cover
             self.logger.error(
                 'Failed connect to Redis because: {0}'.format(str(e)))
-        return
 
     @staticmethod
     def _diff_machine(machine_a, machine_b):
@@ -529,11 +535,7 @@ class SDNConnect(object):
                     ep.p_prev_states.append((ep.state, int(time.time())))
                 elif ep.state != 'inactive' and machine['active'] == 0:
                     if ep.state in ['mirroring', 'reinvestigating']:
-                        status = Actions(
-                            ep, self.sdnc).unmirror_endpoint()
-                        if not status:
-                            self.logger.warning(
-                                'Unable to unmirror the endpoint: {0}'.format(ep.name))
+                        self.unmirror_endpoint(ep)
                         if ep.state == 'mirroring':
                             ep.p_next_state = 'mirror'
                         elif ep.state == 'reinvestigating':
@@ -557,7 +559,7 @@ class SDNConnect(object):
                     ep = self.endpoints.get(h, None)
                     if ep:
                         ep.acl_data.append(
-                            (item[0], item[4], item[5]), int(time.time()))
+                            ((item[0], item[4], item[5]), int(time.time())))
         self.store_endpoints()
         self.get_stored_endpoints()
 
@@ -579,7 +581,6 @@ class SDNConnect(object):
                             {'field_name': 'ipv4_OS', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
                             {'field_name': 'ipv6_OS', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
                         ]
-                        
                         #make history entries for any changed prop
                         prior = None
                         for timestamp in mac_addresses:
@@ -647,7 +648,7 @@ class SDNConnect(object):
                     self.logger.error(
                         'Unable to store endpoints in Redis because {0}'.format(str(e)))
 
-class Monitor(object):
+class Monitor:
 
     def __init__(self, skip_rabbit):
         self.faucet_event = []
@@ -690,20 +691,20 @@ class Monitor(object):
                 schedule=self.schedule),
             name='st_worker')
 
+    def update_routing_key_time(self, routing_key):
+        self.prom.prom_metrics['last_rabbitmq_routing_key_time'].labels(
+            routing_key=routing_key).set(time.time())
+
     def format_rabbit_message(self, item):
         '''
         read a message off the rabbit_q
         the message should be item = (routing_key,msg)
         '''
-        ret_val = {}
-
         routing_key, my_obj = item
-        self.logger.debug('rabbit_message:{0}'.format(my_obj))
+        self.logger.debug('routing_key: {0} rabbit_message: {1}'.format(routing_key, my_obj))
         my_obj = json.loads(my_obj)
-        self.logger.debug('routing_key:{0}'.format(routing_key))
-        remove_list = []
 
-        if routing_key == 'poseidon.algos.decider':
+        def handler_algos_decider(my_obj):
             self.logger.debug('decider value:{0}'.format(my_obj))
             for name, message in my_obj.items():
                 endpoint = self.s.endpoints.get(name, None)
@@ -713,52 +714,44 @@ class Monitor(object):
                     endpoint.p_prev_states.append(
                         (endpoint.state, int(time.time())))
                     if message.get('valid', False):
-                        ret_val.update(my_obj)
-                    else:
-                        ret_val = {}
-                        break
-        elif routing_key == 'poseidon.action.ignore':
+                        return (my_obj, None)
+                    break
+            return ({}, None)
+
+        def handler_action_ignore(my_obj):
             for name in my_obj:
                 endpoint = self.s.endpoints.get(name, None)
                 if endpoint:
                     endpoint.ignore = True
-        elif routing_key == 'poseidon.action.clear.ignored':
+            return ({}, None)
+
+        def handler_action_clear_ignored(my_obj):
             for name in my_obj:
                 endpoint = self.s.endpoints.get(name, None)
                 if endpoint:
                     endpoint.ignore = False
-        elif routing_key == 'poseidon.action.change':
+            return ({}, None)
+
+        def handler_action_change(my_obj):
             for name, state in my_obj:
                 endpoint = self.s.endpoints.get(name, None)
                 if endpoint:
                     try:
-                        if state != 'mirror' and state != 'reinvestigate' and (endpoint.state == 'mirroring' or endpoint.state == 'reinvestigating'):
-                            status = Actions(
-                                endpoint, self.s.sdnc).unmirror_endpoint()
-                            if not status:
-                                self.logger.warning(
-                                    'Unable to unmirror the endpoint: {0}'.format(endpoint.name))
+                        if (state != 'mirror' and state != 'reinvestigate' and
+                                (endpoint.state == 'mirroring' or endpoint.state == 'reinvestigating')):
+                            self.s.unmirror_endpoint(endpoint)
                         endpoint.trigger(state)
                         endpoint.p_next_state = None
                         endpoint.p_prev_states.append(
                             (endpoint.state, int(time.time())))
                         if endpoint.state == 'mirroring' or endpoint.state == 'reinvestigating':
-                            status = Actions(
-                                endpoint, self.s.sdnc).mirror_endpoint()
-                            if status:
-                                try:
-                                    self.s.r.hincrby(
-                                        'vent_plugin_counts', 'ncapture')
-                                except Exception as e:  # pragma: no cover
-                                    self.logger.error(
-                                        'Failed to update count of plugins because: {0}'.format(str(e)))
-                            else:
-                                self.logger.warning(
-                                    'Unable to mirror the endpoint: {0}'.format(endpoint.name))
+                            self.s.mirror_endpoint(endpoint)
                     except Exception as e:  # pragma: no cover
                         self.logger.error(
                             'Unable to change endpoint {0} because: {1}'.format(endpoint.name, str(e)))
-        elif routing_key == 'poseidon.action.update_acls':
+            return ({}, None)
+
+        def handler_action_update_acls(my_obj):
             for ip in my_obj:
                 rules = my_obj[ip]
                 endpoints = self.s.endpoints_by_ip(ip)
@@ -766,28 +759,159 @@ class Monitor(object):
                     endpoint = endpoints[0]
                     try:
                         status = Actions(
-                            endpoint, self.s.sdnc).update_acls(rules_file=self.controller['RULES_FILE'], endpoints=endpoints, force_apply_rules=rules)
+                            endpoint, self.s.sdnc).update_acls(
+                                rules_file=self.controller['RULES_FILE'], endpoints=endpoints, force_apply_rules=rules)
                         if not status:
                             self.logger.warning(
                                 'Unable to apply rules: {0} to endpoint: {1}'.format(rules, endpoint.name))
                     except Exception as e:
                         self.logger.error(
                                 'Unable to apply rules: {0} to endpoint: {1} because {2}'.format(rules, endpoint.name, str(e)))
-        elif routing_key == 'poseidon.action.remove':
+            return ({}, None)
+
+        def handler_action_remove(my_obj):
             remove_list = [name for name in my_obj]
-        elif routing_key == 'poseidon.action.remove.ignored':
+            return ({}, remove_list)
+
+        def handler_action_remove_ignored(_my_obj):
             remove_list = [
-                endpoint.name for endpoint in self.s.endpoints.values() if endpoint.ignore]
-        elif routing_key == 'poseidon.action.remove.inactives':
-            remove_list = [endpoint.name for endpoint in self.s.endpoints.values(
-            ) if endpoint.state == 'inactive']
-        elif routing_key == self.controller['FA_RABBIT_ROUTING_KEY']:
+                endpoint.name for endpoint in self.s.endpoints.values()
+                if endpoint.ignore]
+            return ({}, remove_list)
+
+        def handler_action_remove_inactives(_my_obj):
+            remove_list = [
+                endpoint.name for endpoint in self.s.endpoints.values()
+                if endpoint.state == 'inactive']
+            return ({}, remove_list)
+
+        def handler_faucet_event(my_obj):
             self.logger.debug('FAUCET Event:{0}'.format(my_obj))
-            ret_val.update(my_obj)
-        for endpoint_name in remove_list:
-            if endpoint_name in self.s.endpoints:
-                del self.s.endpoints[endpoint_name]
-        return ret_val
+            self.faucet_event.append(my_obj)
+            return (my_obj, None)
+
+        handlers = {
+            'poseidon.algos.decider': handler_algos_decider,
+            'poseidon.action.ignore': handler_action_ignore,
+            'poseidon.action.clear.ignored': handler_action_clear_ignored,
+            'poseidon.action.change': handler_action_change,
+            'poseidon.action.update_acls': handler_action_update_acls,
+            'poseidon.action.remove': handler_action_remove,
+            'poseidon.action.remove.ignored': handler_action_remove_ignored,
+            'poseidon.action.remove.inactives': handler_action_remove_inactives,
+            self.controller['FA_RABBIT_ROUTING_KEY']: handler_faucet_event,
+        }
+
+        handler = handlers.get(routing_key, None)
+        if handler is None:
+            self.logger.error('no handler for routing_key {0}'.format(routing_key))
+        else:
+            ret_val, remove_list = handler(my_obj)
+            self.update_routing_key_time(routing_key)
+            if remove_list:
+                for endpoint_name in remove_list:
+                    if endpoint_name in self.s.endpoints:
+                        del self.s.endpoints[endpoint_name]
+            return (ret_val, True)
+
+        return ({}, False)
+
+    def process_ml_returns(self, msg):
+        # TODO: networkml currently writes its decisions directly to redis, so this function is not used.
+        ml_returns = msg.get('data', None)
+        if ml_returns is None:
+            return
+        self.logger.info('ML results: {0}'.format(ml_returns))
+        extras = deepcopy(ml_returns)
+        # process results from ml output and update impacted endpoints
+        for ep in self.s.endpoints.values():
+            if ep.name in ml_returns:
+                del extras[ep.name]
+            if ep.name in ml_returns and 'valid' in ml_returns[ep.name] and not ep.ignore:
+                if ep.state in ['mirroring', 'reinvestigating']:
+                    self.s.unmirror_endpoint(ep)
+                if ml_returns[ep.name]['valid']:
+                    ml_decision = None
+                    if 'decisions' in ml_returns[ep.name] and 'behavior' in ml_returns[ep.name]['decisions']:
+                        ml_decision = ml_returns[ep.name]['decisions']['behavior']
+                    if ml_decision == 'normal':
+                        ep.known()
+                    else:
+                        ep.abnormal()
+                else:
+                    ep.unknown()
+                ep.p_prev_states.append(
+                    (ep.state, int(time.time())))
+        extra_machines = []
+        self.logger.debug('extra devices: {0}'.format(extras))
+        for device in extras:
+            if device['valid']:
+                extra_machine = {
+                    'mac': device['source_mac'],
+                    'segment': NO_DATA,
+                    'port': NO_DATA,
+                    'tenant': NO_DATA,
+                    'active': 0,
+                    'name': None}
+                try:
+                    source_ip = ipaddress.ip_address(
+                        device['source_ip'])
+                except ValueError:
+                    source_ip = None
+                if source_ip:
+                    extra_machine['ipv%u' %
+                                  source_ip.version] = str(source_ip)
+                extra_machines.append(extra_machine)
+        self.s.find_new_machines(extra_machines)
+
+    def schedule_mirroring(self):
+        queued_endpoints = [
+            endpoint for endpoint in self.s.endpoints.values()
+            if not endpoint.ignore and endpoint.state == 'queued' and endpoint.p_next_state != 'inactive']
+        self.s.investigations = len([
+            endpoint for endpoint in self.s.endpoints.values()
+            if endpoint.state in ['mirroring', 'reinvestigating']])
+        # mirror things in the order they got added to the queue
+        queued_endpoints = sorted(
+            queued_endpoints, key=lambda x: x.p_prev_states[-1][1])
+
+        investigation_budget = max(
+            self.controller['max_concurrent_reinvestigations'] -
+            self.s.investigations,
+            0)
+        self.logger.debug('investigations {0}, budget {1}, queued {2}'.format(
+            str(self.s.investigations), str(investigation_budget), str(len(queued_endpoints))))
+
+        for endpoint in queued_endpoints[:investigation_budget]:
+            endpoint.trigger(endpoint.p_next_state)
+            endpoint.p_next_state = None
+            endpoint.p_prev_states.append(
+                (endpoint.state, int(time.time())))
+            self.s.mirror_endpoint(endpoint)
+
+        for endpoint in self.s.endpoints.values():
+            if not endpoint.ignore:
+                if self.s.sdnc:
+                    if endpoint.state == 'unknown':
+                        endpoint.p_next_state = 'mirror'
+                        endpoint.queue()
+                        endpoint.p_prev_states.append(
+                            (endpoint.state, int(time.time())))
+                    elif endpoint.state in ['mirroring', 'reinvestigating']:
+                        cur_time = int(time.time())
+                        # timeout after 2 times the reinvestigation frequency
+                        # in case something didn't report back, put back in an
+                        # unknown state
+                        if cur_time - endpoint.p_prev_states[-1][1] > 2*self.controller['reinvestigation_frequency']:
+                            self.logger.debug(
+                                'timing out: {0} and setting to unknown'.format(endpoint.name))
+                            self.s.unmirror_endpoint(endpoint)
+                            endpoint.unknown()
+                            endpoint.p_prev_states.append(
+                                (endpoint.state, int(time.time())))
+                else:
+                    if endpoint.state != 'known':
+                        endpoint.known()
 
     def process(self):
         global CTRL_C
@@ -796,129 +920,15 @@ class Monitor(object):
             time.sleep(1)
 
             found_work, item = self.get_q_item()
-            ml_returns = {}
 
-            if found_work and item[0] == self.controller['FA_RABBIT_ROUTING_KEY']:
-                self.faucet_event.append(self.format_rabbit_message(item))
-                self.logger.debug(
-                    'Faucet event: {0}'.format(self.faucet_event))
-            elif found_work:
-                msg = self.format_rabbit_message(item)
-                if 'data' in msg:
-                    ml_returns = msg['data']
-                if ml_returns:
-                    self.logger.info(
-                        'ML results: {0}'.format(ml_returns))
-                extras = deepcopy(ml_returns)
-                # process results from ml output and update impacted endpoints
-                for ep in self.s.endpoints.values():
-                    if ep.name in ml_returns:
-                        del extras[ep.name]
-                    if ep.name in ml_returns and 'valid' in ml_returns[ep.name] and not ep.ignore:
-                        if ep.state in ['mirroring', 'reinvestigating']:
-                            status = Actions(
-                                ep, self.s.sdnc).unmirror_endpoint()
-                            if not status:
-                                self.logger.warning(
-                                    'Unable to unmirror the endpoint: {0}'.format(ep.name))
-                        if ml_returns[ep.name]['valid']:
-                            ml_decision = None
-                            if 'decisions' in ml_returns[ep.name] and 'behavior' in ml_returns[ep.name]['decisions']:
-                                ml_decision = ml_returns[ep.name]['decisions']['behavior']
-                            if ml_decision == 'normal':
-                                ep.known()
-                            else:
-                                ep.abnormal()
-                        else:
-                            ep.unknown()
-                        ep.p_prev_states.append(
-                            (ep.state, int(time.time())))
-                extra_machines = []
-                self.logger.debug('extra devices: {0}'.format(extras))
-                for device in extras:
-                    if device['valid']:
-                        extra_machine = {
-                            'mac': device['source_mac'],
-                            'segment': NO_DATA,
-                            'port': NO_DATA,
-                            'tenant': NO_DATA,
-                            'active': 0,
-                            'name': None}
-                        try:
-                            source_ip = ipaddress.ip_address(
-                                device['source_ip'])
-                        except ValueError:
-                            source_ip = None
-                        if source_ip:
-                            extra_machine['ipv%u' %
-                                          source_ip.version] = str(source_ip)
-                        extra_machines.append(extra_machine)
-                self.s.find_new_machines(extra_machines)
+            if found_work:
+                msg, msg_valid = self.format_rabbit_message(item)
+                if msg and msg_valid:
+                    self.process_ml_returns(msg)
 
-            queued_endpoints = [
-                endpoint for endpoint in self.s.endpoints.values()
-                if not endpoint.ignore and endpoint.state == 'queued' and endpoint.p_next_state != 'inactive']
-            self.s.investigations = len([
-                endpoint for endpoint in self.s.endpoints.values()
-                if endpoint.state in ['mirroring', 'reinvestigating']])
-            # mirror things in the order they got added to the queue
-            queued_endpoints = sorted(
-                queued_endpoints, key=lambda x: x.p_prev_states[-1][1])
+            self.schedule_mirroring()
 
-            investigation_budget = max(
-                self.controller['max_concurrent_reinvestigations'] -
-                self.s.investigations,
-                0)
-            self.logger.debug('investigations {0}, budget {1}, queued {2}'.format(
-                str(self.s.investigations), str(investigation_budget), str(len(queued_endpoints))))
-
-            for endpoint in queued_endpoints[:investigation_budget]:
-                endpoint.trigger(endpoint.p_next_state)
-                endpoint.p_next_state = None
-                endpoint.p_prev_states.append(
-                    (endpoint.state, int(time.time())))
-                status = Actions(
-                    endpoint, self.s.sdnc).mirror_endpoint()
-                if status:
-                    try:
-                        if self.s.r:
-                            self.s.r.hincrby('vent_plugin_counts', 'ncapture')
-                    except Exception as e:  # pragma: no cover
-                        self.logger.error(
-                            'Failed to update count of plugins because: {0}'.format(str(e)))
-                else:
-                    self.logger.warning(
-                        'Unable to mirror the endpoint: {0}'.format(endpoint.name))
-
-            for endpoint in self.s.endpoints.values():
-                if not endpoint.ignore:
-                    if self.s.sdnc:
-                        if endpoint.state == 'unknown':
-                            endpoint.p_next_state = 'mirror'
-                            endpoint.queue()
-                            endpoint.p_prev_states.append(
-                                (endpoint.state, int(time.time())))
-                        elif endpoint.state in ['mirroring', 'reinvestigating']:
-                            cur_time = int(time.time())
-                            # timeout after 2 times the reinvestigation frequency
-                            # in case something didn't report back, put back in an
-                            # unknown state
-                            if cur_time - endpoint.p_prev_states[-1][1] > 2*self.controller['reinvestigation_frequency']:
-                                self.logger.debug(
-                                    'timing out: {0} and setting to unknown'.format(endpoint.name))
-                                status = Actions(
-                                    endpoint, self.s.sdnc).unmirror_endpoint()
-                                if not status:
-                                    self.logger.warning(
-                                        'Unable to unmirror the endpoint: {0}'.format(endpoint.name))
-                                endpoint.unknown()
-                                endpoint.p_prev_states.append(
-                                    (endpoint.state, int(time.time())))
-                    else:
-                        if endpoint.state != 'known':
-                            endpoint.known()
         self.s.store_endpoints()
-        return
 
     def get_q_item(self):
         '''
@@ -955,7 +965,7 @@ class Monitor(object):
         self.logger.debug('EXITING')
         sys.exit()
 
-    def signal_handler(self, signal, frame):
+    def signal_handler(self, _signal, _frame):
         ''' hopefully eat a CTRL_C and signal system shutdown '''
         global CTRL_C
         CTRL_C['STOP'] = True
