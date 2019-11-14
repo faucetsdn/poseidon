@@ -237,6 +237,7 @@ class SDNConnect:
                                     metadata = {}
                                     ml_info = self.r.hgetall(
                                         mac.decode('ascii')+'_'+str(timestamp))
+                                    self.logger.info(str(ml_info))
                                     for ml_field, ml_field_default in (
                                             (b'labels', []),
                                             (b'confidences', []),
