@@ -213,6 +213,36 @@ class SDNConnect:
                     self.logger.error(
                         'Unable to get existing endpoints from Redis because {0}'.format(str(e)))
 
+    def parse_metadata(self, mac_info, ml_info):
+        metadata = {}
+        tmp = {}
+        if mac_info[b'poseidon_hash'] in ml_info:
+            tmp = ast.literal_eval(
+                ml_info[mac_info[b'poseidon_hash']].decode('ascii'))
+        elif mac_info[b'poseidon_hash'].decode('ascii') in ml_info:
+            tmp = ast.literal_eval(
+                ml_info[mac_info[b'poseidon_hash'].decode('ascii')].decode('ascii'))
+        for ml_field, ml_field_default in (
+                (b'labels', []),
+                (b'confidences', [])):
+            if ml_field in ml_info:
+                content = ast.literal_eval(ml_info[ml_field].decode('ascii'))
+            else:
+                content = ml_field_default
+            metadata[ml_field.decode('ascii')] = content
+        behavior = 'None'
+        pcap_labels = 'None'
+        if 'decisions' in tmp:
+            decisions = tmp['decisions']
+            if 'behavior' in decisions:
+                behavior = decisions['behavior']
+        if 'pcap_labels' in tmp:
+            pcap_labels = tmp['pcap_labels']
+        metadata.update({
+            'behavior': behavior,
+            'pcap_labels': pcap_labels})
+        return metadata
+
     def get_stored_metadata(self, hash_id):
         mac_addresses = {}
         ip_addresses = {ip_field: {} for ip_field in MACHINE_IP_FIELDS}
@@ -234,31 +264,9 @@ class SDNConnect:
                                 timestamps = ast.literal_eval(
                                     mac_info[b'timestamps'].decode('ascii'))
                                 for timestamp in timestamps:
-                                    metadata = {}
                                     ml_info = self.r.hgetall(
                                         mac.decode('ascii')+'_'+str(timestamp))
-                                    self.logger.info(str(ml_info))
-                                    for ml_field, ml_field_default in (
-                                            (b'labels', []),
-                                            (b'confidences', []),
-                                            (b'pcap_labels', 'None')):
-                                        if ml_field in ml_info:
-                                            content = ast.literal_eval(ml_info[ml_field].decode('ascii'))
-                                        else:
-                                            content = ml_field_default
-                                        metadata[ml_field.decode('ascii')] = content
-                                    behavior = 'None'
-                                    tmp = []
-                                    if mac_info[b'poseidon_hash'] in ml_info:
-                                        tmp = ast.literal_eval(
-                                            ml_info[mac_info[b'poseidon_hash']].decode('ascii'))
-                                    elif mac_info[b'poseidon_hash'].decode('ascii') in ml_info:
-                                        tmp = ast.literal_eval(
-                                            ml_info[mac_info[b'poseidon_hash'].decode('ascii')].decode('ascii'))
-                                    if 'decisions' in tmp:
-                                        if 'behavior' in tmp['decisions']:
-                                            behavior = tmp['decisions']['behavior']
-                                    metadata['behavior'] = behavior
+                                    metadata = self.parse_metadata(mac_info, ml_info)
                                     mac_addresses[mac.decode('ascii')][str(timestamp)] = metadata
                             except Exception as e:  # pragma: no cover
                                 self.logger.error(
