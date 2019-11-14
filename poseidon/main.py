@@ -242,10 +242,10 @@ class SDNConnect:
                                             (b'confidences', []),
                                             (b'pcap_labels', 'None')):
                                         if ml_field in ml_info:
-                                            content = ast.literal_eval(ml_info[ml_field]).decode('ascii')
+                                            content = ast.literal_eval(ml_info[ml_field].decode('ascii'))
                                         else:
                                             content = ml_field_default
-                                        metadata[ml_field] = content
+                                        metadata[ml_field.decode('ascii')] = content
                                     behavior = 'None'
                                     tmp = []
                                     if mac_info[b'poseidon_hash'] in ml_info:
