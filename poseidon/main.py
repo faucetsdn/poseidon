@@ -245,7 +245,7 @@ class SDNConnect:
                                             content = ast.literal_eval(ml_info[ml_field].decode('ascii'))
                                         else:
                                             content = ml_field_default
-                                        metadata[str(ml_field)] = content
+                                        metadata[ml_field.decode('ascii')] = content
                                     behavior = 'None'
                                     tmp = []
                                     if mac_info[b'poseidon_hash'] in ml_info:
