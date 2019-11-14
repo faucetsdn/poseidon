@@ -1,4 +1,4 @@
-0#!/usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 The main entrypoint for Poseidon, schedules the threads, connects to SDN
@@ -568,7 +568,8 @@ class SDNConnect:
         self.store_endpoints()
         self.get_stored_endpoints()
 
-    def update_history(self, endpoint, mac_addresses, ipv4_addresses, ipv6_addresses):
+    @staticmethod
+    def update_history(endpoint, mac_addresses, ipv4_addresses, ipv6_addresses):
         #list of fields to make history entries for, along with entry type for that field
         fields = [
             {'field_name': 'behavior', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
@@ -577,7 +578,7 @@ class SDNConnect:
         ]
         #make history entries for any changed prop
         prior = None
-        for timestamp, record in mac_addresses.items():
+        for record in mac_addresses.values():
             for field in fields:
                 if field['field_name'] in record and prior and field['field_name'] in prior and \
                    prior[field['field_name']] != record[field['field_name']]:
@@ -585,9 +586,9 @@ class SDNConnect:
                         record[field['field_name']])
                 prior = record
 
-        # TODO: history for IP address changes isn't accumulated yet.
+        # TODO: history for IP address changes isn't accumulated yet (see get_stored_metadata()).
         prior = None
-        for timestamp, record in ipv4_addresses.items():
+        for record in ipv4_addresses.values():
             for field in fields:
                 if field['field_name'] in record and prior and field['field_name'] in prior and \
                    prior[field['field_name']] != record[field['field_name']]:
@@ -596,7 +597,7 @@ class SDNConnect:
                 prior = record
 
         prior = None
-        for timestamp, record in ipv6_addresses.items():
+        for record in ipv6_addresses.values():
             for field in fields:
                 if field['field_name'] in record and prior and field['field_name'] in prior and \
                    prior[field['field_name']] != record[field['field_name']]:
