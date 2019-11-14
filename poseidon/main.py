@@ -207,7 +207,7 @@ class SDNConnect:
                         p_endpoints = ast.literal_eval(p_endpoints.decode('ascii'))
                         for p_endpoint in p_endpoints:
                             endpoint = EndpointDecoder(p_endpoint).get_endpoint()
-                            endpoints[endpoint.name] = endpoint
+                            new_endpoints[endpoint.name] = endpoint
                         self.endpoints = new_endpoints
                 except Exception as e:  # pragma: no cover
                     self.logger.error(
