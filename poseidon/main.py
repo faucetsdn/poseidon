@@ -242,7 +242,7 @@ class SDNConnect:
                                             (b'confidences', []),
                                             (b'pcap_labels', 'None')):
                                         if ml_field in ml_info:
-                                            content = ast.literal_eval(ml_info[ml_field]).decode('ascii')
+                                            content = ast.literal_eval(ml_info[ml_field].decode('ascii'))
                                         else:
                                             content = ml_field_default
                                         metadata[ml_field] = content
