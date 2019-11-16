@@ -463,6 +463,23 @@ def test_merge_machine():
     assert new_machine['ipv6'] == new_machine['ipv6']
 
 
+def test_parse_metadata():
+    controller = Config().get_config()
+    s = SDNConnect(controller)
+    mac_info = {
+        b'poseidon_hash': 'myhash',
+    }
+    ml_info = {
+        b'labels': b'["foo", "bar"]',
+        b'confidences': b'[1.0, 2.0]',
+        'myhash': b'{"pcap_labels": "mylabels", "decisions": {"behavior": "definitely"}}',
+    }
+    assert s.parse_metadata(mac_info, ml_info) == {
+        'behavior': 'None', 'confidences': [1.0, 2.0],
+        'labels': ['foo', 'bar'], 'pcap_labels': 'mylabels',
+        'behavior': 'definitely'}
+
+
 def test_schedule_thread_worker():
     from threading import Thread
 
