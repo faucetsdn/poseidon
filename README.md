@@ -24,6 +24,7 @@ Poseidon began as a joint effort between two of the IQT Labs: [Cyber Reboot](htt
       - [Interface Group](#interface-group)
     - [Faucet Configuration](#faucet-configuration)
 - [Usage](#usage)
+- [Troubleshooting](#troubleshooting)
 - [Related Components](#related-components)
 - [Additional Info](#additional-info)
 
@@ -221,6 +222,84 @@ Jul 25 15:42:20 PoseidonHost poseidon[4273]: Poseidon successfully started, capt
 ```
 
 To continue to test (assuming demo installation), please see `/opt/poseidon/docs/demo.txt`, also referenced in the repo above.
+
+## Troubleshooting
+
+Poseidon by its nature depends on other systems. Following are some common issues and troubleshooting steps.
+
+### Poseidon doesn't start (cannot access Poseidon CLI after a long time).
+
+* Check that vent can use git successfully to checkout the files it needs.
+
+There should be no git checkout errors. If there are, check network connectivity to github, and that */opt/poseidon/.vent_startup.yml* is correct (if you have customized it for developtment).
+
+# docker ps |grep /vent:
+4fe3bb1853f0        cyberreboot/vent:v0.9.15                "/bin/sh -c '(flask …"   14 minutes ago      Up 14 minutes (healthy)                                                                                                  vent
+# docker exec -ti 4fe3bb1853f0 /bin/sh
+/ # tail /root/.vent/vent.log
+2019-11-16 23:49:27,863 - watch:467  - INFO - Attaching to network: "vent" with the following links: [('cyberreboot-vent-redis-v0.9.15', 'redis'), ('cyberreboot-vent-rabbitmq-v0.9.15', 'rabbit')]
+2019-11-16 23:49:27,874 - watch:469  - INFO - Detaching from network: bridge
+2019-11-16 23:49:28,186 - watch:467  - INFO - Attaching to network: "vent" with the following links: [('cyberreboot-vent-redis-v0.9.15', 'redis'), ('cyberreboot-vent-rabbitmq-v0.9.15', 'rabbit')]
+2019-11-16 23:49:28,200 - watch:469  - INFO - Detaching from network: bridge
+2019-11-16 23:49:30,527 - watch:488  - INFO - (True, ['cyberreboot/vent-plugins-p0f:master', 'cyberreboot/networkml:master'])
+2019-11-16 23:49:31,143 - watch:488  - INFO - (True, ['cyberreboot/vent-plugins-p0f:master', 'cyberreboot/networkml:master'])
+2019-11-16 23:49:33,618 - watch:488  - INFO - (True, ['cyberreboot/vent-plugins-p0f:master', 'cyberreboot/networkml:master'])
+2019-11-16 23:49:40,191 - watch:467  - INFO - Attaching to network: "vent" with the following links: [('cyberreboot-vent-redis-v0.9.15', 'redis'), ('cyberreboot-vent-rabbitmq-v0.9.15', 'rabbit')]
+2019-11-16 23:49:40,735 - watch:469  - INFO - Detaching from network: bridge
+2019-11-16 23:49:48,008 - watch:488  - INFO - (True, ['cyberreboot/vent-plugins-p0f:master', 'cyberreboot/networkml:master'])
+/ # grep git /root/.vent/vent.log
+/ #
+```
+
+### Poseidon doesn't detect any hosts.
+
+The most common cause of this problem, with the FAUCET controller, is RabbitMQ connectivity.
+
+* Check that the RabbitMQ event adapter (faucet/event-adapter-rabbitmq) is running and not restarting.
+
+```
+# docker ps|grep faucet/event-adapter-rabbitmq
+4a7509829be0        faucet/event-adapter-rabbitmq           "/usr/local/bin/entr…"   3 days ago          Up 3 days 
+```
+
+* Check that FAUCET.Event messages are being received by Poseidon.
+
+This command reports the time that the most recent FAUCET.Event message was received by Posiedon.
+
+If run repeatedly over a couple of minutes this timestamp should increase.
+
+```
+# wget -q -O- localhost:9304|grep -E ^last_rabbitmq_routing_key_time.+FAUCET.Event
+last_rabbitmq_routing_key_time{routing_key="FAUCET.Event"} 1.5739482267393966e+09
+# wget -q -O- localhost:9304|grep -E ^last_rabbitmq_routing_key_time.+FAUCET.Event
+last_rabbitmq_routing_key_time{routing_key="FAUCET.Event"} 1.5739487978768678e+09
+```
+
+### Poseidon doesn't report any host roles.
+
+* Check that the mirror interface is up and receiving packets. The interface must be up before Posiedon starts.
+
+```
+# ifconfig enx0023559c2781
+enx0023559c2781: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet6 fe80::223:55ff:fe9c:2781  prefixlen 64  scopeid 0x20<link>
+        ether 00:23:55:9c:27:81  txqueuelen 1000  (Ethernet)
+        RX packets 82979981  bytes 77510139268 (77.5 GB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 202  bytes 15932 (15.9 KB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+```
+
+* Check that there is disk space available and pcaps are being accumulated in */opt/vent_files*
+
+```
+# find /opt/vent_files -type f -name \*pcap |head -5
+/opt/vent_files/trace_d3f3217106acd75fe7b5c7069a84a227c9e48377_2019-11-15_03_10_41.pcap
+/opt/vent_files/tcprewrite-dot1q-2019-11-15-06_26_48.529473-UTC/pcap-node-splitter-2019-11-15-06_26_50.192570-UTC/clients/trace_0a6ce9490c193b65c3cad51fffbadeaed4ed5fdd_2019-11-15_06_11_24-client-ip-216-58-196-147-192-168-254-254-216-58-196-147-vssmonitoring-frame-eth-ip-icmp.pcap
+/opt/vent_files/tcprewrite-dot1q-2019-11-15-06_26_48.529473-UTC/pcap-node-splitter-2019-11-15-06_26_50.192570-UTC/clients/trace_0a6ce9490c193b65c3cad51fffbadeaed4ed5fdd_2019-11-15_06_11_24-miscellaneous-192-168-254-1-192-168-254-254-vssmonitoring-frame-eth-arp.pcap
+/opt/vent_files/tcprewrite-dot1q-2019-11-15-06_26_48.529473-UTC/pcap-node-splitter-2019-11-15-06_26_50.192570-UTC/clients/trace_0a6ce9490c193b65c3cad51fffbadeaed4ed5fdd_2019-11-15_06_11_24-client-ip-192-168-254-254-192-168-254-254-74-125-200-189-udp-frame-eth-ip-wsshort-port-443.pcap
+/opt/vent_files/tcprewrite-dot1q-2019-11-15-06_26_48.529473-UTC/pcap-node-splitter-2019-11-15-06_26_50.192570-UTC/servers/trace_0a6ce9490c193b65c3cad51fffbadeaed4ed5fdd_2019-11-15_06_11_24-server-ip-74-125-68-188-192-168-254-254-74-125-68-188-frame-eth-ip-tcp-port-5228.pcap
+```
 
 
 ## Developing
