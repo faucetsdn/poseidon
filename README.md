@@ -233,6 +233,7 @@ Poseidon by its nature depends on other systems. Following are some common issue
 
 There should be no git checkout errors. If there are, check network connectivity to github, and that */opt/poseidon/.vent_startup.yml* is correct (if you have customized it for developtment).
 
+```
 # docker ps |grep /vent:
 4fe3bb1853f0        cyberreboot/vent:v0.9.15                "/bin/sh -c '(flask …"   14 minutes ago      Up 14 minutes (healthy)                                                                                                  vent
 # docker exec -ti 4fe3bb1853f0 /bin/sh
