@@ -225,18 +225,16 @@ To continue to test (assuming demo installation), please see `/opt/poseidon/docs
 
 ## Troubleshooting
 
-Poseidon by its nature depends on other systems. Following are some common issues and troubleshooting steps.
+Poseidon by its nature depends on other systems. The following are some common issues and troubleshooting steps.
 
 ### Poseidon doesn't start (cannot access Poseidon CLI after a long time).
 
 * Check that vent can use git successfully to checkout the files it needs.
 
-There should be no git checkout errors. If there are, check network connectivity to github, and that */opt/poseidon/.vent_startup.yml* is correct (if you have customized it for developtment).
+There should be no git checkout errors. If there are, check network connectivity to github, and that */opt/poseidon/.vent_startup.yml* is correct (if you have customized it for development).
 
 ```
-# docker ps |grep /vent:
-4fe3bb1853f0        cyberreboot/vent:v0.9.15                "/bin/sh -c '(flask …"   14 minutes ago      Up 14 minutes (healthy)                                                                                                  vent
-# docker exec -ti 4fe3bb1853f0 /bin/sh
+# docker exec -ti vent /bin/sh
 / # tail /root/.vent/vent.log
 2019-11-16 23:49:27,863 - watch:467  - INFO - Attaching to network: "vent" with the following links: [('cyberreboot-vent-redis-v0.9.15', 'redis'), ('cyberreboot-vent-rabbitmq-v0.9.15', 'rabbit')]
 2019-11-16 23:49:27,874 - watch:469  - INFO - Detaching from network: bridge
@@ -260,7 +258,7 @@ The most common cause of this problem, with the FAUCET controller, is RabbitMQ c
 
 ```
 # docker ps|grep faucet/event-adapter-rabbitmq
-4a7509829be0        faucet/event-adapter-rabbitmq           "/usr/local/bin/entr…"   3 days ago          Up 3 days 
+4a7509829be0        faucet/event-adapter-rabbitmq           "/usr/local/bin/entr…"   3 days ago          Up 3 days
 ```
 
 * Check that FAUCET.Event messages are being received by Poseidon.
