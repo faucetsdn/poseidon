@@ -25,6 +25,7 @@ Poseidon began as a joint effort between two of the IQT Labs: [Cyber Reboot](htt
     - [Faucet Configuration](#faucet-configuration)
 - [Usage](#usage)
 - [Troubleshooting](#troubleshooting)
+- [Network Data Logging](#logging)
 - [Related Components](#related-components)
 - [Additional Info](#additional-info)
 
@@ -159,7 +160,7 @@ NEW: If you have used the .DEB installer previously, it is worth noting that Pos
 After installation you'll have a new command `poseidon` available for looking at the status, logs, changing the configuration, or stopping and starting the service.
 ```
 $ poseidon help
-Poseidon 0.7.8, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of machine learning techniques. For more info visit: https://github.com/CyberReboot/poseidon
+Poseidon 0.7.9, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of machine learning techniques. For more info visit: https://github.com/CyberReboot/poseidon
 
 Usage: poseidon [option]
 Options:
@@ -317,6 +318,18 @@ cd poseidon
 make build_debian
 sudo dpkg -i dist/poseidon*.deb
 ```
+
+## Network Data Logging
+
+Poseidon logs some data about the network it monitors. Therefore it is important to secure Poseidon's own host (aside from logging, Poseidon can of course change FAUCET's network configuration).
+
+There are two main types of logging at the lowest level. The first is FAUCET events - FAUCET generates an event when it learns on which port a host is present on the network, and the event includes source and destination Ethernet MAC and IP addresses (if present). For example:
+
+```
+2019-11-21 20:18:41,909 [DEBUG] faucet - got faucet message for l2_learn: {'version': 1, 'time': 1574367516.3555572, 'dp_id': 1, 'dp_name': 'x930', 'event_id': 172760, 'L2_LEARN': {'port_no': 22, 'previous_port_no': None, 'vid': 254, 'eth_src': '0e:00:00:00:00:99', 'eth_dst': '0e:00:00:00:00:01', 'eth_type': 2048, 'l3_src_ip': '192.168.254.3', 'l3_dst_ip': '192.168.254.254'}}
+```
+
+The second type of logging is host based pcap captures, with most of the application (L4) payload removed. Poseidon causes vent's `vent-ncapture` component (https://github.com/CyberReboot/vent/tree/master/vent/extras/network_tap/ncapture) to capture traffic, which is logged in `/opt/vent_files`. These are used in turn to learn host roles, etc.
 
 
 ## Related Components
