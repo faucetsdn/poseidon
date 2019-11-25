@@ -1,6 +1,6 @@
 falcon==2.0.0
 falcon-cors==1.1.7
 gevent==1.4.0
-gunicorn==20.0.2
+gunicorn==20.0.3
 natural==0.2.0
 redis==3.3.11
