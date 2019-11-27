@@ -160,7 +160,8 @@ def test_update_history():
     s = SDNConnect(controller)
     s.endpoints[endpoint.name] = endpoint
     metadata = {123: {'behavior': 'normal'}}
-    s.update_history(endpoint, {'00:00:00:00:00:00': metadata}, {'0.0.0.0': metadata}, {'1212::1': metadata})
+    s.update_history(endpoint, {'00:00:00:00:00:00': metadata}, {
+                     '0.0.0.0': metadata}, {'1212::1': metadata})
 
 
 def test_format_rabbit_message():
@@ -228,7 +229,7 @@ def test_format_rabbit_message():
     assert retval == {}
     assert msg_valid
 
-    ip_data = dict({'10.0.0.1':['rule1']})
+    ip_data = dict({'10.0.0.1': ['rule1']})
     message = ('poseidon.action.update_acls', json.dumps(ip_data))
     retval, msg_valid = mockMonitor.format_rabbit_message(message)
     assert retval == {}
@@ -456,8 +457,10 @@ def test_show_endpoints():
 def test_merge_machine():
     controller = Config().get_config()
     s = SDNConnect(controller)
-    old_machine = {'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv6': '1212::1'}
-    new_machine = {'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '', 'ipv6': ''}
+    old_machine = {'tenant': 'foo', 'mac': '00:00:00:00:00:00',
+                   'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv6': '1212::1'}
+    new_machine = {'tenant': 'foo', 'mac': '00:00:00:00:00:00',
+                   'segment': 'foo', 'port': '1', 'ipv4': '', 'ipv6': ''}
     s.merge_machine_ip(old_machine, new_machine)
     assert old_machine['ipv4'] == new_machine['ipv4']
     assert new_machine['ipv6'] == new_machine['ipv6']

@@ -5,7 +5,7 @@
 - Added extra protocol label field to CLI
 - Fixed missing event data for ACL history
 - Added more tests
- 
+
 # v0.7.8 (2019-11-08)
 
 - Fix bug where jq wasn't already on the system installing the deb

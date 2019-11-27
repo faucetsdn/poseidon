@@ -392,7 +392,8 @@ class Parser():
         if ipv6_only or ipv4_and_ipv6:
             ip_fields_filter.add(IPV6_FIELD)
         for field in fields:
-            ip_fields = {ip_field for ip_field in IP_FIELDS if ip_field in field.lower()}
+            ip_fields = {
+                ip_field for ip_field in IP_FIELDS if ip_field in field.lower()}
             if ip_fields and not ip_fields.issubset(ip_fields_filter):
                 continue
             filtered_fields.append(field)
@@ -400,7 +401,8 @@ class Parser():
 
     def display_results(self, endpoints, fields, sort_by=0, max_width=0, unique=False, nonzero=False, output_format='table', ipv4_only=True, ipv6_only=False, ipv4_and_ipv6=False):
         matrix = []
-        fields = self.display_ip_filter(fields, ipv4_only, ipv6_only, ipv4_and_ipv6)
+        fields = self.display_ip_filter(
+            fields, ipv4_only, ipv6_only, ipv4_and_ipv6)
         fields_lookup = {'id': (GetData._get_name, 0),
                          'mac': (GetData._get_mac, 1),
                          'mac address': (GetData._get_mac, 1),
@@ -482,7 +484,8 @@ class Parser():
                 record = []
                 for field in fields:
                     if field.lower() in fields_lookup:
-                        record.append(fields_lookup[field.lower()][0](endpoint))
+                        record.append(
+                            fields_lookup[field.lower()][0](endpoint))
                         records.append(record)
                 matrix.append(record)
         results = ''

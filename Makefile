@@ -34,7 +34,7 @@ build_debian:
 	cp -R bin/* installers/debian/$(TAG)-$(VERSION)/usr/bin/
 	docker pull cyberreboot/vent:v0.10.0
 	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-vent.tar cyberreboot/vent:v0.10.0
-	
+
 	docker pull cyberreboot/vent-file-drop:v0.10.0
 	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-vent-file-drop.tar cyberreboot/vent-file-drop:v0.10.0
 	docker pull cyberreboot/vent-network-tap:v0.10.0
@@ -63,7 +63,7 @@ build_debian:
 	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-crviz.tar cyberreboot/crviz:v0.3.16
 	docker pull cyberreboot/networkml:v0.4.2
 	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-networkml.tar cyberreboot/networkml:v0.4.2
-	
+
 	mkdir -p dist
 	rm -rf dist/*
 	docker build -t poseidon-dpkg -f Dockerfile.dpkg .
@@ -92,7 +92,7 @@ build_debian_net:
 	cp -R bin/* installers/debian/$(TAG)-$(VERSION)/usr/bin/
 	docker pull cyberreboot/vent:v0.10.0
 	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-vent.tar cyberreboot/vent:v0.10.0
-	
+
 	mkdir -p dist
 	docker build -t poseidon-dpkg --build-arg PKG_NAME=poseidon-net -f Dockerfile.dpkg .
 	docker run --rm poseidon-dpkg > dist/$(TAG)-$(VERSION)-net.deb

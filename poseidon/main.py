@@ -32,9 +32,12 @@ from poseidon.controllers.faucet.faucet import FaucetProxy
 from poseidon.controllers.faucet.parser import Parser
 from poseidon.helpers.actions import Actions
 from poseidon.helpers.config import Config
-from poseidon.helpers.endpoint import Endpoint, EndpointDecoder, endpoint_factory
-from poseidon.helpers.endpoint import MACHINE_IP_FIELDS, MACHINE_IP_PREFIXES
+from poseidon.helpers.endpoint import Endpoint
+from poseidon.helpers.endpoint import endpoint_factory
+from poseidon.helpers.endpoint import EndpointDecoder
 from poseidon.helpers.endpoint import HistoryTypes
+from poseidon.helpers.endpoint import MACHINE_IP_FIELDS
+from poseidon.helpers.endpoint import MACHINE_IP_PREFIXES
 from poseidon.helpers.log import Logger
 from poseidon.helpers.metadata import get_ether_vendor
 from poseidon.helpers.metadata import get_rdns_lookup
@@ -204,9 +207,11 @@ class SDNConnect:
                     p_endpoints = self.r.get('p_endpoints')
                     if p_endpoints:
                         new_endpoints = {}
-                        p_endpoints = ast.literal_eval(p_endpoints.decode('ascii'))
+                        p_endpoints = ast.literal_eval(
+                            p_endpoints.decode('ascii'))
                         for p_endpoint in p_endpoints:
-                            endpoint = EndpointDecoder(p_endpoint).get_endpoint()
+                            endpoint = EndpointDecoder(
+                                p_endpoint).get_endpoint()
                             new_endpoints[endpoint.name] = endpoint
                         self.endpoints = new_endpoints
                 except Exception as e:  # pragma: no cover
@@ -266,8 +271,10 @@ class SDNConnect:
                                 for timestamp in timestamps:
                                     ml_info = self.r.hgetall(
                                         mac.decode('ascii')+'_'+str(timestamp))
-                                    metadata = self.parse_metadata(mac_info, ml_info)
-                                    mac_addresses[mac.decode('ascii')][str(timestamp)] = metadata
+                                    metadata = self.parse_metadata(
+                                        mac_info, ml_info)
+                                    mac_addresses[mac.decode('ascii')][str(
+                                        timestamp)] = metadata
                             except Exception as e:  # pragma: no cover
                                 self.logger.error(
                                     'Unable to get existing ML data from Redis because: {0}'.format(str(e)))
@@ -394,12 +401,14 @@ class SDNConnect:
                     elif endpoint.state == arg:
                         endpoints.append(endpoint)
                 elif show_type in ['os', 'behavior', 'role']:
-                    mac_addresses = endpoint.metadata.get('mac_addresses', None)
+                    mac_addresses = endpoint.metadata.get(
+                        'mac_addresses', None)
                     endpoint_mac = endpoint.endpoint_data['mac']
                     if endpoint_mac and mac_addresses and endpoint_mac in mac_addresses:
                         timestamps = mac_addresses[endpoint_mac]
                         try:
-                            newest = sorted([timestamp for timestamp in timestamps])[-1]
+                            newest = sorted(
+                                [timestamp for timestamp in timestamps])[-1]
                             newest = timestamps[newest]
                         except IndexError:
                             newest = None
@@ -579,20 +588,20 @@ class SDNConnect:
 
     @staticmethod
     def update_history(endpoint, mac_addresses, ipv4_addresses, ipv6_addresses):
-        #list of fields to make history entries for, along with entry type for that field
+        # list of fields to make history entries for, along with entry type for that field
         fields = [
-            {'field_name': 'behavior', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
-            {'field_name': 'ipv4_OS', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
-            {'field_name': 'ipv6_OS', 'entry_type':HistoryTypes.PROPERTY_CHANGE},
+            {'field_name': 'behavior', 'entry_type': HistoryTypes.PROPERTY_CHANGE},
+            {'field_name': 'ipv4_OS', 'entry_type': HistoryTypes.PROPERTY_CHANGE},
+            {'field_name': 'ipv6_OS', 'entry_type': HistoryTypes.PROPERTY_CHANGE},
         ]
-        #make history entries for any changed prop
+        # make history entries for any changed prop
         prior = None
         for record in mac_addresses.values():
             for field in fields:
                 if field['field_name'] in record and prior and field['field_name'] in prior and \
                    prior[field['field_name']] != record[field['field_name']]:
                     endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.mac_addresses['field_name'],
-                        record[field['field_name']])
+                                                     record[field['field_name']])
                 prior = record
 
         # TODO: history for IP address changes isn't accumulated yet (see get_stored_metadata()).
@@ -602,7 +611,7 @@ class SDNConnect:
                 if field['field_name'] in record and prior and field['field_name'] in prior and \
                    prior[field['field_name']] != record[field['field_name']]:
                     endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.ipv4_addresses['field_name'],
-                        record[field['field_name']])
+                                                     record[field['field_name']])
                 prior = record
 
         prior = None
@@ -611,11 +620,10 @@ class SDNConnect:
                 if field['field_name'] in record and prior and field['field_name'] in prior and \
                    prior[field['field_name']] != record[field['field_name']]:
                     endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.ipv6_addresses['field_name'],
-                        record[field['field_name']])
+                                                     record[field['field_name']])
                 prior = record
 
     def store_endpoints(self):
-
         ''' store current endpoints in Redis. '''
         with self.redis_lock:
             if self.r:
@@ -625,7 +633,8 @@ class SDNConnect:
                         # set metadata
                         mac_addresses, ipv4_addresses, ipv6_addresses = self.get_stored_metadata(
                             str(endpoint.name))
-                        self.update_history(endpoint, mac_addresses, ipv4_addresses, ipv6_addresses)
+                        self.update_history(
+                            endpoint, mac_addresses, ipv4_addresses, ipv6_addresses)
                         endpoint.metadata = {
                             'mac_addresses': mac_addresses,
                             'ipv4_addresses': ipv4_addresses,
@@ -642,7 +651,8 @@ class SDNConnect:
                         }
                         self.r.hmset(endpoint.name, redis_endpoint_data)
                         mac = endpoint.endpoint_data['mac']
-                        self.r.hmset(mac, {'poseidon_hash': str(endpoint.name)})
+                        self.r.hmset(
+                            mac, {'poseidon_hash': str(endpoint.name)})
                         if not self.r.sismember('mac_addresses', mac):
                             self.r.sadd('mac_addresses', mac)
                         for ip_field in MACHINE_IP_FIELDS:
@@ -655,12 +665,14 @@ class SDNConnect:
                                 self.r.hmset(
                                     str(machine_ip), {'poseidon_hash': str(endpoint.name)})
                                 if not self.r.sismember('ip_addresses', str(machine_ip)):
-                                    self.r.sadd('ip_addresses', str(machine_ip))
+                                    self.r.sadd('ip_addresses',
+                                                str(machine_ip))
                         serialized_endpoints.append(endpoint.encode())
                     self.r.set('p_endpoints', str(serialized_endpoints))
                 except Exception as e:  # pragma: no cover
                     self.logger.error(
                         'Unable to store endpoints in Redis because {0}'.format(str(e)))
+
 
 class Monitor:
 
@@ -715,7 +727,8 @@ class Monitor:
         the message should be item = (routing_key,msg)
         '''
         routing_key, my_obj = item
-        self.logger.debug('routing_key: {0} rabbit_message: {1}'.format(routing_key, my_obj))
+        self.logger.debug(
+            'routing_key: {0} rabbit_message: {1}'.format(routing_key, my_obj))
         my_obj = json.loads(my_obj)
 
         def handler_algos_decider(my_obj):
@@ -780,7 +793,7 @@ class Monitor:
                                 'Unable to apply rules: {0} to endpoint: {1}'.format(rules, endpoint.name))
                     except Exception as e:
                         self.logger.error(
-                                'Unable to apply rules: {0} to endpoint: {1} because {2}'.format(rules, endpoint.name, str(e)))
+                            'Unable to apply rules: {0} to endpoint: {1} because {2}'.format(rules, endpoint.name, str(e)))
             return ({}, None)
 
         def handler_action_remove(my_obj):
@@ -818,7 +831,8 @@ class Monitor:
 
         handler = handlers.get(routing_key, None)
         if handler is None:
-            self.logger.error('no handler for routing_key {0}'.format(routing_key))
+            self.logger.error(
+                'no handler for routing_key {0}'.format(routing_key))
         else:
             ret_val, remove_list = handler(my_obj)
             self.update_routing_key_time(routing_key)
