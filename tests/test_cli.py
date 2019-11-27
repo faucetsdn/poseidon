@@ -7,7 +7,8 @@ from poseidon.cli.cli import GetData
 from poseidon.cli.cli import Parser
 from poseidon.cli.cli import PoseidonShell
 from poseidon.constants import NO_DATA
-from poseidon.helpers.endpoint import Endpoint, endpoint_factory
+from poseidon.helpers.endpoint import Endpoint
+from poseidon.helpers.endpoint import endpoint_factory
 
 
 def test_poseidonshell():
@@ -121,8 +122,10 @@ def test_completion():
 def test_display_ip():
     parser = Parser()
     fields = ['foo', 'bar', 'IPv4', 'IPv6']
-    assert ['foo', 'bar', 'IPv4'] == parser.display_ip_filter(fields, True, False, False)
-    assert ['foo', 'bar', 'IPv6'] == parser.display_ip_filter(fields, False, True, False)
+    assert ['foo', 'bar', 'IPv4'] == parser.display_ip_filter(
+        fields, True, False, False)
+    assert ['foo', 'bar', 'IPv6'] == parser.display_ip_filter(
+        fields, False, True, False)
     assert fields == parser.display_ip_filter(fields, False, False, True)
 
 
@@ -369,6 +372,7 @@ def test_get_ipv6_os():
     ipv6_os = GetData._get_ipv6_os(endpoint)
     assert ipv6_os == 'foo'
 
+
 def test_get_pcap_labels():
     endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
@@ -380,6 +384,7 @@ def test_get_pcap_labels():
         '00:00:00:00:00:00': {'1551711125': {'pcap_labels': 'foo'}}}}
     pcap_labels = GetData._get_pcap_labels(endpoint)
     assert pcap_labels == 'foo'
+
 
 def test_get_role():
     endpoint = endpoint_factory('foo')

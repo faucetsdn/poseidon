@@ -262,7 +262,7 @@ class Parser:
                         matches = 0
                         for r in rules[rule]:
                             if('rule' in r and 'device_key' in r['rule'] and
-                                r['rule']['device_key'] == 'os'):
+                                    r['rule']['device_key'] == 'os'):
                                 match = False
                                 if 'ipv4_addresses' in endpoint.metadata:
                                     for ip in endpoint.metadata['ipv4_addresses']:
@@ -279,7 +279,7 @@ class Parser:
                                 if match:
                                     matches += 1
                             elif('rule' in r and 'device_key' in r['rule'] and
-                                r['rule']['device_key'] == 'role'):
+                                 r['rule']['device_key'] == 'role'):
                                 match = False
                                 if 'mac_addresses' in endpoint.metadata:
                                     for mac in endpoint.metadata['mac_addresses']:
@@ -304,7 +304,7 @@ class Parser:
                                 if match:
                                     matches += 1
                             elif('rule' in r and 'device_key' in r['rule'] and
-                                r['rule']['device_key'] == 'behavior'):
+                                 r['rule']['device_key'] == 'behavior'):
                                 match = False
                                 if 'mac_addresses' in endpoint.metadata:
                                     for mac in endpoint.metadata['mac_addresses']:

@@ -8,9 +8,9 @@ import falcon
 import redis
 from natural.date import duration
 
+from .constants import NO_DATA
 from .routes import paths
 from .routes import version
-from .constants import NO_DATA
 
 
 class Endpoints(object):

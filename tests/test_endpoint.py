@@ -5,8 +5,9 @@ Test module for endpoints.
 """
 import os
 
+from poseidon.helpers.endpoint import Endpoint
 from poseidon.helpers.endpoint import endpoint_factory
-from poseidon.helpers.endpoint import Endpoint, EndpointDecoder
+from poseidon.helpers.endpoint import EndpointDecoder
 
 
 def test_Endpoint():
