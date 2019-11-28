@@ -1,0 +1,84 @@
+version: '3.7'
+services:
+    redis:
+        restart: always
+        image: 'cyberreboot/vent-redis:v0.10.0'
+        volumes:
+            - '${POSEIDON_PREFIX}/opt/redis:/data'
+        networks:
+            poseidon:
+    rabbit:
+        restart: always
+        image: 'cyberreboot/vent-rabbitmq:v0.10.0'
+        ports:
+            - '127.0.0.1:15672:15672'
+            - '5672:5672'
+        networks:
+            poseidon:
+                aliases:
+                    - RABBIT_SERVER
+                    - rabbitmq
+                    - messenger
+    network_tap:
+        restart: always
+        image: 'cyberreboot/vent-network-tap:master'
+        volumes:
+            - '/var/run/docker.sock:/var/run/docker.sock'
+            - '${POSEIDON_PREFIX}/opt/vent_files:/files'
+        environment:
+            PYTHONUNBUFFERED: '0'
+        networks:
+            poseidon:
+                aliases:
+                    - vent_ip
+    crviz:
+        restart: always
+        image: 'cyberreboot/crviz:v0.3.16'
+        ports:
+            - '5001:5000'
+        networks:
+            poseidon:
+    poseidon_api:
+        restart: always
+        build:
+            context: api
+            dockerfile: Dockerfile
+        image: 'cyberreboot/poseidon-api:v0.7.9'
+        ports:
+            - '5000:8000'
+        environment:
+            PYTHONUNBUFFERED: '0'
+        networks:
+            poseidon:
+                aliases:
+                    - poseidon-api
+    poseidon:
+        restart: always
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: 'cyberreboot/poseidon:v0.7.9'
+        ports:
+            - '127.0.0.1:9304:9304'
+        environment:
+            PYTHONUNBUFFERED: '0'
+        volumes:
+            - '${POSEIDON_PREFIX}/opt/poseidon:/opt/poseidon'
+            - '${POSEIDON_PREFIX}/var/log/faucet/faucet.log:/var/log/faucet/faucet.log'
+            - '${POSEIDON_PREFIX}/etc/faucet:/etc/faucet'
+            - '${POSEIDON_PREFIX}/var/log/poseidon/poseidon.log:/var/log/poseidon/poseidon.log'
+        networks:
+            - poseidon
+    workers:
+        restart: always
+        image: 'cyberreboot/poseidon-workers:latest'
+        environment:
+            PYTHONUNBUFFERED: '0'
+        networks:
+            - poseidon
+        volumes:
+            - './workers.json:/definitions/workers.json'
+            - '/var/run/docker.sock:/var/run/docker.sock'
+
+networks:
+    poseidon:
