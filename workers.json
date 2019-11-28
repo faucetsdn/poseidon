@@ -1,0 +1,79 @@
+{
+  "workers": [
+    {
+      "image": "cyberreboot/vent-plugins-pcap-to-node-pcap",
+      "inputs": [
+        "pcap-dot1q"
+      ],
+      "labels": "",
+      "name": "pcap-splitter",
+      "outputs": [
+        "pcap"
+      ],
+      "stage": "preprocessing",
+      "version": "v0.1.6",
+      "viewableOutput": false
+    },
+    {
+      "image": "cyberreboot/vent-plugins-tcprewrite-dot1q",
+      "inputs": [
+        "pcap",
+        "pcapng"
+      ],
+      "labels": "",
+      "name": "pcap-dot1q",
+      "outputs": [
+        "pcap"
+      ],
+      "stage": "preprocessing",
+      "version": "v0.1.6",
+      "viewableOutput": false
+    },
+    {
+      "command": [
+        "-p"
+      ],
+      "contentType": "application/json",
+      "environment": {
+        "POSEIDON_PUBLIC_SESSIONS": "1",
+        "RABBIT": "True",
+        "RABBIT_EXCHANGE": "",
+        "RABBIT_HOST": "messenger",
+        "RABBIT_QUEUE": "True",
+        "RABBIT_QUEUE_NAME": "task_queue",
+        "RABBIT_ROUTING_KEY": "task_queue",
+        "REDIS": "False"
+      },
+      "image": "cyberreboot/networkml",
+      "inputs": [
+        "pcap-splitter"
+      ],
+      "labels": "",
+      "name": "networkml",
+      "outputs": [
+        "rabbitmq"
+      ],
+      "stage": "analysis",
+      "version": "v0.4.2",
+      "viewableOutput": true
+    },
+    {
+      "contentType": "application/json",
+      "environment": {
+        "redis": "false"
+      },
+      "image": "cyberreboot/vent-plugins-p0f",
+      "inputs": [
+        "pcap-splitter"
+      ],
+      "labels": "",
+      "name": "p0f",
+      "outputs": [
+        "rabbitmq"
+      ],
+      "stage": "analysis",
+      "version": "v0.1.6",
+      "viewableOutput": true
+    }
+  ]
+}
