@@ -2,7 +2,7 @@ version: '3.7'
 services:
     redis:
         restart: always
-        image: 'cyberreboot/vent-redis:v0.10.0'
+        image: 'cyberreboot/vent-redis:v0.10.1'
         volumes:
             - '${POSEIDON_PREFIX}/opt/redis:/data'
         networks:
