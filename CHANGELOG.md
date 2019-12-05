@@ -1,3 +1,7 @@
+# v0.8.0 (2019-12-05)
+
+- Updated versions of grafana, pytest, cmd2, gunicorn, pytype, pyyaml
+
 # v0.7.9 (2019-11-22)
 
 - Updated versions of urllib3, prometheus, cmd2, pylint, and pytest
