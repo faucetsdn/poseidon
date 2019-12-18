@@ -33,7 +33,7 @@ services:
                     - vent_ip
     crviz:
         restart: always
-        image: 'cyberreboot/crviz:v0.3.16'
+        image: 'cyberreboot/crviz:v0.3.17'
         ports:
             - '5001:5000'
         networks:
