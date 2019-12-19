@@ -2,14 +2,14 @@ version: '3.7'
 services:
     redis:
         restart: always
-        image: 'cyberreboot/vent-redis:v0.10.0'
+        image: 'cyberreboot/vent-redis:v0.10.1'
         volumes:
             - '${POSEIDON_PREFIX}/opt/redis:/data'
         networks:
             poseidon:
     rabbit:
         restart: always
-        image: 'cyberreboot/vent-rabbitmq:v0.10.0'
+        image: 'cyberreboot/vent-rabbitmq:v0.10.1'
         ports:
             - '127.0.0.1:15672:15672'
             - '5672:5672'
@@ -33,7 +33,7 @@ services:
                     - vent_ip
     crviz:
         restart: always
-        image: 'cyberreboot/crviz:v0.3.16'
+        image: 'cyberreboot/crviz:v0.3.17'
         ports:
             - '5001:5000'
         networks:
