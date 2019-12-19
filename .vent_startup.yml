@@ -31,31 +31,31 @@ https://github.com/cyberreboot/vent:
         start: yes
 https://github.com/cyberreboot/poseidon:
     '@':
-        branch: v0.8.0
+        branch: v0.8.1
         build: yes
         start: yes
     api:
-        branch: v0.8.0
+        branch: v0.8.1
         build: yes
         start: yes
 https://github.com/cyberreboot/vent-plugins:
     pcap_to_node_pcap:
-        branch: v0.1.6
+        branch: v0.1.7
         build: yes
     p0f:
-        branch: v0.1.6
+        branch: v0.1.7
         build: yes
     tcprewrite_dot1q:
-        branch: v0.1.6
+        branch: v0.1.7
         build: yes
 https://github.com/cyberreboot/crviz:
     '@':
-        branch: v0.3.16
+        branch: v0.3.17
         build: yes
         start: yes
 https://github.com/cyberreboot/networkml:
     '@':
-        branch: v0.4.3
+        branch: v0.4.4
         build: yes
 vent.cfg:
     build-options:

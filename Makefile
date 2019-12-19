@@ -49,20 +49,20 @@ build_debian:
 	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-vent-rq-worker.tar cyberreboot/vent-rq-worker:v0.10.1
 	docker pull cyberreboot/vent-syslog:v0.10.1
 	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-vent-syslog.tar cyberreboot/vent-syslog:v0.10.1
-	docker pull cyberreboot/poseidon:v0.8.0
-	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-poseidon.tar cyberreboot/poseidon:v0.8.0
-	docker pull cyberreboot/poseidon-api:v0.8.0
-	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-poseidon-api.tar cyberreboot/poseidon-api:v0.8.0
-	docker pull cyberreboot/vent-plugins-pcap-to-node-pcap:v0.1.6
-	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-vent-plugins-pcap-to-node-pcap.tar cyberreboot/vent-plugins-pcap-to-node-pcap:v0.1.6
-	docker pull cyberreboot/vent-plugins-p0f:v0.1.6
-	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-vent-plugins-p0f.tar cyberreboot/vent-plugins-p0f:v0.1.6
-	docker pull cyberreboot/vent-plugins-tcprewrite-dot1q:v0.1.6
-	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-vent-plugins-tcprewrite-dot1q.tar cyberreboot/vent-plugins-tcprewrite-dot1q:v0.1.6
-	docker pull cyberreboot/crviz:v0.3.16
-	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-crviz.tar cyberreboot/crviz:v0.3.16
-	docker pull cyberreboot/networkml:v0.4.3
-	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-networkml.tar cyberreboot/networkml:v0.4.3
+	docker pull cyberreboot/poseidon:v0.8.1
+	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-poseidon.tar cyberreboot/poseidon:v0.8.1
+	docker pull cyberreboot/poseidon-api:v0.8.1
+	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-poseidon-api.tar cyberreboot/poseidon-api:v0.8.1
+	docker pull cyberreboot/vent-plugins-pcap-to-node-pcap:v0.1.7
+	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-vent-plugins-pcap-to-node-pcap.tar cyberreboot/vent-plugins-pcap-to-node-pcap:v0.1.7
+	docker pull cyberreboot/vent-plugins-p0f:v0.1.7
+	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-vent-plugins-p0f.tar cyberreboot/vent-plugins-p0f:v0.1.7
+	docker pull cyberreboot/vent-plugins-tcprewrite-dot1q:v0.1.7
+	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-vent-plugins-tcprewrite-dot1q.tar cyberreboot/vent-plugins-tcprewrite-dot1q:v0.1.7
+	docker pull cyberreboot/crviz:v0.3.17
+	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-crviz.tar cyberreboot/crviz:v0.3.17
+	docker pull cyberreboot/networkml:v0.4.4
+	docker save -o installers/debian/$(TAG)-$(VERSION)/opt/poseidon/dist/cyberreboot-networkml.tar cyberreboot/networkml:v0.4.4
 
 	mkdir -p dist
 	rm -rf dist/*

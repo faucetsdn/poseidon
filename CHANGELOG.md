@@ -1,3 +1,8 @@
+# v0.8.1 (2019-12-19)
+
+- Updated versions of grafana, pytest, pytype, cmd2
+- Updated versions of NetworkML, CRviz, and vent-plugins
+
 # v0.8.0 (2019-12-05)
 
 - Updated versions of grafana, pytest, cmd2, gunicorn, pytype, pyyaml
