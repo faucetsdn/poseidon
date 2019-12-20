@@ -343,6 +343,7 @@ The second type of logging is host based pcap captures, with most of the applica
 
 - [Authors](AUTHORS)
 - Blog posts:
+  - [How to Install Poseidon and get it working with Faucet SDN](https://blog.cyberreboot.org/how-to-install-poseidon-and-get-it-working-with-faucet-sdn-c3cdeed1901f)
   - [Running Poseidon on a 100G Netowork](https://blog.cyberreboot.org/running-poseidon-on-a-100g-network-8def4dc8eecd)
   - [Using machine learning to classify devices on your network](https://blog.cyberreboot.org/using-machine-learning-to-classify-devices-on-your-network-e9bb98cbfdb6)
   - [CRviz: Initial Release](https://blog.cyberreboot.org/crviz-initial-release-45a3023e0e93)
