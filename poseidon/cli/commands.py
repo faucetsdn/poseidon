@@ -18,7 +18,7 @@ class Commands:
         self.states = ['active', 'inactive', 'known', 'unknown',
                        'mirroring', 'abnormal', 'shutdown', 'reinvestigating', 'queued']
         self.controller = Config().get_config()
-        self.sdnc = SDNConnect(self.controller)
+        self.sdnc = SDNConnect(self.controller, first_time=False)
         self.sdnc.get_stored_endpoints()
 
     def _publish_action(self, address, payload):
