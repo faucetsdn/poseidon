@@ -905,9 +905,7 @@ class Monitor:
             found_work, item = self.get_q_item()
 
             if found_work:
-                msg, msg_valid = self.format_rabbit_message(item)
-                if msg and msg_valid:
-                    self.process_ml_returns(msg)
+                self.format_rabbit_message(item)
 
             self.schedule_mirroring()
 
