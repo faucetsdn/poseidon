@@ -10,22 +10,22 @@
       "outputs": [
         "pcap"
       ],
-      "stage": "preprocessing",
+      "stage": "poseidon_poseidon",
       "version": "v0.1.6",
       "viewableOutput": false
     },
     {
       "image": "cyberreboot/vent-plugins-tcprewrite-dot1q",
       "inputs": [
-        "pcap",
-        "pcapng"
+        "ncapture",
+        "ncapture"
       ],
       "labels": "",
       "name": "pcap-dot1q",
       "outputs": [
         "pcap"
       ],
-      "stage": "preprocessing",
+      "stage": "poseidon_poseidon",
       "version": "v0.1.6",
       "viewableOutput": false
     },
@@ -53,7 +53,7 @@
       "outputs": [
         "rabbitmq"
       ],
-      "stage": "analysis",
+      "stage": "poseidon_poseidon",
       "version": "v0.4.2",
       "viewableOutput": true
     },
@@ -71,7 +71,7 @@
       "outputs": [
         "rabbitmq"
       ],
-      "stage": "analysis",
+      "stage": "poseidon_poseidon",
       "version": "v0.1.6",
       "viewableOutput": true
     }
