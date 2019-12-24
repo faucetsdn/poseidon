@@ -31,7 +31,7 @@ def test_Parser():
         obj.config(path, 'apply_acls', None, None)
         obj.config(path, 'apply_acls', 1, 't1-1', endpoints=['foo'],
                    rules_file=os.path.join(os.getcwd(),
-                                           'tests/sample_acls.yaml'))
+                                           'rules.yaml'))
         obj.config(path, 'unknown', None, None)
         obj.log(os.path.join(log_dir, 'faucet.log'))
 
