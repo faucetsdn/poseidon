@@ -245,6 +245,7 @@ def test_format_rabbit_message():
 def test_rabbit_callback():
     def mock_method(): return True
     mock_method.routing_key = 'test_routing_key'
+    mock_method.delivery_tag = 'test_delivery_tag'
 
     # force mock_method coverage
     assert mock_method()
