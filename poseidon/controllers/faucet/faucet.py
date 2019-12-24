@@ -64,7 +64,6 @@ class FaucetProxy(Connection, Parser):
             self.trunk_ports, *args, **kwargs)
         self.logger = logging.getLogger('faucet')
         self.mac_table = {}
-        Parser().clear_mirrors(self.config_file)
 
     @staticmethod
     def format_endpoints(data, controller):

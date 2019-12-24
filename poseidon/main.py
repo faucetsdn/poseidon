@@ -145,7 +145,7 @@ class SDNConnect:
         self.get_sdn_context()
         self.redis_lock = threading.Lock()
         self.connect_redis()
-        if first_time:
+        if self.first_time:
             self.endpoints = {}
             self.investigations = 0
             self.clear_filters()
