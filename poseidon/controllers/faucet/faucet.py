@@ -6,7 +6,6 @@ Created on 17 November 2017
 import ipaddress
 import json
 import logging
-import os
 
 from poseidon.controllers.faucet.connection import Connection
 from poseidon.controllers.faucet.parser import Parser
@@ -137,7 +136,7 @@ class FaucetProxy(Connection, Parser):
             else:
                 # only allow private addresses
                 if 'ip-address' in self.mac_table[mac][0] and (self.mac_table[mac][0]['ip-address'] == 'None' or
-                                                               self.mac_table[mac][0]['ip-address'] == None or
+                                                               self.mac_table[mac][0]['ip-address'] is None or
                                                                not ipaddress.ip_address(self.mac_table[mac][0]['ip-address']).is_global):
                     retval.append(self.mac_table[mac])
         return retval

@@ -10,19 +10,28 @@ from poseidon.controllers.faucet.parser import Parser
 from poseidon.helpers.config import Config
 
 
+def test_parse_rules():
+    Parser.parse_rules(os.path.join(os.getcwd(),
+                                    'tests/sample_faucet_config.yaml'))
+
+
 def test_Parser():
     """
     Tests Parser
     """
     def check_config(obj, path):
-        obj.config(path, 'mirror', 1, 'switch1')
-        obj.config(path, 'mirror', 2, 0x70b3d56cd32e)
-        obj.config(path, 'mirror', 2, 'switch1')
-        obj.config(path, 'mirror', 5, 'switch1')
+        obj.config(path, 'mirror', 1, 't1-1')
+        obj.config(path, 'mirror', 2, 0x1)
+        obj.config(path, 'mirror', 2, 't1-1')
+        obj.config(path, 'mirror', 5, 't2-1')
         obj.config(path, 'mirror', 6, 'bad')
         obj.config(path, 'unmirror', None, None)
+        obj.config(path, 'unmirror', 1, 't1-1')
         obj.config(path, 'shutdown', None, None)
         obj.config(path, 'apply_acls', None, None)
+        obj.config(path, 'apply_acls', 1, 't1-1', endpoints=['foo'],
+                   rules_file=os.path.join(os.getcwd(),
+                                           'tests/sample_acls.yaml'))
         obj.config(path, 'unknown', None, None)
         obj.log(os.path.join(log_dir, 'faucet.log'))
 

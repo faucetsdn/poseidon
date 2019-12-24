@@ -1,6 +1,10 @@
 vlans:
     office:
         vid: 100
+
+include:
+- sample_acls.yaml
+
 dps:
     t1-1:
         dp_id: 0x1

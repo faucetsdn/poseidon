@@ -220,7 +220,8 @@ class SDNConnect:
                     self.logger.error(
                         'Unable to get existing endpoints from Redis because {0}'.format(str(e)))
 
-    def parse_metadata(self, mac_info, ml_info):
+    @staticmethod
+    def parse_metadata(mac_info, ml_info):
         metadata = {}
         tmp = {}
         if mac_info[b'poseidon_hash'] in ml_info:
@@ -273,7 +274,7 @@ class SDNConnect:
                                 for timestamp in timestamps:
                                     ml_info = self.r.hgetall(
                                         mac.decode('ascii')+'_'+str(timestamp))
-                                    metadata = self.parse_metadata(
+                                    metadata = SDNConnect.parse_metadata(
                                         mac_info, ml_info)
                                     mac_addresses[mac.decode('ascii')][str(
                                         timestamp)] = metadata
@@ -524,7 +525,7 @@ class SDNConnect:
             machine['ether_vendor'] = get_ether_vendor(
                 machine['mac'], '/poseidon/poseidon/metadata/nmap-mac-prefixes.txt')
             machine.update(self._parse_machine_ip(machine))
-            if not 'controller_type' in machine:
+            if 'controller_type' not in machine:
                 machine.update({
                     'controller_type': 'none',
                     'controller': ''})
