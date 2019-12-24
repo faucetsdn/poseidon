@@ -249,6 +249,9 @@ def test_rabbit_callback():
     # force mock_method coverage
     assert mock_method()
 
+    class MockChannel:
+        def basic_ack(self, delivery_tag): return True
+
     class MockQueue:
         item = None
 
@@ -260,9 +263,10 @@ def test_rabbit_callback():
         def get_item(self):
             return self.item
 
+    mock_channel = MockChannel()
     mock_queue = MockQueue()
     rabbit_callback(
-        'Channel',
+        mock_channel,
         mock_method,
         'properties',
         'body',
@@ -270,7 +274,7 @@ def test_rabbit_callback():
     assert mock_queue.get_item() == (mock_method.routing_key, 'body')
 
     rabbit_callback(
-        'Channel',
+        mock_channel,
         mock_method,
         'properties',
         'body',
