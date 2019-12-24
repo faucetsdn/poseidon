@@ -286,7 +286,7 @@ class Parser:
                                             if float(record) > most_recent:
                                                 most_recent = float(record)
                                         most_recent = str(most_recent)
-                                        if most_recent != '0' and 'labels' in endpoint.metadata['mac_addresses'][mac][most_recent] and 'confidences' in endpoint.metadata['mac_addresses'][mac][most_recent]:
+                                        if most_recent != '0' and most_recent in endpoint.metadata['mac_addresses'][mac] and 'labels' in endpoint.metadata['mac_addresses'][mac][most_recent] and 'confidences' in endpoint.metadata['mac_addresses'][mac][most_recent]:
                                             # check top three
                                             for i in range(3):
                                                 if endpoint.metadata['mac_addresses'][mac][most_recent]['labels'][i] == r['rule']['value']:
