@@ -26,7 +26,7 @@ services:
             - '/var/run/docker.sock:/var/run/docker.sock'
             - '${POSEIDON_PREFIX}/opt/vent_files:/files'
         environment:
-            PYTHONUNBUFFERED: '0'
+            PYTHONUNBUFFERED: '1'
         networks:
             poseidon:
                 aliases:
@@ -47,7 +47,7 @@ services:
         ports:
             - '5000:8000'
         environment:
-            PYTHONUNBUFFERED: '0'
+            PYTHONUNBUFFERED: '1'
         networks:
             poseidon:
                 aliases:
@@ -59,7 +59,7 @@ services:
             context: .
             dockerfile: Dockerfile
         environment:
-            PYTHONUNBUFFERED: '0'
+            PYTHONUNBUFFERED: '1'
         volumes:
             - '${POSEIDON_PREFIX}/opt/poseidon:/opt/poseidon'
             - '${POSEIDON_PREFIX}/var/log/faucet:/var/log/faucet'
@@ -71,11 +71,12 @@ services:
         restart: always
         image: 'cyberreboot/poseidon-workers:latest'
         environment:
-            PYTHONUNBUFFERED: '0'
+            PYTHONUNBUFFERED: '1'
         networks:
             - poseidon
         volumes:
-            - './workers.json:/definitions/workers.json'
+            - './workers.json:/app/workers.json'
+            - '/definitions'
             - '/var/run/docker.sock:/var/run/docker.sock'
 
 networks:
