@@ -418,12 +418,6 @@ def test_process():
         def format_rabbit_message(self, item):
             return ({'data': {}}, False)
 
-        def store_endpoints(self):
-            return
-
-        def update_routing_key_time(self, routing_key):
-            return
-
     mock_monitor = MockMonitor()
 
     t1 = Thread(target=thread1)

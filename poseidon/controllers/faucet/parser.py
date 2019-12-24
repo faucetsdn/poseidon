@@ -249,7 +249,7 @@ class Parser:
                                 'Using named ACL: {0}, but it was not found in included ACL files, assuming ACL name exists in Faucet config'.format(acl))
 
                 for endpoint in endpoints:
-                    if 'acls_in' in obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
+                    if endpoint.endpoint_data['segment'] in obj_doc['dps'] and 'acls_in' in obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
                             endpoint.endpoint_data['port'])]:
                         existing_acls = obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
                             endpoint.endpoint_data['port'])]['acls_in']
@@ -286,7 +286,7 @@ class Parser:
                                             if float(record) > most_recent:
                                                 most_recent = float(record)
                                         most_recent = str(most_recent)
-                                        if most_recent != '0' and 'labels' in endpoint.metadata['mac_addresses'][mac][most_recent] and 'confidences' in endpoint.metadata['mac_addresses'][mac][most_recent]:
+                                        if most_recent != '0' and most_recent in endpoint.metadata['mac_addresses'][mac] and 'labels' in endpoint.metadata['mac_addresses'][mac][most_recent] and 'confidences' in endpoint.metadata['mac_addresses'][mac][most_recent]:
                                             # check top three
                                             for i in range(3):
                                                 if endpoint.metadata['mac_addresses'][mac][most_recent]['labels'][i] == r['rule']['value']:
@@ -311,7 +311,7 @@ class Parser:
                                             if float(record) > most_recent:
                                                 most_recent = float(record)
                                         most_recent = str(most_recent)
-                                        if most_recent != '0' and 'behavior' in endpoint.metadata['mac_addresses'][mac][most_recent] and endpoint.metadata['mac_addresses'][mac][most_recent]['behavior'] == r['rule']['value']:
+                                        if most_recent != '0' and most_recent in endpoint.metadata['mac_addresses'][mac] and 'behavior' in endpoint.metadata['mac_addresses'][mac][most_recent] and endpoint.metadata['mac_addresses'][mac][most_recent]['behavior'] == r['rule']['value']:
                                             self.logger.info('Behavior match: {0} {1}, rule: {2}'.format(
                                                 mac, r['rule']['value'], rule))
                                             match = True
