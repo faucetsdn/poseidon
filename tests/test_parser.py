@@ -7,6 +7,7 @@ import os
 
 from poseidon.controllers.faucet.faucet import FaucetProxy
 from poseidon.controllers.faucet.parser import Parser
+from poseidon.controllers.faucet.parser import represent_none
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import endpoint_factory
 
@@ -19,6 +20,19 @@ def test_parse_rules():
 def test_clear_mirrors():
     Parser.clear_mirrors(os.path.join(os.getcwd(),
                                       'tests/sample_faucet_config.yaml'))
+
+
+def test_represent_none():
+    class MockDumper:
+        def represent_scalar(self, foo, bar): return True
+
+    foo = MockDumper()
+    represent_none(foo, '')
+
+
+def test_get_config_file():
+    config = Parser.get_config_file(None)
+    assert config == '/etc/faucet/faucet.yaml'
 
 
 def test_Parser():
@@ -55,12 +69,16 @@ def test_Parser():
         '0.0.0.0': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
     endpoints = [endpoint]
 
-    parser = Parser()
+    parser = Parser(mirror_ports={'t1-1': 2})
+    parser2 = Parser()
     controller = Config().get_config()
     proxy = FaucetProxy(controller)
     check_config(parser, os.path.join(config_dir, 'faucet.yaml'), endpoints)
+    check_config(parser2, os.path.join(config_dir, 'faucet.yaml'), endpoints)
     check_config(proxy, os.path.join(config_dir, 'faucet.yaml'), endpoints)
     check_config(parser, os.path.join(os.getcwd(),
                                       'tests/sample_faucet_config.yaml'), endpoints)
+    check_config(parser2, os.path.join(os.getcwd(),
+                                       'tests/sample_faucet_config.yaml'), endpoints)
     check_config(proxy, os.path.join(os.getcwd(),
                                      'tests/sample_faucet_config.yaml'), endpoints)
