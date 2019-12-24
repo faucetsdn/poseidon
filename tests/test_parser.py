@@ -16,6 +16,11 @@ def test_parse_rules():
                                     'tests/sample_faucet_config.yaml'))
 
 
+def test_clear_mirrors():
+    Parser.clear_mirrors(os.path.join(os.getcwd(),
+                                      'tests/sample_faucet_config.yaml'))
+
+
 def test_Parser():
     """
     Tests Parser
