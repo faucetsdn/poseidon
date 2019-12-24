@@ -847,54 +847,6 @@ class Monitor:
 
         return ({}, False)
 
-    def process_ml_returns(self, msg):
-        # TODO: networkml currently writes its decisions directly to redis, so this function is not used.
-        ml_returns = msg.get('data', None)
-        if ml_returns is None:
-            return
-        self.logger.info('ML results: {0}'.format(ml_returns))
-        extras = deepcopy(ml_returns)
-        # process results from ml output and update impacted endpoints
-        for ep in self.s.endpoints.values():
-            if ep.name in ml_returns:
-                del extras[ep.name]
-            if ep.name in ml_returns and 'valid' in ml_returns[ep.name] and not ep.ignore:
-                if ep.state in ['mirroring', 'reinvestigating']:
-                    self.s.unmirror_endpoint(ep)
-                if ml_returns[ep.name]['valid']:
-                    ml_decision = None
-                    if 'decisions' in ml_returns[ep.name] and 'behavior' in ml_returns[ep.name]['decisions']:
-                        ml_decision = ml_returns[ep.name]['decisions']['behavior']
-                    if ml_decision == 'normal':
-                        ep.known()
-                    else:
-                        ep.abnormal()
-                else:
-                    ep.unknown()
-                ep.p_prev_states.append(
-                    (ep.state, int(time.time())))
-        extra_machines = []
-        self.logger.debug('extra devices: {0}'.format(extras))
-        for device in extras:
-            if device['valid']:
-                extra_machine = {
-                    'mac': device['source_mac'],
-                    'segment': NO_DATA,
-                    'port': NO_DATA,
-                    'tenant': NO_DATA,
-                    'active': 0,
-                    'name': None}
-                try:
-                    source_ip = ipaddress.ip_address(
-                        device['source_ip'])
-                except ValueError:
-                    source_ip = None
-                if source_ip:
-                    extra_machine['ipv%u' %
-                                  source_ip.version] = str(source_ip)
-                extra_machines.append(extra_machine)
-        self.s.find_new_machines(extra_machines)
-
     def schedule_mirroring(self):
         queued_endpoints = [
             endpoint for endpoint in self.s.endpoints.values()

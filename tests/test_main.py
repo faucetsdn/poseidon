@@ -27,6 +27,40 @@ from poseidon.main import SDNConnect
 logger = logging.getLogger('test')
 
 
+def test_mirror_endpoint():
+    controller = Config().get_config()
+    s = SDNConnect(controller)
+    endpoint = endpoint_factory('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+    s.endpoints[endpoint.name] = endpoint
+    s.mirror_endpoint(endpoint)
+
+
+def test_unmirror_endpoint():
+    controller = Config().get_config()
+    s = SDNConnect(controller)
+    endpoint = endpoint_factory('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+    s.endpoints[endpoint.name] = endpoint
+    s.unmirror_endpoint(endpoint)
+
+
+def test_clear_filters():
+    controller = Config().get_config()
+    s = SDNConnect(controller)
+    endpoint = endpoint_factory('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+    s.endpoints[endpoint.name] = endpoint
+    s.clear_filters()
+
+
+def test_check_endpoints():
+    SDNConnect.check_endpoints()
+
+
 def test_endpoint_by_name():
     controller = Config().get_config()
     s = SDNConnect(controller)
@@ -357,6 +391,7 @@ def test_Monitor_init():
                  'port': 2, 'segment': 'switch1', 'ipv4': '2106::1', 'mac': '00:00:00:00:00:00', 'id': 'foo4', 'behavior': 1, 'ipv6': '0'},
              {'active': 1, 'source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'ipv4_os': 'unknown', 'tenant': 'vlan1', 'port': 1, 'segment': 'switch1', 'ipv4': '::', 'mac': '00:00:00:00:00:00', 'id': 'foo5', 'behavior': 1, 'ipv6': '0'}]
     monitor.prom.update_metrics(hosts)
+    monitor.update_routing_key_time('foo')
 
 
 def test_process():
