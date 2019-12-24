@@ -93,8 +93,14 @@ def test_FaucetProxy():
     proxy.unmirror_mac('00:00:00:00:00:00', None, None)
     proxy.update_acls()
 
+    controller = Config().get_config()
+    controller['MIRROR_PORTS'] = '{"foo":1}'
+    controller['ignore_vlans'] = ['foo']
+    controller['ignore_ports'] = [1]
+    proxy = FaucetProxy(controller)
+
 
 def test_format_endpoints():
     data = [[{'ip-state': 'foo'}, {'ip-state': 'bar'}],
-            [{'ip-state': 'foo'}, {'ip-state': 'bar'}]]
+            [{'ip-state': 'foo', 'ip-address': '0.0.0.0'}, {'ip-state': 'bar', 'ip-address': '::1'}]]
     output = FaucetProxy.format_endpoints(data, 'foo')
