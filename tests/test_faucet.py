@@ -82,6 +82,7 @@ def test_FaucetProxy():
     proxy.mirror_mac('00:00:00:00:00:00', None, None)
     proxy.mirror_mac('00:00:00:00:00:01', None, None)
     proxy.unmirror_mac('00:00:00:00:00:00', None, None)
+    proxy.update_acls()
 
     proxy = FaucetProxy(controller)
     proxy.rabbit_enabled = False
@@ -90,6 +91,7 @@ def test_FaucetProxy():
     proxy.mirror_mac('00:00:00:00:00:00', None, None)
     proxy.mirror_mac('00:00:00:00:00:01', None, None)
     proxy.unmirror_mac('00:00:00:00:00:00', None, None)
+    proxy.update_acls()
 
 
 def test_format_endpoints():

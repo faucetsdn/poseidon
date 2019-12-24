@@ -7,6 +7,8 @@ include:
 
 dps:
     t1-1:
+        arp_neighbor_timeout: 900
+        timeout: 1801
         dp_id: 0x1
         hardware: "Open vSwitch"
         stack:
@@ -17,7 +19,9 @@ dps:
                     dp: t2-1
                     port: 1
             2:
-                native_vlan: office
+                output_only: True
+                mirror:
+                - 3
             3:
                 native_vlan: office
                 loop_protect_external: True

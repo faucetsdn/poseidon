@@ -18,6 +18,7 @@ def test_commands():
 
     commands.what_is('foo')
     commands.history_of('foo')
+    commands.acls_of('foo')
     commands.where_is('foo')
     commands.show_devices('foo bar')
     commands.show_devices('all')
@@ -29,3 +30,9 @@ def test_commands():
     commands.ignore('inactive')
     commands.remove_inactives('foo')
     commands.remove_ignored('foo')
+
+    endpoint2 = endpoint_factory('foo2')
+    endpoint2.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+    commands.sdnc.endpoints[endpoint2.name] = endpoint2
+    commands.what_is('00:00:00:00:00:00')
