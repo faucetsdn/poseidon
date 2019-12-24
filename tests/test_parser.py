@@ -27,7 +27,7 @@ def test_represent_none():
         def represent_scalar(foo, bar): return True
 
     foo = MockDumper()
-    represent_none(foo)
+    represent_none(foo, '')
 
 
 def test_get_config_file():
