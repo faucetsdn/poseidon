@@ -58,7 +58,10 @@ def test_clear_filters():
 
 
 def test_check_endpoints():
-    SDNConnect().check_endpoints()
+    controller = Config().get_config()
+    s = SDNConnect(controller)
+    s.sdnc = None
+    s.check_endpoints()
 
 
 def test_endpoint_by_name():
