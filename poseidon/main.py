@@ -131,10 +131,10 @@ def schedule_thread_worker(schedule):
 
 class SDNConnect:
 
-    def __init__(self, controller):
+    def __init__(self, controller, first_time=True):
         self.controller = controller
         self.r = None
-        self.first_time = True
+        self.first_time = first_time
         self.sdnc = None
         trunk_ports = self.controller['trunk_ports']
         if isinstance(trunk_ports, str):
@@ -143,12 +143,13 @@ class SDNConnect:
             self.trunk_ports = trunk_ports
         self.logger = logger
         self.get_sdn_context()
-        self.endpoints = {}
-        self.investigations = 0
-        self.clear_filters()
         self.redis_lock = threading.Lock()
         self.connect_redis()
-        self.default_endpoints()
+        if self.first_time:
+            self.endpoints = {}
+            self.investigations = 0
+            self.clear_filters()
+            self.default_endpoints()
 
     def mirror_endpoint(self, endpoint):
         ''' mirror an endpoint. '''
