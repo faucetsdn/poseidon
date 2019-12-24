@@ -61,6 +61,7 @@ def rabbit_callback(ch, method, properties, body, q=None):
         q.put((method.routing_key, body))
     else:
         logger.debug('poseidonMain workQueue is None')
+    ch.basic_ack(delivery_tag=method.delivery_tag)
 
 
 def schedule_job_kickurl(schedule_func):
