@@ -212,7 +212,7 @@ class Parser:
                         else:
                             acls_doc = Parser().yaml_in(rules_path+'/'+f)
                         if isinstance(acls_doc, bool):
-                            self.logger.warn(
+                            self.logger.warning(
                                 'Include file {0} was not found, ACLs may not be working as expected'.format(f))
                         else:
                             obj_doc['include'] = ['poseidon_'+acls_filename]
@@ -225,7 +225,7 @@ class Parser:
                 for f in files:
                     acl_doc = Parser().yaml_in(f)
                     if isinstance(acl_doc, bool):
-                        self.logger.warn(
+                        self.logger.warning(
                             'Include file {0} was not found, ACLs may not be working as expected'.format(f))
                     else:
                         if 'acls' in acl_doc:
