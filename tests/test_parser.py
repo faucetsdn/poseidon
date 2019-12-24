@@ -36,6 +36,8 @@ def test_Parser():
     parser.config(os.path.join(config_dir, 'faucet.yaml'),
                   'shutdown', None, None)
     parser.config(os.path.join(config_dir, 'faucet.yaml'),
+                  'apply_acls', None, None)
+    parser.config(os.path.join(config_dir, 'faucet.yaml'),
                   'unknown', None, None)
     parser.log(os.path.join(log_dir, 'faucet.log'))
 
@@ -55,6 +57,8 @@ def test_Parser():
                  'unmirror', None, None)
     proxy.config(os.path.join(config_dir, 'faucet.yaml'),
                  'shutdown', None, None)
+    parser.config(os.path.join(config_dir, 'faucet.yaml'),
+                  'apply_acls', None, None)
     proxy.config(os.path.join(config_dir, 'faucet.yaml'),
                  'unknown', None, None)
     proxy.log(os.path.join(log_dir, 'faucet.log'))
