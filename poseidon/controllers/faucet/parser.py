@@ -96,7 +96,7 @@ class Parser:
             if not self.mirror_ports:
                 self.logger.error('Unable to mirror, no mirror ports defined')
                 return False
-            if not 'dps' in obj_doc:
+            if 'dps' not in obj_doc:
                 self.logger.warning(
                     'Unable to find switch configs in {0}'.format(config_file))
                 ok = False
@@ -109,12 +109,12 @@ class Parser:
                                     'from in the configs. switch: {0} {1}'.format(switch, str(obj_doc)))
                 ok = False
             else:
-                if not switch_found in self.mirror_ports:
+                if switch_found not in self.mirror_ports:
                     self.logger.warning('Unable to mirror {0} on {1}, mirror port not defined on that switch'.format(
                         str(port), str(switch_found)))
                     ok = False
                 else:
-                    if not port in obj_doc['dps'][switch_found]['interfaces']:
+                    if port not in obj_doc['dps'][switch_found]['interfaces']:
                         self.logger.warning('No port match found for port {0} '
                                             ' to mirror from the switch {1} in '
                                             ' the configs'.format(str(port), obj_doc['dps'][switch_found]['interfaces']))
@@ -141,7 +141,7 @@ class Parser:
                     else:
                         obj_doc['dps'][switch_found]['timeout'] = self.reinvestigation_frequency
                     obj_doc['dps'][switch_found]['arp_neighbor_timeout'] = self.reinvestigation_frequency
-                    if not port in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] and port is not None:
+                    if port not in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] and port is not None:
                         obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'].append(
                             port)
                 elif action == 'unmirror':
@@ -180,18 +180,17 @@ class Parser:
                         else:
                             acls_filenames.append(f)
                     for conf_file in conf_files:
-                        if conf_file.startswith('poseidon') and not conf_file in acls_filenames:
+                        if conf_file.startswith('poseidon') and conf_file not in acls_filenames:
                             obj_doc['include'].remove(conf_file)
                             rewrite = True
                             self.logger.info(
-                                'Removing {0} from config'.format(acls_filename))
+                                'Removing {0} from config'.format(conf_file))
                     for f in files:
                         if '/' in f:
-                            acls_path, acls_filename = f.rsplit('/', 1)
+                            _, acls_filename = f.rsplit('/', 1)
                         else:
-                            acls_path = ''
                             acls_filename = f
-                        if not 'poseidon_'+acls_filename in conf_files:
+                        if 'poseidon_'+acls_filename not in conf_files:
                             obj_doc['include'].append(
                                 'poseidon_'+acls_filename)
                             if f.startswith('/'):
@@ -205,9 +204,8 @@ class Parser:
                 else:
                     for f in files:
                         if '/' in f:
-                            acls_path, acls_filename = f.rsplit('/', 1)
+                            _, acls_filename = f.rsplit('/', 1)
                         else:
-                            acls_path = ''
                             acls_filename = f
                         if f.startswith('/'):
                             acls_doc = Parser().yaml_in(f)
@@ -246,7 +244,7 @@ class Parser:
                 # check that acls in rules exist in the included acls file
                 if 'include' in rules_doc:
                     for acl in acls:
-                        if not acl in acl_names:
+                        if acl not in acl_names:
                             self.logger.info(
                                 'Using named ACL: {0}, but it was not found in included ACL files, assuming ACL name exists in Faucet config'.format(acl))
 
@@ -370,7 +368,7 @@ class Parser:
             if not rewrite:
                 return True
 
-            if not 'include' in rules_doc:
+            if 'include' not in rules_doc:
                 self.logger.info(
                     'No included ACLs files in the rules file, using ACLs that Faucet already knows about')
 

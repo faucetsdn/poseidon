@@ -350,28 +350,28 @@ class Parser():
                 sort_by = int(flags[flag])
             elif flag == 'max_width':
                 max_width = int(flags[flag])
-            elif flag == 'unique' and flags[flag] == True:
+            elif flag == 'unique' and flags[flag] is True:
                 unique = True
-            elif flag == 'nonzero' and flags[flag] == True:
+            elif flag == 'nonzero' and flags[flag] is True:
                 nonzero = True
             elif flag == 'output_format':
                 output_format = flags[flag]
-            elif flag == '4' and flags[flag] == True:
+            elif flag == '4' and flags[flag] is True:
                 ipv4_only = True
                 ipv6_only = False
                 ipv4_and_ipv6 = False
-            elif flag == '6' and flags[flag] == True:
+            elif flag == '6' and flags[flag] is True:
                 ipv6_only = True
                 ipv4_only = False
                 ipv4_and_ipv6 = False
-            elif flag == '4and6' and flags[flag] == True:
+            elif flag == '4and6' and flags[flag] is True:
                 ipv4_only = False
                 ipv6_only = False
                 ipv4_and_ipv6 = True
             else:
                 valid = False
 
-        if 'fields' in flags and not '4' in flags and not '6' in flags and not '4and6' in flags:
+        if 'fields' in flags and '4' not in flags and '6' not in flags and '4and6' not in flags:
             ipv4_only = False
             ipv6_only = False
             ipv4_and_ipv6 = False

@@ -3,7 +3,7 @@ vlans:
         vid: 100
 
 include:
-- test_acls.yaml
+- sample_acls.yaml
 
 dps:
     t1-1:
