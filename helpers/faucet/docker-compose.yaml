@@ -1,4 +1,4 @@
-version: '3.7'
+version: '2.0'
 services:
     prometheus:
         restart: always
@@ -7,10 +7,12 @@ services:
         ports:
             - '9090:9090'
         volumes:
-            - '${POSEIDON_PREFIX}/opt/prometheus/:/prometheus'
-            - './helpers/faucet/prometheus-docker-compose.yml:/etc/prometheus/prometheus.yml'
-        networks:
-            - poseidon
+            - '${FAUCET_PREFIX}/opt/prometheus/:/prometheus'
+            - './etc/prometheus/prometheus-docker-compose.yml:/etc/prometheus/prometheus.yml'
+            - './etc/prometheus/faucet.rules.yml:/etc/prometheus/faucet.rules.yml'
+        external_links:
+            - cyberreboot-poseidon-master:poseidon
+
     grafana:
         restart: always
         image: 'grafana/grafana:6.5.2'
@@ -18,46 +20,36 @@ services:
         ports:
             - '3000:3000'
         volumes:
-            - '${POSEIDON_PREFIX}/opt/grafana:/var/lib/grafana'
-            - '${POSEIDON_PREFIX}/opt/grafana/provisioning:/etc/grafana/provisioning'
+            - '${FAUCET_PREFIX}/opt/grafana:/var/lib/grafana'
+            - '${FAUCET_PREFIX}/opt/grafana/provisioning:/etc/grafana/provisioning'
+
     gauge:
         restart: always
-        image: 'faucet/gauge:1.9.28'
+        image: 'faucet/gauge:latest'
         environment:
             GAUGE_CONFIG: '/etc/faucet/gauge.yaml'
         volumes:
-            - '${POSEIDON_PREFIX}/var/log/faucet:/var/log/faucet'
-            - '${POSEIDON_PREFIX}/etc/faucet:/etc/faucet'
+            - '${FAUCET_PREFIX}/var/log/faucet:/var/log/faucet'
+            - '${FAUCET_PREFIX}/etc/faucet:/etc/faucet'
         ports:
             - '6654:6653'
+            - '9303'
+
     faucet:
         restart: always
-        image: 'faucet/faucet:1.9.28'
+        image: 'faucet/faucet:latest'
         volumes:
-            - '${POSEIDON_PREFIX}/var/log/faucet:/var/log/faucet'
-            - '${POSEIDON_PREFIX}/var/run/faucet:/var/run/faucet'
-            - '${POSEIDON_PREFIX}/etc/faucet:/etc/faucet'
+            - '${FAUCET_PREFIX}/var/log/faucet:/var/log/faucet'
+            - '${FAUCET_PREFIX}/var/run/faucet:/var/run/faucet'
+            - '${FAUCET_PREFIX}/etc/faucet:/etc/faucet'
         ports:
             - '6653:6653'
+            - '9302'
         environment:
-            FAUCET_CONFIG_STAT_RELOAD: '1'
-            FAUCET_EVENT_SOCK: '1'
-            FAUCET_CONFIG_AUTO_REVERT: '1'
-    rabbitmq_adapter:
-        restart: always
-        image: 'faucet/event-adapter-rabbitmq:1.9.28'
-        depends_on:
-            - faucet
-        volumes:
-            - '${POSEIDON_PREFIX}/var/run/faucet:/var/run/faucet'
-        environment:
-            FAUCET_EVENT_SOCK: '1'
-            FA_RABBIT_HOST: 'rabbit'
-            FA_RABBIT_PORT: '${FA_RABBIT_PORT}'
-            FA_RABBIT_EXCHANGE: '${FA_RABBIT_EXCHANGE}'
-            FA_RABBIT_EXCHANGE_TYPE: '${FA_RABBIT_EXCHANGE_TYPE}'
-            FA_RABBIT_ROUTING_KEY: '${FA_RABBIT_ROUTING_KEY}'
-        networks:
-            - poseidon
+            FAUCET_CONFIG_STAT_RELOAD: '${FAUCET_CONFIG_STAT_RELOAD}'
+            FAUCET_EVENT_SOCK: '${FAUCET_EVENT_SOCK}'
+            FAUCET_CONFIG_AUTO_REVERT: '${FAUCET_CONFIG_AUTO_REVERT}'
 networks:
-    poseidon:
+    default:
+        external:
+            name: vent
