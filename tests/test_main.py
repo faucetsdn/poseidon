@@ -55,6 +55,14 @@ def test_clear_filters():
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
     s.endpoints[endpoint.name] = endpoint
     s.clear_filters()
+    controller = Config().get_config()
+    controller['TYPE'] = 'bcf'
+    s = SDNConnect(controller)
+    endpoint = endpoint_factory('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+    s.endpoints[endpoint.name] = endpoint
+    s.clear_filters()
 
 
 def test_check_endpoints():
@@ -395,6 +403,12 @@ def test_Monitor_init():
              {'active': 1, 'source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'ipv4_os': 'unknown', 'tenant': 'vlan1', 'port': 1, 'segment': 'switch1', 'ipv4': '::', 'mac': '00:00:00:00:00:00', 'id': 'foo5', 'behavior': 1, 'ipv6': '0'}]
     monitor.prom.update_metrics(hosts)
     monitor.update_routing_key_time('foo')
+
+
+def test_SDNConnect_init():
+    controller = Config().get_config()
+    controller['trunk_ports'] = []
+    s = SDNConnect(controller, first_time=False)
 
 
 def test_process():
