@@ -45,7 +45,7 @@ def test_Parser():
 
     endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
-        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv6': '1212::1'}
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 't1-1', 'port': '1', 'ipv4': '0.0.0.0', 'ipv6': '1212::1'}
     endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'1551805502': {'labels': ['developer workstation'], 'behavior': 'normal'}}}, 'ipv4_addresses': {
         '0.0.0.0': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
     endpoints = [endpoint]
