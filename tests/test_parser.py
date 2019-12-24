@@ -14,6 +14,18 @@ def test_Parser():
     """
     Tests Parser
     """
+    def check_config(obj, path):
+        obj.config(path, 'mirror', 1, 'switch1')
+        obj.config(path, 'mirror', 2, 0x70b3d56cd32e)
+        obj.config(path, 'mirror', 2, 'switch1')
+        obj.config(path, 'mirror', 5, 'switch1')
+        obj.config(path, 'mirror', 6, 'bad')
+        obj.config(path, 'unmirror', None, None)
+        obj.config(path, 'shutdown', None, None)
+        obj.config(path, 'apply_acls', None, None)
+        obj.config(path, 'unknown', None, None)
+        obj.log(os.path.join(log_dir, 'faucet.log'))
+
     config_dir = '/etc/faucet'
     log_dir = '/var/log/faucet'
     if not os.path.exists(config_dir):
@@ -21,44 +33,11 @@ def test_Parser():
     if not os.path.exists(log_dir):
         log_dir = os.path.join(os.getcwd(), 'faucet')
     parser = Parser()
-    parser.config(os.path.join(config_dir, 'faucet.yaml'),
-                  'mirror', 1, 'switch1')
-    parser.config(os.path.join(config_dir, 'faucet.yaml'),
-                  'mirror', 2, 0x70b3d56cd32e)
-    parser.config(os.path.join(config_dir, 'faucet.yaml'),
-                  'mirror', 2, 'switch1')
-    parser.config(os.path.join(config_dir, 'faucet.yaml'),
-                  'mirror', 5, 'switch1')
-    parser.config(os.path.join(config_dir, 'faucet.yaml'),
-                  'mirror', 6, 'bad')
-    parser.config(os.path.join(config_dir, 'faucet.yaml'),
-                  'unmirror', None, None)
-    parser.config(os.path.join(config_dir, 'faucet.yaml'),
-                  'shutdown', None, None)
-    parser.config(os.path.join(config_dir, 'faucet.yaml'),
-                  'apply_acls', None, None)
-    parser.config(os.path.join(config_dir, 'faucet.yaml'),
-                  'unknown', None, None)
-    parser.log(os.path.join(log_dir, 'faucet.log'))
-
     controller = Config().get_config()
     proxy = FaucetProxy(controller)
-    proxy.config(os.path.join(config_dir, 'faucet.yaml'),
-                 'mirror', 1, 'switch1')
-    proxy.config(os.path.join(config_dir, 'faucet.yaml'),
-                 'mirror', 2, 0x70b3d56cd32e)
-    proxy.config(os.path.join(config_dir, 'faucet.yaml'),
-                 'mirror', 2, 'switch1')
-    proxy.config(os.path.join(config_dir, 'faucet.yaml'),
-                 'mirror', 5, 'switch1')
-    proxy.config(os.path.join(config_dir, 'faucet.yaml'),
-                 'mirror', 6, 'bad')
-    proxy.config(os.path.join(config_dir, 'faucet.yaml'),
-                 'unmirror', None, None)
-    proxy.config(os.path.join(config_dir, 'faucet.yaml'),
-                 'shutdown', None, None)
-    parser.config(os.path.join(config_dir, 'faucet.yaml'),
-                  'apply_acls', None, None)
-    proxy.config(os.path.join(config_dir, 'faucet.yaml'),
-                 'unknown', None, None)
-    proxy.log(os.path.join(log_dir, 'faucet.log'))
+    check_config(parser, os.path.join(config_dir, 'faucet.yaml'))
+    check_config(proxy, os.path.join(config_dir, 'faucet.yaml'))
+    check_config(parser, os.path.join(os.getcwd(),
+                                      'tests/sample_faucet_config.yaml'))
+    check_config(proxy, os.path.join(os.getcwd(),
+                                     'tests/sample_faucet_config.yaml'))
