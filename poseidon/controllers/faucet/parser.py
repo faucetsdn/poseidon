@@ -249,7 +249,7 @@ class Parser:
                                 'Using named ACL: {0}, but it was not found in included ACL files, assuming ACL name exists in Faucet config'.format(acl))
 
                 for endpoint in endpoints:
-                    if 'acls_in' in obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
+                    if endpoint.endpoint_data['segment'] in obj_doc['dps'] and 'acls_in' in obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
                             endpoint.endpoint_data['port'])]:
                         existing_acls = obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
                             endpoint.endpoint_data['port'])]['acls_in']
