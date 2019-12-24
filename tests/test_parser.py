@@ -70,11 +70,15 @@ def test_Parser():
     endpoints = [endpoint]
 
     parser = Parser(mirror_ports={'t1-1': 2})
+    parser2 = Parser()
     controller = Config().get_config()
     proxy = FaucetProxy(controller)
     check_config(parser, os.path.join(config_dir, 'faucet.yaml'), endpoints)
+    check_config(parser2, os.path.join(config_dir, 'faucet.yaml'), endpoints)
     check_config(proxy, os.path.join(config_dir, 'faucet.yaml'), endpoints)
     check_config(parser, os.path.join(os.getcwd(),
                                       'tests/sample_faucet_config.yaml'), endpoints)
+    check_config(parser2, os.path.join(os.getcwd(),
+                                       'tests/sample_faucet_config.yaml'), endpoints)
     check_config(proxy, os.path.join(os.getcwd(),
                                      'tests/sample_faucet_config.yaml'), endpoints)
