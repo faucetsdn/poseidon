@@ -311,7 +311,7 @@ class Parser:
                                             if float(record) > most_recent:
                                                 most_recent = float(record)
                                         most_recent = str(most_recent)
-                                        if most_recent != '0' and 'behavior' in endpoint.metadata['mac_addresses'][mac][most_recent] and endpoint.metadata['mac_addresses'][mac][most_recent]['behavior'] == r['rule']['value']:
+                                        if most_recent != '0' and most_recent in endpoint.metadata['mac_addresses'][mac] and 'behavior' in endpoint.metadata['mac_addresses'][mac][most_recent] and endpoint.metadata['mac_addresses'][mac][most_recent]['behavior'] == r['rule']['value']:
                                             self.logger.info('Behavior match: {0} {1}, rule: {2}'.format(
                                                 mac, r['rule']['value'], rule))
                                             match = True
