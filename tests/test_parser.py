@@ -24,7 +24,7 @@ def test_clear_mirrors():
 
 def test_represent_none():
     class MockDumper:
-        def represent_scalar(foo): return True
+        def represent_scalar(self, foo, bar): return True
 
     foo = MockDumper()
     represent_none(foo, '')
