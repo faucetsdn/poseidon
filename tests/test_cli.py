@@ -33,6 +33,7 @@ def test_poseidonshell():
     shell.show_all('foo', [])
     shell.show_role('foo', [])
     shell.show_state('foo', [])
+    shell.show_acls('foo', [])
     shell.show_behavior('foo', [])
     shell.show_os('foo', [])
     shell.show_what('foo', [])
@@ -50,6 +51,8 @@ def test_poseidonshell():
     shell.help_task()
     shell.emptyline()
     shell.do_shell('ls')
+    shell.do_set('echo foo')
+    shell.do_set('foo')
 
 
 def test_check_flags():
