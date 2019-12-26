@@ -70,13 +70,15 @@ services:
     workers:
         restart: always
         image: 'cyberreboot/poseidon-workers:latest'
+        build:
+            context: workers
+            dockerfile: Dockerfile
         environment:
             PYTHONUNBUFFERED: '1'
+            VOL_PREFIX: '${POSEIDON_PREFIX}'
         networks:
             - poseidon
         volumes:
-            - './workers.json:/app/workers.json'
-            - '/definitions'
             - '/var/run/docker.sock:/var/run/docker.sock'
 
 networks:
