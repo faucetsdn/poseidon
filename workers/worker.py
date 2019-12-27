@@ -58,7 +58,7 @@ def callback(ch, method, properties, body):
                                  volumes={
                                      vol_prefix + '/opt/vent_files': {'bind': '/files', 'mode': 'rw'}},
                                  environment=environment,
-                                 remove=False,
+                                 remove=True,
                                  command=command,
                                  detach=True)
                 print(' [Create container] %s UTC %r:%r:%r:%r' % (str(datetime.datetime.utcnow()),
