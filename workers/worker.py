@@ -108,16 +108,14 @@ def callback(ch, method, properties, body):
     r = setup_redis()
     print('redis: {0}'.format(status))
     if r:
-        r.sadd(session_id, pipeline['id'])
-        r.hmset(pipeline['id']+'_status', status)
-        statuses = r.hgetall(pipeline['id']+'_status')
+        r.hmset('status', status)
+        statuses = r.hgetall('status')
         for s in statuses:
             statuses[s] = json.loads(statuses[s])
-        id_dir = pipeline['id']
         for worker in extra_workers:
             if not worker in statuses:
                 status[worker] = extra_workers[worker]
-        r.hmset(f'{id_dir}_status', status)
+        r.hmset('status', status)
         r.close()
 
 
