@@ -2,6 +2,7 @@
   "workers": [
     {
       "image": "cyberreboot/vent-plugins-pcap-to-node-pcap",
+      "version": "v0.1.7",
       "inputs": [
         "pcap-dot1q"
       ],
@@ -11,13 +12,12 @@
         "pcap"
       ],
       "stage": "poseidon_poseidon",
-      "version": "v0.1.6",
       "viewableOutput": false
     },
     {
       "image": "cyberreboot/vent-plugins-tcprewrite-dot1q",
+      "version": "v0.1.7",
       "inputs": [
-        "ncapture",
         "ncapture"
       ],
       "labels": "",
@@ -26,25 +26,11 @@
         "pcap"
       ],
       "stage": "poseidon_poseidon",
-      "version": "v0.1.6",
       "viewableOutput": false
     },
     {
-      "command": [
-        "-p"
-      ],
-      "contentType": "application/json",
-      "environment": {
-        "POSEIDON_PUBLIC_SESSIONS": "1",
-        "RABBIT": "True",
-        "RABBIT_EXCHANGE": "",
-        "RABBIT_HOST": "messenger",
-        "RABBIT_QUEUE": "True",
-        "RABBIT_QUEUE_NAME": "task_queue",
-        "RABBIT_ROUTING_KEY": "task_queue",
-        "REDIS": "False"
-      },
       "image": "cyberreboot/networkml",
+      "version": "latest",
       "inputs": [
         "pcap-splitter"
       ],
@@ -54,15 +40,25 @@
         "rabbitmq"
       ],
       "stage": "poseidon_poseidon",
-      "version": "v0.4.2",
-      "viewableOutput": true
-    },
-    {
+      "viewableOutput": true,
+      "command": [
+        "-p"
+      ],
       "contentType": "application/json",
       "environment": {
-        "redis": "false"
-      },
+        "POSEIDON_PUBLIC_SESSIONS": "1",
+        "RABBIT": "True",
+        "RABBIT_EXCHANGE": "topic-poseidon-internal",
+        "RABBIT_HOST": "messenger",
+        "RABBIT_QUEUE": "True",
+        "RABBIT_QUEUE_NAME": "topic-poseidon-internal",
+        "RABBIT_ROUTING_KEY": "poseidon.algos.decider",
+        "REDIS": "true"
+      }
+    },
+    {
       "image": "cyberreboot/vent-plugins-p0f",
+      "version": "v0.1.7",
       "inputs": [
         "pcap-splitter"
       ],
@@ -72,8 +68,11 @@
         "rabbitmq"
       ],
       "stage": "poseidon_poseidon",
-      "version": "v0.1.6",
-      "viewableOutput": true
+      "viewableOutput": true,
+      "contentType": "application/json",
+      "environment": {
+        "redis": "true"
+      }
     }
   ]
 }

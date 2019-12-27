@@ -21,7 +21,7 @@ services:
                     - messenger
     network_tap:
         restart: always
-        image: 'cyberreboot/vent-network-tap:v0.10.1'
+        image: 'cyberreboot/vent-network-tap:master'
         volumes:
             - '/var/run/docker.sock:/var/run/docker.sock'
             - '${POSEIDON_PREFIX}/opt/vent_files:/files'
@@ -70,13 +70,15 @@ services:
     workers:
         restart: always
         image: 'cyberreboot/poseidon-workers:latest'
+        build:
+            context: workers
+            dockerfile: Dockerfile
         environment:
             PYTHONUNBUFFERED: '1'
+            VOL_PREFIX: '${POSEIDON_PREFIX}'
         networks:
             - poseidon
         volumes:
-            - './workers.json:/app/workers.json'
-            - '/definitions'
             - '/var/run/docker.sock:/var/run/docker.sock'
 
 networks:
