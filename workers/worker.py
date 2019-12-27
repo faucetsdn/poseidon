@@ -113,6 +113,7 @@ def callback(ch, method, properties, body):
         statuses = r.hgetall(pipeline['id']+'_status')
         for s in statuses:
             statuses[s] = json.loads(statuses[s])
+        id_dir = pipeline['id']
         for worker in extra_workers:
             if not worker in statuses:
                 status[worker] = extra_workers[worker]

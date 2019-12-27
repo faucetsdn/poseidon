@@ -21,7 +21,7 @@ services:
                     - messenger
     network_tap:
         restart: always
-        image: 'cyberreboot/vent-network-tap:v0.10.1'
+        image: 'cyberreboot/vent-network-tap:master'
         volumes:
             - '/var/run/docker.sock:/var/run/docker.sock'
             - '${POSEIDON_PREFIX}/opt/vent_files:/files'
