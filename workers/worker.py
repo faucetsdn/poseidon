@@ -113,7 +113,7 @@ def callback(ch, method, properties, body):
         for s in statuses:
             statuses[s] = json.loads(statuses[s])
         for worker in extra_workers:
-            if not worker in statuses:
+            if worker not in statuses:
                 status[worker] = extra_workers[worker]
         r.hmset('status', status)
         r.close()
