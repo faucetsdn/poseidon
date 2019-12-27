@@ -1,4 +1,4 @@
-FROM alpine:3.11
+FROM alpine:3.10
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
 LABEL poseidon.namespace="primary"
 
@@ -31,7 +31,8 @@ HEALTHCHECK --interval=15s --timeout=15s \
 COPY . /poseidon
 WORKDIR /poseidon
 ENV PYTHONPATH /poseidon:$PYTHONPATH
-COPY /poseidon/config/poseidon.config /opt/poseidon/poseidon.config
+RUN mkdir -p /opt/poseidon
+RUN mv /poseidon/config/poseidon.config /opt/poseidon/poseidon.config
 ENV POSEIDON_CONFIG /opt/poseidon/poseidon.config
 
 CMD (flask run > /dev/null 2>&1) & (tini -s -- /usr/bin/python3 poseidon/main.py)
