@@ -17,7 +17,7 @@ env:
 jobs:
   include:
   - stage: test
-    script: /bin/bash --version && /bin/bash -n installers/debian/postinst installers/debian/preinst installers/debian/prerm installers/debian/postrm installers/debian/config bin/poseidon helpers/run && shellcheck -x -e SC2119 -e SC2129 -e SC2001 -e SC2044 installers/debian/postinst installers/debian/preinst installers/debian/prerm installers/debian/postrm installers/debian/config bin/poseidon helpers/run
+    script: /bin/bash --version && /bin/bash -n bin/poseidon helpers/run && shellcheck -x -e SC2119 -e SC2129 -e SC2001 -e SC2044 bin/poseidon helpers/run
   - script: pip install -r test-requirements.txt && pip install -r api/requirements.txt && py.test -v -vv --cov-report term-missing --cov=. -c .coveragerc
 before_install:
   - sudo apt-get update
