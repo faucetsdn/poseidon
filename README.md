@@ -5,7 +5,6 @@
 [![codecov](https://codecov.io/gh/CyberReboot/poseidon/branch/master/graph/badge.svg?token=ORXmFYC3MM)](https://codecov.io/gh/CyberReboot/poseidon)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/e31df16fa65447bf8527e366c6271bf3)](https://www.codacy.com/app/CyberReboot/poseidon?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=CyberReboot/poseidon&amp;utm_campaign=Badge_Grade)
 [![Docker Hub Downloads](https://img.shields.io/docker/pulls/cyberreboot/poseidon.svg)](https://hub.docker.com/r/cyberreboot/poseidon/)
-[![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/badges/version/cyberreboot/poseidon/deb/poseidon/latest/d=ubuntu%252Fbionic/?render=true)](https://cloudsmith.io/~cyberreboot/repos/poseidon/packages/)
 
 > Software Defined Network Situational Awareness
 
@@ -19,10 +18,10 @@ Poseidon began as a joint effort between two of the IQT Labs: [Cyber Reboot](htt
 - [Prerequisites](#prerequisites)
 - [Installing Poseidon](#installing)
 - [SDN Controller Configuration](#sdn-controller-configuration)
+    - [Faucet Configuration](#faucet-configuration)
     - [Big Cloud Fabric Configuration](#big-cloud-fabric-configuration)
       - [Span Fabric](#span-fabric)
       - [Interface Group](#interface-group)
-    - [Faucet Configuration](#faucet-configuration)
 - [Usage](#usage)
 - [Troubleshooting](#troubleshooting)
 - [Network Data Logging](#logging)
@@ -36,50 +35,50 @@ The Poseidon project originally began as an experiment to test the merits of lev
 
 ## Prerequisites
 
-- A dedicated Linux System or Virtual Machine (A Debian-based distribution is preferred - Ubuntu 16.x is ideal)
-  - Currently supported versions for the .DEB install are:
-    - Ubuntu 16.04
-    - Ubuntu 18.04
-    - Ubuntu 19.04
-    - Ubuntu 19.10
 - [Docker](https://www.docker.com/) - Poseidon and related components run on top of Docker, so understanding the fundamentals will be useful for troubleshooting as well.  Note: installing via Snap is currently unsupported. [A Good Ubuntu Docker Quick-Start](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04)
+- [Compose](https://docs.docker.com/compose/) - Poseidon is orchestrated with docker-compose.
+- [Curl](https://curl.haxx.se/download.html) - command-line for transferring data with URLs.
+- [jq](https://stedolan.github.io/jq/download/) - command-line JSON processor.
+- An SDN Controller - specifically [BigSwitch Cloud Fabric](https://www.bigswitch.com/community-edition) or [Faucet](https://faucet.nz/)
 - ~10GB of free disk space
-- An SDN Controller - specifically [BigSwitch Cloud Fabric](https://www.bigswitch.com/community-edition) or [Faucet](https://faucet.nz/) - if you want full functionality (this is now optional, if you simply want to replay previously created captures of a network, or don't have an SDN environment available).
 
-> Note: Installation on `OS X` is possible but not supported, see the `./helpers/run` file (above) as a starting point.
+> Note: Installation on `OS X` is possible but not supported.
 
 ## Installing
 
 ### Permissions for Docker
 
-To simplify the using commands with Docker, we recommend allowing the user that will be executing Poseidon commands be part of the `docker` group so they can execute Docker commands without `sudo`.  Typically, this can be done with:
+To simplify using commands with Docker, we recommend allowing the user that will be executing Poseidon commands be part of the `docker` group so they can execute Docker commands without `sudo`.  Typically, this can be done with:
 ```
 sudo usermod -aG docker $USER
 ```
 Followed by closing the existing shell and starting a new one.
 
-### Installing the Debian Package
-
-On Ubuntu, this will download and install our `.deb` package from [Cloudsmith](https://cloudsmith.io/~/cyberreboot/repos/poseidon/packages/):
-
-NOTE: jq must be installed before Poseidon; this requirement will be removed in future.
+### Getting the bits
 
 ```
-sudo apt-get install -y apt-transport-https curl
-curl -sLf "https://dl.cloudsmith.io/public/cyberreboot/poseidon/cfg/gpg/gpg.F9E23875C98A1F72.key" | sudo apt-key add -
-sudo add-apt-repository "deb [arch=amd64] https://dl.cloudsmith.io/public/cyberreboot/poseidon/deb/ubuntu $(lsb_release -cs) main"
-sudo apt-get update
-sudo apt-get jq
-sudo apt-get install poseidon
+curl -L https://raw.githubusercontent.com/CyberReboot/poseidon/master/bin/poseidon -o /usr/local/bin/poseidon
+chmod +x /usr/local/bin/poseidon
 ```
-
-If you prefer a lightweight package that downloads the images from the latest build at install time, you can alternatively install: `sudo apt-get install poseidon-net`
-
-> Note: The installer has a `Demo` option in the installation wizard that will deploy and configure the full Poseidon package, the Faucet controller  (and related components like Grafana and Prometheus), mininet, and openvswitch.  We suggest the demo install as a starting point if much of this is new to you.
-
 
 ## SDN Controller Configuration
-If you opt to do a full install (NOT the demo mode), you need to first identify one of the two supported controllers (*BigSwitch Cloud Fabric* or *Faucet*). The controller needs to be running and accessible (via network API) by the Poseidon system.  We recommend making sure the SDN portion is configured BEFORE the above Poseidon installation, but it's not a hard requirement.
+You need to first identify one of the two supported controllers (*BigSwitch Cloud Fabric* or *Faucet*). The controller needs to be running and accessible (via network API) by the Poseidon system.  We recommend making sure the SDN portion is configured BEFORE the above Poseidon installation, but it's not a hard requirement.
+
+#### Faucet Configuration
+<img src="/docs/img/faucet.png" width="190" height="100">
+Poseidon requires at least Faucet version 1.8.6 or higher.
+
+Unless Poseidon and Faucet are running on the same host, Poseidon will connect to Faucet using SSH.  So you'll need to create an account that can SSH to the machine running Faucet and that has rights to modify the configuration file `faucet.yaml` (currently Poseidon expects it to be in the default `/etc/faucet/faucet.yaml` location and `dps` must all be defined in `faucet.yaml` for Poseidon to update the network posture correctly).
+
+Faucet needs to be started with the following environment variables set:
+```
+export FAUCET_EVENT_SOCK=1
+export FAUCET_CONFIG_STAT_RELOAD=1
+```
+
+If using the [RabbitMQ adapter for Faucet](https://github.com/faucetsdn/faucet/tree/master/adapters/vendors/rabbitmq) (recommended) make sure to also export `FA_RABBIT_HOST` to the IP address of the host where Poseidon is running.
+
+Faucet is now configured and ready for use with Poseidon.
 
 #### BigSwitch Big Cloud Fabric Configuration
 <img src="/docs/img/bcf.png" width="114" height="100"/>
@@ -137,119 +136,65 @@ span-fabric poseidon
 
 BCF is now configured and ready for use with Poseidon.
 
-#### Faucet Configuration
-<img src="/docs/img/faucet.png" width="190" height="100">
-Poseidon requires at least Faucet version 1.8.6 or higher.
-
-Unless Poseidon and Faucet are running on the same host, Poseidon will connect to Faucet using SSH.  So you'll need to create an account that can SSH to the machine running Faucet and that has rights to modify the configuration file `faucet.yaml` (currently Poseidon expects it to be in the default `/etc/faucet/faucet.yaml` location and `dps` must all be defined in `faucet.yaml` for Poseidon to update the network posture correctly).
-
-Faucet needs to be started with the following environment variables set:
-```
-export FAUCET_EVENT_SOCK=1
-export FAUCET_CONFIG_STAT_RELOAD=1
-```
-
-If using the [RabbitMQ adapter for Faucet](https://github.com/faucetsdn/faucet/tree/master/adapters/vendors/rabbitmq) (recommended) make sure to also export `FA_RABBIT_HOST` to the IP address of the host where Poseidon is running.
-
-Faucet is now configured and ready for use with Poseidon.
-
 ## Usage
 
-NEW: If you have used the .DEB installer previously, it is worth noting that Poseidon is now packaged as a standard Linux service, and ties in nicely to both systemctl and journalctl.
-
-After installation you'll have a new command `poseidon` available for looking at the status, logs, changing the configuration, or stopping and starting the service.
+After installation you'll have a new command `poseidon` available for looking at the configuration, logs, and shell, as well as stopping and starting the service.
 ```
 $ poseidon help
-Poseidon 0.8.1, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of machine learning techniques. For more info visit: https://github.com/CyberReboot/poseidon
+Poseidon, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of machine learning techniques. For more info visit: https://github.com/CyberReboot/poseidon
 
 Usage: poseidon [option]
 Options:
     -a,  api           get url to the Poseidon API
     -c,  config        display current configuration info
+    -d,  delete        delete Poseidon installation (uses sudo)
     -e,  shell         enter into the Poseidon shell, requires Poseidon to already be running
     -h,  help          print this help
-    -i,  info/status   display current status of the Poseidon service
+    -i,  install       install Poseidon repo (uses sudo)
     -l,  logs          display the information logs about what Poseidon is doing
-    -L,  system-logs   display the system logs related to Poseidon
-    -p,  pcap          process a PCAP file or directory of PCAPs (uses sudo)
-    -R,  reconfig      reconfigures all settings (uses sudo, will restart the Poseidon service)
     -r,  restart       restart the Poseidon service (uses sudo)
     -s,  start         start the Poseidon service (uses sudo)
     -S,  stop          stop the Poseidon service (uses sudo)
+    -u,  update        update Poseidon repo, optionally supply a version (uses sudo)
     -v,  viz/visualize get url to visualize Poseidon with CRviz
-    -V,  version       display the version of Poseidon and exit
-    -Z,  reset         reset the configuration (uses sudo)
+    -V,  version       get the version installed
 ```
 
-Poseidon makes heavy use of a sister project, [vent](https://vent.readthedocs.io/en/latest/?badge=latest). With a successful installation you should minimally see a combination of Poseidon and Vent components, to include:
+Step 0:
 
-1. The following 14 containers with a "(healthy)" STATUS listed (NOTE: this is truncated output):
-```
-# docker ps
-CONTAINER ID        IMAGE                                  COMMAND                  STATUS
-8c07adf421fb        cyberreboot/poseidon:master            "/bin/sh -c '(flask …"   Up 2 hours (healthy)
-0a4f947f299b        cyberreboot/vent-file-drop:master      "/bin/sh -c '(flask …"   Up 2 hours (healthy)
-511f90c6ddd3        cyberreboot/crviz:master               "serve -s build -l 5…"   Up 2 hours (healthy)
-fb250044ff17        cyberreboot/poseidon-api:master        "/bin/sh -c '(flask …"   Up 2 hours (healthy)
-8e898fd68c08        cyberreboot/vent-network-tap:master    "/bin/sh -c '(flask …"   Up 2 hours (healthy)
-552f65d7a982        cyberreboot/vent-rq-worker:master      "/bin/sh -c '(flask …"   Up 2 hours (healthy)
-8dbabe78d1b9        cyberreboot/vent-rq-worker:master      "/bin/sh -c '(flask …"   Up 2 hours (healthy)
-e076452c1515        cyberreboot/vent-rq-worker:master      "/bin/sh -c '(flask …"   Up 2 hours (healthy)
-d0f406f240b1        cyberreboot/vent-rq-worker:master      "/bin/sh -c '(flask …"   Up 2 hours (healthy)
-6229e46723a9        cyberreboot/vent-rq-dashboard:master   "/bin/sh -c '(flask …"   Up 2 hours (healthy)
-5c695040603b        cyberreboot/vent-redis:master          "docker-entrypoint.s…"   Up 2 hours (healthy)
-004e5fdde96e        cyberreboot/vent-syslog:master         "/usr/sbin/syslog-ng…"   Up 2 hours (healthy)
-c0cd7c1f881c        cyberreboot/vent-rabbitmq:master       "docker-entrypoint.s…"   Up 2 hours (healthy)
-d81f5509628c        cyberreboot/vent                       "/bin/sh -c '(flask …"   Up 2 hours (healthy)
-```
-
-(NOTE: On our test systems it usually takes 1-2 minutes for all containers to spin up)
-
-If you performed the demo installation, you should also see the following Faucet-related containers running (NOTE: Faucet has not yet implemented docker-friendly health checks, so the "(healthy)" reference will not be shown):
+Optionally specify a prefix location to install Poseidon by setting an environment variable, if it is unset, it will default to `/opt` and Poseidon. (If using Faucet, it will also override `/etc` locations to this prefix.)
 
 ```
-196f53632485        grafana/grafana:5.2.1                  "/run.sh"                Up 2 hours
-cfb7d68b66e0        prom/prometheus:v2.3.1                 "/bin/prometheus --c…"   Up 2 hours
-86f4188d67f6        faucet/gauge:latest                    "/usr/local/bin/entr…"   Up 2 hours
-2e186573532e        faucet/event-adapter-rabbitmq          "/usr/local/bin/entr…"   Up 2 hours
-c0652a6ccd44        influxdb:1.6-alpine                    "/entrypoint.sh infl…"   Up 2 hours
-2a949b5b1687        faucet/faucet:latest                   "/usr/local/bin/entr…"   Up 2 hours
+export POSEIDON_PREFIX=/tmp
 ```
 
-2. You should see "Poseidon successfully started, capturing logs..." in your syslog output:
+Step 1:
+
 ```
-# journalctl -u poseidon | grep capturing
-Jul 25 15:42:20 PoseidonHost poseidon[4273]: Poseidon successfully started, capturing logs...
+poseidon install
 ```
 
-To continue to test (assuming demo installation), please see `/opt/poseidon/docs/demo.txt`, also referenced in the repo above.
+Step 2:
+
+Configure Poseidon for your preferred settings. Open `/opt/poseidon/poseidon.config` (add the Poseidon prefix if you specified one).
+
+If you're planning to use BCF, change values in the `Poseidon` and `Bcf` sections. If using Faucet, make sure to minimally change the `controller_mirror_ports` to match the switch name and port number of your mirror port.  Regardless of which controller you choose, you will need to update the `collector_nic` in the `vent` section to match the interface name of the NIC your mirror port is connected to.
+
+Step 3:
+
+If you want to Poseidon to spin up Faucet for you as well, simply run:
+```
+poseidon start
+```
+
+Otherwise, if using BCF or your own installation of Faucet (note you'll need to wire together the event socket and config reload options yourself if you go this path):
+```
+poseidon start --standalone
+```
 
 ## Troubleshooting
 
 Poseidon by its nature depends on other systems. The following are some common issues and troubleshooting steps.
-
-### Poseidon doesn't start (cannot access Poseidon CLI after a long time).
-
-* Check that vent can use git successfully to checkout the files it needs.
-
-There should be no git checkout errors. If there are, check network connectivity to github, and that */opt/poseidon/.vent_startup.yml* is correct (if you have customized it for development).
-
-```
-# docker exec -ti vent /bin/sh
-/ # tail /root/.vent/vent.log
-2019-11-16 23:49:27,863 - watch:467  - INFO - Attaching to network: "vent" with the following links: [('cyberreboot-vent-redis-v0.9.15', 'redis'), ('cyberreboot-vent-rabbitmq-v0.9.15', 'rabbit')]
-2019-11-16 23:49:27,874 - watch:469  - INFO - Detaching from network: bridge
-2019-11-16 23:49:28,186 - watch:467  - INFO - Attaching to network: "vent" with the following links: [('cyberreboot-vent-redis-v0.9.15', 'redis'), ('cyberreboot-vent-rabbitmq-v0.9.15', 'rabbit')]
-2019-11-16 23:49:28,200 - watch:469  - INFO - Detaching from network: bridge
-2019-11-16 23:49:30,527 - watch:488  - INFO - (True, ['cyberreboot/vent-plugins-p0f:master', 'cyberreboot/networkml:master'])
-2019-11-16 23:49:31,143 - watch:488  - INFO - (True, ['cyberreboot/vent-plugins-p0f:master', 'cyberreboot/networkml:master'])
-2019-11-16 23:49:33,618 - watch:488  - INFO - (True, ['cyberreboot/vent-plugins-p0f:master', 'cyberreboot/networkml:master'])
-2019-11-16 23:49:40,191 - watch:467  - INFO - Attaching to network: "vent" with the following links: [('cyberreboot-vent-redis-v0.9.15', 'redis'), ('cyberreboot-vent-rabbitmq-v0.9.15', 'rabbit')]
-2019-11-16 23:49:40,735 - watch:469  - INFO - Detaching from network: bridge
-2019-11-16 23:49:48,008 - watch:488  - INFO - (True, ['cyberreboot/vent-plugins-p0f:master', 'cyberreboot/networkml:master'])
-/ # grep git /root/.vent/vent.log
-/ #
-```
 
 ### Poseidon doesn't detect any hosts.
 
@@ -264,20 +209,22 @@ The most common cause of this problem, with the FAUCET controller, is RabbitMQ c
 
 * Check that FAUCET.Event messages are being received by Poseidon.
 
-This command reports the time that the most recent FAUCET.Event message was received by Posiedon.
+This command reports the time that the most recent FAUCET.Event message was received by Poseidon.
 
 If run repeatedly over a couple of minutes this timestamp should increase.
 
 ```
-# wget -q -O- localhost:9304|grep -E ^last_rabbitmq_routing_key_time.+FAUCET.Event
+docker exec -it poseidon_poseidon_1 /bin/sh
+/poseidon # wget -q -O- localhost:9304|grep -E ^last_rabbitmq_routing_key_time.+FAUCET.Event
 last_rabbitmq_routing_key_time{routing_key="FAUCET.Event"} 1.5739482267393966e+09
-# wget -q -O- localhost:9304|grep -E ^last_rabbitmq_routing_key_time.+FAUCET.Event
+/poseidon # wget -q -O- localhost:9304|grep -E ^last_rabbitmq_routing_key_time.+FAUCET.Event
 last_rabbitmq_routing_key_time{routing_key="FAUCET.Event"} 1.5739487978768678e+09
+/poseidon # exit
 ```
 
 ### Poseidon doesn't report any host roles.
 
-* Check that the mirror interface is up and receiving packets. The interface must be up before Posiedon starts.
+* Check that the mirror interface is up and receiving packets (should be configured in `collector_nic`. The interface must be up before Posiedon starts.
 
 ```
 # ifconfig enx0023559c2781
@@ -290,7 +237,7 @@ enx0023559c2781: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
 ```
 
-* Check that there is disk space available and pcaps are being accumulated in */opt/vent_files*
+* Check that there is disk space available and pcaps are being accumulated in */opt/vent_files* (add `POSEIDON_PREFIX` in front if it was used.)
 
 ```
 # find /opt/vent_files -type f -name \*pcap |head -5
@@ -306,18 +253,7 @@ enx0023559c2781: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
 
 ### Modifying Code that Runs in a Docker Container
 
-If installed as described above, poseidon's codebase will be at `/opt/poseidon`.  At this location, a `.vent_startup.yml` file can be edited to point to a fork of the original repository.  Develop and commit changes on the poseidon fork and use `poseidon -r` to reload and see your changes.
-You can verify that it's building against your fork by doing a `docker ps` and the poseidon container will be named off of your fork.
-
-### Modifying Code that Runs on the Host Machine
-
-To make changes to anything outside of the `poseidon` subdirectory you will need to build a new `.deb` and reinstall.
-```
-git clone <YOUR-POSEIDON-FORK>
-cd poseidon
-make build_debian
-sudo dpkg -i dist/poseidon*.deb
-```
+If installed as described above, poseidon's codebase will be at `/opt/poseidon`.  At this location, make changes, then run `poseidon restart`.
 
 ## Network Data Logging
 
@@ -329,15 +265,14 @@ There are two main types of logging at the lowest level. The first is FAUCET eve
 2019-11-21 20:18:41,909 [DEBUG] faucet - got faucet message for l2_learn: {'version': 1, 'time': 1574367516.3555572, 'dp_id': 1, 'dp_name': 'x930', 'event_id': 172760, 'L2_LEARN': {'port_no': 22, 'previous_port_no': None, 'vid': 254, 'eth_src': '0e:00:00:00:00:99', 'eth_dst': '0e:00:00:00:00:01', 'eth_type': 2048, 'l3_src_ip': '192.168.254.3', 'l3_dst_ip': '192.168.254.254'}}
 ```
 
-The second type of logging is host based pcap captures, with most of the application (L4) payload removed. Poseidon causes vent's `vent-ncapture` component (https://github.com/CyberReboot/vent/tree/master/vent/extras/network_tap/ncapture) to capture traffic, which is logged in `/opt/vent_files`. These are used in turn to learn host roles, etc.
+The second type of logging is host based pcap captures, with most of the application (L4) payload removed. Poseidon causes the `ncapture` component (https://github.com/CyberReboot/network-tools/tree/master/network_tap/ncapture) to capture traffic, which is logged in `/opt/vent_files`. These are used in turn to learn host roles, etc.
 
 
 ## Related Components
 
 - [CRviz](https://github.com/CyberReboot/CRviz)
 - [NetworkML](https://github.com/CyberReboot/NetworkML)
-- [Vent](https://github.com/CyberReboot/vent)
-- [Vent-Plugins](https://github.com/CyberReboot/vent-plugins)
+- [network-tools](https://github.com/CyberReboot/network-tools)
 
 ## Additional Info
 
@@ -364,8 +299,9 @@ The second type of logging is host based pcap captures, with most of the applica
 - [License](LICENSE)
 - [Maintainers](MAINTAINERS)
 - [Releases](https://github.com/CyberReboot/poseidon/releases)
-- Tests
+- [Tests](https://travis-ci.org/CyberReboot/poseidon)
 - [Version](VERSION)
 - Videos:
+  - [Installing Poseidon and Faucet together](https://www.youtube.com/watch?v=Qst5oNs5uY0)
   - [Analyzing and Visualizing Networks: The Powerful Combination of Poseidon and CRviz](https://www.youtube.com/watch?v=mTe5ajQRNL0)
   - [Poseidon + Faucet SDN](https://www.youtube.com/watch?v=nOgWze_4HOU)
