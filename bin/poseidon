@@ -66,7 +66,7 @@ function check_args()
                 sudo mkdir -p "$POSEIDON_PREFIX"/opt/poseidon
                 sudo tar -C "$POSEIDON_PREFIX"/opt/poseidon -xvf /tmp/poseidon.tar.gz --strip=1
                 sudo chmod -R 755 "$POSEIDON_PREFIX"/opt/poseidon
-                sudo cp "$POSEIDON_PREFIX"/opt/poseidon/config/poseidon.config "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config
+                sudo cp -n "$POSEIDON_PREFIX"/opt/poseidon/config/poseidon.config "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config
                 rm -f /tmp/poseidon.tar.gz
                 exit
                 ;;
@@ -105,10 +105,17 @@ function check_args()
                 else
                     echo "Checking volumes..."
                     check_files
-                    sudo mkdir -p "$POSEIDON_PREFIX"/opt/grafana
+                    sudo mkdir -p "$POSEIDON_PREFIX"/opt/grafana/provisioning/dashboards
+                    sudo mkdir -p "$POSEIDON_PREFIX"/opt/grafana/dashboards
                     sudo mkdir -p "$POSEIDON_PREFIX"/opt/prometheus
-                    sudo chmod 777 "$POSEIDON_PREFIX"/opt/grafana
+                    sudo chmod -R 777 "$POSEIDON_PREFIX"/opt/grafana
                     sudo chmod 777 "$POSEIDON_PREFIX"/opt/prometheus
+                    sudo cp -n "$POSEIDON_PREFIX"/opt/poseidon/helpers/faucet/gauge.yaml "$POSEIDON_PREFIX"/etc/faucet/gauge.yaml
+                    sudo cp -n "$POSEIDON_PREFIX"/opt/poseidon/helpers/faucet/dashboards.yaml "$POSEIDON_PREFIX"/opt/grafana/provisioning/dashboards/dashboards.yaml
+                    sudo cp -n "$POSEIDON_PREFIX"/opt/poseidon/docs/poseidon_stats.json "$POSEIDON_PREFIX"/opt/grafana/dashboards/poseidon_stats.json
+                    curl -L https://docs.faucet.nz/en/latest/_static/grafana-dashboards/faucet_instrumentation.json > "$POSEIDON_PREFIX"/opt/grafana/dashboards/faucet_instrumentation.json || true
+                    curl -L https://docs.faucet.nz/en/latest/_static/grafana-dashboards/faucet_inventory.json > "$POSEIDON_PREFIX"/opt/grafana/dashboards/faucet_inventory.json || true
+                    curl -L https://docs.faucet.nz/en/latest/_static/grafana-dashboards/faucet_port_statistics.json > "$POSEIDON_PREFIX"/opt/grafana/dashboards/faucet_port_statistics.json || true
                     docker-compose -f docker-compose.yaml -f helpers/faucet/docker-compose-experimental.yaml up --build -d
                 fi
                 echo -n "Waiting for Poseidon to become healthy..."
@@ -127,6 +134,10 @@ function check_args()
                     echo -en "\\b"
                     sleep 0.3
                 done
+                if [ "$2" = "--grafana" ]; then
+                    # TODO check for wget
+                    wget -O- --auth-no-challenge --post-data='{"name":"${DS_PROMETHEUS}","type":"prometheus","access":"proxy","url":"http://prometheus:9090","basicAuth":false,"isDefault":true}' --header="Content-Type: application/json;charset=UTF-8charset=UTF-8" 'http://admin:admin@0.0.0.0:3000/api/datasources'
+                fi
                 echo "Poseidon successfully started."
                 popd > /dev/null 2>&1 || exit
                 exit
@@ -142,7 +153,7 @@ function check_args()
                 ;;
             -u|update)
                 # TODO update this script
-                cp "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config /tmp/poseidon.config 2>/dev/null
+                cp "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config /tmp/poseidon.config || true
                 sudo rm -rf "$POSEIDON_PREFIX"/opt/poseidon
                 if [ -z "$2" ]; then
                     echo "Updating to latest release..."
@@ -151,7 +162,8 @@ function check_args()
                     echo "Updating to $2..."
                     poseidon install "$2"
                 fi
-                mv /tmp/poseidon.config "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config 2>/dev/null
+                sudo mv /tmp/poseidon.config "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config || true
+                echo "Done updating."
                 exit
                 ;;
             -v|viz|visualize)
