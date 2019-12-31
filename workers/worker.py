@@ -6,7 +6,6 @@ import uuid
 
 import docker
 import pika
-import requests
 from redis import StrictRedis
 
 
@@ -21,10 +20,6 @@ def callback(ch, method, properties, body):
     extra_workers = {}
     for worker in workers['workers']:
         file_path = pipeline['file_path']
-        try:
-            session_id = file_path.split('/')[2]
-        except Exception as e:  # pragma: no cover
-            session_id = ''
         if 'id' in pipeline and (('results' in pipeline and pipeline['results']['tool'] in worker['inputs']) or ('file_type' in pipeline and pipeline['file_type'] in worker['inputs'])):
             uid = str(uuid.uuid4()).split('-')[-1]
             name = worker['name'] + '_' + uid
