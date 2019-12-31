@@ -93,7 +93,7 @@ function check_args()
                    poseidon stop
                 fi
                 echo "Starting Poseidon..."
-                pushd `pwd` && cd "$POSEIDON_PREFIX"/opt/poseidon
+                pushd "$(pwd)" && cd "$POSEIDON_PREFIX"/opt/poseidon
                 echo "`pwd`"
                 sudo mkdir -p "$POSEIDON_PREFIX"/opt/redis
                 sudo mkdir -p "$POSEIDON_PREFIX"/opt/vent_files
