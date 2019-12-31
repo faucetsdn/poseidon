@@ -129,7 +129,7 @@ function check_args()
                     sleep 0.3
                 done
                 echo "Poseidon successfully started."
-                popd > /dev/null 2>&1
+                popd > /dev/null 2>&1 || exit
                 exit
                 ;;
             -S|stop)
