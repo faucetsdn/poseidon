@@ -165,7 +165,7 @@ def load_workers():
     return workers
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     queue_name = 'task_queue'
     host = 'messenger'
     main(queue_name, host)
