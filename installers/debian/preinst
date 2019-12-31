@@ -1,9 +1,0 @@
-#!/bin/bash
-
-set -e
-
-red='\e[0;31m'
-endColor='\e[0m'
-
-command -v jq >/dev/null 2>&1 || { echo >&2 -e "${red}jq not installed, please install it first${endColor}"; exit 1; }
-command -v docker >/dev/null 2>&1 || { echo >&2 -e "${red}Docker not installed, please install it first: https://docs.docker.com/install/linux/docker-ce/ubuntu/${endColor}"; exit 1; }

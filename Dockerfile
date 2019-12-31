@@ -1,7 +1,8 @@
-FROM alpine:3.11
+FROM alpine:3.10
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
 LABEL poseidon.namespace="primary"
 
+ENV PYTHONUNBUFFERED 1
 COPY requirements.txt requirements.txt
 COPY healthcheck /healthcheck
 RUN apk upgrade --no-cache && \
@@ -29,13 +30,9 @@ HEALTHCHECK --interval=15s --timeout=15s \
 
 COPY . /poseidon
 WORKDIR /poseidon
-ENV PYTHONPATH /poseidon/poseidon:$PYTHONPATH
-ENV POSEIDON_CONFIG /poseidon/config/poseidon.config
+ENV PYTHONPATH /poseidon:$PYTHONPATH
+RUN mkdir -p /opt/poseidon
+RUN mv /poseidon/config/poseidon.config /opt/poseidon/poseidon.config
+ENV POSEIDON_CONFIG /opt/poseidon/poseidon.config
 
-ENV PYTHONUNBUFFERED 0
-ENV SYS_LOG_HOST NOT_CONFIGURED
-ENV SYS_LOG_PORT 514
-
-EXPOSE 9304
-
-CMD (flask run > /dev/null 2>&1) & (tini -s -- /usr/bin/python3 /poseidon/poseidon/main.py)
+CMD (flask run > /dev/null 2>&1) & (tini -s -- /usr/bin/python3 poseidon/main.py)
