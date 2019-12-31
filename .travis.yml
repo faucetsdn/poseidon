@@ -18,7 +18,7 @@ jobs:
   include:
   - stage: test
     script: /bin/bash --version && /bin/bash -n bin/poseidon && shellcheck -x -e SC2016 -e SC2119 -e SC2129 -e SC2001 -e SC2044 bin/poseidon
-  - script: pip install -r test-requirements.txt && pip install -r api/requirements.txt && py.test -v -vv --cov-report term-missing --cov=. -c .coveragerc
+  - script: pip install -r test-requirements.txt && py.test -v -vv --cov-report term-missing --cov=. -c .coveragerc
 before_install:
   - sudo apt-get update
   - sudo apt-get install docker-ce
