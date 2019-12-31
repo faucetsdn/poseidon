@@ -20,6 +20,8 @@ services:
         volumes:
             - '${POSEIDON_PREFIX}/opt/grafana:/var/lib/grafana'
             - '${POSEIDON_PREFIX}/opt/grafana/provisioning:/etc/grafana/provisioning'
+        networks:
+            - poseidon
     gauge:
         restart: always
         image: 'faucet/gauge:1.9.28'
@@ -30,6 +32,8 @@ services:
             - '${POSEIDON_PREFIX}/etc/faucet:/etc/faucet'
         ports:
             - '6654:6653'
+        networks:
+            - poseidon
     faucet:
         restart: always
         image: 'faucet/faucet:1.9.28'
@@ -43,6 +47,8 @@ services:
             FAUCET_CONFIG_STAT_RELOAD: '1'
             FAUCET_EVENT_SOCK: '1'
             FAUCET_CONFIG_AUTO_REVERT: '1'
+        networks:
+            - poseidon
     rabbitmq_adapter:
         restart: always
         image: 'faucet/event-adapter-rabbitmq:1.9.28'
