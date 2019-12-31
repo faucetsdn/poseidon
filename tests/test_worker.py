@@ -12,3 +12,8 @@ from workers.worker import setup_redis
 
 def test_setup_docker():
     d = setup_docker()
+
+
+def test_load_workers():
+    os.system('cp workers/workers.json workers.json')
+    workers = load_workers()

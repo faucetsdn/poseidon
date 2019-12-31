@@ -160,7 +160,7 @@ def setup_redis(host='redis', port=6379, db=0):
 
 
 def load_workers():
-    with open('/app/workers.json') as json_file:
+    with open('workers.json') as json_file:
         workers = json.load(json_file)
     return workers
 
