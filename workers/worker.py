@@ -108,15 +108,18 @@ def callback(ch, method, properties, body):
     r = setup_redis()
     print('redis: {0}'.format(status))
     if r:
-        r.hmset('status', status)
-        statuses = r.hgetall('status')
-        for s in statuses:
-            statuses[s] = json.loads(statuses[s])
-        for worker in extra_workers:
-            if worker not in statuses:
-                status[worker] = extra_workers[worker]
-        r.hmset('status', status)
-        r.close()
+        try:
+            r.hmset('status', status)
+            statuses = r.hgetall('status')
+            for s in statuses:
+                statuses[s] = json.loads(statuses[s])
+            for worker in extra_workers:
+                if worker not in statuses:
+                    status[worker] = extra_workers[worker]
+            r.hmset('status', status)
+            r.close()
+        except Exception as e:  # pragma: no cover
+            print('Failed to update Redis because: {0}'.format(str(e)))
 
 
 def main(queue_name, host):
