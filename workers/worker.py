@@ -36,12 +36,7 @@ def callback(ch, method, properties, body):
             if 'command' in worker:
                 command = worker['command']
 
-            if worker['name'] == 'ncapture':
-                command[1] = 'pcapfile:' + file_path
-                command[3] = pipeline['id']
-                command.append(os.path.dirname(file_path))
-            else:
-                command.append(file_path)
+            command.append(file_path)
 
             environment = pipeline
             if 'environment' in worker:
@@ -119,7 +114,7 @@ def callback(ch, method, properties, body):
             print('Failed to update Redis because: {0}'.format(str(e)))
 
 
-def main(queue_name, host):
+def main(queue_name, host):  # pragma: no cover
     """Creates the connection to RabbitMQ as a consumer and binds to the queue
     waiting for messages
     """
