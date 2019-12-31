@@ -93,8 +93,7 @@ function check_args()
                    poseidon stop
                 fi
                 echo "Starting Poseidon..."
-                pushd "$(pwd)" && cd "$POSEIDON_PREFIX"/opt/poseidon
-                echo "`pwd`"
+                pushd "$(pwd)" && cd "$POSEIDON_PREFIX"/opt/poseidon || exit
                 sudo mkdir -p "$POSEIDON_PREFIX"/opt/redis
                 sudo mkdir -p "$POSEIDON_PREFIX"/opt/vent_files
                 sudo chmod 777 "$POSEIDON_PREFIX"/opt/redis
@@ -150,7 +149,7 @@ function check_args()
                     poseidon install
                 else
                     echo "Updating to $2..."
-                    poseidon install $2
+                    poseidon install "$2"
                 fi
                 mv /tmp/poseidon.config "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config 2>/dev/null
                 exit
