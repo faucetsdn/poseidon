@@ -3,6 +3,8 @@
 Created on 31 Dec 2019
 @author: cglewis
 """
+import os
+
 from workers.worker import callback
 from workers.worker import load_workers
 from workers.worker import main
