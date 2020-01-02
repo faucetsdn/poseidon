@@ -21,7 +21,7 @@ services:
                     - messenger
     network_tap:
         restart: always
-        image: 'cyberreboot/vent-network-tap:master'
+        image: 'cyberreboot/network-tap:v0.11.0'
         volumes:
             - '/var/run/docker.sock:/var/run/docker.sock'
             - '${POSEIDON_PREFIX}/opt/vent_files:/files'
@@ -40,10 +40,7 @@ services:
             poseidon:
     poseidon_api:
         restart: always
-        image: 'cyberreboot/poseidon-api:master'
-        build:
-            context: api
-            dockerfile: Dockerfile
+        image: 'cyberreboot/poseidon-api:v0.9.0'
         ports:
             - '5000:8000'
         environment:
@@ -54,10 +51,7 @@ services:
                     - poseidon-api
     poseidon:
         restart: always
-        image: 'cyberreboot/poseidon:master'
-        build:
-            context: .
-            dockerfile: Dockerfile
+        image: 'cyberreboot/poseidon:v0.9.0'
         environment:
             PYTHONUNBUFFERED: '1'
         volumes:
@@ -69,10 +63,7 @@ services:
             - poseidon
     workers:
         restart: always
-        image: 'cyberreboot/poseidon-workers:latest'
-        build:
-            context: workers
-            dockerfile: Dockerfile
+        image: 'cyberreboot/poseidon-workers:v0.9.0'
         environment:
             PYTHONUNBUFFERED: '1'
             VOL_PREFIX: '${POSEIDON_PREFIX}'
