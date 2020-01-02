@@ -1,8 +1,7 @@
 {
   "workers": [
     {
-      "image": "cyberreboot/vent-plugins-pcap-to-node-pcap",
-      "version": "v0.1.7",
+      "image": "cyberreboot/pcap-to-node-pcap",
       "inputs": [
         "pcap-dot1q"
       ],
@@ -12,11 +11,11 @@
         "pcap"
       ],
       "stage": "poseidon_poseidon",
+      "version": "v0.11.0",
       "viewableOutput": false
     },
     {
-      "image": "cyberreboot/vent-plugins-tcprewrite-dot1q",
-      "version": "v0.1.7",
+      "image": "cyberreboot/tcprewrite-dot1q",
       "inputs": [
         "ncapture"
       ],
@@ -26,21 +25,10 @@
         "pcap"
       ],
       "stage": "poseidon_poseidon",
+      "version": "v0.11.0",
       "viewableOutput": false
     },
     {
-      "image": "cyberreboot/networkml",
-      "version": "latest",
-      "inputs": [
-        "pcap-splitter"
-      ],
-      "labels": "",
-      "name": "networkml",
-      "outputs": [
-        "rabbitmq"
-      ],
-      "stage": "poseidon_poseidon",
-      "viewableOutput": true,
       "command": [
         "-p"
       ],
@@ -54,11 +42,26 @@
         "RABBIT_QUEUE_NAME": "topic-poseidon-internal",
         "RABBIT_ROUTING_KEY": "poseidon.algos.decider",
         "REDIS": "true"
-      }
+      },
+      "image": "cyberreboot/networkml",
+      "inputs": [
+        "pcap-splitter"
+      ],
+      "labels": "",
+      "name": "networkml",
+      "outputs": [
+        "rabbitmq"
+      ],
+      "stage": "poseidon_poseidon",
+      "version": "v0.4.5",
+      "viewableOutput": true
     },
     {
-      "image": "cyberreboot/vent-plugins-p0f",
-      "version": "v0.1.7",
+      "contentType": "application/json",
+      "environment": {
+        "redis": "true"
+      },
+      "image": "cyberreboot/p0f",
       "inputs": [
         "pcap-splitter"
       ],
@@ -68,11 +71,8 @@
         "rabbitmq"
       ],
       "stage": "poseidon_poseidon",
-      "viewableOutput": true,
-      "contentType": "application/json",
-      "environment": {
-        "redis": "true"
-      }
+      "version": "v0.11.0",
+      "viewableOutput": true
     }
   ]
 }
