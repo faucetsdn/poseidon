@@ -1,3 +1,9 @@
+# v0.9.0 (2020-01-02)
+
+- Updated version of prometheus
+- Moved orchestrator from Vent to docker-compose
+- Removed .deb package now that it can be run with docker-compose
+
 # v0.8.1 (2019-12-19)
 
 - Updated versions of grafana, pytest, pytype, cmd2
