@@ -8,7 +8,6 @@ import ast
 import configparser
 import logging
 import os
-import netifaces  # pytype: disable=import-error
 
 
 class Config():
@@ -45,11 +44,6 @@ class Config():
             'logger_level': 'INFO',
         }
 
-        def valid_interface(name):
-            if name in netifaces.interfaces():
-                return name
-            raise Exception('no such interface: %s' % name)
-
         config_map = {
             'controller_type': ('TYPE', []),
             'controller_uri': ('URI', []),
@@ -62,7 +56,7 @@ class Config():
             'controller_config_file': ('CONFIG_FILE', []),
             'controller_log_file': ('LOG_FILE', []),
             'rules_file': ('RULES_FILE', []),
-            'collector_nic': ('collector_nic', [valid_interface]),
+            'collector_nic': ('collector_nic', []),
             'controller_mirror_ports': ('MIRROR_PORTS', [ast.literal_eval]),
             'automated_acls': ('AUTOMATED_ACLS', [ast.literal_eval]),
             'rabbit_enabled': ('RABBIT_ENABLED', [ast.literal_eval]),
