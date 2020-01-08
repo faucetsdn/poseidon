@@ -36,7 +36,11 @@ class Logger:
             with open('/var/log/poseidon/poseidon.log', 'w'):
                 pass
         # set up logging to file
-        logging.basicConfig(level=level_int[controller['logger_level'].upper()],
+        level_str = controller.get('logger_level', None)
+        level = 0
+        if isinstance(level_str, str):
+            level = level_int.get(level_str.upper(), 0)
+        logging.basicConfig(level=level,
                             format='%(asctime)s [%(levelname)s] %(name)s - %(message)s',
                             filename='/var/log/poseidon/poseidon.log',
                             filemode='a')

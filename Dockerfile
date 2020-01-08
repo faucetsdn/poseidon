@@ -13,7 +13,8 @@ RUN apk upgrade --no-cache && \
     python3-dev \
     py3-paramiko \
     tini \
-    yaml-dev && \
+    yaml-dev \
+    linux-headers && \
     pip3 install --no-cache-dir --upgrade pip==19.1 && \
     pip3 install --no-cache-dir -r requirements.txt && \
     pip3 install --no-cache-dir -r /healthcheck/requirements.txt && \
