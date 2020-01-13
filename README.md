@@ -135,6 +135,22 @@ span-fabric poseidon
 
 BCF is now configured and ready for use with Poseidon.
 
+## Configuring Poseidon
+
+You will need to create a directory and config file on the server where Poseidon will run.
+
+```
+sudo mkdir /opt/poseidon
+sudo cp config/poseidon.config /opt/poseidon
+```
+
+Now, edit this file. You will need to set at minimum:
+
+* controller_type, as appropriate to the controller you are running (see above).
+* collector_nic: must be set to the interface name on the server, that is connected to the switch mirror port.
+* controller_mirror_ports: must be set to the interface on the switch that will be used as the mirror port.
+
+
 ## Starting Poseidon
 
 Poseidon supports an existing Faucet/Gauge, Prometheus/Grafana installation. Or, Poseidon can start all those tasks for you. If you have an existing Faucet/Gauge Prometheus/Gauge et al installation, you will need to integrate Poseidon's Prometheus and Grafana configuration with your existing installation manually. You won't need to do this right away, but until you do you won't be able to see Poseidon's Grafana based dashboards.
