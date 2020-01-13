@@ -70,7 +70,7 @@ Poseidon requires at least Faucet version 1.8.6 or higher.
 
 Unless Poseidon and Faucet are running on the same host, Poseidon will connect to Faucet using SSH.  So you'll need to create an account that can SSH to the machine running Faucet and that has rights to modify the configuration file `faucet.yaml` (currently Poseidon expects it to be in the default `/etc/faucet/faucet.yaml` location and `dps` must all be defined in `faucet.yaml` for Poseidon to update the network posture correctly).
 
-If you have Faucet running already, make use Faucet is started with the following environment variables, which allow Poseidon to change its config, and receive Faucet events:
+If you have Faucet running already, make sure Faucet is started with the following environment variables, which allow Poseidon to change its config, and receive Faucet events:
 
 ```
 export FAUCET_EVENT_SOCK=1
@@ -161,7 +161,7 @@ To start everything run:
 docker-compose -f docker-compose.yaml -f helpers/faucet/docker-compose-experimental.yaml -f helpers/faucet/docker-compose-experimental-faucet.yaml -f helpers/faucet/docker-compose-experimental-monitoring.yaml up -d --build
 ```
 
-If you run Faucet/Grafana and Prometheus/Grafana already, you can run:
+If you run Faucet/Gauge and Prometheus/Grafana already, you can run:
 
 ```
 docker-compose -f docker-compose.yaml -f helpers/faucet/docker-compose-experimental.yaml up -d --build
