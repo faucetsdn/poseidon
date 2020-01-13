@@ -1,0 +1,26 @@
+version: '3.7'
+services:
+    prometheus:
+        restart: always
+        image: 'prom/prometheus:v2.15.2'
+        user: 'root'
+        ports:
+            - '9090:9090'
+        volumes:
+            - '${POSEIDON_PREFIX}/opt/prometheus/:/prometheus'
+            - './helpers/faucet/prometheus-docker-compose.yml:/etc/prometheus/prometheus.yml'
+        networks:
+            - poseidon
+    grafana:
+        restart: always
+        image: 'grafana/grafana:6.5.2'
+        user: 'root'
+        ports:
+            - '3000:3000'
+        volumes:
+            - '${POSEIDON_PREFIX}/opt/grafana:/var/lib/grafana'
+            - '${POSEIDON_PREFIX}/opt/grafana/provisioning:/etc/grafana/provisioning'
+        networks:
+            - poseidon
+networks:
+    poseidon:

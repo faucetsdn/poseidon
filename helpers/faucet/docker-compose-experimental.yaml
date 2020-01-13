@@ -1,54 +1,5 @@
 version: '3.7'
 services:
-    prometheus:
-        restart: always
-        image: 'prom/prometheus:v2.15.2'
-        user: 'root'
-        ports:
-            - '9090:9090'
-        volumes:
-            - '${POSEIDON_PREFIX}/opt/prometheus/:/prometheus'
-            - './helpers/faucet/prometheus-docker-compose.yml:/etc/prometheus/prometheus.yml'
-        networks:
-            - poseidon
-    grafana:
-        restart: always
-        image: 'grafana/grafana:6.5.2'
-        user: 'root'
-        ports:
-            - '3000:3000'
-        volumes:
-            - '${POSEIDON_PREFIX}/opt/grafana:/var/lib/grafana'
-            - '${POSEIDON_PREFIX}/opt/grafana/provisioning:/etc/grafana/provisioning'
-        networks:
-            - poseidon
-    gauge:
-        restart: always
-        image: 'faucet/gauge:1.9.28'
-        environment:
-            GAUGE_CONFIG: '/etc/faucet/gauge.yaml'
-        volumes:
-            - '${POSEIDON_PREFIX}/var/log/faucet:/var/log/faucet'
-            - '${POSEIDON_PREFIX}/etc/faucet:/etc/faucet'
-        ports:
-            - '6654:6653'
-        networks:
-            - poseidon
-    faucet:
-        restart: always
-        image: 'faucet/faucet:1.9.28'
-        volumes:
-            - '${POSEIDON_PREFIX}/var/log/faucet:/var/log/faucet'
-            - '${POSEIDON_PREFIX}/var/run/faucet:/var/run/faucet'
-            - '${POSEIDON_PREFIX}/etc/faucet:/etc/faucet'
-        ports:
-            - '6653:6653'
-        environment:
-            FAUCET_CONFIG_STAT_RELOAD: '1'
-            FAUCET_EVENT_SOCK: '1'
-            FAUCET_CONFIG_AUTO_REVERT: '1'
-        networks:
-            - poseidon
     rabbitmq_adapter:
         restart: always
         image: 'faucet/event-adapter-rabbitmq:1.9.28'
