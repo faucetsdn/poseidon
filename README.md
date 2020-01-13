@@ -56,6 +56,10 @@ Followed by closing the existing shell and starting a new one.
 
 ### Getting the bits
 
+*NOTE: If you have previously installed Poseidon from a .deb package, please remove it first. Installation from .deb is no longer supported.*
+
+Install the poseidon script which we will use to install and manage Poseidon.
+
 ```
 curl -L https://raw.githubusercontent.com/CyberReboot/poseidon/master/bin/poseidon -o /usr/local/bin/poseidon
 chmod +x /usr/local/bin/poseidon
@@ -150,22 +154,6 @@ Now, edit this file. You will need to set at minimum:
 * collector_nic: must be set to the interface name on the server, that is connected to the switch mirror port.
 * controller_mirror_ports: must be set to the interface on the switch that will be used as the mirror port.
 
-
-## Starting Poseidon
-
-Poseidon supports an existing Faucet/Gauge, Prometheus/Grafana installation. Or, Poseidon can start all those tasks for you. If you have an existing Faucet/Gauge Prometheus/Gauge et al installation, you will need to integrate Poseidon's Prometheus and Grafana configuration with your existing installation manually. You won't need to do this right away, but until you do you won't be able to see Poseidon's Grafana based dashboards.
-
-To start everything run:
-
-```
-docker-compose -f docker-compose.yaml -f helpers/faucet/docker-compose-experimental.yaml -f helpers/faucet/docker-compose-experimental-faucet.yaml -f helpers/faucet/docker-compose-experimental-monitoring.yaml up -d --build
-```
-
-If you run Faucet/Gauge and Prometheus/Grafana already, you can run:
-
-```
-docker-compose -f docker-compose.yaml -f helpers/faucet/docker-compose-experimental.yaml up -d --build
-```
 
 ## Usage
 
