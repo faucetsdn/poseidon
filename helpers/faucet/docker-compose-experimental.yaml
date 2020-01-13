@@ -3,8 +3,6 @@ services:
     rabbitmq_adapter:
         restart: always
         image: 'faucet/event-adapter-rabbitmq:1.9.28'
-        depends_on:
-            - faucet
         volumes:
             - '${POSEIDON_PREFIX}/var/run/faucet:/var/run/faucet'
         environment:
