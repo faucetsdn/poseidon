@@ -29,14 +29,15 @@ function die()
 
 function tmpdir()
 {
-    local out=$(mktemp -d)
-    echo $out
+    local out
+    out=$(mktemp -d)
+    echo "$out"
 }
 
 function check_args()
 {
     for req_cmd in curl docker docker-compose jq wget ; do
-            $($req_cmd --help > /dev/null) || die "$req_cmd must be installed"
+            $req_cmd --help > /dev/null || die "$req_cmd must be installed"
     done
 
     while :; do
@@ -70,15 +71,15 @@ function check_args()
                 tardir=$(tmpdir)
                 tarfile=$tardir/poseidon.tar.gz
                 if [ -z "$2" ]; then
-                    curl -s https://api.github.com/repos/cyberreboot/poseidon/releases/latest | jq '.["tarball_url"]' | xargs curl -L > $tarfile
+                    curl -s https://api.github.com/repos/cyberreboot/poseidon/releases/latest | jq '.["tarball_url"]' | xargs curl -L > "$tarfile"
                 else
-                    curl -L https://github.com/cyberreboot/poseidon/tarball/"$2" > $tarfile
+                    curl -L https://github.com/cyberreboot/poseidon/tarball/"$2" > "$tarfile"
                 fi
                 sudo mkdir -p "$POSEIDON_PREFIX"/opt/poseidon
-                sudo tar -C "$POSEIDON_PREFIX"/opt/poseidon -xvf $tarfile --strip=1
+                sudo tar -C "$POSEIDON_PREFIX"/opt/poseidon -xvf "$tarfile" --strip=1
                 sudo chmod -R 755 "$POSEIDON_PREFIX"/opt/poseidon
                 sudo cp -n "$POSEIDON_PREFIX"/opt/poseidon/config/poseidon.config "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config
-                rm -rf $tardir
+                rm -rf "$tardir"
                 exit
                 ;;
             -l|logs)
@@ -132,7 +133,7 @@ function check_args()
                     curl -L https://docs.faucet.nz/en/latest/_static/grafana-dashboards/faucet_port_statistics.json > "$POSEIDON_PREFIX"/opt/grafana/dashboards/faucet_port_statistics.json || true
                     composefiles="$composefiles -f helpers/faucet/docker-compose-experimental-faucet.yaml -f helpers/faucet/docker-compose-experimental-monitoring.yaml"
                 fi
-                $(docker-compose $composefiles up -d --build) || die "docker-compose returned an error"
+                docker-compose $composefiles up -d --build || die "docker-compose returned an error"
                 echo -n "Waiting for Poseidon to become healthy..."
                 until [ "$(docker ps -q --filter "label=com.docker.compose.service=poseidon")" ] && [ "$(docker inspect poseidon_poseidon_1 -f \{\{.State.Health.Status\}\})" = "healthy" ]
                 do
@@ -167,7 +168,7 @@ function check_args()
                 ;;
             -u|update)
                 configdir=$(tmpdir)
-                cp "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config $configdir || true
+                cp "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config "$configdir" || true
                 sudo rm -rf "$POSEIDON_PREFIX"/opt/poseidon
                 if [ -z "$2" ]; then
                     echo "Updating to latest release..."
@@ -177,7 +178,7 @@ function check_args()
                     poseidon install "$2"
                 fi
                 sudo mv $configdir/poseidon.config "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config || true
-                rm -rf $configdir
+                rm -rf "$configdir"
                 echo "Done updating."
                 exit
                 ;;
