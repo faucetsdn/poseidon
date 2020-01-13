@@ -27,8 +27,19 @@ function die()
     exit 1
 }
 
+function tmpdir()
+{
+    local out
+    out=$(mktemp -d)
+    echo "$out"
+}
+
 function check_args()
 {
+    for req_cmd in curl docker docker-compose jq wget ; do
+            $req_cmd --help > /dev/null || die "$req_cmd must be installed"
+    done
+
     while :; do
         case $1 in
             -a|api)
@@ -57,17 +68,18 @@ function check_args()
                 exit
                 ;;
             -i|install)
-                # TODO check for docker, curl, jq
+                tardir=$(tmpdir)
+                tarfile=$tardir/poseidon.tar.gz
                 if [ -z "$2" ]; then
-                    curl -s https://api.github.com/repos/cyberreboot/poseidon/releases/latest | jq '.["tarball_url"]' | xargs curl -L > /tmp/poseidon.tar.gz
+                    curl -s https://api.github.com/repos/cyberreboot/poseidon/releases/latest | jq '.["tarball_url"]' | xargs curl -L > "$tarfile"
                 else
-                    curl -L https://github.com/cyberreboot/poseidon/tarball/"$2" > /tmp/poseidon.tar.gz
+                    curl -L https://github.com/cyberreboot/poseidon/tarball/"$2" > "$tarfile"
                 fi
                 sudo mkdir -p "$POSEIDON_PREFIX"/opt/poseidon
-                sudo tar -C "$POSEIDON_PREFIX"/opt/poseidon -xvf /tmp/poseidon.tar.gz --strip=1
+                sudo tar -C "$POSEIDON_PREFIX"/opt/poseidon -xvf "$tarfile" --strip=1
                 sudo chmod -R 755 "$POSEIDON_PREFIX"/opt/poseidon
                 sudo cp -n "$POSEIDON_PREFIX"/opt/poseidon/config/poseidon.config "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config
-                rm -f /tmp/poseidon.tar.gz
+                rm -rf "$tardir"
                 exit
                 ;;
             -l|logs)
@@ -94,30 +106,34 @@ function check_args()
                 fi
                 echo "Starting Poseidon..."
                 pushd "$(pwd)" && cd "$POSEIDON_PREFIX"/opt/poseidon || exit
-                sudo mkdir -p "$POSEIDON_PREFIX"/opt/redis
-                sudo mkdir -p "$POSEIDON_PREFIX"/opt/vent_files
-                sudo chmod 777 "$POSEIDON_PREFIX"/opt/redis
-                sudo chmod 777 "$POSEIDON_PREFIX"/opt/vent_files
+                sudo mkdir -p "$POSEIDON_PREFIX"/opt/redis "$POSEIDON_PREFIX"/opt/vent_files
+                sudo chmod 777 "$POSEIDON_PREFIX"/opt/redis "$POSEIDON_PREFIX"/opt/vent_files
                 sudo touch "$POSEIDON_PREFIX"/opt/poseidon/.poseidon_history
                 sudo chmod 777 "$POSEIDON_PREFIX"/opt/poseidon/.poseidon_history
-                if [ "$2" = "--standalone" ]; then
-                    docker-compose -f docker-compose.yaml up --build -d
-                else
+                composefiles="-f docker-compose.yaml -f helpers/faucet/docker-compose-experimental.yaml"
+                installtype="--complete"
+                if [ "$2" != "" ] ; then
+                    installtype="$2"
+                fi
+                if [ "$installtype" = "--standalone" ]; then
+                    # Start only Poseidon and RabbitMQ adapter - assume Faucet/Gauge and Prometheus/Grafana already running.
+                    echo "Starting Poseidon with RabbitMQ adapter only."
+                fi
+                if [ "$installtype" = "--complete" ] ; then
+                    echo "Starting Poseidon with FAUCET, Gauge, Prometheus and Grafana."
                     echo "Checking volumes..."
                     check_files
-                    sudo mkdir -p "$POSEIDON_PREFIX"/opt/grafana/provisioning/dashboards
-                    sudo mkdir -p "$POSEIDON_PREFIX"/opt/grafana/dashboards
-                    sudo mkdir -p "$POSEIDON_PREFIX"/opt/prometheus
-                    sudo chmod -R 777 "$POSEIDON_PREFIX"/opt/grafana
-                    sudo chmod 777 "$POSEIDON_PREFIX"/opt/prometheus
+                    sudo mkdir -p "$POSEIDON_PREFIX"/opt/grafana/provisioning/dashboards "$POSEIDON_PREFIX"/opt/grafana/dashboards "$POSEIDON_PREFIX"/opt/prometheus
+                    sudo chmod -R 777 "$POSEIDON_PREFIX"/opt/grafana chmod 777 "$POSEIDON_PREFIX"/opt/prometheus
                     sudo cp -n "$POSEIDON_PREFIX"/opt/poseidon/helpers/faucet/gauge.yaml "$POSEIDON_PREFIX"/etc/faucet/gauge.yaml
                     sudo cp -n "$POSEIDON_PREFIX"/opt/poseidon/helpers/faucet/dashboards.yaml "$POSEIDON_PREFIX"/opt/grafana/provisioning/dashboards/dashboards.yaml
                     sudo cp -n "$POSEIDON_PREFIX"/opt/poseidon/docs/poseidon_stats.json "$POSEIDON_PREFIX"/opt/grafana/dashboards/poseidon_stats.json
                     curl -L https://docs.faucet.nz/en/latest/_static/grafana-dashboards/faucet_instrumentation.json > "$POSEIDON_PREFIX"/opt/grafana/dashboards/faucet_instrumentation.json || true
                     curl -L https://docs.faucet.nz/en/latest/_static/grafana-dashboards/faucet_inventory.json > "$POSEIDON_PREFIX"/opt/grafana/dashboards/faucet_inventory.json || true
                     curl -L https://docs.faucet.nz/en/latest/_static/grafana-dashboards/faucet_port_statistics.json > "$POSEIDON_PREFIX"/opt/grafana/dashboards/faucet_port_statistics.json || true
-                    docker-compose -f docker-compose.yaml -f helpers/faucet/docker-compose-experimental.yaml up --build -d
+                    composefiles="$composefiles -f helpers/faucet/docker-compose-experimental-faucet.yaml -f helpers/faucet/docker-compose-experimental-monitoring.yaml"
                 fi
+                docker-compose "$composefiles" up -d --build || die "docker-compose returned an error"
                 echo -n "Waiting for Poseidon to become healthy..."
                 until [ "$(docker ps -q --filter "label=com.docker.compose.service=poseidon")" ] && [ "$(docker inspect poseidon_poseidon_1 -f \{\{.State.Health.Status\}\})" = "healthy" ]
                 do
@@ -135,7 +151,6 @@ function check_args()
                     sleep 0.3
                 done
                 if [ "$2" = "--grafana" ]; then
-                    # TODO check for wget
                     wget -O- --auth-no-challenge --post-data='{"name":"${DS_PROMETHEUS}","type":"prometheus","access":"proxy","url":"http://prometheus:9090","basicAuth":false,"isDefault":true}' --header="Content-Type: application/json;charset=UTF-8charset=UTF-8" 'http://admin:admin@0.0.0.0:3000/api/datasources'
                 fi
                 echo "Poseidon successfully started."
@@ -153,7 +168,8 @@ function check_args()
                 ;;
             -u|update)
                 # TODO update this script
-                cp "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config /tmp/poseidon.config || true
+                configdir=$(tmpdir)
+                cp "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config "$configdir" || true
                 sudo rm -rf "$POSEIDON_PREFIX"/opt/poseidon
                 if [ -z "$2" ]; then
                     echo "Updating to latest release..."
@@ -162,7 +178,8 @@ function check_args()
                     echo "Updating to $2..."
                     poseidon install "$2"
                 fi
-                sudo mv /tmp/poseidon.config "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config || true
+                sudo mv "$configdir/poseidon.config" "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config || true
+                rm -rf "$configdir"
                 echo "Done updating."
                 exit
                 ;;
