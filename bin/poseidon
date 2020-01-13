@@ -35,7 +35,7 @@ function tmpdir()
 
 function check_args()
 {
-    for req_cmd in curl docker docker-compose jq wget xxx ; do
+    for req_cmd in curl docker docker-compose jq wget ; do
             $($req_cmd --help > /dev/null) || die "$req_cmd must be installed"
     done
 
