@@ -36,7 +36,7 @@ The Poseidon project originally began as an experiment to test the merits of lev
 ## Prerequisites
 
 - [Docker](https://www.docker.com/) - Poseidon and related components run on top of Docker, so understanding the fundamentals will be useful for troubleshooting as well.  Note: installing via Snap is currently unsupported. [A Good Ubuntu Docker Quick-Start](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04)
-- [Compose](https://docs.docker.com/compose/) - Poseidon is orchestrated with docker-compose.
+- [Compose](https://docs.docker.com/compose/) - Poseidon is orchestrated with [docker-compose](https://docs.docker.com/compose/install/). You will need a version that supports compose file format version 3.
 - [Curl](https://curl.haxx.se/download.html) - command-line for transferring data with URLs.
 - [jq](https://stedolan.github.io/jq/download/) - command-line JSON processor.
 - An SDN Controller - specifically [BigSwitch Cloud Fabric](https://www.bigswitch.com/community-edition) or [Faucet](https://faucet.nz/)
@@ -56,6 +56,10 @@ Followed by closing the existing shell and starting a new one.
 
 ### Getting the bits
 
+*NOTE: If you have previously installed Poseidon from a .deb package, please remove it first. Installation from .deb is no longer supported.*
+
+Install the poseidon script which we will use to install and manage Poseidon.
+
 ```
 curl -L https://raw.githubusercontent.com/CyberReboot/poseidon/master/bin/poseidon -o /usr/local/bin/poseidon
 chmod +x /usr/local/bin/poseidon
@@ -70,13 +74,12 @@ Poseidon requires at least Faucet version 1.8.6 or higher.
 
 Unless Poseidon and Faucet are running on the same host, Poseidon will connect to Faucet using SSH.  So you'll need to create an account that can SSH to the machine running Faucet and that has rights to modify the configuration file `faucet.yaml` (currently Poseidon expects it to be in the default `/etc/faucet/faucet.yaml` location and `dps` must all be defined in `faucet.yaml` for Poseidon to update the network posture correctly).
 
-Faucet needs to be started with the following environment variables set:
+If you have Faucet running already, make sure Faucet is started with the following environment variables, which allow Poseidon to change its config, and receive Faucet events:
+
 ```
 export FAUCET_EVENT_SOCK=1
 export FAUCET_CONFIG_STAT_RELOAD=1
 ```
-
-If using the [RabbitMQ adapter for Faucet](https://github.com/faucetsdn/faucet/tree/master/adapters/vendors/rabbitmq) (recommended) make sure to also export `FA_RABBIT_HOST` to the IP address of the host where Poseidon is running.
 
 Faucet is now configured and ready for use with Poseidon.
 
@@ -135,6 +138,22 @@ span-fabric poseidon
 ```
 
 BCF is now configured and ready for use with Poseidon.
+
+## Configuring Poseidon
+
+You will need to create a directory and config file on the server where Poseidon will run.
+
+```
+sudo mkdir /opt/poseidon
+sudo cp config/poseidon.config /opt/poseidon
+```
+
+Now, edit this file. You will need to set at minimum:
+
+* controller_type, as appropriate to the controller you are running (see above).
+* collector_nic: must be set to the interface name on the server, that is connected to the switch mirror port.
+* controller_mirror_ports: must be set to the interface on the switch that will be used as the mirror port.
+
 
 ## Usage
 
