@@ -105,30 +105,34 @@ function check_args()
                 fi
                 echo "Starting Poseidon..."
                 pushd "$(pwd)" && cd "$POSEIDON_PREFIX"/opt/poseidon || exit
-                sudo mkdir -p "$POSEIDON_PREFIX"/opt/redis
-                sudo mkdir -p "$POSEIDON_PREFIX"/opt/vent_files
-                sudo chmod 777 "$POSEIDON_PREFIX"/opt/redis
-                sudo chmod 777 "$POSEIDON_PREFIX"/opt/vent_files
+                sudo mkdir -p "$POSEIDON_PREFIX"/opt/redis "$POSEIDON_PREFIX"/opt/vent_files
+                sudo chmod 777 "$POSEIDON_PREFIX"/opt/redis "$POSEIDON_PREFIX"/opt/vent_files
                 sudo touch "$POSEIDON_PREFIX"/opt/poseidon/.poseidon_history
                 sudo chmod 777 "$POSEIDON_PREFIX"/opt/poseidon/.poseidon_history
-                if [ "$2" = "--standalone" ]; then
-                    docker-compose -f docker-compose.yaml up --build -d
-                else
+                composefiles="-f docker-compose.yaml -f helpers/faucet/docker-compose-experimental.yaml"
+                installtype="--complete"
+                if [ "$2" != "" ] ; then
+                    installtype="$2"
+                fi
+                if [ "$installtype" = "--standalone" ]; then
+                    # Start only Poseidon and RabbitMQ adapter - assume Faucet/Gauge and Prometheus/Grafana already running.
+                    echo "Starting Poseidon with RabbitMQ adapter only."
+                fi
+                if [ "$installtype" = "--complete" ] ; then
+                    echo "Starting Poseidon with FAUCET, Gauge, Prometheus and Grafana."
                     echo "Checking volumes..."
                     check_files
-                    sudo mkdir -p "$POSEIDON_PREFIX"/opt/grafana/provisioning/dashboards
-                    sudo mkdir -p "$POSEIDON_PREFIX"/opt/grafana/dashboards
-                    sudo mkdir -p "$POSEIDON_PREFIX"/opt/prometheus
-                    sudo chmod -R 777 "$POSEIDON_PREFIX"/opt/grafana
-                    sudo chmod 777 "$POSEIDON_PREFIX"/opt/prometheus
+                    sudo mkdir -p "$POSEIDON_PREFIX"/opt/grafana/provisioning/dashboards "$POSEIDON_PREFIX"/opt/grafana/dashboards "$POSEIDON_PREFIX"/opt/prometheus
+                    sudo chmod -R 777 "$POSEIDON_PREFIX"/opt/grafana chmod 777 "$POSEIDON_PREFIX"/opt/prometheus
                     sudo cp -n "$POSEIDON_PREFIX"/opt/poseidon/helpers/faucet/gauge.yaml "$POSEIDON_PREFIX"/etc/faucet/gauge.yaml
                     sudo cp -n "$POSEIDON_PREFIX"/opt/poseidon/helpers/faucet/dashboards.yaml "$POSEIDON_PREFIX"/opt/grafana/provisioning/dashboards/dashboards.yaml
                     sudo cp -n "$POSEIDON_PREFIX"/opt/poseidon/docs/poseidon_stats.json "$POSEIDON_PREFIX"/opt/grafana/dashboards/poseidon_stats.json
                     curl -L https://docs.faucet.nz/en/latest/_static/grafana-dashboards/faucet_instrumentation.json > "$POSEIDON_PREFIX"/opt/grafana/dashboards/faucet_instrumentation.json || true
                     curl -L https://docs.faucet.nz/en/latest/_static/grafana-dashboards/faucet_inventory.json > "$POSEIDON_PREFIX"/opt/grafana/dashboards/faucet_inventory.json || true
                     curl -L https://docs.faucet.nz/en/latest/_static/grafana-dashboards/faucet_port_statistics.json > "$POSEIDON_PREFIX"/opt/grafana/dashboards/faucet_port_statistics.json || true
-                    docker-compose -f docker-compose.yaml -f helpers/faucet/docker-compose-experimental.yaml up --build -d
+                    composefiles="$composefiles -f helpers/faucet/docker-compose-experimental-faucet.yaml -f helpers/faucet/docker-compose-experimental-monitoring.yaml"
                 fi
+                $(docker-compose $composefiles up -d --build) || die "docker-compose returned an error"
                 echo -n "Waiting for Poseidon to become healthy..."
                 until [ "$(docker ps -q --filter "label=com.docker.compose.service=poseidon")" ] && [ "$(docker inspect poseidon_poseidon_1 -f \{\{.State.Health.Status\}\})" = "healthy" ]
                 do
