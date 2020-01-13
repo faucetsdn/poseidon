@@ -75,7 +75,7 @@ function check_args()
                     curl -L https://github.com/cyberreboot/poseidon/tarball/"$2" > $tarfile
                 fi
                 sudo mkdir -p "$POSEIDON_PREFIX"/opt/poseidon
-                sudo tar -C "$POSEIDON_PREFIX"/opt/poseidon -xvf /tmp/poseidon.tar.gz --strip=1
+                sudo tar -C "$POSEIDON_PREFIX"/opt/poseidon -xvf $tarfile --strip=1
                 sudo chmod -R 755 "$POSEIDON_PREFIX"/opt/poseidon
                 sudo cp -n "$POSEIDON_PREFIX"/opt/poseidon/config/poseidon.config "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config
                 rm -rf $tardir
