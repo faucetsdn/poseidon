@@ -106,11 +106,11 @@ function check_args()
                 fi
                 echo "Starting Poseidon..."
                 pushd "$(pwd)" && cd "$POSEIDON_PREFIX"/opt/poseidon || exit
-                sudo mkdir -p "$POSEIDON_PREFIX"/opt/redis "$POSEIDON_PREFIX"/opt/vent_files
-                sudo chmod 777 "$POSEIDON_PREFIX"/opt/redis "$POSEIDON_PREFIX"/opt/vent_files
+                sudo mkdir -p "$POSEIDON_PREFIX"/opt/redis "$POSEIDON_PREFIX"/opt/poseidon_files
+                sudo chmod 777 "$POSEIDON_PREFIX"/opt/redis "$POSEIDON_PREFIX"/opt/poseidon_files
                 sudo touch "$POSEIDON_PREFIX"/opt/poseidon/.poseidon_history
                 sudo chmod 777 "$POSEIDON_PREFIX"/opt/poseidon/.poseidon_history
-                composefiles="-f docker-compose.yaml -f helpers/faucet/docker-compose-experimental.yaml"
+                composefiles="-f docker-compose.yaml -f helpers/faucet/docker-compose.yaml"
                 installtype="--complete"
                 if [ "$2" != "" ] ; then
                     installtype="$2"
@@ -131,7 +131,7 @@ function check_args()
                     curl -L https://docs.faucet.nz/en/latest/_static/grafana-dashboards/faucet_instrumentation.json > "$POSEIDON_PREFIX"/opt/grafana/dashboards/faucet_instrumentation.json || true
                     curl -L https://docs.faucet.nz/en/latest/_static/grafana-dashboards/faucet_inventory.json > "$POSEIDON_PREFIX"/opt/grafana/dashboards/faucet_inventory.json || true
                     curl -L https://docs.faucet.nz/en/latest/_static/grafana-dashboards/faucet_port_statistics.json > "$POSEIDON_PREFIX"/opt/grafana/dashboards/faucet_port_statistics.json || true
-                    composefiles="$composefiles -f helpers/faucet/docker-compose-experimental-faucet.yaml -f helpers/faucet/docker-compose-experimental-monitoring.yaml"
+                    composefiles="$composefiles -f helpers/faucet/docker-compose-faucet.yaml -f helpers/faucet/docker-compose-monitoring.yaml"
                 fi
                 docker-compose "$composefiles" up -d --build || die "docker-compose returned an error"
                 echo -n "Waiting for Poseidon to become healthy..."

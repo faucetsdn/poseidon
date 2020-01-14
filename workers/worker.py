@@ -43,7 +43,7 @@ def callback(ch, method, properties, body):
                                  name=name,
                                  network=worker['stage'],
                                  volumes={
-                                     vol_prefix + '/opt/vent_files': {'bind': '/files', 'mode': 'rw'}},
+                                     vol_prefix + '/opt/poseidon_files': {'bind': '/files', 'mode': 'rw'}},
                                  environment=environment,
                                  remove=True,
                                  command=command,

@@ -2,14 +2,14 @@ version: '3.7'
 services:
     redis:
         restart: always
-        image: 'cyberreboot/vent-redis:v0.10.1'
+        image: 'cyberreboot/redis:latest'
         volumes:
             - '${POSEIDON_PREFIX}/opt/redis:/data'
         networks:
             poseidon:
     rabbit:
         restart: always
-        image: 'cyberreboot/vent-rabbitmq:v0.10.1'
+        image: 'cyberreboot/rabbitmq:latest'
         ports:
             - '127.0.0.1:15672:15672'
             - '5672:5672'
@@ -24,13 +24,11 @@ services:
         image: 'cyberreboot/network-tap:v0.11.0'
         volumes:
             - '/var/run/docker.sock:/var/run/docker.sock'
-            - '${POSEIDON_PREFIX}/opt/vent_files:/files'
+            - '${POSEIDON_PREFIX}/opt/poseidon_files:/files'
         environment:
             PYTHONUNBUFFERED: '1'
         networks:
             poseidon:
-                aliases:
-                    - vent_ip
     crviz:
         restart: always
         image: 'cyberreboot/crviz:v0.3.17'
