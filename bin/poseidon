@@ -167,7 +167,6 @@ function check_args()
                 exit
                 ;;
             -u|update)
-                # TODO update this script
                 configdir=$(tmpdir)
                 cp "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config "$configdir" || true
                 sudo rm -rf "$POSEIDON_PREFIX"/opt/poseidon
@@ -180,6 +179,9 @@ function check_args()
                 fi
                 sudo mv "$configdir/poseidon.config" "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config || true
                 rm -rf "$configdir"
+                # update this script
+                curl -L https://raw.githubusercontent.com/CyberReboot/poseidon/master/bin/poseidon -o /usr/local/bin/poseidon
+                chmod +x /usr/local/bin/poseidon
                 echo "Done updating."
                 exit
                 ;;
