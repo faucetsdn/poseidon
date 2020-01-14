@@ -133,7 +133,7 @@ function check_args()
                     curl -L https://docs.faucet.nz/en/latest/_static/grafana-dashboards/faucet_port_statistics.json > "$POSEIDON_PREFIX"/opt/grafana/dashboards/faucet_port_statistics.json || true
                     composefiles="$composefiles -f helpers/faucet/docker-compose-faucet.yaml -f helpers/faucet/docker-compose-monitoring.yaml"
                 fi
-                docker-compose $(echo "$composefiles") up -d --build || die "docker-compose returned an error"
+                docker-compose ${composefiles} up -d --build || die "docker-compose returned an error"
                 echo -n "Waiting for Poseidon to become healthy..."
                 until [ "$(docker ps -q --filter "label=com.docker.compose.service=poseidon")" ] && [ "$(docker inspect poseidon_poseidon_1 -f \{\{.State.Health.Status\}\})" = "healthy" ]
                 do
