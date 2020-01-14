@@ -104,13 +104,13 @@ span-fabric <name>
 
 ##### Interface Group
 
-Replace `<interface-group>` with the name of your interface-group. Additionally fill in the `YOUR_LEAF_SWITCH` and `YOUR_INTERFACE_WHERE_VENT_WILL_RECORD_TRAFFIC_FROM`.
+Replace `<interface-group>` with the name of your interface-group. Additionally fill in the `YOUR_LEAF_SWITCH` and `YOUR_INTERFACE_WHERE_POSEIDON_WILL_RECORD_TRAFFIC_FROM`.
 ```
 ! interface-group
 interface-group <interface-group>
   description 'packets get mirrored here to be processed'
   mode span-fabric
-  member switch YOUR_LEAF_SWITCH interface YOUR_INTERFACE_WHERE_VENT_WILL_RECORD_TRAFFIC_FROM
+  member switch YOUR_LEAF_SWITCH interface YOUR_INTERFACE_WHERE_POSEIDON_WILL_RECORD_TRAFFIC_FROM
 ```
 
 Poseidon will connect to the BCF controller using its REST API, so you will also need the BCF API hostname or IP address and credentials for the controller. If your controller is an HA pair and has a virtual IP address, we recommend using that virtual address. Also, because Poseidon will be making dynamic `filter` rule changes we will need an account that has administrative privileges.  (Poseidon only modifies the filter rules of the defined span-fabric, but until BigSwitch has more granular access control options this means admin privs!) Bringing the above configuration requirements together, below is an example of what the relevant parts of your BCF configuration could look like where the span-fabric is called 'poseidon', the user 'poseidon' is defined for API access, and the egress interface is interface '48' on switch 'leaf04' and labelled as interface group 'ig1':
@@ -197,7 +197,7 @@ Step 2:
 
 Configure Poseidon for your preferred settings. Open `/opt/poseidon/poseidon.config` (add the Poseidon prefix if you specified one).
 
-If you're planning to use BCF, change values in the `Poseidon` and `Bcf` sections. If using Faucet, make sure to minimally change the `controller_mirror_ports` to match the switch name and port number of your mirror port.  Regardless of which controller you choose, you will need to update the `collector_nic` in the `vent` section to match the interface name of the NIC your mirror port is connected to.
+If you're planning to use BCF, change values in the `Poseidon` and `Bcf` sections. If using Faucet, make sure to minimally change the `controller_mirror_ports` to match the switch name and port number of your mirror port.  Regardless of which controller you choose, you will need to update the `collector_nic` in the `poseidon` section to match the interface name of the NIC your mirror port is connected to.
 
 Step 3:
 
@@ -256,15 +256,15 @@ enx0023559c2781: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
 ```
 
-* Check that there is disk space available and pcaps are being accumulated in */opt/vent_files* (add `POSEIDON_PREFIX` in front if it was used.)
+* Check that there is disk space available and pcaps are being accumulated in */opt/poseidon_files* (add `POSEIDON_PREFIX` in front if it was used.)
 
 ```
-# find /opt/vent_files -type f -name \*pcap |head -5
-/opt/vent_files/trace_d3f3217106acd75fe7b5c7069a84a227c9e48377_2019-11-15_03_10_41.pcap
-/opt/vent_files/tcprewrite-dot1q-2019-11-15-06_26_48.529473-UTC/pcap-node-splitter-2019-11-15-06_26_50.192570-UTC/clients/trace_0a6ce9490c193b65c3cad51fffbadeaed4ed5fdd_2019-11-15_06_11_24-client-ip-216-58-196-147-192-168-254-254-216-58-196-147-vssmonitoring-frame-eth-ip-icmp.pcap
-/opt/vent_files/tcprewrite-dot1q-2019-11-15-06_26_48.529473-UTC/pcap-node-splitter-2019-11-15-06_26_50.192570-UTC/clients/trace_0a6ce9490c193b65c3cad51fffbadeaed4ed5fdd_2019-11-15_06_11_24-miscellaneous-192-168-254-1-192-168-254-254-vssmonitoring-frame-eth-arp.pcap
-/opt/vent_files/tcprewrite-dot1q-2019-11-15-06_26_48.529473-UTC/pcap-node-splitter-2019-11-15-06_26_50.192570-UTC/clients/trace_0a6ce9490c193b65c3cad51fffbadeaed4ed5fdd_2019-11-15_06_11_24-client-ip-192-168-254-254-192-168-254-254-74-125-200-189-udp-frame-eth-ip-wsshort-port-443.pcap
-/opt/vent_files/tcprewrite-dot1q-2019-11-15-06_26_48.529473-UTC/pcap-node-splitter-2019-11-15-06_26_50.192570-UTC/servers/trace_0a6ce9490c193b65c3cad51fffbadeaed4ed5fdd_2019-11-15_06_11_24-server-ip-74-125-68-188-192-168-254-254-74-125-68-188-frame-eth-ip-tcp-port-5228.pcap
+# find /opt/poseidon_files -type f -name \*pcap |head -5
+/opt/poseidon_files/trace_d3f3217106acd75fe7b5c7069a84a227c9e48377_2019-11-15_03_10_41.pcap
+/opt/poseidon_files/tcprewrite-dot1q-2019-11-15-06_26_48.529473-UTC/pcap-node-splitter-2019-11-15-06_26_50.192570-UTC/clients/trace_0a6ce9490c193b65c3cad51fffbadeaed4ed5fdd_2019-11-15_06_11_24-client-ip-216-58-196-147-192-168-254-254-216-58-196-147-vssmonitoring-frame-eth-ip-icmp.pcap
+/opt/poseidon_files/tcprewrite-dot1q-2019-11-15-06_26_48.529473-UTC/pcap-node-splitter-2019-11-15-06_26_50.192570-UTC/clients/trace_0a6ce9490c193b65c3cad51fffbadeaed4ed5fdd_2019-11-15_06_11_24-miscellaneous-192-168-254-1-192-168-254-254-vssmonitoring-frame-eth-arp.pcap
+/opt/poseidon_files/tcprewrite-dot1q-2019-11-15-06_26_48.529473-UTC/pcap-node-splitter-2019-11-15-06_26_50.192570-UTC/clients/trace_0a6ce9490c193b65c3cad51fffbadeaed4ed5fdd_2019-11-15_06_11_24-client-ip-192-168-254-254-192-168-254-254-74-125-200-189-udp-frame-eth-ip-wsshort-port-443.pcap
+/opt/poseidon_files/tcprewrite-dot1q-2019-11-15-06_26_48.529473-UTC/pcap-node-splitter-2019-11-15-06_26_50.192570-UTC/servers/trace_0a6ce9490c193b65c3cad51fffbadeaed4ed5fdd_2019-11-15_06_11_24-server-ip-74-125-68-188-192-168-254-254-74-125-68-188-frame-eth-ip-tcp-port-5228.pcap
 ```
 
 
@@ -284,7 +284,7 @@ There are two main types of logging at the lowest level. The first is FAUCET eve
 2019-11-21 20:18:41,909 [DEBUG] faucet - got faucet message for l2_learn: {'version': 1, 'time': 1574367516.3555572, 'dp_id': 1, 'dp_name': 'x930', 'event_id': 172760, 'L2_LEARN': {'port_no': 22, 'previous_port_no': None, 'vid': 254, 'eth_src': '0e:00:00:00:00:99', 'eth_dst': '0e:00:00:00:00:01', 'eth_type': 2048, 'l3_src_ip': '192.168.254.3', 'l3_dst_ip': '192.168.254.254'}}
 ```
 
-The second type of logging is host based pcap captures, with most of the application (L4) payload removed. Poseidon causes the `ncapture` component (https://github.com/CyberReboot/network-tools/tree/master/network_tap/ncapture) to capture traffic, which is logged in `/opt/vent_files`. These are used in turn to learn host roles, etc.
+The second type of logging is host based pcap captures, with most of the application (L4) payload removed. Poseidon causes the `ncapture` component (https://github.com/CyberReboot/network-tools/tree/master/network_tap/ncapture) to capture traffic, which is logged in `/opt/poseidon_files`. These are used in turn to learn host roles, etc.
 
 
 ## Related Components

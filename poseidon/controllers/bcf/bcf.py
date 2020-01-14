@@ -358,7 +358,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             self,
             seq,
             mirror=True,
-            span_name='vent',
+            span_name='poseidon',
             s_dict=None,
             fabric_span_endpoint="data/controller/applications/bcf/span-fabric[name=\"{0}\"]",
             **target_kwargs):
@@ -370,7 +370,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
 
 
         If mirror=True, PUT to apply the filter rules specified by target_kwargs
-        to a specified span fabric (vent by default).  For example,
+        to a specified span fabric (poseidon by default).  For example,
         bcf.mirror_traffic(seq=1, tenant="TENANT", segment="SEGMENT")
         will apply a rule with seq=1 filtering all traffic matching tenant
         TENANT and segment SEGMENT. If a rule with seq=1 already exists, it will
@@ -381,7 +381,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         "src-ip-cidr": "X.A.0.33/32:"
 
         {
-            "name": "vent",
+            "name": "poseidon",
             "active": true,
             "priority": 1,
             "dest-interface-group": "ig1",
@@ -405,7 +405,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
 
         resource = fabric_span_endpoint.format(self.span_fabric_name)
         uri = urljoin(self.base_uri, resource)
-        data = self.get_span_fabric()  # first element is vent span rule
+        data = self.get_span_fabric()  # first element is poseidon span rule
         self.logger.debug('{0}'.format(data))
         if mirror:
             new_filter = {}
@@ -436,7 +436,7 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
             **target_kwargs):
         resource = fabric_span_endpoint.format(self.span_fabric_name)
         uri = urljoin(self.base_uri, resource)
-        data = self.get_span_fabric()  # first element is vent span rule
+        data = self.get_span_fabric()  # first element is poseidon span rule
         data['filter'] = []
         self.logger.debug('remove filter rules put body: {0}'.format(data))
         r = self.request_resource(method='PUT', url=uri, data=json.dumps(

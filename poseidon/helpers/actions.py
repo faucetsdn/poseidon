@@ -20,14 +20,14 @@ class Actions(object):
 
     def mirror_endpoint(self):
         '''
-        tell vent to start a collector and the controller to begin
+        tell network_tap to start a collector and the controller to begin
         mirroring traffic
         '''
         status = False
         if self.sdnc:
             if self.sdnc.mirror_mac(self.endpoint.endpoint_data['mac'], self.endpoint.endpoint_data['segment'], self.endpoint.endpoint_data['port']):
                 status = Collector(
-                    self.endpoint, self.endpoint.endpoint_data['segment']).start_vent_collector()
+                    self.endpoint, self.endpoint.endpoint_data['segment']).start_collector()
         else:
             status = True
         return status
@@ -38,7 +38,7 @@ class Actions(object):
         if self.sdnc:
             if self.sdnc.unmirror_mac(self.endpoint.endpoint_data['mac'], self.endpoint.endpoint_data['segment'], self.endpoint.endpoint_data['port']):
                 status = Collector(
-                    self.endpoint, self.endpoint.endpoint_data['segment']).stop_vent_collector()
+                    self.endpoint, self.endpoint.endpoint_data['segment']).stop_collector()
         else:
             status = True
         return status

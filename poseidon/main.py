@@ -157,7 +157,7 @@ class SDNConnect:
         status = Actions(endpoint, self.sdnc).mirror_endpoint()
         if status:
             try:
-                self.r.hincrby('vent_plugin_counts', 'ncapture')
+                self.r.hincrby('network_tools_counts', 'ncapture')
             except Exception as e:  # pragma: no cover
                 self.logger.error(
                     'Failed to update count of plugins because: {0}'.format(str(e)))

@@ -3,7 +3,6 @@
 Created on 5 December 2018
 @author: Charlie Lewis
 """
-
 import ast
 import configparser
 import logging
@@ -30,7 +29,7 @@ class Config():
             'USER': None,
             'PASS': None,
             'TYPE': None,
-            'SPAN_FABRIC_NAME': 'vent',
+            'SPAN_FABRIC_NAME': 'poseidon',
             'INTERFACE_GROUP': 'ig1',
             'CONFIG_FILE': None,
             'LOG_FILE': None,

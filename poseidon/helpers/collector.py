@@ -33,9 +33,9 @@ class Collector(object):
         self.interval = str(self.controller['reinvestigation_frequency'])
         self.iterations = str(iterations)
 
-    def start_vent_collector(self):
+    def start_collector(self):
         '''
-        Starts vent collector for a given endpoint with the
+        Starts collector for a given endpoint with the
         options passed in at the creation of the class instance.
         '''
         status = False
@@ -47,11 +47,11 @@ class Collector(object):
             'iters': self.iterations,
             'metadata': "{'endpoint_data': " + str(self.endpoint.endpoint_data) + '}'}
 
-        self.logger.debug('Vent payload: {0}'.format(str(payload)))
+        self.logger.debug('Payload: {0}'.format(str(payload)))
 
-        vent_addr = self.controller['vent_ip'] + \
-            ':' + self.controller['vent_port']
-        uri = 'http://' + vent_addr + '/create'
+        network_tap_addr = self.controller['network_tap_ip'] + \
+            ':' + self.controller['network_tap_port']
+        uri = 'http://' + network_tap_addr + '/create'
 
         try:
             resp = requests.post(uri, data=json.dumps(payload))
@@ -61,34 +61,34 @@ class Collector(object):
             response = ast.literal_eval(resp.text)
             if response[0]:
                 self.logger.info(
-                    'Successfully started the vent collector for: {0}'.format(self.id))
+                    'Successfully started the collector for: {0}'.format(self.id))
                 self.endpoint.endpoint_data['container_id'] = response[1].rsplit(
                     ':', 1)[-1].strip()
                 status = True
             else:
                 self.logger.error(
-                    'Failed to start vent collector because: {0}'.format(response[1]))
+                    'Failed to start collector because: {0}'.format(response[1]))
         except Exception as e:  # pragma: no cover
             self.logger.error(
-                'Failed to start vent collector because: {0}'.format(str(e)))
+                'Failed to start collector because: {0}'.format(str(e)))
         return status
 
-    def stop_vent_collector(self):
+    def stop_collector(self):
         '''
-        Stops vent collector for a given endpoint.
+        Stops collector for a given endpoint.
         '''
         status = False
         if 'container_id' not in self.endpoint.endpoint_data:
             self.logger.warning(
-                'No vent collector to stop because no container_id for endpoint')
+                'No collector to stop because no container_id for endpoint')
             return True
 
         payload = {'id': [self.endpoint.endpoint_data['container_id']]}
-        self.logger.debug('Vent payload: {0}'.format(str(payload)))
+        self.logger.debug('Payload: {0}'.format(str(payload)))
 
-        vent_addr = self.controller['vent_ip'] + \
-            ':' + self.controller['vent_port']
-        uri = 'http://' + vent_addr + '/stop'
+        network_tap_addr = self.controller['network_tap_ip'] + \
+            ':' + self.controller['network_tap_port']
+        uri = 'http://' + network_tap_addr + '/stop'
 
         try:
             resp = requests.post(uri, data=json.dumps(payload))
@@ -97,21 +97,21 @@ class Collector(object):
             response = ast.literal_eval(resp.text)
             if response[0]:
                 self.logger.info(
-                    'Successfully stopped the vent collector for: {0}'.format(self.id))
+                    'Successfully stopped the collector for: {0}'.format(self.id))
                 status = True
             else:
                 self.logger.error(
-                    'Failed to stop vent collector because response failed with: {0}'.format(response[1]))
+                    'Failed to stop collector because response failed with: {0}'.format(response[1]))
         except Exception as e:  # pragma: no cover
             self.logger.error(
-                'Failed to stop vent collector because: {0}'.format(str(e)))
+                'Failed to stop collector because: {0}'.format(str(e)))
         return status
 
     # returns a dictionary of existing collectors keyed on dev_hash
-    def get_vent_collectors(self):
-        vent_addr = self.controller['vent_ip'] + \
-            ':' + self.controller['vent_port']
-        uri = 'http://' + vent_addr + '/list'
+    def get_collectors(self):
+        network_tap_addr = self.controller['network_tap_ip'] + \
+            ':' + self.controller['network_tap_port']
+        uri = 'http://' + network_tap_addr + '/list'
         collectors = {}
         try:
             resp = requests.get(uri)
@@ -120,14 +120,14 @@ class Collector(object):
             self.logger.debug('collector list response: ' + text)
         except Exception as e:  # pragma: no cover
             self.logger.debug(
-                'failed to get vent collector statuses' + str(e))
+                'failed to get collector statuses' + str(e))
 
         return collectors
 
     def host_has_active_collectors(self, dev_hash):
         active_collectors_exist = False
 
-        collectors = self.get_vent_collectors()
+        collectors = self.get_collectors()
 
         if dev_hash in collectors:
             hash_coll = collectors[dev_hash]

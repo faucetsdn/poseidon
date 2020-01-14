@@ -177,7 +177,7 @@
     "name": "prod",
     "port-count": 0,
     "qos-traffic-class": "traffic-class-0",
-    "tenant": "VENT"
+    "tenant": "POSEIDON"
   },
   {
     "active-endpoint-count": 0,
