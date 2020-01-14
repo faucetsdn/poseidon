@@ -124,7 +124,7 @@ function check_args()
                     echo "Checking volumes..."
                     check_files
                     sudo mkdir -p "$POSEIDON_PREFIX"/opt/grafana/provisioning/dashboards "$POSEIDON_PREFIX"/opt/grafana/dashboards "$POSEIDON_PREFIX"/opt/prometheus
-                    sudo chmod -R 777 "$POSEIDON_PREFIX"/opt/grafana chmod 777 "$POSEIDON_PREFIX"/opt/prometheus
+                    sudo chmod -R 777 "$POSEIDON_PREFIX"/opt/grafana "$POSEIDON_PREFIX"/opt/prometheus
                     sudo cp -n "$POSEIDON_PREFIX"/opt/poseidon/helpers/faucet/gauge.yaml "$POSEIDON_PREFIX"/etc/faucet/gauge.yaml
                     sudo cp -n "$POSEIDON_PREFIX"/opt/poseidon/helpers/faucet/dashboards.yaml "$POSEIDON_PREFIX"/opt/grafana/provisioning/dashboards/dashboards.yaml
                     sudo cp -n "$POSEIDON_PREFIX"/opt/poseidon/docs/poseidon_stats.json "$POSEIDON_PREFIX"/opt/grafana/dashboards/poseidon_stats.json
