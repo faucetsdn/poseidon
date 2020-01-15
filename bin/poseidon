@@ -180,8 +180,8 @@ function check_args()
                 sudo mv "$configdir/poseidon.config" "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config || true
                 rm -rf "$configdir"
                 # update this script
-                curl -L https://raw.githubusercontent.com/CyberReboot/poseidon/master/bin/poseidon -o /usr/local/bin/poseidon
-                chmod +x /usr/local/bin/poseidon
+                sudo curl -L https://raw.githubusercontent.com/CyberReboot/poseidon/master/bin/poseidon -o /usr/local/bin/poseidon
+                sudo chmod +x /usr/local/bin/poseidon
                 echo "Done updating."
                 exit
                 ;;
