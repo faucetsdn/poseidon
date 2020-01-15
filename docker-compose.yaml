@@ -38,7 +38,7 @@ services:
             poseidon:
     poseidon_api:
         build:
-            context: .
+            context: api
             dockerfile: Dockerfile
         restart: always
         image: 'cyberreboot/poseidon-api:latest'
@@ -67,7 +67,7 @@ services:
             - poseidon
     workers:
         build:
-            context: .
+            context: workers
             dockerfile: Dockerfile
         restart: always
         image: 'cyberreboot/poseidon-workers:latest'
