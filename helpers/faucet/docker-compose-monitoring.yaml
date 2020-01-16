@@ -9,6 +9,7 @@ services:
         volumes:
             - '${POSEIDON_PREFIX}/opt/prometheus/:/prometheus'
             - './helpers/faucet/prometheus-docker-compose.yml:/etc/prometheus/prometheus.yml'
+            - './helpers/faucet/faucet.rules.yml:/etc/prometheus/faucet.rules.yml'
         networks:
             - poseidon
     grafana:
