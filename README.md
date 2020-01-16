@@ -16,7 +16,7 @@ Poseidon began as a joint effort between two of the IQT Labs: [Cyber Reboot](htt
 
 - [Background](#background)
 - [Prerequisites](#prerequisites)
-- [Installing Poseidon](#installing)
+- [Installing or updating Poseidon](#installing)
 - [SDN Controller Configuration](#sdn-controller-configuration)
     - [Faucet Configuration](#faucet-configuration)
     - [Big Cloud Fabric Configuration](#big-cloud-fabric-configuration)
@@ -153,6 +153,11 @@ Now, edit this file. You will need to set at minimum:
 * controller_type, as appropriate to the controller you are running (see above).
 * collector_nic: must be set to the interface name on the server, that is connected to the switch mirror port.
 * controller_mirror_ports: must be set to the interface on the switch that will be used as the mirror port.
+
+
+## Updating Poseidon
+
+From v0.10.0, you can update an existing Poseidon installation with `poseidon -u` (your configuration will be preserved). Updating from previous versions is not supported - please remove and reinstall as above. You can also give `poseidon -u` a specific git hash if you want to update to an unreleased version.
 
 
 ## Usage
