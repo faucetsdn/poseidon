@@ -150,8 +150,8 @@ function check_args()
                     echo -en "\\b"
                     sleep 0.3
                 done
-                if [ "$2" = "--grafana" ]; then
-                    wget -O- --auth-no-challenge --post-data='{"name":"${DS_PROMETHEUS}","type":"prometheus","access":"proxy","url":"http://prometheus:9090","basicAuth":false,"isDefault":true}' --header="Content-Type: application/json;charset=UTF-8charset=UTF-8" 'http://admin:admin@0.0.0.0:3000/api/datasources'
+                if [ "$2" = "--complete" ]; then
+                    wget -O- --auth-no-challenge --post-data='{"name":"${DS_PROMETHEUS}","type":"prometheus","access":"proxy","url":"http://prometheus:9090","basicAuth":false,"isDefault":true}' --header="Content-Type: application/json;charset=UTF-8charset=UTF-8" 'http://admin:admin@0.0.0.0:3000/api/datasources' 2> /dev/null
                 fi
                 echo "Poseidon successfully started."
                 popd > /dev/null 2>&1 || exit
