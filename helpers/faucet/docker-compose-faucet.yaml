@@ -14,7 +14,7 @@ services:
             - poseidon
     faucet:
         restart: always
-        image: 'faucet/faucet:1.9.29'
+        image: 'faucet/faucet:1.9.30'
         volumes:
             - '${POSEIDON_PREFIX}/var/log/faucet:/var/log/faucet'
             - '${POSEIDON_PREFIX}/var/run/faucet:/var/run/faucet'
