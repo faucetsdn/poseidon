@@ -1,3 +1,9 @@
+# v0.10.0 (2020-01-16)
+
+- Poseidon is now completely docker-compose only; remove all vestiges of vent. Pcap logs are now logged in /opt/poseidon_files not /opt/vent_files
+- New versions of pyyaml, pytype, cmd2, transitions, grafana, CRviz, network-tap, NetworkML, pcap-to-node-pcap, tcprewrite-dot1q, p0f
+
+
 # v0.9.0 (2020-01-02)
 
 - Updated version of prometheus
