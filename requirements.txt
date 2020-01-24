@@ -7,6 +7,7 @@ redis==3.3.11
 requests==2.22.0
 schedule==0.6.0
 scp==0.13.2
+scikit-build==0.10.0
 texttable==1.6.2
 transitions==0.7.2
 urllib3==1.25.7
