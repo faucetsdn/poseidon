@@ -2,7 +2,7 @@ version: '3.7'
 services:
     gauge:
         restart: always
-        image: 'faucet/gauge:1.9.30'
+        image: 'faucet/gauge:1.9.31'
         environment:
             GAUGE_CONFIG: '/etc/faucet/gauge.yaml'
         volumes:
