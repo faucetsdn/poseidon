@@ -21,6 +21,8 @@ def test_Actions():
     a = Actions(endpoint, s.sdnc)
     a.mirror_endpoint()
     a.unmirror_endpoint()
+    a.coprocess_endpoint()
+    a.uncoprocess_endpoint()
     a.shutdown_endpoint()
 
 
@@ -37,4 +39,6 @@ def test_Actions_nosdn():
     a = Actions(endpoint, s.sdnc)
     a.mirror_endpoint()
     a.unmirror_endpoint()
+    a.coprocess_endpoint()
+    a.uncoprocess_endpoint()
     a.shutdown_endpoint()

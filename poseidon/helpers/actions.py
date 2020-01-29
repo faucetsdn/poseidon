@@ -4,6 +4,7 @@ Created on 9 December 2018
 @author: Charlie Lewis
 """
 from poseidon.helpers.collector import Collector
+from poseidon.volos.coprocessor import Coprocessor
 
 
 class Actions(object):
@@ -39,6 +40,31 @@ class Actions(object):
             if self.sdnc.unmirror_mac(self.endpoint.endpoint_data['mac'], self.endpoint.endpoint_data['segment'], self.endpoint.endpoint_data['port']):
                 status = Collector(
                     self.endpoint, self.endpoint.endpoint_data['segment']).stop_collector()
+        else:
+            status = True
+        return status
+
+    def coprocess_endpoint(self):
+        '''
+        tell network_tap to start a collector and the controller to begin
+        mirroring traffic
+        '''
+        status = False
+        if self.sdnc:
+            if self.sdnc.coprocess_mac(self.endpoint.endpoint_data['mac'], self.endpoint.endpoint_data['segment'], self.endpoint.endpoint_data['port']):
+                status = Coprocessor(
+                    self.endpoint, self.endpoint.endpoint_data['segment']).start_coprocessor()
+        else:
+            status = True
+        return status
+
+    def uncoprocess_endpoint(self):
+        ''' tell the controller to unmirror traffic '''
+        status = False
+        if self.sdnc:
+            if self.sdnc.uncoprocess_mac(self.endpoint.endpoint_data['mac'], self.endpoint.endpoint_data['segment'], self.endpoint.endpoint_data['port']):
+                status = Coprocessor(
+                    self.endpoint, self.endpoint.endpoint_data['segment']).stop_coprocessor()
         else:
             status = True
         return status

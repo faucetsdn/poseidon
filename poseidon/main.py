@@ -116,6 +116,35 @@ def schedule_job_reinvestigation(schedule_func):
         if schedule_func.s.sdnc:
             trigger_reinvestigation(candidates)
 
+def schedule_job_coprocessing(schedule_func):
+    ''' put endpoints into the reinvestigation state if possible '''
+    global CTRL_C
+
+    def trigger_coprocessing(candidates):
+        # get random order of things that are known
+        for _ in range(schedule_func.controller['max_concurrent_reinvestigations'] - schedule_func.s.investigations):
+            if len(candidates) > 0:
+                chosen = candidates.pop()
+                schedule_func.logger.info('Starting coprocessing on: {0} {1}'.format(
+                    chosen.name, chosen.state))
+                chosen.coprocess()
+                chosen.p_prev_states.append(
+                    (chosen.state, int(time.time())))
+                schedule_func.s.coprocess_endpoint(chosen)
+
+    if not CTRL_C['STOP']:
+        candidates = [
+            endpoint for endpoint in schedule_func.s.endpoints.values()
+            if endpoint.state in ['queued']]
+        if len(candidates) == 0:
+            # if no queued endpoints, then known and abnormal are candidates
+            candidates = [
+                endpoint for endpoint in schedule_func.s.endpoints.values()
+                if endpoint.state in ['known', 'abnormal']]
+            if len(candidates) > 0:
+                random.shuffle(candidates)
+        if schedule_func.s.sdnc:
+            trigger_coprocessing(candidates)
 
 def schedule_thread_worker(schedule):
     ''' schedule thread, takes care of running processes in the future '''
