@@ -141,18 +141,18 @@ class FaucetProxy(Connection, Parser):
                     retval.append(self.mac_table[mac])
         return retval
 
-    def update_acls(self, rules_file=None, endpoints=None, force_apply_rules=None):
+    def update_acls(self, rules_file=None, endpoints=None, force_apply_rules=None, force_remove_rules=None):
         self.logger.debug('updating acls')
         status = None
         if self.host:
             self.receive_file('config')
             if self.config(self.config_file,
-                           'apply_acls', None, None, rules_file=rules_file, endpoints=endpoints, force_apply_rules=force_apply_rules):
+                           'apply_acls', None, None, rules_file=rules_file, endpoints=endpoints, force_apply_rules=force_apply_rules, force_remove_rules=force_remove_rules):
                 self.send_file('config')
                 status = True
         else:
             status = self.config(self.config_file, 'apply_acls',
-                                 None, None, rules_file=rules_file, endpoints=endpoints, force_apply_rules=force_apply_rules)
+                                 None, None, rules_file=rules_file, endpoints=endpoints, force_apply_rules=force_apply_rules, force_remove_rules=force_remove_rules)
         # TODO check if config was successfully updated
         return status
 
