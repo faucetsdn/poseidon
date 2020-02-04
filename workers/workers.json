@@ -45,7 +45,7 @@
       },
       "image": "cyberreboot/networkml",
       "inputs": [
-        "pcap-splitter"
+        "ncapture"
       ],
       "labels": "",
       "name": "networkml",
