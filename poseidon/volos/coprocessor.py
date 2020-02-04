@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Created on 9 December 2018
-@author: Charlie Lewis
+Created on 30 January 2020
+@author: Ryan Ashley
 """
 import ast
 import json
