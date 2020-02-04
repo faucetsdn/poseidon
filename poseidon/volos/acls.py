@@ -5,6 +5,7 @@ Created on 31 January 2020
 """
 import json
 import logging
+import os
 import yaml
 
 class Acls(object):
@@ -18,7 +19,7 @@ class Acls(object):
         self.copro_port = copro_port
         self.acl_dir = acl_dir
     
-  def write_acls(self, port_list=[]):
+  def write_acl_file(self, port_list=[]):
     acls = { }
     key = 'volos_copro_' + self.mac
     acls[key] = []
@@ -55,5 +56,10 @@ class Acls(object):
             rule['rule'][port['proto']+ '_dst'] = port['port']
             acls[key].append(rule)
     acls[key].append({'rule':{'actions': {'allow': 1}}})
-    with open(f"{self.acl_dir}/volos_copro_{self.mac}", 'w') as acl_file:
+    with open(os.path.join(self.acl_dir, f"/volos_copro_{self.mac}"), 'w') as acl_file:
         status = yaml.dump({'acls': acls}, acl_file)
+
+  def delete_acl_file(self):
+    path = os.path.join(self.acl_dir, f"/volos_copro_{self.mac}")
+    if os.path.exists(path):
+      os.remove(path)
