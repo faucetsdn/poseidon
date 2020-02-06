@@ -9,6 +9,7 @@ import logging
 
 from poseidon.controllers.faucet.connection import Connection
 from poseidon.controllers.faucet.parser import Parser
+from poseidon.volos.volos import Volos
 
 
 class FaucetProxy(Connection, Parser):
@@ -32,6 +33,10 @@ class FaucetProxy(Connection, Parser):
         self.host = controller['URI']
         self.user = controller['USER']
         self.pw = controller['PASS']
+
+        #parse volos config
+        self.volos = Volos(controller)
+
         ignore_vlans = controller['ignore_vlans']
         if isinstance(ignore_vlans, str):
             self.ignore_vlans = json.loads(ignore_vlans)
@@ -236,57 +241,44 @@ class FaucetProxy(Connection, Parser):
         self.logger.debug('unmirror status: ' + str(status))
         return status
 
-    def coprocess_mac(self, my_mac, my_switch, my_port):
-        self.logger.debug('mirroring mac')
-        port = None
-        switch = None
-        status = None
+    def coprocess_mac(self, my_mac):
+        self.logger.debug('coprocess mac')
         for mac in self.mac_table:
             if my_mac == mac:
                 port = self.mac_table[mac][0]['port']
                 switch = self.mac_table[mac][0]['segment']
-        if port and switch:
-            if self.host:
-                self.receive_file('config')
-                if self.config(self.config_file,
-                               'mirror', int(port), switch):
-                    self.send_file('config')
-                    # TODO check if this is actually True
-                    status = True
-            else:
-                status = self.config(
-                    self.config_file, 'mirror', int(port), switch)
+        if self.host:
+            self.receive_file('config')
+            if self.config(self.config_file,
+                           'coprocess', int(port), switch):
+                self.send_file('config')
+                # TODO check if this is actually True
+                status = True
         else:
-            status = False
-        self.logger.debug('mirror status: ' + str(status))
+            status = self.config(
+                self.config_file, 'coprocess', int(port), switch)
+
+        self.logger.debug('coprocess status: ' + str(status))
         return status
 
-    def uncoprocess_mac(self, my_mac, my_switch, my_port):
+    def uncoprocess_mac(self, my_mac):
         port = 0
-        switch = None
-        status = None
         for mac in self.mac_table:
             if my_mac == mac:
                 port = self.mac_table[mac][0]['port']
                 switch = self.mac_table[mac][0]['segment']
-        if port and switch:
-            trunk = False
-            for sw in self.trunk_ports:
-                if sw == switch and self.trunk_ports[sw].split(',')[1] == str(port):
-                    trunk = True
-            if not trunk:
+
                 if self.host:
                     self.receive_file('config')
                     if self.config(self.config_file,
-                                   'unmirror', int(port), switch):
+                                   'unmcoprocess', int(port), switch):
                         self.send_file('config')
                         # TODO check if config was successfully updated
                         status = True
                 else:
                     status = self.config(
-                        self.config_file, 'unmirror', int(port), switch)
-            else:
-                self.logger.debug('not unmirroring a trunk port')
+                        self.config_file, 'uncoprocess', int(port), switch)
+
         self.logger.debug('unmirror status: ' + str(status))
         return status
 
