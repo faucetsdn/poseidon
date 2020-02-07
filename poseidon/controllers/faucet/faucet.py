@@ -271,7 +271,7 @@ class FaucetProxy(Connection, Parser):
                 if self.host:
                     self.receive_file('config')
                     if self.config(self.config_file,
-                                   'unmcoprocess', int(port), switch):
+                                   'uncoprocess', int(port), switch):
                         self.send_file('config')
                         # TODO check if config was successfully updated
                         status = True
