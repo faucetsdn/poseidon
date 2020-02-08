@@ -122,7 +122,7 @@ def schedule_job_coprocessing(schedule_func):
 
     def trigger_coprocessing(candidates):
         # get random order of things that are known
-        for _ in range(schedule_func.controller['max_concurrent_reinvestigations'] - schedule_func.s.investigations):
+        for _ in range(schedule_func.controller['max_concurrent_coprocessing'] - schedule_func.s.coprocessing):
             if len(candidates) > 0:
                 chosen = candidates.pop()
                 schedule_func.logger.info('Starting coprocessing on: {0} {1}'.format(
@@ -132,7 +132,7 @@ def schedule_job_coprocessing(schedule_func):
                     (chosen.state, int(time.time())))
                 schedule_func.s.coprocess_endpoint(chosen)
 
-    if not CTRL_C['STOP']:
+    if not CTRL_C['STOP'] and schedule_func.s.volos.enabled:
         candidates = [
             endpoint for endpoint in schedule_func.s.endpoints.values()
             if endpoint.state in ['queued']]
@@ -178,6 +178,7 @@ class SDNConnect:
         if self.first_time:
             self.endpoints = {}
             self.investigations = 0
+            self.coprocessing = 0
             self.clear_filters()
             self.default_endpoints()
 
@@ -924,6 +925,56 @@ class Monitor:
                 else:
                     if endpoint.state != 'known':
                         endpoint.known()
+
+    def schedule_coprocessing(self):
+        queued_endpoints = [
+            endpoint for endpoint in self.s.endpoints.values()
+            if not endpoint.copro_ignore and endpoint.copro_state == 'queued']
+        self.s.coprocessing = len([
+            endpoint for endpoint in self.s.endpoints.values()
+            if endpoint.copro_state in ['coprocessing']])
+        # mirror things in the order they got added to the queue
+        queued_endpoints = sorted(
+             queued_endpoints, key=lambda x: x.p_prev_copro_states[-1][1])
+
+        coprocessing_budget = max(
+            self.controller['max_concurrent_coprocessing'] -
+            self.s.coprocessing,
+            0)
+        self.logger.debug('coprocessing {0}, budget {1}, queued {2}'.format(
+            str(self.s.coprocessing), str(coprocessing_budget), str(len(queued_endpoints))))
+
+        for endpoint in queued_endpoints[:coprocessing_budget]:
+            endpoint.trigger(endpoint.p_next_copro_state)
+            endpoint.p_next_copro_state = None
+            endpoint.p_prev_copro_states.append(
+                (endpoint.copro_state, int(time.time())))
+            self.s.coprocess_endpoint(endpoint)
+
+        for endpoint in self.s.endpoints.values():
+            if not endpoint.copro_ignore:
+                if self.s.sdnc:
+                    if endpoint.copro_state == 'unknown':
+                        endpoint.p_next_copro_state = 'coprocessing'
+                        endpoint.queue()
+                        endpoint.p_prev_copro_states.append(
+                            (endpoint.copro_state, int(time.time())))
+                    elif endpoint.copro_state in ['coprocessing']:
+                        cur_time = int(time.time())
+                        # timeout after 2 times the reinvestigation frequency
+                        # in case something didn't report back, put back in an
+                        # unknown state
+                        if cur_time - endpoint.p_prev_copro_states[-1][1] > 2*self.controller['coprocessing_frequency']:
+                            self.logger.debug(
+                                'timing out: {0} and setting to unknown'.format(endpoint.name))
+                            self.s.unmirror_endpoint(endpoint)
+                            endpoint.unknown()
+                            endpoint.p_prev_copro_states.append(
+                                (endpoint.copro_state, int(time.time())))
+                else:
+                    if endpoint.state != 'nominal':
+                        endpoint.nominal()
+
 
     def process(self):
         global CTRL_C

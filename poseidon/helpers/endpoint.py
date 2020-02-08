@@ -141,9 +141,12 @@ class Endpoint:
     def __init__(self, hashed_val):
         self.name = hashed_val.strip()
         self.ignore = False
+        self.copro_ignores = False
         self.endpoint_data = None
         self.p_next_state = None
         self.p_prev_states = []
+        self.p_next_copro_state = None
+        self.p_prev_copross_states = []
         self.acl_data = []
         self.metadata = {}
         self.history = []
