@@ -24,6 +24,7 @@ def callback(ch, method, properties, body):
             uid = str(uuid.uuid4()).split('-')[-1]
             name = worker['name'] + '_' + uid
             image = worker['image']
+            ports = None
 
             if 'version' in worker:
                 image += ':' + worker['version']
@@ -38,6 +39,8 @@ def callback(ch, method, properties, body):
                 environment.update(worker['environment'])
             if 'rabbit' not in pipeline:
                 pipeline['rabbit'] = 'true'
+            if 'ports' in worker:
+                ports = worker['ports']
             try:
                 d.containers.run(image=image,
                                  name=name,
@@ -47,6 +50,7 @@ def callback(ch, method, properties, body):
                                  environment=environment,
                                  remove=True,
                                  command=command,
+                                 ports=ports,
                                  detach=True)
                 print(' [Create container] %s UTC %r:%r:%r:%r' % (str(datetime.datetime.utcnow()),
                                                                   method.routing_key,
