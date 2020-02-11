@@ -1,0 +1,57 @@
+name: buildx
+
+on:
+  push:
+    branches: master
+    tags: 'v*'
+
+jobs:
+  buildx:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Get the version
+      id: get_version
+      run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
+    - name: Change for master
+      id: change_version
+      run: if [ "${{ steps.get_version.outputs.VERSION }}" == "master" ]; then echo ::set-output name=VERSION::latest; else echo ::set-output name=VERSION::${{ steps.get_version.outputs.VERSION }}; fi
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: crazy-max/ghaction-docker-buildx@v1.0.5
+      with:
+        version: latest
+    - name: Docker Login
+      env:
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_TOKEN }}
+      run: |
+        echo "${DOCKER_PASSWORD}" | docker login --username "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      if: github.repository == 'cyberreboot/poseidon' && github.event_name == 'push'
+
+    - name: Build and push platforms
+      env:
+        DOCKER_CLI_EXPERIMENTAL: enabled
+      run: |
+        docker buildx build \
+          --platform linux/amd64,linux/arm/v7,linux/arm64 \
+          --push \
+          -t cyberreboot/poseidon:${{ steps.change_version.outputs.VERSION }} . && \
+        docker buildx build \
+          --platform linux/amd64,linux/arm/v7,linux/arm64 \
+          --push \
+          -t cyberreboot/poseidon-api:${{ steps.change_version.outputs.VERSION }} api && \
+        docker buildx build \
+          --platform linux/amd64,linux/arm/v7,linux/arm64 \
+          --push \
+          -t cyberreboot/poseidon-workers:${{ steps.change_version.outputs.VERSION }} workers && \
+        docker buildx build \
+          --platform linux/amd64,linux/arm/v7,linux/arm64 \
+          --push \
+          -t cyberreboot/rabbitmq:${{ steps.change_version.outputs.VERSION }} helpers/rabbitmq && \
+        docker buildx build \
+          --platform linux/amd64,linux/arm/v7,linux/arm64 \
+          --push \
+          -t cyberreboot/redis:${{ steps.change_version.outputs.VERSION }} helpers/redis
+      if: github.repository == 'cyberreboot/poseidon' && github.event_name == 'push'
