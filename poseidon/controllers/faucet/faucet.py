@@ -242,7 +242,7 @@ class FaucetProxy(Connection, Parser):
         return status
 
     def coprocess_mac(self, my_mac):
-        self.logger.debug('coprocess mac')
+        self.logger.debug('coprocess mac: {0}'.format(my_mac))
         for mac in self.mac_table:
             if my_mac == mac:
                 port = self.mac_table[mac][0]['port']
@@ -262,6 +262,7 @@ class FaucetProxy(Connection, Parser):
         return status
 
     def uncoprocess_mac(self, my_mac):
+        self.logger.debug('uncoprocess mac: {0}'.format(my_mac))
         port = 0
         for mac in self.mac_table:
             if my_mac == mac:
@@ -279,6 +280,6 @@ class FaucetProxy(Connection, Parser):
                     status = self.config(
                         self.config_file, 'uncoprocess', int(port), switch)
 
-        self.logger.debug('unmirror status: ' + str(status))
+        self.logger.debug('uncoprocess status: ' + str(status))
         return status
 
