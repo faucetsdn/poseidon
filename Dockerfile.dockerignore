@@ -2,7 +2,6 @@
 .gitignore
 .git
 .pre-commit-config.yaml
-.travis.yml
 CHANGELOG.md
 CODE_OF_CONDUCT.md
 CONTRIBUTING.md
