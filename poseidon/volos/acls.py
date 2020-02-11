@@ -20,6 +20,7 @@ class Acl(object):
         self.acl_dir = acl_dir
         self.acl_key = f"volos_copro_{self.mac}"
         self.acl_file = os.path.join(self.acl_dir, f"/volos_copro_{self.mac}.yaml")
+          
     
   def write_acl_file(self, port_list=[]):
     acls = { }
@@ -74,4 +75,16 @@ class Acl(object):
         status = True
     except Exception as e:  # pragma: no cover
       self.logger.error('Volos ACL file:{0} could not be deleted. Coprocessing may not work as expected'.format(self.acl_file))
+    return status
+
+  def ensure_acls_dir(self):
+    status = False
+    try:
+      if not os.path.exists(self.acl_dir):
+        os.Path(self.acl_dir).makedir(parents=True, exist_ok=True)
+        status = True
+    except Exception as e:  # pragma: no cover
+      self.logger.error('Volos ACL directory:{0} could not be created. Coprocessing may not work as expected'.format(self.acl_file))
+      status = False
+
     return status

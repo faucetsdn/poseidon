@@ -57,7 +57,7 @@ class Actions(object):
                 force_apply_rules = [acl.acl_key]
                 coprocess_rules_files = [acl.acl_file]
                 port_list = self.sdnc.volos.get_port_list(self.endpoint.endpoint_data['mac'], ipv4=self.endpoint.endpoint_data.get('ipv4', None), ipv6=self.endpoint.endpoint_data.get('ipv6', None))
-                if acl.write_acl_file(port_list):
+                if acl.ensure_acl_dir() and acl.write_acl_file(port_list):
                     status = self.sdnc.update_acls(
                         rules_file=None, endpoints=endpoints, force_apply_rules=force_apply_rules, coprocess_rules_files=coprocess_rules_files)
             else:
