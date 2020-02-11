@@ -14,16 +14,10 @@ def client():
 
 
 def test_setup_redis():
-    if 'POSEIDON_TRAVIS' in os.environ:
-        r = redis.StrictRedis(host='localhost',
-                              port=6379,
-                              db=0,
-                              decode_responses=True)
-    else:
-        r = redis.StrictRedis(host='redis',
-                              port=6379,
-                              db=0,
-                              decode_responses=True)
+    r = redis.StrictRedis(host='redis',
+                          port=6379,
+                          db=0,
+                          decode_responses=True)
     r.sadd('ip_addresses', '10.0.0.1')
     r.sadd('ip_addresses', 'None')
     r.sadd('ip_addresses', '2601:645:8200:a571:18fd:6640:9cd9:10d3')

@@ -20,10 +20,12 @@ jobs:
       run: |
         export PYTHONPATH=$PWD/poseidon:$PYTHONPATH
         export POSEIDON_CONFIG=$PWD/config/poseidon.config
+        echo "127.0.0.1  localhost redis" | sudo tee -a /etc/hosts
         sudo apt-get update && \
         sudo apt-get install -yq --no-install-recommends python3.7 python3.7-dev && \
         sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 && \
         sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2 && \
+        docker run -d -p 6379:6379 redis:latest && \
         pip3 install -U pip && \
         pip3 install codecov scikit-build && \
         find . -name requirements.txt -type f -exec pip3 install -r {} \; && \

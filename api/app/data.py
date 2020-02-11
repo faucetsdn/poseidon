@@ -46,16 +46,10 @@ class Nodes():
     def connect_redis(self):
         self.r = None
         try:
-            if 'POSEIDON_TRAVIS' in os.environ:
-                self.r = redis.StrictRedis(host='localhost',
-                                           port=6379,
-                                           db=0,
-                                           decode_responses=True)
-            else:  # pragma: no cover
-                self.r = redis.StrictRedis(host='redis',
-                                           port=6379,
-                                           db=0,
-                                           decode_responses=True)
+            self.r = redis.StrictRedis(host='redis',
+                                       port=6379,
+                                       db=0,
+                                       decode_responses=True)
         except Exception as e:  # pragma: no cover
             return (False, 'unable to connect to redis because: ' + str(e))
         return (True, 'connected')

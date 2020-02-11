@@ -350,11 +350,6 @@ def test_schedule_job_reinvestigation():
             self.controller = Config().get_config()
             self.controller['max_concurrent_reinvestigations'] = 10
             self.s = SDNConnect(self.controller)
-            if 'POSEIDON_TRAVIS' in os.environ:
-                self.s.r = redis.StrictRedis(host='localhost',
-                                             port=6379,
-                                             db=0,
-                                             decode_responses=True)
             endpoint = endpoint_factory('foo')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
@@ -434,11 +429,6 @@ def test_process():
             self.s.get_sdn_context()
             self.s.controller['TYPE'] = 'faucet'
             self.s.get_sdn_context()
-            if 'POSEIDON_TRAVIS' in os.environ:
-                self.s.r = redis.StrictRedis(host='localhost',
-                                             port=6379,
-                                             db=0,
-                                             decode_responses=True)
             endpoint = endpoint_factory('foo')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
