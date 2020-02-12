@@ -5,6 +5,7 @@ RUN apk upgrade --no-cache && \
     apk add --no-cache \
     build-base \
     cmake \
+    tshark \
     python3-dev \
     yaml-dev && \
     pip3 install --no-cache-dir scikit-build && \
