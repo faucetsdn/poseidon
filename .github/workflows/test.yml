@@ -18,6 +18,8 @@ jobs:
         /bin/bash --version && /bin/bash -n bin/poseidon && shellcheck -x -e SC2016 -e SC2119 -e SC2129 -e SC2001 -e SC2044 bin/poseidon
     - name: unit_test
       run: |
+        export DEBIAN_FRONTEND=noninteractive && \
+        echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections
         export PYTHONPATH=$PWD/poseidon:$PYTHONPATH
         export POSEIDON_CONFIG=$PWD/config/poseidon.config
         echo "127.0.0.1  localhost redis" | sudo tee -a /etc/hosts
