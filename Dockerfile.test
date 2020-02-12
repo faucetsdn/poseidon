@@ -1,10 +1,14 @@
 FROM redis:latest
 FROM poseidon:latest
+
+ENV DEBIAN_FRONTEND=noninteractive
+
 # TODO: remove workaround for broken ninja build (https://github.com/scikit-build/ninja-python-distributions/issues/22)
 RUN apk upgrade --no-cache && \
     apk add --no-cache \
     build-base \
     cmake \
+    tshark \
     python3-dev \
     yaml-dev && \
     pip3 install --no-cache-dir scikit-build && \
