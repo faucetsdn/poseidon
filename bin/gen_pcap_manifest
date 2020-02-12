@@ -27,6 +27,7 @@ def get_pcap_mac_ips(pcap_dirs):
                 if os.path.isfile(pcap)])
     pcap_pairs = {}
     for pcap in pcaps:
+        print(f'Processing {pcap}...')
         tshark_args = ['tshark', '-T', 'fields', '-r', pcap, '-s', '256']
         fields = ('eth.src', 'eth.dst', 'ipv6.src_host',
                   'ipv6.dst_host', 'ip.src', 'ip.dst')
@@ -66,6 +67,7 @@ def get_pcap_mac_ips(pcap_dirs):
 
 
 def gen_manifest(pcap_pairs, csv_output):
+    print(f'Generating manifest {csv_output}...')
     with gzip.open(csv_output, 'wb') as csv_out:
         writer = csv.DictWriter(io.TextIOWrapper(
             csv_out, newline='', write_through=True), fieldnames=('eth', 'ip', 'pcap'))
