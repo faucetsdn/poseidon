@@ -13,7 +13,6 @@ import sys
 import netaddr
 
 
-ZERO_EUI = netaddr.EUI('00:00:00:00:00:00', dialect=netaddr.mac_unix_expanded)
 BCAST_EUI = netaddr.EUI('ff:ff:ff:ff:ff:ff', dialect=netaddr.mac_unix_expanded)
 
 
@@ -27,7 +26,7 @@ def get_pcap_mac_ips(pcap_dirs):
                 if os.path.isfile(pcap)])
     pcap_pairs = {}
     for pcap in pcaps:
-        tshark_args = ['tshark', '-T', 'fields', '-r', pcap, '-s', '64']
+        tshark_args = ['tshark', '-T', 'fields', '-r', pcap, '-s', '256']
         fields = ('eth.src', 'eth.dst', 'ipv6.src_host', 'ipv6.dst_host', 'ip.src', 'ip.dst')
         for field in fields:
             tshark_args.extend(['-e', field])
