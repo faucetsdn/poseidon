@@ -30,7 +30,11 @@ def get_pcap_mac_ips(pcap_dirs):
         fields = ('eth.src', 'eth.dst', 'ipv6.src_host', 'ipv6.dst_host', 'ip.src', 'ip.dst')
         for field in fields:
             tshark_args.extend(['-e', field])
-        tshark_proc = subprocess.Popen(tshark_args, stdout=subprocess.PIPE)
+        try:
+            tshark_proc = subprocess.Popen(tshark_args, stdout=subprocess.PIPE)
+        except FileNotFoundError:
+            sys.stderr.write('Please install tshark.\n')
+            sys.exit(-1)
         pairs = set()
         for tshark_line in tshark_proc.stdout.readlines():
             tshark_line_list = tshark_line.decode('utf-8').rstrip('\n').split('\t')
