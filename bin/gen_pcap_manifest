@@ -1,20 +1,21 @@
-#!/usr/bin/python3
-
-
+#!/usr/bin/env python3
 import argparse
 import csv
-import io
-import gzip
-import ipaddress
 import glob
+import gzip
+import io
+import ipaddress
 import os
 import subprocess
 import sys
-import netaddr
+try:
+    import netaddr
+except ImportError:
+    print('Please install netaddr with "pip3 install netaddr"')
+    sys.exit(1)
 
 
 BCAST_EUI = netaddr.EUI('ff:ff:ff:ff:ff:ff', dialect=netaddr.mac_unix_expanded)
-
 
 
 def get_pcap_mac_ips(pcap_dirs):
@@ -26,8 +27,10 @@ def get_pcap_mac_ips(pcap_dirs):
                 if os.path.isfile(pcap)])
     pcap_pairs = {}
     for pcap in pcaps:
+        print(f'Processing {pcap}...')
         tshark_args = ['tshark', '-T', 'fields', '-r', pcap, '-s', '256']
-        fields = ('eth.src', 'eth.dst', 'ipv6.src_host', 'ipv6.dst_host', 'ip.src', 'ip.dst')
+        fields = ('eth.src', 'eth.dst', 'ipv6.src_host',
+                  'ipv6.dst_host', 'ip.src', 'ip.dst')
         for field in fields:
             tshark_args.extend(['-e', field])
         try:
@@ -37,10 +40,13 @@ def get_pcap_mac_ips(pcap_dirs):
             sys.exit(-1)
         pairs = set()
         for tshark_line in tshark_proc.stdout.readlines():
-            tshark_line_list = tshark_line.decode('utf-8').rstrip('\n').split('\t')
+            tshark_line_list = tshark_line.decode(
+                'utf-8').rstrip('\n').split('\t')
             eth_src_str, eth_dst_str, ipv6_src, ipv6_dst, ipv4_src, ipv4_dst = tshark_line_list
-            eth_src = netaddr.EUI(eth_src_str, dialect=netaddr.mac_unix_expanded)
-            eth_dst = netaddr.EUI(eth_dst_str, dialect=netaddr.mac_unix_expanded)
+            eth_src = netaddr.EUI(
+                eth_src_str, dialect=netaddr.mac_unix_expanded)
+            eth_dst = netaddr.EUI(
+                eth_dst_str, dialect=netaddr.mac_unix_expanded)
             for src_ip_str in (ipv4_src, ipv6_src):
                 try:
                     ip_src = ipaddress.ip_address(src_ip_str)
@@ -61,13 +67,15 @@ def get_pcap_mac_ips(pcap_dirs):
 
 
 def gen_manifest(pcap_pairs, csv_output):
+    print(f'Generating manifest {csv_output}...')
     with gzip.open(csv_output, 'wb') as csv_out:
         writer = csv.DictWriter(io.TextIOWrapper(
             csv_out, newline='', write_through=True), fieldnames=('eth', 'ip', 'pcap'))
         writer.writeheader()
         for pcap, pairs in sorted(pcap_pairs.items()):
             for eth, ipa in pairs:
-                writer.writerow({'eth': str(eth), 'ip': str(ipa), 'pcap': pcap})
+                writer.writerow(
+                    {'eth': str(eth), 'ip': str(ipa), 'pcap': pcap})
 
 
 def main():

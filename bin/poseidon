@@ -79,6 +79,8 @@ function check_args()
                 sudo tar -C "$POSEIDON_PREFIX"/opt/poseidon -xvf "$tarfile" --strip=1
                 sudo chmod -R 755 "$POSEIDON_PREFIX"/opt/poseidon
                 sudo cp -n "$POSEIDON_PREFIX"/opt/poseidon/config/poseidon.config "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config
+                sudo cp -n "$POSEIDON_PREFIX"/opt/poseidon/bin/gen_pcap_manifest /usr/local/bin/gen_pcap_manifest
+                sudo chmod +x /usr/local/bin/gen_pcap_manifest
                 rm -rf "$tardir"
                 exit
                 ;;
@@ -181,7 +183,8 @@ function check_args()
                 rm -rf "$configdir"
                 # update this script
                 sudo curl -L https://raw.githubusercontent.com/CyberReboot/poseidon/master/bin/poseidon -o /usr/local/bin/poseidon
-                sudo chmod +x /usr/local/bin/poseidon
+                sudo curl -L https://raw.githubusercontent.com/CyberReboot/poseidon/master/bin/gen_pcap_manifest -o /usr/local/bin/gen_pcap_manifest
+                sudo chmod +x /usr/local/bin/poseidon /usr/local/bin/gen_pcap_manifest
                 echo "Done updating."
                 exit
                 ;;
