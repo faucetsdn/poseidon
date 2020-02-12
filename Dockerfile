@@ -13,7 +13,6 @@ RUN apk upgrade --no-cache && \
     python3-dev \
     py3-paramiko \
     tini \
-    tshark \
     yaml-dev \
     linux-headers && \
     pip3 install --no-cache-dir --upgrade pip==20.0.2 && \
