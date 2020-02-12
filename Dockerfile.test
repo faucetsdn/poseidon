@@ -1,5 +1,8 @@
 FROM redis:latest
 FROM poseidon:latest
+
+ENV DEBIAN_FRONTEND=noninteractive
+
 # TODO: remove workaround for broken ninja build (https://github.com/scikit-build/ninja-python-distributions/issues/22)
 RUN apk upgrade --no-cache && \
     apk add --no-cache \
