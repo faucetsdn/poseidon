@@ -12,7 +12,7 @@ RUN apk add --update \
     musl-dev \
     python3 \
     python3-dev \
-    && pip3 install --no-cache-dir --upgrade pip==19.1 \
+    && pip3 install --no-cache-dir --upgrade pip==20.0.2 \
     && pip3 install --no-cache-dir -r requirements.txt \
     && pip3 install --no-cache-dir -r /healthcheck/requirements.txt \
     && apk del \
