@@ -1,9 +1,10 @@
-cmd2==0.9.25
+cmd2==0.10.0
 natural==0.2.0
+netaddr==0.7.19
 pika==1.1.0
 prometheus_client==0.7.1
 pyyaml==5.3
-redis==3.4.0
+redis==3.4.1
 requests==2.22.0
 schedule==0.6.0
 scp==0.13.2
