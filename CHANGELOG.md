@@ -1,4 +1,4 @@
-# v0.11.2 (2020-02-13)
+# v0.10.1 (2020-02-13)
 
 - NetworkML now run against combined pcap (one to many) rather than host to host. 
 - Add new gen_pcap_manifest.py script to aid curation of pcaps by MAC or IP.
