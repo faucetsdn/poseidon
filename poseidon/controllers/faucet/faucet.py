@@ -10,6 +10,7 @@ import logging
 from poseidon.controllers.faucet.connection import Connection
 from poseidon.controllers.faucet.parser import Parser
 from poseidon.volos.volos import Volos
+from poseidon.volos.coprocessor import Coprocessor
 
 
 class FaucetProxy(Connection, Parser):
@@ -36,7 +37,7 @@ class FaucetProxy(Connection, Parser):
 
         #parse volos config
         self.volos = Volos(controller)
-
+        self.coprocessor = Coprocessor(controller)
         ignore_vlans = controller['ignore_vlans']
         if isinstance(ignore_vlans, str):
             self.ignore_vlans = json.loads(ignore_vlans)

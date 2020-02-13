@@ -8,6 +8,8 @@ import logging
 import os
 import yaml
 
+from pathlib import Path
+
 class Acl(object):
 
   def __init__(self, endpoint, acl_dir, copro_vlan=2, copro_port=23):
@@ -81,7 +83,7 @@ class Acl(object):
     status = False
     try:
       if not os.path.exists(self.acl_dir):
-        os.Path(self.acl_dir).makedir(parents=True, exist_ok=True)
+        Path(self.acl_dir).mkdir(parents=True, exist_ok=True)
         status = True
     except Exception as e:  # pragma: no cover
       self.logger.error('Volos ACL directory:{0} could not be created. Coprocessing may not work as expected'.format(self.acl_file))

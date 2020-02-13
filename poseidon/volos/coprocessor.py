@@ -28,6 +28,7 @@ class Coprocessor(object):
         self.pipette_port = controller['pipette_port']
         self.pcap_location = controller['pcap_location']
         self.pcap_size = controller['pcap_size']
+        self.pipette_running = False
 
     def update_pipette(self):
         status = True

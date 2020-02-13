@@ -133,6 +133,10 @@ def schedule_job_coprocessing(schedule_func):
                 schedule_func.s.coprocess_endpoint(chosen)
 
     if not CTRL_C['STOP'] and schedule_func.s.volos.enabled:
+        if schedule_func.s.coprocessor and not schedule_func.s.coprocessor.pipette_running:
+            schedule_func.s.start_pipette
+            schedule_func.s.pipette_running = True
+
         candidates = [
             endpoint for endpoint in schedule_func.s.endpoints.values()
             if endpoint.state in ['queued']]
@@ -145,7 +149,10 @@ def schedule_job_coprocessing(schedule_func):
                 random.shuffle(candidates)
         if schedule_func.s.sdnc:
             trigger_coprocessing(candidates)
-
+    else:
+        if schedule_func.s.coprocessor and schedule_func.s.coprocessor.pipette_running:
+            schedule_func.s.stop_pipette
+            schedule_func.s.pipette_running = False
 def schedule_thread_worker(schedule):
     ''' schedule thread, takes care of running processes in the future '''
     global CTRL_C

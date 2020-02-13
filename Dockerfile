@@ -14,6 +14,7 @@ RUN apk upgrade --no-cache && \
     py3-paramiko \
     tini \
     yaml-dev \
+    git \
     linux-headers && \
     pip3 install --no-cache-dir --upgrade pip==19.1 && \
     pip3 install --no-cache-dir -r requirements.txt && \
