@@ -31,7 +31,7 @@ services:
             poseidon:
     crviz:
         restart: always
-        image: 'cyberreboot/crviz:v0.3.18'
+        image: 'cyberreboot/crviz:v0.3.19'
         ports:
             - '5001:5000'
         networks:
