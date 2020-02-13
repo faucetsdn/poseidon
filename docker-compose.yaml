@@ -9,7 +9,7 @@ services:
             poseidon:
     rabbit:
         restart: always
-        image: 'cyberreboot/rabbitmq:0.10.2'
+        image: 'cyberreboot/rabbitmq:v0.10.2'
         ports:
             - '127.0.0.1:15672:15672'
             - '5672:5672'
