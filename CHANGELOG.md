@@ -1,5 +1,6 @@
 # v0.10.1 (2020-02-13)
 
+- Linux arm7 and arm64 now supported via Docker.
 - NetworkML now run against combined pcap (one to many) rather than host to host. 
 - Add new gen_pcap_manifest.py script to aid curation of pcaps by MAC or IP.
 - Move to github actions rather than TravisCI.
