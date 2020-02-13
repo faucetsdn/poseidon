@@ -1,3 +1,8 @@
+# v0.10.2 (2020-02-13)
+
+- Fix stale images for ncapture and rabbitmq.
+
+
 # v0.10.1 (2020-02-13)
 
 - Linux arm7 and arm64 now supported via Docker.
