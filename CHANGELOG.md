@@ -1,3 +1,12 @@
+# v0.11.2 (2020-02-13)
+
+- NetworkML now run against combined pcap (one to many) rather than host to host. 
+- Add new gen_pcap_manifest.py script to aid curation of pcaps by MAC or IP.
+- Move to github actions rather than TravisCI.
+- Upgraded versions of NetworkML, CRViz and network-tools
+- New versions of mock, pytype, redis, pytest, grafana, urllib3, cmd2
+
+
 # v0.10.0 (2020-01-16)
 
 - Poseidon is now completely docker-compose only; remove all vestiges of vent. Pcap logs are now logged in /opt/poseidon_files not /opt/vent_files
