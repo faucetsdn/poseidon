@@ -2,14 +2,14 @@ version: '3.7'
 services:
     redis:
         restart: always
-        image: 'cyberreboot/redis:v0.10.2'
+        image: 'cyberreboot/redis:latest'
         volumes:
             - '${POSEIDON_PREFIX}/opt/redis:/data'
         networks:
             poseidon:
     rabbit:
         restart: always
-        image: 'cyberreboot/rabbitmq:v0.10.2'
+        image: 'cyberreboot/rabbitmq:latest'
         ports:
             - '127.0.0.1:15672:15672'
             - '5672:5672'
@@ -37,8 +37,11 @@ services:
         networks:
             poseidon:
     poseidon_api:
+        build:
+            context: api
+            dockerfile: Dockerfile
         restart: always
-        image: 'cyberreboot/poseidon-api:v0.10.2'
+        image: 'cyberreboot/poseidon-api:latest'
         ports:
             - '5000:8000'
         environment:
@@ -48,8 +51,11 @@ services:
                 aliases:
                     - poseidon-api
     poseidon:
+        build:
+            context: .
+            dockerfile: Dockerfile
         restart: always
-        image: 'cyberreboot/poseidon:v0.10.2'
+        image: 'cyberreboot/poseidon:latest'
         environment:
             PYTHONUNBUFFERED: '1'
         volumes:
@@ -60,8 +66,11 @@ services:
         networks:
             - poseidon
     workers:
+        build:
+            context: workers
+            dockerfile: Dockerfile
         restart: always
-        image: 'cyberreboot/poseidon-workers:v0.10.2'
+        image: 'cyberreboot/poseidon-workers:latest'
         environment:
             PYTHONUNBUFFERED: '1'
             VOL_PREFIX: '${POSEIDON_PREFIX}'
