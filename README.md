@@ -1,7 +1,7 @@
 # Poseidon
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Build Status](https://travis-ci.org/CyberReboot/poseidon.svg?branch=master)](https://travis-ci.org/CyberReboot/poseidon)
+![Build Status](https://github.com/CyberReboot/poseidon/workflows/test/badge.svg)
 [![codecov](https://codecov.io/gh/CyberReboot/poseidon/branch/master/graph/badge.svg?token=ORXmFYC3MM)](https://codecov.io/gh/CyberReboot/poseidon)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/e31df16fa65447bf8527e366c6271bf3)](https://www.codacy.com/app/CyberReboot/poseidon?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=CyberReboot/poseidon&amp;utm_campaign=Badge_Grade)
 [![Docker Hub Downloads](https://img.shields.io/docker/pulls/cyberreboot/poseidon.svg)](https://hub.docker.com/r/cyberreboot/poseidon/)
@@ -323,7 +323,7 @@ The second type of logging is host based pcap captures, with most of the applica
 - [License](LICENSE)
 - [Maintainers](MAINTAINERS)
 - [Releases](https://github.com/CyberReboot/poseidon/releases)
-- [Tests](https://travis-ci.org/CyberReboot/poseidon)
+- [Tests](https://github.com/CyberReboot/poseidon/actions)
 - [Version](VERSION)
 - Videos:
   - [Installing Poseidon and Faucet together](https://www.youtube.com/watch?v=Qst5oNs5uY0)

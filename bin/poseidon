@@ -80,6 +80,8 @@ function check_args()
                 sudo tar -C "$POSEIDON_PREFIX"/opt/poseidon -xvf "$tarfile" --strip=1
                 sudo chmod -R 755 "$POSEIDON_PREFIX"/opt/poseidon
                 sudo cp -n "$POSEIDON_PREFIX"/opt/poseidon/config/poseidon.config "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config
+                sudo cp -n "$POSEIDON_PREFIX"/opt/poseidon/bin/gen_pcap_manifest /usr/local/bin/gen_pcap_manifest
+                sudo chmod +x /usr/local/bin/gen_pcap_manifest
                 rm -rf "$tardir"
                 exit
                 ;;
@@ -138,7 +140,7 @@ function check_args()
                     curl -L https://docs.faucet.nz/en/latest/_static/grafana-dashboards/faucet_port_statistics.json > "$POSEIDON_PREFIX"/opt/grafana/dashboards/faucet_port_statistics.json || true
                     composefiles+=(-f helpers/faucet/docker-compose-faucet.yaml -f helpers/faucet/docker-compose-monitoring.yaml)
                 fi
-                docker-compose "${composefiles[@]}" up -d --build || die "docker-compose returned an error"
+                docker-compose "${composefiles[@]}" up -d --build --quiet-pull || die "docker-compose returned an error"
                 echo -n "Waiting for Poseidon to become healthy..."
                 until [ "$(docker ps -q --filter "label=com.docker.compose.service=poseidon")" ] && [ "$(docker inspect poseidon_poseidon_1 -f \{\{.State.Health.Status\}\})" = "healthy" ]
                 do
@@ -186,7 +188,8 @@ function check_args()
                 rm -rf "$configdir"
                 # update this script
                 sudo curl -L https://raw.githubusercontent.com/CyberReboot/poseidon/master/bin/poseidon -o /usr/local/bin/poseidon
-                sudo chmod +x /usr/local/bin/poseidon
+                sudo curl -L https://raw.githubusercontent.com/CyberReboot/poseidon/master/bin/gen_pcap_manifest -o /usr/local/bin/gen_pcap_manifest
+                sudo chmod +x /usr/local/bin/poseidon /usr/local/bin/gen_pcap_manifest
                 echo "Done updating."
                 exit
                 ;;
