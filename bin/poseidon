@@ -268,7 +268,7 @@ function check_files()
 }
 
 function parse_config(){
-    CFG=~/github/public/poseidon/dev/config/poseidon.config;
+    CFG="$POSEIDON_PREFIX"/opt/poseidon/poseidon.config;
     for ini in `awk '/^\[/' $CFG` # finds the SECTIONS (aka "PIPETTE")
     do 
       if [[ $ini == *"PIPETTE"* ]]; then
