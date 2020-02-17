@@ -277,7 +277,6 @@ function parse_config(){
         while read A B
         do
           ARHG[$A]=$B
-          echo "in section $ini, $A is equal to"  ${ARHG["$A"]}
         done < <(awk -F'=' '/\[/ {x=0} x==1 && $0~/=/ && NF==2 {print $1, $2} $0==INI {x=1}' INI="$ini" $CFG)
         
         REPO=${ARHG["pipette_repo"]}
