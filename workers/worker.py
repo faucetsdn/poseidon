@@ -38,6 +38,10 @@ def callback(ch, method, properties, body):
                 environment.update(worker['environment'])
             if 'rabbit' not in pipeline:
                 pipeline['rabbit'] = 'true'
+            keep_images = os.getenv('KEEPIMAGES', '0')
+            remove = True
+            if keep_images == '1':
+                remove = False
             try:
                 d.containers.run(image=image,
                                  name=name,
@@ -45,7 +49,7 @@ def callback(ch, method, properties, body):
                                  volumes={
                                      vol_prefix + '/opt/poseidon_files': {'bind': '/files', 'mode': 'rw'}},
                                  environment=environment,
-                                 remove=True,
+                                 remove=remove,
                                  command=command,
                                  detach=True)
                 print(' [Create container] %s UTC %r:%r:%r:%r' % (str(datetime.datetime.utcnow()),
