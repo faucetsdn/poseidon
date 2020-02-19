@@ -285,7 +285,6 @@ function parse_config(){
         C=${ARHG["coprocessor_nic"]}
         F=${ARHG["fake_interface"]}
         M=${ARHG["fake_mac"]}
-        FCH=${ARHG["fake_server_mac"]}
         #sed command used to convert array notation to space delimited
         I=$(echo "${ARHG["fake_ips"]}" | sed 's/\[//g; s/\]//g; s/ //g; s/,/ /g')
         V=$(echo "${ARHG["coprocessor_vlans"]}" | sed 's/\[//g; s/\]//g; s/ //g; s/,/ /g')
@@ -308,7 +307,7 @@ function run_pipette(){
     sudo git clone "$REPO" "$DIR"
     cd "$DIR" || return
     sudo git pull
-    sudo ./runpipette.sh -c "$C" -f "$F" -m "$M" -fch "$FCH" -i "$I" -v "$V" -b "$B" -p "$P" -r "$PL" "$PS" &
+    sudo ./runpipette.sh -c "$C" -f "$F" -m "$M" -i "$I" -v "$V" -b "$B" -p "$P" -r "$PL" "$PS" &
 }
 
 # entry point
