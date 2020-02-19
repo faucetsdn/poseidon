@@ -269,15 +269,16 @@ function check_files()
 
 function parse_config(){
     CFG="$POSEIDON_PREFIX"/opt/poseidon/poseidon.config;
-    for ini in `awk '/^\[/' $CFG` # finds the SECTIONS (aka "PIPETTE")
+    # shellcheck disable=SC2013
+    for ini in $(awk '/^\[/' "$CFG") # finds the SECTIONS (aka "PIPETTE")
     do 
       if [[ $ini == *"PIPETTE"* ]]; then
         unset ARHG # resets ARHG 
         declare -A ARHG # declares an associative array
-        while read A B
+        while read -r A B
         do
           ARHG[$A]=$B
-        done < <(awk -F'=' '/\[/ {x=0} x==1 && $0~/=/ && NF==2 {print $1, $2} $0==INI {x=1}' INI="$ini" $CFG)
+        done < <(awk -F'=' '/\[/ {x=0} x==1 && $0~/=/ && NF==2 {print $1, $2} $0==INI {x=1}' INI="$ini" "$CFG")
         
         REPO=${ARHG["pipette_repo"]}
         DIR=${ARHG["pipette_dir"]}
