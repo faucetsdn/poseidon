@@ -27,6 +27,7 @@ services:
             - '${POSEIDON_PREFIX}/opt/poseidon_files:/files'
         environment:
             PYTHONUNBUFFERED: '1'
+            KEEPIMAGES: '0'
         networks:
             poseidon:
     crviz:
@@ -73,6 +74,7 @@ services:
         image: 'cyberreboot/poseidon-workers:latest'
         environment:
             PYTHONUNBUFFERED: '1'
+            KEEPIMAGES: '0'
             VOL_PREFIX: '${POSEIDON_PREFIX}'
         networks:
             - poseidon
