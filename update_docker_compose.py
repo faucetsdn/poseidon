@@ -40,8 +40,8 @@ for service, service_config in dc['services'].items():
     repo = OWN_VERSIONED_SERVICES.get(service, None)
     if repo:
         req = urllib.request.Request(
-            url='https://api.github.com/repos/%s/releases/latest' % repo)  # nosec
-        res = urllib.request.urlopen(req, timeout=15)
+            url='https://api.github.com/repos/%s/releases/latest' % repo)
+        res = urllib.request.urlopen(req, timeout=15)  # nosec
         latest_json = json.loads(res.read().decode('utf-8'))
         version = latest_json['name']
     elif DEV:

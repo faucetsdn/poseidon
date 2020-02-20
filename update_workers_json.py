@@ -26,8 +26,8 @@ for worker in workers['workers']:
         print('Unknown repo for %s' % worker['image'])
         sys.exit(-1)
     req = urllib.request.Request(
-        url='https://api.github.com/repos/%s/releases/latest' % repo)  # nosec
-    res = urllib.request.urlopen(req, timeout=15)
+        url='https://api.github.com/repos/%s/releases/latest' % repo)
+    res = urllib.request.urlopen(req, timeout=15)  # nosec
     latest_json = json.loads(res.read().decode('utf-8'))
     latest_name = latest_json['name']
     if latest_name != latest_json['name']:
