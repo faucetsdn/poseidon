@@ -50,7 +50,7 @@ services:
                     - poseidon-api
     poseidon:
         restart: always
-        image: 'cyberreboot/poseidon:latest:v0.10.3'
+        image: 'cyberreboot/poseidon:v0.10.3'
         environment:
             PYTHONUNBUFFERED: '1'
         volumes:
