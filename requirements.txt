@@ -11,4 +11,3 @@ scp==0.13.2
 texttable==1.6.2
 transitions==0.7.2
 urllib3==1.25.8
-gitpython==3.0.7
