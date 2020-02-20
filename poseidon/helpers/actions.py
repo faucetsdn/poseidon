@@ -52,7 +52,7 @@ class Actions(object):
         status = False
         if self.sdnc:
             if self.sdnc.volos and self.sdnc.volos.enabled:
-                acl = Acl(self.endpoint, acl_dir=self.sdnc.volos.acl_dir, copro_vlan=self.sdnc.volos.copro_vlan, copro_port=self.sdnc.volos.copro_port)
+                acl = Acl(self.endpoint, acl_dir=self.sdnc.volos.acl_dir, copro_vlans=[self.sdnc.volos.copro_vlan], copro_port=self.sdnc.volos.copro_port)
                 endpoints = [self.endpoint]
                 force_apply_rules = [acl.acl_key]
                 coprocess_rules_files = [acl.acl_file]
@@ -69,7 +69,7 @@ class Actions(object):
         status = False
         if self.sdnc:
             if self.sdnc.volos and self.sdnc.volos.enabled:
-                acl = Acl(self.endpoint, acl_dir=self.sdnc.volos.acl_dir, copro_vlan=self.sdnc.volos.copro_vlan, copro_port=self.sdnc.volos.copro_port)
+                acl = Acl(self.endpoint, acl_dir=self.sdnc.volos.acl_dir, copro_vlans=[self.sdnc.volos.copro_vlan], copro_port=self.sdnc.volos.copro_port)
                 endpoints = [self.endpoint]
                 force_remove_rules = [acl.acl_key]
                 if self.sdnc.update_acls(

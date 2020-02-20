@@ -21,7 +21,7 @@ class Volos(object):
         self.enabled = controller['enable_volos']
         self.coprocessor_nic = controller['coprocessor_nic']
         self.coprocessor_port = controller['coprocessor_port']
-        self.coprocessor_vlan = controller['coprocessor_vlan']
+        self.coprocessor_vlans = controller['coprocessor_vlans']
         self.coprocessing_frequency = controller['coprocessing_frequency']
         self.ignore_copro_ports = controller['ignore_copro_ports']
         self.acl_dir = controller['acl_dir']

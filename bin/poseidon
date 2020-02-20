@@ -269,23 +269,25 @@ function check_files()
 
 function parse_config(){
     CFG="$POSEIDON_PREFIX"/opt/poseidon/poseidon.config;
-    for ini in `awk '/^\[/' $CFG` # finds the SECTIONS (aka "PIPETTE")
+    # shellcheck disable=SC2013
+    for ini in $(awk '/^\[/' "$CFG") # finds the SECTIONS (aka "PIPETTE")
     do 
       if [[ $ini == *"PIPETTE"* ]]; then
         unset ARHG # resets ARHG 
         declare -A ARHG # declares an associative array
-        while read A B
+        while read -r A B
         do
           ARHG[$A]=$B
-        done < <(awk -F'=' '/\[/ {x=0} x==1 && $0~/=/ && NF==2 {print $1, $2} $0==INI {x=1}' INI="$ini" $CFG)
+        done < <(awk -F'=' '/\[/ {x=0} x==1 && $0~/=/ && NF==2 {print $1, $2} $0==INI {x=1}' INI="$ini" "$CFG")
         
         REPO=${ARHG["pipette_repo"]}
         DIR=${ARHG["pipette_dir"]}
         C=${ARHG["coprocessor_nic"]}
         F=${ARHG["fake_interface"]}
         M=${ARHG["fake_mac"]}
-        FCH=${ARHG["fake_server_mac"]}
-        I=${ARHG["fake_ip"]}
+        #sed command used to convert array notation to space delimited
+        I=$(echo "${ARHG["fake_ips"]}" | sed 's/\[//g; s/\]//g; s/ //g; s/,/ /g')
+        V=$(echo "${ARHG["coprocessor_vlans"]}" | sed 's/\[//g; s/\]//g; s/ //g; s/,/ /g')
         B=${ARHG["bridge"]}
         P=${ARHG["pipette_port"]}
         PL=${ARHG["pcap_location"]}
@@ -303,9 +305,9 @@ function run_pipette(){
         sudo rm -rf "$DIR"
     fi
     sudo git clone "$REPO" "$DIR"
-    cd "$DIR"
+    cd "$DIR" || return
     sudo git pull
-    sudo ./runpipette.sh -c $C -f $F -m $M -fch $FCH -i $I -b $B -p $P -r $PL $PS &
+    sudo ./runpipette.sh -c "$C" -f "$F" -m "$M" -i "$I" -v "$V" -b "$B" -p "$P" -r "$PL" "$PS" &
 }
 
 # entry point
