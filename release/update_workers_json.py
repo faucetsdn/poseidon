@@ -1,15 +1,11 @@
-#!/usr/bin/python3
-
-
+#!/usr/bin/env python3
 # Generate diff for workers.json to update to latest releases.
-
-
 import json
 import sys
 import urllib.request
 
 
-WORKERS_JSON = 'workers/workers.json'
+WORKERS_JSON = '../workers/workers.json'
 RELEASE_MAP = {
     'cyberreboot/pcap-to-node-pcap': 'cyberreboot/network-tools',
     'cyberreboot/tcprewrite-dot1q': 'cyberreboot/network-tools',
@@ -39,4 +35,5 @@ with open(WORKERS_JSON, 'w') as f:
 
 
 if changes:
-    print('Upgrade workers: ' + ', '.join('%s: %s' % (repo, version) for repo, version in changes))
+    print('Upgrade workers: ' + ', '.join('%s: %s' % (repo, version)
+                                          for repo, version in changes))
