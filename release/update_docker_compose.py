@@ -1,15 +1,14 @@
-#!/usr/bin/python3
-
+#!/usr/bin/env python3
 # update docker-compose.yaml with release version or dev version, depending on contents of VERSION.
-
-from collections import OrderedDict
 import json
-import ruamel.yaml
 import sys
 import urllib.request
+from collections import OrderedDict
 
-VERSION_FILE = 'VERSION'
-DOCKER_COMPOSE = 'docker-compose.yaml'
+import ruamel.yaml
+
+VERSION_FILE = '../VERSION'
+DOCKER_COMPOSE = '../docker-compose.yaml'
 RELEASE_VER = open(VERSION_FILE).read().strip()
 DEV = RELEASE_VER.endswith('.dev')
 
@@ -34,7 +33,8 @@ NON_DEV_SERVICE_DELETE = {
 # Broadly preserves formatting.
 yaml = ruamel.yaml.YAML()
 yaml.indent(mapping=4, sequence=2, offset=4)
-dc = ruamel.yaml.round_trip_load(open(DOCKER_COMPOSE).read(), preserve_quotes=True)
+dc = ruamel.yaml.round_trip_load(
+    open(DOCKER_COMPOSE).read(), preserve_quotes=True)
 for service, service_config in dc['services'].items():
     image, version = service_config['image'].split(':')
     repo = OWN_VERSIONED_SERVICES.get(service, None)
@@ -49,7 +49,7 @@ for service, service_config in dc['services'].items():
         if service in DEV_SERVICE_OVERRIDE:
             service_config.update(DEV_SERVICE_OVERRIDE[service])
     else:
-        version = 'v' + RELEASE_VER 
+        version = 'v' + RELEASE_VER
         del_keys = NON_DEV_SERVICE_DELETE.get(service, None)
         if del_keys:
             for del_key in del_keys:
