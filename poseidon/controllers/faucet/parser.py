@@ -21,12 +21,16 @@ class Parser:
                  mirror_ports=None,
                  reinvestigation_frequency=None,
                  max_concurrent_reinvestigations=None,
-                 ignore_vlans=None):
+                 ignore_vlans=None,
+                 copro_port=None,
+                 copro_vlan=None):
         self.logger = logging.getLogger('parser')
         self.mirror_ports = mirror_ports
         self.reinvestigation_frequency = reinvestigation_frequency
         self.max_concurrent_reinvestigations = max_concurrent_reinvestigations
         self.ignore_vlans = ignore_vlans
+        self.copro_port = copro_port
+        self.copro_vlan = copro_vlan
 
     @staticmethod
     @exception
@@ -82,7 +86,7 @@ class Parser:
         obj_doc = Parser().yaml_in(config_file)
         return obj_doc
 
-    def config(self, config_file, action, port, switch, rules_file=None, endpoints=None, force_apply_rules=None):
+    def config(self, config_file, action, port, switch, rules_file=None, endpoints=None, force_apply_rules=None, force_remove_rules=None, coprocess_rules_files=None):
         status = [True, []]
         switch_found = None
         config_file = Parser().get_config_file(config_file)
@@ -174,6 +178,8 @@ class Parser:
                 if 'include' in obj_doc:
                     conf_files = obj_doc['include']
                     acls_filenames = []
+                    if coprocess_rules_files:
+                        acls_filenames += coprocess_rules_files
                     for f in files:
                         if '/' in f:
                             acls_filenames.append(f.rsplit('/', 1)[1])
@@ -354,7 +360,7 @@ class Parser:
                         all_rule_acls = list(set(all_rule_acls))
                         removed_acls = []
                         for acl in existing_acls:
-                            if acl in acls and acl not in all_rule_acls:
+                            if acl in acls and (acl not in all_rule_acls or acl in force_remove_rules):
                                 obj_doc['dps'][endpoint.endpoint_data['segment']]['interfaces'][int(
                                     endpoint.endpoint_data['port'])]['acls_in'].remove(acl)
                                 self.logger.info('Removing no longer needed ACL: {0} for: {1} on switch: {2} and port: {3}'.format(
