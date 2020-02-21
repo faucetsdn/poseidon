@@ -8,6 +8,8 @@ RUN apk upgrade --no-cache && \
     apk add --no-cache \
     build-base \
     cmake \
+    g++ \
+    make \
     tshark \
     python3-dev \
     yaml-dev && \
