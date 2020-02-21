@@ -116,7 +116,43 @@ def schedule_job_reinvestigation(schedule_func):
         if schedule_func.s.sdnc:
             trigger_reinvestigation(candidates)
 
+def schedule_job_coprocessing(schedule_func):
+    ''' put endpoints into the reinvestigation state if possible '''
+    global CTRL_C
 
+    def trigger_coprocessing(candidates):
+        # get random order of things that are known
+        for _ in range(schedule_func.controller['max_concurrent_coprocessing'] - schedule_func.s.coprocessing):
+            if len(candidates) > 0:
+                chosen = candidates.pop()
+                schedule_func.logger.info('Starting coprocessing on: {0} {1}'.format(
+                    chosen.name, chosen.state))
+                chosen.coprocess()
+                chosen.p_prev_states.append(
+                    (chosen.state, int(time.time())))
+                schedule_func.s.coprocess_endpoint(chosen)
+
+    if not CTRL_C['STOP'] and schedule_func.s.volos.enabled:
+        if schedule_func.s.coprocessor and not schedule_func.s.coprocessor.pipette_running:
+            schedule_func.s.start_pipette
+            schedule_func.s.pipette_running = True
+
+        candidates = [
+            endpoint for endpoint in schedule_func.s.endpoints.values()
+            if endpoint.state in ['queued']]
+        if len(candidates) == 0:
+            # if no queued endpoints, then known and abnormal are candidates
+            candidates = [
+                endpoint for endpoint in schedule_func.s.endpoints.values()
+                if endpoint.state in ['known', 'abnormal']]
+            if len(candidates) > 0:
+                random.shuffle(candidates)
+        if schedule_func.s.sdnc:
+            trigger_coprocessing(candidates)
+    else:
+        if schedule_func.s.coprocessor and schedule_func.s.coprocessor.pipette_running:
+            schedule_func.s.stop_pipette
+            schedule_func.s.pipette_running = False
 def schedule_thread_worker(schedule):
     ''' schedule thread, takes care of running processes in the future '''
     global CTRL_C
@@ -149,6 +185,7 @@ class SDNConnect:
         if self.first_time:
             self.endpoints = {}
             self.investigations = 0
+            self.coprocessing = 0
             self.clear_filters()
             self.default_endpoints()
 
@@ -895,6 +932,56 @@ class Monitor:
                 else:
                     if endpoint.state != 'known':
                         endpoint.known()
+
+    def schedule_coprocessing(self):
+        queued_endpoints = [
+            endpoint for endpoint in self.s.endpoints.values()
+            if not endpoint.copro_ignore and endpoint.copro_state == 'queued']
+        self.s.coprocessing = len([
+            endpoint for endpoint in self.s.endpoints.values()
+            if endpoint.copro_state in ['coprocessing']])
+        # mirror things in the order they got added to the queue
+        queued_endpoints = sorted(
+             queued_endpoints, key=lambda x: x.p_prev_copro_states[-1][1])
+
+        coprocessing_budget = max(
+            self.controller['max_concurrent_coprocessing'] -
+            self.s.coprocessing,
+            0)
+        self.logger.debug('coprocessing {0}, budget {1}, queued {2}'.format(
+            str(self.s.coprocessing), str(coprocessing_budget), str(len(queued_endpoints))))
+
+        for endpoint in queued_endpoints[:coprocessing_budget]:
+            endpoint.trigger(endpoint.p_next_copro_state)
+            endpoint.p_next_copro_state = None
+            endpoint.p_prev_copro_states.append(
+                (endpoint.copro_state, int(time.time())))
+            self.s.coprocess_endpoint(endpoint)
+
+        for endpoint in self.s.endpoints.values():
+            if not endpoint.copro_ignore:
+                if self.s.sdnc:
+                    if endpoint.copro_state == 'unknown':
+                        endpoint.p_next_copro_state = 'coprocessing'
+                        endpoint.queue()
+                        endpoint.p_prev_copro_states.append(
+                            (endpoint.copro_state, int(time.time())))
+                    elif endpoint.copro_state in ['coprocessing']:
+                        cur_time = int(time.time())
+                        # timeout after 2 times the reinvestigation frequency
+                        # in case something didn't report back, put back in an
+                        # unknown state
+                        if cur_time - endpoint.p_prev_copro_states[-1][1] > 2*self.controller['coprocessing_frequency']:
+                            self.logger.debug(
+                                'timing out: {0} and setting to unknown'.format(endpoint.name))
+                            self.s.unmirror_endpoint(endpoint)
+                            endpoint.unknown()
+                            endpoint.p_prev_copro_states.append(
+                                (endpoint.copro_state, int(time.time())))
+                else:
+                    if endpoint.state != 'nominal':
+                        endpoint.nominal()
+
 
     def process(self):
         global CTRL_C

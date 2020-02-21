@@ -73,6 +73,17 @@
       "stage": "poseidon_poseidon",
       "version": "v0.11.4",
       "viewableOutput": true
+    },
+    {
+      "image": "yeasy/simple-web",
+      "inputs": [],
+      "labels": "",
+      "name": "simple-web",
+      "outputs": [],
+      "stage": "poseidon_volos",
+      "version": "latest",
+      "viewableOutput": false,
+      "ports": ["80:80"]
     }
   ]
 }

@@ -20,6 +20,7 @@ class HistoryTypes():
     STATE_CHANGE = 'State Change'
     ACL_CHANGE = 'ACL Change'
     PROPERTY_CHANGE = 'Property Change'
+    COPRO_CHANGE = 'Coprocessor Change'
 
 
 class Endpoint:
@@ -113,21 +114,50 @@ class Endpoint:
             'dest': 'inactive', 'before': 'update_state_history'}
     ]
 
+    copro_states = ['unknown', 'coprocessing', 'nominal', 'suspicious', 'queued']
+
+    copro_transitions = [
+        {'trigger': 'coprocess', 'source': 'unknown',
+            'dest': 'coprocessing', 'before': 'update_copro_history'},
+        {'trigger': 'queue', 'source': 'unknown',
+            'dest': 'queued', 'before': 'update_copro_history'},  
+        {'trigger': 'coprocess', 'source': 'queued',
+            'dest': 'coprocessing', 'before': 'update_copro_history'},
+        {'trigger': 'nominal', 'source': 'coprocessing',
+            'dest': 'nominal', 'before': 'update_copro_history'},
+        {'trigger': 'suspicious', 'source': 'coprocessing',
+            'dest': 'suspicious', 'before': 'update_copro_history'},
+        {'trigger': 'queue', 'source': 'nominal',
+            'dest': 'queued', 'before': 'update_copro_history'},  
+        {'trigger': 'coprocess', 'source': 'nominal',
+            'dest': 'coprocessing', 'before': 'update_copro_history'},
+        {'trigger': 'queue', 'source': 'suspicious',
+            'dest': 'queued', 'before': 'update_copro_history'},  
+        {'trigger': 'coprocess', 'source': 'suspicious',
+            'dest': 'coprocessing', 'before': 'update_copro_history'},
+
+    ]
+
     def __init__(self, hashed_val):
         self.name = hashed_val.strip()
         self.ignore = False
+        self.copro_ignores = False
         self.endpoint_data = None
         self.p_next_state = None
         self.p_prev_states = []
+        self.p_next_copro_state = None
+        self.p_prev_copross_states = []
         self.acl_data = []
         self.metadata = {}
         self.history = []
         self.state = None
+        self.copro_state = None
 
     def encode(self):
         endpoint_d = {
             'name': self.name,
             'state': self.state,
+            'copro_state': self.copro_state,
             'ignore': self.ignore,
             'endpoint_data': self.endpoint_data,
             'p_next_state': self.p_next_state,
@@ -142,10 +172,10 @@ class Endpoint:
         self.history.append(
             {'type': entry_type, 'timestamp': timestamp, 'message': message})
 
-    def update_state_history(self, event_data):
+    def update_copro_history(self, event_data):
         self._add_history_entry(
-            HistoryTypes.STATE_CHANGE, time.time(),
-            'State changed from {0} to {1}'.format(event_data.transition.source, event_data.transition.dest))
+            HistoryTypes.COPRO_CHANGE, time.time(),
+            'Coprocessing state changed from {0} to {1}'.format(event_data.transition.source, event_data.transition.dest))
 
     def update_acl_history(self, event_data, added_acls, removed_acls):
         message = ''
@@ -164,6 +194,11 @@ class Endpoint:
     def update_property_history(self, entry_type, timestamp, field_name, old_value, new_value):
         self._add_history_entry(entry_type, timestamp,
                                 'Property {0} changed from {1} to {2}'.format(field_name, old_value, new_value))
+
+    def update_state_history(self, event_data):
+        self._add_history_entry(
+            HistoryTypes.STATE_CHANGE, time.time(),
+            'State changed from {0} to {1}'.format(event_data.transition.source, event_data.transition.dest))
 
     @staticmethod
     def make_hash(machine, trunk=False):
@@ -189,6 +224,14 @@ def endpoint_factory(hashed_val):
         send_event=True)
     machine.name = endpoint.name[:8]+' '
     endpoint.machine = machine
+    copro_machine = Machine(
+        model=endpoint,
+        states=Endpoint.copro_states,
+        transitions=Endpoint.copro_transitions,
+        initial='unknown',
+        send_event=True)
+    copro_machine.name = endpoint.name[:8]+'_copro'
+    endpoint.copro_machine = copro_machine
     return endpoint
 
 
@@ -198,6 +241,7 @@ class EndpointDecoder:
         e = json.loads(endpoint)
         self.endpoint = endpoint_factory(e['name'])
         self.endpoint.state = e['state']
+        self.endpoint.copro_state = e['copro_state']
         if 'ignore' in e:
             if e['ignore']:
                 self.endpoint.ignore = True

@@ -222,6 +222,14 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
         # TODO
         return True
 
+    def coprocess_mac(self, mac, switch, port):
+        # TODO
+        return True
+
+    def uncoprocess_mac(self, mac, switch, port):
+        # TODO
+        return True
+
     def shutdown_ip(self, ip_addr, shutdown=True, mac_addr=None):
         if mac_addr is None:
             records = self.get_byip(ip_addr)

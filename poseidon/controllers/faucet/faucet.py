@@ -9,6 +9,8 @@ import logging
 
 from poseidon.controllers.faucet.connection import Connection
 from poseidon.controllers.faucet.parser import Parser
+from poseidon.volos.volos import Volos
+from poseidon.volos.coprocessor import Coprocessor
 
 
 class FaucetProxy(Connection, Parser):
@@ -32,6 +34,10 @@ class FaucetProxy(Connection, Parser):
         self.host = controller['URI']
         self.user = controller['USER']
         self.pw = controller['PASS']
+
+        #parse volos config
+        self.volos = Volos(controller)
+        self.coprocessor = Coprocessor(controller)
         ignore_vlans = controller['ignore_vlans']
         if isinstance(ignore_vlans, str):
             self.ignore_vlans = json.loads(ignore_vlans)
@@ -141,18 +147,18 @@ class FaucetProxy(Connection, Parser):
                     retval.append(self.mac_table[mac])
         return retval
 
-    def update_acls(self, rules_file=None, endpoints=None, force_apply_rules=None):
+    def update_acls(self, rules_file=None, endpoints=None, force_apply_rules=None, force_remove_rules=None):
         self.logger.debug('updating acls')
         status = None
         if self.host:
             self.receive_file('config')
             if self.config(self.config_file,
-                           'apply_acls', None, None, rules_file=rules_file, endpoints=endpoints, force_apply_rules=force_apply_rules):
+                           'apply_acls', None, None, rules_file=rules_file, endpoints=endpoints, force_apply_rules=force_apply_rules, force_remove_rules=force_remove_rules):
                 self.send_file('config')
                 status = True
         else:
             status = self.config(self.config_file, 'apply_acls',
-                                 None, None, rules_file=rules_file, endpoints=endpoints, force_apply_rules=force_apply_rules)
+                                 None, None, rules_file=rules_file, endpoints=endpoints, force_apply_rules=force_apply_rules, force_remove_rules=force_remove_rules)
         # TODO check if config was successfully updated
         return status
 
@@ -235,3 +241,46 @@ class FaucetProxy(Connection, Parser):
                 self.logger.debug('not unmirroring a trunk port')
         self.logger.debug('unmirror status: ' + str(status))
         return status
+
+    def coprocess_mac(self, my_mac):
+        self.logger.debug('coprocess mac: {0}'.format(my_mac))
+        for mac in self.mac_table:
+            if my_mac == mac:
+                port = self.mac_table[mac][0]['port']
+                switch = self.mac_table[mac][0]['segment']
+        if self.host:
+            self.receive_file('config')
+            if self.config(self.config_file,
+                           'coprocess', int(port), switch):
+                self.send_file('config')
+                # TODO check if this is actually True
+                status = True
+        else:
+            status = self.config(
+                self.config_file, 'coprocess', int(port), switch)
+
+        self.logger.debug('coprocess status: ' + str(status))
+        return status
+
+    def uncoprocess_mac(self, my_mac):
+        self.logger.debug('uncoprocess mac: {0}'.format(my_mac))
+        port = 0
+        for mac in self.mac_table:
+            if my_mac == mac:
+                port = self.mac_table[mac][0]['port']
+                switch = self.mac_table[mac][0]['segment']
+
+                if self.host:
+                    self.receive_file('config')
+                    if self.config(self.config_file,
+                                   'uncoprocess', int(port), switch):
+                        self.send_file('config')
+                        # TODO check if config was successfully updated
+                        status = True
+                else:
+                    status = self.config(
+                        self.config_file, 'uncoprocess', int(port), switch)
+
+        self.logger.debug('uncoprocess status: ' + str(status))
+        return status
+
