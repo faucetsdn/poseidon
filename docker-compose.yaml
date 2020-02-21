@@ -21,12 +21,13 @@ services:
                     - messenger
     network_tap:
         restart: always
-        image: 'cyberreboot/network-tap:v0.11.3'
+        image: 'cyberreboot/network-tap:v0.11.4'
         volumes:
             - '/var/run/docker.sock:/var/run/docker.sock'
             - '${POSEIDON_PREFIX}/opt/poseidon_files:/files'
         environment:
             PYTHONUNBUFFERED: '1'
+            KEEPIMAGES: '0'
         networks:
             poseidon:
     crviz:
@@ -73,6 +74,7 @@ services:
         image: 'cyberreboot/poseidon-workers:latest'
         environment:
             PYTHONUNBUFFERED: '1'
+            KEEPIMAGES: '0'
             VOL_PREFIX: '${POSEIDON_PREFIX}'
         networks:
             - poseidon

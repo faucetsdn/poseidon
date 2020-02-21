@@ -21,7 +21,6 @@ class Coprocessor(object):
         self.coprocessor_vlans = controller['coprocessor_vlans']
         self.fake_interface = controller['fake_interface']
         self.fake_mac = controller['fake_mac']
-        self.fake_server_mac = controller['fake_server_mac']
         self.fake_ips = controller['fake_ips']
         self.bridge = controller['bridge']
         self.pipette_port = controller['pipette_port']

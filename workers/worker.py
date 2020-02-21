@@ -41,6 +41,12 @@ def callback(ch, method, properties, body):
                 pipeline['rabbit'] = 'true'
             if 'ports' in worker:
                 ports = worker['ports']
+
+            keep_images = os.getenv('KEEPIMAGES', '0')
+            remove = True
+            if keep_images == '1':
+                remove = False
+
             try:
                 d.containers.run(image=image,
                                  name=name,
@@ -48,7 +54,7 @@ def callback(ch, method, properties, body):
                                  volumes={
                                      vol_prefix + '/opt/poseidon_files': {'bind': '/files', 'mode': 'rw'}},
                                  environment=environment,
-                                 remove=True,
+                                 remove=remove,
                                  command=command,
                                  ports=ports,
                                  detach=True)

@@ -1,3 +1,11 @@
+# v0.10.3 (2020-02-21)
+
+- network-tools v0.11.4, networkml v0.4.8 (fix no results from networkml).
+- Add KEEPIMAGES diagnostic environment variable to keep containers.
+- Update grafana, requests, cmd2, faucet, gauge, event-adapater-rabbit-mq
+- Initial Volos infrastructure.
+
+
 # v0.10.2 (2020-02-13)
 
 - Fix stale images for ncapture and rabbitmq.
