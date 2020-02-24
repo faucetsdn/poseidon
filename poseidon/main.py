@@ -116,6 +116,7 @@ def schedule_job_reinvestigation(schedule_func):
         if schedule_func.s.sdnc:
             trigger_reinvestigation(candidates)
 
+
 def schedule_job_coprocessing(schedule_func):
     ''' put endpoints into the reinvestigation state if possible '''
     global CTRL_C
@@ -153,6 +154,8 @@ def schedule_job_coprocessing(schedule_func):
         if schedule_func.s.coprocessor and schedule_func.s.coprocessor.pipette_running:
             schedule_func.s.stop_pipette
             schedule_func.s.pipette_running = False
+
+
 def schedule_thread_worker(schedule):
     ''' schedule thread, takes care of running processes in the future '''
     global CTRL_C
@@ -936,13 +939,13 @@ class Monitor:
     def schedule_coprocessing(self):
         queued_endpoints = [
             endpoint for endpoint in self.s.endpoints.values()
-            if not endpoint.copro_ignore and endpoint.copro_state == 'queued']
+            if not endpoint.copro_ignore and endpoint.copro_state == 'copro_queued']
         self.s.coprocessing = len([
             endpoint for endpoint in self.s.endpoints.values()
             if endpoint.copro_state in ['copro_coprocessing']])
         # mirror things in the order they got added to the queue
         queued_endpoints = sorted(
-             queued_endpoints, key=lambda x: x.p_prev_copro_states[-1][1])
+            queued_endpoints, key=lambda x: x.p_prev_copro_states[-1][1])
 
         coprocessing_budget = max(
             self.controller['max_concurrent_coprocessing'] -
@@ -961,7 +964,7 @@ class Monitor:
         for endpoint in self.s.endpoints.values():
             if not endpoint.copro_ignore:
                 if self.s.sdnc:
-                    if endpoint.copro_state == 'unknown':
+                    if endpoint.copro_state == 'copro_unknown':
                         endpoint.p_next_copro_state = 'copro_coprocessing'
                         endpoint.copro_queue()
                         endpoint.p_prev_copro_states.append(
@@ -979,9 +982,8 @@ class Monitor:
                             endpoint.p_prev_copro_states.append(
                                 (endpoint.copro_state, int(time.time())))
                 else:
-                    if endpoint.state != 'nominal':
+                    if endpoint.state != 'copro_nominal':
                         endpoint.copro_nominal()
-
 
     def process(self):
         global CTRL_C
