@@ -225,8 +225,9 @@ def endpoint_factory(hashed_val):
         send_event=True)
     machine.name = endpoint.name[:8]+' '
     endpoint.machine = machine
+    copro_endpoint = Endpoint(hashed_val)
     copro_machine = Machine(
-        model=endpoint,
+        model=copro_endpoint,
         states=Endpoint.copro_states,
         transitions=Endpoint.copro_transitions,
         initial='copro_unknown',
