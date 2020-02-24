@@ -15,8 +15,7 @@ RUN apk upgrade --no-cache && \
     tini \
     yaml-dev \
     linux-headers && \
-    # https://github.com/google/pytype/issues/495 requires older version of pip
-    pip3 install --no-cache-dir --upgrade pip==19.0.1 && \
+    pip3 install --no-cache-dir --upgrade pip==20.0.2 && \
     pip3 install --no-cache-dir -r requirements.txt && \
     pip3 install --no-cache-dir -r /healthcheck/requirements.txt && \
     apk del build-base \
