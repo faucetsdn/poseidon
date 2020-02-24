@@ -114,27 +114,27 @@ class Endpoint:
             'dest': 'inactive', 'before': 'update_state_history'}
     ]
 
-    copro_states = ['unknown', 'coprocessing', 'nominal', 'suspicious', 'queued']
+    copro_states = ['copro_unknown', 'copro_coprocessing', 'copro_nominal', 'copro_suspicious', 'copro_queued']
 
     copro_transitions = [
-        {'trigger': 'coprocess', 'source': 'unknown',
-            'dest': 'coprocessing', 'before': 'update_copro_history'},
-        {'trigger': 'queue', 'source': 'unknown',
-            'dest': 'queued', 'before': 'update_copro_history'},  
-        {'trigger': 'coprocess', 'source': 'queued',
-            'dest': 'coprocessing', 'before': 'update_copro_history'},
-        {'trigger': 'nominal', 'source': 'coprocessing',
-            'dest': 'nominal', 'before': 'update_copro_history'},
-        {'trigger': 'suspicious', 'source': 'coprocessing',
-            'dest': 'suspicious', 'before': 'update_copro_history'},
-        {'trigger': 'queue', 'source': 'nominal',
-            'dest': 'queued', 'before': 'update_copro_history'},  
-        {'trigger': 'coprocess', 'source': 'nominal',
-            'dest': 'coprocessing', 'before': 'update_copro_history'},
-        {'trigger': 'queue', 'source': 'suspicious',
-            'dest': 'queued', 'before': 'update_copro_history'},  
-        {'trigger': 'coprocess', 'source': 'suspicious',
-            'dest': 'coprocessing', 'before': 'update_copro_history'},
+        {'trigger': 'copro_coprocess', 'source': 'copro_unknown',
+            'dest': 'copro_coprocessing', 'before': 'update_copro_history'},
+        {'trigger': 'copro_queue', 'source': 'copro_unknown',
+            'dest': 'copro_queued', 'before': 'update_copro_history'},  
+        {'trigger': 'copro_coprocess', 'source': 'copro_queued',
+            'dest': 'copro_coprocessing', 'before': 'update_copro_history'},
+        {'trigger': 'copro_nominal', 'source': 'copro_coprocessing',
+            'dest': 'copro_nominal', 'before': 'update_copro_history'},
+        {'trigger': 'copro_suspicious', 'source': 'copro_coprocessing',
+            'dest': 'copro_suspicious', 'before': 'update_copro_history'},
+        {'trigger': 'copro_queue', 'source': 'copro_nominal',
+            'dest': 'copro_queued', 'before': 'update_copro_history'},  
+        {'trigger': 'copro_coprocess', 'source': 'copro_nominal',
+            'dest': 'copro_coprocessing', 'before': 'update_copro_history'},
+        {'trigger': 'copro_queue', 'source': 'copro_suspicious',
+            'dest': 'copro_queued', 'before': 'update_copro_history'},  
+        {'trigger': 'copro_coprocess', 'source': 'copro_suspicious',
+            'dest': 'copro_coprocessing', 'before': 'update_copro_history'},
 
     ]
 
