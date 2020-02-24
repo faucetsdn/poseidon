@@ -127,7 +127,7 @@ def schedule_job_coprocessing(schedule_func):
                 chosen = candidates.pop()
                 schedule_func.logger.info('Starting coprocessing on: {0} {1}'.format(
                     chosen.name, chosen.state))
-                chosen.coprocess()
+                chosen.copro_coprocess()
                 chosen.p_prev_states.append(
                     (chosen.state, int(time.time())))
                 schedule_func.s.coprocess_endpoint(chosen)
@@ -939,7 +939,7 @@ class Monitor:
             if not endpoint.copro_ignore and endpoint.copro_state == 'queued']
         self.s.coprocessing = len([
             endpoint for endpoint in self.s.endpoints.values()
-            if endpoint.copro_state in ['coprocessing']])
+            if endpoint.copro_state in ['copro_coprocessing']])
         # mirror things in the order they got added to the queue
         queued_endpoints = sorted(
              queued_endpoints, key=lambda x: x.p_prev_copro_states[-1][1])
@@ -962,11 +962,11 @@ class Monitor:
             if not endpoint.copro_ignore:
                 if self.s.sdnc:
                     if endpoint.copro_state == 'unknown':
-                        endpoint.p_next_copro_state = 'coprocessing'
-                        endpoint.queue()
+                        endpoint.p_next_copro_state = 'copro_coprocessing'
+                        endpoint.copro_queue()
                         endpoint.p_prev_copro_states.append(
                             (endpoint.copro_state, int(time.time())))
-                    elif endpoint.copro_state in ['coprocessing']:
+                    elif endpoint.copro_state in ['copro_coprocessing']:
                         cur_time = int(time.time())
                         # timeout after 2 times the reinvestigation frequency
                         # in case something didn't report back, put back in an
@@ -974,13 +974,13 @@ class Monitor:
                         if cur_time - endpoint.p_prev_copro_states[-1][1] > 2*self.controller['coprocessing_frequency']:
                             self.logger.debug(
                                 'timing out: {0} and setting to unknown'.format(endpoint.name))
-                            self.s.unmirror_endpoint(endpoint)
-                            endpoint.unknown()
+                            self.s.uncoprocess_endpoint(endpoint)
+                            endpoint.copro_unknown()
                             endpoint.p_prev_copro_states.append(
                                 (endpoint.copro_state, int(time.time())))
                 else:
                     if endpoint.state != 'nominal':
-                        endpoint.nominal()
+                        endpoint.copro_nominal()
 
 
     def process(self):
