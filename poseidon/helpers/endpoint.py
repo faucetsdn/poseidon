@@ -114,13 +114,14 @@ class Endpoint:
             'dest': 'inactive', 'before': 'update_state_history'}
     ]
 
-    copro_states = ['copro_unknown', 'copro_coprocessing', 'copro_nominal', 'copro_suspicious', 'copro_queued']
+    copro_states = ['copro_unknown', 'copro_coprocessing',
+                    'copro_nominal', 'copro_suspicious', 'copro_queued']
 
     copro_transitions = [
         {'trigger': 'copro_coprocess', 'source': 'copro_unknown',
             'dest': 'copro_coprocessing', 'before': 'update_copro_history'},
         {'trigger': 'copro_queue', 'source': 'copro_unknown',
-            'dest': 'copro_queued', 'before': 'update_copro_history'},  
+            'dest': 'copro_queued', 'before': 'update_copro_history'},
         {'trigger': 'copro_coprocess', 'source': 'copro_queued',
             'dest': 'copro_coprocessing', 'before': 'update_copro_history'},
         {'trigger': 'copro_nominal', 'source': 'copro_coprocessing',
@@ -128,11 +129,11 @@ class Endpoint:
         {'trigger': 'copro_suspicious', 'source': 'copro_coprocessing',
             'dest': 'copro_suspicious', 'before': 'update_copro_history'},
         {'trigger': 'copro_queue', 'source': 'copro_nominal',
-            'dest': 'copro_queued', 'before': 'update_copro_history'},  
+            'dest': 'copro_queued', 'before': 'update_copro_history'},
         {'trigger': 'copro_coprocess', 'source': 'copro_nominal',
             'dest': 'copro_coprocessing', 'before': 'update_copro_history'},
         {'trigger': 'copro_queue', 'source': 'copro_suspicious',
-            'dest': 'copro_queued', 'before': 'update_copro_history'},  
+            'dest': 'copro_queued', 'before': 'update_copro_history'},
         {'trigger': 'copro_coprocess', 'source': 'copro_suspicious',
             'dest': 'copro_coprocessing', 'before': 'update_copro_history'},
 
@@ -228,7 +229,7 @@ def endpoint_factory(hashed_val):
         model=endpoint,
         states=Endpoint.copro_states,
         transitions=Endpoint.copro_transitions,
-        initial='unknown',
+        initial='copro_unknown',
         send_event=True)
     copro_machine.name = endpoint.name[:8]+'_copro'
     endpoint.copro_machine = copro_machine
