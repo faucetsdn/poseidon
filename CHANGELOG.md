@@ -1,4 +1,4 @@
-# v0.10.4 (2020-02-28)
+# v0.11.0 (2020-02-28)
 
 - Update faucet, gauge, event-adapater-rabbit-mq
 - Add config infrastructure for Volos (should copy new VOLOS and PIPETTE sections into existing poseidon.config)
