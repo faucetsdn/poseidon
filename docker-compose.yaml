@@ -32,15 +32,12 @@ services:
             poseidon:
     crviz:
         restart: always
-        image: 'cyberreboot/crviz:v0.3.19'
+        image: 'cyberreboot/crviz:v0.3.20'
         ports:
             - '5001:5000'
         networks:
             poseidon:
     poseidon_api:
-        build:
-            context: api
-            dockerfile: Dockerfile
         restart: always
         image: 'cyberreboot/poseidon-api:latest'
         ports:
@@ -51,10 +48,10 @@ services:
             poseidon:
                 aliases:
                     - poseidon-api
-    poseidon:
         build:
-            context: .
+            context: api
             dockerfile: Dockerfile
+    poseidon:
         restart: always
         image: 'cyberreboot/poseidon:latest'
         environment:
@@ -66,10 +63,10 @@ services:
             - '${POSEIDON_PREFIX}/var/log/poseidon:/var/log/poseidon'
         networks:
             - poseidon
-    workers:
         build:
-            context: workers
+            context: .
             dockerfile: Dockerfile
+    workers:
         restart: always
         image: 'cyberreboot/poseidon-workers:latest'
         environment:
@@ -81,5 +78,8 @@ services:
         volumes:
             - '/var/run/docker.sock:/var/run/docker.sock'
 
+        build:
+            context: workers
+            dockerfile: Dockerfile
 networks:
     poseidon:

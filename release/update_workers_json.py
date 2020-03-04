@@ -11,6 +11,7 @@ RELEASE_MAP = {
     'cyberreboot/tcprewrite-dot1q': 'cyberreboot/network-tools',
     'cyberreboot/networkml': 'cyberreboot/networkml',
     'cyberreboot/p0f': 'cyberreboot/network-tools',
+    'yeasy/simple-web': 'yeasy/simple-web',
 }
 
 
@@ -23,7 +24,11 @@ for worker in workers['workers']:
         sys.exit(-1)
     req = urllib.request.Request(
         url='https://api.github.com/repos/%s/releases/latest' % repo)
-    res = urllib.request.urlopen(req, timeout=15)  # nosec
+    try:
+        res = urllib.request.urlopen(req, timeout=15)  # nosec
+    except urllib.error.HTTPError:
+        print('no release for %s, skipping update' % worker['image'])
+        continue
     latest_json = json.loads(res.read().decode('utf-8'))
     latest_name = latest_json['name']
     if latest_name != latest_json['name']:

@@ -80,10 +80,12 @@
       "labels": "",
       "name": "simple-web",
       "outputs": [],
+      "ports": [
+        "80:80"
+      ],
       "stage": "poseidon_volos",
       "version": "latest",
-      "viewableOutput": false,
-      "ports": ["80:80"]
+      "viewableOutput": false
     }
   ]
 }

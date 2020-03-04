@@ -1,3 +1,9 @@
+# v0.11.0 (2020-02-28)
+
+- Update faucet, gauge, event-adapater-rabbit-mq
+- Add config infrastructure for Volos (should copy new VOLOS and PIPETTE sections into existing poseidon.config)
+
+
 # v0.10.3 (2020-02-21)
 
 - network-tools v0.11.4, networkml v0.4.8 (fix no results from networkml).
