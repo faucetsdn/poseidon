@@ -86,57 +86,49 @@ class Parser:
         obj_doc = Parser().yaml_in(config_file)
         return obj_doc
 
-    def config(self, config_file, action, port, switch, rules_file=None, endpoints=None, force_apply_rules=None, force_remove_rules=None, coprocess_rules_files=None):
+    def check_mirror(self, config_file, switch, port, obj_doc):
+        if not obj_doc:
+            self.logger.error('No config found')
+            return False
+        if not self.mirror_ports:
+            self.logger.error('Unable to mirror, no mirror ports defined')
+            return False
+        if 'dps' not in obj_doc:
+            self.logger.error(f'Unable to find switches in {config_file}')
+            return False
+
+        for s in obj_doc['dps']:
+            if (switch == s and s in self.mirror_ports and
+                'interfaces' in obj_doc['dps'][s] and
+                port in obj_doc['dps'][s]['interfaces'] and
+                    self.mirror_ports[s] in obj_doc['dps'][s]['interfaces']):
+                return s
+
+        self.logger.error(f'No switch/port match found to mirror from in '
+                          'the configs or mirror port not defined on that '
+                          'switch: {switch} {obj_doc}')
+        return False
+
+    def config(self, config_file, action, port, switch, rules_file=None,
+               endpoints=None, force_apply_rules=None, force_remove_rules=None,
+               coprocess_rules_files=None):
         status = [True, []]
         switch_found = None
         config_file = Parser().get_config_file(config_file)
         obj_doc = Parser().yaml_in(config_file)
 
-        if not obj_doc:
-            return False
+        switch_found = self.check_mirror(config_file, switch, port, obj_doc)
 
         if action == 'mirror' or action == 'unmirror':
-            ok = True
-            if not self.mirror_ports:
-                self.logger.error('Unable to mirror, no mirror ports defined')
-                return False
-            if 'dps' not in obj_doc:
-                self.logger.warning(
-                    'Unable to find switch configs in {0}'.format(config_file))
-                ok = False
-            else:
-                for s in obj_doc['dps']:
-                    if switch == s:
-                        switch_found = s
-            if not switch_found:
-                self.logger.warning('No switch match found to mirror '
-                                    'from in the configs. switch: {0} {1}'.format(switch, str(obj_doc)))
-                ok = False
-            else:
-                if switch_found not in self.mirror_ports:
-                    self.logger.warning('Unable to mirror {0} on {1}, mirror port not defined on that switch'.format(
-                        str(port), str(switch_found)))
-                    ok = False
+            if switch_found:
+                interfaces = obj_doc['dps'][switch_found]['interfaces']
+                if 'mirror' in interfaces[self.mirror_ports[switch_found]]:
+                    if not isinstance(interfaces[self.mirror_ports[switch_found]]['mirror'], list):
+                        interfaces[self.mirror_ports[switch_found]]['mirror'] = [
+                            interfaces[self.mirror_ports[switch_found]]['mirror']]
                 else:
-                    if port not in obj_doc['dps'][switch_found]['interfaces']:
-                        self.logger.warning('No port match found for port {0} '
-                                            ' to mirror from the switch {1} in '
-                                            ' the configs'.format(str(port), obj_doc['dps'][switch_found]['interfaces']))
-                        ok = False
-                    if not self.mirror_ports[switch_found] in obj_doc['dps'][switch_found]['interfaces']:
-                        self.logger.warning('No port match found for port {0} '
-                                            'to mirror from the switch {1} in '
-                                            'the configs'.format(str(self.mirror_ports[switch_found]), obj_doc['dps'][switch_found]['interfaces']))
-                        ok = False
-                    else:
-                        if 'mirror' in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]:
-                            if not isinstance(obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'], list):
-                                obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] = [
-                                    obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror']]
-                        else:
-                            obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] = [
-                            ]
-            if ok:
+                    interfaces[self.mirror_ports[switch_found]]['mirror'] = [
+                    ]
                 if action == 'mirror':
                     # TODO make this smarter about more complex configurations (backup original values, etc)
                     if self.reinvestigation_frequency:
@@ -145,20 +137,20 @@ class Parser:
                     else:
                         obj_doc['dps'][switch_found]['timeout'] = self.reinvestigation_frequency
                     obj_doc['dps'][switch_found]['arp_neighbor_timeout'] = self.reinvestigation_frequency
-                    if port not in obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'] and port is not None:
-                        obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'].append(
+                    if port not in interfaces[self.mirror_ports[switch_found]]['mirror'] and port is not None:
+                        interfaces[self.mirror_ports[switch_found]]['mirror'].append(
                             port)
                 elif action == 'unmirror':
                     try:
                         # TODO check for still running captures on this port
-                        obj_doc['dps'][switch_found]['interfaces'][self.mirror_ports[switch_found]]['mirror'].remove(
+                        interfaces[self.mirror_ports[switch_found]]['mirror'].remove(
                             port)
                     except ValueError:
                         self.logger.warning('Port: {0} was not already '
                                             'mirroring on this switch: {1}'.format(str(port), str(switch_found)))
             else:
                 self.logger.error('Unable to mirror due to warnings')
-                return False
+                return switch_found
         elif action == 'shutdown':
             # TODO
             pass
