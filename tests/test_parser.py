@@ -6,15 +6,17 @@ Test module for faucet parser.
 import os
 
 from poseidon.controllers.faucet.faucet import FaucetProxy
+from poseidon.controllers.faucet.helpers import get_config_file
+from poseidon.controllers.faucet.helpers import parse_rules
+from poseidon.controllers.faucet.helpers import represent_none
 from poseidon.controllers.faucet.parser import Parser
-from poseidon.controllers.faucet.parser import represent_none
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import endpoint_factory
 
 
 def test_parse_rules():
-    Parser.parse_rules(os.path.join(os.getcwd(),
-                                    'tests/sample_faucet_config.yaml'))
+    parse_rules(os.path.join(os.getcwd(),
+                             'tests/sample_faucet_config.yaml'))
 
 
 def test_clear_mirrors():
@@ -31,7 +33,7 @@ def test_represent_none():
 
 
 def test_get_config_file():
-    config = Parser.get_config_file(None)
+    config = get_config_file(None)
     assert config == '/etc/faucet/faucet.yaml'
 
 

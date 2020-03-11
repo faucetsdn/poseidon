@@ -9,8 +9,8 @@ import logging
 
 from poseidon.controllers.faucet.connection import Connection
 from poseidon.controllers.faucet.parser import Parser
-from poseidon.volos.volos import Volos
 from poseidon.volos.coprocessor import Coprocessor
+from poseidon.volos.volos import Volos
 
 
 class FaucetProxy(Connection, Parser):
@@ -35,7 +35,7 @@ class FaucetProxy(Connection, Parser):
         self.user = controller['USER']
         self.pw = controller['PASS']
 
-        #parse volos config
+        # parse volos config
         self.volos = Volos(controller)
         self.coprocessor = Coprocessor(controller)
         ignore_vlans = controller['ignore_vlans']
@@ -149,18 +149,20 @@ class FaucetProxy(Connection, Parser):
 
     def update_acls(self, rules_file=None, endpoints=None, force_apply_rules=None, force_remove_rules=None):
         self.logger.debug('updating acls')
-        status = None
         if self.host:
             self.receive_file('config')
-            if self.config(self.config_file,
-                           'apply_acls', None, None, rules_file=rules_file, endpoints=endpoints, force_apply_rules=force_apply_rules, force_remove_rules=force_remove_rules):
+            if self.config(self.config_file, 'apply_acls', None, None,
+                           rules_file=rules_file, endpoints=endpoints,
+                           force_apply_rules=force_apply_rules,
+                           force_remove_rules=force_remove_rules):
                 self.send_file('config')
-                status = True
         else:
-            status = self.config(self.config_file, 'apply_acls',
-                                 None, None, rules_file=rules_file, endpoints=endpoints, force_apply_rules=force_apply_rules, force_remove_rules=force_remove_rules)
+            self.config(self.config_file, 'apply_acls', None, None,
+                        rules_file=rules_file, endpoints=endpoints,
+                        force_apply_rules=force_apply_rules,
+                        force_remove_rules=force_remove_rules)
         # TODO check if config was successfully updated
-        return status
+        return True
 
     def shutdown_ip(self, ip_addr, shutdown=True, mac_addr=None):
         shutdowns = []
@@ -192,7 +194,6 @@ class FaucetProxy(Connection, Parser):
         self.logger.debug('mirroring mac')
         port = None
         switch = None
-        status = None
         for mac in self.mac_table:
             if my_mac == mac:
                 port = self.mac_table[mac][0]['port']
@@ -204,19 +205,13 @@ class FaucetProxy(Connection, Parser):
                                'mirror', int(port), switch):
                     self.send_file('config')
                     # TODO check if this is actually True
-                    status = True
             else:
-                status = self.config(
-                    self.config_file, 'mirror', int(port), switch)
-        else:
-            status = False
-        self.logger.debug('mirror status: ' + str(status))
-        return status
+                self.config(self.config_file, 'mirror', int(port), switch)
+        return True
 
     def unmirror_mac(self, my_mac, my_switch, my_port):
         port = 0
         switch = None
-        status = None
         for mac in self.mac_table:
             if my_mac == mac:
                 port = self.mac_table[mac][0]['port']
@@ -233,14 +228,13 @@ class FaucetProxy(Connection, Parser):
                                    'unmirror', int(port), switch):
                         self.send_file('config')
                         # TODO check if config was successfully updated
-                        status = True
                 else:
-                    status = self.config(
-                        self.config_file, 'unmirror', int(port), switch)
+                    self.config(self.config_file, 'unmirror',
+                                int(port), switch)
             else:
                 self.logger.debug('not unmirroring a trunk port')
-        self.logger.debug('unmirror status: ' + str(status))
-        return status
+                return False
+        return True
 
     def coprocess_mac(self, my_mac):
         self.logger.debug('coprocess mac: {0}'.format(my_mac))
@@ -254,13 +248,9 @@ class FaucetProxy(Connection, Parser):
                            'coprocess', int(port), switch):
                 self.send_file('config')
                 # TODO check if this is actually True
-                status = True
         else:
-            status = self.config(
-                self.config_file, 'coprocess', int(port), switch)
-
-        self.logger.debug('coprocess status: ' + str(status))
-        return status
+            self.config(self.config_file, 'coprocess', int(port), switch)
+        return True
 
     def uncoprocess_mac(self, my_mac):
         self.logger.debug('uncoprocess mac: {0}'.format(my_mac))
@@ -276,11 +266,7 @@ class FaucetProxy(Connection, Parser):
                                    'uncoprocess', int(port), switch):
                         self.send_file('config')
                         # TODO check if config was successfully updated
-                        status = True
                 else:
-                    status = self.config(
-                        self.config_file, 'uncoprocess', int(port), switch)
-
-        self.logger.debug('uncoprocess status: ' + str(status))
-        return status
-
+                    self.config(self.config_file, 'uncoprocess',
+                                int(port), switch)
+        return True
