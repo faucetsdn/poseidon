@@ -1,3 +1,10 @@
+# v0.11.1 (2020-03-26)
+
+- crviz to v0.3.21
+- Update faucet, gauge, event-adapater-rabbit-mq, pytest, prometheus, transitions, grafana, pyyaml, cmd2, mock
+- refactor for future FAUCET tunneling support
+
+
 # v0.11.0 (2020-02-28)
 
 - Update faucet, gauge, event-adapater-rabbit-mq
