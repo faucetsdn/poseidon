@@ -9,5 +9,5 @@ requests==2.23.0
 schedule==0.6.0
 scp==0.13.2
 texttable==1.6.2
-transitions==0.8.0
+transitions==0.8.1
 urllib3==1.25.8
