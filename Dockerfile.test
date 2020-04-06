@@ -15,8 +15,8 @@ RUN apk upgrade --no-cache && \
     yaml-dev
 
 RUN pip3 install --no-cache-dir scikit-build==0.10.0
-RUN CXXFLAGS="-D_BSD_SOURCE" pip3 install --no-cache-dir ninja
-RUN pip3 install --no-cache-dir --no-use-pep517 -r test-requirements.txt
+# TODO: https://github.com/scikit-build/ninja-python-distributions/issues/22
+RUN CXXFLAGS="-D_BSD_SOURCE" pip3 install --no-cache-dir -r test-requirements.txt
 
 CMD pytype --protocols api/app/*py poseidon/main.py poseidon/*/*py workers/*py && \
     ./tests/api_smoke_test.sh && \
