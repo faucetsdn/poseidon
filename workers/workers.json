@@ -11,7 +11,7 @@
         "pcap"
       ],
       "stage": "poseidon_poseidon",
-      "version": "v0.11.4",
+      "version": "v0.11.5",
       "viewableOutput": false
     },
     {
@@ -25,7 +25,7 @@
         "pcap"
       ],
       "stage": "poseidon_poseidon",
-      "version": "v0.11.4",
+      "version": "v0.11.5",
       "viewableOutput": false
     },
     {
@@ -71,7 +71,7 @@
         "rabbitmq"
       ],
       "stage": "poseidon_poseidon",
-      "version": "v0.11.4",
+      "version": "v0.11.5",
       "viewableOutput": true
     },
     {
