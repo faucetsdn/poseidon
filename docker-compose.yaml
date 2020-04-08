@@ -21,7 +21,7 @@ services:
                     - messenger
     network_tap:
         restart: always
-        image: 'cyberreboot/network-tap:v0.11.4'
+        image: 'cyberreboot/network-tap:v0.11.5'
         volumes:
             - '/var/run/docker.sock:/var/run/docker.sock'
             - '${POSEIDON_PREFIX}/opt/poseidon_files:/files'
