@@ -1,3 +1,8 @@
+# v0.11.2 (2020-04-10)
+
+- Update faucet, gauge, event-adapater-rabbit-mq, network-tap, pytype, cmd2, flask, transitions
+
+
 # v0.11.1 (2020-03-26)
 
 - crviz to v0.3.21
