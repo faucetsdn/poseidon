@@ -9,12 +9,13 @@ RUN apk upgrade --no-cache && \
     apk add --no-cache \
     build-base \
     curl \
+    libffi-dev \
+    linux-headers \
     python3 \
     python3-dev \
     py3-paramiko \
     tini \
-    yaml-dev \
-    linux-headers && \
+    yaml-dev && \
     pip3 install --no-cache-dir --upgrade pip==20.0.2 && \
     pip3 install --no-cache-dir -r requirements.txt && \
     pip3 install --no-cache-dir -r /healthcheck/requirements.txt && \
