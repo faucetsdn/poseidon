@@ -1,4 +1,4 @@
-FROM alpine:3.11
+FROM alpine:3.10
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
 LABEL poseidon.namespace="api"
 
@@ -8,7 +8,6 @@ COPY healthcheck /healthcheck
 RUN apk add --update \
     curl \
     gcc \
-    libffi-dev \
     linux-headers \
     musl-dev \
     python3 \
