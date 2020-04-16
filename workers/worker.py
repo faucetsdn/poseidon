@@ -9,6 +9,51 @@ import pika
 from redis import StrictRedis
 
 
+def save(r, tool, results):
+    timestamp = str(int(time.time()))
+    if tool not in ['p0f']:  # , 'networkml']:
+        return
+    try:
+        if isinstance(results, list):
+            for result in results:
+                for key in result:
+                    redis_k = {}
+                    for k in result[key]:
+                        redis_k[k] = str(result[key][k])
+                    r.hmset(key, redis_k)
+                    r.hmset(tool+'_'+timestamp+'_'+key, redis_k)
+                    r.sadd('ip_addresses', key)
+                    r.sadd(tool+'_timestamps', timestamp)
+        elif isinstance(results, dict):
+            for key in results:
+                redis_k = {}
+                for k in results[key]:
+                    redis_k[k] = str(results[key][k])
+                r.hmset(key, redis_k)
+                r.hmset(tool+'_'+timestamp+'_'+key, redis_k)
+                r.sadd('ip_addresses', key)
+                r.sadd(tool+'_timestamps', timestamp)
+    except Exception as e:  # pragma: no cover
+        print(
+            f'Unable to store contents of {tool}: {results} in redis because: {e}')
+    return
+
+
+def set_status(r, status):
+    try:
+        r.hmset('status', status)
+        statuses = r.hgetall('status')
+        for s in statuses:
+            statuses[s] = json.loads(statuses[s])
+        for worker in extra_workers:
+            if worker not in statuses:
+                status[worker] = extra_workers[worker]
+        r.hmset('status', status)
+    except Exception as e:  # pragma: no cover
+        print(f'Failed to update Redis because: {e}')
+    return
+
+
 def callback(ch, method, properties, body):
     """Callback that has the message that was received"""
     vol_prefix = os.getenv('VOL_PREFIX', '')
@@ -18,6 +63,7 @@ def callback(ch, method, properties, body):
     worker_found = False
     status = {}
     extra_workers = {}
+    r = setup_redis()
     for worker in workers['workers']:
         file_path = pipeline['file_path']
         if 'id' in pipeline and (('results' in pipeline and pipeline['results']['tool'] in worker['inputs']) or ('file_type' in pipeline and pipeline['file_type'] in worker['inputs'])):
@@ -86,6 +132,7 @@ def callback(ch, method, properties, body):
                                                    method.routing_key,
                                                    pipeline['id'],
                                                    pipeline['results']))
+            save(r, pipeline['results']['tool'], pipeline['data'])
             status[pipeline['results']['tool']] = json.dumps(
                 {'state': 'In progress', 'timestamp': str(datetime.datetime.utcnow())})
         else:
@@ -101,22 +148,11 @@ def callback(ch, method, properties, body):
 
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
-    # store state of status in redis
-    r = setup_redis()
-    print('redis: {0}'.format(status))
-    if r:
-        try:
-            r.hmset('status', status)
-            statuses = r.hgetall('status')
-            for s in statuses:
-                statuses[s] = json.loads(statuses[s])
-            for worker in extra_workers:
-                if worker not in statuses:
-                    status[worker] = extra_workers[worker]
-            r.hmset('status', status)
-            r.close()
-        except Exception as e:  # pragma: no cover
-            print('Failed to update Redis because: {0}'.format(str(e)))
+    set_status(r, status)
+    try:
+        r.close()
+    except Exception as e:  # pragma: no cover
+        print('Failed to close Redis connection because: {0}'.format(str(e)))
 
 
 def main(queue_name, host):  # pragma: no cover
