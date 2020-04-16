@@ -59,7 +59,7 @@
     {
       "contentType": "application/json",
       "environment": {
-        "redis": "true"
+        "rabbit": "true"
       },
       "image": "cyberreboot/p0f",
       "inputs": [
