@@ -7,8 +7,8 @@ import json
 import logging
 import os
 import subprocess
-
 from pathlib import Path
+
 
 class Coprocessor(object):
 
@@ -33,7 +33,7 @@ class Coprocessor(object):
         Starts OVS and containers
         '''
         status = False
-        
+
         return status
 
     def stop_coprocessor(self):
@@ -41,7 +41,5 @@ class Coprocessor(object):
         Stops OVS and containers
         '''
         status = False
-        
-        return status
 
-    
+        return status

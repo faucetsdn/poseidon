@@ -4,8 +4,8 @@ Created on 9 December 2018
 @author: Charlie Lewis
 """
 from poseidon.helpers.collector import Collector
-from poseidon.volos.coprocessor import Coprocessor
 from poseidon.volos.acls import Acl
+from poseidon.volos.coprocessor import Coprocessor
 
 
 class Actions(object):
@@ -52,11 +52,13 @@ class Actions(object):
         status = False
         if self.sdnc:
             if self.sdnc.volos and self.sdnc.volos.enabled:
-                acl = Acl(self.endpoint, acl_dir=self.sdnc.volos.acl_dir, copro_vlans=[self.sdnc.volos.copro_vlan], copro_port=self.sdnc.volos.copro_port)
+                acl = Acl(self.endpoint, acl_dir=self.sdnc.volos.acl_dir, copro_vlans=[
+                          self.sdnc.volos.copro_vlan], copro_port=self.sdnc.volos.copro_port)
                 endpoints = [self.endpoint]
                 force_apply_rules = [acl.acl_key]
                 coprocess_rules_files = [acl.acl_file]
-                port_list = self.sdnc.volos.get_port_list(self.endpoint.endpoint_data['mac'], ipv4=self.endpoint.endpoint_data.get('ipv4', None), ipv6=self.endpoint.endpoint_data.get('ipv6', None))
+                port_list = self.sdnc.volos.get_port_list(self.endpoint.endpoint_data['mac'], ipv4=self.endpoint.endpoint_data.get(
+                    'ipv4', None), ipv6=self.endpoint.endpoint_data.get('ipv6', None))
                 if acl.ensure_acls_dir() and acl.write_acl_file(port_list):
                     status = self.sdnc.update_acls(
                         rules_file=None, endpoints=endpoints, force_apply_rules=force_apply_rules, coprocess_rules_files=coprocess_rules_files)
@@ -69,11 +71,12 @@ class Actions(object):
         status = False
         if self.sdnc:
             if self.sdnc.volos and self.sdnc.volos.enabled:
-                acl = Acl(self.endpoint, acl_dir=self.sdnc.volos.acl_dir, copro_vlans=[self.sdnc.volos.copro_vlan], copro_port=self.sdnc.volos.copro_port)
+                acl = Acl(self.endpoint, acl_dir=self.sdnc.volos.acl_dir, copro_vlans=[
+                          self.sdnc.volos.copro_vlan], copro_port=self.sdnc.volos.copro_port)
                 endpoints = [self.endpoint]
                 force_remove_rules = [acl.acl_key]
                 if self.sdnc.update_acls(
-                        rules_file=None, endpoints=endpoints, force_remove_rules=force_remove_rules, coprocess_rules_files=None) :
+                        rules_file=None, endpoints=endpoints, force_remove_rules=force_remove_rules, coprocess_rules_files=None):
                     status = acl.delete_acl_file()
         else:
             status = True

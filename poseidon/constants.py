@@ -2,6 +2,6 @@
 NO_DATA = 'NO DATA'
 
 PROTOCOL_MAP = {
-	'tcp': 6,
-	'udp': 17
+    'tcp': 6,
+    'udp': 17
 }

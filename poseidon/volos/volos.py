@@ -3,10 +3,11 @@
 Created on 05 February 2020
 @author: Ryan Ashley
 """
-import os
 import json
-import yaml
 import logging
+import os
+
+import yaml
 
 
 #from poseidon.constants import PROTOCOL_MAP
@@ -14,6 +15,7 @@ PROTOCOL_MAP = {
     'tcp': 6,
     'udp': 17
 }
+
 
 class Volos(object):
     def __init__(self, controller):
@@ -31,19 +33,20 @@ class Volos(object):
     def parse_volos_cfg(self, volos_cfg_file):
         cfg = None
         container_cfg = None
-        if os.path.exists(volos_cfg_file): 
+        if os.path.exists(volos_cfg_file):
             try:
                 with open(volos_cfg_file, 'r') as f:
                     cfg = yaml.safe_load(f)
             except Exception as e:  # pragma: no cover
-                self.logger.error('Volos configuration could not be loaded. disabling volos')
                 self.logger.error(
-                        'Failed to load volos config with error: {0}'.format(str(e)))
+                    'Volos configuration could not be loaded. disabling volos')
+                self.logger.error(
+                    'Failed to load volos config with error: {0}'.format(str(e)))
                 self.enabled = False
             container_cfg = []
             if cfg:
                 for repo in cfg:
-                    item ={}
+                    item = {}
                     for name in cfg[repo]:
                         item['repo'] = repo
                         item['name'] = name
@@ -54,10 +57,11 @@ class Volos(object):
                         for port in cfg[repo][name]['ports']:
                             cfg_p = {}
                             cfg_p['proto'] = port['port']['protocol']
-                            cfg_p['proto_id'] = PROTOCOL_MAP[port['port']['protocol']]
+                            cfg_p['proto_id'] = PROTOCOL_MAP[port['port']
+                                                             ['protocol']]
                             mapping = port['port']['mapping']
-                            cfg_p['host'] = mapping[:mapping.index(":")]
-                            cfg_p['dest'] = mapping[mapping.index(":"):]
+                            cfg_p['host'] = mapping[:mapping.index(':')]
+                            cfg_p['dest'] = mapping[mapping.index(':'):]
                             item['ports'].append(cfg_p)
 
                     container_cfg.append(item)
@@ -65,13 +69,14 @@ class Volos(object):
             else:
                 self.enabled = False
         else:
-            self.logger.error('Volos configuration could not found. disabling volos')
+            self.logger.error(
+                'Volos configuration could not found. disabling volos')
             self.enabled = False
 
         return container_cfg
 
     '''
-    build structure of the form 
+    build structure of the form
     {
     'mac1': {
         'ip': {
@@ -97,14 +102,15 @@ class Volos(object):
         ]
     },
     '''
+
     def get_port_list(self, mac, ipv4=None, ipv6=None):
-        port_list ={}
-        port_list[mac] ={
-            'ip':{
+        port_list = {}
+        port_list[mac] = {
+            'ip': {
                 'v4': ipv4,
                 'v6': ipv6
             },
-            'ports':[]
+            'ports': []
         }
         for i in self.container_config:
             for port in i['ports']:
@@ -116,4 +122,3 @@ class Volos(object):
                 port_list[mac]['ports'].append(p)
 
         return port_list
-
