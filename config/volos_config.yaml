@@ -1,9 +1,9 @@
-https://github.com/yeasy/simple-web: 
-    simple-web: 
+https://github.com/yeasy/simple-web:
+    simple-web:
         branch: master
         build: yes
         start: yes
-        ports: 
+        ports:
           - port:
               protocol: tcp
               mapping: "80:80"

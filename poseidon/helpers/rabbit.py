@@ -41,7 +41,8 @@ class Rabbit(object):
                 rabbit_channel = rabbit_connection.channel()
                 rabbit_channel.exchange_declare(exchange=exchange,
                                                 exchange_type='topic')
-                rabbit_channel.queue_declare(queue=queue_name, exclusive=False, durable=True)
+                rabbit_channel.queue_declare(
+                    queue=queue_name, exclusive=False, durable=True)
                 self.logger.debug(
                     'connected to {0} rabbitmq...'.format(host))
                 wait = False
