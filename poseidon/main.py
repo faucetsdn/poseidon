@@ -237,7 +237,7 @@ class SDNConnect:
                     elif endpoint.state in ['known', 'abnormal']:
                         endpoint.p_next_state = endpoint.state
                     endpoint.endpoint_data['active'] = 0
-                    endpoint.inactive()
+                    endpoint.inactive()  # pytype: disable=attribute-error
                     endpoint.p_prev_states.append(
                         (endpoint.state, int(time.time())))
         self.store_endpoints()
@@ -596,9 +596,9 @@ class SDNConnect:
                 ep.endpoint_data = deepcopy(machine)
                 if ep.state == 'inactive' and machine['active'] == 1:
                     if ep.p_next_state in ['known', 'abnormal']:
-                        ep.trigger(ep.p_next_state)
+                        ep.trigger(ep.p_next_state)  # pytype: disable=attribute-error
                     else:
-                        ep.unknown()
+                        ep.unknown()  # pytype: disable=attribute-error
                     ep.p_prev_states.append((ep.state, int(time.time())))
                 elif ep.state != 'inactive' and machine['active'] == 0:
                     if ep.state in ['mirroring', 'reinvestigating']:
@@ -609,7 +609,7 @@ class SDNConnect:
                             ep.p_next_state = 'reinvestigate'
                     if ep.state in ['known', 'abnormal']:
                         ep.p_next_state = ep.state
-                    ep.inactive()
+                    ep.inactive()  # pytype: disable=attribute-error
                     ep.p_prev_states.append((ep.state, int(time.time())))
 
         if change_acls and self.controller['AUTOMATED_ACLS']:
@@ -645,7 +645,7 @@ class SDNConnect:
                 if field['field_name'] in record and prior and field['field_name'] in prior and \
                    prior[field['field_name']] != record[field['field_name']]:
                     endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.mac_addresses['field_name'],
-                                                     record[field['field_name']])
+                                                     prior[field['field_name']], record[field['field_name']])
                 prior = record
 
         # TODO: history for IP address changes isn't accumulated yet (see get_stored_metadata()).
@@ -655,7 +655,7 @@ class SDNConnect:
                 if field['field_name'] in record and prior and field['field_name'] in prior and \
                    prior[field['field_name']] != record[field['field_name']]:
                     endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.ipv4_addresses['field_name'],
-                                                     record[field['field_name']])
+                            prior[field['field_name']], record[field['field_name']])  # pytype: disable=unsupported-operands
                 prior = record
 
         prior = None
@@ -664,7 +664,7 @@ class SDNConnect:
                 if field['field_name'] in record and prior and field['field_name'] in prior and \
                    prior[field['field_name']] != record[field['field_name']]:
                     endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.ipv6_addresses['field_name'],
-                                                     record[field['field_name']])
+                            prior[field['field_name']], record[field['field_name']])  # pytype: disable=unsupported-operands
                 prior = record
 
     def store_endpoints(self):
