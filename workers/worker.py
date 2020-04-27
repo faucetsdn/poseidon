@@ -39,7 +39,7 @@ def save(r, tool, results):
     return
 
 
-def set_status(r, status):
+def set_status(r, status, extra_workers):
     try:
         r.hmset('status', status)
         statuses = r.hgetall('status')
@@ -148,9 +148,10 @@ def callback(ch, method, properties, body):
 
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
-    set_status(r, status)
+    set_status(r, status, extra_workers)
     try:
-        r.close()
+        if hasattr(r, 'close'):
+            r.close()
     except Exception as e:  # pragma: no cover
         print('Failed to close Redis connection because: {0}'.format(str(e)))
 
