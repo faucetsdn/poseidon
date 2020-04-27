@@ -9,36 +9,6 @@ import pika
 from redis import StrictRedis
 
 
-def save(r, tool, results):
-    timestamp = str(int(time.time()))
-    if tool not in ['p0f', 'networkml']:
-        return
-    try:
-        if isinstance(results, list):
-            for result in results:
-                for key in result:
-                    redis_k = {}
-                    for k in result[key]:
-                        redis_k[k] = str(result[key][k])
-                    r.hmset(key, redis_k)
-                    r.hmset(tool+'_'+timestamp+'_'+key, redis_k)
-                    r.sadd('ip_addresses', key)
-                    r.sadd(tool+'_timestamps', timestamp)
-        elif isinstance(results, dict):
-            for key in results:
-                redis_k = {}
-                for k in results[key]:
-                    redis_k[k] = str(results[key][k])
-                r.hmset(key, redis_k)
-                r.hmset(tool+'_'+timestamp+'_'+key, redis_k)
-                r.sadd('ip_addresses', key)
-                r.sadd(tool+'_timestamps', timestamp)
-    except Exception as e:  # pragma: no cover
-        print(
-            f'Unable to store contents of {tool}: {results} in redis because: {e}')
-    return
-
-
 def set_status(r, status, extra_workers):
     try:
         r.hmset('status', status)
@@ -132,7 +102,6 @@ def callback(ch, method, properties, body):
                                                    method.routing_key,
                                                    pipeline['id'],
                                                    pipeline['results']))
-            save(r, pipeline['results']['tool'], pipeline['data'])
             status[pipeline['results']['tool']] = json.dumps(
                 {'state': 'In progress', 'timestamp': str(datetime.datetime.utcnow())})
         else:

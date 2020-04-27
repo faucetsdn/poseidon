@@ -7,7 +7,6 @@ controllers and defines the Monitor class.
 Created on 3 December 2018
 @author: Charlie Lewis
 """
-import ast
 import difflib
 import ipaddress
 import json
@@ -24,7 +23,7 @@ from functools import partial
 import pika
 import requests
 import schedule
-from redis import StrictRedis
+
 
 from poseidon.constants import NO_DATA
 from poseidon.controllers.bcf.bcf import BcfProxy
@@ -33,16 +32,15 @@ from poseidon.controllers.faucet.parser import Parser
 from poseidon.helpers.actions import Actions
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import Endpoint
-from poseidon.helpers.endpoint import endpoint_factory
-from poseidon.helpers.endpoint import EndpointDecoder
-from poseidon.helpers.endpoint import HistoryTypes
 from poseidon.helpers.endpoint import MACHINE_IP_FIELDS
 from poseidon.helpers.endpoint import MACHINE_IP_PREFIXES
+from poseidon.helpers.endpoint import endpoint_factory
 from poseidon.helpers.log import Logger
 from poseidon.helpers.metadata import get_ether_vendor
 from poseidon.helpers.metadata import get_rdns_lookup
 from poseidon.helpers.prometheus import Prometheus
 from poseidon.helpers.rabbit import Rabbit
+from poseidon.helpers.redis import PoseidonRedisClient
 
 requests.packages.urllib3.disable_warnings()
 logging.getLogger('pika').setLevel(logging.WARNING)
@@ -51,6 +49,7 @@ CTRL_C = dict()
 CTRL_C['STOP'] = False
 Logger()
 logger = logging.getLogger('main')
+
 
 
 def rabbit_callback(ch, method, properties, body, q=None):
@@ -62,59 +61,6 @@ def rabbit_callback(ch, method, properties, body, q=None):
     else:
         logger.debug('poseidonMain workQueue is None')
     ch.basic_ack(delivery_tag=method.delivery_tag)
-
-
-def schedule_job_kickurl(schedule_func):
-    global CTRL_C
-    schedule_func.s.check_endpoints(messages=schedule_func.faucet_event)
-    del schedule_func.faucet_event[:]
-
-    if not CTRL_C['STOP']:
-        try:
-            # get current state
-            req = requests.get(
-                'http://poseidon-api:8000/v1/network_full', timeout=10)
-
-            # send results to prometheus
-            hosts = req.json()['dataset']
-            schedule_func.prom.update_metrics(hosts)
-        except requests.exceptions.ConnectionError as e:
-            schedule_func.logger.debug(
-                'Unable to get current state and send it to Prometheus because: {0}'.format(str(e)))
-        except Exception as e:  # pragma: no cover
-            schedule_func.logger.error(
-                'Unable to get current state and send it to Prometheus because: {0}'.format(str(e)))
-
-
-def schedule_job_reinvestigation(schedule_func):
-    ''' put endpoints into the reinvestigation state if possible '''
-    global CTRL_C
-
-    def trigger_reinvestigation(candidates):
-        # get random order of things that are known
-        for _ in range(schedule_func.controller['max_concurrent_reinvestigations'] - schedule_func.s.investigations):
-            if len(candidates) > 0:
-                chosen = candidates.pop()
-                schedule_func.logger.info('Starting reinvestigation on: {0} {1}'.format(
-                    chosen.name, chosen.state))
-                chosen.reinvestigate()
-                chosen.p_prev_states.append(
-                    (chosen.state, int(time.time())))
-                schedule_func.s.mirror_endpoint(chosen)
-
-    if not CTRL_C['STOP']:
-        candidates = [
-            endpoint for endpoint in schedule_func.s.endpoints.values()
-            if endpoint.state in ['queued']]
-        if len(candidates) == 0:
-            # if no queued endpoints, then known and abnormal are candidates
-            candidates = [
-                endpoint for endpoint in schedule_func.s.endpoints.values()
-                if endpoint.state in ['known', 'abnormal']]
-            if len(candidates) > 0:
-                random.shuffle(candidates)
-        if schedule_func.s.sdnc:
-            trigger_reinvestigation(candidates)
 
 
 def schedule_job_coprocessing(schedule_func):
@@ -176,6 +122,7 @@ class SDNConnect:
         self.r = None
         self.first_time = first_time
         self.sdnc = None
+        self.endpoints = {}
         trunk_ports = self.controller['trunk_ports']
         if isinstance(trunk_ports, str):
             self.trunk_ports = json.loads(trunk_ports)
@@ -183,8 +130,8 @@ class SDNConnect:
             self.trunk_ports = trunk_ports
         self.logger = logger
         self.get_sdn_context()
-        self.redis_lock = threading.Lock()
-        self.connect_redis()
+        self.prc = PoseidonRedisClient(self.logger)
+        self.prc.connect()
         if self.first_time:
             self.endpoints = {}
             self.investigations = 0
@@ -196,12 +143,7 @@ class SDNConnect:
         ''' mirror an endpoint. '''
         status = Actions(endpoint, self.sdnc).mirror_endpoint()
         if status:
-            try:
-                if self.r is not None:
-                     self.r.hincrby('network_tools_counts', 'ncapture')
-            except Exception as e:  # pragma: no cover
-                self.logger.error(
-                    'Failed to update count of plugins because: {0}'.format(str(e)))
+            self.prc.inc_network_tools_counts()
         else:
             self.logger.warning(
                 'Unable to mirror the endpoint: {0}'.format(endpoint.name))
@@ -244,118 +186,9 @@ class SDNConnect:
 
     def get_stored_endpoints(self):
         ''' load existing endpoints from Redis. '''
-        with self.redis_lock:
-            if self.r:
-                try:
-                    p_endpoints = self.r.get('p_endpoints')
-                    if p_endpoints:
-                        new_endpoints = {}
-                        p_endpoints = ast.literal_eval(
-                            p_endpoints.decode('ascii'))
-                        for p_endpoint in p_endpoints:
-                            endpoint = EndpointDecoder(
-                                p_endpoint).get_endpoint()
-                            new_endpoints[endpoint.name] = endpoint
-                        self.endpoints = new_endpoints
-                except Exception as e:  # pragma: no cover
-                    self.logger.error(
-                        'Unable to get existing endpoints from Redis because {0}'.format(str(e)))
-
-    @staticmethod
-    def parse_metadata(mac_info, ml_info):
-        metadata = {}
-        tmp = {}
-        if mac_info[b'poseidon_hash'] in ml_info:
-            tmp = ast.literal_eval(
-                ml_info[mac_info[b'poseidon_hash']].decode('ascii'))
-        elif mac_info[b'poseidon_hash'].decode('ascii') in ml_info:
-            tmp = ast.literal_eval(
-                ml_info[mac_info[b'poseidon_hash'].decode('ascii')].decode('ascii'))
-        for ml_field, ml_field_default in (
-                (b'labels', []),
-                (b'confidences', [])):
-            if ml_field in ml_info:
-                content = ast.literal_eval(ml_info[ml_field].decode('ascii'))
-            else:
-                content = ml_field_default
-            metadata[ml_field.decode('ascii')] = content
-        behavior = 'None'
-        pcap_labels = 'None'
-        if 'decisions' in tmp:
-            decisions = tmp['decisions']
-            if 'behavior' in decisions:
-                behavior = decisions['behavior']
-        if 'pcap_labels' in tmp:
-            pcap_labels = tmp['pcap_labels']
-        metadata.update({
-            'behavior': behavior,
-            'pcap_labels': pcap_labels})
-        return metadata
-
-    def get_stored_metadata(self, hash_id):
-        mac_addresses = {}
-        ip_addresses = {ip_field: {} for ip_field in MACHINE_IP_FIELDS}
-
-        if self.r:
-            macs = []
-            try:
-                macs = self.r.smembers('mac_addresses')
-            except Exception as e:  # pragma: no cover
-                self.logger.error(
-                    'Unable to get existing mac addresses from Redis because: {0}'.format(str(e)))
-            for mac in macs:
-                try:
-                    mac_info = self.r.hgetall(mac)
-                    if b'poseidon_hash' in mac_info and mac_info[b'poseidon_hash'] == hash_id.encode('utf-8'):
-                        mac_addresses[mac.decode('ascii')] = {}
-                        if b'timestamps' in mac_info:
-                            try:
-                                timestamps = ast.literal_eval(
-                                    mac_info[b'timestamps'].decode('ascii'))
-                                for timestamp in timestamps:
-                                    ml_info = self.r.hgetall(
-                                        mac.decode('ascii')+'_'+str(timestamp))
-                                    metadata = SDNConnect.parse_metadata(
-                                        mac_info, ml_info)
-                                    mac_addresses[mac.decode('ascii')][str(
-                                        timestamp)] = metadata
-                            except Exception as e:  # pragma: no cover
-                                self.logger.error(
-                                    'Unable to get existing ML data from Redis because: {0}'.format(str(e)))
-                        try:
-                            poseidon_info = self.r.hgetall(
-                                mac_info[b'poseidon_hash'])
-                            if b'endpoint_data' in poseidon_info:
-                                endpoint_data = ast.literal_eval(
-                                    poseidon_info[b'endpoint_data'].decode('ascii'))
-                                for ip_field in MACHINE_IP_FIELDS:
-                                    try:
-                                        raw_field = endpoint_data.get(
-                                            ip_field, None)
-                                        machine_ip = ipaddress.ip_address(
-                                            raw_field)
-                                    except ValueError:
-                                        machine_ip = ''
-                                    if machine_ip:
-                                        try:
-                                            ip_info = self.r.hgetall(raw_field)
-                                            short_os = ip_info.get(
-                                                b'short_os', None)
-                                            ip_addresses[ip_field][raw_field] = {
-                                            }
-                                            if short_os:
-                                                ip_addresses[ip_field][raw_field]['os'] = short_os.decode(
-                                                    'ascii')
-                                        except Exception as e:  # pragma: no cover
-                                            self.logger.error(
-                                                'Unable to get existing {0} data from Redis because: {1}'.format(ip_field, str(e)))
-                        except Exception as e:  # pragma: no cover
-                            self.logger.error(
-                                'Unable to get existing endpoint data from Redis because: {0}'.format(str(e)))
-                except Exception as e:  # pragma: no cover
-                    self.logger.error(
-                        'Unable to get existing metadata for {0} from Redis because: {1}'.format(mac, str(e)))
-        return mac_addresses, ip_addresses['ipv4'], ip_addresses['ipv6']
+        new_endpoints = self.prc.get_stored_endpoints()
+        if new_endpoints:
+            self.endpoints = new_endpoints
 
     def get_sdn_context(self):
         controller_type = self.controller.get('TYPE', None)
@@ -503,15 +336,6 @@ class SDNConnect:
 
         self.find_new_machines(parsed)
 
-    def connect_redis(self, host='redis', port=6379, db=0):
-        self.r = None
-        try:
-            self.r = StrictRedis(host=host, port=port, db=db,
-                                 socket_connect_timeout=2)
-        except Exception as e:  # pragma: no cover
-            self.logger.error(
-                'Failed connect to Redis because: {0}'.format(str(e)))
-
     @staticmethod
     def _diff_machine(machine_a, machine_b):
 
@@ -630,92 +454,9 @@ class SDNConnect:
         self.store_endpoints()
         self.get_stored_endpoints()
 
-    @staticmethod
-    def update_history(endpoint, mac_addresses, ipv4_addresses, ipv6_addresses):
-        # list of fields to make history entries for, along with entry type for that field
-        fields = [
-            {'field_name': 'behavior', 'entry_type': HistoryTypes.PROPERTY_CHANGE},
-            {'field_name': 'ipv4_OS', 'entry_type': HistoryTypes.PROPERTY_CHANGE},
-            {'field_name': 'ipv6_OS', 'entry_type': HistoryTypes.PROPERTY_CHANGE},
-        ]
-        # make history entries for any changed prop
-        prior = None
-        for record in mac_addresses.values():
-            for field in fields:
-                if field['field_name'] in record and prior and field['field_name'] in prior and \
-                   prior[field['field_name']] != record[field['field_name']]:
-                    endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.mac_addresses['field_name'],
-                                                     prior[field['field_name']], record[field['field_name']])
-                prior = record
-
-        # TODO: history for IP address changes isn't accumulated yet (see get_stored_metadata()).
-        prior = None
-        for record in ipv4_addresses.values():
-            for field in fields:
-                if field['field_name'] in record and prior and field['field_name'] in prior and \
-                   prior[field['field_name']] != record[field['field_name']]:
-                    endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.ipv4_addresses['field_name'],
-                            prior[field['field_name']], record[field['field_name']])  # pytype: disable=unsupported-operands
-                prior = record
-
-        prior = None
-        for record in ipv6_addresses.values():
-            for field in fields:
-                if field['field_name'] in record and prior and field['field_name'] in prior and \
-                   prior[field['field_name']] != record[field['field_name']]:
-                    endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.ipv6_addresses['field_name'],
-                            prior[field['field_name']], record[field['field_name']])  # pytype: disable=unsupported-operands
-                prior = record
-
     def store_endpoints(self):
         ''' store current endpoints in Redis. '''
-        with self.redis_lock:
-            if self.r:
-                try:
-                    serialized_endpoints = []
-                    for endpoint in self.endpoints.values():
-                        # set metadata
-                        mac_addresses, ipv4_addresses, ipv6_addresses = self.get_stored_metadata(
-                            str(endpoint.name))
-                        self.update_history(
-                            endpoint, mac_addresses, ipv4_addresses, ipv6_addresses)
-                        endpoint.metadata = {
-                            'mac_addresses': mac_addresses,
-                            'ipv4_addresses': ipv4_addresses,
-                            'ipv6_addresses': ipv6_addresses}
-                        redis_endpoint_data = {
-                            'name': str(endpoint.name),
-                            'state': str(endpoint.state),
-                            'ignore': str(endpoint.ignore),
-                            'endpoint_data': str(endpoint.endpoint_data),
-                            'next_state': str(endpoint.p_next_state),
-                            'prev_states': str(endpoint.p_prev_states),
-                            'acl_data': str(endpoint.acl_data),
-                            'metadata': str(endpoint.metadata),
-                        }
-                        self.r.hmset(endpoint.name, redis_endpoint_data)
-                        mac = endpoint.endpoint_data['mac']
-                        self.r.hmset(
-                            mac, {'poseidon_hash': str(endpoint.name)})
-                        if not self.r.sismember('mac_addresses', mac):
-                            self.r.sadd('mac_addresses', mac)
-                        for ip_field in MACHINE_IP_FIELDS:
-                            try:
-                                machine_ip = ipaddress.ip_address(
-                                    endpoint.endpoint_data.get(ip_field, None))
-                            except ValueError:
-                                machine_ip = None
-                            if machine_ip:
-                                self.r.hmset(
-                                    str(machine_ip), {'poseidon_hash': str(endpoint.name)})
-                                if not self.r.sismember('ip_addresses', str(machine_ip)):
-                                    self.r.sadd('ip_addresses',
-                                                str(machine_ip))
-                        serialized_endpoints.append(endpoint.encode())
-                    self.r.set('p_endpoints', str(serialized_endpoints))
-                except Exception as e:  # pragma: no cover
-                    self.logger.error(
-                        'Unable to store endpoints in Redis because {0}'.format(str(e)))
+        self.prc.store_endpoints(self.endpoints)
 
 
 class Monitor:
@@ -723,6 +464,7 @@ class Monitor:
     def __init__(self, skip_rabbit):
         self.faucet_event = []
         self.m_queue = queue.Queue()
+        self.job_queue = queue.Queue()
         self.skip_rabbit = skip_rabbit
         self.logger = logger
         self.rabbit_channel_connection_local = None
@@ -747,12 +489,10 @@ class Monitor:
         self.s = SDNConnect(self.controller)
 
         # schedule periodic scan of endpoints thread
-        self.schedule.every(self.controller['scan_frequency']).seconds.do(
-            partial(schedule_job_kickurl, schedule_func=self))
+        self.schedule.every(self.controller['scan_frequency']).seconds.do(self.schedule_job_kickurl)
 
         # schedule periodic reinvestigations thread
-        self.schedule.every(self.controller['reinvestigation_frequency']).seconds.do(
-            partial(schedule_job_reinvestigation, schedule_func=self))
+        self.schedule.every(self.controller['reinvestigation_frequency']).seconds.do(self.schedule_job_reinvestigation)
 
         # schedule all threads
         self.schedule_thread = threading.Thread(
@@ -760,6 +500,61 @@ class Monitor:
                 schedule_thread_worker,
                 schedule=self.schedule),
             name='st_worker')
+
+    def job_kickurl(self):
+        self.s.check_endpoints(messages=self.faucet_event)
+        del self.faucet_event[:]
+        try:
+            # get current state
+            req = requests.get(
+                'http://poseidon-api:8000/v1/network_full', timeout=10)
+            # send results to prometheus
+            hosts = req.json()['dataset']
+            self.prom.update_metrics(hosts)
+        except requests.exceptions.ConnectionError as e:
+            self.logger.debug(
+                'Unable to get current state and send it to Prometheus because: {0}'.format(str(e)))
+        except Exception as e:  # pragma: no cover
+            self.logger.error(
+                'Unable to get current state and send it to Prometheus because: {0}'.format(str(e)))
+
+    def job_reinvestigation(self):
+        ''' put endpoints into the reinvestigation state if possible '''
+
+        def trigger_reinvestigation(candidates):
+            # get random order of things that are known
+            for _ in range(self.controller['max_concurrent_reinvestigations'] - self.s.investigations):
+                if len(candidates) > 0:
+                    chosen = candidates.pop()
+                    self.logger.info('Starting reinvestigation on: {0} {1}'.format(
+                        chosen.name, chosen.state))
+                    chosen.reinvestigate()
+                    chosen.p_prev_states.append(
+                        (chosen.state, int(time.time())))
+                    self.s.mirror_endpoint(chosen)
+
+        candidates = [
+            endpoint for endpoint in self.s.endpoints.values()
+            if endpoint.state in ['queued']]
+        if len(candidates) == 0:
+            # if no queued endpoints, then known and abnormal are candidates
+            candidates = [
+                endpoint for endpoint in self.s.endpoints.values()
+                if endpoint.state in ['known', 'abnormal']]
+            if len(candidates) > 0:
+                random.shuffle(candidates)
+        if self.s.sdnc:
+            trigger_reinvestigation(candidates)
+
+    def queue_job(self, job):
+        if self.job_queue.qsize() < 2:
+            self.job_queue.put(job)
+
+    def schedule_job_kickurl(self):
+        self.queue_job(self.job_kickurl)
+
+    def schedule_job_reinvestigation(self):
+        self.queue_job(self.job_reinvestigation)
 
     def update_routing_key_time(self, routing_key):
         self.prom.prom_metrics['last_rabbitmq_routing_key_time'].labels(
@@ -777,16 +572,24 @@ class Monitor:
 
         def handler_algos_decider(my_obj):
             self.logger.debug('decider value:{0}'.format(my_obj))
-            for name, message in my_obj.items():
-                endpoint = self.s.endpoints.get(name, None)
-                if endpoint and message.get('plugin', None) == 'ncapture':
-                    endpoint.trigger('unknown')
-                    endpoint.p_next_state = None
-                    endpoint.p_prev_states.append(
-                        (endpoint.state, int(time.time())))
-                    if message.get('valid', False):
-                        return (my_obj, None)
-                    break
+            data = my_obj.get('data', None)
+            results = my_obj.get('results', {})
+            tool = results.get('tool', None)
+            if isinstance(data, dict):
+                if tool == 'p0f':
+                    self.s.prc.store_p0f_result(my_obj)
+                elif tool == 'networkml':
+                    self.s.prc.store_tool_result(my_obj, 'networkml')
+                    for name, message in data.items():
+                        endpoint = self.s.endpoints.get(name, None)
+                        if endpoint:
+                            endpoint.trigger('unknown')
+                            endpoint.p_next_state = None
+                            endpoint.p_prev_states.append(
+                                (endpoint.state, int(time.time())))
+                            if message.get('valid', False):
+                                return (data, None)
+                            break
             return ({}, None)
 
         def handler_action_ignore(my_obj):
@@ -991,11 +794,14 @@ class Monitor:
         signal.signal(signal.SIGINT, partial(self.signal_handler))
         while not CTRL_C['STOP']:
             time.sleep(1)
-
             found_work, item = self.get_q_item()
-
             if found_work:
                 self.format_rabbit_message(item)
+            else:
+                if not self.job_queue.empty():
+                    schedule_func = self.job_queue.get()
+                    self.logger.info('calling %s' % schedule_func)
+                    schedule_func()
 
             self.schedule_mirroring()
 
