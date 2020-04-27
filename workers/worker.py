@@ -203,6 +203,6 @@ def load_workers():
 
 
 if __name__ == '__main__':  # pragma: no cover
-    queue_name = 'task_queue'
-    host = 'messenger'
+    queue_name = os.getenv('RABBIT_QUEUE_NAME', 'task_queue')
+    host = os.getenv('RABBIT_HOST', 'messenger')
     main(queue_name, host)

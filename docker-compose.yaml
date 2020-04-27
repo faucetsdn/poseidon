@@ -73,6 +73,7 @@ services:
             PYTHONUNBUFFERED: '1'
             KEEPIMAGES: '0'
             VOL_PREFIX: '${POSEIDON_PREFIX}'
+            RABBIT_QUEUE_NAME: 'topic-poseidon-internal'
         networks:
             - poseidon
         volumes:
