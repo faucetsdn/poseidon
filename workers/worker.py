@@ -11,7 +11,7 @@ from redis import StrictRedis
 
 def save(r, tool, results):
     timestamp = str(int(time.time()))
-    if tool not in ['p0f']:  # , 'networkml']:
+    if tool not in ['p0f', 'networkml']:
         return
     try:
         if isinstance(results, list):

@@ -39,7 +39,7 @@ jobs:
     - name: docker_test
       run: make run_tests
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1.0.5
+      uses: codecov/codecov-action@v1.0.6
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       with:
