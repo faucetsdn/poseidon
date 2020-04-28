@@ -39,9 +39,9 @@ class Volos(object):
                     cfg = yaml.safe_load(f)
             except Exception as e:  # pragma: no cover
                 self.logger.error(
-                    'Volos configuration could not be loaded. disabling volos')
+                    'Volos configuration could not be loaded, disabling Volos')
                 self.logger.error(
-                    'Failed to load volos config with error: {0}'.format(str(e)))
+                    'Failed to load Volos config with error: {0}'.format(str(e)))
                 self.enabled = False
             container_cfg = []
             if cfg:

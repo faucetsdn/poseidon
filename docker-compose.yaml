@@ -37,6 +37,8 @@ services:
             - '5001:5000'
         networks:
             poseidon:
+        depends_on:
+            - poseidon
     poseidon_api:
         restart: always
         image: 'cyberreboot/poseidon-api:latest'
@@ -51,6 +53,8 @@ services:
         build:
             context: api
             dockerfile: Dockerfile
+        depends_on:
+            - poseidon
     poseidon:
         restart: always
         image: 'cyberreboot/poseidon:latest'
@@ -66,6 +70,9 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
+        depends_on:
+            - rabbit
+            - redis
     workers:
         restart: always
         image: 'cyberreboot/poseidon-workers:latest'
@@ -73,14 +80,14 @@ services:
             PYTHONUNBUFFERED: '1'
             KEEPIMAGES: '0'
             VOL_PREFIX: '${POSEIDON_PREFIX}'
-            RABBIT_QUEUE_NAME: 'topic-poseidon-internal'
         networks:
             - poseidon
         volumes:
             - '/var/run/docker.sock:/var/run/docker.sock'
-
         build:
             context: workers
             dockerfile: Dockerfile
+        depends_on:
+            - poseidon
 networks:
     poseidon:
