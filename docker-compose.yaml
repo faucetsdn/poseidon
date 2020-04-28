@@ -21,7 +21,7 @@ services:
                     - messenger
     network_tap:
         restart: always
-        image: 'cyberreboot/network-tap:v0.11.7'
+        image: 'cyberreboot/network-tap:v0.11.8'
         volumes:
             - '/var/run/docker.sock:/var/run/docker.sock'
             - '${POSEIDON_PREFIX}/opt/poseidon_files:/files'
@@ -37,6 +37,8 @@ services:
             - '5001:5000'
         networks:
             poseidon:
+        depends_on:
+            - poseidon
     poseidon_api:
         restart: always
         image: 'cyberreboot/poseidon-api:latest'
@@ -51,6 +53,8 @@ services:
         build:
             context: api
             dockerfile: Dockerfile
+        depends_on:
+            - poseidon
     poseidon:
         restart: always
         image: 'cyberreboot/poseidon:latest'
@@ -66,6 +70,9 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
+        depends_on:
+            - rabbit
+            - redis
     workers:
         restart: always
         image: 'cyberreboot/poseidon-workers:latest'
@@ -77,9 +84,10 @@ services:
             - poseidon
         volumes:
             - '/var/run/docker.sock:/var/run/docker.sock'
-
         build:
             context: workers
             dockerfile: Dockerfile
+        depends_on:
+            - poseidon
 networks:
     poseidon:

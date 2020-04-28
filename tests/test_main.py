@@ -8,6 +8,7 @@ Created on 28 June 2016
 import json
 import logging
 import os
+import queue
 import time
 
 import redis
@@ -16,11 +17,10 @@ from prometheus_client import Gauge
 from poseidon.constants import NO_DATA
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import endpoint_factory
+from poseidon.helpers.redis import PoseidonRedisClient
 from poseidon.main import CTRL_C
 from poseidon.main import Monitor
 from poseidon.main import rabbit_callback
-from poseidon.main import schedule_job_kickurl
-from poseidon.main import schedule_job_reinvestigation
 from poseidon.main import schedule_thread_worker
 from poseidon.main import SDNConnect
 
@@ -201,12 +201,10 @@ def test_update_history():
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv6': '1212::1'}
     endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'1551805502': {'labels': ['developer workstation'], 'behavior': 'normal'}}}, 'ipv4_addresses': {
         '0.0.0.0': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
-    controller = Config().get_config()
-    s = SDNConnect(controller)
-    s.endpoints[endpoint.name] = endpoint
     metadata = {123: {'behavior': 'normal'}}
-    s.update_history(endpoint, {'00:00:00:00:00:00': metadata}, {
-                     '0.0.0.0': metadata}, {'1212::1': metadata})
+    prc = PoseidonRedisClient(None)
+    prc.update_history(endpoint, {'00:00:00:00:00:00': metadata}, {
+                       '0.0.0.0': metadata}, {'1212::1': metadata})
 
 
 def test_format_rabbit_message():
@@ -327,47 +325,6 @@ def test_rabbit_callback():
         None)
 
 
-def test_schedule_job_kickurl():
-
-    class func():
-
-        def __init__(self):
-            self.logger = logger
-            self.faucet_event = []
-            self.controller = Config().get_config()
-            self.s = SDNConnect(self.controller)
-
-    schedule_job_kickurl(func())
-
-
-def test_schedule_job_reinvestigation():
-
-    class func():
-
-        def __init__(self):
-            self.logger = logger
-            self.faucet_event = []
-            self.controller = Config().get_config()
-            self.controller['max_concurrent_reinvestigations'] = 10
-            self.s = SDNConnect(self.controller)
-            endpoint = endpoint_factory('foo')
-            endpoint.endpoint_data = {
-                'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
-            endpoint.mirror()
-            endpoint.known()
-            self.s.endpoints[endpoint.name] = endpoint
-            endpoint = endpoint_factory('foo2')
-            endpoint.endpoint_data = {
-                'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
-            endpoint.mirror()
-            endpoint.known()
-            self.s.endpoints[endpoint.name] = endpoint
-            self.s.store_endpoints()
-            self.s.get_stored_endpoints()
-
-    schedule_job_reinvestigation(func())
-
-
 def test_find_new_machines():
     controller = Config().get_config()
     s = SDNConnect(controller)
@@ -429,6 +386,7 @@ def test_process():
             self.s.get_sdn_context()
             self.s.controller['TYPE'] = 'faucet'
             self.s.get_sdn_context()
+            self.job_queue = queue.Queue()
             endpoint = endpoint_factory('foo')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
@@ -508,17 +466,14 @@ def test_merge_machine():
 
 
 def test_parse_metadata():
-    controller = Config().get_config()
-    s = SDNConnect(controller)
+    prc = PoseidonRedisClient(None)
     mac_info = {
         b'poseidon_hash': 'myhash',
     }
     ml_info = {
-        b'labels': b'["foo", "bar"]',
-        b'confidences': b'[1.0, 2.0]',
-        'myhash': b'{"pcap_labels": "mylabels", "decisions": {"behavior": "definitely"}}',
+        'myhash': b'{"pcap_labels": "mylabels", "classification": {"labels": ["foo", "bar"], "confidences": [1.0, 2.0]}, "decisions": {"behavior": "definitely"}}',
     }
-    assert s.parse_metadata(mac_info, ml_info) == {
+    assert prc.parse_metadata(mac_info, ml_info) == {
         'behavior': 'None', 'confidences': [1.0, 2.0],
         'labels': ['foo', 'bar'], 'pcap_labels': 'mylabels',
         'behavior': 'definitely'}

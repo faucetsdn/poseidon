@@ -142,8 +142,9 @@ class GetData():
             metadata = mac_addresses[endpoint_mac]
             newest = GetData._get_newest_metadata(metadata)
             if newest:
-                if 'labels' in newest:
-                    return newest['labels'][0]
+                labels = newest.get('labels', None)
+                if labels:
+                    return labels[0]
         return NO_DATA
 
     @staticmethod
@@ -154,8 +155,9 @@ class GetData():
             metadata = mac_addresses[endpoint_mac]
             newest = GetData._get_newest_metadata(metadata)
             if newest:
-                if 'confidences' in newest:
-                    return str(newest['confidences'][0])
+                confidences = newest.get('confidences', None)
+                if confidences:
+                    return str(confidences[0])
         return NO_DATA
 
     @staticmethod

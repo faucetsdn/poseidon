@@ -30,7 +30,8 @@
     },
     {
       "command": [
-        "-r"
+        "-r",
+        "-o/tmp"
       ],
       "contentType": "application/json",
       "environment": {
@@ -55,7 +56,11 @@
     {
       "contentType": "application/json",
       "environment": {
-        "rabbit": "true"
+        "rabbit": "true",
+        "RABBIT_EXCHANGE": "topic-poseidon-internal",
+        "RABBIT_HOST": "messenger",
+        "RABBIT_QUEUE_NAME": "topic-poseidon-internal",
+        "RABBIT_ROUTING_KEY": "poseidon.algos.decider"
       },
       "image": "cyberreboot/p0f",
       "inputs": [
@@ -67,7 +72,7 @@
         "rabbitmq"
       ],
       "stage": "poseidon_poseidon",
-      "version": "v0.11.6",
+      "version": "latest",
       "viewableOutput": true
     },
     {
