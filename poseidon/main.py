@@ -583,6 +583,8 @@ class Monitor:
                     for name, message in data.items():
                         endpoint = self.s.endpoints.get(name, None)
                         if endpoint:
+                            self.logger.debug('processing networkml results for %s', name)
+                            self.s.unmirror_endpoint(endpoint)
                             endpoint.trigger('unknown')
                             endpoint.p_next_state = None
                             endpoint.p_prev_states.append(
@@ -590,6 +592,8 @@ class Monitor:
                             if message.get('valid', False):
                                 return (data, None)
                             break
+                        else:
+                            self.logger.debug('endpoint %s from networkml not found', name)
             return ({}, None)
 
         def handler_action_ignore(my_obj):
@@ -793,21 +797,18 @@ class Monitor:
         global CTRL_C
         signal.signal(signal.SIGINT, partial(self.signal_handler))
         while not CTRL_C['STOP']:
-            time.sleep(1)
-            found_work, item = self.get_q_item()
+            found_work, rabbit_msg = self.get_q_item(self.m_queue)
             if found_work:
-                self.format_rabbit_message(item)
-            else:
-                if not self.job_queue.empty():
-                    schedule_func = self.job_queue.get()
-                    self.logger.info('calling %s' % schedule_func)
-                    schedule_func()
-
+                self.format_rabbit_message(rabbit_msg)
+            found_work, schedule_func = self.get_q_item(self.job_queue)
+            if found_work and callable(schedule_func):
+                self.logger.info('calling %s', schedule_func)
+                schedule_func()
             self.schedule_mirroring()
 
         self.s.store_endpoints()
 
-    def get_q_item(self):
+    def get_q_item(self, q):
         '''
         attempt to get a work item from the queue
         m_queue -> (routing_key, body)
@@ -820,9 +821,9 @@ class Monitor:
 
         if not CTRL_C['STOP']:
             try:
-                item = self.m_queue.get(False)
+                item = q.get(True, timeout=1)
                 found_work = True
-                self.m_queue.task_done()
+                q.task_done()
             except queue.Empty:  # pragma: no cover
                 pass
 
