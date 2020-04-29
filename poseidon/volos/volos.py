@@ -38,7 +38,7 @@ class Volos(object):
                 with open(volos_cfg_file, 'r') as f:
                     cfg = yaml.safe_load(f)
             except Exception as e:  # pragma: no cover
-                self.logger.error(
+                self.logger.warning(
                     'Volos configuration could not be loaded, disabling Volos')
                 self.logger.error(
                     'Failed to load Volos config with error: {0}'.format(str(e)))
@@ -69,8 +69,8 @@ class Volos(object):
             else:
                 self.enabled = False
         else:
-            self.logger.error(
-                'Volos configuration could not found. disabling volos')
+            self.logger.debug(
+                'Volos configuration could not be found. disabling volos')
             self.enabled = False
 
         return container_cfg
