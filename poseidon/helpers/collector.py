@@ -20,6 +20,7 @@ class Collector(object):
         self.endpoint = endpoint
         self.id = endpoint.name
         self.mac = endpoint.endpoint_data['mac']
+        self.nic = None
         nic = self.controller['collector_nic']
         try:
             eval_nic = ast.literal_eval(nic)
