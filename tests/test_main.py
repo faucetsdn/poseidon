@@ -171,7 +171,7 @@ def test_signal_handler():
 def test_get_q_item():
     class MockMQueue:
 
-        def get(self, block):
+        def get(self, block, timeout):
             return 'Item'
 
         def task_done(self):
@@ -187,12 +187,12 @@ def test_get_q_item():
             self.s = SDNConnect(self.controller)
 
     mock_monitor = MockMonitor()
-    mock_monitor.m_queue = MockMQueue()
-    assert (True, 'Item') == mock_monitor.get_q_item()
+    m_queue = MockMQueue()
+    assert (True, 'Item') == mock_monitor.get_q_item(m_queue)
 
     CTRL_C['STOP'] = True
-    mock_monitor.m_queue = MockMQueue()
-    assert (False, None) == mock_monitor.get_q_item()
+    m_queue = MockMQueue()
+    assert (False, None) == mock_monitor.get_q_item(m_queue)
 
 
 def test_update_history():
@@ -387,6 +387,7 @@ def test_process():
             self.s.controller['TYPE'] = 'faucet'
             self.s.get_sdn_context()
             self.job_queue = queue.Queue()
+            self.m_queue = queue.Queue()
             endpoint = endpoint_factory('foo')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
@@ -409,10 +410,10 @@ def test_process():
             self.s.store_endpoints()
             self.s.get_stored_endpoints()
 
-        def get_q_item(self):
+        def get_q_item(self, q):
             return (True, ('foo', {'data': {}}))
 
-        def bad_get_q_item(self):
+        def bad_get_q_item(self, q):
             return (False, ('bar', {'data': {}}))
 
         def format_rabbit_message(self, item):
