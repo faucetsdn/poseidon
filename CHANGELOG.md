@@ -1,18 +1,25 @@
+# v0.12.0 (2020-04-30)
+
+- Major update networkml to 0.5.3 (complete implementation change from v0.4.x)
+- p0f and networkml no longer update redis, now done by poseidon
+- Update faucet, gauge, event-adapter-rabbit-mq, pytype, network-tap, pylint, codecov, grafana, prometheus
+
+
 # v0.11.2 (2020-04-10)
 
-- Update faucet, gauge, event-adapater-rabbit-mq, network-tap, pytype, cmd2, flask, transitions
+- Update faucet, gauge, event-adapter-rabbit-mq, network-tap, pytype, cmd2, flask, transitions
 
 
 # v0.11.1 (2020-03-26)
 
 - crviz to v0.3.21
-- Update faucet, gauge, event-adapater-rabbit-mq, pytest, prometheus, transitions, grafana, pyyaml, cmd2, mock
+- Update faucet, gauge, event-adapter-rabbit-mq, pytest, prometheus, transitions, grafana, pyyaml, cmd2, mock
 - refactor for future FAUCET tunneling support
 
 
 # v0.11.0 (2020-02-28)
 
-- Update faucet, gauge, event-adapater-rabbit-mq
+- Update faucet, gauge, event-adapter-rabbit-mq
 - Add config infrastructure for Volos (should copy new VOLOS and PIPETTE sections into existing poseidon.config)
 
 
@@ -20,7 +27,7 @@
 
 - network-tools v0.11.4, networkml v0.4.8 (fix no results from networkml).
 - Add KEEPIMAGES diagnostic environment variable to keep containers.
-- Update grafana, requests, cmd2, faucet, gauge, event-adapater-rabbit-mq
+- Update grafana, requests, cmd2, faucet, gauge, event-adapter-rabbit-mq
 - Initial Volos infrastructure.
 
 
