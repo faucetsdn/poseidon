@@ -466,7 +466,7 @@ def test_merge_machine():
     assert new_machine['ipv6'] == new_machine['ipv6']
 
 
-def test_parse_metadata():
+def test_parse_networkml_metadata():
     prc = PoseidonRedisClient(None)
     mac_info = {
         b'poseidon_hash': 'myhash',
@@ -474,7 +474,7 @@ def test_parse_metadata():
     ml_info = {
         'myhash': b'{"pcap_labels": "mylabels", "classification": {"labels": ["foo", "bar"], "confidences": [1.0, 2.0]}, "decisions": {"behavior": "definitely"}}',
     }
-    assert prc.parse_metadata(mac_info, ml_info) == {
+    assert prc.parse_networkml_metadata(mac_info, ml_info) == {
         'behavior': 'None', 'confidences': [1.0, 2.0],
         'labels': ['foo', 'bar'], 'pcap_labels': 'mylabels',
         'behavior': 'definitely'}
