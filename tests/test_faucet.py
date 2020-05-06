@@ -4,9 +4,18 @@ Test module for faucet.
 @author: Charlie Lewis
 """
 import os
-
+import tempfile
 from poseidon.controllers.faucet.faucet import FaucetProxy
 from poseidon.helpers.config import Config
+from poseidon.controllers.faucet.helpers import yaml_in, yaml_out
+
+
+def test_yaml_in():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        test_yaml_file = os.path.join(tmpdir, 'test.yaml')
+        content = {'test': 'content'}
+        yaml_out(test_yaml_file, content)
+        assert yaml_in(test_yaml_file) == content
 
 
 def test_get_endpoints():
