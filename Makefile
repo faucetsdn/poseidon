@@ -6,10 +6,7 @@ build_poseidon:
 	docker build -t $(TAG) .
 
 run_tests: build_poseidon
-	docker kill $(TAG)-redis || true
 	docker build -f ./Dockerfile.test -t $(TAG)-test .
-	docker run --rm -d --name $(TAG)-redis redis:latest
-	docker run --rm -v /var/run/docker.sock:/var/run/docker.sock --link $(TAG)-redis:redis $(TAG)-test
-	docker kill $(TAG)-redis
+	docker run --rm -v /var/run/docker.sock:/var/run/docker.sock $(TAG)-test
 
 .PHONY:  build_poseidon run_tests

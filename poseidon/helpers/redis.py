@@ -33,18 +33,16 @@ class PoseidonRedisClient:
         self.logger.debug('store key %s value %s', key, str_values)
         self.r.hmset(key, str_values)
 
-    def store_p0f_result(self, my_obj):
+    def store_p0f_result(self, data):
         # TODO: migrate to store_tool_result()
-        try:
-            data = my_obj['data']
-        except KeyError:
-            return
-        if not data:
-            return
-        if self.r:
+        valid = False
+        if data and self.r:
             for ip, ip_data in data.items():
-                if ip_data:
-                    self.hmset(str(ip), ip_data)
+                # Don't overwrite with a blank result.
+                if ip_data and ip_data.get('full_os', None):
+                    self.hmset('_'.join(('p0f', str(ip))), ip_data)
+                    valid = True
+        return valid
 
     def store_tool_result(self, my_obj, tool):
         if self.r:
@@ -95,32 +93,36 @@ class PoseidonRedisClient:
                     'Unable to get existing endpoints from Redis because {0}'.format(str(e)))
         return {}
 
-    @staticmethod
-    def parse_networkml_metadata(mac_info, ml_info):
-        metadata = {}
-        tmp = {}
-        if mac_info[b'poseidon_hash'] in ml_info:
-            tmp = ast.literal_eval(
-                ml_info[mac_info[b'poseidon_hash']].decode('ascii'))
-        elif mac_info[b'poseidon_hash'].decode('ascii') in ml_info:
-            tmp = ast.literal_eval(
-                ml_info[mac_info[b'poseidon_hash'].decode('ascii')].decode('ascii'))
-        classification = tmp.get('classification', {})
-        for ml_field in ('labels', 'confidences'):
-            content = classification.get(ml_field, [])
-            metadata[ml_field] = content
-        behavior = 'None'
-        pcap_labels = 'None'
-        if 'decisions' in tmp:
-            decisions = tmp['decisions']
-            if 'behavior' in decisions:
-                behavior = decisions['behavior']
-        if 'pcap_labels' in tmp:
-            pcap_labels = tmp['pcap_labels']
-        metadata.update({
-            'behavior': behavior,
-            'pcap_labels': pcap_labels})
-        return metadata
+    def parse_networkml_metadata(self, mac_info, ml_info):
+
+        def parse_raw_results(poseidon_hash_key):
+            raw_results = ml_info.get(poseidon_hash_key, None)
+            if raw_results:
+                self.logger.debug('found %s by key %s' % (raw_results, poseidon_hash_key))
+                return ast.literal_eval(raw_results.decode('ascii'))
+            return {}
+
+        results = parse_raw_results(mac_info[b'poseidon_hash'])
+        if not results:
+            try:
+                results = parse_raw_results(mac_info[b'poseidon_hash'].decode('ascii'))
+            except AttributeError:
+                pass
+        if not results:
+            self.logger.debug('no results for %s in %s' % (mac_info, ml_info))
+        classification = results.get('classification', {})
+        labels = classification.get('labels', [])
+        confidences = classification.get('confidences', [])
+        decisions = results.get('decisions', {})
+        behavior = decisions.get('behavior', None)
+        pcap_labels = results.get('pcap_labels', None)
+        if labels and confidences:
+            return {
+                'labels': labels,
+                'confidences': confidences,
+                'behavior': behavior,
+                'pcap_labels': pcap_labels}
+        return {}
 
     def get_stored_mac_metadata(self, mac_info, source_mac):
         mac_address = {}
@@ -129,7 +131,7 @@ class PoseidonRedisClient:
             try:
                 timestamps = ast.literal_eval(raw_timestamps.decode('ascii'))
                 for timestamp in sorted(timestamps):
-                    mac_address[str(timestamp)] = {}
+                    timestamp_str = str(timestamp)
                     # retrieve tool results by timestamp
                     # TODO: add more tools and tool info parsers (e.g. p0f)
                     for tool, tool_parser in (
@@ -137,7 +139,10 @@ class PoseidonRedisClient:
                         key = '_'.join((tool, source_mac, str(timestamp)))
                         tool_info = self.r.hgetall(key)
                         metadata = tool_parser(mac_info, tool_info)
-                        mac_address[str(timestamp)].update(metadata)
+                        if metadata:
+                            if timestamp_str not in mac_address:
+                                mac_address[timestamp_str] = {}
+                            mac_address[timestamp_str].update(metadata)
                         self.logger.debug('got stored tool data %s from %s, %s', metadata, tool_info, mac_info)
             except Exception as e:  # pragma: no cover
                 self.logger.error(
@@ -159,7 +164,7 @@ class PoseidonRedisClient:
                     if machine_ip:
                         # TODO: migrate to networkml-style results rather than just raw IP lookup.
                         try:
-                            ip_info = self.r.hgetall(raw_field)
+                            ip_info = self.r.hgetall('_'.join(('p0f', raw_field)))
                             short_os = ip_info.get(b'short_os', None)
                             ip_addresses[ip_field][raw_field] = {}
                             if short_os:

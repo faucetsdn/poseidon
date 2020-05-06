@@ -11,13 +11,11 @@ import os
 import queue
 import time
 
-import redis
 from prometheus_client import Gauge
 
 from poseidon.constants import NO_DATA
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import endpoint_factory
-from poseidon.helpers.redis import PoseidonRedisClient
 from poseidon.main import CTRL_C
 from poseidon.main import Monitor
 from poseidon.main import rabbit_callback
@@ -195,18 +193,6 @@ def test_get_q_item():
     assert (False, None) == mock_monitor.get_q_item(m_queue)
 
 
-def test_update_history():
-    endpoint = endpoint_factory('foo')
-    endpoint.endpoint_data = {
-        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv6': '1212::1'}
-    endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'1551805502': {'labels': ['developer workstation'], 'behavior': 'normal'}}}, 'ipv4_addresses': {
-        '0.0.0.0': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
-    metadata = {123: {'behavior': 'normal'}}
-    prc = PoseidonRedisClient(None)
-    prc.update_history(endpoint, {'00:00:00:00:00:00': metadata}, {
-                       '0.0.0.0': metadata}, {'1212::1': metadata})
-
-
 def test_format_rabbit_message():
     CTRL_C['STOP'] = False
 
@@ -299,6 +285,9 @@ def test_rabbit_callback():
     class MockQueue:
         item = None
 
+        def qsize(self):
+            return 1
+
         def put(self, item):
             self.item = item
             return True
@@ -322,7 +311,7 @@ def test_rabbit_callback():
         mock_method,
         'properties',
         'body',
-        None)
+        mock_queue)
 
 
 def test_find_new_machines():
@@ -409,11 +398,15 @@ def test_process():
             self.s.endpoints[endpoint.name] = endpoint
             self.s.store_endpoints()
             self.s.get_stored_endpoints()
+            self.results = 0
 
-        def get_q_item(self, q):
-            return (True, ('foo', {'data': {}}))
+        def get_q_item(self, q, timeout=1):
+            if not self.results:
+                self.results += 1
+                return (True, ('foo', {'data': {}}))
+            return (False, None)
 
-        def bad_get_q_item(self, q):
+        def bad_get_q_item(self, q, timeout=1):
             return (False, ('bar', {'data': {}}))
 
         def format_rabbit_message(self, item):
@@ -464,20 +457,6 @@ def test_merge_machine():
     s.merge_machine_ip(old_machine, new_machine)
     assert old_machine['ipv4'] == new_machine['ipv4']
     assert new_machine['ipv6'] == new_machine['ipv6']
-
-
-def test_parse_networkml_metadata():
-    prc = PoseidonRedisClient(None)
-    mac_info = {
-        b'poseidon_hash': 'myhash',
-    }
-    ml_info = {
-        'myhash': b'{"pcap_labels": "mylabels", "classification": {"labels": ["foo", "bar"], "confidences": [1.0, 2.0]}, "decisions": {"behavior": "definitely"}}',
-    }
-    assert prc.parse_networkml_metadata(mac_info, ml_info) == {
-        'behavior': 'None', 'confidences': [1.0, 2.0],
-        'labels': ['foo', 'bar'], 'pcap_labels': 'mylabels',
-        'behavior': 'definitely'}
 
 
 def test_schedule_thread_worker():
