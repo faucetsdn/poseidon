@@ -36,7 +36,11 @@ def callback(ch, method, properties, body):
     r = setup_redis()
     for worker in workers['workers']:
         file_path = pipeline['file_path']
-        if 'id' in pipeline and (('results' in pipeline and pipeline['results']['tool'] in worker['inputs']) or ('file_type' in pipeline and pipeline['file_type'] in worker['inputs'])):
+        if file_path in ['-1', '']:
+            print(' [X file empty] %s UTC %r:%r' % (str(datetime.datetime.utcnow()),
+                                                    method.routing_key,
+                                                    pipeline))
+        elif 'id' in pipeline and (('results' in pipeline and pipeline['results']['tool'] in worker['inputs']) or ('file_type' in pipeline and pipeline['file_type'] in worker['inputs'])):
             uid = str(uuid.uuid4()).split('-')[-1]
             name = worker['name'] + '_' + uid
             image = worker['image']
