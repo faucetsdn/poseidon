@@ -22,7 +22,8 @@ jobs:
       id: buildx
       uses: crazy-max/ghaction-docker-buildx@v1.6.0
       with:
-        version: latest
+        buildx-version: latest
+        qemu-version: latest
     - name: Docker Login
       env:
         DOCKER_PASSWORD: ${{ secrets.DOCKER_TOKEN }}
