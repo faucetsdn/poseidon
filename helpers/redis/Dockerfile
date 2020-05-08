@@ -1,4 +1,4 @@
-FROM redis:5-alpine
+FROM redis:6-alpine
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
 
 HEALTHCHECK --interval=15s --timeout=15s \
