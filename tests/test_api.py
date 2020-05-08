@@ -3,9 +3,14 @@ import os
 import falcon
 import pytest
 import redis
+from pytest_redis import factories
 from falcon import testing
 
 from api.app.app import api
+
+
+redis_my_proc = factories.redis_proc(port=6379)
+redis_my = factories.redisdb('redis_my_proc')
 
 
 @pytest.fixture
@@ -13,8 +18,8 @@ def client():
     return testing.TestClient(api)
 
 
-def test_setup_redis():
-    r = redis.StrictRedis(host='redis',
+def setup_redis():
+    r = redis.StrictRedis(host='localhost',
                           port=6379,
                           db=0,
                           decode_responses=True)
@@ -105,29 +110,33 @@ def test_setup_redis():
              'state': 'KNOWN'})
 
 
-def test_v1(client):
+def test_v1(client, redis_my):
+    setup_redis()
     response = client.simulate_get('/v1')
     assert response.status == falcon.HTTP_OK
 
 
-def test_network(client):
+def test_network(client, redis_my):
+    setup_redis()
     response = client.simulate_get('/v1/network')
     assert len(response.json) == 2
     assert response.status == falcon.HTTP_OK
 
 
-def test_network_by_ip(client):
+def test_network_by_ip(client, redis_my):
+    setup_redis()
     response = client.simulate_get('/v1/network/10.0.0.1')
     assert len(response.json['dataset']) == 1
     assert response.status == falcon.HTTP_OK
 
 
-def test_network_full(client):
+def test_network_full(client, redis_my):
+    setup_redis()
     response = client.simulate_get('/v1/network_full')
     assert len(response.json) == 1
     assert response.status == falcon.HTTP_OK
 
 
-def test_info(client):
+def test_info(client, redis_my):
     response = client.simulate_get('/v1/info')
     assert response.status == falcon.HTTP_OK

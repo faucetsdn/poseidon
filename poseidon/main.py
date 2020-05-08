@@ -54,8 +54,8 @@ logger = logging.getLogger('main')
 
 def rabbit_callback(ch, method, properties, body, q=None):
     ''' callback, places rabbit data into internal queue'''
-    logger.debug('got a message: {0}:{1}:{2}'.format(
-        method.routing_key, body, type(body)))
+    logger.debug('got a message: {0}:{1}:{2} (qsize {3})'.format(
+        method.routing_key, body, type(body), q.qsize()))
     if q is not None:
         q.put((method.routing_key, body))
     else:
@@ -451,12 +451,16 @@ class SDNConnect:
                     if ep:
                         ep.acl_data.append(
                             ((item[0], item[4], item[5]), int(time.time())))
-        self.store_endpoints()
-        self.get_stored_endpoints()
+        self.refresh_endpoints()
 
     def store_endpoints(self):
         ''' store current endpoints in Redis. '''
         self.prc.store_endpoints(self.endpoints)
+
+    def refresh_endpoints(self):
+        self.logger.debug('refresh endpoints')
+        self.store_endpoints()
+        self.get_stored_endpoints()
 
 
 class Monitor:
@@ -528,7 +532,7 @@ class Monitor:
                     chosen = candidates.pop()
                     self.logger.info('Starting reinvestigation on: {0} {1}'.format(
                         chosen.name, chosen.state))
-                    chosen.reinvestigate()
+                    chosen.reinvestigate()  # pytype: disable=attribute-error
                     chosen.p_prev_states.append(
                         (chosen.state, int(time.time())))
                     self.s.mirror_endpoint(chosen)
@@ -577,7 +581,8 @@ class Monitor:
             tool = results.get('tool', None)
             if isinstance(data, dict):
                 if tool == 'p0f':
-                    self.s.prc.store_p0f_result(my_obj)
+                    if self.s.prc.store_p0f_result(data):
+                        return (data, None)
                 elif tool == 'networkml':
                     self.s.prc.store_tool_result(my_obj, 'networkml')
                     for name, message in data.items():
@@ -585,7 +590,7 @@ class Monitor:
                         if endpoint:
                             self.logger.debug('processing networkml results for %s', name)
                             self.s.unmirror_endpoint(endpoint)
-                            endpoint.trigger('unknown')
+                            endpoint.trigger('unknown')  # pytype: disable=attribute-error
                             endpoint.p_next_state = None
                             endpoint.p_prev_states.append(
                                 (endpoint.state, int(time.time())))
@@ -618,7 +623,7 @@ class Monitor:
                         if (state != 'mirror' and state != 'reinvestigate' and
                                 (endpoint.state == 'mirroring' or endpoint.state == 'reinvestigating')):
                             self.s.unmirror_endpoint(endpoint)
-                        endpoint.trigger(state)
+                        endpoint.trigger(state)  # pytype: disable=attribute-error
                         endpoint.p_next_state = None
                         endpoint.p_prev_states.append(
                             (endpoint.state, int(time.time())))
@@ -714,7 +719,7 @@ class Monitor:
             str(self.s.investigations), str(investigation_budget), str(len(queued_endpoints))))
 
         for endpoint in queued_endpoints[:investigation_budget]:
-            endpoint.trigger(endpoint.p_next_state)
+            endpoint.trigger(endpoint.p_next_state)  # pytype: disable=attribute-error
             endpoint.p_next_state = None
             endpoint.p_prev_states.append(
                 (endpoint.state, int(time.time())))
@@ -725,7 +730,7 @@ class Monitor:
                 if self.s.sdnc:
                     if endpoint.state == 'unknown':
                         endpoint.p_next_state = 'mirror'
-                        endpoint.queue()
+                        endpoint.queue()  # pytype: disable=attribute-error
                         endpoint.p_prev_states.append(
                             (endpoint.state, int(time.time())))
                     elif endpoint.state in ['mirroring', 'reinvestigating']:
@@ -737,17 +742,17 @@ class Monitor:
                             self.logger.debug(
                                 'timing out: {0} and setting to unknown'.format(endpoint.name))
                             self.s.unmirror_endpoint(endpoint)
-                            endpoint.unknown()
+                            endpoint.unknown()  # pytype: disable=attribute-error
                             endpoint.p_prev_states.append(
                                 (endpoint.state, int(time.time())))
                 else:
                     if endpoint.state != 'known':
-                        endpoint.known()
+                        endpoint.known()  # pytype: disable=attribute-error
 
     def schedule_coprocessing(self):
         queued_endpoints = [
             endpoint for endpoint in self.s.endpoints.values()
-            if not endpoint.copro_ignore and endpoint.copro_state == 'copro_queued']
+            if not endpoint.copro_ignore and endpoint.copro_state == 'copro_queued']  # pytype: disable=attribute-error
         self.s.coprocessing = len([
             endpoint for endpoint in self.s.endpoints.values()
             if endpoint.copro_state in ['copro_coprocessing']])
@@ -763,71 +768,71 @@ class Monitor:
             str(self.s.coprocessing), str(coprocessing_budget), str(len(queued_endpoints))))
 
         for endpoint in queued_endpoints[:coprocessing_budget]:
-            endpoint.trigger(endpoint.p_next_copro_state)
-            endpoint.p_next_copro_state = None
-            endpoint.p_prev_copro_states.append(
+            endpoint.trigger(endpoint.p_next_copro_state)  # pytype: disable=attribute-error
+            endpoint.p_next_copro_state = None  # pytype: disable=attribute-error
+            endpoint.p_prev_copro_states.append(  # pytype: disable=attribute-error
                 (endpoint.copro_state, int(time.time())))
             self.s.coprocess_endpoint(endpoint)
 
         for endpoint in self.s.endpoints.values():
-            if not endpoint.copro_ignore:
+            if not endpoint.copro_ignore:  # pytype: disable=attribute-error
                 if self.s.sdnc:
-                    if endpoint.copro_state == 'copro_unknown':
+                    if endpoint.copro_state == 'copro_unknown':  # pytype: disable=attribute-error
                         endpoint.p_next_copro_state = 'copro_coprocessing'
-                        endpoint.copro_queue()
-                        endpoint.p_prev_copro_states.append(
+                        endpoint.copro_queue()  # pytype: disable=attribute-error
+                        endpoint.p_prev_copro_states.append(  # pytype: disable=attribute-error
                             (endpoint.copro_state, int(time.time())))
-                    elif endpoint.copro_state in ['copro_coprocessing']:
+                    elif endpoint.copro_state in ['copro_coprocessing']:  # pytype: disable=attribute-error
                         cur_time = int(time.time())
                         # timeout after 2 times the reinvestigation frequency
                         # in case something didn't report back, put back in an
                         # unknown state
-                        if cur_time - endpoint.p_prev_copro_states[-1][1] > 2*self.controller['coprocessing_frequency']:
+                        if cur_time - endpoint.p_prev_copro_states[-1][1] > 2*self.controller['coprocessing_frequency']:  # pytype: disable=attribute-error
                             self.logger.debug(
                                 'timing out: {0} and setting to unknown'.format(endpoint.name))
                             self.s.uncoprocess_endpoint(endpoint)
-                            endpoint.copro_unknown()
-                            endpoint.p_prev_copro_states.append(
-                                (endpoint.copro_state, int(time.time())))
+                            endpoint.copro_unknown()  # pytype: disable=attribute-error
+                            endpoint.p_prev_copro_states.append(  # pytype: disable=attribute-error
+                                (endpoint.copro_state, int(time.time())))  # pytype: disable=attribute-error
                 else:
                     if endpoint.state != 'copro_nominal':
-                        endpoint.copro_nominal()
+                        endpoint.copro_nominal()  # pytype: disable=attribute-error
 
     def process(self):
         global CTRL_C
         signal.signal(signal.SIGINT, partial(self.signal_handler))
         while not CTRL_C['STOP']:
-            found_work, rabbit_msg = self.get_q_item(self.m_queue)
-            if found_work:
+            while True:
+                found_work, rabbit_msg = self.get_q_item(self.m_queue, timeout=0)
+                if not found_work:
+                    break
                 self.format_rabbit_message(rabbit_msg)
+            self.s.refresh_endpoints()
             found_work, schedule_func = self.get_q_item(self.job_queue)
             if found_work and callable(schedule_func):
                 self.logger.info('calling %s', schedule_func)
                 schedule_func()
             self.schedule_mirroring()
 
-        self.s.store_endpoints()
+        self.s.refresh_endpoints()
 
-    def get_q_item(self, q):
+    def get_q_item(self, q, timeout=1):
         '''
         attempt to get a work item from the queue
         m_queue -> (routing_key, body)
         a read from get_q_item should be of the form
         (boolean,(routing_key, body))
         '''
-        found_work = False
-        item = None
         global CTRL_C
-
         if not CTRL_C['STOP']:
             try:
-                item = q.get(True, timeout=1)
-                found_work = True
-                q.task_done()
+                if timeout:
+                    return(True, q.get(True, timeout=timeout))
+                return (True, q.get_nowait())
             except queue.Empty:  # pragma: no cover
                 pass
 
-        return (found_work, item)
+        return (False, None)
 
     def shutdown(self):
         ''' gracefully shut down. '''

@@ -46,7 +46,7 @@ class Nodes():
     def connect_redis(self):
         self.r = None
         try:
-            self.r = redis.StrictRedis(host='redis',
+            self.r = redis.StrictRedis(host=os.getenv('REDIS_HOST', 'redis'),
                                        port=6379,
                                        db=0,
                                        decode_responses=True)
