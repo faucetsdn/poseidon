@@ -1,3 +1,11 @@
+# v0.12.1 (2020-05-08)
+
+- networkml 0.5.4 (can return multiple results)
+- Poseidon can parse multiple results from both networkml and p0f
+- Poseidon does atomic replace of FAUCET config files
+- Update faucet, gauge, event-adapter-rabbit-mq, pylint, prometheus
+
+
 # v0.12.0 (2020-04-30)
 
 - Major update networkml to 0.5.3 (complete implementation change from v0.4.x)
