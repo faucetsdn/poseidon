@@ -125,13 +125,8 @@ class FaucetProxy(Connection, Parser):
         if messages:
             self.logger.debug('faucet messages: {0}'.format(messages))
             for message in messages:
-                if 'L2_LEARN' in message or 'L2_EXPIRE' in message or 'PORT_CHANGE' in message:
-                    self.logger.debug(
-                        'l2 faucet message: {0}'.format(message))
+                if not self.ignore_event(message):
                     self.event(message)
-                else:
-                    self.logger.debug(
-                        'faucet event: {0}'.format(message))
         elif not self.rabbit_enabled:
             if self.host:
                 self.receive_file('log')

@@ -669,9 +669,10 @@ class Monitor:
             return ({}, remove_list)
 
         def handler_faucet_event(my_obj):
-            self.logger.debug('FAUCET Event:{0}'.format(my_obj))
-            self.faucet_event.append(my_obj)
-            return (my_obj, None)
+            if not self.s.sdnc.ignore_event(my_obj):
+                self.faucet_event.append(my_obj)
+                return (my_obj, None)
+            return ({}, None)
 
         handlers = {
             'poseidon.algos.decider': handler_algos_decider,
