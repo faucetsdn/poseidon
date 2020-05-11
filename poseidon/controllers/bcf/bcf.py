@@ -96,6 +96,9 @@ class BcfProxy(JsonMixin, CookieAuthControllerProxy):
                 'unable to connect to the controller because: {0}'.format(str(e)))
         return connected
 
+    def ignore_event(self, _message):
+        return False
+
     def get_endpoints(
             self,
             messages=None,
