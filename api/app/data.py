@@ -1,4 +1,5 @@
 import ast
+import ipaddress
 import json
 import os
 import time
@@ -13,9 +14,10 @@ from .routes import paths
 from .routes import version
 
 
-class Endpoints(object):
+class Endpoints:
 
-    def on_get(self, req, resp):
+    @staticmethod
+    def on_get(_req, resp):
         endpoints = []
         for path in paths():
             endpoints.append(version()+path)
@@ -25,15 +27,16 @@ class Endpoints(object):
         resp.status = falcon.HTTP_200
 
 
-class Info(object):
+class Info:
 
-    def on_get(self, req, resp):
+    @staticmethod
+    def on_get(_req, resp):
         resp.body = json.dumps({'version': 'v0.1.2'})
         resp.content_type = falcon.MEDIA_TEXT
         resp.status = falcon.HTTP_200
 
 
-class Nodes():
+class Nodes:
 
     def __init__(self, fields, ip=None):
         self.nodes = []
@@ -110,43 +113,25 @@ class Nodes():
                             for key in node:
                                 if key in endpoint_data:
                                     node[key] = endpoint_data[key]
-                            if 'ipv4' in node:
-                                try:
-                                    ipv4 = endpoint_data['ipv4']
-                                    should_append = ipv4 == self.ip or should_append
-                                    if isinstance(ipv4, str) and ipv4 != 'None':
-                                        if 'ipv4_subnet' in node:
-                                            if '.' in ipv4:
-                                                node['ipv4_subnet'] = '.'.join(
-                                                    ipv4.split('.')[:-1])+'.0/24'
-                                            else:
-                                                node['ipv4_subnet'] = NO_DATA
-                                        ipv4_info = self.r.hgetall(ipv4)
-                                        if ipv4_info and 'short_os' in ipv4_info:
-                                            node['ipv4_os'] = ipv4_info['short_os']
-                                except Exception as e:  # pragma: no cover
-                                    print(
-                                        'Failed to set IPv4 info because: {0}'.format(str(e)))
-                            if 'ipv6' in node:
-                                try:
-                                    ipv6 = endpoint_data['ipv6']
-                                    should_append = ipv6 == self.ip or should_append
-                                    if isinstance(ipv6, str) and ipv6 != 'None':
-                                        if 'ipv6_subnet' in node:
-                                            if ':' in ipv6:
-                                                node['ipv6_subnet'] = ':'.join(
-                                                    ipv6.split(':')[0:4])+'::0/64'
-                                            else:
-                                                node['ipv6_subnet'] = NO_DATA
-                                        ipv6_info = self.r.hgetall(ipv6)
-                                        if ipv6_info and 'short_os' in ipv6_info:
-                                            node['ipv6_os'] = ipv6_info['short_os']
-                                except Exception as e:  # pragma: no cover
-                                    print(
-                                        'Failed to set IPv6 info because: {0}'.format(str(e)))
+                            for ip_field, prefix in (
+                                    ('ipv4', 24),
+                                    ('ipv6', 64)):
+                                if ip_field not in node:
+                                    continue
+                                ipv = endpoint_data.get(ip_field, None)
+                                if ipv is None:
+                                    continue
+                                should_append = ipv == self.ip or should_append
+                                if isinstance(ipv, str) and ipv != 'None' and ipv:
+                                    subnet_key = '%s_subnet' % ip_field
+                                    if subnet_key in node:
+                                        subnet = ipaddress.ip_network(ipv).supernet(new_prefix=prefix)
+                                        node[subnet_key] = str(subnet)
+                                    ip_info = self.r.hgetall('_'.join(('p0f', ipv)))
+                                    if ip_info and 'short_os' in ip_info:
+                                        node['%s_os' % ip_field] = ip_info['short_os']
                     except Exception as e:  # pragma: no cover
-                        print(
-                            'Failed to set all poseidon info because: {0}'.format(str(e)))
+                        print('Failed to set all poseidon info because: {0}'.format(str(e)))
 
                 # grab ml results
                 if 'role' in node:
@@ -155,32 +140,23 @@ class Nodes():
                             timestamps = ast.literal_eval(
                                 mac_info['timestamps'])
                             ml_info = self.r.hgetall(
-                                mac+'_'+str(timestamps[-1]))
-                            if 'labels' in ml_info:
-                                labels = ast.literal_eval(
-                                    ml_info['labels'])
-                                node['role'] = labels[0]
-                            if 'confidences' in ml_info:
-                                confidences = ast.literal_eval(
-                                    ml_info['confidences'])
-                                node['role_confidence'] = int(
-                                    confidences[0]*100)
-                            if 'behavior' in node and 'poseidon_hash' in mac_info and mac_info['poseidon_hash'] in ml_info:
-                                results = ast.literal_eval(
-                                    ml_info[mac_info['poseidon_hash']])
-                                node['behavior'] = 1
-                                if results['decisions']['behavior'] == 'normal':
-                                    node['behavior'] = 0
+                                '_'.join(('networkml', mac, str(timestamps[-1]))))
+                            for _poseidon_hash, raw_results in ml_info.items():
+                                results = ast.literal_eval(raw_results)
+                                classification = results.get('classification', {})
+                                labels = classification.get('labels', None)
+                                confidences = classification.get('confidences', None)
+                                if labels:
+                                    node['role'] = labels[0]
+                                if confidences:
+                                    node['role_confidence'] = int(confidences[0] * 100)
                         except Exception as e:  # pragma: no cover
-                            print(
-                                'Failed to set all ML info because: {0}'.format(str(e)))
+                            print('Failed to set all ML info because: {0}'.format(str(e)))
                 if should_append:
                     self.nodes.append(node)
 
-        return
 
-
-class NetworkFull(object):
+class NetworkFull:
 
     @staticmethod
     def get_fields():
@@ -205,7 +181,8 @@ class NetworkFull(object):
         n.build_nodes()
         return n.nodes
 
-    def on_get(self, req, resp):
+    @staticmethod
+    def on_get(_req, resp):
         network = {}
         dataset = NetworkFull.get_dataset()
         network['dataset'] = dataset
@@ -215,7 +192,7 @@ class NetworkFull(object):
         resp.status = falcon.HTTP_200
 
 
-class Network(object):
+class Network:
 
     @staticmethod
     def get_fields():
@@ -260,7 +237,8 @@ class Network(object):
                 {'path': [field], 'displayName': Network.field_mapping()[field], 'groupable': 'true'})
         return configuration
 
-    def on_get(self, req, resp):
+    @staticmethod
+    def on_get(_req, resp):
         network = {}
         dataset = Network.get_dataset()
         configuration = Network.get_configuration()
@@ -272,7 +250,7 @@ class Network(object):
         resp.status = falcon.HTTP_200
 
 
-class NetworkByIp(object):
+class NetworkByIp:
 
     @staticmethod
     def get_dataset(ip=None):
@@ -289,7 +267,8 @@ class NetworkByIp(object):
                 {'path': [field], 'displayName': Network.field_mapping()[field], 'groupable': 'true'})
         return configuration
 
-    def on_get(self, req, resp, ip):
+    @staticmethod
+    def on_get(_req, resp, ip):
         network = {}
         dataset = NetworkByIp.get_dataset(ip)
         configuration = NetworkByIp.get_configuration()

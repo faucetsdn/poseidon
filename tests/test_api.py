@@ -1,4 +1,3 @@
-import os
 
 import falcon
 import pytest
@@ -29,42 +28,28 @@ def setup_redis():
     r.sadd('mac_addresses', '00:00:00:00:00:01')
     r.sadd('mac_addresses', '00:00:00:00:00:02')
     r.sadd('mac_addresses', '00:00:00:00:00:03')
-    r.hmset('10.0.0.1',
-            {'timestamps': "['1527208227']",
-             'short_os': 'Mac'})
-    r.hmset('None',
-            {'timestamps': "['1527208220', '1527208227']",
-             'short_os': 'Windows'})
-    r.hmset('2601:645:8200:a571:18fd:6640:9cd9:10d3',
-            {'timestamps': "['1527208220', '1527208228']",
-             'short_os': 'Linux'})
-    r.hmset('00:00:00:00:00:01',
-            {'timestamps': "['1527208227']", 'poseidon_hash': '6cd09124a66ef1bbc72c1aff4e333766d3533f81'})
-    r.hmset('00:00:00:00:00:02',
-            {'timestamps': "['1527208220', '1527208227']", 'poseidon_hash': '6cd09124a66ef1bbc72c1aff4e333766d3533f82'})
-    r.hmset('00:00:00:00:00:03',
-            {'timestamps': "['1527208220', '1527208228']", 'poseidon_hash': '6cd09124a66ef1bbc72c1aff4e333766d3533f83'})
-    r.hmset('00:00:00:00:00:01_1527208227', {'labels': "['Developer workstation', \
-                                                'Unknown', \
-                                                'Smartphone']",
-                                             '6cd09124a66ef1bbc72c1aff4e333766d3533f81': "{'decisions':{'behavior':'normal'}}",
-                                             'confidences': '[0.6065386838895384, \
-                                                     0.3487681867266965, \
-                                                     0.015645883198622094]'})
-    r.hmset('00:00:00:00:00:02_1527208227', {'labels': "['Developer workstation', \
-                                                'Unknown', \
-                                                'Smartphone']",
-                                             '6cd09124a66ef1bbc72c1aff4e333766d3533f82': "{'decisions':{'behavior':'normal'}}",
-                                             'confidences': '[0.6065386838895384, \
-                                                     0.3487681867266965, \
-                                                     0.015645883198622094]'})
-    r.hmset('00:00:00:00:00:03_1527208228', {'labels': "['Developer workstation', \
-                                                'Unknown', \
-                                                'Smartphone']",
-                                             '6cd09124a66ef1bbc72c1aff4e333766d3533f83': "{'decisions':{'behavior':'normal'}}",
-                                             'confidences': '[0.6065386838895384, \
-                                                     0.3487681867266965, \
-                                                     0.015645883198622094]'})
+
+    r.hmset(
+        'p0f_10.0.0.1', {'timestamps': "['1527208227']", 'short_os': 'Mac'})
+    r.hmset(
+        'p0f_None', {'timestamps': "['1527208220', '1527208227']", 'short_os': 'Windows'})
+    r.hmset(
+        'p0f_2601:645:8200:a571:18fd:6640:9cd9:10d3', {'timestamps': "['1527208220', '1527208228']", 'short_os': 'Linux'})
+
+    r.hmset(
+        '00:00:00:00:00:01', {'timestamps': "['1527208227']", 'poseidon_hash': '6cd09124a66ef1bbc72c1aff4e333766d3533f81'})
+    r.hmset(
+        '00:00:00:00:00:02', {'timestamps': "['1527208220', '1527208227']", 'poseidon_hash': '6cd09124a66ef1bbc72c1aff4e333766d3533f82'})
+    r.hmset(
+        '00:00:00:00:00:03', {'timestamps': "['1527208220', '1527208228']", 'poseidon_hash': '6cd09124a66ef1bbc72c1aff4e333766d3533f83'})
+
+    for key, name in (
+            ('networkml_00:00:00:00:00:01_1527208227', '6cd09124a66ef1bbc72c1aff4e333766d3533f81'),
+            ('networkml_00:00:00:00:00:02_1527208227', '6cd09124a66ef1bbc72c1aff4e333766d3533f82'),
+            ('networkml_00:00:00:00:00:03_1527208228', '6cd09124a66ef1bbc72c1aff4e333766d3533f83')):
+        r.hmset(key, {
+            name: "{'decisions':{'behavior': 'normal'}, 'classification': {'confidences': [0.606, 0.348, 0.015], 'labels': ['Developer workstation', 'Unknown', 'Smartphone']}}"})
+
     r.hmset('6cd09124a66ef1bbc72c1aff4e333766d3533f81',
             {'transition_time': '1524623228.1019075',
              'endpoint_data': "{'name': None, \
@@ -110,6 +95,20 @@ def setup_redis():
              'state': 'KNOWN'})
 
 
+def verify_endpoints(response):
+    assert response.json['dataset']
+    nodes = {node['id']: node for node in response.json['dataset']}
+    first_node = nodes['6cd09124a66ef1bbc72c1aff4e333766d3533f81']
+    assert first_node['mac'] == '00:00:00:00:00:01'
+    assert first_node['ipv4_os'] == 'Mac'
+    assert first_node['ipv4'] == '10.0.0.1'
+    assert first_node['ipv4_subnet'] == '10.0.0.0/24'
+    third_node = nodes['6cd09124a66ef1bbc72c1aff4e333766d3533f83']
+    assert third_node['role'] == 'Developer workstation'
+    assert third_node['ipv6'] == '2601:645:8200:a571:18fd:6640:9cd9:10d3'
+    assert third_node['ipv6_subnet'] == '2601:645:8200:a571::/64'
+
+
 def test_v1(client, redis_my):
     setup_redis()
     response = client.simulate_get('/v1')
@@ -121,6 +120,7 @@ def test_network(client, redis_my):
     response = client.simulate_get('/v1/network')
     assert len(response.json) == 2
     assert response.status == falcon.HTTP_OK
+    verify_endpoints(response)
 
 
 def test_network_by_ip(client, redis_my):
@@ -135,6 +135,7 @@ def test_network_full(client, redis_my):
     response = client.simulate_get('/v1/network_full')
     assert len(response.json) == 1
     assert response.status == falcon.HTTP_OK
+    verify_endpoints(response)
 
 
 def test_info(client, redis_my):
