@@ -30,9 +30,9 @@ jobs:
         sudo apt-get install -y python-setuptools tshark redis-server && \
         sudo service redis-server stop && \
         pip3 install -U pip && \
-        pip3 install codecov scikit-build && \
-        find . -name requirements.txt -type f -exec pip3 install -r {} \; && \
-        find . -name test-requirements.txt -type f -exec pip3 install -r {} \; && \
+        python3 -m pip install codecov scikit-build && \
+        find . -name requirements.txt -type f -exec python3 -m pip install -r {} \; && \
+        find . -name test-requirements.txt -type f -exec python3 -m pip install -r {} \; && \
         export PATH=/home/runner/.local/bin:$PATH && \
         py.test -v -vv --cov-report term-missing --cov=. -c .coveragerc && \
         coverage report && coverage xml
