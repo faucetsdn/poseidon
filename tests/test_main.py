@@ -200,6 +200,11 @@ def test_format_rabbit_message():
         def __init__(self):
             self.logger = logger
 
+    class MockParser:
+
+        def ignore_event(self, _):
+            return False
+
     class MockMonitor(Monitor):
 
         def __init__(self):
@@ -208,6 +213,7 @@ def test_format_rabbit_message():
             self.controller = Config().get_config()
             self.s = SDNConnect(self.controller)
             self.faucet_event = []
+            self.s.sdnc = MockParser()
 
         def update_routing_key_time(self, routing_key):
             return

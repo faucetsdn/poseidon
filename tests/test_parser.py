@@ -14,6 +14,22 @@ from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import endpoint_factory
 
 
+def test_ignore_events():
+    parser = Parser(ignore_vlans=[999], ignore_ports={'switch99': 11})
+    for message_type in ('L2_LEARN', 'L2_EXPIRE', 'PORT_CHANGE'):
+        assert parser.ignore_event(
+            {'dp_name': 'switch123', message_type: {'vid': 999, 'port_no': 123}})
+        assert not parser.ignore_event(
+            {'dp_name': 'switch123', message_type: {'vid': 333, 'port_no': 123}})
+        assert parser.ignore_event(
+            {'dp_name': 'switch99', message_type: {'vid': 333, 'port_no': 11}})
+        assert not parser.ignore_event(
+            {'dp_name': 'switch99', message_type: {'vid': 333, 'port_no': 99}})
+    assert parser.ignore_event(
+        {'dp_name': 'switch123', 'UNKNOWN': {'vid': 123, 'port_no': 123}})
+
+
+
 def test_parse_rules():
     parse_rules(os.path.join(os.getcwd(),
                              'tests/sample_faucet_config.yaml'))

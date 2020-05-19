@@ -153,27 +153,31 @@ class Parser:
         yaml_out(config_file, obj_doc)
 
     def ignore_event(self, message):
-        if self.ignore_vlans:
-            vlan = message['L2_LEARN']['vid']
-            if vlan in self.ignore_vlans:
-                self.logger.debug('ignoring event because VLAN %s ignored' % vlan)
-                return True
-        if self.ignore_ports:
-            switch = str(message['dp_name'])
-            port_no = message['L2_LEARN']['port_no']
-            for ignore_switch, ignore_port_no in self.ignore_ports.items():
-                if ignore_switch == switch and ignore_port_no == port_no:
-                    self.logger.debug('ignoring event because switch %s port %s is ignored' % (switch, port_no))
-                    return True
-        return False
+        for message_type in ('L2_LEARN', 'L2_EXPIRE', 'PORT_CHANGE'):
+            message_body = message.get(message_type, None)
+            if message_body:
+                if self.ignore_vlans:
+                    vlan = message_body.get('vid', None)
+                    if vlan in self.ignore_vlans:
+                        self.logger.debug('ignoring event because VLAN %s ignored' % vlan)
+                        return True
+                if self.ignore_ports:
+                    switch = str(message['dp_name'])
+                    port_no = message_body.get('port_no', None)
+                    for ignore_switch, ignore_port_no in self.ignore_ports.items():
+                        if ignore_switch == switch and ignore_port_no == port_no:
+                            self.logger.debug('ignoring event because switch %s port %s is ignored' % (switch, port_no))
+                            return True
+                # Not on any ignore list, don't ignore.
+                return False
+        # Not a message we are interested in, ignore it.
+        return True
 
     def event(self, message):
         dp_name = str(message['dp_name'])
         if 'L2_LEARN' in message:
             self.logger.debug(
                 'got faucet message for l2_learn: {0}'.format(message))
-            if self.ignore_event(message):
-                return
             message = message['L2_LEARN']
             eth_src = message['eth_src']
             data = {}
