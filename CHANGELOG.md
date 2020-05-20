@@ -1,3 +1,9 @@
+# v0.12.2 (2020-05-21)
+
+- Fix API not updated with networkml/p0f results.
+- Update pytest, redis, faucet, gauge, pytype, grafana.
+
+
 # v0.12.1 (2020-05-08)
 
 - networkml 0.5.4 (can return multiple results)
