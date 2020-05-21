@@ -5,6 +5,7 @@ services:
         image: 'faucet/gauge:1.9.42'
         environment:
             GAUGE_CONFIG: '/etc/faucet/gauge.yaml'
+            GAUGE_CONFIG_STAT_RELOAD: '1'
         volumes:
             - '${POSEIDON_PREFIX}/var/log/faucet:/var/log/faucet'
             - '${POSEIDON_PREFIX}/etc/faucet:/etc/faucet'
