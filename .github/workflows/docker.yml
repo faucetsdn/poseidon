@@ -20,7 +20,7 @@ jobs:
       run: if [ "${{ steps.get_version.outputs.VERSION }}" == "master" ]; then echo ::set-output name=VERSION::latest; else echo ::set-output name=VERSION::${{ steps.get_version.outputs.VERSION }}; fi
     - name: Set up Docker Buildx
       id: buildx
-      uses: crazy-max/ghaction-docker-buildx@v1.6.0
+      uses: crazy-max/ghaction-docker-buildx@v1.6.2
       with:
         buildx-version: latest
         qemu-version: latest
