@@ -24,10 +24,10 @@ def set_status(r, status, extra_workers):
     return
 
 
-def callback(ch, method, properties, body):
+def callback(ch, method, properties, body, workers_json='workers.json'):
     """Callback that has the message that was received"""
     vol_prefix = os.getenv('VOL_PREFIX', '')
-    workers = load_workers()
+    workers = load_workers(workers_json)
     d = setup_docker()
     pipeline = json.loads(body.decode('utf-8'))
     worker_found = False
@@ -169,8 +169,8 @@ def setup_redis(host='redis', port=6379, db=0):
     return r
 
 
-def load_workers():
-    with open('workers.json') as json_file:
+def load_workers(workers_json='workers.json'):
+    with open(workers_json) as json_file:
         workers = json.load(json_file)
     return workers
 

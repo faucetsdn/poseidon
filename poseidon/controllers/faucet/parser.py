@@ -91,7 +91,7 @@ class Parser:
             interfaces_conf = switch_conf['interfaces']
             mirror_interface_conf = interfaces_conf[self.mirror_ports[switch_found]]
 
-        if action == 'mirror' or action == 'unmirror':
+        if action in ('mirror', 'unmirror'):
             if switch_found:
                 if 'mirror' in mirror_interface_conf:
                     if not isinstance(mirror_interface_conf['mirror'], list):
@@ -99,7 +99,7 @@ class Parser:
                 else:
                     mirror_interface_conf['mirror'] = []
                 if action == 'mirror':
-                    # TODO make this smarter about more complex configurations (backup original values, etc)
+                    # TODO: make smarter with more complex configs (backup original values, etc)
                     if self.reinvestigation_frequency:
                         switch_conf['timeout'] = (self.reinvestigation_frequency * 2) + 1
                     else:
@@ -112,8 +112,9 @@ class Parser:
                         # TODO check for still running captures on this port
                         mirror_interface_conf['mirror'].remove(port)
                     except ValueError:
-                        self.logger.warning('Port: {0} was not already '
-                                            'mirroring on this switch: {1}'.format(str(port), str(switch_found)))
+                        self.logger.warning(
+                            'Port: {0} was not already mirroring on this switch: {1}'.format(
+                                str(port), str(switch_found)))
             else:
                 self.logger.error('Unable to mirror due to warnings')
         elif action == 'shutdown':
@@ -135,7 +136,7 @@ class Parser:
             try:
                 if len(mirror_interface_conf['mirror']) == 0:
                     del mirror_interface_conf['mirror']
-                    # TODO make this smarter about more complex configurations (backup original values, etc)
+                    # TODO: Make smarter about more complex configs (backup original values, etc)
                     if 'timeout' in switch_conf:
                         del switch_conf['timeout']
                     if 'arp_neighbor_timeout' in switch_conf:
@@ -156,6 +157,10 @@ class Parser:
         for message_type in ('L2_LEARN', 'L2_EXPIRE', 'PORT_CHANGE'):
             message_body = message.get(message_type, None)
             if message_body:
+                # When stacking is in use, we only want to learn on switch, that a host is local to.
+                if 'stack_descr' in message_body:
+                    self.logger.debug('ignoring event because learning from a stack port')
+                    return True
                 if self.ignore_vlans:
                     vlan = message_body.get('vid', None)
                     if vlan in self.ignore_vlans:
@@ -166,7 +171,9 @@ class Parser:
                     port_no = message_body.get('port_no', None)
                     for ignore_switch, ignore_port_no in self.ignore_ports.items():
                         if ignore_switch == switch and ignore_port_no == port_no:
-                            self.logger.debug('ignoring event because switch %s port %s is ignored' % (switch, port_no))
+                            self.logger.debug(
+                                'ignoring event because switch %s port %s is ignored' % (
+                                    switch, port_no))
                             return True
                 # Not on any ignore list, don't ignore.
                 return False
@@ -175,27 +182,28 @@ class Parser:
 
     def event(self, message):
         dp_name = str(message['dp_name'])
+        def make_mac_inactive(mac):
+            if mac in self.mac_table:
+                self.mac_table[mac][0]['active'] = 0
+
         if 'L2_LEARN' in message:
             self.logger.debug(
                 'got faucet message for l2_learn: {0}'.format(message))
             message = message['L2_LEARN']
             eth_src = message['eth_src']
-            data = {}
-            data['ip-address'] = message['l3_src_ip']
-            data['ip-state'] = 'L2 learned'
-            data['mac'] = eth_src
-            data['segment'] = dp_name
-            data['port'] = str(message['port_no'])
-            data['vlan'] = 'VLAN'+str(message['vid'])
-            data['tenant'] = 'VLAN'+str(message['vid'])
-            data['active'] = 1
+            vlan_str = 'VLAN%s' % message['vid']
+            data = {
+                'ip-address': message['l3_src_ip'],
+                'ip-state': 'L2 learned',
+                'mac': eth_src,
+                'segment': dp_name,
+                'port': str(message['port_no']),
+                'vlan': vlan_str,
+                'tenant': vlan_str,
+                'active': 1}
 
             if eth_src in self.mac_table:
-                dup = False
-                for d in self.mac_table[eth_src]:
-                    if data == d:
-                        dup = True
-                if dup:
+                if data in self.mac_table[eth_src]:
                     self.mac_table[eth_src].remove(data)
                 self.mac_table[eth_src].insert(0, data)
             else:
@@ -204,20 +212,18 @@ class Parser:
             self.logger.debug(
                 'got faucet message for l2_expire: {0}'.format(message))
             message = message['L2_EXPIRE']
-            if message['eth_src'] in self.mac_table:
-                self.mac_table[message['eth_src']][0]['active'] = 0
+            make_mac_inactive(message['eth_src'])
         elif 'PORT_CHANGE' in message:
             self.logger.debug(
                 'got faucet message for port_change: {0}'.format(message))
             message = message['PORT_CHANGE']
+            port_no_str = str(message['port_no'])
             if not message['status']:
                 m_table = self.mac_table.copy()
                 for mac in m_table:
                     for data in m_table[mac]:
-                        if (str(message['port_no']) == data['port'] and
-                                dp_name == data['segment']):
-                            if mac in self.mac_table:
-                                self.mac_table[mac][0]['active'] = 0
+                        if port_no_str == data['port'] and dp_name == data['segment']:
+                            make_mac_inactive(mac)
 
     def log(self, log_file):
         self.logger.debug('parsing log file')

@@ -4,7 +4,8 @@ Test module for faucet parser.
 @author: Charlie Lewis
 """
 import os
-
+import shutil
+import tempfile
 from poseidon.controllers.faucet.faucet import FaucetProxy
 from poseidon.controllers.faucet.helpers import get_config_file
 from poseidon.controllers.faucet.helpers import parse_rules
@@ -12,6 +13,8 @@ from poseidon.controllers.faucet.helpers import represent_none
 from poseidon.controllers.faucet.parser import Parser
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import endpoint_factory
+
+SAMPLE_CONFIG = 'tests/sample_faucet_config.yaml'
 
 
 def test_ignore_events():
@@ -25,19 +28,23 @@ def test_ignore_events():
             {'dp_name': 'switch99', message_type: {'vid': 333, 'port_no': 11}})
         assert not parser.ignore_event(
             {'dp_name': 'switch99', message_type: {'vid': 333, 'port_no': 99}})
+        assert parser.ignore_event(
+            {'dp_name': 'switch99', message_type: {'vid': 333, 'port_no': 99, 'stack_descr': 'something'}})
     assert parser.ignore_event(
         {'dp_name': 'switch123', 'UNKNOWN': {'vid': 123, 'port_no': 123}})
 
 
 
 def test_parse_rules():
-    parse_rules(os.path.join(os.getcwd(),
-                             'tests/sample_faucet_config.yaml'))
+    with tempfile.TemporaryDirectory() as tmpdir:
+        shutil.copy(SAMPLE_CONFIG, tmpdir)
+        parse_rules(os.path.join(tmpdir, os.path.basename(SAMPLE_CONFIG)))
 
 
 def test_clear_mirrors():
-    Parser.clear_mirrors(os.path.join(os.getcwd(),
-                                      'tests/sample_faucet_config.yaml'))
+    with tempfile.TemporaryDirectory() as tmpdir:
+        shutil.copy(SAMPLE_CONFIG, tmpdir)
+        Parser.clear_mirrors(os.path.join(tmpdir, os.path.basename(SAMPLE_CONFIG)))
 
 
 def test_represent_none():
@@ -94,9 +101,8 @@ def test_Parser():
     check_config(parser, os.path.join(config_dir, 'faucet.yaml'), endpoints)
     check_config(parser2, os.path.join(config_dir, 'faucet.yaml'), endpoints)
     check_config(proxy, os.path.join(config_dir, 'faucet.yaml'), endpoints)
-    check_config(parser, os.path.join(os.getcwd(),
-                                      'tests/sample_faucet_config.yaml'), endpoints)
-    check_config(parser2, os.path.join(os.getcwd(),
-                                       'tests/sample_faucet_config.yaml'), endpoints)
-    check_config(proxy, os.path.join(os.getcwd(),
-                                     'tests/sample_faucet_config.yaml'), endpoints)
+    with tempfile.TemporaryDirectory() as tmpdir:
+        shutil.copy(SAMPLE_CONFIG, tmpdir)
+        check_config(parser, os.path.join(tmpdir, os.path.basename(SAMPLE_CONFIG)), endpoints)
+        check_config(parser2, os.path.join(tmpdir, os.path.basename(SAMPLE_CONFIG)), endpoints)
+        check_config(proxy, os.path.join(tmpdir, os.path.basename(SAMPLE_CONFIG)), endpoints)
