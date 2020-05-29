@@ -67,17 +67,32 @@ def callback(ch, method, properties, body):
             if keep_images == '1':
                 remove = False
 
+            use_swarm = os.getenv('SWARM', '0')
             try:
-                d.containers.run(image=image,
-                                 name=name,
-                                 network=worker['stage'],
-                                 volumes={
-                                     vol_prefix + '/opt/poseidon_files': {'bind': '/files', 'mode': 'rw'}},
-                                 environment=environment,
-                                 remove=remove,
-                                 command=command,
-                                 ports=ports,
-                                 detach=True)
+                if use_swarm == '1':
+                    # fix environment
+                    env = []
+                    for key in environment:
+                        env.append(key+'='+environment[key])
+                    d.services.create(image=image,
+                                      name=name,
+                                      networks=[worker['stage']],
+                                      constraints='node.role==worker',
+                                      mounts=[vol_prefix +
+                                              '/opt/poseidon_files:/files:rw'],
+                                      environment=env,
+                                      command=command)
+                else:
+                    d.containers.run(image=image,
+                                     name=name,
+                                     network=worker['stage'],
+                                     volumes={
+                                         vol_prefix + '/opt/poseidon_files': {'bind': '/files', 'mode': 'rw'}},
+                                     environment=environment,
+                                     remove=remove,
+                                     command=command,
+                                     ports=ports,
+                                     detach=True)
                 print(' [Create container] %s UTC %r:%r:%r:%r' % (str(datetime.datetime.utcnow()),
                                                                   method.routing_key,
                                                                   pipeline['id'],

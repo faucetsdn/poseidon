@@ -80,6 +80,7 @@ services:
             PYTHONUNBUFFERED: '1'
             KEEPIMAGES: '0'
             VOL_PREFIX: '${POSEIDON_PREFIX}'
+            SWARM: '${POSEIDON_SWARM}'
         networks:
             - poseidon
         volumes:
