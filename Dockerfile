@@ -1,4 +1,4 @@
-FROM alpine:3.10
+FROM alpine:3.12
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
 LABEL poseidon.namespace="primary"
 
@@ -11,11 +11,11 @@ RUN apk upgrade --no-cache && \
     curl \
     linux-headers \
     python3 \
+    py3-pip \
     python3-dev \
     py3-paramiko \
     tini \
     yaml-dev && \
-    pip3 install --no-cache-dir --upgrade pip==20.0.2 && \
     pip3 install --no-cache-dir -r requirements.txt && \
     pip3 install --no-cache-dir -r /healthcheck/requirements.txt && \
     apk del build-base \
