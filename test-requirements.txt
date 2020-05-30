@@ -9,4 +9,4 @@ pylint==2.5.2
 pytest-cov==2.9.0
 pytest-redis==2.0.0
 pytest==5.4.2
-pytype==2020.5.13
+#pytype==2020.5.13

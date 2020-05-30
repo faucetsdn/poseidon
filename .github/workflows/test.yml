@@ -24,9 +24,9 @@ jobs:
         export POSEIDON_CONFIG=$PWD/config/poseidon.config
         export REDIS_HOST=127.0.0.1
         sudo apt-get update && \
-        sudo apt-get install -yq --no-install-recommends python3.7 python3.7-dev && \
+        sudo apt-get install -yq --no-install-recommends python3.8 python3.8-dev && \
         sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 && \
-        sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2 && \
+        sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 3 && \
         sudo apt-get install tshark redis-server && \
         sudo service redis-server stop && \
         pip3 install -U setuptools && \
@@ -39,7 +39,7 @@ jobs:
     - name: docker_test
       run: make run_tests
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1.0.6
+      uses: codecov/codecov-action@v1.0.7
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       with:
