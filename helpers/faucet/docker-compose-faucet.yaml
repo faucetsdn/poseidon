@@ -30,3 +30,4 @@ services:
             - poseidon
 networks:
     poseidon:
+        driver: overlay

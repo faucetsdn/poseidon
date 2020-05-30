@@ -73,15 +73,16 @@ def callback(ch, method, properties, body):
                     # fix environment
                     env = []
                     for key in environment:
-                        env.append(key+'='+environment[key])
+                        if key != 'results':
+                            env.append(key+'='+str(environment[key]))
                     d.services.create(image=image,
                                       name=name,
                                       networks=[worker['stage']],
-                                      constraints='node.role==worker',
+                                      constraints=['node.role==worker'],
                                       mounts=[vol_prefix +
                                               '/opt/poseidon_files:/files:rw'],
-                                      environment=env,
-                                      command=command)
+                                      env=env,
+                                      args=command)
                 else:
                     d.containers.run(image=image,
                                      name=name,
