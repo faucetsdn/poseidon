@@ -171,6 +171,7 @@ function check_args()
                 else
                     echo "Poseidon is not running."
                 fi
+                docker network rm poseidon_poseidon || true
                 exit
                 ;;
             -u|update)
