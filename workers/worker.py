@@ -75,10 +75,12 @@ def callback(ch, method, properties, body):
                     for key in environment:
                         if key != 'results':
                             env.append(key+'='+str(environment[key]))
+                    restart_policy = docker.types.RestartPolicy()
                     d.services.create(image=image,
                                       name=name,
                                       networks=[worker['stage']],
                                       constraints=['node.role==worker'],
+                                      restart_policy=restart_policy,
                                       mounts=[vol_prefix +
                                               '/opt/poseidon_files:/files:rw'],
                                       env=env,
