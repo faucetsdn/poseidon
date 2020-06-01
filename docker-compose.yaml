@@ -92,3 +92,4 @@ services:
             dockerfile: Dockerfile
 networks:
     poseidon:
+        driver: overlay

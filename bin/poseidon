@@ -117,6 +117,12 @@ function check_args()
                 sudo chmod 777 "$POSEIDON_PREFIX"/opt/redis "$POSEIDON_PREFIX"/opt/poseidon_files
                 sudo touch "$POSEIDON_PREFIX"/opt/poseidon/.poseidon_history
                 sudo chmod 777 "$POSEIDON_PREFIX"/opt/poseidon/.poseidon_history
+                if docker node ls > /dev/null 2>&1; then
+                    echo "Swarm Manager node detected..."
+                else
+                    echo "Swarm Manager node not detected..."
+                    find /opt/poseidon -name "docker-compose*" | xargs sed -i '/driver: overlay$/d'
+                fi
                 composefiles=(-f docker-compose.yaml -f helpers/faucet/docker-compose.yaml)
                 installtype="--complete"
                 if [ "$2" != "" ] ; then
@@ -171,6 +177,7 @@ function check_args()
                 else
                     echo "Poseidon is not running."
                 fi
+                docker network rm poseidon_poseidon || true
                 exit
                 ;;
             -u|update)
