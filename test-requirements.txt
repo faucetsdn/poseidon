@@ -8,5 +8,5 @@ ruamel.yaml==0.16.10
 pylint==2.5.2
 pytest-cov==2.9.0
 pytest-redis==2.0.0
-pytest==5.4.2
+pytest==5.4.3
 pytype==2020.6.1
