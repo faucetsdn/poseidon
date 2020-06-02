@@ -24,7 +24,6 @@ import pika
 import requests
 import schedule
 
-
 from poseidon.constants import NO_DATA
 from poseidon.controllers.bcf.bcf import BcfProxy
 from poseidon.controllers.faucet.faucet import FaucetProxy
@@ -32,9 +31,9 @@ from poseidon.controllers.faucet.parser import Parser
 from poseidon.helpers.actions import Actions
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import Endpoint
+from poseidon.helpers.endpoint import endpoint_factory
 from poseidon.helpers.endpoint import MACHINE_IP_FIELDS
 from poseidon.helpers.endpoint import MACHINE_IP_PREFIXES
-from poseidon.helpers.endpoint import endpoint_factory
 from poseidon.helpers.log import Logger
 from poseidon.helpers.metadata import get_ether_vendor
 from poseidon.helpers.metadata import get_rdns_lookup
@@ -49,7 +48,6 @@ CTRL_C = dict()
 CTRL_C['STOP'] = False
 Logger()
 logger = logging.getLogger('main')
-
 
 
 def rabbit_callback(ch, method, properties, body, q=None):
@@ -194,6 +192,8 @@ class SDNConnect:
         controller_type = self.controller.get('TYPE', None)
         if controller_type == 'bcf':
             try:
+                self.logger.warning(
+                    'Using BCF has been DEPRECATED and will be removed in a future version.')
                 self.sdnc = BcfProxy(self.controller)
             except Exception as e:  # pragma: no cover
                 self.logger.error(
@@ -420,7 +420,8 @@ class SDNConnect:
                 ep.endpoint_data = deepcopy(machine)
                 if ep.state == 'inactive' and machine['active'] == 1:
                     if ep.p_next_state in ['known', 'abnormal']:
-                        ep.trigger(ep.p_next_state)  # pytype: disable=attribute-error
+                        # pytype: disable=attribute-error
+                        ep.trigger(ep.p_next_state)
                     else:
                         ep.unknown()  # pytype: disable=attribute-error
                     ep.p_prev_states.append((ep.state, int(time.time())))
@@ -493,10 +494,12 @@ class Monitor:
         self.s = SDNConnect(self.controller)
 
         # schedule periodic scan of endpoints thread
-        self.schedule.every(self.controller['scan_frequency']).seconds.do(self.schedule_job_kickurl)
+        self.schedule.every(self.controller['scan_frequency']).seconds.do(
+            self.schedule_job_kickurl)
 
         # schedule periodic reinvestigations thread
-        self.schedule.every(self.controller['reinvestigation_frequency']).seconds.do(self.schedule_job_reinvestigation)
+        self.schedule.every(self.controller['reinvestigation_frequency']).seconds.do(
+            self.schedule_job_reinvestigation)
 
         # schedule all threads
         self.schedule_thread = threading.Thread(
@@ -588,9 +591,11 @@ class Monitor:
                     for name, message in data.items():
                         endpoint = self.s.endpoints.get(name, None)
                         if endpoint:
-                            self.logger.debug('processing networkml results for %s', name)
+                            self.logger.debug(
+                                'processing networkml results for %s', name)
                             self.s.unmirror_endpoint(endpoint)
-                            endpoint.trigger('unknown')  # pytype: disable=attribute-error
+                            # pytype: disable=attribute-error
+                            endpoint.trigger('unknown')
                             endpoint.p_next_state = None
                             endpoint.p_prev_states.append(
                                 (endpoint.state, int(time.time())))
@@ -598,7 +603,8 @@ class Monitor:
                                 return (data, None)
                             break
                         else:
-                            self.logger.debug('endpoint %s from networkml not found', name)
+                            self.logger.debug(
+                                'endpoint %s from networkml not found', name)
             return ({}, None)
 
         def handler_action_ignore(my_obj):
@@ -623,7 +629,8 @@ class Monitor:
                         if (state != 'mirror' and state != 'reinvestigate' and
                                 (endpoint.state == 'mirroring' or endpoint.state == 'reinvestigating')):
                             self.s.unmirror_endpoint(endpoint)
-                        endpoint.trigger(state)  # pytype: disable=attribute-error
+                        # pytype: disable=attribute-error
+                        endpoint.trigger(state)
                         endpoint.p_next_state = None
                         endpoint.p_prev_states.append(
                             (endpoint.state, int(time.time())))
@@ -721,7 +728,8 @@ class Monitor:
             str(self.s.investigations), str(investigation_budget), str(len(queued_endpoints))))
 
         for endpoint in queued_endpoints[:investigation_budget]:
-            endpoint.trigger(endpoint.p_next_state)  # pytype: disable=attribute-error
+            # pytype: disable=attribute-error
+            endpoint.trigger(endpoint.p_next_state)
             endpoint.p_next_state = None
             endpoint.p_prev_states.append(
                 (endpoint.state, int(time.time())))
@@ -770,7 +778,8 @@ class Monitor:
             str(self.s.coprocessing), str(coprocessing_budget), str(len(queued_endpoints))))
 
         for endpoint in queued_endpoints[:coprocessing_budget]:
-            endpoint.trigger(endpoint.p_next_copro_state)  # pytype: disable=attribute-error
+            # pytype: disable=attribute-error
+            endpoint.trigger(endpoint.p_next_copro_state)
             endpoint.p_next_copro_state = None  # pytype: disable=attribute-error
             endpoint.p_prev_copro_states.append(  # pytype: disable=attribute-error
                 (endpoint.copro_state, int(time.time())))
@@ -784,12 +793,14 @@ class Monitor:
                         endpoint.copro_queue()  # pytype: disable=attribute-error
                         endpoint.p_prev_copro_states.append(  # pytype: disable=attribute-error
                             (endpoint.copro_state, int(time.time())))
-                    elif endpoint.copro_state in ['copro_coprocessing']:  # pytype: disable=attribute-error
+                    # pytype: disable=attribute-error
+                    elif endpoint.copro_state in ['copro_coprocessing']:
                         cur_time = int(time.time())
                         # timeout after 2 times the reinvestigation frequency
                         # in case something didn't report back, put back in an
                         # unknown state
-                        if cur_time - endpoint.p_prev_copro_states[-1][1] > 2*self.controller['coprocessing_frequency']:  # pytype: disable=attribute-error
+                        # pytype: disable=attribute-error
+                        if cur_time - endpoint.p_prev_copro_states[-1][1] > 2*self.controller['coprocessing_frequency']:
                             self.logger.debug(
                                 'timing out: {0} and setting to unknown'.format(endpoint.name))
                             self.s.uncoprocess_endpoint(endpoint)
@@ -805,7 +816,8 @@ class Monitor:
         signal.signal(signal.SIGINT, partial(self.signal_handler))
         while not CTRL_C['STOP']:
             while True:
-                found_work, rabbit_msg = self.get_q_item(self.m_queue, timeout=0)
+                found_work, rabbit_msg = self.get_q_item(
+                    self.m_queue, timeout=0)
                 if not found_work:
                     break
                 self.format_rabbit_message(rabbit_msg)

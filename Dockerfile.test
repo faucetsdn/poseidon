@@ -22,6 +22,6 @@ RUN CXXFLAGS="-D_BSD_SOURCE" pip3 install --no-cache-dir -r test-requirements.tx
 
 CMD py.test -v -vv --cov-report term-missing --cov=. -c .coveragerc && \
     # commenting out pytype until release for python3.8 is out
-    #pytype api/app/*py poseidon/*/*py workers/*py && \
-    #pytype poseidon/main.py && \
+    pytype api/app/*py poseidon/*/*py workers/*py && \
+    pytype poseidon/main.py && \
     ./tests/api_smoke_test.sh
