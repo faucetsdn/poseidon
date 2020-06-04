@@ -30,10 +30,10 @@ for worker in workers['workers']:
         print('no release for %s, skipping update' % worker['image'])
         continue
     latest_json = json.loads(res.read().decode('utf-8'))
-    latest_name = latest_json['name']
-    if latest_name != latest_json['name']:
-        changes.add((repo, latest_json['name']))
-        worker['version'] = latest_name
+    latest_version = latest_json['name']
+    if worker['version'] != latest_version:
+        changes.add((repo, latest_version))
+        worker['version'] = latest_version
 
 with open(WORKERS_JSON, 'w') as f:
     f.write(json.dumps(workers, indent=2, sort_keys=True))
