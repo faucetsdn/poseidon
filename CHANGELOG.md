@@ -1,3 +1,11 @@
+# v0.12.3 (2020-06-05)
+
+- BCF (Bigswitch Cloud Fabric) support is deprecated and will be removed in the next release
+- Experimental support for docker swarms
+- When FAUCET stacking is detected, do not redundantly learn endpoints on stack links
+- Update faucet, gauge, event-adapter-rabbit-mq, buildx, pytype, docker, redis, grafana, pytest
+
+
 # v0.12.2 (2020-05-21)
 
 - Fix API not updated with networkml/p0f results.
