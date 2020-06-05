@@ -81,6 +81,7 @@ def callback(ch, method, properties, body, workers_json='workers.json'):
                                       networks=[worker['stage']],
                                       constraints=['node.role==worker'],
                                       restart_policy=restart_policy,
+                                      labels={'project': 'poseidon'},
                                       mounts=[vol_prefix +
                                               '/opt/poseidon_files:/files:rw'],
                                       env=env,
