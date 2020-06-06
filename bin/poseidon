@@ -119,8 +119,8 @@ function check_args()
                 sudo chmod 777 "$POSEIDON_PREFIX"/opt/poseidon/.poseidon_history
                 if docker node ls > /dev/null 2>&1; then
                     echo "Swarm Manager node detected..."
-                    if [ "$(docker service ls -q --filter "project=poseidon" | wc -l)" -gt 0 ]; then
-                        (docker service ls -q --filter "project=poseidon" | xargs docker service rm) && echo "Poseidon services cleaned up."
+                    if [ "$(docker service ls -q --filter "label=project=poseidon" | wc -l)" -gt 0 ]; then
+                        (docker service ls -q --filter "label=project=poseidon" | xargs docker service rm) && echo "Poseidon services cleaned up."
                     fi
                 else
                     echo "Swarm Manager node not detected..."
