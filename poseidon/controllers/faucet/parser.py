@@ -87,13 +87,14 @@ class Parser:
 
     def clear_mirrors(self, config_file):
         faucet_conf = self._read_faucet_conf(config_file)
-        dps = faucet_conf.get('dps', None)
-        if dps:
-            for switch in dps:
-                switch_conf, mirror_interface_conf, _ = self.check_mirror(switch, faucet_conf)
-                if switch_conf and mirror_interface_conf:
-                    self.set_mirror_config(switch_conf, mirror_interface_conf, None)
-            return self._write_faucet_conf(config_file, faucet_conf)
+        if faucet_conf:
+            dps = faucet_conf.get('dps', None)
+            if dps:
+                for switch in dps:
+                    switch_conf, mirror_interface_conf, _ = self.check_mirror(switch, faucet_conf)
+                    if switch_conf and mirror_interface_conf:
+                        self.set_mirror_config(switch_conf, mirror_interface_conf, None)
+                return self._write_faucet_conf(config_file, faucet_conf)
         return False
 
     def config(self, config_file, action, port, switch, rules_file=None,
