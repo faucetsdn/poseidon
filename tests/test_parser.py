@@ -6,6 +6,7 @@ Test module for faucet parser.
 import os
 import shutil
 import tempfile
+import yaml
 from poseidon.controllers.faucet.faucet import FaucetProxy
 from poseidon.controllers.faucet.helpers import get_config_file
 from poseidon.controllers.faucet.helpers import parse_rules
@@ -44,7 +45,8 @@ def test_parse_rules():
 def test_clear_mirrors():
     with tempfile.TemporaryDirectory() as tmpdir:
         shutil.copy(SAMPLE_CONFIG, tmpdir)
-        Parser.clear_mirrors(os.path.join(tmpdir, os.path.basename(SAMPLE_CONFIG)))
+        parser = Parser(ignore_vlans=[999], ignore_ports={'switch99': 11})
+        parser.clear_mirrors(os.path.join(tmpdir, os.path.basename(SAMPLE_CONFIG)))
 
 
 def test_represent_none():
@@ -58,6 +60,50 @@ def test_represent_none():
 def test_get_config_file():
     config = get_config_file(None)
     assert config == '/etc/faucet/faucet.yaml'
+
+
+def test_set_mirror_config():
+    switch_conf_str = """
+dps:
+    s1:
+        interfaces:
+            1:
+                output_only: true
+                mirror: [2]
+            2:
+                native_vlan: 100
+            3:
+                native_vlan: 100
+"""
+    switch_conf = yaml.safe_load(switch_conf_str)
+    mirror_interface_conf = switch_conf['dps']['s1']['interfaces'][1]
+    parser = Parser(mirror_ports={'s1': 1})
+    assert mirror_interface_conf['mirror'] == [2]
+    ports = 3
+    parser.set_mirror_config(switch_conf, mirror_interface_conf, ports)
+    assert mirror_interface_conf['mirror'] == [3]
+
+
+def test_check_mirror_config():
+    switch_conf_str = """
+dps:
+    s1:
+        interfaces:
+            1:
+                output_only: true
+                mirror: [2]
+            2:
+                native_vlan: 100
+            3:
+                native_vlan: 100
+"""
+    orig_switch_conf = yaml.safe_load(switch_conf_str)
+    orig_mirror_interface_conf = orig_switch_conf['dps']['s1']['interfaces'][1]
+    parser = Parser(mirror_ports={'s1': 1})
+    switch_conf, mirror_iterface_conf, mirror_ports = parser.check_mirror('s1', orig_switch_conf)
+    assert switch_conf == orig_switch_conf['dps']['s1']
+    assert orig_mirror_interface_conf == mirror_iterface_conf
+    assert mirror_ports == {2}
 
 
 def test_Parser():
@@ -106,3 +152,4 @@ def test_Parser():
         check_config(parser, os.path.join(tmpdir, os.path.basename(SAMPLE_CONFIG)), endpoints)
         check_config(parser2, os.path.join(tmpdir, os.path.basename(SAMPLE_CONFIG)), endpoints)
         check_config(proxy, os.path.join(tmpdir, os.path.basename(SAMPLE_CONFIG)), endpoints)
+
