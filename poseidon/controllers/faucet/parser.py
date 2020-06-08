@@ -51,8 +51,10 @@ class Parser:
             switch_conf['timeout'] = self.reinvestigation_frequency
         switch_conf['arp_neighbor_timeout'] = self.reinvestigation_frequency
         if ports:
-            if not isinstance(ports, list):
+            if isinstance(ports, set):
                 ports = list(ports)
+            if not isinstance(ports, list):
+                ports = [ports]
             mirror_interface_conf['mirror'] = ports
         # Don't delete timeout/arp_neighbor_timeout when setting mirror list to empty,
         # as that could cause an unnecessary cold start.
