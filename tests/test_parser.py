@@ -44,7 +44,8 @@ def test_parse_rules():
 def test_clear_mirrors():
     with tempfile.TemporaryDirectory() as tmpdir:
         shutil.copy(SAMPLE_CONFIG, tmpdir)
-        Parser.clear_mirrors(os.path.join(tmpdir, os.path.basename(SAMPLE_CONFIG)))
+        parser = Parser(ignore_vlans=[999], ignore_ports={'switch99': 11})
+        parser.clear_mirrors(os.path.join(tmpdir, os.path.basename(SAMPLE_CONFIG)))
 
 
 def test_represent_none():
