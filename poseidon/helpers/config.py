@@ -57,6 +57,8 @@ class Config():
             'rules_file': ('RULES_FILE', []),
             'collector_nic': ('collector_nic', []),
             'controller_mirror_ports': ('MIRROR_PORTS', [ast.literal_eval]),
+            'tunnel_vlan': ('tunnel_vlan', [int]),
+            'tunnel_name': ('tunnel_name', []),
             'automated_acls': ('AUTOMATED_ACLS', [ast.literal_eval]),
             'rabbit_enabled': ('RABBIT_ENABLED', [ast.literal_eval]),
             'FA_RABBIT_ENABLED': ('FA_RABBIT_ENABLED', [ast.literal_eval]),

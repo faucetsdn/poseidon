@@ -20,11 +20,9 @@ class FaucetProxy(Connection, Parser):
                  *args,
                  **kwargs):
         '''Initializes Faucet object.'''
-        mirror_ports = controller['MIRROR_PORTS']
-        if isinstance(mirror_ports, str):
-            self.mirror_ports = json.loads(mirror_ports)
-        else:
-            self.mirror_ports = mirror_ports
+        self.mirror_ports = controller['MIRROR_PORTS']
+        self.tunnel_vlan = controller['tunnel_vlan']
+        self.tunnel_name = controller['tunnel_name']
         self.rabbit_enabled = controller['RABBIT_ENABLED']
         self.learn_pub_adds = controller['LEARN_PUBLIC_ADDRESSES']
         self.reinvestigation_frequency = controller['reinvestigation_frequency']
@@ -34,25 +32,15 @@ class FaucetProxy(Connection, Parser):
         self.host = controller['URI']
         self.user = controller['USER']
         self.pw = controller['PASS']
+        self.trunk_ports = controller['trunk_ports']
+        self.ignore_vlans = controller['ignore_vlans']
+        self.ignore_ports = controller['ignore_ports']
 
-        # parse volos config
-        self.volos = Volos(controller)
-        self.coprocessor = Coprocessor(controller)
-        ignore_vlans = controller['ignore_vlans']
-        if isinstance(ignore_vlans, str):
-            self.ignore_vlans = json.loads(ignore_vlans)
-        else:
-            self.ignore_vlans = ignore_vlans
-        ignore_ports = controller['ignore_ports']
-        if isinstance(ignore_ports, str):
-            self.ignore_ports = json.loads(ignore_ports)
-        else:
-            self.ignore_ports = ignore_ports
-        trunk_ports = controller['trunk_ports']
-        if isinstance(trunk_ports, str):
-            self.trunk_ports = json.loads(trunk_ports)
-        else:
-            self.trunk_ports = trunk_ports
+        for json_conf_name in ('mirror_ports', 'ignore_vlans', 'ignore_ports', 'trunk_ports'):
+            json_conf = getattr(self, json_conf_name)
+            if isinstance(json_conf, str):
+                setattr(self, json_conf_name, json.loads(json_conf))
+
         super(FaucetProxy, self).__init__(
             self.host,
             self.user,
@@ -66,7 +54,14 @@ class FaucetProxy(Connection, Parser):
             self.max_concurrent_reinvestigations,
             self.ignore_vlans,
             self.ignore_ports,
-            self.trunk_ports, *args, **kwargs)
+            self.trunk_ports,
+            self.tunnel_vlan,
+            self.tunnel_name,
+            *args, **kwargs)
+
+        # parse volos config
+        self.volos = Volos(controller)
+        self.coprocessor = Coprocessor(controller)
         self.logger = logging.getLogger('faucet')
         self.mac_table = {}
 
