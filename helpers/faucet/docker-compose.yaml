@@ -16,7 +16,7 @@ services:
             - poseidon
     faucetagent_adapter:
         restart: "no"
-        image: 'faucet/event-adapter-faucetagent:1.9.45'
+        image: 'faucet/event-adapter-faucetagent:1.9.46'
         ports:
             - '10161:10161'
         volumes:
