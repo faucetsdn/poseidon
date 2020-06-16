@@ -10,6 +10,7 @@ from poseidon.controllers.faucet.helpers import get_config_file
 from poseidon.controllers.faucet.helpers import parse_rules
 from poseidon.controllers.faucet.helpers import yaml_in
 from poseidon.controllers.faucet.helpers import yaml_out
+from poseidon.volos.acls import Acl
 
 
 class Parser:
@@ -52,7 +53,9 @@ class Parser:
         if not faucet_conf:
             return faucet_conf
         dps = faucet_conf.get('dps', None)
+        acls = Acl()
         if dps is not None and self.mirror_ports:
+            acls.read(config_yaml=faucet_conf)
             root_stack_switch = [
                 switch for switch, switch_conf in dps.items()
                 if switch_conf.get('stack', {}).get('priority', None)]
@@ -60,16 +63,16 @@ class Parser:
             if root_stack_switch:
                 root_stack_switch = root_stack_switch[0]
                 root_mirror_port = self.mirror_ports.get(root_stack_switch, None)
-                if 'acls' not in faucet_conf:
-                    faucet_conf['acls'] = {}
-                faucet_conf['acls'].update({
-                    self.tunnel_name: [
-                        # Safety rule to prevent looped packets being output to the loop.
-                        {'rule': {'vlan_vid': self.tunnel_vlan, 'actions': {'allow': 0}}},
-                        # Tunnel back to root.
-                        {'rule': {'actions': {'allow': 0, 'output': {'tunnel': {
-                            'type': 'vlan', 'tunnel_id': self.tunnel_vlan,
-                            'dp': root_stack_switch, 'port': root_mirror_port}}}}}]})
+                # Safety rule to prevent looped packets being output to the loop.
+                acls.add_rule(
+                    self.tunnel_name,
+                    {'rule': {'vlan_vid': self.tunnel_vlan, 'actions': {'allow': 0}}})
+                # Tunnel back to root.
+                acls.add_rule(
+                    self.tunnel_name,
+                    {'rule': {'actions': {'allow': 0, 'output': {'tunnel': {
+                        'type': 'vlan', 'tunnel_id': self.tunnel_vlan,
+                        'dp': root_stack_switch, 'port': root_mirror_port}}}}})
 
             for switch, mirror_port in self.mirror_ports.items():
                 if switch not in dps:
@@ -100,6 +103,8 @@ class Parser:
                             'coprocessor': {'strategy': 'vlan_vid'},
                         })
                 dps[switch] = switch_conf
+            # Merge ACL updates, if any back in)
+            faucet_conf['acls'] = acls.acls
         return faucet_conf
 
     @staticmethod
