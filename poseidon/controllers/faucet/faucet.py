@@ -30,8 +30,6 @@ class FaucetProxy(Connection, Parser):
         self.config_file = controller['CONFIG_FILE']
         self.log_file = controller['LOG_FILE']
         self.host = controller['URI']
-        self.user = controller['USER']
-        self.pw = controller['PASS']
         self.trunk_ports = controller['trunk_ports']
         self.ignore_vlans = controller['ignore_vlans']
         self.ignore_ports = controller['ignore_ports']
@@ -43,8 +41,6 @@ class FaucetProxy(Connection, Parser):
 
         super(FaucetProxy, self).__init__(
             self.host,
-            self.user,
-            self.pw,
             self.config_file,
             self.log_file,
             self.mirror_ports,
