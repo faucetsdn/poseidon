@@ -26,11 +26,7 @@ class Config():
         # set some defaults
         controller = {
             'URI': None,
-            'USER': None,
-            'PASS': None,
             'TYPE': None,
-            'SPAN_FABRIC_NAME': 'poseidon',
-            'INTERFACE_GROUP': 'ig1',
             'CONFIG_FILE': None,
             'LOG_FILE': None,
             'RULES_FILE': None,
@@ -46,11 +42,6 @@ class Config():
         config_map = {
             'controller_type': ('TYPE', []),
             'controller_uri': ('URI', []),
-            'controller_user': ('USER', []),
-            'controller_pass': ('PASS', []),
-            'controller_span_fabric_name': ('SPAN_FABRIC_NAME', []),
-            'controller_interface_group': ('INTERFACE_GROUP', []),
-            'trust_self_signed_cert': ('TRUST_SELF_SIGNED_CERT', [ast.literal_eval]),
             'learn_public_addresses': ('LEARN_PUBLIC_ADDRESSES', [ast.literal_eval]),
             'controller_config_file': ('CONFIG_FILE', []),
             'controller_log_file': ('LOG_FILE', []),
