@@ -72,7 +72,7 @@ You need to first identify one of the two supported controllers (*BigSwitch Clou
 <img src="/docs/img/faucet.png" width="190" height="100">
 Poseidon requires at least Faucet version 1.8.6 or higher.
 
-Unless Poseidon and Faucet are running on the same host, Poseidon will connect to Faucet using SSH.  So you'll need to create an account that can SSH to the machine running Faucet and that has rights to modify the configuration file `faucet.yaml` (currently Poseidon expects it to be in the default `/etc/faucet/faucet.yaml` location and `dps` must all be defined in `faucet.yaml` for Poseidon to update the network posture correctly).
+Unless Poseidon and Faucet are running on the same host, Poseidon will connect to Faucet using SSH.  So you'll need to create an account that can SSH to the machine running Faucet and that has rights to modify the configuration file `faucet.yaml` (currently Poseidon expects it to be in the default `/etc/faucet/faucet.yaml` location and `dps` and `acls` must all be defined in `faucet.yaml` (not in `include`) for Poseidon to update the network posture correctly).
 
 If you have Faucet running already, make sure Faucet is started with the following environment variables, which allow Poseidon to change its config, and receive Faucet events:
 
@@ -82,6 +82,10 @@ export FAUCET_CONFIG_STAT_RELOAD=1
 ```
 
 Faucet is now configured and ready for use with Poseidon.
+
+##### Faucet stacking
+
+Faucet supports stacking (distributed switching - multiple switches acting together as one).  Poseidon also supports this - Poseidon's mirroring interface should be connected to a port on the root switch.  You will need to allocate a port on each non-root switch also, and install a loopback plug (either Ethernet or fiber) in that port.  Poseidon will detect stacking and take care of the rest of the details (using Faucet's tunneling feature to move mirror packets from the non-root switches to the root switch's mirror port).  The only Poseidon config required is to add the dedicated port on each switch to the `controller_mirror_port` dictionary.
 
 #### BigSwitch Big Cloud Fabric Configuration
 <img src="/docs/img/bcf.png" width="114" height="100"/>

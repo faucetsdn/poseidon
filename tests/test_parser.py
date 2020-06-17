@@ -6,6 +6,7 @@ Test module for faucet parser.
 import os
 import shutil
 import tempfile
+import yaml
 from poseidon.controllers.faucet.faucet import FaucetProxy
 from poseidon.controllers.faucet.helpers import get_config_file
 from poseidon.controllers.faucet.helpers import parse_rules
@@ -44,7 +45,8 @@ def test_parse_rules():
 def test_clear_mirrors():
     with tempfile.TemporaryDirectory() as tmpdir:
         shutil.copy(SAMPLE_CONFIG, tmpdir)
-        Parser.clear_mirrors(os.path.join(tmpdir, os.path.basename(SAMPLE_CONFIG)))
+        parser = Parser(ignore_vlans=[999], ignore_ports={'switch99': 11})
+        parser.clear_mirrors(os.path.join(tmpdir, os.path.basename(SAMPLE_CONFIG)))
 
 
 def test_represent_none():
@@ -60,6 +62,141 @@ def test_get_config_file():
     assert config == '/etc/faucet/faucet.yaml'
 
 
+def test_set_mirror_config():
+    switch_conf_str = """
+dps:
+    s1:
+        interfaces:
+            1:
+                output_only: true
+                mirror: [2]
+            2:
+                native_vlan: 100
+            3:
+                native_vlan: 100
+"""
+    switch_conf = yaml.safe_load(switch_conf_str)
+    mirror_interface_conf = switch_conf['dps']['s1']['interfaces'][1]
+    parser = Parser(mirror_ports={'s1': 1})
+    assert mirror_interface_conf['mirror'] == [2]
+    ports = 3
+    parser.set_mirror_config(mirror_interface_conf, ports)
+    assert mirror_interface_conf['mirror'] == [3]
+
+
+def test_stack_default_config():
+    switch_conf_str = """
+dps:
+    s1:
+        stack:
+            priority: 1
+        dp_id: 0x1
+        interfaces:
+            1:
+                output_only: true
+            2:
+                native_vlan: 100
+            3:
+                native_vlan: 100
+            4:
+                stack:
+                    dp: s2
+                    port: 4
+    s2:
+        dp_id: 0x2
+        interfaces:
+            1:
+                output_only: true
+            2:
+                native_vlan: 100
+            3:
+                native_vlan: 100
+            4:
+                stack:
+                    dp: s1
+                    port: 4
+"""
+    new_switch_conf_str = """
+dps:
+    s1:
+        stack:
+            priority: 1
+        dp_id: 0x1
+        interfaces:
+            1:
+                output_only: true
+                description: Poseidon local mirror
+            2:
+                native_vlan: 100
+            3:
+                native_vlan: 100
+            4:
+                stack:
+                    dp: s2
+                    port: 4
+    s2:
+        dp_id: 0x2
+        interfaces:
+            1:
+                description: Poseidon remote mirror (loopback plug)
+                acls_in: [poseidon_tunnel]
+                coprocessor:
+                    strategy: vlan_vid
+            2:
+                native_vlan: 100
+            3:
+                native_vlan: 100
+            4:
+                stack:
+                    dp: s1
+                    port: 4
+acls:
+    poseidon_tunnel:
+        - rule:
+            vlan_vid: 999
+            actions:
+                allow: 0
+        - rule:
+            actions:
+                allow: 0
+                output:
+                    tunnel:
+                        type: vlan
+                        tunnel_id: 999
+                        dp: s1
+                        port: 1
+"""
+    orig_faucet_conf = yaml.safe_load(switch_conf_str)
+    test_faucet_conf = yaml.safe_load(new_switch_conf_str)
+    parser = Parser(mirror_ports={'s1': 1, 's2': 1}, tunnel_vlan=999, tunnel_name='poseidon_tunnel')
+    new_faucet_conf = parser._set_default_switch_conf(orig_faucet_conf)
+    assert new_faucet_conf['dps']['s1'] == test_faucet_conf['dps']['s1']
+    assert new_faucet_conf['dps']['s2'] == test_faucet_conf['dps']['s2']
+    assert new_faucet_conf['acls'] == test_faucet_conf['acls']
+
+
+def test_check_mirror_config():
+    switch_conf_str = """
+dps:
+    s1:
+        interfaces:
+            1:
+                output_only: true
+                mirror: [2]
+            2:
+                native_vlan: 100
+            3:
+                native_vlan: 100
+"""
+    orig_switch_conf = yaml.safe_load(switch_conf_str)
+    orig_mirror_interface_conf = orig_switch_conf['dps']['s1']['interfaces'][1]
+    parser = Parser(mirror_ports={'s1': 1})
+    switch_conf, mirror_iterface_conf, mirror_ports = parser.check_mirror('s1', orig_switch_conf)
+    assert switch_conf == orig_switch_conf['dps']['s1']
+    assert orig_mirror_interface_conf == mirror_iterface_conf
+    assert mirror_ports == {2}
+
+
 def test_Parser():
     """
     Tests Parser
@@ -71,6 +208,7 @@ def test_Parser():
         obj.config(path, 'mirror', 5, 't2-1')
         obj.config(path, 'mirror', 6, 'bad')
         obj.config(path, 'unmirror', None, None)
+        obj.config(path, 'unmirror', 1, 't1-1')
         obj.config(path, 'unmirror', 1, 't1-1')
         obj.config(path, 'shutdown', None, None)
         obj.config(path, 'apply_acls', None, None)
@@ -106,3 +244,4 @@ def test_Parser():
         check_config(parser, os.path.join(tmpdir, os.path.basename(SAMPLE_CONFIG)), endpoints)
         check_config(parser2, os.path.join(tmpdir, os.path.basename(SAMPLE_CONFIG)), endpoints)
         check_config(proxy, os.path.join(tmpdir, os.path.basename(SAMPLE_CONFIG)), endpoints)
+

@@ -4,7 +4,6 @@ Created on 19 November 2017
 @author: Charlie Lewis
 """
 import logging
-from copy import deepcopy
 
 from poseidon.controllers.faucet.acls import ACLs
 from poseidon.controllers.faucet.helpers import get_config_file
@@ -22,7 +21,9 @@ class Parser:
                  ignore_vlans=None,
                  ignore_ports=None,
                  copro_port=None,
-                 copro_vlan=None):
+                 copro_vlan=None,
+                 tunnel_vlan=None,
+                 tunnel_name=None):
         self.logger = logging.getLogger('parser')
         self.mirror_ports = mirror_ports
         self.reinvestigation_frequency = reinvestigation_frequency
@@ -31,127 +32,164 @@ class Parser:
         self.ignore_ports = ignore_ports
         self.copro_port = copro_port
         self.copro_vlan = copro_vlan
+        self.tunnel_vlan = tunnel_vlan
+        self.tunnel_name = tunnel_name
         self.mac_table = {}
 
     @staticmethod
-    def clear_mirrors(config_file):
+    def _write_faucet_conf(config_file, faucet_conf):
         config_file = get_config_file(config_file)
-        obj_doc = yaml_in(config_file)
-        if obj_doc:
-            # TODO make this smarter about more complex configurations (backup original values, etc)
-            obj_copy = deepcopy(obj_doc)
-            if 'dps' in obj_copy:
-                for switch in obj_copy['dps']:
-                    if 'interfaces' in obj_copy['dps'][switch]:
-                        for port in obj_copy['dps'][switch]['interfaces']:
-                            if 'mirror' in obj_copy['dps'][switch]['interfaces'][port]:
-                                del obj_doc['dps'][switch]['interfaces'][port]['mirror']
-                    if 'timeout' in obj_copy['dps'][switch]:
-                        del obj_doc['dps'][switch]['timeout']
-                    if 'arp_neighbor_timeout' in obj_copy['dps'][switch]:
-                        del obj_doc['dps'][switch]['arp_neighbor_timeout']
-                return yaml_out(config_file, obj_doc)
-        return False
+        return yaml_out(config_file, faucet_conf)
 
-    def check_mirror(self, config_file, switch, port, obj_doc):
-        if not obj_doc:
+    @staticmethod
+    def _read_faucet_conf(config_file):
+        config_file = get_config_file(config_file)
+        faucet_conf = yaml_in(config_file)
+        return faucet_conf
+
+    def _set_default_switch_conf(self, faucet_conf):
+        # TODO: make smarter with more complex configs (backup original values, etc)
+        if not faucet_conf:
+            return faucet_conf
+        dps = faucet_conf.get('dps', None)
+        if dps is not None and self.mirror_ports:
+            root_stack_switch = [
+                switch for switch, switch_conf in dps.items()
+                if switch_conf.get('stack', {}).get('priority', None)]
+            root_mirror_port = None
+            if root_stack_switch:
+                root_stack_switch = root_stack_switch[0]
+                root_mirror_port = self.mirror_ports.get(root_stack_switch, None)
+                if 'acls' not in faucet_conf:
+                    faucet_conf['acls'] = {}
+                faucet_conf['acls'].update({
+                    self.tunnel_name: [
+                        # Safety rule to prevent looped packets being output to the loop.
+                        {'rule': {'vlan_vid': self.tunnel_vlan, 'actions': {'allow': 0}}},
+                        # Tunnel back to root.
+                        {'rule': {'actions': {'allow': 0, 'output': {'tunnel': {
+                            'type': 'vlan', 'tunnel_id': self.tunnel_vlan,
+                            'dp': root_stack_switch, 'port': root_mirror_port}}}}}]})
+
+            for switch, mirror_port in self.mirror_ports.items():
+                if switch not in dps:
+                    continue
+                switch_conf = dps[switch]
+                if self.reinvestigation_frequency:
+                    switch_conf['timeout'] = (self.reinvestigation_frequency * 2) + 1
+                    switch_conf['arp_neighbor_timeout'] = self.reinvestigation_frequency
+                # If stacking was detected, provision tunnel config on non root switches.
+                # Poseidon's mirror NIC must be connected to the root switch's mirror port.
+                # Non mirror switches must have a loopback plug installed in their mirror port.
+                if root_stack_switch and root_mirror_port:
+                    mirror_port_conf = switch_conf.get('interfaces', {}).get(mirror_port, None)
+                    if not mirror_port_conf:
+                        continue
+                    for existing_key in set(mirror_port_conf.keys()):
+                        if existing_key not in ('mirror',):
+                            del mirror_port_conf[existing_key]
+                    if root_stack_switch == switch:
+                        mirror_port_conf.update({
+                            'description': 'Poseidon local mirror',
+                            'output_only': True,
+                        })
+                    else:
+                        mirror_port_conf.update({
+                            'description': 'Poseidon remote mirror (loopback plug)',
+                            'acls_in': [self.tunnel_name],
+                            'coprocessor': {'strategy': 'vlan_vid'},
+                        })
+                dps[switch] = switch_conf
+        return faucet_conf
+
+    @staticmethod
+    def set_mirror_config(mirror_interface_conf, ports):
+        if ports:
+            if isinstance(ports, set):
+                ports = list(ports)
+            if not isinstance(ports, list):
+                ports = [ports]
+            mirror_interface_conf['mirror'] = ports
+        # Don't delete DP level config when setting mirror list to empty,
+        # as that could cause an unnecessary cold start.
+        elif 'mirror' in mirror_interface_conf:
+            del mirror_interface_conf['mirror']
+
+    def check_mirror(self, switch, faucet_conf):
+        switch_conf = None
+        mirror_interface_conf = None
+        existing_mirror_ports = []
+
+        if not faucet_conf:
             self.logger.error('No config found')
-            return False
-        if not self.mirror_ports:
+        elif not self.mirror_ports:
             self.logger.error('Unable to mirror, no mirror ports defined')
-            return False
-        if 'dps' not in obj_doc:
-            self.logger.error(f'Unable to find switches in {config_file}')
-            return False
+        else:
+            dps = faucet_conf.get('dps', None)
+            if dps is not None:
+                switch_conf = dps.get(switch, None)
+                switch_mirror_port = self.mirror_ports.get(switch, None)
+                if switch_conf is not None and switch_mirror_port is not None:
+                    interfaces_conf = switch_conf.get('interfaces', None)
+                    if interfaces_conf:
+                        mirror_interface_conf = interfaces_conf.get(switch_mirror_port, None)
+                        if mirror_interface_conf:
+                            existing_mirror_ports = mirror_interface_conf.get('mirror', [])
+                            if not isinstance(existing_mirror_ports, list):
+                                existing_mirror_ports = list(existing_mirror_ports)
+                            existing_mirror_ports = set(existing_mirror_ports)
 
-        for s in obj_doc['dps']:
-            if (switch == s and s in self.mirror_ports and
-                    'interfaces' in obj_doc['dps'][s] and
-                    port in obj_doc['dps'][s]['interfaces'] and
-                    self.mirror_ports[s] in obj_doc['dps'][s]['interfaces']):
-                return s
+        return (switch_conf, mirror_interface_conf, existing_mirror_ports)
 
-        self.logger.error(f'No switch/port match found to mirror from in '
-                          'the configs or mirror port not defined on that '
-                          'switch: {switch} {obj_doc}')
+    def clear_mirrors(self, config_file):
+        faucet_conf = self._read_faucet_conf(config_file)
+        if faucet_conf:
+            dps = faucet_conf.get('dps', None)
+            if dps:
+                for switch in dps:
+                    switch_conf, mirror_interface_conf, _ = self.check_mirror(switch, faucet_conf)
+                    if switch_conf and mirror_interface_conf:
+                        self.set_mirror_config(mirror_interface_conf, None)
+                return self._write_faucet_conf(config_file, faucet_conf)
         return False
 
     def config(self, config_file, action, port, switch, rules_file=None,
                endpoints=None, force_apply_rules=None, force_remove_rules=None,
                coprocess_rules_files=None):
-        switch_found = None
-        config_file = get_config_file(config_file)
-        obj_doc = yaml_in(config_file)
-        switch_found = self.check_mirror(config_file, switch, port, obj_doc)
-        switch_conf = {}
-        interfaces_conf = {}
-        mirror_interface_conf = {}
-        if switch_found:
-            switch_conf = obj_doc['dps'][switch_found]
-            interfaces_conf = switch_conf['interfaces']
-            mirror_interface_conf = interfaces_conf[self.mirror_ports[switch_found]]
+        faucet_conf = self._read_faucet_conf(config_file)
+        faucet_conf = self._set_default_switch_conf(faucet_conf)
+        switch_conf, mirror_interface_conf, mirror_ports = self.check_mirror(switch, faucet_conf)
 
-        if action in ('mirror', 'unmirror'):
-            if switch_found:
-                if 'mirror' in mirror_interface_conf:
-                    if not isinstance(mirror_interface_conf['mirror'], list):
-                        mirror_interface_conf['mirror'] = [mirror_interface_conf['mirror']]
-                else:
-                    mirror_interface_conf['mirror'] = []
+        if action in ('shutdown', 'apply_routes'):
+            # TODO: not implemented.
+            pass
+        elif action in ('mirror', 'unmirror'):
+            if switch_conf and mirror_interface_conf:
                 if action == 'mirror':
-                    # TODO: make smarter with more complex configs (backup original values, etc)
-                    if self.reinvestigation_frequency:
-                        switch_conf['timeout'] = (self.reinvestigation_frequency * 2) + 1
-                    else:
-                        switch_conf['timeout'] = self.reinvestigation_frequency
-                    switch_conf['arp_neighbor_timeout'] = self.reinvestigation_frequency
-                    if port not in mirror_interface_conf['mirror'] and port is not None:
-                        mirror_interface_conf['mirror'].append(port)
+                    mirror_ports.add(port)
                 elif action == 'unmirror':
                     try:
                         # TODO check for still running captures on this port
-                        mirror_interface_conf['mirror'].remove(port)
-                    except ValueError:
+                        mirror_ports.remove(port)
+                    except KeyError:
                         self.logger.warning(
                             'Port: {0} was not already mirroring on this switch: {1}'.format(
-                                str(port), str(switch_found)))
+                                str(port), str(switch)))
             else:
                 self.logger.error('Unable to mirror due to warnings')
-        elif action == 'shutdown':
-            # TODO
-            pass
         elif action == 'apply_acls':
             rules_doc = parse_rules(rules_file)
-            obj_doc = ACLs().apply_acls(config_file, rules_file, endpoints,
-                                        force_apply_rules, force_remove_rules,
-                                        coprocess_rules_files, obj_doc,
-                                        rules_doc)
-        elif action == 'apply_routes':
-            # TODO
-            pass
+            faucet_conf = ACLs().apply_acls(
+                config_file, rules_file, endpoints,
+                force_apply_rules, force_remove_rules,
+                coprocess_rules_files, faucet_conf, rules_doc)
         else:
             self.logger.warning('Unknown action: {0}'.format(action))
 
-        if switch_found:
-            try:
-                if len(mirror_interface_conf['mirror']) == 0:
-                    del mirror_interface_conf['mirror']
-                    # TODO: Make smarter about more complex configs (backup original values, etc)
-                    if 'timeout' in switch_conf:
-                        del switch_conf['timeout']
-                    if 'arp_neighbor_timeout' in switch_conf:
-                        del switch_conf['arp_neighbor_timeout']
-                else:
-                    ports = []
-                    for p in mirror_interface_conf['mirror']:
-                        if p:
-                            ports.append(p)
-                    mirror_interface_conf['mirror'] = ports
-            except Exception as e:
-                self.logger.warning(
-                    'Unable to remove empty mirror list because: {0}'.format(str(e)))
+        if switch_conf and mirror_interface_conf:
+            self.set_mirror_config(mirror_interface_conf, mirror_ports)
 
-        yaml_out(config_file, obj_doc)
+        self._write_faucet_conf(config_file, faucet_conf)
 
     def ignore_event(self, message):
         for message_type in ('L2_LEARN', 'L2_EXPIRE', 'PORT_CHANGE'):
