@@ -19,9 +19,6 @@ Poseidon began as a joint effort between two of the IQT Labs: [Cyber Reboot](htt
 - [Installing or updating Poseidon](#installing)
 - [SDN Controller Configuration](#sdn-controller-configuration)
     - [Faucet Configuration](#faucet-configuration)
-    - [Big Cloud Fabric Configuration](#big-cloud-fabric-configuration)
-      - [Span Fabric](#span-fabric)
-      - [Interface Group](#interface-group)
 - [Usage](#usage)
 - [Troubleshooting](#troubleshooting)
 - [Network Data Logging](#logging)
@@ -39,7 +36,7 @@ The Poseidon project originally began as an experiment to test the merits of lev
 - [Compose](https://docs.docker.com/compose/) - Poseidon is orchestrated with [docker-compose](https://docs.docker.com/compose/install/). You will need a version that supports compose file format version 3.
 - [Curl](https://curl.haxx.se/download.html) - command-line for transferring data with URLs.
 - [jq](https://stedolan.github.io/jq/download/) - command-line JSON processor.
-- An SDN Controller - specifically [BigSwitch Cloud Fabric](https://www.bigswitch.com/community-edition) or [Faucet](https://faucet.nz/)
+- An SDN Controller - specifically [Faucet](https://faucet.nz/)
 - ~10GB of free disk space
 
 > Note: Installation on `OS X` is possible but not supported.
@@ -65,9 +62,6 @@ curl -L https://raw.githubusercontent.com/CyberReboot/poseidon/master/bin/poseid
 chmod +x /usr/local/bin/poseidon
 ```
 
-## SDN Controller Configuration
-You need to first identify one of the two supported controllers (*BigSwitch Cloud Fabric* or *Faucet*). The controller needs to be running and accessible (via network API) by the Poseidon system.  We recommend making sure the SDN portion is configured BEFORE the above Poseidon installation, but it's not a hard requirement.
-
 #### Faucet Configuration
 <img src="/docs/img/faucet.png" width="190" height="100">
 NOTE: Poseidon requires at least Faucet version 1.9.46 or higher.
@@ -86,62 +80,6 @@ Faucet is now configured and ready for use with Poseidon.
 ##### Faucet stacking
 
 Faucet supports stacking (distributed switching - multiple switches acting together as one).  Poseidon also supports this - Poseidon's mirroring interface should be connected to a port on the root switch.  You will need to allocate a port on each non-root switch also, and install a loopback plug (either Ethernet or fiber) in that port.  Poseidon will detect stacking and take care of the rest of the details (using Faucet's tunneling feature to move mirror packets from the non-root switches to the root switch's mirror port).  The only Poseidon config required is to add the dedicated port on each switch to the `controller_mirror_port` dictionary.
-
-#### BigSwitch Big Cloud Fabric Configuration
-<img src="/docs/img/bcf.png" width="114" height="100"/>
-You will need to access the API of your Big Cloud Fabric (BCF) controller using authorized credentials (user/pass) and you will need to add support in your BCF controller for moving mirrored endpoint network data around your network. In BCF, allowing port mirroring for Poseidon is done using 1) the "span-fabric" feature and 2) identifying a switch interface to send the captured ("spanned") traffic out of. The BigSwitch config will need an admin to add:
-
-
-- span-fabric: you need to define a fabric-wide port mirroring mechanism and give it a name (e.g. 'poseidon')
-- interface-group: you need to identify which port the mirrored traffic is going to egress from, and name it (e.g. 'ig1')
-
-##### Span Fabric
-
-Replace `<name>` with the name of your span-fabric and `<interface-group>` with the name of your interface-group.
-```
-! span-fabric
-span-fabric <name>
-  active
-  destination interface-group <interface-group>
-  priority 1
-```
-
-##### Interface Group
-
-Replace `<interface-group>` with the name of your interface-group. Additionally fill in the `YOUR_LEAF_SWITCH` and `YOUR_INTERFACE_WHERE_POSEIDON_WILL_RECORD_TRAFFIC_FROM`.
-```
-! interface-group
-interface-group <interface-group>
-  description 'packets get mirrored here to be processed'
-  mode span-fabric
-  member switch YOUR_LEAF_SWITCH interface YOUR_INTERFACE_WHERE_POSEIDON_WILL_RECORD_TRAFFIC_FROM
-```
-
-Poseidon will connect to the BCF controller using its REST API, so you will also need the BCF API hostname or IP address and credentials for the controller. If your controller is an HA pair and has a virtual IP address, we recommend using that virtual address. Also, because Poseidon will be making dynamic `filter` rule changes we will need an account that has administrative privileges.  (Poseidon only modifies the filter rules of the defined span-fabric, but until BigSwitch has more granular access control options this means admin privs!) Bringing the above configuration requirements together, below is an example of what the relevant parts of your BCF configuration could look like where the span-fabric is called 'poseidon', the user 'poseidon' is defined for API access, and the egress interface is interface '48' on switch 'leaf04' and labelled as interface group 'ig1':
-
-```
-! user
-user poseidon
-  hashed-password method=PBKDF2WithHmacSHA512,salt=M4534fcV1Ksg_fNm2pGQ,rounds=25000,ph=true,eWNHYUPVAUYosBVRguJnkmAzM
-
-! group
-group admin
-  associate user poseidon
-
-! interface-group
-interface-group ig1
-  description 'Mirroring for Poseidon'
-  mode span-fabric
-  member switch leaf04 interface ethernet48
-
-! span-fabric
-span-fabric poseidon
-  active
-  destination interface-group ig1
-  priority 1
-```
-
-BCF is now configured and ready for use with Poseidon.
 
 ## Configuring Poseidon
 
@@ -206,7 +144,7 @@ Step 2:
 
 Configure Poseidon for your preferred settings. Open `/opt/poseidon/poseidon.config` (add the Poseidon prefix if you specified one).
 
-If you're planning to use BCF, change values in the `Poseidon` and `Bcf` sections. If using Faucet, make sure to minimally change the `controller_mirror_ports` to match the switch name and port number of your mirror port.  Regardless of which controller you choose, you will need to update the `collector_nic` in the `poseidon` section to match the interface name of the NIC your mirror port is connected to.
+For using Faucet, make sure to minimally change the `controller_mirror_ports` to match the switch name and port number of your mirror port.  You will also need to update the `collector_nic` in the `poseidon` section to match the interface name of the NIC your mirror port is connected to.
 
 Step 3:
 
@@ -215,7 +153,7 @@ If you want to Poseidon to spin up Faucet for you as well, simply run:
 poseidon start
 ```
 
-Otherwise, if using BCF or your own installation of Faucet (note you'll need to wire together the event socket and config reload options yourself if you go this path):
+Other if using your own installation of Faucet (note you'll need to wire together the event socket and config reload options yourself if you go this path):
 ```
 poseidon start --standalone
 ```

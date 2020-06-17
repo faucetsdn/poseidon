@@ -54,7 +54,7 @@ def test_clear_filters():
     s.endpoints[endpoint.name] = endpoint
     s.clear_filters()
     controller = Config().get_config()
-    controller['TYPE'] = 'bcf'
+    controller['TYPE'] = 'faucet'
     s = SDNConnect(controller)
     endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
@@ -376,8 +376,6 @@ def test_process():
             self.controller = Config().get_config()
             self.s = SDNConnect(self.controller)
             self.s.controller['TYPE'] = 'None'
-            self.s.get_sdn_context()
-            self.s.controller['TYPE'] = 'bcf'
             self.s.get_sdn_context()
             self.s.controller['TYPE'] = 'faucet'
             self.s.get_sdn_context()

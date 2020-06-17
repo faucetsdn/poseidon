@@ -25,7 +25,6 @@ import requests
 import schedule
 
 from poseidon.constants import NO_DATA
-from poseidon.controllers.bcf.bcf import BcfProxy
 from poseidon.controllers.faucet.faucet import FaucetProxy
 from poseidon.controllers.faucet.parser import Parser
 from poseidon.helpers.actions import Actions
@@ -157,10 +156,6 @@ class SDNConnect:
         ''' clear any exisiting filters. '''
         if isinstance(self.sdnc, FaucetProxy):
             Parser().clear_mirrors(self.controller['CONFIG_FILE'])
-        elif isinstance(self.sdnc, BcfProxy):
-            self.logger.debug('removing bcf filter rules')
-            retval = self.sdnc.remove_filter_rules()
-            self.logger.debug('removed filter rules: {0}'.format(retval))
 
     def default_endpoints(self):
         ''' set endpoints to default state. '''
@@ -190,16 +185,7 @@ class SDNConnect:
 
     def get_sdn_context(self):
         controller_type = self.controller.get('TYPE', None)
-        if controller_type == 'bcf':
-            try:
-                self.logger.warning(
-                    'Using BCF has been DEPRECATED and will be removed in a future version.')
-                self.sdnc = BcfProxy(self.controller)
-            except Exception as e:  # pragma: no cover
-                self.logger.error(
-                    'BcfProxy could not connect to {0} because {1}'.format(
-                        self.controller['URI'], e))
-        elif controller_type == 'faucet':
+        if controller_type == 'faucet':
             try:
                 self.sdnc = FaucetProxy(self.controller)
             except Exception as e:  # pragma: no cover
@@ -209,8 +195,6 @@ class SDNConnect:
         elif controller_type == 'None':
             self.sdnc = None
         else:
-            if 'CONTROLLER_PASS' in self.controller:
-                self.controller['CONTROLLER_PASS'] = '********'
             self.logger.error(
                 'Unknown SDN controller config: {0}'.format(
                     self.controller))
