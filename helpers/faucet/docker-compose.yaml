@@ -14,14 +14,6 @@ services:
             FA_RABBIT_ROUTING_KEY: '${FA_RABBIT_ROUTING_KEY}'
         networks:
             - poseidon
-    faucetagent_adapter:
-        restart: "no"
-        image: 'faucet/event-adapter-faucetagent:1.9.46'
-        ports:
-            - '10161:10161'
-        volumes:
-            - '${POSEIDON_PREFIX}/opt/faucetagent/certs:/opt/faucetagent/certs'
-            - '${POSEIDON_PREFIX}/etc/faucet:/etc/faucet'
 networks:
     poseidon:
         driver: overlay
