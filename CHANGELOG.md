@@ -1,3 +1,10 @@
+# v0.13.0 (2020-06-18)
+
+- Removed support for BCF (BigSwitch Cloud Fabric)
+- Better cleanup of services when using docker swarm
+- Faucet tunnels are now used for mirroring, allowing multi-switch mirroring to a single location
+- Updated faucet, gauge, event-adapter-rabbitmq, cmd2, requests, pylint, pytest-cov, buildx
+
 # v0.12.3 (2020-06-05)
 
 - BCF (Bigswitch Cloud Fabric) support is deprecated and will be removed in the next release

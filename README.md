@@ -153,7 +153,7 @@ If you want to Poseidon to spin up Faucet for you as well, simply run:
 poseidon start
 ```
 
-Other if using your own installation of Faucet (note you'll need to wire together the event socket and config reload options yourself if you go this path):
+Otherwise if using your own installation of Faucet (note you'll need to wire together the event socket and config reload options yourself if you go this path):
 ```
 poseidon start --standalone
 ```
