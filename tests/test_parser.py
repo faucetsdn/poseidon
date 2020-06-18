@@ -115,6 +115,11 @@ dps:
                 stack:
                     dp: s1
                     port: 4
+acls:
+    existing_acl:
+        - rule:
+            actions:
+                allow: 1
 """
     new_switch_conf_str = """
 dps:
@@ -151,6 +156,10 @@ dps:
                     dp: s1
                     port: 4
 acls:
+    existing_acl:
+        - rule:
+            actions:
+                allow: 1
     poseidon_tunnel:
         - rule:
             vlan_vid: 999

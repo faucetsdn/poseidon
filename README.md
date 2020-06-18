@@ -64,7 +64,7 @@ chmod +x /usr/local/bin/poseidon
 
 #### Faucet Configuration
 <img src="/docs/img/faucet.png" width="190" height="100">
-Poseidon requires at least Faucet version 1.8.6 or higher.
+NOTE: Poseidon requires at least Faucet version 1.9.46 or higher.
 
 Unless Poseidon and Faucet are running on the same host, Poseidon will connect to Faucet using SSH.  So you'll need to create an account that can SSH to the machine running Faucet and that has rights to modify the configuration file `faucet.yaml` (currently Poseidon expects it to be in the default `/etc/faucet/faucet.yaml` location and `dps` and `acls` must all be defined in `faucet.yaml` (not in `include`) for Poseidon to update the network posture correctly).
 
