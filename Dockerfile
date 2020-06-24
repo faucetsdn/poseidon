@@ -9,8 +9,6 @@ RUN apk upgrade --no-cache && \
     apk add --no-cache \
     build-base \
     curl \
-    go \
-    git \
     linux-headers \
     python3 \
     py3-pip \
@@ -18,15 +16,13 @@ RUN apk upgrade --no-cache && \
     py3-paramiko \
     tini \
     yaml-dev && \
-    pip3 install --no-cache-dir -r requirements.txt -r /healthcheck/requirements.txt && \
+    pip3 install --no-cache-dir -r requirements.txt && \
+    pip3 install --no-cache-dir -r /healthcheck/requirements.txt && \
     apk del build-base \
     python3-dev \
     yaml-dev && \
     rm -rf /var/cache/* && \
     rm -rf /root/.cache/*
-ENV GNMIREPO=github.com/google/gnxi
-ENV GOPATH=/root/go
-RUN mkdir -p $GOPATH && for tool in capabilities get set target; do toolrepo=$GNMIREPO/gnmi_$tool ; echo $toolrepo ; go get $toolrepo && go install $toolrepo ; done
 
 # healthcheck
 ENV FLASK_APP /healthcheck/hc.py
