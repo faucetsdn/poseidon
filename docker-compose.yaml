@@ -55,35 +55,6 @@ services:
         build:
             context: api
             dockerfile: Dockerfile
-    poseidon_certstrap:
-        restart: on-failure
-        image: 'cyberreboot/cyberreboot-certstrap:latest'
-        build:
-            context: certstrap
-            dockerfile: Dockerfile
-        volumes:
-            - '${POSEIDON_PREFIX}/opt/poseidon:/opt/poseidon'
-        command:
-            - /opt/poseidon/local/faucetconfrpc
-            - faucetconfrpc
-    faucetconfrpc:
-        restart: always
-        image: 'cyberreboot/faucetconfrpc:v0.2'
-        environment:
-            PYTHONUNBUFFERED: '1'
-        ports:
-            - 59999
-        volumes:
-            - '${POSEIDON_PREFIX}/opt/poseidon/local:/local'
-            - /etc/faucet:/etc/faucet
-        networks:
-            poseidon:
-        command:
-            - --key=/local/faucetconfrpc/faucetconfrpc.key
-            - --cert=/local/faucetconfrpc/faucetconfrpc.crt
-            - --cacert=/local/faucetconfrpc/faucetconfrpc-ca.crt
-            - --host=0.0.0.0
-            - --config_dir=/etc/faucet
     poseidon:
         restart: always
         image: 'cyberreboot/poseidon:latest'
@@ -99,7 +70,6 @@ services:
         depends_on:
             - rabbit
             - redis
-            - faucetconfrpc
         build:
             context: .
             dockerfile: Dockerfile
