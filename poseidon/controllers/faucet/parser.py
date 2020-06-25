@@ -21,10 +21,10 @@ class Parser:
                  max_concurrent_reinvestigations=None,
                  ignore_vlans=None,
                  ignore_ports=None,
-                 copro_port=None,
-                 copro_vlan=None,
                  tunnel_vlan=None,
-                 tunnel_name=None):
+                 tunnel_name=None,
+                 copro_port=None,
+                 copro_vlan=None):
         self.logger = logging.getLogger('parser')
         self.mirror_ports = mirror_ports
         self.reinvestigation_frequency = reinvestigation_frequency
@@ -63,6 +63,8 @@ class Parser:
             if root_stack_switch:
                 root_stack_switch = root_stack_switch[0]
                 root_mirror_port = self.mirror_ports.get(root_stack_switch, None)
+                if self.tunnel_name in acls.acls:
+                    del acls.acls[self.tunnel_name]
                 # Safety rule to prevent looped packets being output to the loop.
                 acls.add_rule(
                     self.tunnel_name,
@@ -143,7 +145,6 @@ class Parser:
                             if not isinstance(existing_mirror_ports, list):
                                 existing_mirror_ports = list(existing_mirror_ports)
                             existing_mirror_ports = set(existing_mirror_ports)
-
         return (switch_conf, mirror_interface_conf, existing_mirror_ports)
 
     def clear_mirrors(self, config_file):
@@ -267,53 +268,3 @@ class Parser:
                     for data in m_table[mac]:
                         if port_no_str == data['port'] and dp_name == data['segment']:
                             make_mac_inactive(mac)
-
-    def log(self, log_file):
-        self.logger.debug('parsing log file')
-        if not log_file:
-            # default to FAUCET default
-            log_file = '/var/log/faucet/faucet.log'
-        # NOTE very fragile, prone to errors
-        try:
-            with open(log_file, 'r') as f:
-                for line in f:
-                    if 'L2 learned' in line:
-                        learned_mac = line.split()
-                        data = {'ip-address': learned_mac[16][0:-1],
-                                'ip-state': 'L2 learned',
-                                'mac': learned_mac[10],
-                                'segment': learned_mac[7][1:-1],
-                                'port': learned_mac[22],
-                                'tenant': learned_mac[24] + learned_mac[25],
-                                'active': 1}
-                        if learned_mac[10] in self.mac_table:
-                            dup = False
-                            for d in self.mac_table[learned_mac[10]]:
-                                if data == d:
-                                    dup = True
-                            if dup:
-                                self.mac_table[learned_mac[10]].remove(data)
-                            self.mac_table[learned_mac[10]].insert(0, data)
-                        else:
-                            self.mac_table[learned_mac[10]] = [data]
-                    elif ', expired [' in line:
-                        expired_mac = line.split(', expired [')
-                        expired_mac = expired_mac[1].split()[0]
-                        if expired_mac in self.mac_table:
-                            self.mac_table[expired_mac][0]['active'] = 0
-                    elif ' Port ' in line:
-                        # try and see if it was a port down event
-                        # this will break if more than one port expires at the same time TODO
-                        port_change = line.split(' Port ')
-                        dpid = port_change[0].split()[-2]
-                        port_change = port_change[1].split()
-                        if port_change[1] == 'down':
-                            m_table = self.mac_table.copy()
-                            for mac in m_table:
-                                for data in m_table[mac]:
-                                    if (port_change[0] == data['port'] and
-                                            dpid == data['segment']):
-                                        self.mac_table[mac][0]['active'] = 0
-        except Exception as e:
-            self.logger.error(
-                'Error parsing Faucet log file {0}'.format(str(e)))

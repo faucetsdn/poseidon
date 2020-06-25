@@ -225,14 +225,6 @@ def test_Parser():
                    rules_file=os.path.join(os.getcwd(),
                                            'rules.yaml'))
         obj.config(path, 'unknown', None, None)
-        obj.log(os.path.join(log_dir, 'faucet.log'))
-
-    config_dir = '/etc/faucet'
-    log_dir = '/var/log/faucet'
-    if not os.path.exists(config_dir):
-        config_dir = os.path.join(os.getcwd(), 'faucet')
-    if not os.path.exists(log_dir):
-        log_dir = os.path.join(os.getcwd(), 'faucet')
 
     endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
@@ -241,16 +233,13 @@ def test_Parser():
         '0.0.0.0': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
     endpoints = [endpoint]
 
-    parser = Parser(mirror_ports={'t1-1': 2})
-    parser2 = Parser()
-    controller = Config().get_config()
-    proxy = FaucetProxy(controller)
-    check_config(parser, os.path.join(config_dir, 'faucet.yaml'), endpoints)
-    check_config(parser2, os.path.join(config_dir, 'faucet.yaml'), endpoints)
-    check_config(proxy, os.path.join(config_dir, 'faucet.yaml'), endpoints)
-    with tempfile.TemporaryDirectory() as tmpdir:
-        shutil.copy(SAMPLE_CONFIG, tmpdir)
-        check_config(parser, os.path.join(tmpdir, os.path.basename(SAMPLE_CONFIG)), endpoints)
-        check_config(parser2, os.path.join(tmpdir, os.path.basename(SAMPLE_CONFIG)), endpoints)
-        check_config(proxy, os.path.join(tmpdir, os.path.basename(SAMPLE_CONFIG)), endpoints)
+    with tempfile.TemporaryDirectory() as config_dir:
+        shutil.copy(SAMPLE_CONFIG, os.path.join(config_dir, 'faucet.yaml'))
+        parser = Parser(mirror_ports={'t1-1': 2})
+        parser2 = Parser()
+        controller = Config().get_config()
+        proxy = FaucetProxy(controller)
+        check_config(parser, os.path.join(config_dir, 'faucet.yaml'), endpoints)
+        check_config(parser2, os.path.join(config_dir, 'faucet.yaml'), endpoints)
+        check_config(proxy, os.path.join(config_dir, 'faucet.yaml'), endpoints)
 
