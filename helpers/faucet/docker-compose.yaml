@@ -18,7 +18,7 @@ services:
         restart: on-failure
         image: 'cyberreboot/faucet-certstrap:latest'
         build:
-            context: certstrap
+            context: helpers/faucet/certstrap
             dockerfile: Dockerfile
         volumes:
             - '${POSEIDON_PREFIX}/opt/poseidon:/opt/poseidon'
