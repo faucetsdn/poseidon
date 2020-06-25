@@ -117,6 +117,8 @@ function check_args()
                 sudo chmod 777 "$POSEIDON_PREFIX"/opt/redis "$POSEIDON_PREFIX"/opt/poseidon_files
                 sudo touch "$POSEIDON_PREFIX"/opt/poseidon/.poseidon_history
                 sudo chmod 777 "$POSEIDON_PREFIX"/opt/poseidon/.poseidon_history
+                localdir="$POSEIDON_PREFIX"/opt/poseidon/local
+                if [ ! -d "$localdir" ] ; then sudo mkdir "$localdir" ; fi
                 if docker node ls > /dev/null 2>&1; then
                     echo "Swarm Manager node detected..."
                     if [ "$(docker service ls -q --filter "label=project=poseidon" | wc -l)" -gt 0 ]; then
@@ -185,7 +187,10 @@ function check_args()
                 ;;
             -u|update)
                 configdir=$(tmpdir)
-                cp "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config "$configdir" || true
+                localdir="$POSEIDON_PREFIX"/opt/poseidon/local
+                if [ ! -d "$localdir" ] ; then sudo mkdir -p "$localdir" ; fi
+                sudo cp -a "$localdir" "$configdir"
+                sudo cp "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config "$configdir" || true
                 sudo rm -rf "$POSEIDON_PREFIX"/opt/poseidon
                 if [ -z "$2" ]; then
                     echo "Updating to latest release..."
@@ -194,7 +199,7 @@ function check_args()
                     echo "Updating to $2..."
                     poseidon install "$2"
                 fi
-                sudo mv "$configdir/poseidon.config" "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config || true
+                sudo cp -a "$configdir"/* "$POSEIDON_PREFIX"/opt/poseidon
                 rm -rf "$configdir"
                 # update this script
                 sudo curl -L https://raw.githubusercontent.com/CyberReboot/poseidon/master/bin/poseidon -o /usr/local/bin/poseidon
