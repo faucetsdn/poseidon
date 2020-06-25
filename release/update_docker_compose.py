@@ -8,6 +8,7 @@ from collections import OrderedDict
 import ruamel.yaml
 
 VERSION_FILE = '../VERSION'
+# TODO: only updates to Poseidon's main docker-compose.yaml are currently handled.
 DOCKER_COMPOSE = '../docker-compose.yaml'
 RELEASE_VER = open(VERSION_FILE).read().strip()
 DEV = RELEASE_VER.endswith('.dev')
@@ -28,6 +29,7 @@ NON_DEV_SERVICE_DELETE = {
     'poseidon_api': ['build'],
     'poseidon': ['build'],
     'workers': ['build'],
+    'poseidon_certstrap': ['build'],
 }
 
 # Broadly preserves formatting.

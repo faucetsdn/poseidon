@@ -11,6 +11,7 @@ RELEASE_MAP = {
     'cyberreboot/tcprewrite-dot1q': 'cyberreboot/network-tools',
     'cyberreboot/networkml': 'cyberreboot/networkml',
     'cyberreboot/p0f': 'cyberreboot/network-tools',
+    'cyberreboot/faucetconfrpc': 'cyberreboot/faucetconfrpc',
     'yeasy/simple-web': 'yeasy/simple-web',
 }
 

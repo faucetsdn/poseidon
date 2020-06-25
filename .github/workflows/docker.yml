@@ -54,5 +54,9 @@ jobs:
         docker buildx build \
           --platform linux/amd64,linux/arm/v7,linux/arm64 \
           --push \
-          -t cyberreboot/redis:${{ steps.change_version.outputs.VERSION }} helpers/redis
+          -t cyberreboot/redis:${{ steps.change_version.outputs.VERSION }} helpers/redis && \
+        docker buildx build \
+          --platform linux/amd64,linux/arm/v7,linux/arm64 \
+          --push \
+          -t cyberreboot/faucet-certstrap:${{ steps.change_version.outputs.VERSION }} helpers/faucet/certstrap
       if: github.repository == 'cyberreboot/poseidon' && github.event_name == 'push'
