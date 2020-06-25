@@ -8,6 +8,7 @@ from collections import OrderedDict
 import ruamel.yaml
 
 VERSION_FILE = '../VERSION'
+# TODO: only updates to Poseidon's main docker-compose.yaml are currently handled.
 DOCKER_COMPOSE = '../docker-compose.yaml'
 RELEASE_VER = open(VERSION_FILE).read().strip()
 DEV = RELEASE_VER.endswith('.dev')
@@ -22,7 +23,6 @@ DEV_SERVICE_OVERRIDE = {
     'poseidon_api': {'build': {'context': 'api', 'dockerfile': 'Dockerfile'}},
     'poseidon': {'build': {'context': '.', 'dockerfile': 'Dockerfile'}},
     'workers': {'build': {'context': 'workers', 'dockerfile': 'Dockerfile'}},
-    'poseidon_certstrap': {'build': {'context': 'certstrap', 'dockerfile': 'Dockerfile'}},
 }
 # For non-dev versions, delete this config.
 NON_DEV_SERVICE_DELETE = {
