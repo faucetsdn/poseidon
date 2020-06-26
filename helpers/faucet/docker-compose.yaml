@@ -25,6 +25,8 @@ services:
         command:
             - /opt/poseidon/local/faucetconfrpc
             - faucetconfrpc
+        networks:
+            - poseidon
     faucetconfrpc:
         restart: always
         image: 'cyberreboot/faucetconfrpc:v0.2'
@@ -36,7 +38,7 @@ services:
             - '${POSEIDON_PREFIX}/opt/poseidon/local:/local'
             - /etc/faucet:/etc/faucet
         networks:
-            poseidon:
+            - poseidon
         command:
             - --key=/local/faucetconfrpc/faucetconfrpc.key
             - --cert=/local/faucetconfrpc/faucetconfrpc.crt

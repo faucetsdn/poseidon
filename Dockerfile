@@ -13,7 +13,6 @@ RUN apk upgrade --no-cache && \
     python3 \
     py3-pip \
     python3-dev \
-    py3-paramiko \
     tini \
     yaml-dev && \
     pip3 install --no-cache-dir -r requirements.txt && \
