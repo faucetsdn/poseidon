@@ -34,6 +34,7 @@ class Config():
             'reinvestigation_frequency': 900,
             'max_concurrent_reinvestigations': 2,
             'logger_level': 'INFO',
+            'faucetconfrpc_address': 'faucetconfrpc:59999'
         }
 
         config_map = {

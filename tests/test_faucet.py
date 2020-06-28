@@ -6,8 +6,15 @@ Test module for faucet.
 import os
 import tempfile
 from poseidon.controllers.faucet.faucet import FaucetProxy
-from poseidon.helpers.config import Config
 from poseidon.controllers.faucet.helpers import yaml_in, yaml_out
+from poseidon.controllers.faucet.parser import FaucetLocalConfGetSetter
+from poseidon.helpers.config import Config
+
+
+def _get_proxy(controller=None):
+    if controller is None:
+        controller = Config().get_config()
+    return FaucetProxy(controller, faucetconfgetsetter_cl=FaucetLocalConfGetSetter)
 
 
 def test_yaml_in():
@@ -19,12 +26,11 @@ def test_yaml_in():
 
 
 def test_get_endpoints():
-    controller = Config().get_config()
-    proxy = FaucetProxy(controller)
+    proxy = _get_proxy()
     a = proxy.get_endpoints()
     assert isinstance(a, list)
 
-    proxy = FaucetProxy(controller)
+    proxy = _get_proxy()
     a = proxy.get_endpoints(messages=[{'dp_name': 'switch', 'L2_LEARN': {'l3_src_ip': '10.0.0.1', 'eth_src': '00:00:00:00:00:00', 'port_no': 1, 'vid': '100'}}, {
                             'version': 1, 'time': 1525205350.0357792, 'dp_id': 1, 'dp_name': 'switch-1', 'event_id': 5, 'PORT_CHANGE': {'port_no': 1, 'reason': 'MODIFY', 'status': False}}, {}])
     assert isinstance(a, list)
@@ -34,8 +40,7 @@ def test_FaucetProxy():
     """
     Tests Faucet
     """
-    controller = Config().get_config()
-    proxy = FaucetProxy(controller)
+    proxy = _get_proxy()
     proxy.shutdown_ip('10.0.0.9')
     proxy.shutdown_endpoint()
     proxy.mirror_mac('00:00:00:00:00:00', None, None)
@@ -43,7 +48,7 @@ def test_FaucetProxy():
     proxy.unmirror_mac('00:00:00:00:00:00', None, None)
     proxy.update_acls()
 
-    proxy = FaucetProxy(controller)
+    proxy = _get_proxy()
     proxy.shutdown_ip('10.0.0.9')
     proxy.shutdown_endpoint()
     proxy.mirror_mac('00:00:00:00:00:00', None, None)
@@ -55,7 +60,7 @@ def test_FaucetProxy():
     controller['MIRROR_PORTS'] = '{"foo":1}'
     controller['ignore_vlans'] = ['foo']
     controller['ignore_ports'] = [1]
-    proxy = FaucetProxy(controller)
+    proxy = _get_proxy(controller)
 
 
 def test_format_endpoints():

@@ -62,9 +62,8 @@ services:
             PYTHONUNBUFFERED: '1'
         volumes:
             - '${POSEIDON_PREFIX}/opt/poseidon:/opt/poseidon'
-            - '${POSEIDON_PREFIX}/var/log/faucet:/var/log/faucet'
-            - '${POSEIDON_PREFIX}/etc/faucet:/etc/faucet'
             - '${POSEIDON_PREFIX}/var/log/poseidon:/var/log/poseidon'
+            - '${POSEIDON_PREFIX}/opt/poseidon/local:/local'
         networks:
             - poseidon
         depends_on:

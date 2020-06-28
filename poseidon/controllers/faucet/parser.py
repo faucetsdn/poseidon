@@ -4,12 +4,9 @@ Created on 19 November 2017
 @author: Charlie Lewis
 """
 import logging
-
 from poseidon.controllers.faucet.acls import ACLs
-from poseidon.controllers.faucet.helpers import get_config_file
+from poseidon.controllers.faucet.config import FaucetLocalConfGetSetter, FaucetRemoteConfGetSetter
 from poseidon.controllers.faucet.helpers import parse_rules
-from poseidon.controllers.faucet.helpers import yaml_in
-from poseidon.controllers.faucet.helpers import yaml_out
 from poseidon.volos.acls import Acl
 
 
@@ -23,8 +20,10 @@ class Parser:
                  ignore_ports=None,
                  tunnel_vlan=None,
                  tunnel_name=None,
+                 faucetconfrpc_address=None,
                  copro_port=None,
-                 copro_vlan=None):
+                 copro_vlan=None,
+                 faucetconfgetsetter_cl=FaucetRemoteConfGetSetter):
         self.logger = logging.getLogger('parser')
         self.mirror_ports = mirror_ports
         self.reinvestigation_frequency = reinvestigation_frequency
@@ -35,25 +34,25 @@ class Parser:
         self.copro_vlan = copro_vlan
         self.tunnel_vlan = tunnel_vlan
         self.tunnel_name = tunnel_name
+        self.faucetconfgetsetter = faucetconfgetsetter_cl(
+            client_key='/local/faucetconfrpc/client.key',
+            client_cert='/local/faucetconfrpc/client.crt',
+            ca_cert='/local/faucetconfrpc/faucetconfrpc-ca.crt',
+            server_addr=faucetconfrpc_address)
         self.mac_table = {}
 
-    @staticmethod
-    def _write_faucet_conf(config_file, faucet_conf):
-        config_file = get_config_file(config_file)
-        return yaml_out(config_file, faucet_conf)
+    def _read_faucet_conf(self, config_file):
+        return self.faucetconfgetsetter.read_faucet_conf(config_file)
 
-    @staticmethod
-    def _read_faucet_conf(config_file):
-        config_file = get_config_file(config_file)
-        faucet_conf = yaml_in(config_file)
-        return faucet_conf
+    def _write_faucet_conf(self, config_file, faucet_conf):
+        return self.faucetconfgetsetter.write_faucet_conf(config_file, faucet_conf)
 
     def _set_default_switch_conf(self, faucet_conf):
         # TODO: make smarter with more complex configs (backup original values, etc)
         if not faucet_conf:
             return faucet_conf
         dps = faucet_conf.get('dps', None)
-        acls = Acl()
+        acls = Acl(faucetconfgetsetter=self.faucetconfgetsetter)
         if dps is not None and self.mirror_ports:
             acls.read(config_yaml=faucet_conf)
             root_stack_switch = [
@@ -163,6 +162,10 @@ class Parser:
                endpoints=None, force_apply_rules=None, force_remove_rules=None,
                coprocess_rules_files=None):
         faucet_conf = self._read_faucet_conf(config_file)
+        if faucet_conf is None:
+            self.logger.warning('Cannot read FAUCET config file')
+            return
+
         faucet_conf = self._set_default_switch_conf(faucet_conf)
         switch_conf, mirror_interface_conf, mirror_ports = self.check_mirror(switch, faucet_conf)
 
@@ -195,7 +198,8 @@ class Parser:
         if switch_conf and mirror_interface_conf:
             self.set_mirror_config(mirror_interface_conf, mirror_ports)
 
-        self._write_faucet_conf(config_file, faucet_conf)
+        if self._write_faucet_conf(config_file, faucet_conf) is None:
+            self.logger.error('Cannot write FAUCET config file')
 
     def ignore_event(self, message):
         for message_type in ('L2_LEARN', 'L2_EXPIRE', 'PORT_CHANGE'):
