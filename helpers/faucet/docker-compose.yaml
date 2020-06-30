@@ -29,7 +29,7 @@ services:
             - poseidon
     faucetconfrpc:
         restart: always
-        image: 'cyberreboot/faucetconfrpc:v0.3'
+        image: 'cyberreboot/faucetconfrpc:v0.4'
         environment:
             PYTHONUNBUFFERED: '1'
         ports:
