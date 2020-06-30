@@ -4,21 +4,26 @@ Created on 4 March 2020
 @author: Charlie Lewis
 """
 import logging
-
-import yaml
-
-from poseidon.controllers.faucet.helpers import yaml_in
-from poseidon.controllers.faucet.helpers import yaml_out
-from poseidon.helpers.exception_decor import exception
+from poseidon.controllers.faucet.config import FaucetLocalConfGetSetter, FaucetRemoteConfGetSetter
 
 
 class ACLs:
 
     def __init__(self):
         self.logger = logging.getLogger('acls')
+        self.faucetconfgetsetter = FaucetLocalConfGetSetter()
+
+    def _read_conf(self, config_file):
+        return self.faucetconfgetsetter.read_faucet_conf(config_file)
+
+    def _write_conf(self, config_file, faucet_conf):
+        return self.faucetconfgetsetter.write_faucet_conf(config_file, faucet_conf)
+
+    def _config_file_paths(self, file_paths):
+        return [self.faucetconfgetsetter.config_file_path(f) for f in file_paths]
 
     def include_acl_files(self, rules_doc, rules_file, coprocess_rules_files, obj_doc, config_file):
-        files = rules_doc['include']
+        files = self._config_file_paths(rules_doc['include'])
         rules_path = rules_file.rsplit('/', 1)[0]
         config_path = config_file.rsplit('/', 1)[0]
         conf_files = []
@@ -27,7 +32,7 @@ class ACLs:
             conf_files = obj_doc['include']
             acls_filenames = []
             if coprocess_rules_files:
-                acls_filenames += coprocess_rules_files
+                acls_filenames += self._config_file_paths(coprocess_rules_files)
             for f in files:
                 if '/' in f:
                     acls_filenames.append(f.rsplit('/', 1)[1])
@@ -47,11 +52,11 @@ class ACLs:
                     obj_doc['include'].append(
                         'poseidon_'+acls_filename)
                     if f.startswith('/'):
-                        acls_doc = yaml_in(f)
+                        acls_doc = self._read_conf(f)
                     else:
-                        acls_doc = yaml_in(rules_path+'/'+f)
-                    yaml_out(config_path+'/poseidon_' +
-                             acls_filename, acls_doc)
+                        acls_doc = self._read_conf(rules_path+'/'+f)
+                    self._write_conf(config_path+'/poseidon_' +
+                                     acls_filename, acls_doc)
                     self.logger.info(
                         'Adding {0} to config'.format(acls_filename))
         else:
@@ -61,22 +66,22 @@ class ACLs:
                 else:
                     acls_filename = f
                 if f.startswith('/'):
-                    acls_doc = yaml_in(f)
+                    acls_doc = self._read_conf(f)
                 else:
-                    acls_doc = yaml_in(rules_path+'/'+f)
+                    acls_doc = self._read_conf(rules_path+'/'+f)
                 if isinstance(acls_doc, bool):
                     self.logger.warning(
                         'Include file {0} was not found, ACLs may not be working as expected'.format(f))
                 else:
                     obj_doc['include'] = ['poseidon_'+acls_filename]
-                    yaml_out(config_path+'/poseidon_' +
-                             acls_filename, acls_doc)
+                    self._write_conf(config_path+'/poseidon_' +
+                                     acls_filename, acls_doc)
                     self.logger.info(
                         'Adding {0} to config'.format(acls_filename))
 
         # get defined ACL names from included files
         for f in files:
-            acl_doc = yaml_in(f)
+            acl_doc = self._read_conf(f)
             if isinstance(acl_doc, bool):
                 self.logger.warning(
                     'Include file {0} was not found, ACLs may not be working as expected'.format(f))

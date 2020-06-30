@@ -9,6 +9,8 @@ RUN apk upgrade --no-cache && \
     apk add --no-cache \
     build-base \
     curl \
+    libc6-compat \
+    libstdc++ \
     linux-headers \
     python3 \
     py3-pip \

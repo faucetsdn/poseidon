@@ -8,18 +8,27 @@ import shutil
 import tempfile
 import yaml
 from poseidon.controllers.faucet.faucet import FaucetProxy
-from poseidon.controllers.faucet.helpers import get_config_file
-from poseidon.controllers.faucet.helpers import parse_rules
-from poseidon.controllers.faucet.helpers import represent_none
-from poseidon.controllers.faucet.parser import Parser
+from poseidon.controllers.faucet.helpers import get_config_file, parse_rules, represent_none
+from poseidon.controllers.faucet.parser import Parser, FaucetLocalConfGetSetter
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import endpoint_factory
+
 
 SAMPLE_CONFIG = 'tests/sample_faucet_config.yaml'
 
 
+def _get_parser(**kwargs):
+    return Parser(faucetconfgetsetter_cl=FaucetLocalConfGetSetter, **kwargs)
+
+
+def _get_proxy(controller=None):
+    if controller is None:
+        controller = Config().get_config()
+    return FaucetProxy(controller, faucetconfgetsetter_cl=FaucetLocalConfGetSetter)
+
+
 def test_ignore_events():
-    parser = Parser(ignore_vlans=[999], ignore_ports={'switch99': 11})
+    parser = _get_parser(ignore_vlans=[999], ignore_ports={'switch99': 11})
     for message_type in ('L2_LEARN', 'L2_EXPIRE', 'PORT_CHANGE'):
         assert parser.ignore_event(
             {'dp_name': 'switch123', message_type: {'vid': 999, 'port_no': 123}})
@@ -45,7 +54,7 @@ def test_parse_rules():
 def test_clear_mirrors():
     with tempfile.TemporaryDirectory() as tmpdir:
         shutil.copy(SAMPLE_CONFIG, tmpdir)
-        parser = Parser(ignore_vlans=[999], ignore_ports={'switch99': 11})
+        parser = _get_parser(ignore_vlans=[999], ignore_ports={'switch99': 11})
         parser.clear_mirrors(os.path.join(tmpdir, os.path.basename(SAMPLE_CONFIG)))
 
 
@@ -77,7 +86,7 @@ dps:
 """
     switch_conf = yaml.safe_load(switch_conf_str)
     mirror_interface_conf = switch_conf['dps']['s1']['interfaces'][1]
-    parser = Parser(mirror_ports={'s1': 1})
+    parser = _get_parser(mirror_ports={'s1': 1})
     assert mirror_interface_conf['mirror'] == [2]
     ports = 3
     parser.set_mirror_config(mirror_interface_conf, ports)
@@ -177,7 +186,7 @@ acls:
 """
     orig_faucet_conf = yaml.safe_load(switch_conf_str)
     test_faucet_conf = yaml.safe_load(new_switch_conf_str)
-    parser = Parser(mirror_ports={'s1': 1, 's2': 1}, tunnel_vlan=999, tunnel_name='poseidon_tunnel')
+    parser = _get_parser(mirror_ports={'s1': 1, 's2': 1}, tunnel_vlan=999, tunnel_name='poseidon_tunnel')
     new_faucet_conf = parser._set_default_switch_conf(orig_faucet_conf)
     assert new_faucet_conf['dps']['s1'] == test_faucet_conf['dps']['s1']
     assert new_faucet_conf['dps']['s2'] == test_faucet_conf['dps']['s2']
@@ -199,7 +208,7 @@ dps:
 """
     orig_switch_conf = yaml.safe_load(switch_conf_str)
     orig_mirror_interface_conf = orig_switch_conf['dps']['s1']['interfaces'][1]
-    parser = Parser(mirror_ports={'s1': 1})
+    parser = _get_parser(mirror_ports={'s1': 1})
     switch_conf, mirror_iterface_conf, mirror_ports = parser.check_mirror('s1', orig_switch_conf)
     assert switch_conf == orig_switch_conf['dps']['s1']
     assert orig_mirror_interface_conf == mirror_iterface_conf
@@ -235,10 +244,10 @@ def test_Parser():
 
     with tempfile.TemporaryDirectory() as config_dir:
         shutil.copy(SAMPLE_CONFIG, os.path.join(config_dir, 'faucet.yaml'))
-        parser = Parser(mirror_ports={'t1-1': 2})
-        parser2 = Parser()
+        parser = _get_parser(mirror_ports={'t1-1': 2})
+        parser2 = _get_parser()
         controller = Config().get_config()
-        proxy = FaucetProxy(controller)
+        proxy = _get_proxy(controller)
         check_config(parser, os.path.join(config_dir, 'faucet.yaml'), endpoints)
         check_config(parser2, os.path.join(config_dir, 'faucet.yaml'), endpoints)
         check_config(proxy, os.path.join(config_dir, 'faucet.yaml'), endpoints)

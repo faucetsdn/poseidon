@@ -29,6 +29,7 @@ class FaucetProxy(Parser):
         self.trunk_ports = controller['trunk_ports']
         self.ignore_vlans = controller['ignore_vlans']
         self.ignore_ports = controller['ignore_ports']
+        self.faucetconfrpc_address = controller['faucetconfrpc_address']
 
         for json_conf_name in ('mirror_ports', 'ignore_vlans', 'ignore_ports', 'trunk_ports'):
             json_conf = getattr(self, json_conf_name)
@@ -43,6 +44,7 @@ class FaucetProxy(Parser):
             self.ignore_ports,
             self.tunnel_vlan,
             self.tunnel_name,
+            faucetconfrpc_address=self.faucetconfrpc_address,
             *args, **kwargs)
 
         # parse volos config
