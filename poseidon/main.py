@@ -155,7 +155,7 @@ class SDNConnect:
     def clear_filters(self):
         ''' clear any exisiting filters. '''
         if isinstance(self.sdnc, FaucetProxy):
-            Parser().clear_mirrors(self.controller['CONFIG_FILE'])
+            self.sdnc.clear_mirrors(self.controller['CONFIG_FILE'])
 
     def default_endpoints(self):
         ''' set endpoints to default state. '''
@@ -190,8 +190,7 @@ class SDNConnect:
                 self.sdnc = FaucetProxy(self.controller)
             except Exception as e:  # pragma: no cover
                 self.logger.error(
-                    'FaucetProxy could not connect to {0} because {1}'.format(
-                        self.controller['URI'], e))
+                    'FaucetProxy could not connect to controller because {0}'.format(e))
         elif controller_type == 'None':
             self.sdnc = None
         else:
@@ -307,16 +306,13 @@ class SDNConnect:
 
         try:
             current = self.sdnc.get_endpoints(messages=messages)
-            parsed = self.sdnc.format_endpoints(
-                current, self.controller['URI'])
+            parsed = self.sdnc.format_endpoints(current)
             retval['machines'] = parsed
             retval['resp'] = 'ok'
         except Exception as e:  # pragma: no cover
             self.logger.error(
-                'Could not establish connection to {0} because {1}.'.format(
-                    self.controller['URI'], e))
-            retval['controller'] = 'Could not establish connection to {0}.'.format(
-                self.controller['URI'])
+                'Could not establish connection to controller because {0}.'.format(e))
+            retval['controller'] = 'Could not establish connection to controller'
 
         self.find_new_machines(parsed)
 
@@ -863,8 +859,8 @@ def main(skip_rabbit=False):  # pragma: no cover
     pmain = Monitor(skip_rabbit=skip_rabbit)
     if not skip_rabbit:
         rabbit = Rabbit()
-        host = pmain.controller['rabbit_server']
-        port = int(pmain.controller['rabbit_port'])
+        host = pmain.controller['FA_RABBIT_HOST']
+        port = int(pmain.controller['FA_RABBIT_PORT'])
         exchange = 'topic-poseidon-internal'
         queue_name = 'poseidon_main'
         binding_key = ['poseidon.algos.#', 'poseidon.action.#']
@@ -878,22 +874,21 @@ def main(skip_rabbit=False):  # pragma: no cover
             queue_name,
             pmain.m_queue)
 
-    if pmain.controller['FA_RABBIT_ENABLED']:
-        rabbit = Rabbit()
-        host = pmain.controller['FA_RABBIT_HOST']
-        port = pmain.controller['FA_RABBIT_PORT']
-        exchange = pmain.controller['FA_RABBIT_EXCHANGE']
-        queue_name = 'poseidon_main'
-        binding_key = [pmain.controller['FA_RABBIT_ROUTING_KEY']+'.#']
-        retval = rabbit.make_rabbit_connection(
-            host, port, exchange, queue_name, binding_key)
-        pmain.rabbit_channel_local = retval[0]
-        pmain.rabbit_channel_connection_local_fa = retval[1]
-        pmain.rabbit_thread = rabbit.start_channel(
-            pmain.rabbit_channel_local,
-            rabbit_callback,
-            queue_name,
-            pmain.m_queue)
+    rabbit = Rabbit()
+    host = pmain.controller['FA_RABBIT_HOST']
+    port = pmain.controller['FA_RABBIT_PORT']
+    exchange = pmain.controller['FA_RABBIT_EXCHANGE']
+    queue_name = 'poseidon_main'
+    binding_key = [pmain.controller['FA_RABBIT_ROUTING_KEY']+'.#']
+    retval = rabbit.make_rabbit_connection(
+        host, port, exchange, queue_name, binding_key)
+    pmain.rabbit_channel_local = retval[0]
+    pmain.rabbit_channel_connection_local_fa = retval[1]
+    pmain.rabbit_thread = rabbit.start_channel(
+        pmain.rabbit_channel_local,
+        rabbit_callback,
+        queue_name,
+        pmain.m_queue)
 
     pmain.schedule_thread.start()
 

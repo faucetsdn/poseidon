@@ -7,31 +7,35 @@ Created on 31 January 2020
 import logging
 import os
 from pathlib import Path
-from poseidon.controllers.faucet.helpers import yaml_in, yaml_out
-
+from poseidon.controllers.faucet.config import FaucetLocalConfGetSetter
 
 
 class Acl:
 
-    def __init__(self, acl_file=None):
+    def __init__(self, acl_file=None, faucetconfgetsetter=FaucetLocalConfGetSetter):
         self.acls = {}
         self.acl_file = acl_file
+        self.faucetconfgetsetter = faucetconfgetsetter
 
     def read(self, config_yaml=None):
         try:
             if config_yaml is None:
-                config_yaml = yaml_in(self.acl_file)
+                config_yaml = self.faucetconfgetsetter.read_faucet_conf(self.acl_file)
             self.acls = config_yaml.get('acls', {})
         except (FileNotFoundError, PermissionError):
-            return
+            pass
+        return self.acls
+
+    def _merge_acls(self, config):
+        config['acls'].update(self.acls)
 
     def write(self):
         try:
-            config = yaml_in(self.acl_file)
+            config = self.read()
             if 'acls' not in config:
                 config['acls'] = {}
-            config['acls'].update(self.acls)
-            yaml_out(self.acl_file, config)
+            self._merge_acls(config)
+            self.faucetconfgetsetter.write_faucet_conf(self.acl_file, config)
             return True
         except (FileNotFoundError, PermissionError):
             return False
@@ -44,16 +48,8 @@ class Acl:
 
 class ExclusiveAcl(Acl):
 
-    def write(self):
-        try:
-            config = yaml_in(self.acl_file)
-            if 'acls' not in config:
-                config['acls'] = {}
-            config['acls'] = self.acls
-            yaml_out(self.acl_file, config)
-            return True
-        except (FileNotFoundError, PermissionError):
-            return False
+    def _merge_acls(self, config):
+        config['acls'] = self.acls
 
 
 class VolosAcl(ExclusiveAcl):

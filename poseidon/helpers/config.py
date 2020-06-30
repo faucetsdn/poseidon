@@ -25,34 +25,28 @@ class Config():
     def get_config(self):
         # set some defaults
         controller = {
-            'URI': None,
             'TYPE': None,
             'CONFIG_FILE': None,
-            'LOG_FILE': None,
             'RULES_FILE': None,
             'MIRROR_PORTS': None,
             'AUTOMATED_ACLS': False,
-            'RABBIT_ENABLED': False,
             'LEARN_PUBLIC_ADDRESSES': False,
             'reinvestigation_frequency': 900,
             'max_concurrent_reinvestigations': 2,
             'logger_level': 'INFO',
+            'faucetconfrpc_address': 'faucetconfrpc:59999'
         }
 
         config_map = {
             'controller_type': ('TYPE', []),
-            'controller_uri': ('URI', []),
             'learn_public_addresses': ('LEARN_PUBLIC_ADDRESSES', [ast.literal_eval]),
             'controller_config_file': ('CONFIG_FILE', []),
-            'controller_log_file': ('LOG_FILE', []),
             'rules_file': ('RULES_FILE', []),
             'collector_nic': ('collector_nic', []),
             'controller_mirror_ports': ('MIRROR_PORTS', [ast.literal_eval]),
             'tunnel_vlan': ('tunnel_vlan', [int]),
             'tunnel_name': ('tunnel_name', []),
             'automated_acls': ('AUTOMATED_ACLS', [ast.literal_eval]),
-            'rabbit_enabled': ('RABBIT_ENABLED', [ast.literal_eval]),
-            'FA_RABBIT_ENABLED': ('FA_RABBIT_ENABLED', [ast.literal_eval]),
             'FA_RABBIT_PORT': ('FA_RABBIT_PORT', [int]),
             'scan_frequency': ('scan_frequency', [int]),
             'reinvestigation_frequency': ('reinvestigation_frequency', [int]),

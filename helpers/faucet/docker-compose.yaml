@@ -2,7 +2,7 @@ version: '3.7'
 services:
     rabbitmq_adapter:
         restart: always
-        image: 'faucet/event-adapter-rabbitmq:1.9.46'
+        image: 'faucet/event-adapter-rabbitmq:1.9.47'
         volumes:
             - '${POSEIDON_PREFIX}/var/run/faucet:/var/run/faucet'
         environment:
@@ -27,16 +27,14 @@ services:
             - faucetconfrpc
     faucetconfrpc:
         restart: always
-        image: 'cyberreboot/faucetconfrpc:v0.2'
+        image: 'cyberreboot/faucetconfrpc:v0.4'
         environment:
             PYTHONUNBUFFERED: '1'
-        ports:
-            - 59999
         volumes:
             - '${POSEIDON_PREFIX}/opt/poseidon/local:/local'
             - /etc/faucet:/etc/faucet
         networks:
-            poseidon:
+            - poseidon
         command:
             - --key=/local/faucetconfrpc/faucetconfrpc.key
             - --cert=/local/faucetconfrpc/faucetconfrpc.crt

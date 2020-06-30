@@ -4,12 +4,9 @@ Created on 19 November 2017
 @author: Charlie Lewis
 """
 import logging
-
 from poseidon.controllers.faucet.acls import ACLs
-from poseidon.controllers.faucet.helpers import get_config_file
+from poseidon.controllers.faucet.config import FaucetLocalConfGetSetter, FaucetRemoteConfGetSetter
 from poseidon.controllers.faucet.helpers import parse_rules
-from poseidon.controllers.faucet.helpers import yaml_in
-from poseidon.controllers.faucet.helpers import yaml_out
 from poseidon.volos.acls import Acl
 
 
@@ -21,10 +18,12 @@ class Parser:
                  max_concurrent_reinvestigations=None,
                  ignore_vlans=None,
                  ignore_ports=None,
+                 tunnel_vlan=None,
+                 tunnel_name=None,
+                 faucetconfrpc_address=None,
                  copro_port=None,
                  copro_vlan=None,
-                 tunnel_vlan=None,
-                 tunnel_name=None):
+                 faucetconfgetsetter_cl=FaucetRemoteConfGetSetter):
         self.logger = logging.getLogger('parser')
         self.mirror_ports = mirror_ports
         self.reinvestigation_frequency = reinvestigation_frequency
@@ -35,25 +34,25 @@ class Parser:
         self.copro_vlan = copro_vlan
         self.tunnel_vlan = tunnel_vlan
         self.tunnel_name = tunnel_name
+        self.faucetconfgetsetter = faucetconfgetsetter_cl(
+            client_key='/local/faucetconfrpc/client.key',
+            client_cert='/local/faucetconfrpc/client.crt',
+            ca_cert='/local/faucetconfrpc/faucetconfrpc-ca.crt',
+            server_addr=faucetconfrpc_address)
         self.mac_table = {}
 
-    @staticmethod
-    def _write_faucet_conf(config_file, faucet_conf):
-        config_file = get_config_file(config_file)
-        return yaml_out(config_file, faucet_conf)
+    def _read_faucet_conf(self, config_file):
+        return self.faucetconfgetsetter.read_faucet_conf(config_file)
 
-    @staticmethod
-    def _read_faucet_conf(config_file):
-        config_file = get_config_file(config_file)
-        faucet_conf = yaml_in(config_file)
-        return faucet_conf
+    def _write_faucet_conf(self, config_file, faucet_conf):
+        return self.faucetconfgetsetter.write_faucet_conf(config_file, faucet_conf)
 
     def _set_default_switch_conf(self, faucet_conf):
         # TODO: make smarter with more complex configs (backup original values, etc)
         if not faucet_conf:
             return faucet_conf
         dps = faucet_conf.get('dps', None)
-        acls = Acl()
+        acls = Acl(faucetconfgetsetter=self.faucetconfgetsetter)
         if dps is not None and self.mirror_ports:
             acls.read(config_yaml=faucet_conf)
             root_stack_switch = [
@@ -63,6 +62,8 @@ class Parser:
             if root_stack_switch:
                 root_stack_switch = root_stack_switch[0]
                 root_mirror_port = self.mirror_ports.get(root_stack_switch, None)
+                if self.tunnel_name in acls.acls:
+                    del acls.acls[self.tunnel_name]
                 # Safety rule to prevent looped packets being output to the loop.
                 acls.add_rule(
                     self.tunnel_name,
@@ -143,7 +144,6 @@ class Parser:
                             if not isinstance(existing_mirror_ports, list):
                                 existing_mirror_ports = list(existing_mirror_ports)
                             existing_mirror_ports = set(existing_mirror_ports)
-
         return (switch_conf, mirror_interface_conf, existing_mirror_ports)
 
     def clear_mirrors(self, config_file):
@@ -162,6 +162,10 @@ class Parser:
                endpoints=None, force_apply_rules=None, force_remove_rules=None,
                coprocess_rules_files=None):
         faucet_conf = self._read_faucet_conf(config_file)
+        if faucet_conf is None:
+            self.logger.warning('Cannot read FAUCET config file')
+            return
+
         faucet_conf = self._set_default_switch_conf(faucet_conf)
         switch_conf, mirror_interface_conf, mirror_ports = self.check_mirror(switch, faucet_conf)
 
@@ -194,7 +198,8 @@ class Parser:
         if switch_conf and mirror_interface_conf:
             self.set_mirror_config(mirror_interface_conf, mirror_ports)
 
-        self._write_faucet_conf(config_file, faucet_conf)
+        if self._write_faucet_conf(config_file, faucet_conf) is None:
+            self.logger.error('Cannot write FAUCET config file')
 
     def ignore_event(self, message):
         for message_type in ('L2_LEARN', 'L2_EXPIRE', 'PORT_CHANGE'):
@@ -267,53 +272,3 @@ class Parser:
                     for data in m_table[mac]:
                         if port_no_str == data['port'] and dp_name == data['segment']:
                             make_mac_inactive(mac)
-
-    def log(self, log_file):
-        self.logger.debug('parsing log file')
-        if not log_file:
-            # default to FAUCET default
-            log_file = '/var/log/faucet/faucet.log'
-        # NOTE very fragile, prone to errors
-        try:
-            with open(log_file, 'r') as f:
-                for line in f:
-                    if 'L2 learned' in line:
-                        learned_mac = line.split()
-                        data = {'ip-address': learned_mac[16][0:-1],
-                                'ip-state': 'L2 learned',
-                                'mac': learned_mac[10],
-                                'segment': learned_mac[7][1:-1],
-                                'port': learned_mac[22],
-                                'tenant': learned_mac[24] + learned_mac[25],
-                                'active': 1}
-                        if learned_mac[10] in self.mac_table:
-                            dup = False
-                            for d in self.mac_table[learned_mac[10]]:
-                                if data == d:
-                                    dup = True
-                            if dup:
-                                self.mac_table[learned_mac[10]].remove(data)
-                            self.mac_table[learned_mac[10]].insert(0, data)
-                        else:
-                            self.mac_table[learned_mac[10]] = [data]
-                    elif ', expired [' in line:
-                        expired_mac = line.split(', expired [')
-                        expired_mac = expired_mac[1].split()[0]
-                        if expired_mac in self.mac_table:
-                            self.mac_table[expired_mac][0]['active'] = 0
-                    elif ' Port ' in line:
-                        # try and see if it was a port down event
-                        # this will break if more than one port expires at the same time TODO
-                        port_change = line.split(' Port ')
-                        dpid = port_change[0].split()[-2]
-                        port_change = port_change[1].split()
-                        if port_change[1] == 'down':
-                            m_table = self.mac_table.copy()
-                            for mac in m_table:
-                                for data in m_table[mac]:
-                                    if (port_change[0] == data['port'] and
-                                            dpid == data['segment']):
-                                        self.mac_table[mac][0]['active'] = 0
-        except Exception as e:
-            self.logger.error(
-                'Error parsing Faucet log file {0}'.format(str(e)))
