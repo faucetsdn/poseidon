@@ -155,7 +155,7 @@ class SDNConnect:
     def clear_filters(self):
         ''' clear any exisiting filters. '''
         if isinstance(self.sdnc, FaucetProxy):
-            self.sdnc.clear_mirrors(self.controller['CONFIG_FILE'])
+            self.sdnc.clear_mirrors()
 
     def default_endpoints(self):
         ''' set endpoints to default state. '''

@@ -17,32 +17,35 @@ from poseidon.helpers.endpoint import endpoint_factory
 SAMPLE_CONFIG = 'tests/sample_faucet_config.yaml'
 
 
-def _get_parser(**kwargs):
-    return Parser(faucetconfgetsetter_cl=FaucetLocalConfGetSetter, **kwargs)
+def _get_parser(faucetconfgetsetter_cl=FaucetLocalConfGetSetter, **kwargs):
+    return Parser(faucetconfgetsetter_cl=faucetconfgetsetter_cl, **kwargs)
 
 
-def _get_proxy(controller=None):
+def _get_proxy(controller=None, faucetconfgetsetter_cl=FaucetLocalConfGetSetter):
     if controller is None:
         controller = Config().get_config()
-    return FaucetProxy(controller, faucetconfgetsetter_cl=FaucetLocalConfGetSetter)
+    return FaucetProxy(controller, faucetconfgetsetter_cl=faucetconfgetsetter_cl)
 
 
 def test_ignore_events():
-    parser = _get_parser(ignore_vlans=[999], ignore_ports={'switch99': 11})
-    for message_type in ('L2_LEARN', 'L2_EXPIRE', 'PORT_CHANGE'):
+    with tempfile.TemporaryDirectory() as tmpdir:
+        faucetconfgetsetter_cl = FaucetLocalConfGetSetter
+        faucetconfgetsetter_cl.DEFAULT_CONFIG_NAME = os.path.join(tmpdir, 'faucet.yaml')
+        parser = _get_parser(
+            faucetconfgetsetter_cl=faucetconfgetsetter_cl, ignore_vlans=[999], ignore_ports={'switch99': 11})
+        for message_type in ('L2_LEARN', 'L2_EXPIRE', 'PORT_CHANGE'):
+            assert parser.ignore_event(
+                {'dp_name': 'switch123', message_type: {'vid': 999, 'port_no': 123}})
+            assert not parser.ignore_event(
+                {'dp_name': 'switch123', message_type: {'vid': 333, 'port_no': 123}})
+            assert parser.ignore_event(
+                {'dp_name': 'switch99', message_type: {'vid': 333, 'port_no': 11}})
+            assert not parser.ignore_event(
+                {'dp_name': 'switch99', message_type: {'vid': 333, 'port_no': 99}})
+            assert parser.ignore_event(
+                {'dp_name': 'switch99', message_type: {'vid': 333, 'port_no': 99, 'stack_descr': 'something'}})
         assert parser.ignore_event(
-            {'dp_name': 'switch123', message_type: {'vid': 999, 'port_no': 123}})
-        assert not parser.ignore_event(
-            {'dp_name': 'switch123', message_type: {'vid': 333, 'port_no': 123}})
-        assert parser.ignore_event(
-            {'dp_name': 'switch99', message_type: {'vid': 333, 'port_no': 11}})
-        assert not parser.ignore_event(
-            {'dp_name': 'switch99', message_type: {'vid': 333, 'port_no': 99}})
-        assert parser.ignore_event(
-            {'dp_name': 'switch99', message_type: {'vid': 333, 'port_no': 99, 'stack_descr': 'something'}})
-    assert parser.ignore_event(
-        {'dp_name': 'switch123', 'UNKNOWN': {'vid': 123, 'port_no': 123}})
-
+            {'dp_name': 'switch123', 'UNKNOWN': {'vid': 123, 'port_no': 123}})
 
 
 def test_parse_rules():
@@ -53,9 +56,12 @@ def test_parse_rules():
 
 def test_clear_mirrors():
     with tempfile.TemporaryDirectory() as tmpdir:
-        shutil.copy(SAMPLE_CONFIG, tmpdir)
-        parser = _get_parser(ignore_vlans=[999], ignore_ports={'switch99': 11})
-        parser.clear_mirrors(os.path.join(tmpdir, os.path.basename(SAMPLE_CONFIG)))
+        faucetconfgetsetter_cl = FaucetLocalConfGetSetter
+        faucetconfgetsetter_cl.DEFAULT_CONFIG_NAME = os.path.join(tmpdir, 'faucet.yaml')
+        shutil.copy(SAMPLE_CONFIG, faucetconfgetsetter_cl.DEFAULT_CONFIG_NAME)
+        parser = _get_parser(
+            faucetconfgetsetter_cl=faucetconfgetsetter_cl, ignore_vlans=[999], ignore_ports={'switch99': 11})
+        parser.clear_mirrors()
 
 
 def test_represent_none():
@@ -85,12 +91,18 @@ dps:
                 native_vlan: 100
 """
     switch_conf = yaml.safe_load(switch_conf_str)
-    mirror_interface_conf = switch_conf['dps']['s1']['interfaces'][1]
-    parser = _get_parser(mirror_ports={'s1': 1})
-    assert mirror_interface_conf['mirror'] == [2]
-    ports = 3
-    parser.set_mirror_config(mirror_interface_conf, ports)
-    assert mirror_interface_conf['mirror'] == [3]
+    with tempfile.TemporaryDirectory() as tmpdir:
+        faucetconfgetsetter_cl = FaucetLocalConfGetSetter
+        faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(tmpdir, 'faucet.yaml')
+        mirror_interface_conf = switch_conf['dps']['s1']['interfaces'][1]
+        parser = _get_parser(
+            faucetconfgetsetter_cl=faucetconfgetsetter_cl,
+            mirror_ports={'s1': 1},
+            proxy_mirror_ports={'sx': ['s1', 99]})
+        assert mirror_interface_conf['mirror'] == [2]
+        ports = 3
+        parser.set_mirror_config(mirror_interface_conf, ports)
+        assert mirror_interface_conf['mirror'] == [3]
 
 
 def test_stack_default_config():
@@ -186,11 +198,48 @@ acls:
 """
     orig_faucet_conf = yaml.safe_load(switch_conf_str)
     test_faucet_conf = yaml.safe_load(new_switch_conf_str)
-    parser = _get_parser(mirror_ports={'s1': 1, 's2': 1}, tunnel_vlan=999, tunnel_name='poseidon_tunnel')
-    new_faucet_conf = parser._set_default_switch_conf(orig_faucet_conf)
-    assert new_faucet_conf['dps']['s1'] == test_faucet_conf['dps']['s1']
-    assert new_faucet_conf['dps']['s2'] == test_faucet_conf['dps']['s2']
-    assert new_faucet_conf['acls'] == test_faucet_conf['acls']
+    with tempfile.TemporaryDirectory() as tmpdir:
+        faucetconfgetsetter_cl = FaucetLocalConfGetSetter
+        faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(tmpdir, 'faucet.yaml')
+        parser = _get_parser(
+            faucetconfgetsetter_cl=faucetconfgetsetter_cl,
+            mirror_ports={'s1': 1, 's2': 1},
+            proxy_mirror_ports={'sx': ['s1', 99]},
+            tunnel_vlan=999, tunnel_name='poseidon_tunnel')
+        new_faucet_conf = parser._set_default_switch_conf(orig_faucet_conf)
+        assert new_faucet_conf['dps']['s1'] == test_faucet_conf['dps']['s1']
+        assert new_faucet_conf['dps']['s2'] == test_faucet_conf['dps']['s2']
+        assert new_faucet_conf['acls'] == test_faucet_conf['acls']
+
+
+def test_proxy_mirror_config():
+    faucet_conf_str = """
+dps:
+    s1:
+        interfaces:
+            1:
+                output_only: true
+            2:
+                native_vlan: 100
+            3:
+                native_vlan: 100
+            99:
+                native_vlan: 100
+    sx:
+        interfaces:
+            1:
+                native_vlan: 100
+"""
+    faucet_conf = yaml.safe_load(faucet_conf_str)
+    with tempfile.TemporaryDirectory() as tmpdir:
+        faucetconfgetsetter_cl = FaucetLocalConfGetSetter
+        faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(tmpdir, 'faucet.yaml')
+        parser = _get_parser(
+            faucetconfgetsetter_cl=faucetconfgetsetter_cl,
+            mirror_ports={'s1': 1},
+            proxy_mirror_ports={'sx': ['s1', 99]})
+        # returns s1:99, not sx.
+        assert parser.proxy_mirror_port('sx', 1, faucet_conf) == ('s1', 99)
 
 
 def test_check_mirror_config():
@@ -208,32 +257,37 @@ dps:
 """
     orig_switch_conf = yaml.safe_load(switch_conf_str)
     orig_mirror_interface_conf = orig_switch_conf['dps']['s1']['interfaces'][1]
-    parser = _get_parser(mirror_ports={'s1': 1})
-    switch_conf, mirror_iterface_conf, mirror_ports = parser.check_mirror('s1', orig_switch_conf)
-    assert switch_conf == orig_switch_conf['dps']['s1']
-    assert orig_mirror_interface_conf == mirror_iterface_conf
-    assert mirror_ports == {2}
+    with tempfile.TemporaryDirectory() as tmpdir:
+        faucetconfgetsetter_cl = FaucetLocalConfGetSetter
+        faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(tmpdir, 'faucet.yaml')
+        parser = _get_parser(
+            faucetconfgetsetter_cl=faucetconfgetsetter_cl,
+            mirror_ports={'s1': 1},
+            proxy_mirror_ports={'sx': ['s1', 99]})
+        switch_conf, mirror_interface_conf, mirror_ports = parser.check_mirror('s1', orig_switch_conf)
+        assert switch_conf == orig_switch_conf['dps']['s1']
+        assert orig_mirror_interface_conf == mirror_interface_conf
+        assert mirror_ports == {2}
 
 
 def test_Parser():
     """
     Tests Parser
     """
-    def check_config(obj, path, endpoints):
-        obj.config(path, 'mirror', 1, 't1-1')
-        obj.config(path, 'mirror', 2, 0x1)
-        obj.config(path, 'mirror', 2, 't1-1')
-        obj.config(path, 'mirror', 5, 't2-1')
-        obj.config(path, 'mirror', 6, 'bad')
-        obj.config(path, 'unmirror', None, None)
-        obj.config(path, 'unmirror', 1, 't1-1')
-        obj.config(path, 'unmirror', 1, 't1-1')
-        obj.config(path, 'shutdown', None, None)
-        obj.config(path, 'apply_acls', None, None)
-        obj.config(path, 'apply_acls', 1, 't1-1', endpoints=endpoints,
-                   rules_file=os.path.join(os.getcwd(),
-                                           'rules.yaml'))
-        obj.config(path, 'unknown', None, None)
+    def check_config(obj, endpoints):
+        obj.config('mirror', 1, 't1-1')
+        obj.config('mirror', 2, 0x1)
+        obj.config('mirror', 2, 't1-1')
+        obj.config('mirror', 5, 't2-1')
+        obj.config('mirror', 6, 'bad')
+        obj.config('unmirror', None, None)
+        obj.config('unmirror', 1, 't1-1')
+        obj.config('unmirror', 1, 't1-1')
+        obj.config('shutdown', None, None)
+        obj.config('apply_acls', None, None)
+        obj.config('apply_acls', 1, 't1-1', endpoints=endpoints,
+                   rules_file=os.path.join(os.getcwd(), 'rules.yaml'))
+        obj.config('unknown', None, None)
 
     endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
@@ -242,13 +296,17 @@ def test_Parser():
         '0.0.0.0': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
     endpoints = [endpoint]
 
-    with tempfile.TemporaryDirectory() as config_dir:
-        shutil.copy(SAMPLE_CONFIG, os.path.join(config_dir, 'faucet.yaml'))
-        parser = _get_parser(mirror_ports={'t1-1': 2})
-        parser2 = _get_parser()
+    with tempfile.TemporaryDirectory() as tmpdir:
+        faucetconfgetsetter_cl = FaucetLocalConfGetSetter
+        faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(tmpdir, 'faucet.yaml')
+        shutil.copy(SAMPLE_CONFIG, faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE)
+        parser = _get_parser(
+            faucetconfgetsetter_cl=faucetconfgetsetter_cl,
+            mirror_ports={'t1-1': 2},
+            proxy_mirror_ports={'sx': ['s1', 99]})
+        parser2 = _get_parser(faucetconfgetsetter_cl=faucetconfgetsetter_cl)
         controller = Config().get_config()
-        proxy = _get_proxy(controller)
-        check_config(parser, os.path.join(config_dir, 'faucet.yaml'), endpoints)
-        check_config(parser2, os.path.join(config_dir, 'faucet.yaml'), endpoints)
-        check_config(proxy, os.path.join(config_dir, 'faucet.yaml'), endpoints)
-
+        proxy = _get_proxy(faucetconfgetsetter_cl=faucetconfgetsetter_cl, controller=controller)
+        check_config(parser, endpoints)
+        check_config(parser2, endpoints)
+        check_config(proxy, endpoints)

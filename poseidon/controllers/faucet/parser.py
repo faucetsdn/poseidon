@@ -6,8 +6,7 @@ Created on 19 November 2017
 import logging
 
 from poseidon.controllers.faucet.acls import ACLs
-from poseidon.controllers.faucet.config import FaucetLocalConfGetSetter
-from poseidon.controllers.faucet.config import FaucetRemoteConfGetSetter
+from poseidon.controllers.faucet.config import FaucetLocalConfGetSetter, FaucetRemoteConfGetSetter
 from poseidon.controllers.faucet.helpers import parse_rules
 from poseidon.volos.acls import Acl
 
@@ -16,6 +15,7 @@ class Parser:
 
     def __init__(self,
                  mirror_ports=None,
+                 proxy_mirror_ports=None,
                  reinvestigation_frequency=None,
                  max_concurrent_reinvestigations=None,
                  ignore_vlans=None,
@@ -28,6 +28,7 @@ class Parser:
                  faucetconfgetsetter_cl=FaucetRemoteConfGetSetter):
         self.logger = logging.getLogger('parser')
         self.mirror_ports = mirror_ports
+        self.proxy_mirror_ports = proxy_mirror_ports
         self.reinvestigation_frequency = reinvestigation_frequency
         self.max_concurrent_reinvestigations = max_concurrent_reinvestigations
         self.ignore_vlans = ignore_vlans
@@ -43,11 +44,11 @@ class Parser:
             server_addr=faucetconfrpc_address)
         self.mac_table = {}
 
-    def _read_faucet_conf(self, config_file):
-        return self.faucetconfgetsetter.read_faucet_conf(config_file)
+    def _read_faucet_conf(self):
+        return self.faucetconfgetsetter.read_faucet_conf(config_file=None)
 
-    def _write_faucet_conf(self, config_file, faucet_conf):
-        return self.faucetconfgetsetter.write_faucet_conf(config_file, faucet_conf)
+    def _write_faucet_conf(self, faucet_conf):
+        return self.faucetconfgetsetter.write_faucet_conf(config_file=None, faucet_conf=faucet_conf)
 
     def _set_default_switch_conf(self, faucet_conf):
         # TODO: make smarter with more complex configs (backup original values, etc)
@@ -126,6 +127,26 @@ class Parser:
         elif 'mirror' in mirror_interface_conf:
             del mirror_interface_conf['mirror']
 
+    def proxy_mirror_port(self, switch, port, faucet_conf):
+        if self.proxy_mirror_ports:
+            dps = faucet_conf.get('dps', None)
+            if dps is not None:
+                proxy_ports = self.proxy_mirror_ports.get(switch, None)
+                if proxy_ports:
+                    switch, port = proxy_ports
+        return switch, port
+
+    def mirror_switch_port(self, switch, faucet_conf):
+        switch_conf = None
+        switch_mirror_port = None
+        dps = faucet_conf.get('dps', None)
+        if dps:
+            switch_mirror_port = self.mirror_ports.get(switch, None)
+            switch_conf = dps.get(switch, None)
+        if not switch_conf:
+            self.logger.warning('no mirror port for switch %s' % switch)
+        return (switch_conf, switch_mirror_port)
+
     def check_mirror(self, switch, faucet_conf):
         switch_conf = None
         mirror_interface_conf = None
@@ -136,28 +157,21 @@ class Parser:
         elif not self.mirror_ports:
             self.logger.error('Unable to mirror, no mirror ports defined')
         else:
-            dps = faucet_conf.get('dps', None)
-            if dps is not None:
-                switch_conf = dps.get(switch, None)
-                switch_mirror_port = self.mirror_ports.get(switch, None)
-                if switch_conf is not None and switch_mirror_port is not None:
-                    interfaces_conf = switch_conf.get('interfaces', None)
-                    if interfaces_conf:
-                        mirror_interface_conf = interfaces_conf.get(
-                            switch_mirror_port, None)
-                        if mirror_interface_conf:
-                            existing_mirror_ports = mirror_interface_conf.get(
-                                'mirror', [])
-                            if not isinstance(existing_mirror_ports, list):
-                                existing_mirror_ports = list(
-                                    existing_mirror_ports)
-                            existing_mirror_ports = set(existing_mirror_ports)
-            else:
-                self.logger.error('No dps found in Faucet config')
+            switch_conf, switch_mirror_port = self.mirror_switch_port(switch, faucet_conf)
+            if switch_conf is not None and switch_mirror_port is not None:
+                interfaces_conf = switch_conf.get('interfaces', None)
+                if interfaces_conf:
+                    mirror_interface_conf = interfaces_conf.get(
+                        switch_mirror_port, None)
+                    if mirror_interface_conf:
+                        existing_mirror_ports = mirror_interface_conf.get('mirror', [])
+                        if not isinstance(existing_mirror_ports, list):
+                            existing_mirror_ports = list(existing_mirror_ports)
+                        existing_mirror_ports = set(existing_mirror_ports)
         return (switch_conf, mirror_interface_conf, existing_mirror_ports)
 
-    def clear_mirrors(self, config_file):
-        faucet_conf = self._read_faucet_conf(config_file)
+    def clear_mirrors(self):
+        faucet_conf = self._read_faucet_conf()
         if faucet_conf:
             dps = faucet_conf.get('dps', None)
             if dps:
@@ -166,17 +180,18 @@ class Parser:
                         switch, faucet_conf)
                     if switch_conf and mirror_interface_conf:
                         self.set_mirror_config(mirror_interface_conf, None)
-                return self._write_faucet_conf(config_file, faucet_conf)
+                return self._write_faucet_conf(faucet_conf)
         return False
 
-    def config(self, config_file, action, port, switch, rules_file=None,
+    def config(self, action, port, switch, rules_file=None,
                endpoints=None, force_apply_rules=None, force_remove_rules=None,
                coprocess_rules_files=None):
-        faucet_conf = self._read_faucet_conf(config_file)
-        if faucet_conf is None:
+        faucet_conf = self._read_faucet_conf()
+        if not faucet_conf:
             self.logger.warning('Cannot read FAUCET config file')
             return
 
+        switch, port = self.proxy_mirror_port(switch, port, faucet_conf)
         faucet_conf = self._set_default_switch_conf(faucet_conf)
         switch_conf, mirror_interface_conf, mirror_ports = self.check_mirror(
             switch, faucet_conf)
@@ -201,7 +216,7 @@ class Parser:
         elif action == 'apply_acls':
             rules_doc = parse_rules(rules_file)
             faucet_conf = ACLs().apply_acls(
-                config_file, rules_file, endpoints,
+                rules_file, endpoints,
                 force_apply_rules, force_remove_rules,
                 coprocess_rules_files, faucet_conf, rules_doc)
         else:
@@ -210,7 +225,7 @@ class Parser:
         if switch_conf and mirror_interface_conf:
             self.set_mirror_config(mirror_interface_conf, mirror_ports)
 
-        if self._write_faucet_conf(config_file, faucet_conf) is None:
+        if self._write_faucet_conf(faucet_conf) is None:
             self.logger.error('Cannot write FAUCET config file')
 
     def ignore_event(self, message):

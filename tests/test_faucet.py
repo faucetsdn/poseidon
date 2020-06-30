@@ -4,17 +4,20 @@ Test module for faucet.
 @author: Charlie Lewis
 """
 import os
+import shutil
 import tempfile
 from poseidon.controllers.faucet.faucet import FaucetProxy
 from poseidon.controllers.faucet.helpers import yaml_in, yaml_out
 from poseidon.controllers.faucet.parser import FaucetLocalConfGetSetter
 from poseidon.helpers.config import Config
 
+SAMPLE_CONFIG = 'tests/sample_faucet_config.yaml'
 
-def _get_proxy(controller=None):
+
+def _get_proxy(faucetconfgetsetter_cl, controller=None):
     if controller is None:
         controller = Config().get_config()
-    return FaucetProxy(controller, faucetconfgetsetter_cl=FaucetLocalConfGetSetter)
+    return FaucetProxy(controller, faucetconfgetsetter_cl=faucetconfgetsetter_cl)
 
 
 def test_yaml_in():
@@ -26,41 +29,49 @@ def test_yaml_in():
 
 
 def test_get_endpoints():
-    proxy = _get_proxy()
-    a = proxy.get_endpoints()
-    assert isinstance(a, list)
+    with tempfile.TemporaryDirectory() as tmpdir:
+        faucetconfgetsetter_cl = FaucetLocalConfGetSetter
+        faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(tmpdir, 'faucet.yaml')
+        shutil.copy(SAMPLE_CONFIG, faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE)
+        proxy = _get_proxy(faucetconfgetsetter_cl)
+        a = proxy.get_endpoints()
+        assert isinstance(a, list)
 
-    proxy = _get_proxy()
-    a = proxy.get_endpoints(messages=[{'dp_name': 'switch', 'L2_LEARN': {'l3_src_ip': '10.0.0.1', 'eth_src': '00:00:00:00:00:00', 'port_no': 1, 'vid': '100'}}, {
-                            'version': 1, 'time': 1525205350.0357792, 'dp_id': 1, 'dp_name': 'switch-1', 'event_id': 5, 'PORT_CHANGE': {'port_no': 1, 'reason': 'MODIFY', 'status': False}}, {}])
-    assert isinstance(a, list)
+        proxy = _get_proxy(faucetconfgetsetter_cl)
+        a = proxy.get_endpoints(messages=[{'dp_name': 'switch', 'L2_LEARN': {'l3_src_ip': '10.0.0.1', 'eth_src': '00:00:00:00:00:00', 'port_no': 1, 'vid': '100'}}, {
+                                'version': 1, 'time': 1525205350.0357792, 'dp_id': 1, 'dp_name': 'switch-1', 'event_id': 5, 'PORT_CHANGE': {'port_no': 1, 'reason': 'MODIFY', 'status': False}}, {}])
+        assert isinstance(a, list)
 
 
 def test_FaucetProxy():
     """
     Tests Faucet
     """
-    proxy = _get_proxy()
-    proxy.shutdown_ip('10.0.0.9')
-    proxy.shutdown_endpoint()
-    proxy.mirror_mac('00:00:00:00:00:00', None, None)
-    proxy.mirror_mac('00:00:00:00:00:01', None, None)
-    proxy.unmirror_mac('00:00:00:00:00:00', None, None)
-    proxy.update_acls()
+    with tempfile.TemporaryDirectory() as tmpdir:
+        faucetconfgetsetter_cl = FaucetLocalConfGetSetter
+        faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(tmpdir, 'faucet.yaml')
+        shutil.copy(SAMPLE_CONFIG, faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE)
+        proxy = _get_proxy(faucetconfgetsetter_cl)
+        proxy.shutdown_ip('10.0.0.9')
+        proxy.shutdown_endpoint()
+        proxy.mirror_mac('00:00:00:00:00:00', None, None)
+        proxy.mirror_mac('00:00:00:00:00:01', None, None)
+        proxy.unmirror_mac('00:00:00:00:00:00', None, None)
+        proxy.update_acls()
 
-    proxy = _get_proxy()
-    proxy.shutdown_ip('10.0.0.9')
-    proxy.shutdown_endpoint()
-    proxy.mirror_mac('00:00:00:00:00:00', None, None)
-    proxy.mirror_mac('00:00:00:00:00:01', None, None)
-    proxy.unmirror_mac('00:00:00:00:00:00', None, None)
-    proxy.update_acls()
+        proxy = _get_proxy(faucetconfgetsetter_cl)
+        proxy.shutdown_ip('10.0.0.9')
+        proxy.shutdown_endpoint()
+        proxy.mirror_mac('00:00:00:00:00:00', None, None)
+        proxy.mirror_mac('00:00:00:00:00:01', None, None)
+        proxy.unmirror_mac('00:00:00:00:00:00', None, None)
+        proxy.update_acls()
 
-    controller = Config().get_config()
-    controller['MIRROR_PORTS'] = '{"foo":1}'
-    controller['ignore_vlans'] = ['foo']
-    controller['ignore_ports'] = [1]
-    proxy = _get_proxy(controller)
+        controller = Config().get_config()
+        controller['MIRROR_PORTS'] = '{"foo":1}'
+        controller['ignore_vlans'] = ['foo']
+        controller['ignore_ports'] = [1]
+        proxy = _get_proxy(faucetconfgetsetter_cl, controller)
 
 
 def test_format_endpoints():
