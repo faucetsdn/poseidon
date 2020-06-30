@@ -4,8 +4,10 @@ Created on 19 November 2017
 @author: Charlie Lewis
 """
 import logging
+
 from poseidon.controllers.faucet.acls import ACLs
-from poseidon.controllers.faucet.config import FaucetLocalConfGetSetter, FaucetRemoteConfGetSetter
+from poseidon.controllers.faucet.config import FaucetLocalConfGetSetter
+from poseidon.controllers.faucet.config import FaucetRemoteConfGetSetter
 from poseidon.controllers.faucet.helpers import parse_rules
 from poseidon.volos.acls import Acl
 
@@ -61,7 +63,8 @@ class Parser:
             root_mirror_port = None
             if root_stack_switch:
                 root_stack_switch = root_stack_switch[0]
-                root_mirror_port = self.mirror_ports.get(root_stack_switch, None)
+                root_mirror_port = self.mirror_ports.get(
+                    root_stack_switch, None)
                 if self.tunnel_name in acls.acls:
                     del acls.acls[self.tunnel_name]
                 # Safety rule to prevent looped packets being output to the loop.
@@ -80,13 +83,15 @@ class Parser:
                     continue
                 switch_conf = dps[switch]
                 if self.reinvestigation_frequency:
-                    switch_conf['timeout'] = (self.reinvestigation_frequency * 2) + 1
+                    switch_conf['timeout'] = (
+                        self.reinvestigation_frequency * 2) + 1
                     switch_conf['arp_neighbor_timeout'] = self.reinvestigation_frequency
                 # If stacking was detected, provision tunnel config on non root switches.
                 # Poseidon's mirror NIC must be connected to the root switch's mirror port.
                 # Non mirror switches must have a loopback plug installed in their mirror port.
                 if root_stack_switch and root_mirror_port:
-                    mirror_port_conf = switch_conf.get('interfaces', {}).get(mirror_port, None)
+                    mirror_port_conf = switch_conf.get(
+                        'interfaces', {}).get(mirror_port, None)
                     if not mirror_port_conf:
                         continue
                     for existing_key in set(mirror_port_conf.keys()):
@@ -138,12 +143,17 @@ class Parser:
                 if switch_conf is not None and switch_mirror_port is not None:
                     interfaces_conf = switch_conf.get('interfaces', None)
                     if interfaces_conf:
-                        mirror_interface_conf = interfaces_conf.get(switch_mirror_port, None)
+                        mirror_interface_conf = interfaces_conf.get(
+                            switch_mirror_port, None)
                         if mirror_interface_conf:
-                            existing_mirror_ports = mirror_interface_conf.get('mirror', [])
+                            existing_mirror_ports = mirror_interface_conf.get(
+                                'mirror', [])
                             if not isinstance(existing_mirror_ports, list):
-                                existing_mirror_ports = list(existing_mirror_ports)
+                                existing_mirror_ports = list(
+                                    existing_mirror_ports)
                             existing_mirror_ports = set(existing_mirror_ports)
+            else:
+                self.logger.error('No dps found in Faucet config')
         return (switch_conf, mirror_interface_conf, existing_mirror_ports)
 
     def clear_mirrors(self, config_file):
@@ -152,7 +162,8 @@ class Parser:
             dps = faucet_conf.get('dps', None)
             if dps:
                 for switch in dps:
-                    switch_conf, mirror_interface_conf, _ = self.check_mirror(switch, faucet_conf)
+                    switch_conf, mirror_interface_conf, _ = self.check_mirror(
+                        switch, faucet_conf)
                     if switch_conf and mirror_interface_conf:
                         self.set_mirror_config(mirror_interface_conf, None)
                 return self._write_faucet_conf(config_file, faucet_conf)
@@ -167,7 +178,8 @@ class Parser:
             return
 
         faucet_conf = self._set_default_switch_conf(faucet_conf)
-        switch_conf, mirror_interface_conf, mirror_ports = self.check_mirror(switch, faucet_conf)
+        switch_conf, mirror_interface_conf, mirror_ports = self.check_mirror(
+            switch, faucet_conf)
 
         if action in ('shutdown', 'apply_routes'):
             # TODO: not implemented.
@@ -182,10 +194,10 @@ class Parser:
                         mirror_ports.remove(port)
                     except KeyError:
                         self.logger.warning(
-                            'Port: {0} was not already mirroring on this switch: {1}'.format(
-                                str(port), str(switch)))
+                            f'{port} was not already mirroring on {switch}')
             else:
-                self.logger.error('Unable to mirror due to warnings')
+                self.logger.error(
+                    f'Unable to mirror {switch}:{port} due to warnings')
         elif action == 'apply_acls':
             rules_doc = parse_rules(rules_file)
             faucet_conf = ACLs().apply_acls(
@@ -207,12 +219,14 @@ class Parser:
             if message_body:
                 # When stacking is in use, we only want to learn on switch, that a host is local to.
                 if 'stack_descr' in message_body:
-                    self.logger.debug('ignoring event because learning from a stack port')
+                    self.logger.debug(
+                        'ignoring event because learning from a stack port')
                     return True
                 if self.ignore_vlans:
                     vlan = message_body.get('vid', None)
                     if vlan in self.ignore_vlans:
-                        self.logger.debug('ignoring event because VLAN %s ignored' % vlan)
+                        self.logger.debug(
+                            'ignoring event because VLAN %s ignored' % vlan)
                         return True
                 if self.ignore_ports:
                     switch = str(message['dp_name'])
@@ -230,6 +244,7 @@ class Parser:
 
     def event(self, message):
         dp_name = str(message['dp_name'])
+
         def make_mac_inactive(mac):
             if mac in self.mac_table:
                 self.mac_table[mac][0]['active'] = 0
