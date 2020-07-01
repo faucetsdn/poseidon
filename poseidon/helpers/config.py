@@ -5,6 +5,7 @@ Created on 5 December 2018
 """
 import ast
 import configparser
+import json
 import logging
 import os
 
@@ -26,7 +27,6 @@ class Config():
         # set some defaults
         controller = {
             'TYPE': None,
-            'CONFIG_FILE': None,
             'RULES_FILE': None,
             'MIRROR_PORTS': None,
             'AUTOMATED_ACLS': False,
@@ -40,10 +40,10 @@ class Config():
         config_map = {
             'controller_type': ('TYPE', []),
             'learn_public_addresses': ('LEARN_PUBLIC_ADDRESSES', [ast.literal_eval]),
-            'controller_config_file': ('CONFIG_FILE', []),
             'rules_file': ('RULES_FILE', []),
             'collector_nic': ('collector_nic', []),
-            'controller_mirror_ports': ('MIRROR_PORTS', [ast.literal_eval]),
+            'controller_mirror_ports': ('MIRROR_PORTS', [json.loads]),
+            'controller_proxy_mirror_ports': ('controller_proxy_mirror_ports', [json.loads]),
             'tunnel_vlan': ('tunnel_vlan', [int]),
             'tunnel_name': ('tunnel_name', []),
             'automated_acls': ('AUTOMATED_ACLS', [ast.literal_eval]),
@@ -51,26 +51,23 @@ class Config():
             'scan_frequency': ('scan_frequency', [int]),
             'reinvestigation_frequency': ('reinvestigation_frequency', [int]),
             'max_concurrent_reinvestigations': ('max_concurrent_reinvestigations', [int]),
-            'ignore_vlans': ('ignore_vlans', [ast.literal_eval]),
-            'ignore_ports': ('ignore_ports', [ast.literal_eval]),
-            'trunk_ports': ('trunk_ports', [ast.literal_eval]),
+            'ignore_vlans': ('ignore_vlans', [json.loads]),
+            'ignore_ports': ('ignore_ports', [json.loads]),
+            'trunk_ports': ('trunk_ports', [json.loads]),
             'logger_level': ('logger_level', []),
         }
 
         for section in self.config.sections():
-            for key in self.config[section]:
+            for key, val in self.config[section].items():
+                if isinstance(val, str):
+                    val = val.strip("'")
                 controller_key, val_funcs = config_map.get(key, (key, []))
-                val = self.config[section][key]
-                if val_funcs:
-                    # attempt to validate with function one at a time.
-                    for val_func in val_funcs:
-                        try:
-                            controller[controller_key] = val_func(val)
-                            break
-                        except Exception as e:  # pragma: no cover
-                            self.logger.error(
-                                'Unable to set configuration option {0} because {1}'.format(key, str(e)))
-                else:
-                    # no mapping defined.
-                    controller[controller_key] = val
+                for val_func in val_funcs:
+                    try:
+                        val = val_func(val)
+                        break
+                    except Exception as e:  # pragma: no cover
+                        self.logger.error(
+                            'Unable to set configuration option {0} {1} because {2}'.format(key, val, str(e)))
+                controller[controller_key] = val
         return controller

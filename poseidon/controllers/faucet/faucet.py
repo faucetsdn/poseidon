@@ -20,24 +20,20 @@ class FaucetProxy(Parser):
                  **kwargs):
         '''Initializes Faucet object.'''
         self.mirror_ports = controller['MIRROR_PORTS']
+        self.proxy_mirror_ports = controller['controller_proxy_mirror_ports']
         self.tunnel_vlan = controller['tunnel_vlan']
         self.tunnel_name = controller['tunnel_name']
         self.learn_pub_adds = controller['LEARN_PUBLIC_ADDRESSES']
         self.reinvestigation_frequency = controller['reinvestigation_frequency']
         self.max_concurrent_reinvestigations = controller['max_concurrent_reinvestigations']
-        self.config_file = controller['CONFIG_FILE']
         self.trunk_ports = controller['trunk_ports']
         self.ignore_vlans = controller['ignore_vlans']
         self.ignore_ports = controller['ignore_ports']
         self.faucetconfrpc_address = controller['faucetconfrpc_address']
 
-        for json_conf_name in ('mirror_ports', 'ignore_vlans', 'ignore_ports', 'trunk_ports'):
-            json_conf = getattr(self, json_conf_name)
-            if isinstance(json_conf, str):
-                setattr(self, json_conf_name, json.loads(json_conf))
-
         super(FaucetProxy, self).__init__(
             self.mirror_ports,
+            self.proxy_mirror_ports,
             self.reinvestigation_frequency,
             self.max_concurrent_reinvestigations,
             self.ignore_vlans,
@@ -112,7 +108,7 @@ class FaucetProxy(Parser):
 
     def update_acls(self, rules_file=None, endpoints=None, force_apply_rules=None, force_remove_rules=None):
         self.logger.debug('updating acls')
-        self.config(self.config_file, 'apply_acls', None, None,
+        self.config('apply_acls', None, None,
             rules_file=rules_file, endpoints=endpoints,
             force_apply_rules=force_apply_rules,
             force_remove_rules=force_remove_rules)
@@ -123,44 +119,40 @@ class FaucetProxy(Parser):
         shutdowns = []
         port = 0
         switch = None
-        self.config(self.config_file, 'shutdown', int(port), switch)
+        self.config('shutdown', int(port), switch)
         # TODO check if config was successfully updated
         return shutdowns
 
     def shutdown_endpoint(self):
         port = 0
         switch = None
-        self.config(self.config_file, 'shutdown', int(port), switch)
+        self.config('shutdown', int(port), switch)
         # TODO check if config was successfully updated
+
+    def _mac_switch_port(self, my_mac):
+        try:
+            entry = self.mac_table[my_mac][0]
+            return (entry['segment'], entry['port'])
+        except (KeyError, IndexError):
+            return (None, None)
 
     def mirror_mac(self, my_mac, my_switch, my_port):
         self.logger.debug('mirroring mac %s', my_mac)
-        port = None
-        switch = None
-        for mac in self.mac_table:
-            if my_mac == mac:
-                port = self.mac_table[mac][0]['port']
-                switch = self.mac_table[mac][0]['segment']
-        if port and switch:
-            self.config(self.config_file, 'mirror', int(port), switch)
+        switch, port = self._mac_switch_port(my_mac)
+        if switch and port:
+            self.config('mirror', int(port), switch)
         return True
 
     def unmirror_mac(self, my_mac, my_switch, my_port):
         self.logger.debug('unmirroring mac %s', my_mac)
-        port = 0
-        switch = None
-        for mac in self.mac_table:
-            if my_mac == mac:
-                port = self.mac_table[mac][0]['port']
-                switch = self.mac_table[mac][0]['segment']
+        switch, port = self._mac_switch_port(my_mac)
         if port and switch:
             trunk = False
             for sw in self.trunk_ports:
                 if sw == switch and self.trunk_ports[sw].split(',')[1] == str(port):
                     trunk = True
             if not trunk:
-                self.config(self.config_file, 'unmirror',
-                            int(port), switch)
+                self.config('unmirror', int(port), switch)
             else:
                 self.logger.debug('not unmirroring a trunk port')
                 return False
@@ -168,21 +160,14 @@ class FaucetProxy(Parser):
 
     def coprocess_mac(self, my_mac):
         self.logger.debug('coprocess mac: {0}'.format(my_mac))
-        for mac in self.mac_table:
-            if my_mac == mac:
-                port = self.mac_table[mac][0]['port']
-                switch = self.mac_table[mac][0]['segment']
-        self.config(self.config_file, 'coprocess', int(port), switch)
+        switch, port = self._mac_switch_port(my_mac)
+        if switch and port:
+            self.config('coprocess', int(port), switch)
         return True
 
     def uncoprocess_mac(self, my_mac):
         self.logger.debug('uncoprocess mac: {0}'.format(my_mac))
-        port = 0
-        for mac in self.mac_table:
-            if my_mac == mac:
-                port = self.mac_table[mac][0]['port']
-                switch = self.mac_table[mac][0]['segment']
-
-                self.config(self.config_file, 'uncoprocess',
-                            int(port), switch)
+        switch, port = self._mac_switch_port(my_mac)
+        if switch and port:
+            self.config('uncoprocess', int(port), switch)
         return True
