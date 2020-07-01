@@ -66,7 +66,7 @@ chmod +x /usr/local/bin/poseidon
 <img src="/docs/img/faucet.png" width="190" height="100">
 NOTE: Poseidon requires at least Faucet version 1.9.46 or higher.
 
-Unless Poseidon and Faucet are running on the same host, Poseidon will connect to Faucet using SSH.  So you'll need to create an account that can SSH to the machine running Faucet and that has rights to modify the configuration file `faucet.yaml` (currently Poseidon expects it to be in the default `/etc/faucet/faucet.yaml` location and `dps` and `acls` must all be defined in `faucet.yaml` (not in `include`) for Poseidon to update the network posture correctly).
+Poseidon uses a faucetconfrpc server, to maintain Faucet configuration. Poseidon starts its own server for you by default, and also by default Poseidon and Faucet have to be on the same machine. To run Faucet on a separate machine, you will need to start faucetconfrpc on that other machine, and update `faucetconfrpc_address` to point to where the faucetconfrpc is running.
 
 If you have Faucet running already, make sure Faucet is started with the following environment variables, which allow Poseidon to change its config, and receive Faucet events:
 
@@ -95,6 +95,8 @@ Now, edit this file. You will need to set at minimum:
 * controller_type, as appropriate to the controller you are running (see above).
 * collector_nic: must be set to the interface name on the server, that is connected to the switch mirror port.
 * controller_mirror_ports: must be set to the interface on the switch that will be used as the mirror port.
+
+Optionally, you may also set controller_proxy_mirror_ports (for switches that don't have their own mirror ports, and can be mirrored with another switch).
 
 
 ## Updating Poseidon

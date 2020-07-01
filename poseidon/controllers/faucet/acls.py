@@ -22,10 +22,9 @@ class ACLs:
     def _config_file_paths(self, file_paths):
         return [self.faucetconfgetsetter.config_file_path(f) for f in file_paths]
 
-    def include_acl_files(self, rules_doc, rules_file, coprocess_rules_files, obj_doc, config_file):
+    def include_acl_files(self, rules_doc, rules_file, coprocess_rules_files, obj_doc):
         files = self._config_file_paths(rules_doc['include'])
         rules_path = rules_file.rsplit('/', 1)[0]
-        config_path = config_file.rsplit('/', 1)[0]
         conf_files = []
         acl_names = []
         if 'include' in obj_doc:
@@ -55,7 +54,7 @@ class ACLs:
                         acls_doc = self._read_conf(f)
                     else:
                         acls_doc = self._read_conf(rules_path+'/'+f)
-                    self._write_conf(config_path+'/poseidon_' +
+                    self._write_conf(rules_path+'/poseidon_' +
                                      acls_filename, acls_doc)
                     self.logger.info(
                         'Adding {0} to config'.format(acls_filename))
@@ -74,7 +73,7 @@ class ACLs:
                         'Include file {0} was not found, ACLs may not be working as expected'.format(f))
                 else:
                     obj_doc['include'] = ['poseidon_'+acls_filename]
-                    self._write_conf(config_path+'/poseidon_' +
+                    self._write_conf(rules_path+'/poseidon_' +
                                      acls_filename, acls_doc)
                     self.logger.info(
                         'Adding {0} to config'.format(acls_filename))
@@ -176,7 +175,7 @@ class ACLs:
                         endpoint.endpoint_data['mac'], switch, port, orig_rule_acls))
         return obj_doc, all_rule_acls
 
-    def apply_acls(self, config_file, rules_file, endpoints, force_apply_rules,
+    def apply_acls(self, rules_file, endpoints, force_apply_rules,
                    force_remove_rules, coprocess_rules_files, obj_doc,
                    rules_doc):
         if not endpoints:
@@ -189,7 +188,7 @@ class ACLs:
         else:
             obj_doc, acl_names = self.include_acl_files(rules_doc, rules_file,
                                                         coprocess_rules_files,
-                                                        obj_doc, config_file)
+                                                        obj_doc)
 
         if 'rules' in rules_doc:
             acls = []

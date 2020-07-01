@@ -16,16 +16,20 @@ class FaucetConfGetSetter:
 
 class FaucetLocalConfGetSetter(FaucetConfGetSetter):
 
-    @staticmethod
-    def write_faucet_conf(config_file, faucet_conf):
-        config_file = get_config_file(config_file)
-        return yaml_out(config_file, faucet_conf)
+    DEFAULT_CONFIG_FILE = None
 
-    @staticmethod
-    def read_faucet_conf(config_file):
+    def read_faucet_conf(self, config_file):
+        if config_file is None:
+            config_file = self.DEFAULT_CONFIG_FILE
         config_file = get_config_file(config_file)
         faucet_conf = yaml_in(config_file)
         return faucet_conf
+
+    def write_faucet_conf(self, config_file, faucet_conf):
+        if config_file is None:
+            config_file = self.DEFAULT_CONFIG_FILE
+        config_file = get_config_file(config_file)
+        return yaml_out(config_file, faucet_conf)
 
 
 class FaucetRemoteConfGetSetter(FaucetConfGetSetter):
@@ -38,7 +42,9 @@ class FaucetRemoteConfGetSetter(FaucetConfGetSetter):
 
     @staticmethod
     def config_file_path(config_file):
-        return os.path.basename(config_file)
+        if config_file:
+            return os.path.basename(config_file)
+        return config_file
 
     def read_faucet_conf(self, config_file):
         return self.client.get_config_file(
