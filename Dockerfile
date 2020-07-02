@@ -21,4 +21,4 @@ RUN mkdir -p /opt/poseidon
 RUN mv /poseidon/config/poseidon.config /opt/poseidon/poseidon.config
 ENV POSEIDON_CONFIG /opt/poseidon/poseidon.config
 
-CMD (flask run > /dev/null 2>&1) & (tini -s -- /usr/bin/python3 poseidon/main.py)
+CMD (flask run > /dev/null 2>&1) & (tini -s -- /usr/local/bin/python3 poseidon/main.py)
