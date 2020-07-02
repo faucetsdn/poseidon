@@ -4,24 +4,11 @@ FROM poseidon:latest
 ENV DEBIAN_FRONTEND=noninteractive
 ENV REDIS_HOST=127.0.0.1
 
-# TODO: remove workaround for broken ninja build (https://github.com/scikit-build/ninja-python-distributions/issues/22)
-RUN apk upgrade --no-cache && \
-    apk add --no-cache \
-    build-base \
-    cmake \
-    g++ \
-    make \
-    redis \
-    tshark \
-    python3-dev \
-    yaml-dev
+RUN apt-get update && apt-get install -y redis-server tshark
 
-RUN pip3 install --no-cache-dir scikit-build==0.10.0
-# TODO: https://github.com/scikit-build/ninja-python-distributions/issues/22
-RUN CXXFLAGS="-D_BSD_SOURCE" pip3 install --no-cache-dir -r test-requirements.txt
+RUN pip3 install --no-cache-dir -r test-requirements.txt
 
 CMD py.test -v -vv --cov-report term-missing --cov=. -c .coveragerc && \
-    # commenting out pytype until release for python3.8 is out
     pytype api/app/*py poseidon/*/*py workers/*py && \
     pytype poseidon/main.py && \
     ./tests/api_smoke_test.sh
