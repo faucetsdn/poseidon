@@ -1,3 +1,12 @@
+# v0.14.0 (2020-07-02)
+
+- Poseidon now uses faucetconfrpc to manage Faucet's config files (controller_config_file is obsolete)
+- controller_uri, rabbit_enabled, rabbit_server, rabbit_port all obsolete (Poseidon will always use its own rabbit server)
+- Poseidon no longer supports Faucet log parsing to retrieve events (default remains the Faucet event API)
+- Poseidon can now mirror leaf switches like (WiFi APs) by mirroring the port on a neighboring switch (see controller_proxy_mirror_ports)
+- Changed from alpine:3.12 to debian/python:3.8-slim to reduce build times.
+- Updated docker, netaddr, transitions, pytype, faucet, gauge, faucet-adapter-rabbitmq, grafana, prometheus, networkml, network-tools
+
 # v0.13.0 (2020-06-18)
 
 - Removed support for BCF (BigSwitch Cloud Fabric)
