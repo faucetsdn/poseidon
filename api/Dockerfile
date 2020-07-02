@@ -1,26 +1,13 @@
-FROM alpine:3.12
+FROM python:3.8-slim
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
 LABEL poseidon.namespace="api"
 
 COPY requirements.txt requirements.txt
 COPY healthcheck /healthcheck
 
-RUN apk add --update \
-    curl \
-    gcc \
-    linux-headers \
-    musl-dev \
-    python3 \
-    python3-dev \
-    py3-pip \
-    && pip3 install --no-cache-dir -r requirements.txt \
-    && pip3 install --no-cache-dir -r /healthcheck/requirements.txt \
-    && apk del \
-    gcc \
-    linux-headers \
-    musl-dev \
-    python3-dev \
-    && rm -rf /var/cache/apk/*
+RUN apt-get update && apt-get install -y curl gcc
+RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir -r /healthcheck/requirements.txt
 
 # healthcheck
 ENV FLASK_APP /healthcheck/hc.py
