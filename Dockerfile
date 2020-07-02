@@ -1,29 +1,13 @@
-FROM alpine:3.12
+FROM python:3.8-slim
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
 LABEL poseidon.namespace="primary"
 
 ENV PYTHONUNBUFFERED 1
 COPY requirements.txt requirements.txt
 COPY healthcheck /healthcheck
-RUN apk upgrade --no-cache && \
-    apk add --no-cache \
-    build-base \
-    curl \
-    libc6-compat \
-    libstdc++ \
-    linux-headers \
-    python3 \
-    py3-pip \
-    python3-dev \
-    tini \
-    yaml-dev && \
-    pip3 install --no-cache-dir -r requirements.txt && \
-    pip3 install --no-cache-dir -r /healthcheck/requirements.txt && \
-    apk del build-base \
-    python3-dev \
-    yaml-dev && \
-    rm -rf /var/cache/* && \
-    rm -rf /root/.cache/*
+RUN apt-get update && apt-get install -y curl gcc g++ tini
+RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir -r /healthcheck/requirements.txt
 
 # healthcheck
 ENV FLASK_APP /healthcheck/hc.py
