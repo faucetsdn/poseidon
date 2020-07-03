@@ -1,7 +1,7 @@
 cmd2==1.1.0
 faucetconfrpc==0.6
 natural==0.2.0
-netaddr==0.7.20
+netaddr==0.8.0
 pika==1.1.0
 prometheus_client==0.8.0
 pyyaml==5.3.1
