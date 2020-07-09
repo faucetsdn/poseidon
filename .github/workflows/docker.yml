@@ -46,5 +46,5 @@ jobs:
         docker buildx build \
           --platform linux/amd64,linux/arm/v7,linux/arm64 \
           --push \
-          -t cyberreboot/poseidon-workers:${{ steps.change_version.outputs.VERSION }} workers && \
+          -t cyberreboot/poseidon-workers:${{ steps.change_version.outputs.VERSION }} workers
       if: github.repository == 'cyberreboot/poseidon' && github.event_name == 'push'
