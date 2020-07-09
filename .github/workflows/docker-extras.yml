@@ -41,7 +41,7 @@ jobs:
           -t cyberreboot/rabbitmq:${{ steps.change_version.outputs.VERSION }} helpers/rabbitmq && \
         docker buildx build \
           --platform linux/amd64,linux/arm/v7,linux/arm64 \
-          --push \
+          --push --no-cache \
           -t cyberreboot/faucet-certstrap:${{ steps.change_version.outputs.VERSION }} helpers/faucet/certstrap && \
         docker buildx build \
           --platform linux/amd64,linux/arm/v7,linux/arm64 \
