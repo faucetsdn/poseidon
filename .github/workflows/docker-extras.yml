@@ -1,4 +1,4 @@
-name: buildx
+name: buildx-extras
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
     tags: 'v*'
 
 jobs:
-  buildx-extrs:
+  buildx-extras:
 
     runs-on: ubuntu-latest
 
