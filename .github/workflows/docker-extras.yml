@@ -6,7 +6,7 @@ on:
     tags: 'v*'
 
 jobs:
-  buildx:
+  buildx-extrs:
 
     runs-on: ubuntu-latest
 
