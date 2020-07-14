@@ -93,64 +93,58 @@ class ACLs:
     def match_rules(self, rule, rules, obj_doc, endpoint, switch, port, all_rule_acls, force_apply_rules):
         matches = 0
         for r in rules[rule]:
-            if('rule' in r and 'device_key' in r['rule'] and
-                    r['rule']['device_key'] == 'os'):
-                match = False
-                if 'ipv4_addresses' in endpoint.metadata:
-                    for ip in endpoint.metadata['ipv4_addresses']:
-                        if 'os' in endpoint.metadata['ipv4_addresses'][ip] and endpoint.metadata['ipv4_addresses'][ip]['os'] == r['rule']['value']:
-                            self.logger.info('IPv4 os match: {0} {1}, rule: {2}'.format(
-                                ip, r['rule']['value'], rule))
-                            match = True
-                if 'ipv6_addresses' in endpoint.metadata:
-                    for ip in endpoint.metadata['ipv6_addresses']:
-                        if 'os' in endpoint.metadata['ipv6_addresses'][ip] and endpoint.metadata['ipv6_addresses'][ip]['os'] == r['rule']['value']:
-                            self.logger.info('IPv6 os match: {0} {1}, rule: {2}'.format(
-                                ip, r['rule']['value'], rule))
-                            match = True
-                if match:
-                    matches += 1
-            elif('rule' in r and 'device_key' in r['rule'] and
-                    r['rule']['device_key'] == 'role'):
-                match = False
-                if 'mac_addresses' in endpoint.metadata:
-                    for mac in endpoint.metadata['mac_addresses']:
-                        most_recent = 0
-                        for record in endpoint.metadata['mac_addresses'][mac]:
-                            if float(record) > most_recent:
-                                most_recent = float(record)
-                        most_recent = str(most_recent)
-                        if most_recent != '0' and most_recent in endpoint.metadata['mac_addresses'][mac] and 'labels' in endpoint.metadata['mac_addresses'][mac][most_recent] and 'confidences' in endpoint.metadata['mac_addresses'][mac][most_recent]:
-                            # check top three
-                            for i in range(3):
-                                if endpoint.metadata['mac_addresses'][mac][most_recent]['labels'][i] == r['rule']['value']:
-                                    if 'min_confidence' in r['rule']['value']:
-                                        if float(endpoint.metadata['mac_addresses'][mac][most_recent]['confidences'][i])*100 >= r['rule']['min_confidence']:
-                                            self.logger.info('Confidence match: {0} {1}, rule: {2}'.format(mac, float(
-                                                endpoint.metadata['mac_addresses'][mac][most_recent]['confidences'][i])*100, rule))
+            if 'rule' in r and 'device_key' in r['rule']:
+                rule_data = r['rule']
+                if rule_data['device_key'] == 'os':
+                    match = False
+                    for addresses in ('ipv4_addresses', 'ipv6_addresses'):
+                        if 'addresses' in endpoint.metadata:
+                            for ip, ip_metadata in endpoint.metadata['addresses']:
+                                if 'os' in ip_metadata and ip_metadata['os'] == rule_data['value']:
+                                    self.logger.info('IPv4 os match: {0} {1}, rule: {2}'.format(
+                                        ip, rule_data['value'], rule))
+                                    match = True
+                    if match:
+                        matches += 1
+                elif rule_data['device_key'] == 'role':
+                    match = False
+                    if 'mac_addresses' in endpoint.metadata:
+                        for mac, mac_metadata in endpoint.metadata['mac_addresses'].items():
+                            most_recent = 0
+                            for record in mac_metadata:
+                                if float(record) > most_recent:
+                                    most_recent = float(record)
+                            most_recent = str(most_recent)
+                            if most_recent != '0' and most_recent in mac_metadata and 'labels' in mac_metadata[most_recent] and 'confidences' in mac_metadata[most_recent]:
+                                # check top three
+                                for i in range(3):
+                                    if mac_metadata[most_recent]['labels'][i] == rule_data['value']:
+                                        if 'min_confidence' in rule_data['value']:
+                                            if float(mac_metadata[most_recent]['confidences'][i])*100 >= rule_data['min_confidence']:
+                                                self.logger.info('Confidence match: {0} {1}, rule: {2}'.format(mac, float(
+                                                    mac_metadata[most_recent]['confidences'][i])*100, rule))
+                                                match = True
+                                        else:
+                                            self.logger.info('Role match: {0} {1}, rule: {2}'.format(
+                                                mac, rule_data['value'], rule))
                                             match = True
-                                    else:
-                                        self.logger.info('Role match: {0} {1}, rule: {2}'.format(
-                                            mac, r['rule']['value'], rule))
-                                        match = True
-                if match:
-                    matches += 1
-            elif('rule' in r and 'device_key' in r['rule'] and
-                    r['rule']['device_key'] == 'behavior'):
-                match = False
-                if 'mac_addresses' in endpoint.metadata:
-                    for mac in endpoint.metadata['mac_addresses']:
-                        most_recent = 0
-                        for record in endpoint.metadata['mac_addresses'][mac]:
-                            if float(record) > most_recent:
-                                most_recent = float(record)
-                        most_recent = str(most_recent)
-                        if most_recent != '0' and most_recent in endpoint.metadata['mac_addresses'][mac] and 'behavior' in endpoint.metadata['mac_addresses'][mac][most_recent] and endpoint.metadata['mac_addresses'][mac][most_recent]['behavior'] == r['rule']['value']:
-                            self.logger.info('Behavior match: {0} {1}, rule: {2}'.format(
-                                mac, r['rule']['value'], rule))
-                            match = True
-                if match:
-                    matches += 1
+                    if match:
+                        matches += 1
+                elif rule_data['device_key'] == 'behavior':
+                    match = False
+                    if 'mac_addresses' in endpoint.metadata:
+                        for mac, mac_metadata in endpoint.metadata['mac_addresses'].items():
+                            most_recent = 0
+                            for record in mac_metadata:
+                                if float(record) > most_recent:
+                                    most_recent = float(record)
+                            most_recent = str(most_recent)
+                            if most_recent != '0' and most_recent in mac_metadata and 'behavior' in mac_metadata[most_recent] and mac_metadata[most_recent]['behavior'] == rule_data['value']:
+                                self.logger.info('Behavior match: {0} {1}, rule: {2}'.format(
+                                    mac, rule_data['value'], rule))
+                                match = True
+                    if match:
+                        matches += 1
         if matches == len(rules[rule]) or (force_apply_rules and rule in force_apply_rules):
             rule_acls = []
             for r in rules[rule]:
