@@ -1,4 +1,4 @@
-cmd2==1.1.0
+cmd2==1.2.0
 faucetconfrpc==0.8
 natural==0.2.0
 netaddr==0.8.0
