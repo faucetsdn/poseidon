@@ -101,8 +101,8 @@ class ACLs:
                         if 'addresses' in endpoint.metadata:
                             for ip, ip_metadata in endpoint.metadata['addresses']:
                                 if 'os' in ip_metadata and ip_metadata['os'] == rule_data['value']:
-                                    self.logger.info('IPv4 os match: {0} {1}, rule: {2}'.format(
-                                        ip, rule_data['value'], rule))
+                                    self.logger.info('{0} os match: {1} {2}, rule: {3}'.format(
+                                        addresses, ip, rule_data['value'], rule))
                                     match = True
                     if match:
                         matches += 1
