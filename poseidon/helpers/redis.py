@@ -179,7 +179,9 @@ class PoseidonRedisClient:
 
     def get_stored_metadata(self, hash_id):
         mac_addresses = {}
-        ip_addresses = {ip_field: {} for ip_field in MACHINE_IP_FIELDS}
+        ip_addresses = {}
+        for ip_field in MACHINE_IP_FIELDS:
+            ip_addresses[ip_field] = {}
 
         if self.r:
             macs = []
