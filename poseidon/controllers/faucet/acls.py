@@ -3,7 +3,9 @@
 Created on 4 March 2020
 @author: Charlie Lewis
 """
+
 import logging
+import os
 from poseidon.controllers.faucet.config import FaucetLocalConfGetSetter, FaucetRemoteConfGetSetter
 
 
@@ -25,10 +27,21 @@ class ACLs:
     def include_acl_files(self, rules_doc, rules_file, coprocess_rules_files, obj_doc):
         files = self._config_file_paths(rules_doc['include'])
         rules_path = rules_file.rsplit('/', 1)[0]
-        conf_files = []
-        acl_names = []
-        if 'include' in obj_doc:
-            conf_files = obj_doc['include']
+        conf_files = obj_doc.get('include', [])
+
+        acls_docs = {}
+        for f in files:
+            if f.startswith('/'):
+                acls_doc = self._read_conf(f)
+            else:
+                acls_doc = self._read_conf(os.path.join(rules_path, f))
+            if isinstance(acls_doc, bool):
+                self.logger.warning(
+                    'Include file {0} was not found, ACLs may not be working as expected'.format(f))
+                continue
+            acls_docs[f] = acls_doc
+
+        if conf_files:
             acls_filenames = []
             if coprocess_rules_files:
                 acls_filenames += self._config_file_paths(coprocess_rules_files)
@@ -40,54 +53,25 @@ class ACLs:
             for conf_file in conf_files:
                 if conf_file.startswith('poseidon') and conf_file not in acls_filenames:
                     obj_doc['include'].remove(conf_file)
-                    self.logger.info(
-                        'Removing {0} from config'.format(conf_file))
-            for f in files:
-                if '/' in f:
-                    _, acls_filename = f.rsplit('/', 1)
-                else:
-                    acls_filename = f
-                if 'poseidon_'+acls_filename not in conf_files:
-                    obj_doc['include'].append(
-                        'poseidon_'+acls_filename)
-                    if f.startswith('/'):
-                        acls_doc = self._read_conf(f)
-                    else:
-                        acls_doc = self._read_conf(rules_path+'/'+f)
-                    self._write_conf(rules_path+'/poseidon_' +
-                                     acls_filename, acls_doc)
-                    self.logger.info(
-                        'Adding {0} to config'.format(acls_filename))
+                    self.logger.info('Removing {0} from config'.format(conf_file))
         else:
-            for f in files:
-                if '/' in f:
-                    _, acls_filename = f.rsplit('/', 1)
-                else:
-                    acls_filename = f
-                if f.startswith('/'):
-                    acls_doc = self._read_conf(f)
-                else:
-                    acls_doc = self._read_conf(rules_path+'/'+f)
-                if isinstance(acls_doc, bool):
-                    self.logger.warning(
-                        'Include file {0} was not found, ACLs may not be working as expected'.format(f))
-                else:
-                    obj_doc['include'] = ['poseidon_'+acls_filename]
-                    self._write_conf(rules_path+'/poseidon_' +
-                                     acls_filename, acls_doc)
-                    self.logger.info(
-                        'Adding {0} to config'.format(acls_filename))
+            obj_doc['include'] = []
+
+        for f, acls_doc in acls_docs.items():
+            if '/' in f:
+                _, acls_filename = f.rsplit('/', 1)
+            else:
+                acls_filename = f
+            poseidon_acls_filename = 'poseidon_' + acls_filename
+            if poseidon_acls_filename not in conf_files:
+                obj_doc['include'].append(poseidon_acls_filename)
+                self._write_conf(os.path.join(rules_path, poseidon_acls_filename), acls_doc)
+                self.logger.info('Adding {0} to config'.format(acls_filename))
 
         # get defined ACL names from included files
-        for f in files:
-            acl_doc = self._read_conf(f)
-            if isinstance(acl_doc, bool):
-                self.logger.warning(
-                    'Include file {0} was not found, ACLs may not be working as expected'.format(f))
-            else:
-                if 'acls' in acl_doc:
-                    for acl in acl_doc['acls']:
-                        acl_names.append(acl)
+        acl_names = []
+        for acls_doc in acls_docs.values():
+            acl_names.extend(list(acls_doc.get('acls')), [])
         return obj_doc, acl_names
 
     def match_rules(self, rule, rules, obj_doc, endpoint, switch, port, all_rule_acls, force_apply_rules):
@@ -151,20 +135,22 @@ class ACLs:
                 rule_acls += r['rule']['acls']
                 all_rule_acls += r['rule']['acls']
             rule_acls = list(set(rule_acls))
+            interfaces_conf = obj_doc['dps'][switch]['interfaces']
             if rule_acls:
-                if port not in obj_doc['dps'][switch]['interfaces']:
-                    obj_doc['dps'][switch]['interfaces'][port] = {}
-            if 'acls_in' not in obj_doc['dps'][switch]['interfaces'][port]:
+                if port not in interfaces_conf:
+                    interfaces_conf[port] = {}
+            port_conf = interfaces_conf[port]
+            if 'acls_in' not in port_conf:
                 self.logger.info('All rules met for: {0} on switch: {1} and port: {2}; applying ACLs: {3}'.format(
                     endpoint.endpoint_data['mac'], switch, port, rule_acls))
-                obj_doc['dps'][switch]['interfaces'][port]['acls_in'] = rule_acls
+                port_conf['acls_in'] = rule_acls
             else:
                 # add new ACLs
                 orig_rule_acls = rule_acls
-                rule_acls += obj_doc['dps'][switch]['interfaces'][port]['acls_in']
+                rule_acls += port_conf['acls_in']
                 rule_acls = list(set(rule_acls))
-                if obj_doc['dps'][switch]['interfaces'][port]['acls_in'] != rule_acls:
-                    obj_doc['dps'][switch]['interfaces'][port]['acls_in'] = rule_acls
+                if port_conf['acls_in'] != rule_acls:
+                    port_conf['acls_in'] = rule_acls
                     self.logger.info('All rules met for: {0} on switch: {1} and port: {2}; applying ACLs: {3}'.format(
                         endpoint.endpoint_data['mac'], switch, port, orig_rule_acls))
         return obj_doc, all_rule_acls
@@ -203,10 +189,15 @@ class ACLs:
             for endpoint in endpoints:
                 port = int(endpoint.endpoint_data['port'])
                 switch = endpoint.endpoint_data['segment']
-                if switch in obj_doc['dps'] and 'acls_in' in obj_doc['dps'][switch]['interfaces'][port]:
-                    existing_acls = obj_doc['dps'][switch]['interfaces'][port]['acls_in']
-                else:
-                    existing_acls = []
+                switch_conf = obj_doc['dps'].get(switch, None)
+                if not switch_conf:
+                    continue
+                port_conf = switch_conf['interfaces'].get(port, None)
+                if not port_conf:
+                    continue
+                existing_acls = port_conf.get('acls_in', None)
+                if not existing_acls:
+                    continue
                 all_rule_acls = []
                 for rule in rules:
                     obj_doc, all_rule_acls = self.match_rules(
@@ -215,8 +206,7 @@ class ACLs:
                 all_rule_acls = list(set(all_rule_acls))
                 for acl in existing_acls:
                     if acl in acls and (acl not in all_rule_acls or acl in force_remove_rules):
-                        obj_doc['dps'][switch]['interfaces'][port]['acls_in'].remove(
-                            acl)
+                        port_conf['acls_in'].remove(acl)
                         self.logger.info('Removing no longer needed ACL: {0} for: {1} on switch: {2} and port: {3}'.format(
                             acl, endpoint.endpoint_data['mac'], switch, port))
 
