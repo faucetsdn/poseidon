@@ -81,9 +81,10 @@ class FaucetProxy(Parser):
             if 'ip-address' in md:
                 del md['ip-address']
 
-            md['controller_type'] = 'faucet'
-            md['controller'] = ''
-            md['name'] = None
+            md.update({
+                'controller_type': 'faucet',
+                'controller': '',
+                'name': None})
             ret_list.append(md)
         return ret_list
 
@@ -100,9 +101,11 @@ class FaucetProxy(Parser):
                 retval.append(self.mac_table[mac])
             else:
                 # only allow private addresses
-                if 'ip-address' in self.mac_table[mac][0] and (self.mac_table[mac][0]['ip-address'] == 'None' or
-                                                               self.mac_table[mac][0]['ip-address'] is None or
-                                                               not ipaddress.ip_address(self.mac_table[mac][0]['ip-address']).is_global):
+                first_entry = self.mac_table[mac][0]
+                if 'ip-address' in first_entry and (
+                        first_entry['ip-address'] == 'None' or
+                        first_entry['ip-address'] is None or
+                        not ipaddress.ip_address(first_entry['ip-address']).is_global):
                     retval.append(self.mac_table[mac])
         return retval
 
