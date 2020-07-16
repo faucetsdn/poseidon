@@ -12,30 +12,28 @@ from poseidon.controllers.faucet.config import FaucetLocalConfGetSetter
 
 class Acl:
 
-    def __init__(self, acl_file=None, faucetconfgetsetter=FaucetLocalConfGetSetter):
+    def __init__(self, acl_file=None, faucetconfgetsetter=FaucetLocalConfGetSetter()):
         self.acls = {}
         self.acl_file = acl_file
         self.faucetconfgetsetter = faucetconfgetsetter
 
-    def read(self, config_yaml=None):
+    def _read_existing(self):
         try:
-            if config_yaml is None:
-                config_yaml = self.faucetconfgetsetter.read_faucet_conf(self.acl_file)
-            self.acls = config_yaml.get('acls', {})
+            return self.faucetconfgetsetter.read_faucet_conf(self.acl_file)
         except (FileNotFoundError, PermissionError):
-            pass
-        return self.acls
+            return {}
 
-    def _merge_acls(self, config):
-        config['acls'].update(self.acls)
+    def read(self, config_yaml=None):
+        if config_yaml is None:
+            config_yaml = self._read_existing()
+        self.acls = config_yaml.get('acls', {})
+        return config_yaml
 
     def write(self):
+        config_yaml = self._read_existing()
+        self._merge_acls(config_yaml)
         try:
-            config = self.read()
-            if 'acls' not in config:
-                config['acls'] = {}
-            self._merge_acls(config)
-            self.faucetconfgetsetter.write_faucet_conf(self.acl_file, config)
+            self.faucetconfgetsetter.write_faucet_conf(self.acl_file, config_yaml)
             return True
         except (FileNotFoundError, PermissionError):
             return False
@@ -45,11 +43,16 @@ class Acl:
             self.acls[name] = []
         self.acls[name].append(rule)
 
+    def _merge_acls(self, config_yaml):
+        if 'acls' not in config_yaml:
+            yaml_config['acls'] = {}
+        yaml_config['acls'].update(self.acls)
+
 
 class ExclusiveAcl(Acl):
 
-    def _merge_acls(self, config):
-        config['acls'] = self.acls
+    def _merge_acls(self, yaml_config):
+        yaml_config['acls'] = self.acls
 
 
 class VolosAcl(ExclusiveAcl):
