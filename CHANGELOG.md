@@ -1,3 +1,8 @@
+# v0.14.1 (2020-07-17)
+
+* Internal refactoring to simplify ACL processing.
+* Updated network-tap, pytype, cmd2, faucet, gauge, faucetconfrpc, grafana, netaddr.
+
 # v0.14.0 (2020-07-02)
 
 - Poseidon now uses faucetconfrpc to manage Faucet's config files (controller_config_file is obsolete)
