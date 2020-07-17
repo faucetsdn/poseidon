@@ -1,3 +1,7 @@
+# v0.14.2 (2020-07-17)
+
+* updated faucetconfrpc, crviz
+
 # v0.14.1 (2020-07-17)
 
 * Internal refactoring to simplify ACL processing.
