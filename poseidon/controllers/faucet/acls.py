@@ -71,7 +71,7 @@ class ACLs:
         # get defined ACL names from included files
         acl_names = []
         for acls_doc in acls_docs.values():
-            acl_names.extend(list(acls_doc.get('acls')), [])
+            acl_names.extend(list(acls_doc.get('acls', [])))
         return obj_doc, acl_names
 
     def match_rules(self, rule, rules, obj_doc, endpoint, switch, port, all_rule_acls, force_apply_rules):
