@@ -3,6 +3,7 @@
 Test module for faucet parser.
 @author: Charlie Lewis
 """
+import copy
 import os
 import shutil
 import tempfile
@@ -78,7 +79,7 @@ def test_get_config_file():
 
 
 def test_set_mirror_config():
-    switch_conf_str = """
+    faucet_conf_str = """
 dps:
     s1:
         interfaces:
@@ -90,23 +91,28 @@ dps:
             3:
                 native_vlan: 100
 """
-    switch_conf = yaml.safe_load(switch_conf_str)
+    faucet_conf = yaml.safe_load(faucet_conf_str)
+    switch_conf = faucet_conf['dps']['s1']
+    mirror_interface_conf = switch_conf['interfaces'][1]
     with tempfile.TemporaryDirectory() as tmpdir:
         faucetconfgetsetter_cl = FaucetLocalConfGetSetter
         faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(tmpdir, 'faucet.yaml')
-        mirror_interface_conf = switch_conf['dps']['s1']['interfaces'][1]
         parser = _get_parser(
             faucetconfgetsetter_cl=faucetconfgetsetter_cl,
             mirror_ports={'s1': 1},
             proxy_mirror_ports={'sx': ['s1', 99]})
+        parser.faucetconfgetsetter.faucet_conf = faucet_conf
         assert mirror_interface_conf['mirror'] == [2]
-        ports = 3
-        parser.set_mirror_config(mirror_interface_conf, ports)
+        parser.faucetconfgetsetter.set_mirror_config('s1', 1, 3)
         assert mirror_interface_conf['mirror'] == [3]
+        parser.faucetconfgetsetter.set_mirror_config('s1', 1, [2, 3])
+        assert mirror_interface_conf['mirror'] == [2, 3]
+        parser.faucetconfgetsetter.set_mirror_config('s1', 1, None)
+        assert 'mirror' not in mirror_interface_conf
 
 
 def test_stack_default_config():
-    switch_conf_str = """
+    faucet_conf_str = """
 dps:
     s1:
         stack:
@@ -142,7 +148,7 @@ acls:
             actions:
                 allow: 1
 """
-    new_switch_conf_str = """
+    new_faucet_conf_str = """
 dps:
     s1:
         stack:
@@ -196,8 +202,8 @@ acls:
                         dp: s1
                         port: 1
 """
-    orig_faucet_conf = yaml.safe_load(switch_conf_str)
-    test_faucet_conf = yaml.safe_load(new_switch_conf_str)
+    orig_faucet_conf = yaml.safe_load(faucet_conf_str)
+    test_faucet_conf = yaml.safe_load(new_faucet_conf_str)
     with tempfile.TemporaryDirectory() as tmpdir:
         faucetconfgetsetter_cl = FaucetLocalConfGetSetter
         faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(tmpdir, 'faucet.yaml')
@@ -206,6 +212,7 @@ acls:
             mirror_ports={'s1': 1, 's2': 1},
             proxy_mirror_ports={'sx': ['s1', 99]},
             tunnel_vlan=999, tunnel_name='poseidon_tunnel')
+        parser.faucetconfgetsetter.faucet_conf = orig_faucet_conf
         new_faucet_conf = parser._set_default_switch_conf(orig_faucet_conf)
         assert new_faucet_conf['dps']['s1'] == test_faucet_conf['dps']['s1']
         assert new_faucet_conf['dps']['s2'] == test_faucet_conf['dps']['s2']
@@ -239,11 +246,12 @@ dps:
             mirror_ports={'s1': 1},
             proxy_mirror_ports={'sx': ['s1', 99]})
         # returns s1:99, not sx.
-        assert parser.proxy_mirror_port('sx', 1, faucet_conf) == ('s1', 99)
+        parser.faucetconfgetsetter.faucet_conf = faucet_conf
+        assert parser.proxy_mirror_port('sx', 1) == ('s1', 99)
 
 
 def test_check_mirror_config():
-    switch_conf_str = """
+    faucet_conf_str = """
 dps:
     s1:
         interfaces:
@@ -255,8 +263,7 @@ dps:
             3:
                 native_vlan: 100
 """
-    orig_switch_conf = yaml.safe_load(switch_conf_str)
-    orig_mirror_interface_conf = orig_switch_conf['dps']['s1']['interfaces'][1]
+    faucet_conf = yaml.safe_load(faucet_conf_str)
     with tempfile.TemporaryDirectory() as tmpdir:
         faucetconfgetsetter_cl = FaucetLocalConfGetSetter
         faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(tmpdir, 'faucet.yaml')
@@ -264,9 +271,9 @@ dps:
             faucetconfgetsetter_cl=faucetconfgetsetter_cl,
             mirror_ports={'s1': 1},
             proxy_mirror_ports={'sx': ['s1', 99]})
-        switch_conf, mirror_interface_conf, mirror_ports = parser.check_mirror('s1', orig_switch_conf)
-        assert switch_conf == orig_switch_conf['dps']['s1']
-        assert orig_mirror_interface_conf == mirror_interface_conf
+        parser.faucetconfgetsetter.faucet_conf = faucet_conf
+        port, mirror_ports = parser.check_mirror('s1')
+        assert port == 1
         assert mirror_ports == {2}
 
 
@@ -304,7 +311,9 @@ def test_Parser():
             faucetconfgetsetter_cl=faucetconfgetsetter_cl,
             mirror_ports={'t1-1': 2},
             proxy_mirror_ports={'sx': ['s1', 99]})
+        parser.faucetconfgetsetter.faucet_conf = yaml.safe_load(faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE)
         parser2 = _get_parser(faucetconfgetsetter_cl=faucetconfgetsetter_cl)
+        parser2.faucetconfgetsetter.faucet_conf = yaml.safe_load(faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE)
         controller = Config().get_config()
         proxy = _get_proxy(faucetconfgetsetter_cl=faucetconfgetsetter_cl, controller=controller)
         check_config(parser, endpoints)
