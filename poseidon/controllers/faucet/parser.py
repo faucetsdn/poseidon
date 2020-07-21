@@ -186,7 +186,7 @@ class Parser:
             return
 
         switch, port = self.proxy_mirror_port(switch, port)
-        faucet_conf = self._set_default_switch_conf(faucet_conf)
+        self._set_default_switch_conf(faucet_conf)
         mirror_port, mirror_ports = self.check_mirror(switch)
 
         if action in ('shutdown', 'apply_routes'):
@@ -208,17 +208,17 @@ class Parser:
                     f'Unable to mirror {switch}:{port} due to warnings')
         elif action == 'apply_acls':
             rules_doc = parse_rules(rules_file)
-            faucet_conf = ACLs().apply_acls(
+            self.faucetconfgetsetter.faucet_conf = ACLs().apply_acls(
                 rules_file, endpoints,
                 force_apply_rules, force_remove_rules,
-                coprocess_rules_files, faucet_conf, rules_doc)
+                coprocess_rules_files, self.faucetconfgetsetter.faucet_conf, rules_doc)
         else:
             self.logger.warning('Unknown action: {0}'.format(action))
 
         if mirror_port:
             self._set_mirror_config(switch, mirror_port, mirror_ports)
 
-        if self._write_faucet_conf(faucet_conf) is None:
+        if self._write_faucet_conf() is None:
             self.logger.error('Cannot write FAUCET config file')
 
     def ignore_event(self, message):
