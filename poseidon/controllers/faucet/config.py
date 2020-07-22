@@ -69,7 +69,6 @@ class FaucetLocalConfGetSetter(FaucetConfGetSetter):
     def read_faucet_conf(self, config_file):
         if not config_file:
             config_file = self.DEFAULT_CONFIG_FILE
-        assert config_file
         config_file = get_config_file(config_file)
         faucet_conf = yaml_in(config_file)
         if isinstance(faucet_conf, dict):
