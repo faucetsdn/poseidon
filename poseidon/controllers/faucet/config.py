@@ -6,6 +6,8 @@ from poseidon.controllers.faucet.helpers import get_config_file, yaml_in, yaml_o
 
 class FaucetConfGetSetter:
 
+    DEFAULT_CONFIG_FILE = ''
+
     def __init__(self, **_kwargs):
         self.faucet_conf = {}
 
@@ -17,7 +19,7 @@ class FaucetConfGetSetter:
         self.faucet_conf['acls'] = acls
 
     def get_dps(self):
-        return self.faucet_conf.get('dps', {})
+        return self.faucet_conf['dps']
 
     def get_switch_conf(self, dp):
         return self.get_dps().get(dp, None)
@@ -35,7 +37,7 @@ class FaucetConfGetSetter:
         switch_conf['interfaces'][port] = port_conf
 
     def set_switch_conf(self, dp, switch_conf):
-        self.faucet_conf[dp] = switch_conf
+        self.faucet_conf['dps'][dp] = switch_conf
 
     def get_stack_root_switch(self):
         root_stack_switch = [
@@ -64,10 +66,8 @@ class FaucetConfGetSetter:
 
 class FaucetLocalConfGetSetter(FaucetConfGetSetter):
 
-    DEFAULT_CONFIG_FILE = None
-
     def read_faucet_conf(self, config_file):
-        if config_file is None:
+        if not config_file:
             config_file = self.DEFAULT_CONFIG_FILE
         config_file = get_config_file(config_file)
         faucet_conf = yaml_in(config_file)
@@ -76,7 +76,7 @@ class FaucetLocalConfGetSetter(FaucetConfGetSetter):
         return self.faucet_conf
 
     def write_faucet_conf(self, config_file=None, faucet_conf=None):
-        if config_file is None:
+        if not config_file:
             config_file = self.DEFAULT_CONFIG_FILE
         if faucet_conf is None:
             faucet_conf = self.faucet_conf
@@ -105,7 +105,7 @@ class FaucetRemoteConfGetSetter(FaucetConfGetSetter):
         return self.faucet_conf
 
     def write_faucet_conf(self, config_file=None, faucet_conf=None):
-        if config_file is None:
+        if not config_file:
             config_file = self.DEFAULT_CONFIG_FILE
         if faucet_conf is None:
             faucet_conf = self.faucet_conf
