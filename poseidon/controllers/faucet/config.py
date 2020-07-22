@@ -81,8 +81,6 @@ class FaucetLocalConfGetSetter(FaucetConfGetSetter):
             config_file = self.DEFAULT_CONFIG_FILE
         if faucet_conf is None:
             faucet_conf = self.faucet_conf
-        assert set(faucet_conf.keys()).issubset(
-            set(['dps', 'acls', 'vlans', 'include'])), set(faucet_conf.keys())
         self.faucet_conf = faucet_conf
         config_file = get_config_file(config_file)
         return yaml_out(config_file, self.faucet_conf)
@@ -112,8 +110,6 @@ class FaucetRemoteConfGetSetter(FaucetConfGetSetter):
             config_file = self.DEFAULT_CONFIG_FILE
         if faucet_conf is None:
             faucet_conf = self.faucet_conf
-        assert set(faucet_conf.keys()).issubset(
-            set(['dps', 'acls', 'vlans', 'include'])), set(faucet_conf.keys())
         self.faucet_conf = faucet_conf
         return self.client.set_config_file(
             self.faucet_conf,
