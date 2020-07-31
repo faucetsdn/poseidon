@@ -11,7 +11,7 @@ envdump = EnvironmentDump(app, '/environment')
 
 def application_data():
     return {'maintainer': 'Charlie Lewis',
-            'git_repo': 'https://github.com/CyberReboot/poseidon',
+            'git_repo': 'https://github.com/IQTLabs/poseidon',
             'app': 'poseidon'}
 
 
