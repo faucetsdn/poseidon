@@ -1,5 +1,5 @@
 cmd2==1.2.1
-faucetconfrpc==0.9
+faucetconfrpc==0.13
 natural==0.2.0
 netaddr==0.8.0
 pika==1.1.0
@@ -10,4 +10,4 @@ requests==2.24.0
 schedule==0.6.0
 texttable==1.6.2
 transitions==0.8.2
-urllib3==1.25.9
+urllib3==1.25.10

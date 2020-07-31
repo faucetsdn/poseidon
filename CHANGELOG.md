@@ -1,3 +1,12 @@
+# v0.14.3 (2020-07-31)
+
+* Internal refactoring for faucetconfrpc compatibility
+* updated faucetconfrpc, networkml, pytest, docker, urllib3, pytype, crviz
+
+# v0.14.2 (2020-07-17)
+
+* updated faucetconfrpc, crviz
+
 # v0.14.1 (2020-07-17)
 
 * Internal refactoring to simplify ACL processing.
