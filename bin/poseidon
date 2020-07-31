@@ -2,7 +2,7 @@
 
 function show_help()
 {
-    echo "Poseidon, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of machine learning techniques. For more info visit: https://github.com/CyberReboot/poseidon
+    echo "Poseidon, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of machine learning techniques. For more info visit: https://github.com/IQTLabs/poseidon
 
 Usage: poseidon [option]
 Options:
@@ -72,9 +72,9 @@ function check_args()
                 tardir=$(tmpdir)
                 tarfile=$tardir/poseidon.tar.gz
                 if [ -z "$2" ]; then
-                    curl -s https://api.github.com/repos/cyberreboot/poseidon/releases/latest | jq '.["tarball_url"]' | xargs curl -L > "$tarfile"
+                    curl -s https://api.github.com/repos/iqtlabs/poseidon/releases/latest | jq '.["tarball_url"]' | xargs curl -L > "$tarfile"
                 else
-                    curl -L https://github.com/cyberreboot/poseidon/tarball/"$2" > "$tarfile"
+                    curl -L https://github.com/iqtlabs/poseidon/tarball/"$2" > "$tarfile"
                 fi
                 sudo mkdir -p "$POSEIDON_PREFIX"/opt/poseidon
                 sudo tar -C "$POSEIDON_PREFIX"/opt/poseidon -xvf "$tarfile" --strip=1
@@ -203,8 +203,8 @@ function check_args()
                 sudo cp -a "$configdir"/* "$POSEIDON_PREFIX"/opt/poseidon
                 rm -rf "$configdir"
                 # update this script
-                sudo curl -L https://raw.githubusercontent.com/CyberReboot/poseidon/master/bin/poseidon -o /usr/local/bin/poseidon
-                sudo curl -L https://raw.githubusercontent.com/CyberReboot/poseidon/master/bin/gen_pcap_manifest -o /usr/local/bin/gen_pcap_manifest
+                sudo curl -L https://raw.githubusercontent.com/IQTLabs/poseidon/master/bin/poseidon -o /usr/local/bin/poseidon
+                sudo curl -L https://raw.githubusercontent.com/IQTLabs/poseidon/master/bin/gen_pcap_manifest -o /usr/local/bin/gen_pcap_manifest
                 sudo chmod +x /usr/local/bin/poseidon /usr/local/bin/gen_pcap_manifest
                 echo "Done updating."
                 exit

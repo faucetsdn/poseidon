@@ -7,11 +7,11 @@ import urllib.request
 
 WORKERS_JSON = '../workers/workers.json'
 RELEASE_MAP = {
-    'cyberreboot/pcap-to-node-pcap': 'cyberreboot/network-tools',
-    'cyberreboot/tcprewrite-dot1q': 'cyberreboot/network-tools',
-    'cyberreboot/networkml': 'cyberreboot/networkml',
-    'cyberreboot/p0f': 'cyberreboot/network-tools',
-    'cyberreboot/faucetconfrpc': 'cyberreboot/faucetconfrpc',
+    'iqtlabs/pcap-to-node-pcap': 'iqtlabs/network-tools',
+    'iqtlabs/tcprewrite-dot1q': 'iqtlabs/network-tools',
+    'iqtlabs/networkml': 'iqtlabs/networkml',
+    'iqtlabs/p0f': 'iqtlabs/network-tools',
+    'iqtlabs/faucetconfrpc': 'iqtlabs/faucetconfrpc',
     'yeasy/simple-web': 'yeasy/simple-web',
 }
 

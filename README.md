@@ -1,10 +1,9 @@
 # Poseidon
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-![Build Status](https://github.com/CyberReboot/poseidon/workflows/test/badge.svg)
-[![codecov](https://codecov.io/gh/CyberReboot/poseidon/branch/master/graph/badge.svg?token=ORXmFYC3MM)](https://codecov.io/gh/CyberReboot/poseidon)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/e31df16fa65447bf8527e366c6271bf3)](https://www.codacy.com/app/CyberReboot/poseidon?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=CyberReboot/poseidon&amp;utm_campaign=Badge_Grade)
-[![Docker Hub Downloads](https://img.shields.io/docker/pulls/cyberreboot/poseidon.svg)](https://hub.docker.com/r/cyberreboot/poseidon/)
+![Build Status](https://github.com/IQTLabs/poseidon/workflows/test/badge.svg)
+[![codecov](https://codecov.io/gh/IQTLabs/poseidon/branch/master/graph/badge.svg?token=ORXmFYC3MM)](https://codecov.io/gh/IQTLabs/poseidon)
+[![Docker Hub Downloads](https://img.shields.io/docker/pulls/iqtlabs/poseidon.svg)](https://hub.docker.com/r/iqtlabs/poseidon/)
 
 > Software Defined Network Situational Awareness
 
@@ -58,7 +57,7 @@ Followed by closing the existing shell and starting a new one.
 Install the poseidon script which we will use to install and manage Poseidon.
 
 ```
-curl -L https://raw.githubusercontent.com/CyberReboot/poseidon/master/bin/poseidon -o /usr/local/bin/poseidon
+curl -L https://raw.githubusercontent.com/IQTLabs/poseidon/master/bin/poseidon -o /usr/local/bin/poseidon
 chmod +x /usr/local/bin/poseidon
 ```
 
@@ -109,7 +108,7 @@ From v0.10.0, you can update an existing Poseidon installation with `poseidon -u
 After installation you'll have a new command `poseidon` available for looking at the configuration, logs, and shell, as well as stopping and starting the service.
 ```
 $ poseidon help
-Poseidon, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of machine learning techniques. For more info visit: https://github.com/CyberReboot/poseidon
+Poseidon, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of machine learning techniques. For more info visit: https://github.com/IQTLabs/poseidon
 
 Usage: poseidon [option]
 Options:
@@ -233,14 +232,14 @@ There are two main types of logging at the lowest level. The first is FAUCET eve
 2019-11-21 20:18:41,909 [DEBUG] faucet - got faucet message for l2_learn: {'version': 1, 'time': 1574367516.3555572, 'dp_id': 1, 'dp_name': 'x930', 'event_id': 172760, 'L2_LEARN': {'port_no': 22, 'previous_port_no': None, 'vid': 254, 'eth_src': '0e:00:00:00:00:99', 'eth_dst': '0e:00:00:00:00:01', 'eth_type': 2048, 'l3_src_ip': '192.168.254.3', 'l3_dst_ip': '192.168.254.254'}}
 ```
 
-The second type of logging is host based pcap captures, with most of the application (L4) payload removed. Poseidon causes the `ncapture` component (https://github.com/CyberReboot/network-tools/tree/master/network_tap/ncapture) to capture traffic, which is logged in `/opt/poseidon_files`. These are used in turn to learn host roles, etc.
+The second type of logging is host based pcap captures, with most of the application (L4) payload removed. Poseidon causes the `ncapture` component (https://github.com/IQTLabs/network-tools/tree/master/network_tap/ncapture) to capture traffic, which is logged in `/opt/poseidon_files`. These are used in turn to learn host roles, etc.
 
 
 ## Related Components
 
-- [CRviz](https://github.com/CyberReboot/CRviz)
-- [NetworkML](https://github.com/CyberReboot/NetworkML)
-- [network-tools](https://github.com/CyberReboot/network-tools)
+- [CRviz](https://github.com/IQTLabs/CRviz)
+- [NetworkML](https://github.com/IQTLabs/NetworkML)
+- [network-tools](https://github.com/IQTLabs/network-tools)
 
 ## Additional Info
 
@@ -266,8 +265,8 @@ The second type of logging is host based pcap captures, with most of the applica
 - Developer Guide
 - [License](LICENSE)
 - [Maintainers](MAINTAINERS)
-- [Releases](https://github.com/CyberReboot/poseidon/releases)
-- [Tests](https://github.com/CyberReboot/poseidon/actions)
+- [Releases](https://github.com/IQTLabs/poseidon/releases)
+- [Tests](https://github.com/IQTLabs/poseidon/actions)
 - [Version](VERSION)
 - Videos:
   - [Installing Poseidon and Faucet together](https://www.youtube.com/watch?v=Qst5oNs5uY0)

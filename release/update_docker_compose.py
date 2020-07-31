@@ -15,8 +15,8 @@ DEV = RELEASE_VER.endswith('.dev')
 
 # These services have their own versions - update automatically.
 OWN_VERSIONED_SERVICES = {
-    'crviz': 'cyberreboot/crviz',
-    'network_tap': 'cyberreboot/network-tools',
+    'crviz': 'iqtlabs/crviz',
+    'network_tap': 'iqtlabs/network-tools',
 }
 # For dev versions, add this config.
 DEV_SERVICE_OVERRIDE = {

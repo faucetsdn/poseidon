@@ -29,7 +29,7 @@ jobs:
         DOCKER_PASSWORD: ${{ secrets.DOCKER_TOKEN }}
       run: |
         echo "${DOCKER_PASSWORD}" | docker login --username "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-      if: github.repository == 'cyberreboot/poseidon' && github.event_name == 'push'
+      if: github.repository == 'iqtlabs/poseidon' && github.event_name == 'push'
 
     - name: Build and push platforms
       env:
@@ -38,13 +38,13 @@ jobs:
         docker buildx build \
           --platform linux/amd64,linux/arm/v7,linux/arm64 \
           --push \
-          -t cyberreboot/rabbitmq:${{ steps.change_version.outputs.VERSION }} helpers/rabbitmq && \
+          -t iqtlabs/rabbitmq:${{ steps.change_version.outputs.VERSION }} helpers/rabbitmq && \
         docker buildx build \
           --platform linux/amd64,linux/arm/v7,linux/arm64 \
           --push --no-cache \
-          -t cyberreboot/faucet-certstrap:${{ steps.change_version.outputs.VERSION }} helpers/faucet/certstrap && \
+          -t iqtlabs/faucet-certstrap:${{ steps.change_version.outputs.VERSION }} helpers/faucet/certstrap && \
         docker buildx build \
           --platform linux/amd64,linux/arm/v7,linux/arm64 \
           --push \
-          -t cyberreboot/redis:${{ steps.change_version.outputs.VERSION }} helpers/redis
-      if: github.repository == 'cyberreboot/poseidon' && github.event_name == 'push'
+          -t iqtlabs/redis:${{ steps.change_version.outputs.VERSION }} helpers/redis
+      if: github.repository == 'iqtlabs/poseidon' && github.event_name == 'push'

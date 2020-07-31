@@ -16,7 +16,7 @@ services:
             - poseidon
     faucet_certstrap:
         restart: on-failure
-        image: 'cyberreboot/faucet-certstrap:latest'
+        image: 'iqtlabs/faucet-certstrap:latest'
         build:
             context: helpers/faucet/certstrap
             dockerfile: Dockerfile
