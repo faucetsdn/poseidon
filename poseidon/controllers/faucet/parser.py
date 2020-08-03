@@ -38,9 +38,9 @@ class Parser:
         self.tunnel_vlan = tunnel_vlan
         self.tunnel_name = tunnel_name
         self.faucetconfgetsetter = faucetconfgetsetter_cl(
-            client_key='/local/faucetconfrpc/client.key',
-            client_cert='/local/faucetconfrpc/client.crt',
-            ca_cert='/local/faucetconfrpc/faucetconfrpc-ca.crt',
+            client_key='/certs/client.key',
+            client_cert='/certs/client.crt',
+            ca_cert='/certs/faucetconfrpc-ca.crt',
             server_addr=faucetconfrpc_address)
         self.mac_table = {}
 
