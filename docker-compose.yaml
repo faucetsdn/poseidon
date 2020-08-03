@@ -63,7 +63,7 @@ services:
         volumes:
             - '${POSEIDON_PREFIX}/opt/poseidon:/opt/poseidon'
             - '${POSEIDON_PREFIX}/var/log/poseidon:/var/log/poseidon'
-            - '${POSEIDON_PREFIX}/opt/poseidon/local:/local'
+            - '${POSEIDON_PREFIX}/opt/faucetconfrpc:/certs'
         networks:
             - poseidon
         depends_on:

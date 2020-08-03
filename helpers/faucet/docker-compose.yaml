@@ -23,7 +23,7 @@ services:
         volumes:
             - '${POSEIDON_PREFIX}/opt/poseidon:/opt/poseidon'
         command:
-            - /opt/poseidon/local/faucetconfrpc
+            - /opt/faucetconfrpc
             - faucetconfrpc
     faucetconfrpc:
         restart: always
@@ -31,14 +31,16 @@ services:
         environment:
             PYTHONUNBUFFERED: '1'
         volumes:
-            - '${POSEIDON_PREFIX}/opt/poseidon/local:/local'
+            - '${POSEIDON_PREFIX}/opt/faucetconfrpc:/certs'
             - /etc/faucet:/etc/faucet
+        ports:
+            - '127.0.0.1:59999:59999'
         networks:
             - poseidon
         command:
-            - --key=/local/faucetconfrpc/faucetconfrpc.key
-            - --cert=/local/faucetconfrpc/faucetconfrpc.crt
-            - --cacert=/local/faucetconfrpc/faucetconfrpc-ca.crt
+            - --key=/certs/faucetconfrpc.key
+            - --cert=/certs/faucetconfrpc.crt
+            - --cacert=/certs/faucetconfrpc-ca.crt
             - --host=0.0.0.0
             - --config_dir=/etc/faucet
 networks:
