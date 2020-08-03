@@ -21,7 +21,7 @@ services:
             context: helpers/faucet/certstrap
             dockerfile: Dockerfile
         volumes:
-            - '${POSEIDON_PREFIX}/opt/poseidon:/opt/poseidon'
+            - '${POSEIDON_PREFIX}/opt/faucetconfrpc:/opt/faucetconfrpc'
         command:
             - /opt/faucetconfrpc
             - faucetconfrpc
