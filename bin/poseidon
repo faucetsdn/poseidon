@@ -82,7 +82,7 @@ function check_args()
                 sudo cp -n "$POSEIDON_PREFIX"/opt/poseidon/config/poseidon.config "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config
                 sudo cp -n "$POSEIDON_PREFIX"/opt/poseidon/bin/gen_pcap_manifest /usr/local/bin/gen_pcap_manifest
                 sudo chmod +x /usr/local/bin/gen_pcap_manifest
-                rm -rf "$tardir"
+                sudo rm -rf "$tardir"
                 exit
                 ;;
             -l|logs)
@@ -201,7 +201,7 @@ function check_args()
                     poseidon install "$2"
                 fi
                 sudo cp -a "$configdir"/* "$POSEIDON_PREFIX"/opt/poseidon
-                rm -rf "$configdir"
+                sudo rm -rf "$configdir"
                 # update this script
                 sudo curl -L https://raw.githubusercontent.com/IQTLabs/poseidon/master/bin/poseidon -o /usr/local/bin/poseidon
                 sudo curl -L https://raw.githubusercontent.com/IQTLabs/poseidon/master/bin/gen_pcap_manifest -o /usr/local/bin/gen_pcap_manifest
