@@ -4,12 +4,20 @@ Created on 18 Jan 2019
 @author: Charlie Lewis
 """
 from poseidon.cli.commands import Commands
+from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import Endpoint
 from poseidon.helpers.endpoint import endpoint_factory
 
 
+def get_test_controller():
+    controller = Config().get_config()
+    controller['faucetconfrpc_address'] = None
+    controller['TYPE'] = 'faucet'
+    return controller
+
+
 def test_commands():
-    commands = Commands()
+    commands = Commands(controller=get_test_controller())
     endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
