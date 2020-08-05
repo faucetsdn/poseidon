@@ -442,7 +442,7 @@ class SDNConnect:
 
 class Monitor:
 
-    def __init__(self, skip_rabbit):
+    def __init__(self, skip_rabbit, controller=None):
         self.faucet_event = []
         self.m_queue = queue.Queue()
         self.job_queue = queue.Queue()
@@ -452,7 +452,10 @@ class Monitor:
         self.rabbit_channel_connection_local_fa = None
 
         # get config options
-        self.controller = Config().get_config()
+        if controller is None:
+            self.controller = Config().get_config()
+        else:
+            self.controller = controller
 
         # timer class to call things periodically in own thread
         self.schedule = schedule
