@@ -1,7 +1,7 @@
 {
   "workers": [
     {
-      "image": "cyberreboot/pcap-to-node-pcap",
+      "image": "iqtlabs/pcap-to-node-pcap",
       "inputs": [
         "pcap-dot1q"
       ],
@@ -11,11 +11,11 @@
         "pcap"
       ],
       "stage": "poseidon_poseidon",
-      "version": "v0.11.12",
+      "version": "v0.11.13",
       "viewableOutput": false
     },
     {
-      "image": "cyberreboot/tcprewrite-dot1q",
+      "image": "iqtlabs/tcprewrite-dot1q",
       "inputs": [
         "ncapture"
       ],
@@ -25,7 +25,7 @@
         "pcap"
       ],
       "stage": "poseidon_poseidon",
-      "version": "v0.11.12",
+      "version": "v0.11.13",
       "viewableOutput": false
     },
     {
@@ -41,7 +41,7 @@
         "RABBIT_QUEUE_NAME": "topic-poseidon-internal",
         "RABBIT_ROUTING_KEY": "poseidon.algos.decider"
       },
-      "image": "cyberreboot/networkml",
+      "image": "iqtlabs/networkml",
       "inputs": [
         "ncapture"
       ],
@@ -51,7 +51,7 @@
         "rabbitmq"
       ],
       "stage": "poseidon_poseidon",
-      "version": "v0.5.8",
+      "version": "v0.5.9",
       "viewableOutput": true
     },
     {
@@ -63,7 +63,7 @@
         "RABBIT_ROUTING_KEY": "poseidon.algos.decider",
         "rabbit": "true"
       },
-      "image": "cyberreboot/p0f",
+      "image": "iqtlabs/p0f",
       "inputs": [
         "pcap-splitter"
       ],
@@ -73,7 +73,7 @@
         "rabbitmq"
       ],
       "stage": "poseidon_poseidon",
-      "version": "v0.11.12",
+      "version": "v0.11.13",
       "viewableOutput": true
     },
     {

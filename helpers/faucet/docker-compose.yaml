@@ -27,7 +27,7 @@ services:
             - faucetconfrpc
     faucetconfrpc:
         restart: always
-        image: 'cyberreboot/faucetconfrpc:v0.13'
+        image: 'iqtlabs/faucetconfrpc:v0.14'
         environment:
             PYTHONUNBUFFERED: '1'
         volumes:
