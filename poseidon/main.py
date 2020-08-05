@@ -186,11 +186,7 @@ class SDNConnect:
     def get_sdn_context(self):
         controller_type = self.controller.get('TYPE', None)
         if controller_type == 'faucet':
-            try:
-                self.sdnc = FaucetProxy(self.controller)
-            except Exception as e:  # pragma: no cover
-                self.logger.error(
-                    'FaucetProxy could not connect to controller because {0}'.format(e))
+            self.sdnc = FaucetProxy(self.controller)
         elif controller_type == 'None':
             self.sdnc = None
         else:
