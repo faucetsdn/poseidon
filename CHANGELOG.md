@@ -1,6 +1,6 @@
 # v0.15.0 (2020-08-06)
 
-* updated faucetconfrpc (and certificates move to /opt/poseidon/faucetconfrpc by default.
+* updated faucetconfrpc (and certificates move to /opt/faucetconfrpc by default).
 * updated to networkml 0.6.0
 * repo move from cyberreboot to iqtlabs
 * updated cmd2, faucet, grafana, prometheus, pytype
