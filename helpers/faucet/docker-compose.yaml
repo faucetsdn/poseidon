@@ -34,14 +34,14 @@ services:
             - '${POSEIDON_PREFIX}/opt/faucetconfrpc:/certs'
             - /etc/faucet:/etc/faucet
         ports:
-            - '127.0.0.1:59999:59999'
+            - 59999:59999
         networks:
             - poseidon
         command:
             - --key=/certs/faucetconfrpc.key
             - --cert=/certs/faucetconfrpc.crt
             - --cacert=/certs/faucetconfrpc-ca.crt
-            - --host=0.0.0.0
+            - --host=faucetconfrpc
             - --config_dir=/etc/faucet
 networks:
     poseidon:
