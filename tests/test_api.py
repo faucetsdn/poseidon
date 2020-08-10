@@ -29,29 +29,29 @@ def setup_redis():
     r.sadd('mac_addresses', '00:00:00:00:00:02')
     r.sadd('mac_addresses', '00:00:00:00:00:03')
 
-    r.hmset(
-        'p0f_10.0.0.1', {'timestamps': "['1527208227']", 'short_os': 'Mac'})
-    r.hmset(
-        'p0f_None', {'timestamps': "['1527208220', '1527208227']", 'short_os': 'Windows'})
-    r.hmset(
-        'p0f_2601:645:8200:a571:18fd:6640:9cd9:10d3', {'timestamps': "['1527208220', '1527208228']", 'short_os': 'Linux'})
+    r.hset(
+        'p0f_10.0.0.1', mapping={'timestamps': "['1527208227']", 'short_os': 'Mac'})
+    r.hset(
+        'p0f_None', mapping={'timestamps': "['1527208220', '1527208227']", 'short_os': 'Windows'})
+    r.hset(
+        'p0f_2601:645:8200:a571:18fd:6640:9cd9:10d3', mapping={'timestamps': "['1527208220', '1527208228']", 'short_os': 'Linux'})
 
-    r.hmset(
-        '00:00:00:00:00:01', {'timestamps': "['1527208227']", 'poseidon_hash': '6cd09124a66ef1bbc72c1aff4e333766d3533f81'})
-    r.hmset(
-        '00:00:00:00:00:02', {'timestamps': "['1527208220', '1527208227']", 'poseidon_hash': '6cd09124a66ef1bbc72c1aff4e333766d3533f82'})
-    r.hmset(
-        '00:00:00:00:00:03', {'timestamps': "['1527208220', '1527208228']", 'poseidon_hash': '6cd09124a66ef1bbc72c1aff4e333766d3533f83'})
+    r.hset(
+        '00:00:00:00:00:01', mapping={'timestamps': "['1527208227']", 'poseidon_hash': '6cd09124a66ef1bbc72c1aff4e333766d3533f81'})
+    r.hset(
+        '00:00:00:00:00:02', mapping={'timestamps': "['1527208220', '1527208227']", 'poseidon_hash': '6cd09124a66ef1bbc72c1aff4e333766d3533f82'})
+    r.hset(
+        '00:00:00:00:00:03', mapping={'timestamps': "['1527208220', '1527208228']", 'poseidon_hash': '6cd09124a66ef1bbc72c1aff4e333766d3533f83'})
 
     for key, name in (
             ('networkml_00:00:00:00:00:01_1527208227', '6cd09124a66ef1bbc72c1aff4e333766d3533f81'),
             ('networkml_00:00:00:00:00:02_1527208227', '6cd09124a66ef1bbc72c1aff4e333766d3533f82'),
             ('networkml_00:00:00:00:00:03_1527208228', '6cd09124a66ef1bbc72c1aff4e333766d3533f83')):
-        r.hmset(key, {
+        r.hset(key, mapping={
             name: "{'decisions':{'behavior': 'normal'}, 'classification': {'confidences': [0.606, 0.348, 0.015], 'labels': ['Developer workstation', 'Unknown', 'Smartphone']}}"})
 
-    r.hmset('6cd09124a66ef1bbc72c1aff4e333766d3533f81',
-            {'transition_time': '1524623228.1019075',
+    r.hset('6cd09124a66ef1bbc72c1aff4e333766d3533f81',
+            mapping={'transition_time': '1524623228.1019075',
              'endpoint_data': "{'name': None, \
                                 'prev_states': [], \
                                 'mac': '00:00:00:00:00:01', \
@@ -64,8 +64,8 @@ def setup_redis():
                                 'active': 0}",
              'next_state': 'REINVESTIGATING',
              'state': 'KNOWN'})
-    r.hmset('6cd09124a66ef1bbc72c1aff4e333766d3533f82',
-            {'transition_time': '1524623228.1019075',
+    r.hset('6cd09124a66ef1bbc72c1aff4e333766d3533f82',
+            mapping={'transition_time': '1524623228.1019075',
              'endpoint_data': "{'name': None, \
                                 'prev_states': [], \
                                 'mac': '00:00:00:00:00:02', \
@@ -77,8 +77,8 @@ def setup_redis():
                                 'active': 1}",
              'next_state': 'REINVESTIGATING',
              'state': 'KNOWN'})
-    r.hmset('6cd09124a66ef1bbc72c1aff4e333766d3533f83',
-            {'transition_time': '1524623228.1019075',
+    r.hset('6cd09124a66ef1bbc72c1aff4e333766d3533f83',
+            mapping={'transition_time': '1524623228.1019075',
              'endpoint_data': "{'name': None, \
                                 'prev_states': [], \
                                 'mac': '00:00:00:00:00:03', \
