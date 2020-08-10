@@ -9,6 +9,13 @@ from poseidon.helpers.endpoint import endpoint_factory
 from poseidon.main import SDNConnect
 
 
+def get_test_controller():
+    controller = Config().get_config()
+    controller['faucetconfrpc_address'] = None
+    controller['TYPE'] = 'faucet'
+    return controller
+
+
 def test_Actions():
     """
     Tests Actions
@@ -16,7 +23,7 @@ def test_Actions():
     endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
-    controller = Config().get_config()
+    controller = get_test_controller()
     s = SDNConnect(controller)
     a = Actions(endpoint, s.sdnc)
     a.mirror_endpoint()
@@ -33,7 +40,7 @@ def test_Actions_nosdn():
     endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
-    controller = Config().get_config()
+    controller = get_test_controller()
     s = SDNConnect(controller)
     s.sdnc = None
     a = Actions(endpoint, s.sdnc)

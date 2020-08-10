@@ -186,11 +186,7 @@ class SDNConnect:
     def get_sdn_context(self):
         controller_type = self.controller.get('TYPE', None)
         if controller_type == 'faucet':
-            try:
-                self.sdnc = FaucetProxy(self.controller)
-            except Exception as e:  # pragma: no cover
-                self.logger.error(
-                    'FaucetProxy could not connect to controller because {0}'.format(e))
+            self.sdnc = FaucetProxy(self.controller)
         elif controller_type == 'None':
             self.sdnc = None
         else:
@@ -446,7 +442,7 @@ class SDNConnect:
 
 class Monitor:
 
-    def __init__(self, skip_rabbit):
+    def __init__(self, skip_rabbit, controller=None):
         self.faucet_event = []
         self.m_queue = queue.Queue()
         self.job_queue = queue.Queue()
@@ -456,7 +452,10 @@ class Monitor:
         self.rabbit_channel_connection_local_fa = None
 
         # get config options
-        self.controller = Config().get_config()
+        if controller is None:
+            self.controller = Config().get_config()
+        else:
+            self.controller = controller
 
         # timer class to call things periodically in own thread
         self.schedule = schedule

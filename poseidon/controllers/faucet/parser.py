@@ -37,6 +37,8 @@ class Parser:
         self.copro_vlan = copro_vlan
         self.tunnel_vlan = tunnel_vlan
         self.tunnel_name = tunnel_name
+        if faucetconfrpc_address is None:
+            faucetconfgetsetter_cl = FaucetLocalConfGetSetter
         self.faucetconfgetsetter = faucetconfgetsetter_cl(
             client_key='/certs/client.key',
             client_cert='/certs/client.crt',
