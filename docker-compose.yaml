@@ -21,7 +21,7 @@ services:
                     - messenger
     network_tap:
         restart: always
-        image: 'iqtlabs/network-tap:v0.11.14'
+        image: 'iqtlabs/network-tap:v0.11.15'
         volumes:
             - '/var/run/docker.sock:/var/run/docker.sock'
             - '${POSEIDON_PREFIX}/opt/poseidon_files:/files'
