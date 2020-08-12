@@ -19,7 +19,7 @@ class FaucetConfGetSetter:
         self.faucet_conf['acls'] = acls
 
     def get_dps(self):
-        return self.faucet_conf['dps']
+        return self.faucet_conf.get('dps', {})
 
     def get_switch_conf(self, dp):
         return self.get_dps().get(dp, None)

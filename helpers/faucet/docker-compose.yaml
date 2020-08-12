@@ -2,7 +2,7 @@ version: '3.7'
 services:
     rabbitmq_adapter:
         restart: always
-        image: 'faucet/event-adapter-rabbitmq:1.9.47'
+        image: 'faucet/event-adapter-rabbitmq:1.9.48'
         volumes:
             - '${POSEIDON_PREFIX}/var/run/faucet:/var/run/faucet'
         environment:
@@ -21,27 +21,27 @@ services:
             context: helpers/faucet/certstrap
             dockerfile: Dockerfile
         volumes:
-            - '${POSEIDON_PREFIX}/opt/poseidon:/opt/poseidon'
+            - '${POSEIDON_PREFIX}/opt/faucetconfrpc:/opt/faucetconfrpc'
         command:
             - /opt/faucetconfrpc
             - faucetconfrpc
     faucetconfrpc:
         restart: always
-        image: 'cyberreboot/faucetconfrpc:v0.13'
+        image: 'iqtlabs/faucetconfrpc:v0.14'
         environment:
             PYTHONUNBUFFERED: '1'
         volumes:
             - '${POSEIDON_PREFIX}/opt/faucetconfrpc:/certs'
             - /etc/faucet:/etc/faucet
         ports:
-            - '127.0.0.1:59999:59999'
+            - 59999:59999
         networks:
             - poseidon
         command:
             - --key=/certs/faucetconfrpc.key
             - --cert=/certs/faucetconfrpc.crt
             - --cacert=/certs/faucetconfrpc-ca.crt
-            - --host=0.0.0.0
+            - --host=faucetconfrpc
             - --config_dir=/etc/faucet
 networks:
     poseidon:

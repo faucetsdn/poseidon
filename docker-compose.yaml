@@ -21,7 +21,7 @@ services:
                     - messenger
     network_tap:
         restart: always
-        image: 'cyberreboot/network-tap:v0.11.12'
+        image: 'iqtlabs/network-tap:v0.11.13'
         volumes:
             - '/var/run/docker.sock:/var/run/docker.sock'
             - '${POSEIDON_PREFIX}/opt/poseidon_files:/files'
@@ -32,7 +32,7 @@ services:
             poseidon:
     crviz:
         restart: always
-        image: 'cyberreboot/crviz:v0.3.22'
+        image: 'iqtlabs/crviz:v0.3.23'
         ports:
             - '5001:5000'
         networks:

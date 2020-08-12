@@ -14,10 +14,13 @@ from poseidon.main import SDNConnect
 
 class Commands:
 
-    def __init__(self):
+    def __init__(self, controller=None):
         self.states = ['active', 'inactive', 'known', 'unknown',
                        'mirroring', 'abnormal', 'shutdown', 'reinvestigating', 'queued']
-        self.controller = Config().get_config()
+        if controller is None:
+            self.controller = Config().get_config()
+        else:
+            self.controller = controller
         self.sdnc = SDNConnect(self.controller, first_time=False)
         self.sdnc.get_stored_endpoints()
 

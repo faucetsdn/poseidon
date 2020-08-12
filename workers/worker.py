@@ -11,14 +11,14 @@ from redis import StrictRedis
 
 def set_status(r, status, extra_workers):
     try:
-        r.hmset('status', status)
+        r.hset('status', mapping=status)
         statuses = r.hgetall('status')
         for s in statuses:
             statuses[s] = json.loads(statuses[s])
         for worker in extra_workers:
             if worker not in statuses:
                 status[worker] = extra_workers[worker]
-        r.hmset('status', status)
+        r.hset('status', mapping=status)
     except Exception as e:  # pragma: no cover
         print(f'Failed to update Redis because: {e}')
     return

@@ -31,7 +31,7 @@ class PoseidonRedisClient:
     def hmset(self, key, values):
         str_values = {str(k): str(v) for k, v in values.items()}
         self.logger.debug('store key %s value %s', key, str_values)
-        self.r.hmset(key, str_values)
+        self.r.hset(key, mapping=str_values)
 
     def store_p0f_result(self, data):
         # TODO: migrate to store_tool_result()
