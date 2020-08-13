@@ -1,5 +1,6 @@
 
 import os
+import yaml
 from faucetconfrpc.faucetconfrpc_client_lib import FaucetConfRpcClient
 from poseidon.controllers.faucet.helpers import get_config_file, yaml_in, yaml_out
 
@@ -30,15 +31,6 @@ class FaucetConfGetSetter:
             return None
         return switch_conf['interfaces'].get(port, None)
 
-    def set_port_conf(self, dp, port, port_conf):
-        switch_conf = self.get_switch_conf(dp)
-        if not switch_conf:
-            return None
-        switch_conf['interfaces'][port] = port_conf
-
-    def set_switch_conf(self, dp, switch_conf):
-        self.faucet_conf['dps'][dp] = switch_conf
-
     def get_stack_root_switch(self):
         root_stack_switch = [
             switch for switch, switch_conf in self.get_dps().items()
@@ -63,6 +55,12 @@ class FaucetConfGetSetter:
             del mirror_interface_conf['mirror']
         self.set_port_conf(dp, port, mirror_interface_conf)
 
+    def set_port_conf(self, dp, port, port_conf):
+        raise NotImplementedError
+
+    def update_switch_conf(self, dp, switch_conf):
+        raise NotImplementedError
+
 
 class FaucetLocalConfGetSetter(FaucetConfGetSetter):
 
@@ -84,6 +82,17 @@ class FaucetLocalConfGetSetter(FaucetConfGetSetter):
         config_file = get_config_file(config_file)
         return yaml_out(config_file, self.faucet_conf)
 
+    def set_port_conf(self, dp, port, port_conf):
+        switch_conf = self.get_switch_conf(dp)
+        if not switch_conf:
+            return None
+        switch_conf['interfaces'][port] = port_conf
+        self.write_faucet_conf()
+
+    def update_switch_conf(self, dp, switch_conf):
+        self.faucet_conf['dps'][dp].update(switch_conf)
+        self.write_faucet_conf()
+
 
 class FaucetRemoteConfGetSetter(FaucetConfGetSetter):
 
@@ -104,14 +113,20 @@ class FaucetRemoteConfGetSetter(FaucetConfGetSetter):
             config_filename=self.config_file_path(config_file))
         return self.faucet_conf
 
-    def write_faucet_conf(self, config_file=None, faucet_conf=None):
+    def write_faucet_conf(self, config_file=None, faucet_conf=None, merge=False):
         if not config_file:
             config_file = self.DEFAULT_CONFIG_FILE
         if faucet_conf is None:
             faucet_conf = self.faucet_conf
-        self.faucet_conf = faucet_conf
         return self.client.set_config_file(
             self.faucet_conf,
             config_filename=self.config_file_path(config_file),
-            merge=False)
+            merge=merge)
 
+    def set_port_conf(self, dp, port, port_conf):
+        return self.client.set_dp_interfaces(
+            [(dp, {port: yaml.dump(port_conf)})])
+
+    def update_switch_conf(self, dp, switch_conf):
+        return self.write_faucet_conf(
+            faucet_conf={'dps': {dp: switch_conf}}, merge=True)

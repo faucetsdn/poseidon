@@ -68,7 +68,7 @@ def test_FaucetProxy():
         proxy.update_acls()
 
         controller = Config().get_config()
-        controller['MIRROR_PORTS'] = '{"foo":1}'
+        controller['MIRROR_PORTS'] = {"foo": 1}
         controller['ignore_vlans'] = ['foo']
         controller['ignore_ports'] = [1]
         proxy = _get_proxy(faucetconfgetsetter_cl, controller)
