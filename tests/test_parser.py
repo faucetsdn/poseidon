@@ -223,8 +223,9 @@ acls:
             tunnel_vlan=999, tunnel_name='poseidon_tunnel')
         parser.reinvestigation_frequency = 123
         parser.faucetconfgetsetter.faucet_conf = orig_faucet_conf
-        parser.faucetconfgetsetter.faucet_conf = parser._set_default_switch_conf(orig_faucet_conf)
         parser.faucetconfgetsetter.write_faucet_conf()
+        parser._set_default_switch_conf()
+        parser._read_faucet_conf()
         assert parser.faucetconfgetsetter.faucet_conf['dps']['s1'] == test_faucet_conf['dps']['s1']
         assert parser.faucetconfgetsetter.faucet_conf['dps']['s2'] == test_faucet_conf['dps']['s2']
         assert parser.faucetconfgetsetter.faucet_conf['acls'] == test_faucet_conf['acls']
