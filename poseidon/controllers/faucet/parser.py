@@ -54,19 +54,15 @@ class Parser:
         return self.faucetconfgetsetter.write_faucet_conf(config_file=None, faucet_conf=faucet_conf)
 
     def _get_dps(self):
-        self._read_faucet_conf()
         return self.faucetconfgetsetter.get_dps()
 
     def _get_switch_conf(self, dp):
-        self._read_faucet_conf()
         return self.faucetconfgetsetter.get_switch_conf(dp)
 
     def _get_port_conf(self, dp, port):
-        self._read_faucet_conf()
         return self.faucetconfgetsetter.get_port_conf(dp, port)
 
     def _get_stack_root_switch(self):
-        self._read_faucet_conf()
         return self.faucetconfgetsetter.get_stack_root_switch()
 
     def _get_acls(self):
@@ -77,7 +73,6 @@ class Parser:
 
     def _set_acls(self, acls):
         self.faucetconfgetsetter.set_acls(acls)
-        self._write_faucet_conf()
 
     def _update_switch_conf(self, dp, switch_conf):
         self.faucetconfgetsetter.update_switch_conf(dp, switch_conf)
