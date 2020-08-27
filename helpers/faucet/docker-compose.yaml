@@ -2,7 +2,7 @@ version: '3.7'
 services:
     rabbitmq_adapter:
         restart: always
-        image: 'faucet/event-adapter-rabbitmq:1.9.48'
+        image: 'faucet/event-adapter-rabbitmq:1.9.49'
         volumes:
             - '${POSEIDON_PREFIX}/var/run/faucet:/var/run/faucet'
         environment:
@@ -27,7 +27,7 @@ services:
             - faucetconfrpc
     faucetconfrpc:
         restart: always
-        image: 'iqtlabs/faucetconfrpc:v0.16'
+        image: 'iqtlabs/faucetconfrpc:v0.20'
         environment:
             PYTHONUNBUFFERED: '1'
         volumes:

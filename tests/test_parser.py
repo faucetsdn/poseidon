@@ -93,9 +93,13 @@ dps:
             3:
                 native_vlan: 100
 """
-    faucet_conf = yaml.safe_load(faucet_conf_str)
-    switch_conf = faucet_conf['dps']['s1']
-    mirror_interface_conf = switch_conf['interfaces'][1]
+
+    def mirrors(parser):
+        faucet_conf = parser.faucetconfgetsetter.faucet_conf
+        switch_conf = faucet_conf['dps']['s1']
+        mirror_interface_conf = switch_conf['interfaces'][1]
+        return mirror_interface_conf.get('mirror', None)
+
     with tempfile.TemporaryDirectory() as tmpdir:
         faucetconfgetsetter_cl = FaucetLocalConfGetSetter
         faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(tmpdir, 'faucet.yaml')
@@ -103,17 +107,14 @@ dps:
             faucetconfgetsetter_cl=faucetconfgetsetter_cl,
             mirror_ports={'s1': 1},
             proxy_mirror_ports={'sx': ['s1', 99]})
-        parser.faucetconfgetsetter.faucet_conf = faucet_conf
-        assert mirror_interface_conf['mirror'] == [2]
+        parser.faucetconfgetsetter.faucet_conf = yaml.safe_load(faucet_conf_str)
+        assert mirrors(parser) == [2]
         parser.faucetconfgetsetter.set_mirror_config('s1', 1, 3)
-        assert mirror_interface_conf['mirror'] == [3]
-        parser.faucetconfgetsetter.write_faucet_conf()
+        assert mirrors(parser) == [3]
         parser.faucetconfgetsetter.set_mirror_config('s1', 1, [2, 3])
-        assert mirror_interface_conf['mirror'] == [2, 3]
-        parser.faucetconfgetsetter.write_faucet_conf()
+        assert mirrors(parser) == [2, 3]
         parser.faucetconfgetsetter.set_mirror_config('s1', 1, None)
-        assert 'mirror' not in mirror_interface_conf
-        parser.faucetconfgetsetter.write_faucet_conf()
+        assert mirrors(parser) is None
 
 
 def test_stack_default_config():
@@ -223,8 +224,9 @@ acls:
             tunnel_vlan=999, tunnel_name='poseidon_tunnel')
         parser.reinvestigation_frequency = 123
         parser.faucetconfgetsetter.faucet_conf = orig_faucet_conf
-        parser.faucetconfgetsetter.faucet_conf = parser._set_default_switch_conf(orig_faucet_conf)
         parser.faucetconfgetsetter.write_faucet_conf()
+        parser._set_default_switch_conf()
+        parser._read_faucet_conf()
         assert parser.faucetconfgetsetter.faucet_conf['dps']['s1'] == test_faucet_conf['dps']['s1']
         assert parser.faucetconfgetsetter.faucet_conf['dps']['s2'] == test_faucet_conf['dps']['s2']
         assert parser.faucetconfgetsetter.faucet_conf['acls'] == test_faucet_conf['acls']

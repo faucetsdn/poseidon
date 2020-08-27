@@ -1,3 +1,9 @@
+# v0.15.1 (2020-08-14)
+
+* Fix certstrap created certificates (old faucetconfrpc certificates must be removed, will be automatically recreated)
+* Use more specific faucetconfrpc write RPCs to fix conflicts with other RPC applications.
+* updated network-tools, cmd2, docker, faucetconfrpc, pytype, urllib3, grafana
+
 # v0.15.0 (2020-08-06)
 
 * updated faucetconfrpc (and certificates move to /opt/faucetconfrpc by default).

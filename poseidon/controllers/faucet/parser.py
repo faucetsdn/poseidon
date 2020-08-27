@@ -45,6 +45,7 @@ class Parser:
             ca_cert='/certs/faucetconfrpc-ca.crt',
             server_addr=faucetconfrpc_address)
         self.mac_table = {}
+        self._set_default_switch_conf()
 
     def _read_faucet_conf(self):
         return self.faucetconfgetsetter.read_faucet_conf(config_file=None)
@@ -64,26 +65,31 @@ class Parser:
     def _get_stack_root_switch(self):
         return self.faucetconfgetsetter.get_stack_root_switch()
 
-    def _set_switch_conf(self, dp, switch_conf):
-        self.faucetconfgetsetter.set_switch_conf(dp, switch_conf)
-
-    def _set_port_conf(self, dp, port, port_conf):
-        self.faucetconfgetsetter.set_port_conf(dp, port, port_conf)
+    def _get_acls(self):
+        faucet_conf = self._read_faucet_conf()
+        acls = Acl(faucetconfgetsetter=self.faucetconfgetsetter)
+        acls.read(config_yaml=faucet_conf)
+        return acls
 
     def _set_acls(self, acls):
         self.faucetconfgetsetter.set_acls(acls)
 
+    def _update_switch_conf(self, dp, switch_conf):
+        self.faucetconfgetsetter.update_switch_conf(dp, switch_conf)
+
+    def _set_port_conf(self, dp, port, port_conf):
+        self.faucetconfgetsetter.set_port_conf(dp, port, port_conf)
+
     def _set_mirror_config(self, switch, port, ports=None):
         self.faucetconfgetsetter.set_mirror_config(switch, port, ports)
 
-    def _set_default_switch_conf(self, faucet_conf):
+    def _set_default_switch_conf(self):
         # TODO: make smarter with more complex configs (backup original values, etc)
-        if faucet_conf and self.mirror_ports:
-            acls = Acl(faucetconfgetsetter=self.faucetconfgetsetter)
-            acls.read(config_yaml=faucet_conf)
+        if self.mirror_ports:
             root_stack_switch = self._get_stack_root_switch()
             root_mirror_port = None
             if root_stack_switch:
+                acls = self._get_acls()
                 root_mirror_port = self.mirror_ports.get(
                     root_stack_switch, None)
                 if self.tunnel_name in acls.acls:
@@ -98,16 +104,17 @@ class Parser:
                     {'rule': {'actions': {'allow': 0, 'output': {'tunnel': {
                         'type': 'vlan', 'tunnel_id': self.tunnel_vlan,
                         'dp': root_stack_switch, 'port': root_mirror_port}}}}})
+                # Merge ACL updates, if any back in
+                self._set_acls(acls.acls)
 
             for switch, mirror_port in self.mirror_ports.items():
-                switch_conf = self._get_switch_conf(switch)
-                if not switch_conf:
+                if not self._get_switch_conf(switch):
                     continue
                 if self.reinvestigation_frequency:
-                    switch_conf.update({
+                    switch_conf = {
                         'timeout': (self.reinvestigation_frequency * 2) + 1,
-                        'arp_neighbor_timeout': self.reinvestigation_frequency})
-                    self._set_switch_conf(switch, switch_conf)
+                        'arp_neighbor_timeout': self.reinvestigation_frequency}
+                    self._update_switch_conf(switch, switch_conf)
                 # If stacking was detected, provision tunnel config on non root switches.
                 # Poseidon's mirror NIC must be connected to the root switch's mirror port.
                 # Non mirror switches must have a loopback plug installed in their mirror port.
@@ -130,10 +137,6 @@ class Parser:
                             'coprocessor': {'strategy': 'vlan_vid'},
                         })
                     self._set_port_conf(switch, mirror_port, mirror_port_conf)
-
-            # Merge ACL updates, if any back in
-            self._set_acls(acls.acls)
-        return self.faucetconfgetsetter.faucet_conf
 
     def proxy_mirror_port(self, switch, port):
         if self.proxy_mirror_ports and self._get_switch_conf(switch):
@@ -169,7 +172,6 @@ class Parser:
         return (mirror_port, existing_mirror_ports)
 
     def clear_mirrors(self):
-        self._read_faucet_conf()
         dps = self._get_dps()
         if not dps:
             return False
@@ -177,51 +179,47 @@ class Parser:
             mirror_port, _ = self.check_mirror(switch)
             if mirror_port:
                 self._set_mirror_config(switch, mirror_port)
-        return self._write_faucet_conf()
+
+    def config_mirror(self, action, switch, port):
+        switch, port = self.proxy_mirror_port(switch, port)
+        mirror_port, mirror_ports = self.check_mirror(switch)
+        if mirror_port:
+            if action == 'mirror':
+                mirror_ports.add(port)
+            elif action == 'unmirror':
+                try:
+                    # TODO check for still running captures on this port
+                    mirror_ports.remove(port)
+                except KeyError:
+                    self.logger.warning(
+                        f'{port} was not already mirroring on {switch}')
+            self._set_mirror_config(switch, mirror_port, mirror_ports)
+        else:
+            self.logger.error(
+                f'Unable to mirror {switch}:{port} due to warnings')
+
+    def config_acls(self, rules_file, endpoints, force_apply_rules, force_remove_rules, coprocess_rules_files):
+        rules_doc = parse_rules(rules_file)
+        self._read_faucet_conf()
+        self.faucetconfgetsetter.faucet_conf = ACLs().apply_acls(
+            rules_file, endpoints,
+            force_apply_rules, force_remove_rules,
+            coprocess_rules_files, self.faucetconfgetsetter.faucet_conf, rules_doc)
+        self._write_faucet_conf()
 
     def config(self, action, port, switch, rules_file=None,
                endpoints=None, force_apply_rules=None, force_remove_rules=None,
                coprocess_rules_files=None):
-        faucet_conf = self._read_faucet_conf()
-        if not faucet_conf:
-            self.logger.warning('Cannot read FAUCET config file')
-            return
-
-        switch, port = self.proxy_mirror_port(switch, port)
-        self._set_default_switch_conf(faucet_conf)
-        mirror_port, mirror_ports = self.check_mirror(switch)
-
         if action in ('shutdown', 'apply_routes'):
             # TODO: not implemented.
             pass
         elif action in ('mirror', 'unmirror'):
-            if mirror_port:
-                if action == 'mirror':
-                    mirror_ports.add(port)
-                elif action == 'unmirror':
-                    try:
-                        # TODO check for still running captures on this port
-                        mirror_ports.remove(port)
-                    except KeyError:
-                        self.logger.warning(
-                            f'{port} was not already mirroring on {switch}')
-            else:
-                self.logger.error(
-                    f'Unable to mirror {switch}:{port} due to warnings')
+            self.config_mirror(action, switch, port)
         elif action == 'apply_acls':
-            rules_doc = parse_rules(rules_file)
-            self.faucetconfgetsetter.faucet_conf = ACLs().apply_acls(
-                rules_file, endpoints,
-                force_apply_rules, force_remove_rules,
-                coprocess_rules_files, self.faucetconfgetsetter.faucet_conf, rules_doc)
+            self.config_acls(
+                rules_file, endpoints, force_apply_rules, force_remove_rules, coprocess_rules_files)
         else:
             self.logger.warning('Unknown action: {0}'.format(action))
-
-        if mirror_port:
-            self._set_mirror_config(switch, mirror_port, mirror_ports)
-
-        if self._write_faucet_conf() is None:
-            self.logger.error('Cannot write FAUCET config file')
 
     def ignore_event(self, message):
         for message_type in ('L2_LEARN', 'L2_EXPIRE', 'PORT_CHANGE'):
