@@ -7,8 +7,8 @@ import urllib.request
 
 WORKERS_JSON = '../workers/workers.json'
 RELEASE_MAP = {
-    'iqtlabs/pcap-to-node-pcap': 'iqtlabs/network-tools',
-    'iqtlabs/tcprewrite-dot1q': 'iqtlabs/network-tools',
+    'iqtlabs/pcap_to_node_pcap': 'iqtlabs/network-tools',
+    'iqtlabs/tcprewrite_dot1q': 'iqtlabs/network-tools',
     'iqtlabs/networkml': 'iqtlabs/networkml',
     'iqtlabs/p0f': 'iqtlabs/network-tools',
     'iqtlabs/faucetconfrpc': 'iqtlabs/faucetconfrpc',
