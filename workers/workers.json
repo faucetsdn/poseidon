@@ -1,7 +1,7 @@
 {
   "workers": [
     {
-      "image": "iqtlabs/pcap-to-node-pcap",
+      "image": "iqtlabs/pcap_to_node_pcap",
       "inputs": [
         "pcap-dot1q"
       ],
@@ -11,11 +11,11 @@
         "pcap"
       ],
       "stage": "poseidon_poseidon",
-      "version": "v0.11.15",
+      "version": "v0.11.16",
       "viewableOutput": false
     },
     {
-      "image": "iqtlabs/tcprewrite-dot1q",
+      "image": "iqtlabs/tcprewrite_dot1q",
       "inputs": [
         "ncapture"
       ],
@@ -25,7 +25,7 @@
         "pcap"
       ],
       "stage": "poseidon_poseidon",
-      "version": "v0.11.15",
+      "version": "v0.11.16",
       "viewableOutput": false
     },
     {
@@ -51,7 +51,7 @@
         "rabbitmq"
       ],
       "stage": "poseidon_poseidon",
-      "version": "v0.6.0",
+      "version": "v0.6.1",
       "viewableOutput": true
     },
     {
@@ -73,7 +73,7 @@
         "rabbitmq"
       ],
       "stage": "poseidon_poseidon",
-      "version": "v0.11.15",
+      "version": "v0.11.16",
       "viewableOutput": true
     },
     {

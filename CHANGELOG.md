@@ -1,3 +1,8 @@
+# v0.15.2 (2020-08-27)
+
+* Updated faucet, gauge, grafana, rabbitmq, faucetconfrpc, cmd2, docker, pylint, pytest-cov, and pytype
+* Clean up RPC calls to Faucet
+
 # v0.15.1 (2020-08-14)
 
 * Fix certstrap created certificates (old faucetconfrpc certificates must be removed, will be automatically recreated)
