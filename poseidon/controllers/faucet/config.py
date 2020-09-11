@@ -75,10 +75,9 @@ class FaucetLocalConfGetSetter(FaucetConfGetSetter):
         faucet_conf = yaml_in(config_file)
         if isinstance(faucet_conf, dict):
             self.faucet_conf = faucet_conf
-        else:
-            if self.faucet_conf is None:
-                logging.error('Faucet config is empty, exiting.')
-                sys.exit(1)
+        if self.faucet_conf is None:
+            logging.error('Faucet config is empty, exiting.')
+            sys.exit(1)
         return self.faucet_conf
 
     def write_faucet_conf(self, config_file=None, faucet_conf=None):
