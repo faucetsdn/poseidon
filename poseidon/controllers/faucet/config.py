@@ -1,5 +1,7 @@
 
+import logging
 import os
+import sys
 import yaml
 from faucetconfrpc.faucetconfrpc_client_lib import FaucetConfRpcClient
 from poseidon.controllers.faucet.helpers import get_config_file, yaml_in, yaml_out
@@ -73,6 +75,9 @@ class FaucetLocalConfGetSetter(FaucetConfGetSetter):
         faucet_conf = yaml_in(config_file)
         if isinstance(faucet_conf, dict):
             self.faucet_conf = faucet_conf
+        else:
+            logging.error('Faucet config is empty, exiting.')
+            sys.exit(1)
         return self.faucet_conf
 
     def write_faucet_conf(self, config_file=None, faucet_conf=None):
