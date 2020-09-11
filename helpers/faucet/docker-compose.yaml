@@ -16,10 +16,7 @@ services:
             - poseidon
     faucet_certstrap:
         restart: on-failure
-        image: 'iqtlabs/faucet-certstrap:latest'
-        build:
-            context: helpers/faucet/certstrap
-            dockerfile: Dockerfile
+        image: 'iqtlabs/faucet-certstrap:v0.15.3'
         volumes:
             - '${POSEIDON_PREFIX}/opt/faucetconfrpc:/opt/faucetconfrpc'
         command:
@@ -27,7 +24,7 @@ services:
             - faucetconfrpc
     faucetconfrpc:
         restart: always
-        image: 'iqtlabs/faucetconfrpc:v0.22'
+        image: 'iqtlabs/faucetconfrpc:v0.22.1'
         environment:
             PYTHONUNBUFFERED: '1'
         volumes:
