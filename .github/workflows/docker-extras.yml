@@ -41,10 +41,6 @@ jobs:
           -t iqtlabs/rabbitmq:${{ steps.change_version.outputs.VERSION }} helpers/rabbitmq && \
         docker buildx build \
           --platform linux/amd64,linux/arm/v7,linux/arm64 \
-          --push --no-cache \
-          -t iqtlabs/faucet-certstrap:${{ steps.change_version.outputs.VERSION }} helpers/faucet/certstrap && \
-        docker buildx build \
-          --platform linux/amd64,linux/arm/v7,linux/arm64 \
           --push \
           -t iqtlabs/redis:${{ steps.change_version.outputs.VERSION }} helpers/redis
       if: github.repository == 'iqtlabs/poseidon' && github.event_name == 'push'

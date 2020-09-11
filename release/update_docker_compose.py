@@ -29,7 +29,6 @@ NON_DEV_SERVICE_DELETE = {
     'poseidon_api': ['build'],
     'poseidon': ['build'],
     'workers': ['build'],
-    'poseidon_certstrap': ['build'],
 }
 
 # Broadly preserves formatting.
