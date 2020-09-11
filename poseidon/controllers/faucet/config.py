@@ -122,6 +122,9 @@ class FaucetRemoteConfGetSetter(FaucetConfGetSetter):
     def read_faucet_conf(self, config_file):
         self.faucet_conf = self.client.get_config_file(
             config_filename=self.config_file_path(config_file))
+        if self.faucet_conf is None:
+            logging.error('Faucet config is empty, exiting.')
+            sys.exit(1)
         return self.faucet_conf
 
     def write_faucet_conf(self, config_file=None, faucet_conf=None, merge=False):
