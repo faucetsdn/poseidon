@@ -1,3 +1,7 @@
+# v0.15.3 (2020-09-04)
+
+- Updated cmd2, pytype, faucetconfrpc
+
 # v0.15.2 (2020-08-27)
 
 * Updated faucet, gauge, grafana, rabbitmq, faucetconfrpc, cmd2, docker, pylint, pytest-cov, and pytype
