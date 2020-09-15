@@ -43,7 +43,7 @@ class Acl:
             self.acls[name] = []
         self.acls[name].append(rule)
 
-    def _merge_acls(self, config_yaml):
+    def _merge_acls(self, yaml_config):
         if 'acls' not in config_yaml:
             yaml_config['acls'] = {}
         yaml_config['acls'].update(self.acls)
