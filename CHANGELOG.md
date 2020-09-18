@@ -1,12 +1,6 @@
-# v0.15.4 (2020-09-18)
-
-* Updated faucetconfrpc (move certstrap to faucetconfrpc)
-* Fix handling of empty faucet.yaml
-* Updated pytype, pytest, prometheus, texttable, ruamel.yaml, cmd2
-
 # v0.15.3 (2020-09-04)
 
-* Updated cmd2, pytype, faucetconfrpc
+- Updated cmd2, pytype, faucetconfrpc
 
 # v0.15.2 (2020-08-27)
 
