@@ -16,7 +16,7 @@ services:
             - poseidon
     faucet_certstrap:
         restart: on-failure
-        image: 'iqtlabs/faucet-certstrap:v0.15.3'
+        image: 'iqtlabs/faucet-certstrap:v0.22.4'
         volumes:
             - '${POSEIDON_PREFIX}/opt/faucetconfrpc:/opt/faucetconfrpc'
         command:
@@ -24,7 +24,7 @@ services:
             - faucetconfrpc
     faucetconfrpc:
         restart: always
-        image: 'iqtlabs/faucetconfrpc:v0.22.1'
+        image: 'iqtlabs/faucetconfrpc:v0.22.4'
         environment:
             PYTHONUNBUFFERED: '1'
         volumes:
