@@ -36,7 +36,8 @@ poseidon -i
 poseidon -s
 poseidon -a
 # TODO: ensure test capture container is learned.
-poseidon -e "show all"  "quit"
+# TODO: provide pty
+# poseidon -e "show all"  "quit"
 poseidon -S
 poseidon -d
 docker-compose -f test-e2e-ovs.yml stop
