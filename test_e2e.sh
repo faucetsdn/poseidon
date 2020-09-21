@@ -29,6 +29,7 @@ while ! docker exec -t $OVSID ovs-vsctl show ; do
 done
 docker exec -t $OVSID ovs-vsctl add-br switch1 
 docker exec -t $OVSID ovs-vsctl set-controller switch1 tcp:127.0.0.1:6653,tcp:127.0.0.1:6654
+docker system prune -a -f
 export POSEIDON_PREFIX=/
 export PATH=bin:$PATH
 poseidon -i
