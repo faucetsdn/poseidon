@@ -38,6 +38,8 @@ jobs:
         coverage report && coverage xml
     - name: docker_test
       run: make run_tests
+    - name: e2e_test
+      run: ./test_e2e.sh
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1.0.7
       env:
