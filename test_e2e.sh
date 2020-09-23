@@ -75,7 +75,7 @@ wait_job_up gauge:9303
 wait_var_nonzero "dp_status{dp_name=\"switch1\"}"
 wait_job_up poseidon:9304
 # Poseidon event client receiving from FAUCET
-wait_var_nonzero "last_rabbitmq_routing_key_time"
+wait_var_nonzero "sum(last_rabbitmq_routing_key_time)"
 wget https://github.com/IQTLabs/NetworkML/raw/master/tests/test_data/trace_ab12_2001-01-01_02_03-client-ip-1-2-3-4.pcap -O$TMPDIR/test.pcap
 sudo tcpreplay -t -i sw1b $TMPDIR/test.pcap
 # Poseidon detected endpoints
