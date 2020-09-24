@@ -14,7 +14,7 @@ wait_var_nonzero () {
                 RC=$(echo "$query" | wget -q -O- -i -|jq .data.result)
                 sleep 1
                 TRIES=$((TRIES+1))
-                if [[ "$TRIES" == "90" ]] ; then
+                if [[ "$TRIES" == "120" ]] ; then
 			echo $query timed out: $RC
                         exit 1
                 fi
@@ -66,7 +66,8 @@ docker exec -t $OVSID ovs-ofctl dump-ports switch1
 export POSEIDON_PREFIX=/
 export PATH=bin:$PATH
 sudo rm -rf /opt/poseidon* /var/log/poseidon* /opt/redis
-poseidon -i
+tar cvf $TMPDIR/current.tar .
+poseidon -i $TMPDIR/current.tar
 sudo sed -i -E \
   -e "s/logger_level.+/logger_level = DEBUG/;" \
   -e "s/collector_nic.+/collector_nic = mirrorb/;" \
