@@ -804,7 +804,9 @@ class Monitor:
             found_work, schedule_func = self.get_q_item(self.job_queue)
             if found_work and callable(schedule_func):
                 self.logger.info('calling %s', schedule_func)
+                start_time = time.time()
                 schedule_func()
+                self.logger.debug('%s done (%.1f sec)' % (schedule_func, time.time() - start_time))
             self.schedule_mirroring()
 
         self.s.refresh_endpoints()
