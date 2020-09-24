@@ -65,25 +65,43 @@ docker exec -t $OVSID ovs-vsctl show
 docker exec -t $OVSID ovs-ofctl dump-ports switch1
 export POSEIDON_PREFIX=/
 export PATH=bin:$PATH
+sudo rm -rf /opt/poseidon* /var/log/poseidon* /opt/redis
 poseidon -i
-sed -E "s/collector_nic.+/collector_nic = mirrorb/" < config/poseidon.config | sed -E "s/reinvestigation_frequency.+/reinvestigation_frequency = 15/" > $TMPDIR/poseidon.config
-sudo cp $TMPDIR/poseidon.config /opt/poseidon/poseidon.config
+sudo sed -i -E \
+  -e "s/logger_level.+/logger_level = DEBUG/;" \
+  -e "s/collector_nic.+/collector_nic = mirrorb/;" \
+  -e "s/reinvestigation_frequency.+/reinvestigation_frequency = 30/" \
+  /opt/poseidon/poseidon.config
 sudo cat /opt/poseidon/poseidon.config
+wget https://github.com/IQTLabs/NetworkML/raw/master/tests/test_data/trace_ab12_2001-01-01_02_03-client-ip-1-2-3-4.pcap -O$TMPDIR/test.pcap
 poseidon -s
 wait_job_up faucet:9302
 wait_job_up gauge:9303
 wait_var_nonzero "dp_status{dp_name=\"switch1\"}"
 wait_job_up poseidon:9304
 # Poseidon event client receiving from FAUCET
-wait_var_nonzero "sum(last_rabbitmq_routing_key_time)"
-wget https://github.com/IQTLabs/NetworkML/raw/master/tests/test_data/trace_ab12_2001-01-01_02_03-client-ip-1-2-3-4.pcap -O$TMPDIR/test.pcap
+wait_var_nonzero "last_rabbitmq_routing_key_time{routing_key=\"FAUCET.Event\"}"
 sudo tcpreplay -t -i sw1b $TMPDIR/test.pcap
 # Poseidon detected endpoints
-wait_var_nonzero "sum(poseidon_endpoint_current_states)"
-poseidon -a
-# TODO: ensure test capture container is learned.
-# TODO: provide pty
-# poseidon -e "show all"  "quit"
+wait_var_nonzero "sum(poseidon_endpoint_current_states{current_state=\"mirroring\"})"
+echo waiting for ncapture
+COUNT="0"
+while [[ "$COUNT" == "0" ]] ; do
+	COUNT=$(docker ps -a --filter=status=running|grep -c ncapture|cat)
+	sleep 1
+done
+echo waiting for FAUCET mirror to be applied
+COUNT="0"
+while [[ "$COUNT" == 0 ]] ; do
+	COUNT=$(docker exec -t $OVSID ovs-ofctl dump-flows -OOpenFlow13 switch1 table=0,in_port=1|grep -c output:|cat)
+	sleep 1
+done
+# Send mirror traffic
+sudo tcpreplay -t -i sw1b $TMPDIR/test.pcap
+# wait for networkml to return a result
+wait_var_nonzero "last_rabbitmq_routing_key_time{routing_key=\"poseidon.algos.decider\"}"
+wait_var_nonzero "sum(poseidon_endpoint_oses{ipv4_os=\"Windows\"})"
+wait_var_nonzero "sum(poseidon_endpoint_roles{role!=\"NO DATA\"})"
 poseidon -S
 poseidon -d
 COMPOSE_PROJECT_NAME=ovs docker-compose -f test-e2e-ovs.yml stop
