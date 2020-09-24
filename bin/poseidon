@@ -74,11 +74,11 @@ function check_args()
                 if [ -z "$2" ]; then
                     curl -s https://api.github.com/repos/iqtlabs/poseidon/releases/latest | jq '.["tarball_url"]' | xargs curl -L > "$tarfile"
                 else
-		    if [ -f "$2" ] ; then
+                    if [ -f "$2" ] ; then
                         tarfile=$2
-		    else
+                    else
                         curl -L https://github.com/iqtlabs/poseidon/tarball/"$2" > "$tarfile"
-		    fi
+                    fi
                 fi
                 sudo mkdir -p "$POSEIDON_PREFIX"/opt/poseidon
                 sudo tar -C "$POSEIDON_PREFIX"/opt/poseidon -xvf "$tarfile" --strip=1
