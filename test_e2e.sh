@@ -53,8 +53,8 @@ while ! docker exec -t $OVSID ovs-vsctl show ; do
 done
 sudo sudo ip link add sw1a type veth peer name sw1b && true
 sudo sudo ip link add mirrora type veth peer name mirrorb && true
-sudo ip link set sw1a up
-sudo ip link set sw1b up
+sudo ip link set sw1a down
+sudo ip link set sw1b down
 sudo ip link set mirrora up
 sudo ip link set mirrorb up
 docker exec -t $OVSID ovs-vsctl add-br switch1  -- set bridge switch1 other-config:datapath-id=0x1
@@ -80,6 +80,8 @@ wait_job_up faucet:9302
 wait_job_up gauge:9303
 wait_var_nonzero "dp_status{dp_name=\"switch1\"}"
 wait_job_up poseidon:9304
+sudo ip link set sw1a up
+sudo ip link set sw1b up
 # Poseidon event client receiving from FAUCET
 wait_var_nonzero "last_rabbitmq_routing_key_time{routing_key=\"FAUCET.Event\"}"
 sudo tcpreplay -t -i sw1b $TMPDIR/test.pcap
