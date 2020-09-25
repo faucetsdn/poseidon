@@ -27,17 +27,20 @@ jobs:
         sudo apt-get install -yq --no-install-recommends python3.8 python3.8-dev && \
         sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 && \
         sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 3 && \
-        sudo apt-get install tshark redis-server && \
+        sudo apt-get install tshark redis-server wget jq tcpreplay && \
         sudo service redis-server stop && \
         pip3 install -U setuptools && \
-        pip3 install codecov scikit-build && \
+        pip3 install codecov scikit-build docker-compose && \
         find . -name requirements.txt -type f -exec pip3 install -r {} \; && \
         find . -name test-requirements.txt -type f -exec pip3 install -r {} \; && \
-        export PATH=/home/runner/.local/bin:$PATH && \
-        py.test -v -vv --cov-report term-missing --cov=. -c .coveragerc && \
-        coverage report && coverage xml
+        PATH=/home/runner/.local/bin:$PATH py.test -v -vv --cov-report term-missing --cov=. -c .coveragerc && \
+        PATH=/home/runner/.local/bin:$PATH coverage report && \
+        PATH=/home/runner/.local/bin:$PATH coverage xml
     - name: docker_test
       run: make run_tests
+    - name: e2e_test
+      run: |
+        docker system prune -a -f && ./test_e2e.sh
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1.0.7
       env:

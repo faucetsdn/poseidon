@@ -487,9 +487,8 @@ class Monitor:
                 schedule=self.schedule),
             name='st_worker')
 
-    def job_kickurl(self):
-        self.s.check_endpoints(messages=self.faucet_event)
-        del self.faucet_event[:]
+    def _update_metrics(self):
+        self.logger.debug('updating metrics')
         try:
             # get current state
             req = requests.get(
@@ -497,12 +496,14 @@ class Monitor:
             # send results to prometheus
             hosts = req.json()['dataset']
             self.prom.update_metrics(hosts)
-        except requests.exceptions.ConnectionError as e:
-            self.logger.debug(
-                'Unable to get current state and send it to Prometheus because: {0}'.format(str(e)))
-        except Exception as e:  # pragma: no cover
+        except (requests.exceptions.ConnectionError, Exception) as e:  # pragma: no cover
             self.logger.error(
                 'Unable to get current state and send it to Prometheus because: {0}'.format(str(e)))
+
+    def job_kickurl(self):
+        self.s.check_endpoints(messages=self.faucet_event)
+        del self.faucet_event[:]
+        self._update_metrics()
 
     def job_reinvestigation(self):
         ''' put endpoints into the reinvestigation state if possible '''
@@ -804,7 +805,9 @@ class Monitor:
             found_work, schedule_func = self.get_q_item(self.job_queue)
             if found_work and callable(schedule_func):
                 self.logger.info('calling %s', schedule_func)
+                start_time = time.time()
                 schedule_func()
+                self.logger.debug('%s done (%.1f sec)' % (schedule_func, time.time() - start_time))
             self.schedule_mirroring()
 
         self.s.refresh_endpoints()
