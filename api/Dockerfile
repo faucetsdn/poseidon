@@ -5,7 +5,7 @@ LABEL poseidon.namespace="api"
 COPY requirements.txt requirements.txt
 COPY healthcheck /healthcheck
 
-RUN apt-get update && apt-get install -y curl gcc
+RUN apt-get update && apt-get install -y curl gcc build-essential libssl-dev libffi-dev python-dev
 RUN pip3 install --no-cache-dir -r requirements.txt
 RUN pip3 install --no-cache-dir -r /healthcheck/requirements.txt
 
