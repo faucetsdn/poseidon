@@ -33,5 +33,5 @@ def get_rdns_lookup(ip, timeout=5):
         resolver.timeout = timeout
         resolver.lifetime = resolver.lifetime
         return str(resolver.resolve_address(ip).canonical_name)
-    except (AttributeError, dns.resolver.NoNameservers, dns.resolver.NXDOMAIN, dns.exception.Timeout):  # pragma: no cover
+    except (AttributeError, dns.resolver.NoNameservers, dns.resolver.NXDOMAIN, dns.exception.Timeout):  # pytype: disable=module-attr
         return NO_DATA
