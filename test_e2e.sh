@@ -14,7 +14,7 @@ wait_var_nonzero () {
                 RC=$(echo "$query" | wget -q -O- -i -|jq .data.result)
                 sleep 1
                 TRIES=$((TRIES+1))
-                if [[ "$TRIES" == "120" ]] ; then
+                if [[ "$TRIES" == "180" ]] ; then
 			echo $query timed out: $RC
                         exit 1
                 fi
@@ -57,7 +57,7 @@ sudo ip link set sw1a down
 sudo ip link set sw1b down
 sudo ip link set mirrora up
 sudo ip link set mirrorb up
-docker exec -t $OVSID ovs-vsctl add-br switch1  -- set bridge switch1 other-config:datapath-id=0x1
+docker exec -t $OVSID ovs-vsctl add-br switch1  -- set bridge switch1 other-config:datapath-id=0x1 -- set bridge switch1 datapath_type=netdev
 docker exec -t $OVSID ovs-vsctl add-port switch1 sw1a -- set interface sw1a ofport_request=1
 docker exec -t $OVSID ovs-vsctl add-port switch1 mirrora -- set interface mirrora ofport_request=3
 docker exec -t $OVSID ovs-vsctl set-controller switch1 tcp:127.0.0.1:6653 tcp:127.0.0.1:6654
