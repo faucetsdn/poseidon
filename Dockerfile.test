@@ -4,9 +4,9 @@ FROM poseidon:latest
 ENV DEBIAN_FRONTEND=noninteractive
 ENV REDIS_HOST=127.0.0.1
 
-RUN apt-get update && apt-get install -y redis-server tshark
-
-RUN pip3 install --no-cache-dir -r test-requirements.txt
+RUN apt-get update && apt-get install -y redis-server tshark gcc g++ && \
+  pip3 install --no-cache-dir -r test-requirements.txt && \
+  apt-get purge -y gcc g++ python3-dev && apt -y autoremove --purge && rm -rf /var/cache/* /root/.cache/*
 
 CMD py.test -v -vv --cov-report term-missing --cov=. -c .coveragerc && \
     pytype api/app/*py poseidon/*/*py workers/*py && \
