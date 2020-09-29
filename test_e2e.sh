@@ -84,7 +84,7 @@ sudo ip link set sw1a up
 sudo ip link set sw1b up
 # Poseidon event client receiving from FAUCET
 wait_var_nonzero "last_rabbitmq_routing_key_time{routing_key=\"FAUCET.Event\"}"
-sudo tcpreplay -t -i sw1b $TMPDIR/test.pcap
+sudo tcpreplay -M10 -i sw1b $TMPDIR/test.pcap
 # Poseidon detected endpoints
 wait_var_nonzero "sum(poseidon_endpoint_current_states{current_state=\"mirroring\"})"
 echo waiting for ncapture
@@ -100,7 +100,7 @@ while [[ "$COUNT" == 0 ]] ; do
 	sleep 1
 done
 # Send mirror traffic
-sudo tcpreplay -t -i sw1b $TMPDIR/test.pcap
+sudo tcpreplay -M10 -i sw1b $TMPDIR/test.pcap
 # wait for networkml to return a result
 wait_var_nonzero "last_rabbitmq_routing_key_time{routing_key=\"poseidon.algos.decider\"}"
 wait_var_nonzero "sum(poseidon_endpoint_oses{ipv4_os=\"Windows\"})"
