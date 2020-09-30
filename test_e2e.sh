@@ -4,6 +4,10 @@ set -e
 
 TMPDIR=$(mktemp -d)
 
+tcp_replay () {
+	sudo tcpreplay -M5 -i sw1b $TMPDIR/test.pcap
+}
+
 wait_var_nonzero () {
 	var=$1
 	query="http://0.0.0.0:9090/api/v1/query?query=$var>0"
@@ -19,6 +23,7 @@ wait_var_nonzero () {
                         exit 1
                 fi
         done
+	echo $RC
 }
 
 wait_job_up () {
@@ -43,6 +48,11 @@ dps:
 EOF
 sudo mv $TMPDIR/faucet.yaml /etc/faucet
 
+# pre-fetch workers to avoid timeout.
+for i in $(jq < workers/workers.json '.workers[] | .image + ":" + .version' | sed 's/"//g') ; do
+	docker pull $i
+done
+
 COMPOSE_PROJECT_NAME=ovs docker-compose -f test-e2e-ovs.yml down
 COMPOSE_PROJECT_NAME=ovs docker-compose -f test-e2e-ovs.yml rm -f
 COMPOSE_PROJECT_NAME=ovs docker-compose -f test-e2e-ovs.yml up -d
@@ -53,16 +63,18 @@ while ! docker exec -t $OVSID ovs-vsctl show ; do
 done
 sudo sudo ip link add sw1a type veth peer name sw1b && true
 sudo sudo ip link add mirrora type veth peer name mirrorb && true
-sudo ip link set sw1a down
-sudo ip link set sw1b down
-sudo ip link set mirrora up
-sudo ip link set mirrorb up
+for i in sw1a sw1b mirrora mirrorb ; do
+	sudo ip link set $i down
+done
 docker exec -t $OVSID ovs-vsctl add-br switch1  -- set bridge switch1 other-config:datapath-id=0x1 -- set bridge switch1 datapath_type=netdev
 docker exec -t $OVSID ovs-vsctl add-port switch1 sw1a -- set interface sw1a ofport_request=1
 docker exec -t $OVSID ovs-vsctl add-port switch1 mirrora -- set interface mirrora ofport_request=3
 docker exec -t $OVSID ovs-vsctl set-controller switch1 tcp:127.0.0.1:6653 tcp:127.0.0.1:6654
 docker exec -t $OVSID ovs-vsctl show
 docker exec -t $OVSID ovs-ofctl dump-ports switch1
+for i in sw1a sw1b mirrora mirrorb switch1 ; do
+	sudo /sbin/sysctl net.ipv6.conf.$i.disable_ipv6=1
+done
 export POSEIDON_PREFIX=/
 export PATH=bin:$PATH
 sudo rm -rf /opt/poseidon* /var/log/poseidon* /opt/redis
@@ -80,11 +92,15 @@ wait_job_up faucet:9302
 wait_job_up gauge:9303
 wait_var_nonzero "dp_status{dp_name=\"switch1\"}"
 wait_job_up poseidon:9304
-sudo ip link set sw1a up
-sudo ip link set sw1b up
+sudo ip link set mirrora up
+sudo ip link set mirrorb up
 # Poseidon event client receiving from FAUCET
 wait_var_nonzero "last_rabbitmq_routing_key_time{routing_key=\"FAUCET.Event\"}"
-sudo tcpreplay -M10 -i sw1b $TMPDIR/test.pcap
+sudo ip link set sw1a up
+sudo ip link set sw1b up
+wait_var_nonzero "port_status{port=\"1\"}"
+wait_var_nonzero "port_status{port=\"3\"}"
+tcp_replay
 # Poseidon detected endpoints
 wait_var_nonzero "sum(poseidon_endpoint_current_states{current_state=\"mirroring\"})"
 echo waiting for ncapture
@@ -100,11 +116,15 @@ while [[ "$COUNT" == 0 ]] ; do
 	sleep 1
 done
 # Send mirror traffic
-sudo tcpreplay -M10 -i sw1b $TMPDIR/test.pcap
+tcp_replay
 # wait for networkml to return a result
 wait_var_nonzero "last_rabbitmq_routing_key_time{routing_key=\"poseidon.algos.decider\"}"
-wait_var_nonzero "sum(poseidon_endpoint_oses{ipv4_os=\"Windows\"})"
+# keep endpoints active
+tcp_replay
 wait_var_nonzero "sum(poseidon_endpoint_roles{role!=\"NO DATA\"})"
+# p0f doesn't always return a decision - but check that it returned
+# TODO: determine why p0f not deterministic.
+wait_var_nonzero "sum(poseidon_endpoint_oses)"
 poseidon -S
 poseidon -d
 COMPOSE_PROJECT_NAME=ovs docker-compose -f test-e2e-ovs.yml stop
