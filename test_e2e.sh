@@ -2,6 +2,16 @@
 
 set -e
 
+POSEIDON_IMAGE=$(grep -Eo "image:.+poseidon:[^\']+" docker-compose.yaml |grep -Eo ':\S+')
+if [[ "$POSEIDON_IMAGE" == "" ]] ; then
+	echo error: cannot detect poseidon docker image name.
+	exit 1
+fi
+if [[ "$POSEIDON_IMAGE" != ":latest" ]] ; then
+	echo poseidon image is $POSEIDON_IMAGE, so not running e2e tests  - assuming release
+	exit 0
+fi
+
 TMPDIR=$(mktemp -d)
 
 FASTREPLAY="sudo tcpreplay -q -t -i sw1b $TMPDIR/test.pcap"
