@@ -106,6 +106,7 @@ sudo sed -i -E \
 sudo cat /opt/poseidon/poseidon.config
 wget https://github.com/IQTLabs/NetworkML/raw/master/tests/test_data/trace_ab12_2001-01-01_02_03-client-ip-1-2-3-4.pcap -O$TMPDIR/test.pcap
 poseidon -s
+wait_job_up faucetconfrpc:59998
 wait_job_up faucet:9302
 wait_var_nonzero "port_status{port=\"3\"}"
 wait_job_up gauge:9303
