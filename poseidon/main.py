@@ -35,7 +35,7 @@ from poseidon.helpers.endpoint import MACHINE_IP_FIELDS
 from poseidon.helpers.endpoint import MACHINE_IP_PREFIXES
 from poseidon.helpers.log import Logger
 from poseidon.helpers.metadata import get_ether_vendor
-from poseidon.helpers.metadata import get_rdns_lookup
+from poseidon.helpers.metadata import DNSResolver
 from poseidon.helpers.prometheus import Prometheus
 from poseidon.helpers.rabbit import Rabbit
 from poseidon.helpers.redis import PoseidonRedisClient
@@ -129,6 +129,7 @@ class SDNConnect:
         self.get_sdn_context()
         self.prc = PoseidonRedisClient(self.logger)
         self.prc.connect()
+        self.dns_resolver = DNSResolver()
         if self.first_time:
             self.endpoints = {}
             self.investigations = 0
@@ -323,28 +324,36 @@ class SDNConnect:
         return '\n'.join(difflib.unified_diff(
             machine_a_strlines, machine_b_strlines, n=1))
 
-    @staticmethod
-    def _parse_machine_ip(machine):
+    def _parse_machine_ip(self, machine):
+        machine_ips = set()
         machine_ip_data = {}
         for ip_field, fields in MACHINE_IP_FIELDS.items():
             try:
                 raw_field = machine.get(ip_field, None)
-                machine_ip = ipaddress.ip_address(raw_field)
-                machine_subnet = ipaddress.ip_network(machine_ip).supernet(
-                    new_prefix=MACHINE_IP_PREFIXES[ip_field])
+                machine_ip = str(ipaddress.ip_address(raw_field))
+                machine_subnet = str(ipaddress.ip_network(machine_ip).supernet(
+                    new_prefix=MACHINE_IP_PREFIXES[ip_field]))
             except ValueError:
                 machine_ip = None
                 machine_subnet = None
             machine_ip_data[ip_field] = ''
             if machine_ip:
+                machine_ips.add(machine_ip)
                 machine_ip_data.update({
-                    ip_field: str(machine_ip),
-                    '_'.join((ip_field, 'rdns')): get_rdns_lookup(str(machine_ip)),
-                    '_'.join((ip_field, 'subnet')): str(machine_subnet)})
+                    ip_field: machine_ip,
+                    '_'.join((ip_field, 'subnet')): machine_subnet})
             for field in fields:
                 if field not in machine_ip_data:
                     machine_ip_data[field] = NO_DATA
-        return machine_ip_data
+        machine.update(machine_ip_data)
+        return machine_ips
+
+    def _update_machine_rdns(self, machine, resolved_machine_ips):
+         for ip_field in MACHINE_IP_FIELDS:
+             rdns_field = '_'.join((ip_field, 'rdns'))
+             machine_ip = machine[ip_field]
+             resolved_ip = resolved_machine_ips.get(machine_ip, machine_ip)
+             machine[rdns_field] = resolved_ip
 
     @staticmethod
     def merge_machine_ip(old_machine, new_machine):
@@ -360,16 +369,27 @@ class SDNConnect:
     def find_new_machines(self, machines):
         '''parse switch structure to find new machines added to network
         since last call'''
+
         change_acls = False
+        machine_ips = set()
 
         for machine in machines:
             machine['ether_vendor'] = get_ether_vendor(
                 machine['mac'], '/poseidon/poseidon/metadata/nmap-mac-prefixes.txt')
-            machine.update(self._parse_machine_ip(machine))
+            machine_ips.update(self._parse_machine_ip(machine))
             if 'controller_type' not in machine:
                 machine.update({
                     'controller_type': 'none',
                     'controller': ''})
+
+        if machine_ips:
+            self.logger.debug('resolving %s' % machine_ips)
+            resolved_machine_ips = self.dns_resolver.resolve_ips(list(machine_ips))
+            self.logger.debug('resolver results %s', resolved_machine_ips)
+            for machine in machines:
+                self._update_machine_rdns(machine, resolved_machine_ips)
+
+        for machine in machines:
             trunk = False
             for sw in self.trunk_ports:
                 if sw == machine['segment'] and self.trunk_ports[sw].split(',')[1] == str(machine['port']) and self.trunk_ports[sw].split(',')[0] == machine['mac']:
