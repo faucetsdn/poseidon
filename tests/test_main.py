@@ -16,6 +16,7 @@ from prometheus_client import Gauge
 from poseidon.constants import NO_DATA
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import endpoint_factory
+from poseidon.helpers.metadata import DNSResolver
 from poseidon.main import CTRL_C
 from poseidon.main import Monitor
 from poseidon.main import rabbit_callback
@@ -23,6 +24,16 @@ from poseidon.main import schedule_thread_worker
 from poseidon.main import SDNConnect
 
 logger = logging.getLogger('test')
+
+
+def test_rdns():
+    resolver = DNSResolver()
+    for _ in range(3):
+        res = resolver.resolve_ips({'8.8.8.8', '8.8.4.4', '1.1.1.1'})
+        for name in res.values():
+            if name != NO_DATA:
+                return
+    assert not res
 
 
 def get_test_controller():

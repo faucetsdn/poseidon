@@ -1,3 +1,8 @@
+# v0.15.5 (2020-10-09)
+
+* Add e2e test, reduce size of poseidon and poseidon-api containers.
+* Updated faucetconfrpc, certstrap, pytype, transistions, pytest, cmd2, faucet, gauge, grafana
+
 # v0.15.4 (2020-09-18)
 
 * Updated faucetconfrpc (move certstrap to faucetconfrpc)

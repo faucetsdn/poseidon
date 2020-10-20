@@ -5,9 +5,10 @@ LABEL poseidon.namespace="api"
 COPY requirements.txt requirements.txt
 COPY healthcheck /healthcheck
 
-RUN apt-get update && apt-get install -y curl gcc build-essential libssl-dev libffi-dev python-dev
-RUN pip3 install --no-cache-dir -r requirements.txt
-RUN pip3 install --no-cache-dir -r /healthcheck/requirements.txt
+RUN apt-get update && apt-get install -y curl gcc build-essential libssl-dev libffi-dev python-dev && \
+    pip3 install --no-cache-dir -r requirements.txt && \
+    pip3 install --no-cache-dir -r /healthcheck/requirements.txt && \
+    apt-get purge -y gcc build-essential libssl-dev libffi-dev python-dev && apt -y autoremove --purge && rm -rf /var/cache/* /root/.cache/*
 
 # healthcheck
 ENV FLASK_APP /healthcheck/hc.py

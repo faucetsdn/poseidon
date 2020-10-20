@@ -2,23 +2,44 @@
 
 set -e
 
+POSEIDON_IMAGE=$(grep -Eo "image:.+poseidon:[^\']+" docker-compose.yaml |grep -Eo ':\S+')
+if [[ "$POSEIDON_IMAGE" == "" ]] ; then
+	echo error: cannot detect poseidon docker image name.
+	exit 1
+fi
+if [[ "$POSEIDON_IMAGE" != ":latest" ]] ; then
+	echo poseidon image is $POSEIDON_IMAGE, so not running e2e tests  - assuming release
+	exit 0
+fi
+
 TMPDIR=$(mktemp -d)
+
+FASTREPLAY="sudo tcpreplay -q -t -i sw1b $TMPDIR/test.pcap"
+SLOWREPLAY="sudo tcpreplay -q -M5 -i sw1b $TMPDIR/test.pcap"
 
 wait_var_nonzero () {
 	var=$1
+        cmd=$2
 	query="http://0.0.0.0:9090/api/v1/query?query=$var>0"
 	echo waiting for $query to be non-zero
         RC="[]"
         TRIES=0
         while [[ "$RC" == "[]" ]] || [[ $RC == "" ]] ; do
                 RC=$(echo "$query" | wget -q -O- -i -|jq .data.result)
-                sleep 1
                 TRIES=$((TRIES+1))
-                if [[ "$TRIES" == "120" ]] ; then
+                if [[ "$TRIES" == "180" ]] ; then
 			echo $query timed out: $RC
+                        grep -v store /var/log/poseidon/poseidon.log |tail -500
+                        docker ps -a
                         exit 1
                 fi
+                if [[ "$cmd" == "" ]] ; then
+                        sleep 1
+                else
+                        echo $($cmd)
+                fi
         done
+	echo $RC
 }
 
 wait_job_up () {
@@ -43,6 +64,11 @@ dps:
 EOF
 sudo mv $TMPDIR/faucet.yaml /etc/faucet
 
+# pre-fetch workers to avoid timeout.
+for i in $(jq < workers/workers.json '.workers[] | .image + ":" + .version' | sed 's/"//g') ; do
+	docker pull $i
+done
+
 COMPOSE_PROJECT_NAME=ovs docker-compose -f test-e2e-ovs.yml down
 COMPOSE_PROJECT_NAME=ovs docker-compose -f test-e2e-ovs.yml rm -f
 COMPOSE_PROJECT_NAME=ovs docker-compose -f test-e2e-ovs.yml up -d
@@ -53,16 +79,19 @@ while ! docker exec -t $OVSID ovs-vsctl show ; do
 done
 sudo sudo ip link add sw1a type veth peer name sw1b && true
 sudo sudo ip link add mirrora type veth peer name mirrorb && true
-sudo ip link set sw1a up
-sudo ip link set sw1b up
-sudo ip link set mirrora up
-sudo ip link set mirrorb up
-docker exec -t $OVSID ovs-vsctl add-br switch1  -- set bridge switch1 other-config:datapath-id=0x1
+docker exec -t $OVSID ovs-vsctl add-br switch1  -- set bridge switch1 other-config:datapath-id=0x1 -- set bridge switch1 datapath_type=netdev
 docker exec -t $OVSID ovs-vsctl add-port switch1 sw1a -- set interface sw1a ofport_request=1
 docker exec -t $OVSID ovs-vsctl add-port switch1 mirrora -- set interface mirrora ofport_request=3
 docker exec -t $OVSID ovs-vsctl set-controller switch1 tcp:127.0.0.1:6653 tcp:127.0.0.1:6654
 docker exec -t $OVSID ovs-vsctl show
 docker exec -t $OVSID ovs-ofctl dump-ports switch1
+for i in mirrora mirrorb switch1 sw1a sw1b ; do
+	sudo /sbin/sysctl net.ipv6.conf.$i.disable_ipv6=1
+        sudo ip link set $i down
+done
+for i in mirrora mirrorb switch1 ; do
+        sudo ip link set $i up
+done
 export POSEIDON_PREFIX=/
 export PATH=bin:$PATH
 sudo rm -rf /opt/poseidon* /var/log/poseidon* /opt/redis
@@ -71,20 +100,32 @@ poseidon -i $TMPDIR/current.tar
 sudo sed -i -E \
   -e "s/logger_level.+/logger_level = DEBUG/;" \
   -e "s/collector_nic.+/collector_nic = mirrorb/;" \
-  -e "s/reinvestigation_frequency.+/reinvestigation_frequency = 30/" \
+  -e "s/reinvestigation_frequency.+/reinvestigation_frequency = 60/" \
+  -e "s/max_concurrent_reinvestigations.+/max_concurrent_reinvestigations = 1/" \
   /opt/poseidon/poseidon.config
 sudo cat /opt/poseidon/poseidon.config
 wget https://github.com/IQTLabs/NetworkML/raw/master/tests/test_data/trace_ab12_2001-01-01_02_03-client-ip-1-2-3-4.pcap -O$TMPDIR/test.pcap
 poseidon -s
+wait_job_up faucetconfrpc:59998
 wait_job_up faucet:9302
+wait_var_nonzero "port_status{port=\"3\"}"
 wait_job_up gauge:9303
 wait_var_nonzero "dp_status{dp_name=\"switch1\"}"
 wait_job_up poseidon:9304
+for i in sw1a sw1b ; do
+	sudo ip link set $i up
+done
+wait_var_nonzero "port_status{port=\"1\"}"
+echo waiting for FAUCET to recognize test port
+COUNT="0"
+while [[ "$COUNT" == 0 ]] ; do
+        COUNT=$(docker exec -t $OVSID ovs-ofctl dump-flows -OOpenFlow13 switch1 table=0,in_port=1|grep -c in_port|cat)
+        sleep 1
+done
 # Poseidon event client receiving from FAUCET
 wait_var_nonzero "last_rabbitmq_routing_key_time{routing_key=\"FAUCET.Event\"}"
-sudo tcpreplay -t -i sw1b $TMPDIR/test.pcap
 # Poseidon detected endpoints
-wait_var_nonzero "sum(poseidon_endpoint_current_states{current_state=\"mirroring\"})"
+wait_var_nonzero "sum(poseidon_endpoint_current_states{current_state=\"mirroring\"})" "$FASTREPLAY"
 echo waiting for ncapture
 COUNT="0"
 while [[ "$COUNT" == "0" ]] ; do
@@ -98,11 +139,14 @@ while [[ "$COUNT" == 0 ]] ; do
 	sleep 1
 done
 # Send mirror traffic
-sudo tcpreplay -t -i sw1b $TMPDIR/test.pcap
+echo $($SLOWREPLAY)
 # wait for networkml to return a result
 wait_var_nonzero "last_rabbitmq_routing_key_time{routing_key=\"poseidon.algos.decider\"}"
-wait_var_nonzero "sum(poseidon_endpoint_oses{ipv4_os=\"Windows\"})"
-wait_var_nonzero "sum(poseidon_endpoint_roles{role!=\"NO DATA\"})"
+# keep endpoints active awaiting results
+wait_var_nonzero "sum(poseidon_endpoint_roles{role!=\"NO DATA\"})" "$FASTREPLAY"
+# p0f doesn't always return a decision - but check that it returned
+# TODO: determine why p0f not deterministic.
+wait_var_nonzero "sum(poseidon_endpoint_oses)"
 poseidon -S
 poseidon -d
 COMPOSE_PROJECT_NAME=ovs docker-compose -f test-e2e-ovs.yml stop

@@ -2,7 +2,7 @@ version: '3.7'
 services:
     rabbitmq_adapter:
         restart: always
-        image: 'faucet/event-adapter-rabbitmq:1.9.49'
+        image: 'faucet/event-adapter-rabbitmq:1.9.50'
         volumes:
             - '${POSEIDON_PREFIX}/var/run/faucet:/var/run/faucet'
         environment:
@@ -16,7 +16,7 @@ services:
             - poseidon
     faucet_certstrap:
         restart: on-failure
-        image: 'iqtlabs/faucet-certstrap:v0.22.4'
+        image: 'iqtlabs/faucet-certstrap:v0.22.6'
         volumes:
             - '${POSEIDON_PREFIX}/opt/faucetconfrpc:/opt/faucetconfrpc'
         command:
@@ -24,7 +24,7 @@ services:
             - faucetconfrpc
     faucetconfrpc:
         restart: always
-        image: 'iqtlabs/faucetconfrpc:v0.22.4'
+        image: 'iqtlabs/faucetconfrpc:v0.22.6'
         environment:
             PYTHONUNBUFFERED: '1'
         volumes:
