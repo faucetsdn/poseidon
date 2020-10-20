@@ -18,12 +18,15 @@ jobs:
     - name: Change for master
       id: change_version
       run: if [ "${{ steps.get_version.outputs.VERSION }}" == "master" ]; then echo ::set-output name=VERSION::latest; else echo ::set-output name=VERSION::${{ steps.get_version.outputs.VERSION }}; fi
+    - name: Set up qemu
+      uses: docker/setup-qemu-action@v1
+      with:
+        platforms: all
     - name: Set up Docker Buildx
       id: buildx
-      uses: crazy-max/ghaction-docker-buildx@v3
+      uses: docker/setup-buildx-action@v1
       with:
-        buildx-version: latest
-        qemu-version: latest
+        version: latest
     - name: Docker Login
       env:
         DOCKER_PASSWORD: ${{ secrets.DOCKER_TOKEN }}
