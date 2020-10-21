@@ -30,6 +30,7 @@ class FaucetProxy(Parser):
         self.ignore_vlans = controller['ignore_vlans']
         self.ignore_ports = controller['ignore_ports']
         self.faucetconfrpc_address = controller['faucetconfrpc_address']
+        self.faucetconfrpc_client = controller['faucetconfrpc_client']
 
         super(FaucetProxy, self).__init__(
             self.mirror_ports,
@@ -41,6 +42,7 @@ class FaucetProxy(Parser):
             self.tunnel_vlan,
             self.tunnel_name,
             faucetconfrpc_address=self.faucetconfrpc_address,
+            faucetconfrpc_client=self.faucetconfrpc_client,
             *args, **kwargs)
 
         # parse volos config

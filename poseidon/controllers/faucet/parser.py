@@ -23,6 +23,7 @@ class Parser:
                  tunnel_vlan=None,
                  tunnel_name=None,
                  faucetconfrpc_address=None,
+                 faucetconfrpc_client=None,
                  copro_port=None,
                  copro_vlan=None,
                  faucetconfgetsetter_cl=FaucetRemoteConfGetSetter):
@@ -39,10 +40,14 @@ class Parser:
         self.tunnel_name = tunnel_name
         if faucetconfrpc_address is None:
             faucetconfgetsetter_cl = FaucetLocalConfGetSetter
+        if faucetconfrpc_address:
+            server = faucetconfrpc_address.split(':')[0]
+        else:
+            server = ''
         self.faucetconfgetsetter = faucetconfgetsetter_cl(
-            client_key='/certs/faucetconfrpc.key',
-            client_cert='/certs/faucetconfrpc.crt',
-            ca_cert='/certs/faucetconfrpc-ca.crt',
+            client_key='/certs/%s.key' % faucetconfrpc_client,
+            client_cert='/certs/%s.crt' % faucetconfrpc_client,
+            ca_cert='/certs/%s-ca.crt' % server,
             server_addr=faucetconfrpc_address)
         self.mac_table = {}
         self._set_default_switch_conf()
