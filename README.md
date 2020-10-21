@@ -66,7 +66,7 @@ chmod +x /usr/local/bin/poseidon
 <img src="/docs/img/faucet.png" width="190" height="100">
 NOTE: Poseidon requires at least Faucet version 1.9.46 or higher.
 
-Poseidon uses a faucetconfrpc server, to maintain Faucet configuration. Poseidon starts its own server for you by default, and also by default Poseidon and Faucet have to be on the same machine. To run Faucet on a separate machine, you will need to start faucetconfrpc on that other machine, and update `faucetconfrpc_address` to point to where the faucetconfrpc is running.
+Poseidon uses a faucetconfrpc server, to maintain Faucet configuration. Poseidon starts its own server for you by default, and also by default Poseidon and Faucet have to be on the same machine. To run Faucet on a separate machine, you will need to start faucetconfrpc on that other machine, and update `faucetconfrpc_address` to point to where the faucetconfrpc is running. You may also need to update `faucetconfrpc_client`, if you are not using the provided automatically generated keys.
 
 If you have Faucet running already, make sure Faucet is started with the following environment variables, which allow Poseidon to change its config, and receive Faucet events:
 
