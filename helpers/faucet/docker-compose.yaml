@@ -22,6 +22,7 @@ services:
         command:
             - /opt/faucetconfrpc
             - faucetconfrpc
+            - poseidon
     faucetconfrpc:
         restart: always
         image: 'iqtlabs/faucetconfrpc:v0.22.9'
