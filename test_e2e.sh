@@ -148,7 +148,7 @@ wait_var_nonzero "sum(poseidon_endpoint_roles{role!=\"NO DATA\"})" "$FASTREPLAY"
 # TODO: determine why p0f not deterministic.
 wait_var_nonzero "sum(poseidon_endpoint_oses)"
 # TODO: fix certstrap to allow creating multiple named client keys.
-wait_var_nonzero "sum(faucetconfrpc_ok_total{peer_id=\"faucetconfrpc\"})"
+wait_var_nonzero "sum(faucetconfrpc_ok_total{peer_id=\"poseidon\"})"
 poseidon -S
 poseidon -d
 COMPOSE_PROJECT_NAME=ovs docker-compose -f test-e2e-ovs.yml stop

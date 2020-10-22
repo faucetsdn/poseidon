@@ -16,12 +16,13 @@ services:
             - poseidon
     faucet_certstrap:
         restart: on-failure
-        image: 'iqtlabs/faucet-certstrap:v0.22.8'
+        image: 'iqtlabs/faucet-certstrap:v0.22.9'
         volumes:
             - '${POSEIDON_PREFIX}/opt/faucetconfrpc:/opt/faucetconfrpc'
         command:
             - /opt/faucetconfrpc
             - faucetconfrpc
+            - poseidon
     faucetconfrpc:
         restart: always
         image: 'iqtlabs/faucetconfrpc:v0.22.8'
