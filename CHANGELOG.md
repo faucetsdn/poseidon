@@ -1,3 +1,7 @@
+# v0.15.7 (2020-10-30)
+
+* Upgrade networkml, faucetconfrpc, faucet, gauge, httmock, grafana, pytest, event-adapter-rabbitmq, certstrap
+
 # v0.15.6 (2020-10-23)
 
 * Speed up DNS resolution (parallel)
