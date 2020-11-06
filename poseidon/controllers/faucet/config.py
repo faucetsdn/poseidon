@@ -23,7 +23,7 @@ class FaucetConfGetSetter:
         self.faucet_conf['acls'] = acls
         self.write_faucet_conf(config_file=None)
 
-    def get_dps(self):
+    def get_dps(self):  # pragma: no cover
         raise NotImplementedError
 
     def get_switch_conf(self, dp):
@@ -43,19 +43,19 @@ class FaucetConfGetSetter:
             return root_stack_switch[0]
         return None
 
-    def set_port_conf(self, dp, port, port_conf):
+    def set_port_conf(self, dp, port, port_conf):  # pragma: no cover
         raise NotImplementedError
 
-    def update_switch_conf(self, dp, switch_conf):
+    def update_switch_conf(self, dp, switch_conf):  # pragma: no cover
         raise NotImplementedError
 
-    def mirror_port(self, dp, mirror_port, port):
+    def mirror_port(self, dp, mirror_port, port):  # pragma: no cover
         raise NotImplementedError
 
-    def unmirror_port(self, dp, mirror_port, port):
+    def unmirror_port(self, dp, mirror_port, port):  # pragma: no cover
         raise NotImplementedError
 
-    def clear_mirror_port(self, dp, mirror_port):
+    def clear_mirror_port(self, dp, mirror_port):  # pragma: no cover
         raise NotImplementedError
 
 
@@ -183,11 +183,11 @@ class FaucetRemoteConfGetSetter(FaucetConfGetSetter):
         return self.write_faucet_conf(
             faucet_conf={'dps': {dp: switch_conf}}, merge=True)
 
-    def mirror_port(self, dp, mirror_port, port):
+    def mirror_port(self, dp, mirror_port, port):  # pragma: no cover
         self.client.add_port_mirror(dp, port, mirror_port)
 
-    def unmirror_port(self, dp, mirror_port, port):
+    def unmirror_port(self, dp, mirror_port, port):  # pragma: no cover
         self.client.remove_port_mirror(dp, port, mirror_port)
 
-    def clear_mirror_port(self, dp, mirror_port):
+    def clear_mirror_port(self, dp, mirror_port):  # pragma: no cover
         self.client.clear_port_mirror(dp, mirror_port)
