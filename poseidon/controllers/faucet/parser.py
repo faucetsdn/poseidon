@@ -3,6 +3,7 @@
 Created on 19 November 2017
 @author: Charlie Lewis
 """
+from collections import defaultdict
 import logging
 
 from poseidon.controllers.faucet.acls import ACLs
@@ -50,6 +51,7 @@ class Parser:
             ca_cert='/certs/%s-ca.crt' % server,
             server_addr=faucetconfrpc_address)
         self.mac_table = {}
+        self.mirror_counts = defaultdict(int)
         self._set_default_switch_conf()
 
     def _read_faucet_conf(self):
@@ -85,8 +87,14 @@ class Parser:
     def _set_port_conf(self, dp, port, port_conf):
         self.faucetconfgetsetter.set_port_conf(dp, port, port_conf)
 
-    def _set_mirror_config(self, switch, port, ports=None):
-        self.faucetconfgetsetter.set_mirror_config(switch, port, ports)
+    def _clear_mirror_port(self, switch, port):
+        self.faucetconfgetsetter.clear_mirror_port(switch, port)
+
+    def _mirror_port(self, switch, mirror_port, port):
+        self.faucetconfgetsetter.mirror_port(switch, mirror_port, port)
+
+    def _unmirror_port(self, switch, mirror_port, port):
+        self.faucetconfgetsetter.unmirror_port(switch, mirror_port, port)
 
     def _set_default_switch_conf(self):
         # TODO: make smarter with more complex configs (backup original values, etc)
@@ -151,54 +159,36 @@ class Parser:
         return switch, port
 
     def mirror_switch_port(self, switch):
-        switch_mirror_port = None
-        switch_conf = self._get_switch_conf(switch)
-        if switch_conf:
+        if self.mirror_ports:
             switch_mirror_port = self.mirror_ports.get(switch, None)
-        else:
-            self.logger.warning('no mirror port for switch %s' % switch)
-        return switch_mirror_port
-
-    def check_mirror(self, switch):
-        mirror_port = None
-        existing_mirror_ports = []
-        if not self.mirror_ports:
-            self.logger.error('Unable to mirror, no mirror ports defined')
-        else:
-            mirror_port = self.mirror_switch_port(switch)
-            mirror_interface_conf = self._get_port_conf(switch, mirror_port)
-            if mirror_interface_conf is not None:
-                existing_mirror_ports = mirror_interface_conf.get('mirror', [])
-                if not isinstance(existing_mirror_ports, list):
-                    existing_mirror_ports = list(existing_mirror_ports)
-                existing_mirror_ports = set(existing_mirror_ports)
-            else:
-                mirror_port = None
-        return (mirror_port, existing_mirror_ports)
+            if switch_mirror_port:
+                if self._get_port_conf(switch, switch_mirror_port):
+                    return switch_mirror_port
+        self.logger.warning('no mirror port for switch %s' % switch)
+        return None
 
     def clear_mirrors(self):
         dps = self._get_dps()
         if not dps:
             return False
         for switch in dps:
-            mirror_port, _ = self.check_mirror(switch)
+            mirror_port = self.mirror_switch_port(switch)
             if mirror_port:
-                self._set_mirror_config(switch, mirror_port)
+                self._clear_mirror_port(switch, mirror_port)
 
     def config_mirror(self, action, switch, port):
         switch, port = self.proxy_mirror_port(switch, port)
-        mirror_port, mirror_ports = self.check_mirror(switch)
+        mirror_port = self.mirror_switch_port(switch)
         if mirror_port:
+            mirror_key = (switch, mirror_port)
             if action == 'mirror':
-                mirror_ports.add(port)
+                self._mirror_port(switch, mirror_port, port)
+                self.mirror_counts[mirror_key] += 1
             elif action == 'unmirror':
-                try:
-                    # TODO check for still running captures on this port
-                    mirror_ports.remove(port)
-                except KeyError:
-                    self.logger.warning(
-                        f'{port} was not already mirroring on {switch}')
-            self._set_mirror_config(switch, mirror_port, mirror_ports)
+                self.mirror_counts[mirror_key] -= 1
+                if not self.mirror_counts[mirror_key]:
+                    self.logger.info(f'removing last remaining mirror on {switch}:{mirror_port}')
+                    self._unmirror_port(switch, mirror_port, port)
         else:
             self.logger.error(
                 f'Unable to mirror {switch}:{port} due to warnings')

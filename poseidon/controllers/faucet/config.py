@@ -23,7 +23,7 @@ class FaucetConfGetSetter:
         self.faucet_conf['acls'] = acls
         self.write_faucet_conf(config_file=None)
 
-    def get_dps(self):
+    def get_dps(self):  # pragma: no cover
         raise NotImplementedError
 
     def get_switch_conf(self, dp):
@@ -43,26 +43,19 @@ class FaucetConfGetSetter:
             return root_stack_switch[0]
         return None
 
-    def set_mirror_config(self, dp, port, ports):
-        mirror_interface_conf = self.get_port_conf(dp, port)
-        if not mirror_interface_conf:
-            return
-        if ports:
-            if isinstance(ports, set):
-                ports = list(ports)
-            if not isinstance(ports, list):
-                ports = [ports]
-            mirror_interface_conf['mirror'] = ports
-        # Don't delete DP level config when setting mirror list to empty,
-        # as that could cause an unnecessary cold start.
-        elif 'mirror' in mirror_interface_conf:
-            del mirror_interface_conf['mirror']
-        self.set_port_conf(dp, port, mirror_interface_conf)
-
-    def set_port_conf(self, dp, port, port_conf):
+    def set_port_conf(self, dp, port, port_conf):  # pragma: no cover
         raise NotImplementedError
 
-    def update_switch_conf(self, dp, switch_conf):
+    def update_switch_conf(self, dp, switch_conf):  # pragma: no cover
+        raise NotImplementedError
+
+    def mirror_port(self, dp, mirror_port, port):  # pragma: no cover
+        raise NotImplementedError
+
+    def unmirror_port(self, dp, mirror_port, port):  # pragma: no cover
+        raise NotImplementedError
+
+    def clear_mirror_port(self, dp, mirror_port):  # pragma: no cover
         raise NotImplementedError
 
 
@@ -103,6 +96,47 @@ class FaucetLocalConfGetSetter(FaucetConfGetSetter):
     def update_switch_conf(self, dp, switch_conf):
         self.faucet_conf['dps'][dp].update(switch_conf)
         self.write_faucet_conf()
+
+    def _get_mirrored_ports(self, dp, mirror_port):
+        mirror_interface_conf = self.get_port_conf(dp, mirror_port)
+        mirrored_ports = None
+        if mirror_interface_conf:
+            mirrored_ports = mirror_interface_conf.get('mirror', None)
+        return mirror_interface_conf, mirrored_ports
+
+    def _set_mirror_config(self, dp, mirror_port, mirror_interface_conf, ports=None):
+        if ports:
+            if isinstance(ports, set):
+                ports = list(ports)
+            if not isinstance(ports, list):
+                ports = [ports]
+            mirror_interface_conf['mirror'] = ports
+        # Don't delete DP level config when setting mirror list to empty,
+        # as that could cause an unnecessary cold start.
+        elif 'mirror' in mirror_interface_conf:
+            del mirror_interface_conf['mirror']
+        self.set_port_conf(dp, mirror_port, mirror_interface_conf)
+
+    def mirror_port(self, dp, mirror_port, port):
+        mirror_interface_conf, ports = self._get_mirrored_ports(dp, mirror_port)
+        if ports is None:
+            ports = []
+        ports = set(ports)
+        ports.add(port)
+        self._set_mirror_config(dp, mirror_port, mirror_interface_conf, ports)
+
+    def unmirror_port(self, dp, mirror_port, port):
+        mirror_interface_conf, ports = self._get_mirrored_ports(dp, mirror_port)
+        if ports is None:
+            ports = []
+        ports = set(ports)
+        if port in ports:
+            ports.remove(port)
+            self._set_mirror_config(dp, mirror_port, mirror_interface_conf, ports)
+
+    def clear_mirror_port(self, dp, mirror_port):
+        mirror_interface_conf, _ = self._get_mirrored_ports(dp, mirror_port)
+        self._set_mirror_config(dp, mirror_port, mirror_interface_conf)
 
 
 class FaucetRemoteConfGetSetter(FaucetConfGetSetter):
@@ -148,3 +182,12 @@ class FaucetRemoteConfGetSetter(FaucetConfGetSetter):
     def update_switch_conf(self, dp, switch_conf):
         return self.write_faucet_conf(
             faucet_conf={'dps': {dp: switch_conf}}, merge=True)
+
+    def mirror_port(self, dp, mirror_port, port):  # pragma: no cover
+        self.client.add_port_mirror(dp, port, mirror_port)
+
+    def unmirror_port(self, dp, mirror_port, port):  # pragma: no cover
+        self.client.remove_port_mirror(dp, port, mirror_port)
+
+    def clear_mirror_port(self, dp, mirror_port):  # pragma: no cover
+        self.client.clear_port_mirror(dp, mirror_port)

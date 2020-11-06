@@ -109,11 +109,11 @@ dps:
             proxy_mirror_ports={'sx': ['s1', 99]})
         parser.faucetconfgetsetter.faucet_conf = yaml.safe_load(faucet_conf_str)
         assert mirrors(parser) == [2]
-        parser.faucetconfgetsetter.set_mirror_config('s1', 1, 3)
-        assert mirrors(parser) == [3]
-        parser.faucetconfgetsetter.set_mirror_config('s1', 1, [2, 3])
+        parser.faucetconfgetsetter.mirror_port('s1', 1, 3)
         assert mirrors(parser) == [2, 3]
-        parser.faucetconfgetsetter.set_mirror_config('s1', 1, None)
+        parser.faucetconfgetsetter.mirror_port('s1', 1, 2)
+        assert mirrors(parser) == [2, 3]
+        parser.faucetconfgetsetter.clear_mirror_port('s1', 1)
         assert mirrors(parser) is None
 
 
@@ -285,10 +285,9 @@ dps:
             mirror_ports={'s1': 1},
             proxy_mirror_ports={'sx': ['s1', 99]})
         parser.faucetconfgetsetter.faucet_conf = faucet_conf
-        port, mirror_ports = parser.check_mirror('s1')
+        port = parser.mirror_switch_port('s1')
         parser.faucetconfgetsetter.write_faucet_conf()
         assert port == 1
-        assert mirror_ports == {2}
 
 
 def test_Parser():
