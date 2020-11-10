@@ -150,12 +150,37 @@ For using Faucet, make sure to minimally change the `controller_mirror_ports` to
 
 Step 3:
 
-If you want to Poseidon to spin up Faucet for you as well, simply run:
+If you don't have Faucet already and/or you want to Poseidon to spin up Faucet for you as well, simply run the following command and you will be done:
+
 ```
 poseidon start
 ```
 
-Otherwise if using your own installation of Faucet (note you'll need to wire together the event socket and config reload options yourself if you go this path):
+Step 4:
+
+If you are using your own installation of Faucet, you will need to enable communication between Poseidon and Faucet. Poseidon needs to change Faucet's configuration, and Faucet needs to send events to Poseidon. This configuration needs to be set with environment variables (see https://docs.faucet.nz/). For example, if running Faucet with Docker, you will need the following environment configuration in the `faucet` service in your docker-compose file:
+
+```
+        environment:
+            FAUCET_CONFIG: '/etc/faucet/faucet.yaml'
+            FAUCET_EVENT_SOCK: '/var/run/faucet/faucet.sock'
+            FAUCET_CONFIG_STAT_RELOAD: '1'
+```
+
+If Faucet and Poseidon are running on the same machine, you can start Poseidon and you will be done:
+
+```
+poseidon start --standalone
+```
+
+Step 5:
+
+If you are running Faucet and Poseidon on different machines, configuration is more complex (work to make this easier is ongoing): execute Step 4 first. Then you will need to run `event-adapter-rabbitmq` and `faucetconfrpc` services on the Faucet host, and change Poseidon's configuration to match.
+
+First start all services from `helpers/faucet/docker-compose.yaml` on the Faucet host, using a Docker network that has network connectivity with your Poseidon host. Set `FA_RABBIT_HOST` to be the address of your Poseidon host. `faucet_certstrap` will generate keys in `/opt/faucetconfrpc` which will need to be copied to your Poseidon host. Then modify `faucetconfrpc_address` in `/opt/poseidon/config/poseidon.config` to point to your Faucet host.
+
+You can now start Poseidon:
+
 ```
 poseidon start --standalone
 ```
