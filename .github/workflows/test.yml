@@ -42,7 +42,7 @@ jobs:
       run: |
         docker system prune -a -f && ./test_e2e.sh
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1.0.14
+      uses: codecov/codecov-action@v1.0.15
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       with:
