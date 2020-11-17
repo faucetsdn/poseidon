@@ -3,7 +3,6 @@
 Created on 05 February 2020
 @author: Ryan Ashley
 """
-import json
 import logging
 import os
 

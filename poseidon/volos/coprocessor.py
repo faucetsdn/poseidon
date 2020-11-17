@@ -3,11 +3,7 @@
 Created on 30 January 2020
 @author: Ryan Ashley
 """
-import json
 import logging
-import os
-import subprocess
-from pathlib import Path
 
 
 class Coprocessor(object):
