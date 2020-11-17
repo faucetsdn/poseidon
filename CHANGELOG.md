@@ -1,3 +1,13 @@
+# v0.15.7 (2020-10-30)
+
+* Upgrade networkml, faucetconfrpc, faucet, gauge, httmock, grafana, pytest, event-adapter-rabbitmq, certstrap
+
+# v0.15.6 (2020-10-23)
+
+* Speed up DNS resolution (parallel)
+* Poseidon can use its own grpc client key
+* Upgrade network-tools, networkml, pytype, transitions, prometheus, urllib3, faucet, faucetconfrpc, grafana
+
 # v0.15.5 (2020-10-09)
 
 * Add e2e test, reduce size of poseidon and poseidon-api containers.
