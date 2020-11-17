@@ -26,7 +26,6 @@ import schedule
 
 from poseidon.constants import NO_DATA
 from poseidon.controllers.faucet.faucet import FaucetProxy
-from poseidon.controllers.faucet.parser import Parser
 from poseidon.helpers.actions import Actions
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import Endpoint

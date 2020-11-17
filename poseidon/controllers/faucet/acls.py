@@ -6,7 +6,7 @@ Created on 4 March 2020
 
 import logging
 import os
-from poseidon.controllers.faucet.config import FaucetLocalConfGetSetter, FaucetRemoteConfGetSetter
+from poseidon.controllers.faucet.config import FaucetLocalConfGetSetter
 
 
 class ACLs:
