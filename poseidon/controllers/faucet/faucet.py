@@ -4,7 +4,6 @@ Created on 17 November 2017
 @author: Charlie Lewis
 '''
 import ipaddress
-import json
 import logging
 
 from poseidon.controllers.faucet.parser import Parser

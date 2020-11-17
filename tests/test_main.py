@@ -7,7 +7,6 @@ Created on 28 June 2016
 """
 import json
 import logging
-import os
 import queue
 import time
 

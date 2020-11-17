@@ -1,5 +1,4 @@
 import logging
-import os
 
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import endpoint_factory
