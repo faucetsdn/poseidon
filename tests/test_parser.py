@@ -3,7 +3,6 @@
 Test module for faucet parser.
 @author: Charlie Lewis
 """
-import copy
 import os
 import shutil
 import tempfile

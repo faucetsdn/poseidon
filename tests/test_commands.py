@@ -5,7 +5,6 @@ Created on 18 Jan 2019
 """
 from poseidon.cli.commands import Commands
 from poseidon.helpers.config import Config
-from poseidon.helpers.endpoint import Endpoint
 from poseidon.helpers.endpoint import endpoint_factory
 
 

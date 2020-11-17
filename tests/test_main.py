@@ -11,8 +11,6 @@ import os
 import queue
 import time
 
-from prometheus_client import Gauge
-
 from poseidon.constants import NO_DATA
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import endpoint_factory
