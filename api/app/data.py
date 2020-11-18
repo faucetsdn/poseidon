@@ -97,15 +97,15 @@ class Nodes:
                         if 'ignored' in node and 'ignore' in poseidon_info:
                             node['ignored'] = poseidon_info['ignore']
 
-                        if 'prev_states' in poseidon_info:
-                            prev_states = ast.literal_eval(
-                                poseidon_info['prev_states'])
+                        if 'prev_state' in poseidon_info:
+                            prev_state = ast.literal_eval(
+                                poseidon_info['prev_state'])
                             if 'first_seen' in node:
                                 node['first_seen'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
-                                    prev_states[0][1])) + ' (' + duration(prev_states[0][1]) + ')'
+                                    prev_state[1])) + ' (' + duration(prev_state[1]) + ')'
                             if 'last_seen' in node:
                                 node['last_seen'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
-                                    prev_states[-1][1])) + ' (' + duration(prev_states[-1][1]) + ')'
+                                    prev_state[1])) + ' (' + duration(prev_state[1]) + ')'
 
                         if 'endpoint_data' in poseidon_info:
                             endpoint_data = ast.literal_eval(
@@ -164,7 +164,7 @@ class NetworkFull:
                 'ipv6': 0, 'ipv4_subnet': NO_DATA,
                 'ipv6_subnet': NO_DATA, 'segment': 0, 'port': 0,
                 'tenant': 0, 'active': 0, 'next_state': NO_DATA,
-                'state': NO_DATA, 'prev_states': NO_DATA,
+                'state': NO_DATA, 'prev_state': NO_DATA,
                 'ignored': 'False', 'first_seen': NO_DATA,
                 'last_seen': NO_DATA, 'role': NO_DATA,
                 'role_confidence': 0, 'behavior': 0,

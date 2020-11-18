@@ -260,7 +260,7 @@ class PoseidonRedisClient:
                         'ignore': endpoint.ignore,
                         'endpoint_data': endpoint.endpoint_data,
                         'next_state': endpoint.p_next_state,
-                        'prev_states': endpoint.p_prev_states,
+                        'prev_state': endpoint.p_prev_state,
                         'acl_data': endpoint.acl_data,
                         'metadata': endpoint.metadata,
                     }

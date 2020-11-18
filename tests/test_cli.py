@@ -310,7 +310,7 @@ def test_get_first_seen():
     endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
-    endpoint.p_prev_states = [('unknown', 1551711125)]
+    endpoint.p_prev_state = ('unknown', 1551711125)
     GetData._get_first_seen(endpoint)
 
 
@@ -318,24 +318,23 @@ def test_get_last_seen():
     endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
-    endpoint.p_prev_states = [('unknown', 1551711125)]
+    endpoint.p_prev_state = ('unknown', 1551711125)
     GetData._get_last_seen(endpoint)
 
 
-def test_get_prev_states():
+def test_get_prev_state():
     endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
-    endpoint.p_prev_states = []
-    prev_states = GetData._get_prev_states(endpoint)
-    assert prev_states == NO_DATA
-    endpoint.p_prev_states = [('unknown', 1551711125)]
-    GetData._get_prev_states(endpoint)
-    endpoint.p_prev_states = [('unknown', 1551711125), ('queued', 1551711126)]
-    GetData._get_prev_states(endpoint)
-    endpoint.p_prev_states = [('unknown', 1551711125), ('queued', 1551711126), (
-        'queued', 1551711126), ('queued', 1551711827), ('queued', 1551811126)]
-    GetData._get_prev_states(endpoint)
+    endpoint.p_prev_state = None
+    prev_state = GetData._get_prev_state(endpoint)
+    assert prev_state == NO_DATA
+    endpoint.p_prev_state = ('unknown', 1551711125)
+    GetData._get_prev_state(endpoint)
+    endpoint.p_prev_state = ('queued', 1551711126)
+    GetData._get_prev_state(endpoint)
+    endpoint.p_prev_state = ('queued', 1551711827)
+    GetData._get_prev_state(endpoint)
 
 
 def test_get_history():

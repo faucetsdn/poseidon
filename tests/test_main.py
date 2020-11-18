@@ -409,16 +409,14 @@ def test_process():
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
             endpoint.mirror()
-            endpoint.p_prev_states.append(
-                (endpoint.state, int(time.time())))
+            endpoint.p_prev_state = (endpoint.state, int(time.time()))
             self.s.endpoints[endpoint.name] = endpoint
             endpoint = endpoint_factory('foo2')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
             endpoint.p_next_state = 'mirror'
             endpoint.queue()
-            endpoint.p_prev_states.append(
-                (endpoint.state, int(time.time())))
+            endpoint.p_prev_state = (endpoint.state, int(time.time()))
             self.s.endpoints[endpoint.name] = endpoint
             endpoint = endpoint_factory('foo3')
             endpoint.endpoint_data = {
