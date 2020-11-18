@@ -29,7 +29,7 @@ class DNSResolver:
 
     TIMEOUT = 5
 
-    def _resolve_ip(self, ip):
+    def _resolve_ip(ip):
         try:
             result = socket.getnameinfo((ip, 0), 0)[0]
             if result == ip:
