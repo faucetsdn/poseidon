@@ -105,8 +105,7 @@ def test_parse_networkml_metadata():
     }
     assert prc.parse_networkml_metadata(mac_info, ml_info) == {
         'behavior': 'None', 'confidences': [1.0, 2.0],
-        'labels': ['foo', 'bar'], 'pcap_labels': 'mylabels',
-        'behavior': 'definitely'}
+        'labels': ['foo', 'bar'], 'pcap_labels': 'mylabels'}
     ml_info = {
         'notmyhash': b'{"pcap_labels": "mylabels", "classification": {"labels": ["foo", "bar"], "confidences": [1.0, 2.0]}, "decisions": {"behavior": "definitely"}}',
     }
