@@ -65,11 +65,11 @@ EOF
 sudo mv $TMPDIR/faucet.yaml /etc/faucet
 
 # pre-fetch workers to avoid timeout.
-for i in $(jq < ../workers/workers.json '.workers[] | .image + ":" + .version' | sed 's/"//g') ; do
+for i in $(jq < workers/workers.json '.workers[] | .image + ":" + .version' | sed 's/"//g') ; do
 	docker pull $i
 done
 
-COMPOSE_PROJECT_NAME=ovs docker-compose -f test-e2e-ovs.yml down
+COMPOSE_PROJECT_NAME=ovs docker-compose -f tests/test-e2e-ovs.yml down
 COMPOSE_PROJECT_NAME=ovs docker-compose -f test-e2e-ovs.yml rm -f
 COMPOSE_PROJECT_NAME=ovs docker-compose -f test-e2e-ovs.yml up -d
 OVSID="$(docker ps -q --filter name=ovs)"
