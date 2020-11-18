@@ -41,4 +41,4 @@ class DNSResolver:
 
     def resolve_ips(self, ips):
         with ThreadPoolExecutor() as executor:
-            return {ip: result for ip, result in zip(ips, executor.map(DNSResolver._resolve_ip, list(ips)))}
+            return {ip: result for ip, result in zip(ips, executor.map(DNSResolver()._resolve_ip, list(ips)))}
