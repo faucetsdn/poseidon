@@ -65,7 +65,7 @@ EOF
 sudo mv $TMPDIR/faucet.yaml /etc/faucet
 
 # pre-fetch workers to avoid timeout.
-for i in $(jq < workers/workers.json '.workers[] | .image + ":" + .version' | sed 's/"//g') ; do
+for i in $(jq < ../workers/workers.json '.workers[] | .image + ":" + .version' | sed 's/"//g') ; do
 	docker pull $i
 done
 
