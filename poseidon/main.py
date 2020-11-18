@@ -23,32 +23,34 @@ def main():  # pragma: no cover
     host = pmain.controller['FA_RABBIT_HOST']
     port = int(pmain.controller['FA_RABBIT_PORT'])
     queue_name = 'poseidon_main'
+    rabbit_threads = []
+    rabbit_connections = []
 
     rabbit = Rabbit()
     exchange = 'topic-poseidon-internal'
     binding_key = ['poseidon.algos.#', 'poseidon.action.#']
     retval = rabbit.make_rabbit_connection(
         host, port, exchange, queue_name, binding_key)
-    pmain.rabbit_channel_local = retval[0]
-    pmain.rabbit_channel_connection_local = retval[1]
-    pmain.rabbit_thread = rabbit.start_channel(
-        pmain.rabbit_channel_local,
+    channel, connection = retval[:2]
+    rabbit_connections.append(connection)
+    rabbit_threads.append(rabbit.start_channel(
+        channel,
         pmain.rabbit_callback,
         queue_name,
-        pmain.m_queue)
+        pmain.m_queue))
 
     rabbit = Rabbit()
     exchange = pmain.controller['FA_RABBIT_EXCHANGE']
     binding_key = [pmain.controller['FA_RABBIT_ROUTING_KEY']+'.#']
     retval = rabbit.make_rabbit_connection(
         host, port, exchange, queue_name, binding_key)
-    pmain.rabbit_channel_local = retval[0]
-    pmain.rabbit_channel_connection_local_fa = retval[1]
-    pmain.rabbit_thread = rabbit.start_channel(
-        pmain.rabbit_channel_local,
+    channel, connection = retval[:2]
+    rabbit_connections.append(connection)
+    rabbit_threads.append(rabbit.start_channel(
+        channel,
         pmain.rabbit_callback,
         queue_name,
-        pmain.m_queue)
+        pmain.m_queue))
 
     pmain.schedule_thread.start()
 
@@ -59,6 +61,8 @@ def main():  # pragma: no cover
         logger.error('process() exception: {0}'.format(str(e)))
 
     pmain.shutdown()
+    for connection in rabbit_connections:
+        connection.close()
 
 
 if __name__ == '__main__':  # pragma: no cover
