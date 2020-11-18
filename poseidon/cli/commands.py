@@ -7,9 +7,11 @@ Created on 18 January 2019
 @author: Charlie Lewis
 """
 import json
-
+import logging
 from poseidon.helpers.config import Config
-from poseidon.main import SDNConnect
+from poseidon.sdnconnect import SDNConnect
+
+logger = logging.getLogger('test')
 
 
 class Commands:
@@ -21,7 +23,7 @@ class Commands:
             self.controller = Config().get_config()
         else:
             self.controller = controller
-        self.sdnc = SDNConnect(self.controller, first_time=False)
+        self.sdnc = SDNConnect(self.controller, logger, first_time=False)
         self.sdnc.get_stored_endpoints()
 
     def _publish_action(self, address, payload):
