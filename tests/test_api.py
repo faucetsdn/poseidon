@@ -53,7 +53,7 @@ def setup_redis():
     r.hset('6cd09124a66ef1bbc72c1aff4e333766d3533f81',
             mapping={'transition_time': '1524623228.1019075',
              'endpoint_data': "{'name': None, \
-                                'prev_states': [], \
+                                'prev_state': None, \
                                 'mac': '00:00:00:00:00:01', \
                                 'ipv4': '10.0.0.1', \
                                 'ipv6': '', \
@@ -67,7 +67,7 @@ def setup_redis():
     r.hset('6cd09124a66ef1bbc72c1aff4e333766d3533f82',
             mapping={'transition_time': '1524623228.1019075',
              'endpoint_data': "{'name': None, \
-                                'prev_states': [], \
+                                'prev_state': None, \
                                 'mac': '00:00:00:00:00:02', \
                                 'ipv4': 'None', \
                                 'segment': '1', \
@@ -80,7 +80,7 @@ def setup_redis():
     r.hset('6cd09124a66ef1bbc72c1aff4e333766d3533f83',
             mapping={'transition_time': '1524623228.1019075',
              'endpoint_data': "{'name': None, \
-                                'prev_states': [], \
+                                'prev_state': None, \
                                 'mac': '00:00:00:00:00:03', \
                                 'ipv6': '2601:645:8200:a571:18fd:6640:9cd9:10d3', \
                                 'ipv4': '', \
@@ -91,7 +91,7 @@ def setup_redis():
                                 'active': 1}",
              'next_state': 'REINVESTIGATING',
              'ignore': 'False',
-             'prev_states': "[('UNKNOWN', 1527208228)]",
+             'prev_state': "('UNKNOWN', 1527208228)",
              'state': 'KNOWN'})
 
 

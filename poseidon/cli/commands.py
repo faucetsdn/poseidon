@@ -11,7 +11,7 @@ import logging
 from poseidon.helpers.config import Config
 from poseidon.sdnconnect import SDNConnect
 
-logger = logging.getLogger('test')
+logger = logging.getLogger('commands')
 
 
 class Commands:

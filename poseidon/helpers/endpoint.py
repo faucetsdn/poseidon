@@ -145,7 +145,7 @@ class Endpoint:
         self.copro_ignores = False
         self.endpoint_data = None
         self.p_next_state = None
-        self.p_prev_states = []
+        self.p_prev_state = None
         self.p_next_copro_state = None
         self.p_prev_copross_states = []
         self.acl_data = []
@@ -162,7 +162,7 @@ class Endpoint:
             'ignore': self.ignore,
             'endpoint_data': self.endpoint_data,
             'p_next_state': self.p_next_state,
-            'p_prev_states': self.p_prev_states,
+            'p_prev_state': self.p_prev_state,
             'acl_data': self.acl_data,
             'metadata': self.metadata,
             'history': self.history,
@@ -265,7 +265,7 @@ class EndpointDecoder:
             self.endpoint.acl_data = []
         self.endpoint.endpoint_data = e['endpoint_data']
         self.endpoint.p_next_state = e['p_next_state']
-        self.endpoint.p_prev_states = e['p_prev_states']
+        self.endpoint.p_prev_state = e['p_prev_state']
 
     def get_endpoint(self):
         return self.endpoint

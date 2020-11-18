@@ -29,7 +29,8 @@ class DNSResolver:
 
     TIMEOUT = 5
 
-    def _resolve_ip(self, ip):
+    @staticmethod
+    def _resolve_ip(ip):
         try:
             result = socket.getnameinfo((ip, 0), 0)[0]
             if result == ip:
@@ -40,4 +41,4 @@ class DNSResolver:
 
     def resolve_ips(self, ips):
         with ThreadPoolExecutor() as executor:
-            return {ip: result for ip, result in zip(ips, executor.map(self._resolve_ip, list(ips)))}
+            return {ip: result for ip, result in zip(ips, executor.map(DNSResolver()._resolve_ip, list(ips)))}

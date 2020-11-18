@@ -83,8 +83,7 @@ class SDNConnect:
                         endpoint.p_next_state = endpoint.state
                     endpoint.endpoint_data['active'] = 0
                     endpoint.inactive()  # pytype: disable=attribute-error
-                    endpoint.p_prev_states.append(
-                        (endpoint.state, int(time.time())))
+                    endpoint.p_prev_state = (endpoint.state, int(time.time()))
         self.store_endpoints()
 
     def get_stored_endpoints(self):
@@ -311,7 +310,7 @@ class SDNConnect:
             if ep is None:
                 change_acls = True
                 m = endpoint_factory(h)
-                m.p_prev_states.append((m.state, int(time.time())))
+                m.p_prev_state = (m.state, int(time.time()))
                 m.endpoint_data = deepcopy(machine)
                 self.endpoints[m.name] = m
                 self.logger.info(
@@ -331,7 +330,7 @@ class SDNConnect:
                         ep.trigger(ep.p_next_state)
                     else:
                         ep.unknown()  # pytype: disable=attribute-error
-                    ep.p_prev_states.append((ep.state, int(time.time())))
+                    ep.p_prev_state = (ep.state, int(time.time()))
                 elif ep.state != 'inactive' and machine['active'] == 0:
                     if ep.state in ['mirroring', 'reinvestigating']:
                         self.unmirror_endpoint(ep)
@@ -342,7 +341,7 @@ class SDNConnect:
                     if ep.state in ['known', 'abnormal']:
                         ep.p_next_state = ep.state
                     ep.inactive()  # pytype: disable=attribute-error
-                    ep.p_prev_states.append((ep.state, int(time.time())))
+                    ep.p_prev_state = (ep.state, int(time.time()))
 
         if change_acls and self.controller['AUTOMATED_ACLS']:
             status = Actions(None, self.sdnc).update_acls(

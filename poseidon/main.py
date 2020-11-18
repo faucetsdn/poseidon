@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-The main entrypoint for Poseidon,
+The main entrypoint for Poseidon
 
 Created on 3 December 2018
 @author: Charlie Lewis

@@ -118,13 +118,14 @@ class GetData():
 
     @staticmethod
     def _get_first_seen(endpoint):
+        # TODO this needs to be rewritten after history moves to prometheus
         return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
-            endpoint.p_prev_states[0][1])) + ' (' + duration(endpoint.p_prev_states[0][1]) + ')'
+            endpoint.p_prev_state[1])) + ' (' + duration(endpoint.p_prev_state[1]) + ')'
 
     @staticmethod
     def _get_last_seen(endpoint):
         return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
-            endpoint.p_prev_states[-1][1])) + ' (' + duration(endpoint.p_prev_states[-1][1]) + ')'
+            endpoint.p_prev_state[1])) + ' (' + duration(endpoint.p_prev_state[1]) + ')'
 
     @staticmethod
     def _get_newest_metadata(metadata):
@@ -230,31 +231,26 @@ class GetData():
         return
 
     @staticmethod
-    def _get_prev_states(endpoint):
-        prev_states = endpoint.p_prev_states
+    def _get_prev_state(endpoint):
+        # TODO needs to be rewritten now that prev_state is no longer a history of state changes
+        prev_state = endpoint.p_prev_state
         oldest_state = []
         output = NO_DATA
-        if len(prev_states) > 1:
-            oldest_state = prev_states.pop(0)
-            current_state = prev_states.pop()
-        elif len(prev_states) == 1:
-            current_state = oldest_state = prev_states.pop()
+        if prev_state:
+           current_state = oldest_state = prev_state
         else:
             return output
 
         output = 'First seen: ' + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
             oldest_state[1])) + ' (' + duration(oldest_state[1]) + ') and put into state: ' + oldest_state[0] + '\n'
-        last_state = oldest_state
-        for state in prev_states:
-            delay = delta(state[1], last_state[1])[0]
-            if delay == 'just now':
-                delay = 'immediately'
-            else:
-                delay += ' later'
-            output += 'then ' + delay + ' it changed into state: ' + state[0] + \
-                ' (' + time.strftime('%Y-%m-%d %H:%M:%S',
-                                     time.localtime(state[1])) + ')\n'
-            last_state = state
+        delay = delta(prev_state[1], oldest_state[1])[0]
+        if delay == 'just now':
+            delay = 'immediately'
+        else:
+            delay += ' later'
+        output += 'then ' + delay + ' it changed into state: ' + prev_state[0] + \
+            ' (' + time.strftime('%Y-%m-%d %H:%M:%S',
+                                 time.localtime(prev_state[1])) + ')\n'
         output += 'Finally it was last seen: ' + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
             current_state[1])) + ' (' + duration(current_state[1]) + ')'
         return output
@@ -421,7 +417,7 @@ class Parser():
                          'next state': (GetData._get_next_state, 12),
                          'first seen': (GetData._get_first_seen, 13),
                          'last seen': (GetData._get_last_seen, 14),
-                         'previous states': (GetData._get_prev_states, 15),
+                         'previous state': (GetData._get_prev_state, 15),
                          'ipv4 os': (GetData._get_ipv4_os, 16),
                          'ipv4 os\n(p0f)': (GetData._get_ipv4_os, 16),
                          'ipv6 os': (GetData._get_ipv6_os, 17),
