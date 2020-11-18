@@ -9,7 +9,7 @@ Created on 18 January 2019
 import json
 import logging
 from poseidon.helpers.config import Config
-from poseidon.main import SDNConnect
+from poseidon.sdnconnect import SDNConnect
 
 logger = logging.getLogger('test')
 

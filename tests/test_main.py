@@ -15,9 +15,7 @@ from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import endpoint_factory
 from poseidon.helpers.metadata import DNSResolver
 from poseidon.main import CTRL_C
-from poseidon.main import Monitor
-from poseidon.main import rabbit_callback
-from poseidon.main import schedule_thread_worker
+from poseidon.monitor import Monitor
 from poseidon.sdnconnect import SDNConnect
 
 logger = logging.getLogger('test')
@@ -155,6 +153,7 @@ def test_signal_handler():
             self.logger = logger
             self.controller = get_test_controller()
             self.s = SDNConnect(self.controller, logger)
+            self.ctrl_c = CTRL_C
 
     class MockSchedule:
         call_log = []
@@ -197,6 +196,7 @@ def test_get_q_item():
             self.logger = logger
             self.controller = get_test_controller()
             self.s = SDNConnect(self.controller, logger)
+            self.ctrl_c = CTRL_C
 
     mock_monitor = MockMonitor()
     m_queue = MockMQueue()
@@ -228,6 +228,7 @@ def test_format_rabbit_message():
             self.s = SDNConnect(self.controller, logger)
             self.faucet_event = []
             self.s.sdnc = MockParser()
+            self.ctrl_c = CTRL_C
 
         def update_routing_key_time(self, routing_key):
             return
@@ -316,8 +317,16 @@ def test_rabbit_callback():
         def get_item(self):
             return self.item
 
+    class MockMonitor(Monitor):
+
+        def __init__(self):
+            self.logger = logger
+
     mock_channel = MockChannel()
     mock_queue = MockQueue()
+    monitor = MockMonitor()
+    rabbit_callback = monitor.rabbit_callback
+
     rabbit_callback(
         mock_channel,
         mock_method,
@@ -353,7 +362,7 @@ def test_find_new_machines():
 
 
 def test_Monitor_init():
-    monitor = Monitor(skip_rabbit=True, controller=get_test_controller())
+    monitor = Monitor(logger, CTRL_C, controller=get_test_controller())
     hosts = [{'active': 0, 'source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'ipv4_os': 'unknown', 'tenant': 'vlan1', 'port': 1, 'segment': 'switch1', 'ipv4': '123.123.123.123', 'mac': '00:00:00:00:00:00', 'id': 'foo1', 'behavior': 1, 'ipv6': '0'},
              {'active': 1, 'source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'ipv4_os': 'unknown', 'tenant': 'vlan1',
                  'port': 1, 'segment': 'switch1', 'ipv4': '123.123.123.123', 'mac': '00:00:00:00:00:00', 'id': 'foo2', 'behavior': 1, 'ipv6': '0'},
@@ -395,6 +404,7 @@ def test_process():
             self.s.get_sdn_context()
             self.job_queue = queue.Queue()
             self.m_queue = queue.Queue()
+            self.ctrl_c = CTRL_C
             endpoint = endpoint_factory('foo')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
@@ -499,11 +509,20 @@ def test_schedule_thread_worker():
         def __init__(self):
             pass
 
+    class MockMonitor(Monitor):
+
+        def __init__(self):
+            self.logger = logger
+            self.controller = get_test_controller()
+            self.s = SDNConnect(self.controller, logger)
+            self.ctrl_c = CTRL_C
+
     sys = mocksys()
     t1 = Thread(target=thread1)
     t1.start()
+    monitor = MockMonitor()
     try:
-        schedule_thread_worker(mockSchedule())
+        monitor.schedule_thread_worker(mockSchedule())
     except SystemExit:
         pass
 
