@@ -243,8 +243,7 @@ class GetData():
 
         output = 'First seen: ' + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
             oldest_state[1])) + ' (' + duration(oldest_state[1]) + ') and put into state: ' + oldest_state[0] + '\n'
-        last_state = oldest_state
-        delay = delta(prev_state[1], last_state[1])[0]
+        delay = delta(prev_state[1], oldest_state[1])[0]
         if delay == 'just now':
             delay = 'immediately'
         else:
@@ -252,7 +251,6 @@ class GetData():
         output += 'then ' + delay + ' it changed into state: ' + prev_state[0] + \
             ' (' + time.strftime('%Y-%m-%d %H:%M:%S',
                                  time.localtime(prev_state[1])) + ')\n'
-            last_state = prev_state
         output += 'Finally it was last seen: ' + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
             current_state[1])) + ' (' + duration(current_state[1]) + ')'
         return output
