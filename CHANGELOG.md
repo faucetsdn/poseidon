@@ -1,3 +1,9 @@
+# v0.15.8 (2020-11-20)
+
+* Incremental refactoring to simplify tests and main.py
+* Move to faucetconfrpc add/remove/clear port mirror RPCs
+* Updated faucetconfrpc, certstrap, faucet, gauge, grafana, codecov, prometheus, pytype, urllib3, cmd2, requests, networkml, transitions
+
 # v0.15.7 (2020-10-30)
 
 * Upgrade networkml, faucetconfrpc, faucet, gauge, httmock, grafana, pytest, event-adapter-rabbitmq, certstrap
