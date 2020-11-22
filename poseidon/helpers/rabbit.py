@@ -11,13 +11,20 @@ from functools import partial
 import pika
 
 
-class Rabbit(object):
+class Rabbit:
     '''
     Base Class for RabbitMQ
     '''
 
     def __init__(self):
         self.logger = logging.getLogger('rabbit')
+        self.connection = None
+        self.channel = None
+        self.mq_recv_thread = None
+
+    def close(self):
+        if self.connection:
+            self.connection.close()
 
     def make_rabbit_connection(self, host, port, exchange, queue_name, keys,
                                total_sleep=float('inf')):  # pragma: no cover
@@ -29,19 +36,17 @@ class Rabbit(object):
         '''
         wait = True
         do_rabbit = True
-        rabbit_channel = None
-        rabbit_connection = None
 
         while wait and total_sleep > 0:
             try:
                 # Starting rabbit connection
-                rabbit_connection = pika.BlockingConnection(
+                self.connection = pika.BlockingConnection(
                     pika.ConnectionParameters(host=host, port=port)
                 )
-                rabbit_channel = rabbit_connection.channel()
-                rabbit_channel.exchange_declare(exchange=exchange,
-                                                exchange_type='topic')
-                rabbit_channel.queue_declare(
+                self.channel = self.connection.channel()
+                self.channel.exchange_declare(
+                    exchange=exchange, exchange_type='topic')
+                self.channel.queue_declare(
                     queue=queue_name, exclusive=False, durable=True)
                 self.logger.debug(
                     'connected to {0} rabbitmq...'.format(host))
@@ -57,28 +62,24 @@ class Rabbit(object):
         if wait:
             do_rabbit = False
 
-        if rabbit_channel is not None and isinstance(keys, list) and not wait:
+        if self.channel is not None and isinstance(keys, list) and not wait:
             for key in keys:
                 self.logger.debug(
                     'array adding key:{0} to rabbitmq channel'.format(key))
-                rabbit_channel.queue_bind(exchange=exchange,
-                                          queue=queue_name,
-                                          routing_key=key)
+                self.channel.queue_bind(
+                    exchange=exchange, queue=queue_name, routing_key=key)
 
         if isinstance(keys, str) and not wait:
             self.logger.debug(
                 'string adding key:{0} to rabbitmq channel'.format(keys))
-            rabbit_channel.queue_bind(exchange=exchange,
-                                      queue=queue_name,
-                                      routing_key=keys)
+            self.channel.queue_bind(
+                exchange=exchange, queue=queue_name, routing_key=keys)
 
-        return rabbit_channel, rabbit_connection, do_rabbit
+        return do_rabbit
 
-    def start_channel(self, channel, mycallback, queue, m_queue):
+    def start_channel(self, mycallback, queue, m_queue):
         ''' handle threading for messagetype '''
-        self.logger.debug(
-            'about to start channel {0}'.format(channel))
-        channel.basic_consume(queue, partial(mycallback, q=m_queue))
-        mq_recv_thread = threading.Thread(target=channel.start_consuming)
-        mq_recv_thread.start()
-        return mq_recv_thread
+        self.logger.debug('about to start channel {0}'.format(self.channel))
+        self.channel.basic_consume(queue, partial(mycallback, q=m_queue))
+        self.mq_recv_thread = threading.Thread(target=self.channel.start_consuming)
+        self.mq_recv_thread.start()

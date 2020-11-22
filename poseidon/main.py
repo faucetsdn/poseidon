@@ -15,7 +15,7 @@ CTRL_C = dict()
 CTRL_C['STOP'] = False
 
 
-def main(skip_rabbit=False):  # pragma: no cover
+def main():  # pragma: no cover
     logging.getLogger('pika').setLevel(logging.WARNING)
     Logger()
     logger = logging.getLogger('main')
@@ -24,32 +24,27 @@ def main(skip_rabbit=False):  # pragma: no cover
     port = int(pmain.controller['FA_RABBIT_PORT'])
     queue_name = 'poseidon_main'
 
-    if not skip_rabbit:
-        rabbit = Rabbit()
-        exchange = 'topic-poseidon-internal'
-        binding_key = ['poseidon.algos.#', 'poseidon.action.#']
-        retval = rabbit.make_rabbit_connection(
-            host, port, exchange, queue_name, binding_key)
-        pmain.rabbit_channel_local = retval[0]
-        pmain.rabbit_channel_connection_local = retval[1]
-        pmain.rabbit_thread = rabbit.start_channel(
-            pmain.rabbit_channel_local,
-            pmain.rabbit_callback,
-            queue_name,
-            pmain.m_queue)
+    rabbit = Rabbit()
+    exchange = 'topic-poseidon-internal'
+    binding_key = ['poseidon.algos.#', 'poseidon.action.#']
+    rabbit.make_rabbit_connection(
+        host, port, exchange, queue_name, binding_key)
+    rabbit.start_channel(
+        pmain.rabbit_callback,
+        queue_name,
+        pmain.m_queue)
+    pmain.rabbits.append(rabbit)
 
     rabbit = Rabbit()
     exchange = pmain.controller['FA_RABBIT_EXCHANGE']
     binding_key = [pmain.controller['FA_RABBIT_ROUTING_KEY']+'.#']
-    retval = rabbit.make_rabbit_connection(
+    rabbit.make_rabbit_connection(
         host, port, exchange, queue_name, binding_key)
-    pmain.rabbit_channel_local = retval[0]
-    pmain.rabbit_channel_connection_local_fa = retval[1]
-    pmain.rabbit_thread = rabbit.start_channel(
-        pmain.rabbit_channel_local,
+    rabbit.start_channel(
         pmain.rabbit_callback,
         queue_name,
         pmain.m_queue)
+    pmain.rabbits.append(rabbit)
 
     pmain.schedule_thread.start()
 
@@ -63,4 +58,4 @@ def main(skip_rabbit=False):  # pragma: no cover
 
 
 if __name__ == '__main__':  # pragma: no cover
-    main(skip_rabbit=False)
+    main()

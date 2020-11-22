@@ -14,6 +14,7 @@ from poseidon.constants import NO_DATA
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import endpoint_factory
 from poseidon.helpers.metadata import DNSResolver
+from poseidon.helpers.rabbit import Rabbit
 from poseidon.main import CTRL_C
 from poseidon.monitor import Monitor
 from poseidon.sdnconnect import SDNConnect
@@ -154,6 +155,7 @@ def test_signal_handler():
             self.controller = get_test_controller()
             self.s = SDNConnect(self.controller, logger)
             self.ctrl_c = CTRL_C
+            self.rabbits = []
 
     class MockSchedule:
         call_log = []
@@ -167,16 +169,14 @@ def test_signal_handler():
 
     mock_monitor = MockMonitor()
     mock_monitor.schedule = MockSchedule()
-    mock_monitor.rabbit_channel_connection_local = MockRabbitConnection()
     mock_monitor.logger = MockLogger().logger
+    mock_monitor.rabbits.append(Rabbit())
 
-    # signal handler seem to simply exit and kill all the jobs no matter what
-    # we pass
-
-    mock_monitor.signal_handler(None, None)
+    mock_monitor.signal_handler(None, None, exit=False)
     assert ['job1 cancelled', 'job2 cancelled',
             'job3 cancelled'] == mock_monitor.schedule.call_log
-    assert True == mock_monitor.rabbit_channel_connection_local.connection_closed
+    for rabbit in mock_monitor.rabbits:
+        assert not rabbit.connection
 
 
 def test_get_q_item():

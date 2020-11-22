@@ -29,8 +29,7 @@ class Monitor:
         self.faucet_event = []
         self.m_queue = queue.Queue()
         self.job_queue = queue.Queue()
-        self.rabbit_channel_connection_local = None
-        self.rabbit_channel_connection_local_fa = None
+        self.rabbits = []
 
         # get config options
         if controller is None:
@@ -430,15 +429,12 @@ class Monitor:
         for job in self.schedule.jobs:
             self.logger.debug('shutdown :{0}'.format(job))
             self.schedule.cancel_job(job)
-        if self.rabbit_channel_connection_local:
-            self.rabbit_channel_connection_local.close()
-        if self.rabbit_channel_connection_local_fa:
-            self.rabbit_channel_connection_local_fa.close()
+        for rabbit in self.rabbits:
+            rabbit.close()
         self.logger.debug('SHUTTING DOWN')
         self.logger.debug('EXITING')
-        sys.exit()
 
-    def signal_handler(self, _signal, _frame):
+    def signal_handler(self, _signal, _frame, exit=True):
         ''' hopefully eat a CTRL_C and signal system shutdown '''
         self.ctrl_c['STOP'] = True
         self.logger.debug('CTRL-C: {0}'.format(self.ctrl_c))
@@ -447,3 +443,5 @@ class Monitor:
         except Exception as e:  # pragma: no cover
             self.logger.debug(
                 'Failed to handle signal properly because: {0}'.format(str(e)))
+        if exit:
+            sys.exit(0)
