@@ -22,28 +22,23 @@ def main():  # pragma: no cover
     pmain = Monitor(logger, CTRL_C)
     host = pmain.controller['FA_RABBIT_HOST']
     port = int(pmain.controller['FA_RABBIT_PORT'])
-    queue_name = 'poseidon_main'
 
     rabbit = Rabbit()
     exchange = 'topic-poseidon-internal'
     binding_key = ['poseidon.algos.#', 'poseidon.action.#']
     rabbit.make_rabbit_connection(
-        host, port, exchange, queue_name, binding_key)
+        host, port, exchange, binding_key)
     rabbit.start_channel(
-        pmain.rabbit_callback,
-        queue_name,
-        pmain.m_queue)
+        pmain.rabbit_callback, pmain.m_queue)
     pmain.rabbits.append(rabbit)
 
     rabbit = Rabbit()
     exchange = pmain.controller['FA_RABBIT_EXCHANGE']
     binding_key = [pmain.controller['FA_RABBIT_ROUTING_KEY']+'.#']
     rabbit.make_rabbit_connection(
-        host, port, exchange, queue_name, binding_key)
+        host, port, exchange, binding_key)
     rabbit.start_channel(
-        pmain.rabbit_callback,
-        queue_name,
-        pmain.m_queue)
+        pmain.rabbit_callback, pmain.m_queue)
     pmain.rabbits.append(rabbit)
 
     pmain.schedule_thread.start()

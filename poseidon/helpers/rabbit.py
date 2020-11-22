@@ -21,12 +21,13 @@ class Rabbit:
         self.connection = None
         self.channel = None
         self.mq_recv_thread = None
+        self.queue_name = 'poseidon_main'
 
     def close(self):
         if self.connection:
             self.connection.close()
 
-    def make_rabbit_connection(self, host, port, exchange, queue_name, keys,
+    def make_rabbit_connection(self, host, port, exchange, keys,
                                total_sleep=float('inf')):  # pragma: no cover
         '''
         Connects to rabbitmq using the given hostname,
@@ -47,7 +48,7 @@ class Rabbit:
                 self.channel.exchange_declare(
                     exchange=exchange, exchange_type='topic')
                 self.channel.queue_declare(
-                    queue=queue_name, exclusive=False, durable=True)
+                    queue=self.queue_name, exclusive=False, durable=True)
                 self.logger.debug(
                     'connected to {0} rabbitmq...'.format(host))
                 wait = False
@@ -67,19 +68,19 @@ class Rabbit:
                 self.logger.debug(
                     'array adding key:{0} to rabbitmq channel'.format(key))
                 self.channel.queue_bind(
-                    exchange=exchange, queue=queue_name, routing_key=key)
+                    exchange=exchange, queue=self.queue_name, routing_key=key)
 
         if isinstance(keys, str) and not wait:
             self.logger.debug(
                 'string adding key:{0} to rabbitmq channel'.format(keys))
             self.channel.queue_bind(
-                exchange=exchange, queue=queue_name, routing_key=keys)
+                exchange=exchange, queue=self.queue_name, routing_key=keys)
 
         return do_rabbit
 
-    def start_channel(self, mycallback, queue, m_queue):
+    def start_channel(self, mycallback, m_queue):
         ''' handle threading for messagetype '''
         self.logger.debug('about to start channel {0}'.format(self.channel))
-        self.channel.basic_consume(queue, partial(mycallback, q=m_queue))
+        self.channel.basic_consume(self.queue_name, partial(mycallback, q=m_queue))
         self.mq_recv_thread = threading.Thread(target=self.channel.start_consuming)
         self.mq_recv_thread.start()
