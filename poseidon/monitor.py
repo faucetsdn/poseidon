@@ -278,12 +278,15 @@ class Monitor:
             'no handler for routing_key {0}'.format(routing_key))
         return {}, False
 
+    def _not_ignored_endpoints(self):
+        return [endpoint for endpoint in self.s.endpoints.values() if not endpoint.ignore]
+
     def schedule_mirroring(self):
         queued_endpoints = [
-            endpoint for endpoint in self.s.endpoints.values()
-            if not endpoint.ignore and endpoint.state == 'queued' and endpoint.p_next_state != 'inactive']
+            endpoint for endpoint in self._not_ignored_endpoints()
+            if endpoint.state == 'queued' and endpoint.p_next_state != 'inactive']
         self.s.investigations = len([
-            endpoint for endpoint in self.s.endpoints.values()
+            endpoint for endpoint in self._not_ignored_endpoints()
             if endpoint.state in ['mirroring', 'reinvestigating']])
         # mirror things in the order they got added to the queue
         queued_endpoints = sorted(
@@ -303,27 +306,26 @@ class Monitor:
             endpoint.p_prev_state = (endpoint.state, int(time.time()))
             self.s.mirror_endpoint(endpoint)
 
-        for endpoint in self.s.endpoints.values():
-            if not endpoint.ignore:
-                if self.s.sdnc:
-                    if endpoint.state == 'unknown':
-                        endpoint.p_next_state = 'mirror'
-                        endpoint.queue()  # pytype: disable=attribute-error
+        for endpoint in self._not_ignored_endpoints():
+            if self.s.sdnc:
+                if endpoint.state == 'unknown':
+                    endpoint.p_next_state = 'mirror'
+                    endpoint.queue()  # pytype: disable=attribute-error
+                    endpoint.p_prev_state = (endpoint.state, int(time.time()))
+                elif endpoint.state in ['mirroring', 'reinvestigating']:
+                    cur_time = int(time.time())
+                    # timeout after 2 times the reinvestigation frequency
+                    # in case something didn't report back, put back in an
+                    # unknown state
+                    if cur_time - endpoint.p_prev_state[1] > 2*self.controller['reinvestigation_frequency']:
+                        self.logger.debug(
+                            'timing out: {0} and setting to unknown'.format(endpoint.name))
+                        self.s.unmirror_endpoint(endpoint)
+                        endpoint.unknown()  # pytype: disable=attribute-error
                         endpoint.p_prev_state = (endpoint.state, int(time.time()))
-                    elif endpoint.state in ['mirroring', 'reinvestigating']:
-                        cur_time = int(time.time())
-                        # timeout after 2 times the reinvestigation frequency
-                        # in case something didn't report back, put back in an
-                        # unknown state
-                        if cur_time - endpoint.p_prev_state[1] > 2*self.controller['reinvestigation_frequency']:
-                            self.logger.debug(
-                                'timing out: {0} and setting to unknown'.format(endpoint.name))
-                            self.s.unmirror_endpoint(endpoint)
-                            endpoint.unknown()  # pytype: disable=attribute-error
-                            endpoint.p_prev_state = (endpoint.state, int(time.time()))
-                else:
-                    if endpoint.state != 'known':
-                        endpoint.known()  # pytype: disable=attribute-error
+            else:
+                if endpoint.state != 'known':
+                    endpoint.known()  # pytype: disable=attribute-error
 
     def schedule_coprocessing(self):
         queued_endpoints = [
