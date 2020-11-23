@@ -26,7 +26,6 @@ class Monitor:
     def __init__(self, logger, ctrl_c, controller=None):
         self.logger = logger
         self.ctrl_c = ctrl_c
-        self.faucet_event = []
         self.m_queue = queue.Queue()
         self.job_queue = queue.Queue()
         self.rabbits = []
@@ -145,7 +144,7 @@ class Monitor:
         self.prom.prom_metrics['last_rabbitmq_routing_key_time'].labels(
             routing_key=routing_key).set(time.time())
 
-    def format_rabbit_message(self, item):
+    def format_rabbit_message(self, item, faucet_event, remove_list):
         '''
         read a message off the rabbit_q
         the message should be item = (routing_key,msg)
@@ -163,7 +162,7 @@ class Monitor:
             if isinstance(data, dict):
                 if tool == 'p0f':
                     if self.s.prc.store_p0f_result(data):
-                        return (data, None)
+                        return data
                 elif tool == 'networkml':
                     self.s.prc.store_tool_result(my_obj, 'networkml')
                     for name, message in data.items():
@@ -177,26 +176,26 @@ class Monitor:
                             endpoint.p_next_state = None
                             endpoint.p_prev_state = (endpoint.state, int(time.time()))
                             if message.get('valid', False):
-                                return (data, None)
+                                return data
                             break
                         else:
                             self.logger.debug(
                                 'endpoint %s from networkml not found', name)
-            return ({}, None)
+            return {}
 
         def handler_action_ignore(my_obj):
             for name in my_obj:
                 endpoint = self.s.endpoints.get(name, None)
                 if endpoint:
                     endpoint.ignore = True
-            return ({}, None)
+            return {}
 
         def handler_action_clear_ignored(my_obj):
             for name in my_obj:
                 endpoint = self.s.endpoints.get(name, None)
                 if endpoint:
                     endpoint.ignore = False
-            return ({}, None)
+            return {}
 
         def handler_action_change(my_obj):
             for name, state in my_obj:
@@ -215,7 +214,7 @@ class Monitor:
                     except Exception as e:  # pragma: no cover
                         self.logger.error(
                             'Unable to change endpoint {0} because: {1}'.format(endpoint.name, str(e)))
-            return ({}, None)
+            return {}
 
         def handler_action_update_acls(my_obj):
             for ip in my_obj:
@@ -233,30 +232,30 @@ class Monitor:
                     except Exception as e:
                         self.logger.error(
                             'Unable to apply rules: {0} to endpoint: {1} because {2}'.format(rules, endpoint.name, str(e)))
-            return ({}, None)
+            return {}
 
         def handler_action_remove(my_obj):
-            remove_list = [name for name in my_obj]
-            return ({}, remove_list)
+            remove_list.extend([name for name in my_obj])
+            return {}
 
         def handler_action_remove_ignored(_my_obj):
-            remove_list = [
+            remove_list.extend([
                 endpoint.name for endpoint in self.s.endpoints.values()
-                if endpoint.ignore]
-            return ({}, remove_list)
+                if endpoint.ignore])
+            return {}
 
         def handler_action_remove_inactives(_my_obj):
-            remove_list = [
+            remove_list.extend([
                 endpoint.name for endpoint in self.s.endpoints.values()
-                if endpoint.state == 'inactive']
-            return ({}, remove_list)
+                if endpoint.state == 'inactive'])
+            return {}
 
         def handler_faucet_event(my_obj):
             if self.s and self.s.sdnc:
                 if not self.s.sdnc.ignore_event(my_obj):
-                    self.faucet_event.append(my_obj)
-                    return (my_obj, None)
-            return ({}, None)
+                    faucet_event.append(my_obj)
+                    return my_obj
+            return {}
 
         handlers = {
             'poseidon.algos.decider': handler_algos_decider,
@@ -275,15 +274,11 @@ class Monitor:
             self.logger.error(
                 'no handler for routing_key {0}'.format(routing_key))
         else:
-            ret_val, remove_list = handler(my_obj)
+            ret_val = handler(my_obj)
             self.update_routing_key_time(routing_key)
-            if remove_list:
-                for endpoint_name in remove_list:
-                    if endpoint_name in self.s.endpoints:
-                        del self.s.endpoints[endpoint_name]
-            return (ret_val, True)
+            return ret_val, True
 
-        return ({}, False)
+        return {}, False
 
     def schedule_mirroring(self):
         queued_endpoints = [
@@ -387,15 +382,20 @@ class Monitor:
     def process(self):
         signal.signal(signal.SIGINT, partial(self.signal_handler))
         while not self.ctrl_c['STOP']:
+            faucet_event = []
+            remove_list = []
             while True:
                 found_work, rabbit_msg = self.get_q_item(self.m_queue)
                 if not found_work:
                     break
-                self.format_rabbit_message(rabbit_msg)
+                self.format_rabbit_message(rabbit_msg, faucet_event, remove_list)
+            if remove_list:
+                for endpoint_name in remove_list:
+                    if endpoint_name in self.s.endpoints:
+                        del self.s.endpoints[endpoint_name]
             self.s.refresh_endpoints()
-            if self.faucet_event:
-                self.s.check_endpoints(self.faucet_event)
-                self.faucet_event = []
+            if faucet_event:
+                self.s.check_endpoints(faucet_event)
             found_work, schedule_func = self.get_q_item(self.job_queue)
             if found_work and callable(schedule_func):
                 self.logger.info('calling %s', schedule_func)
