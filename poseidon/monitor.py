@@ -102,8 +102,8 @@ class Monitor:
                 'Unable to get current state and send it to Prometheus because: {0}'.format(str(e)))
 
     def job_kickurl(self):
-        self.s.check_endpoints(messages=self.faucet_event)
-        del self.faucet_event[:]
+        self.s.check_endpoints(self.faucet_event)
+        self.faucet_event = []
         self._update_metrics()
 
     def job_reinvestigation(self):
