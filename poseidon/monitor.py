@@ -75,7 +75,6 @@ class Monitor:
             time.sleep(1)
         self.logger.debug('Threading stop:{0}'.format(
             threading.current_thread().getName()))
-        sys.exit()
 
     def rabbit_callback(self, ch, method, _properties, body, q=None):
         ''' callback, places rabbit data into internal queue'''
