@@ -172,7 +172,7 @@ def test_signal_handler():
     mock_monitor.logger = MockLogger().logger
     mock_monitor.rabbits.append(Rabbit())
 
-    mock_monitor.signal_handler(None, None, exit=False)
+    mock_monitor.signal_handler(None, None, sig_exit=False)
     assert ['job1 cancelled', 'job2 cancelled',
             'job3 cancelled'] == mock_monitor.schedule.call_log
     for rabbit in mock_monitor.rabbits:

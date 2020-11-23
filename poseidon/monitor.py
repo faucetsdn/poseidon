@@ -433,7 +433,7 @@ class Monitor:
         self.logger.debug('SHUTTING DOWN')
         self.logger.debug('EXITING')
 
-    def signal_handler(self, _signal, _frame, exit=True):
+    def signal_handler(self, _signal, _frame, sig_exit=True):
         ''' hopefully eat a CTRL_C and signal system shutdown '''
         self.ctrl_c['STOP'] = True
         self.logger.debug('CTRL-C: {0}'.format(self.ctrl_c))
@@ -442,5 +442,5 @@ class Monitor:
         except Exception as e:  # pragma: no cover
             self.logger.debug(
                 'Failed to handle signal properly because: {0}'.format(str(e)))
-        if exit:
+        if sig_exit:
             sys.exit(0)
