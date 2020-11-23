@@ -404,8 +404,6 @@ class Monitor:
                 self.logger.debug('%s done (%.1f sec)' % (schedule_func, time.time() - start_time))
             self.schedule_mirroring()
 
-        self.s.refresh_endpoints()
-
     def get_q_item(self, q, timeout=1):
         '''
         attempt to get a work item from the queue
@@ -426,6 +424,7 @@ class Monitor:
     def shutdown(self):
         ''' gracefully shut down. '''
         self.s.clear_filters()
+        self.s.refresh_endpoints()
         for job in self.schedule.jobs:
             self.logger.debug('shutdown :{0}'.format(job))
             self.schedule.cancel_job(job)
