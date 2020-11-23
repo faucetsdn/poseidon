@@ -269,14 +269,13 @@ class Monitor:
         }
 
         handler = handlers.get(routing_key, None)
-        if handler is None:
-            self.logger.error(
-                'no handler for routing_key {0}'.format(routing_key))
-        else:
+        if handler is not None:
             ret_val = handler(my_obj)
             self.update_routing_key_time(routing_key)
             return ret_val, True
 
+        self.logger.error(
+            'no handler for routing_key {0}'.format(routing_key))
         return {}, False
 
     def schedule_mirroring(self):
