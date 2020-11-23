@@ -14,6 +14,7 @@ from poseidon.constants import NO_DATA
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import endpoint_factory
 from poseidon.helpers.metadata import DNSResolver
+from poseidon.helpers.rabbit import Rabbit
 from poseidon.main import CTRL_C
 from poseidon.monitor import Monitor
 from poseidon.sdnconnect import SDNConnect
@@ -79,7 +80,7 @@ def test_check_endpoints():
     controller = get_test_controller()
     s = SDNConnect(controller, logger)
     s.sdnc = None
-    s.check_endpoints()
+    s.check_endpoints([])
 
 
 def test_endpoint_by_name():
@@ -154,6 +155,7 @@ def test_signal_handler():
             self.controller = get_test_controller()
             self.s = SDNConnect(self.controller, logger)
             self.ctrl_c = CTRL_C
+            self.rabbits = []
 
     class MockSchedule:
         call_log = []
@@ -167,16 +169,14 @@ def test_signal_handler():
 
     mock_monitor = MockMonitor()
     mock_monitor.schedule = MockSchedule()
-    mock_monitor.rabbit_channel_connection_local = MockRabbitConnection()
     mock_monitor.logger = MockLogger().logger
+    mock_monitor.rabbits.append(Rabbit())
 
-    # signal handler seem to simply exit and kill all the jobs no matter what
-    # we pass
-
-    mock_monitor.signal_handler(None, None)
+    mock_monitor.signal_handler(None, None, sig_exit=False)
     assert ['job1 cancelled', 'job2 cancelled',
             'job3 cancelled'] == mock_monitor.schedule.call_log
-    assert True == mock_monitor.rabbit_channel_connection_local.connection_closed
+    for rabbit in mock_monitor.rabbits:
+        assert not rabbit.connection
 
 
 def test_get_q_item():
@@ -235,59 +235,71 @@ def test_format_rabbit_message():
 
     mockMonitor = MockMonitor()
     mockMonitor.logger = MockLogger().logger
+    faucet_event = []
+    remove_list = []
 
     data = dict({'Key1': 'Val1'})
     message = ('poseidon.algos.decider', json.dumps(data))
-    retval, msg_valid = mockMonitor.format_rabbit_message(message)
+    retval, msg_valid = mockMonitor.format_rabbit_message(
+        message, faucet_event, remove_list)
     assert retval == {}
     assert msg_valid
 
     message = ('FAUCET.Event', json.dumps(data))
-    retval, msg_valid = mockMonitor.format_rabbit_message(message)
+    retval, msg_valid = mockMonitor.format_rabbit_message(
+        message, faucet_event, remove_list)
     assert retval == {'Key1': 'Val1'}
     assert msg_valid
-    assert mockMonitor.faucet_event == [{'Key1': 'Val1'}]
+    assert faucet_event == [{'Key1': 'Val1'}]
 
     message = (None, json.dumps(data))
-    retval, msg_valid = mockMonitor.format_rabbit_message(message)
+    retval, msg_valid = mockMonitor.format_rabbit_message(
+        message, faucet_event, remove_list)
     assert retval == {}
     assert not msg_valid
 
     data = dict({'foo': 'bar'})
     message = ('poseidon.action.ignore', json.dumps(data))
-    retval, msg_valid = mockMonitor.format_rabbit_message(message)
+    retval, msg_valid = mockMonitor.format_rabbit_message(
+        message, faucet_event, remove_list)
     assert retval == {}
     assert msg_valid
 
     message = ('poseidon.action.clear.ignored', json.dumps(data))
-    retval, msg_valid = mockMonitor.format_rabbit_message(message)
+    retval, msg_valid = mockMonitor.format_rabbit_message(
+        message, faucet_event, remove_list)
     assert retval == {}
     assert msg_valid
 
     message = ('poseidon.action.remove', json.dumps(data))
-    retval, msg_valid = mockMonitor.format_rabbit_message(message)
+    retval, msg_valid = mockMonitor.format_rabbit_message(
+        message, faucet_event, remove_list)
     assert retval == {}
     assert msg_valid
 
     message = ('poseidon.action.remove.ignored', json.dumps(data))
-    retval, msg_valid = mockMonitor.format_rabbit_message(message)
+    retval, msg_valid = mockMonitor.format_rabbit_message(
+        message, faucet_event, remove_list)
     assert retval == {}
     assert msg_valid
 
     message = ('poseidon.action.remove.inactives', json.dumps(data))
-    retval, msg_valid = mockMonitor.format_rabbit_message(message)
+    retval, msg_valid = mockMonitor.format_rabbit_message(
+        message, faucet_event, remove_list)
     assert retval == {}
     assert msg_valid
 
     ip_data = dict({'10.0.0.1': ['rule1']})
     message = ('poseidon.action.update_acls', json.dumps(ip_data))
-    retval, msg_valid = mockMonitor.format_rabbit_message(message)
+    retval, msg_valid = mockMonitor.format_rabbit_message(
+        message, faucet_event, remove_list)
     assert retval == {}
     assert msg_valid
 
     data = [('foo', 'unknown')]
     message = ('poseidon.action.change', json.dumps(data))
-    retval, msg_valid = mockMonitor.format_rabbit_message(message)
+    retval, msg_valid = mockMonitor.format_rabbit_message(
+        message, faucet_event, remove_list)
     assert retval == {}
     assert msg_valid
 
@@ -435,7 +447,7 @@ def test_process():
         def bad_get_q_item(self, q, timeout=1):
             return (False, ('bar', {'data': {}}))
 
-        def format_rabbit_message(self, item):
+        def format_rabbit_message(self, item, faucet_event, remove_list):
             return ({'data': {}}, False)
 
     mock_monitor = MockMonitor()

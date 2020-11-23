@@ -26,11 +26,9 @@ class Monitor:
     def __init__(self, logger, ctrl_c, controller=None):
         self.logger = logger
         self.ctrl_c = ctrl_c
-        self.faucet_event = []
         self.m_queue = queue.Queue()
         self.job_queue = queue.Queue()
-        self.rabbit_channel_connection_local = None
-        self.rabbit_channel_connection_local_fa = None
+        self.rabbits = []
 
         # get config options
         if controller is None:
@@ -77,7 +75,6 @@ class Monitor:
             time.sleep(1)
         self.logger.debug('Threading stop:{0}'.format(
             threading.current_thread().getName()))
-        sys.exit()
 
     def rabbit_callback(self, ch, method, _properties, body, q=None):
         ''' callback, places rabbit data into internal queue'''
@@ -103,8 +100,6 @@ class Monitor:
                 'Unable to get current state and send it to Prometheus because: {0}'.format(str(e)))
 
     def job_kickurl(self):
-        self.s.check_endpoints(messages=self.faucet_event)
-        del self.faucet_event[:]
         self._update_metrics()
 
     def job_reinvestigation(self):
@@ -148,7 +143,7 @@ class Monitor:
         self.prom.prom_metrics['last_rabbitmq_routing_key_time'].labels(
             routing_key=routing_key).set(time.time())
 
-    def format_rabbit_message(self, item):
+    def format_rabbit_message(self, item, faucet_event, remove_list):
         '''
         read a message off the rabbit_q
         the message should be item = (routing_key,msg)
@@ -166,7 +161,7 @@ class Monitor:
             if isinstance(data, dict):
                 if tool == 'p0f':
                     if self.s.prc.store_p0f_result(data):
-                        return (data, None)
+                        return data
                 elif tool == 'networkml':
                     self.s.prc.store_tool_result(my_obj, 'networkml')
                     for name, message in data.items():
@@ -180,26 +175,26 @@ class Monitor:
                             endpoint.p_next_state = None
                             endpoint.p_prev_state = (endpoint.state, int(time.time()))
                             if message.get('valid', False):
-                                return (data, None)
+                                return data
                             break
                         else:
                             self.logger.debug(
                                 'endpoint %s from networkml not found', name)
-            return ({}, None)
+            return {}
 
         def handler_action_ignore(my_obj):
             for name in my_obj:
                 endpoint = self.s.endpoints.get(name, None)
                 if endpoint:
                     endpoint.ignore = True
-            return ({}, None)
+            return {}
 
         def handler_action_clear_ignored(my_obj):
             for name in my_obj:
                 endpoint = self.s.endpoints.get(name, None)
                 if endpoint:
                     endpoint.ignore = False
-            return ({}, None)
+            return {}
 
         def handler_action_change(my_obj):
             for name, state in my_obj:
@@ -218,7 +213,7 @@ class Monitor:
                     except Exception as e:  # pragma: no cover
                         self.logger.error(
                             'Unable to change endpoint {0} because: {1}'.format(endpoint.name, str(e)))
-            return ({}, None)
+            return {}
 
         def handler_action_update_acls(my_obj):
             for ip in my_obj:
@@ -236,30 +231,30 @@ class Monitor:
                     except Exception as e:
                         self.logger.error(
                             'Unable to apply rules: {0} to endpoint: {1} because {2}'.format(rules, endpoint.name, str(e)))
-            return ({}, None)
+            return {}
 
         def handler_action_remove(my_obj):
-            remove_list = [name for name in my_obj]
-            return ({}, remove_list)
+            remove_list.extend([name for name in my_obj])
+            return {}
 
         def handler_action_remove_ignored(_my_obj):
-            remove_list = [
+            remove_list.extend([
                 endpoint.name for endpoint in self.s.endpoints.values()
-                if endpoint.ignore]
-            return ({}, remove_list)
+                if endpoint.ignore])
+            return {}
 
         def handler_action_remove_inactives(_my_obj):
-            remove_list = [
+            remove_list.extend([
                 endpoint.name for endpoint in self.s.endpoints.values()
-                if endpoint.state == 'inactive']
-            return ({}, remove_list)
+                if endpoint.state == 'inactive'])
+            return {}
 
         def handler_faucet_event(my_obj):
             if self.s and self.s.sdnc:
                 if not self.s.sdnc.ignore_event(my_obj):
-                    self.faucet_event.append(my_obj)
-                    return (my_obj, None)
-            return ({}, None)
+                    faucet_event.append(my_obj)
+                    return my_obj
+            return {}
 
         handlers = {
             'poseidon.algos.decider': handler_algos_decider,
@@ -274,26 +269,24 @@ class Monitor:
         }
 
         handler = handlers.get(routing_key, None)
-        if handler is None:
-            self.logger.error(
-                'no handler for routing_key {0}'.format(routing_key))
-        else:
-            ret_val, remove_list = handler(my_obj)
+        if handler is not None:
+            ret_val = handler(my_obj)
             self.update_routing_key_time(routing_key)
-            if remove_list:
-                for endpoint_name in remove_list:
-                    if endpoint_name in self.s.endpoints:
-                        del self.s.endpoints[endpoint_name]
-            return (ret_val, True)
+            return ret_val, True
 
-        return ({}, False)
+        self.logger.error(
+            'no handler for routing_key {0}'.format(routing_key))
+        return {}, False
+
+    def _not_ignored_endpoints(self):
+        return [endpoint for endpoint in self.s.endpoints.values() if not endpoint.ignore]
 
     def schedule_mirroring(self):
         queued_endpoints = [
-            endpoint for endpoint in self.s.endpoints.values()
-            if not endpoint.ignore and endpoint.state == 'queued' and endpoint.p_next_state != 'inactive']
+            endpoint for endpoint in self._not_ignored_endpoints()
+            if endpoint.state == 'queued' and endpoint.p_next_state != 'inactive']
         self.s.investigations = len([
-            endpoint for endpoint in self.s.endpoints.values()
+            endpoint for endpoint in self._not_ignored_endpoints()
             if endpoint.state in ['mirroring', 'reinvestigating']])
         # mirror things in the order they got added to the queue
         queued_endpoints = sorted(
@@ -313,27 +306,26 @@ class Monitor:
             endpoint.p_prev_state = (endpoint.state, int(time.time()))
             self.s.mirror_endpoint(endpoint)
 
-        for endpoint in self.s.endpoints.values():
-            if not endpoint.ignore:
-                if self.s.sdnc:
-                    if endpoint.state == 'unknown':
-                        endpoint.p_next_state = 'mirror'
-                        endpoint.queue()  # pytype: disable=attribute-error
+        for endpoint in self._not_ignored_endpoints():
+            if self.s.sdnc:
+                if endpoint.state == 'unknown':
+                    endpoint.p_next_state = 'mirror'
+                    endpoint.queue()  # pytype: disable=attribute-error
+                    endpoint.p_prev_state = (endpoint.state, int(time.time()))
+                elif endpoint.state in ['mirroring', 'reinvestigating']:
+                    cur_time = int(time.time())
+                    # timeout after 2 times the reinvestigation frequency
+                    # in case something didn't report back, put back in an
+                    # unknown state
+                    if cur_time - endpoint.p_prev_state[1] > 2*self.controller['reinvestigation_frequency']:
+                        self.logger.debug(
+                            'timing out: {0} and setting to unknown'.format(endpoint.name))
+                        self.s.unmirror_endpoint(endpoint)
+                        endpoint.unknown()  # pytype: disable=attribute-error
                         endpoint.p_prev_state = (endpoint.state, int(time.time()))
-                    elif endpoint.state in ['mirroring', 'reinvestigating']:
-                        cur_time = int(time.time())
-                        # timeout after 2 times the reinvestigation frequency
-                        # in case something didn't report back, put back in an
-                        # unknown state
-                        if cur_time - endpoint.p_prev_state[1] > 2*self.controller['reinvestigation_frequency']:
-                            self.logger.debug(
-                                'timing out: {0} and setting to unknown'.format(endpoint.name))
-                            self.s.unmirror_endpoint(endpoint)
-                            endpoint.unknown()  # pytype: disable=attribute-error
-                            endpoint.p_prev_state = (endpoint.state, int(time.time()))
-                else:
-                    if endpoint.state != 'known':
-                        endpoint.known()  # pytype: disable=attribute-error
+            else:
+                if endpoint.state != 'known':
+                    endpoint.known()  # pytype: disable=attribute-error
 
     def schedule_coprocessing(self):
         queued_endpoints = [
@@ -390,13 +382,20 @@ class Monitor:
     def process(self):
         signal.signal(signal.SIGINT, partial(self.signal_handler))
         while not self.ctrl_c['STOP']:
+            faucet_event = []
+            remove_list = []
             while True:
-                found_work, rabbit_msg = self.get_q_item(
-                    self.m_queue, timeout=0)
+                found_work, rabbit_msg = self.get_q_item(self.m_queue)
                 if not found_work:
                     break
-                self.format_rabbit_message(rabbit_msg)
+                self.format_rabbit_message(rabbit_msg, faucet_event, remove_list)
+            if remove_list:
+                for endpoint_name in remove_list:
+                    if endpoint_name in self.s.endpoints:
+                        del self.s.endpoints[endpoint_name]
             self.s.refresh_endpoints()
+            if faucet_event:
+                self.s.check_endpoints(faucet_event)
             found_work, schedule_func = self.get_q_item(self.job_queue)
             if found_work and callable(schedule_func):
                 self.logger.info('calling %s', schedule_func)
@@ -404,8 +403,6 @@ class Monitor:
                 schedule_func()
                 self.logger.debug('%s done (%.1f sec)' % (schedule_func, time.time() - start_time))
             self.schedule_mirroring()
-
-        self.s.refresh_endpoints()
 
     def get_q_item(self, q, timeout=1):
         '''
@@ -427,18 +424,16 @@ class Monitor:
     def shutdown(self):
         ''' gracefully shut down. '''
         self.s.clear_filters()
+        self.s.refresh_endpoints()
         for job in self.schedule.jobs:
             self.logger.debug('shutdown :{0}'.format(job))
             self.schedule.cancel_job(job)
-        if self.rabbit_channel_connection_local:
-            self.rabbit_channel_connection_local.close()
-        if self.rabbit_channel_connection_local_fa:
-            self.rabbit_channel_connection_local_fa.close()
+        for rabbit in self.rabbits:
+            rabbit.close()
         self.logger.debug('SHUTTING DOWN')
         self.logger.debug('EXITING')
-        sys.exit()
 
-    def signal_handler(self, _signal, _frame):
+    def signal_handler(self, _signal, _frame, sig_exit=True):
         ''' hopefully eat a CTRL_C and signal system shutdown '''
         self.ctrl_c['STOP'] = True
         self.logger.debug('CTRL-C: {0}'.format(self.ctrl_c))
@@ -447,3 +442,5 @@ class Monitor:
         except Exception as e:  # pragma: no cover
             self.logger.debug(
                 'Failed to handle signal properly because: {0}'.format(str(e)))
+        if sig_exit:
+            sys.exit(0)
