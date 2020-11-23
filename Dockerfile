@@ -6,7 +6,7 @@ ENV PYTHONUNBUFFERED 1
 COPY requirements.txt requirements.txt
 COPY healthcheck /healthcheck
 
-RUN apt-get update && apt-get install -y curl gcc g++ tini libyaml-dev && \
+RUN apt-get update && apt-get install -y --no-install-recommends curl gcc g++ tini libyaml-dev && \
   pip3 install --no-cache-dir -r requirements.txt && \
   pip3 install --no-cache-dir -r /healthcheck/requirements.txt && \
   apt-get purge -y gcc g++ python3-dev && apt -y autoremove --purge && rm -rf /var/cache/* /root/.cache/*
