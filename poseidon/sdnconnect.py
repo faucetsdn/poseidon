@@ -198,13 +198,9 @@ class SDNConnect:
                                 endpoints.append(endpoint)
         return endpoints
 
-    def check_endpoints(self, messages=None):
+    def check_endpoints(self, messages):
         if not self.sdnc:
             return
-
-        retval = {}
-        retval['machines'] = None
-        retval['resp'] = 'bad'
 
         current = None
         parsed = None
@@ -212,12 +208,9 @@ class SDNConnect:
         try:
             current = self.sdnc.get_endpoints(messages=messages)
             parsed = self.sdnc.format_endpoints(current)
-            retval['machines'] = parsed
-            retval['resp'] = 'ok'
         except Exception as e:  # pragma: no cover
             self.logger.error(
                 'Could not establish connection to controller because {0}.'.format(e))
-            retval['controller'] = 'Could not establish connection to controller'
 
         self.find_new_machines(parsed)
 
