@@ -102,8 +102,6 @@ class Monitor:
                 'Unable to get current state and send it to Prometheus because: {0}'.format(str(e)))
 
     def job_kickurl(self):
-        self.s.check_endpoints(self.faucet_event)
-        self.faucet_event = []
         self._update_metrics()
 
     def job_reinvestigation(self):
@@ -390,12 +388,14 @@ class Monitor:
         signal.signal(signal.SIGINT, partial(self.signal_handler))
         while not self.ctrl_c['STOP']:
             while True:
-                found_work, rabbit_msg = self.get_q_item(
-                    self.m_queue, timeout=0)
+                found_work, rabbit_msg = self.get_q_item(self.m_queue)
                 if not found_work:
                     break
                 self.format_rabbit_message(rabbit_msg)
             self.s.refresh_endpoints()
+            if self.faucet_event:
+                self.s.check_endpoints(self.faucet_event)
+                self.faucet_event = []
             found_work, schedule_func = self.get_q_item(self.job_queue)
             if found_work and callable(schedule_func):
                 self.logger.info('calling %s', schedule_func)
