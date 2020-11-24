@@ -113,7 +113,6 @@ class Monitor:
                     self.logger.info('Starting reinvestigation on: {0} {1}'.format(
                         chosen.name, chosen.state))
                     chosen.reinvestigate()  # pytype: disable=attribute-error
-                    chosen.p_prev_state = (chosen.state, int(time.time()))
                     self.s.mirror_endpoint(chosen)
 
         candidates = [
@@ -171,9 +170,8 @@ class Monitor:
                                 'processing networkml results for %s', name)
                             self.s.unmirror_endpoint(endpoint)
                             # pytype: disable=attribute-error
-                            endpoint.trigger('unknown')
+                            endpoint.unknown()
                             endpoint.p_next_state = None
-                            endpoint.p_prev_state = (endpoint.state, int(time.time()))
                             if message.get('valid', False):
                                 return data
                             break
@@ -207,7 +205,6 @@ class Monitor:
                         # pytype: disable=attribute-error
                         endpoint.trigger(state)
                         endpoint.p_next_state = None
-                        endpoint.p_prev_state = (endpoint.state, int(time.time()))
                         if endpoint.state == 'mirroring' or endpoint.state == 'reinvestigating':
                             self.s.mirror_endpoint(endpoint)
                     except Exception as e:  # pragma: no cover
@@ -290,7 +287,7 @@ class Monitor:
             if endpoint.state in ['mirroring', 'reinvestigating']])
         # mirror things in the order they got added to the queue
         queued_endpoints = sorted(
-            queued_endpoints, key=lambda x: x.p_prev_state[1])
+            queued_endpoints, key=lambda x: x.state_time())
 
         investigation_budget = max(
             self.controller['max_concurrent_reinvestigations'] -
@@ -303,7 +300,6 @@ class Monitor:
             # pytype: disable=attribute-error
             endpoint.trigger(endpoint.p_next_state)
             endpoint.p_next_state = None
-            endpoint.p_prev_state = (endpoint.state, int(time.time()))
             self.s.mirror_endpoint(endpoint)
 
         for endpoint in self._not_ignored_endpoints():
@@ -311,18 +307,16 @@ class Monitor:
                 if endpoint.state == 'unknown':
                     endpoint.p_next_state = 'mirror'
                     endpoint.queue()  # pytype: disable=attribute-error
-                    endpoint.p_prev_state = (endpoint.state, int(time.time()))
                 elif endpoint.state in ['mirroring', 'reinvestigating']:
                     cur_time = int(time.time())
                     # timeout after 2 times the reinvestigation frequency
                     # in case something didn't report back, put back in an
                     # unknown state
-                    if cur_time - endpoint.p_prev_state[1] > 2*self.controller['reinvestigation_frequency']:
+                    if cur_time - endpoint.state_time() > 2*self.controller['reinvestigation_frequency']:
                         self.logger.debug(
                             'timing out: {0} and setting to unknown'.format(endpoint.name))
                         self.s.unmirror_endpoint(endpoint)
                         endpoint.unknown()  # pytype: disable=attribute-error
-                        endpoint.p_prev_state = (endpoint.state, int(time.time()))
             else:
                 if endpoint.state != 'known':
                     endpoint.known()  # pytype: disable=attribute-error
