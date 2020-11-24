@@ -333,8 +333,6 @@ def test_get_prev_state():
     GetData._get_prev_state(endpoint)
     endpoint.queue()
     GetData._get_prev_state(endpoint)
-    endpoint.queue()
-    GetData._get_prev_state(endpoint)
 
 
 def test_get_history():
