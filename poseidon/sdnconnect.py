@@ -307,15 +307,9 @@ class SDNConnect:
                 if ep.state == 'inactive' and machine['active'] == 1:
                     ep.reactivate()
                 elif ep.state != 'inactive' and machine['active'] == 0:
-                    if ep.state in ['mirroring', 'reinvestigating']:
+                    if ep.mirror_active():
                         self.unmirror_endpoint(ep)
-                        if ep.state == 'mirroring':
-                            ep.p_next_state = 'mirror'
-                        elif ep.state == 'reinvestigating':
-                            ep.p_next_state = 'reinvestigate'
-                    if ep.state in ['known', 'abnormal']:
-                        ep.p_next_state = ep.state
-                    ep.inactive()  # pytype: disable=attribute-error
+                    ep.deactivate()
 
         if change_acls and self.controller['AUTOMATED_ACLS']:
             status = Actions(None, self.sdnc).update_acls(

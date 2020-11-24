@@ -137,6 +137,13 @@ class Endpoint:
     def state_time(self):
         return self.p_prev_state[1]
 
+    def state_age(self):
+        return int(time.time()) - self.state_time()
+
+    def queue_next(self, next_state):
+        self.p_next_state = next_state
+        self.queue()
+
     def trigger_next(self):
         if self.p_next_state:
             self.trigger(self.p_next_state)
@@ -147,6 +154,23 @@ class Endpoint:
             self.trigger_next()
         else:
             self.unknown()
+
+    def deactivate(self):
+        if self.state == 'mirroring':
+            self.p_next_state = 'mirror'
+        elif self.state == 'reinvestigating':
+            self.p_next_state = 'reinvestigate'
+        elif self.state in ['known', 'abnormal']:
+            self.p_next_state = self.state
+        self.inactive()
+
+    def mirror_active(self):
+        return self.state in ['mirroring', 'reinvestigating']
+
+    def mirror_requested(self, next_state=None):
+        if next_state is None:
+            next_state = self.p_next_state
+        return next_state in ['mirror', 'reinvestigate']
 
     def default(self):
         if not self.ignore:
