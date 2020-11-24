@@ -120,12 +120,12 @@ class GetData():
     def _get_first_seen(endpoint):
         # TODO this needs to be rewritten after history moves to prometheus
         return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
-            endpoint.p_prev_state[1])) + ' (' + duration(endpoint.p_prev_state[1]) + ')'
+            endpoint.state_time())) + ' (' + duration(endpoint.state_time()) + ')'
 
     @staticmethod
     def _get_last_seen(endpoint):
         return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
-            endpoint.p_prev_state[1])) + ' (' + duration(endpoint.p_prev_state[1]) + ')'
+            endpoint.state_time())) + ' (' + duration(endpoint.state_time()) + ')'
 
     @staticmethod
     def _get_newest_metadata(metadata):
@@ -237,7 +237,7 @@ class GetData():
         oldest_state = []
         output = NO_DATA
         if prev_state:
-           current_state = oldest_state = prev_state
+            current_state = oldest_state = prev_state
         else:
             return output
 

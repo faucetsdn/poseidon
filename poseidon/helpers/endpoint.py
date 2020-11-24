@@ -23,120 +23,85 @@ class HistoryTypes():
     COPRO_CHANGE = 'Coprocessor Change'
 
 
+def transit_wrap(trigger, source, dest, before=None, after=None):
+    transit_dict = {'trigger': trigger, 'source': source, 'dest': dest}
+    if before is not None:
+        transit_dict['before'] = before
+    if after is not None:
+        transit_dict['after'] = after
+    return transit_dict
+
+
+def endpoint_transit_wrap(trigger, source, dest):
+    return transit_wrap(trigger, source, dest, before='update_state_history')
+
+
+def endpoint_copro_transit_wrap(trigger, source, dest):
+    return transit_wrap(trigger, source, dest, before='update_copro_history')
+
+
 class Endpoint:
 
     states = ['known', 'unknown', 'mirroring', 'inactive', 'abnormal',
               'shutdown', 'reinvestigating', 'queued']
 
     transitions = [
-        {'trigger': 'mirror', 'source': 'unknown',
-            'dest': 'mirroring', 'before': 'update_state_history'},
-        {'trigger': 'queue', 'source': 'unknown',
-            'dest': 'queued', 'before': 'update_state_history'},
-        {'trigger': 'reinvestigate', 'source': 'known',
-            'dest': 'reinvestigating', 'before': 'update_state_history'},
-        {'trigger': 'queue', 'source': 'known',
-            'dest': 'queued', 'before': 'update_state_history'},
-        {'trigger': 'shutdown', 'source': 'abnormal',
-            'dest': 'shutdown', 'before': 'update_state_history'},
-        {'trigger': 'reinvestigate', 'source': 'abnormal',
-            'dest': 'reinvestigating', 'before': 'update_state_history'},
-        {'trigger': 'queue', 'source': 'abnormal',
-            'dest': 'queued', 'before': 'update_state_history'},
-        {'trigger': 'mirror', 'source': 'queued',
-            'dest': 'mirroring', 'before': 'update_state_history'},
-        {'trigger': 'reinvestigate', 'source': 'queued',
-            'dest': 'reinvestigating', 'before': 'update_state_history'},
-        # check all states and put into known/unknown/abnormal/inactive to account for external updates
-        {'trigger': 'known', 'source': 'known',
-            'dest': 'known', 'before': 'update_state_history'},
-        {'trigger': 'unknown', 'source': 'known',
-            'dest': 'unknown', 'before': 'update_state_history'},
-        {'trigger': 'abnormal', 'source': 'known',
-            'dest': 'abnormal', 'before': 'update_state_history'},
-        {'trigger': 'inactive', 'source': 'known',
-            'dest': 'inactive', 'before': 'update_state_history'},
-        {'trigger': 'known', 'source': 'unknown',
-            'dest': 'known', 'before': 'update_state_history'},
-        {'trigger': 'unknown', 'source': 'unknown',
-            'dest': 'unknown', 'before': 'update_state_history'},
-        {'trigger': 'abnormal', 'source': 'unknown',
-            'dest': 'abnormal', 'before': 'update_state_history'},
-        {'trigger': 'inactive', 'source': 'unknown',
-            'dest': 'inactive', 'before': 'update_state_history'},
-        {'trigger': 'known', 'source': 'mirroring',
-            'dest': 'known', 'before': 'update_state_history'},
-        {'trigger': 'unknown', 'source': 'mirroring',
-            'dest': 'unknown', 'before': 'update_state_history'},
-        {'trigger': 'abnormal', 'source': 'mirroring',
-            'dest': 'abnormal', 'before': 'update_state_history'},
-        {'trigger': 'inactive', 'source': 'mirroring',
-            'dest': 'inactive', 'before': 'update_state_history'},
-        {'trigger': 'known', 'source': 'inactive',
-            'dest': 'known', 'before': 'update_state_history'},
-        {'trigger': 'unknown', 'source': 'inactive',
-            'dest': 'unknown', 'before': 'update_state_history'},
-        {'trigger': 'abnormal', 'source': 'inactive',
-            'dest': 'abnormal', 'before': 'update_state_history'},
-        {'trigger': 'inactive', 'source': 'inactive',
-            'dest': 'inactive', 'before': 'update_state_history'},
-        {'trigger': 'known', 'source': 'abnormal',
-            'dest': 'known', 'before': 'update_state_history'},
-        {'trigger': 'unknown', 'source': 'abnormal',
-            'dest': 'unknown', 'before': 'update_state_history'},
-        {'trigger': 'abnormal', 'source': 'abnormal',
-            'dest': 'abnormal', 'before': 'update_state_history'},
-        {'trigger': 'inactive', 'source': 'abnormal',
-            'dest': 'inactive', 'before': 'update_state_history'},
-        {'trigger': 'known', 'source': 'shutdown',
-            'dest': 'known', 'before': 'update_state_history'},
-        {'trigger': 'unknown', 'source': 'shutdown',
-            'dest': 'unknown', 'before': 'update_state_history'},
-        {'trigger': 'abnormal', 'source': 'shutdown',
-            'dest': 'abnormal', 'before': 'update_state_history'},
-        {'trigger': 'inactive', 'source': 'shutdown',
-            'dest': 'inactive', 'before': 'update_state_history'},
-        {'trigger': 'known', 'source': 'reinvestigating',
-            'dest': 'known', 'before': 'update_state_history'},
-        {'trigger': 'unknown', 'source': 'reinvestigating',
-            'dest': 'unknown', 'before': 'update_state_history'},
-        {'trigger': 'abnormal', 'source': 'reinvestigating',
-            'dest': 'abnormal', 'before': 'update_state_history'},
-        {'trigger': 'inactive', 'source': 'reinvestigating',
-            'dest': 'inactive', 'before': 'update_state_history'},
-        {'trigger': 'known', 'source': 'queued',
-            'dest': 'known', 'before': 'update_state_history'},
-        {'trigger': 'unknown', 'source': 'queued',
-            'dest': 'unknown', 'before': 'update_state_history'},
-        {'trigger': 'abnormal', 'source': 'queued',
-            'dest': 'abnormal', 'before': 'update_state_history'},
-        {'trigger': 'inactive', 'source': 'queued',
-            'dest': 'inactive', 'before': 'update_state_history'}
+        endpoint_transit_wrap('mirror', 'unknown', 'mirroring'),
+        endpoint_transit_wrap('queue', 'unknown', 'queued'),
+        endpoint_transit_wrap('reinvestigate', 'known', 'reinvestigating'),
+        endpoint_transit_wrap('queue', 'known', 'queued'),
+        endpoint_transit_wrap('shutdown', 'abnormal', 'shutdown'),
+        endpoint_transit_wrap('reinvestigate', 'abnormal', 'reinvestigating'),
+        endpoint_transit_wrap('queue', 'abnormal', 'queued'),
+        endpoint_transit_wrap('mirror', 'queued', 'mirroring'),
+        endpoint_transit_wrap('reinvestigate', 'queued', 'reinvestigating'),
+        endpoint_transit_wrap('known', 'known', 'known'),
+        endpoint_transit_wrap('unknown', 'known', 'unknown'),
+        endpoint_transit_wrap('abnormal', 'known', 'abnormal'),
+        endpoint_transit_wrap('inactive', 'known', 'inactive'),
+        endpoint_transit_wrap('known', 'unknown', 'known'),
+        endpoint_transit_wrap('unknown', 'unknown', 'unknown'),
+        endpoint_transit_wrap('abnormal', 'unknown', 'abnormal'),
+        endpoint_transit_wrap('inactive', 'unknown', 'inactive'),
+        endpoint_transit_wrap('known', 'mirroring', 'known'),
+        endpoint_transit_wrap('unknown', 'mirroring', 'unknown'),
+        endpoint_transit_wrap('abnormal', 'mirroring', 'abnormal'),
+        endpoint_transit_wrap('inactive', 'mirroring', 'inactive'),
+        endpoint_transit_wrap('known', 'inactive', 'known'),
+        endpoint_transit_wrap('unknown', 'inactive', 'unknown'),
+        endpoint_transit_wrap('abnormal', 'inactive', 'abnormal'),
+        endpoint_transit_wrap('inactive', 'inactive', 'inactive'),
+        endpoint_transit_wrap('known', 'abnormal', 'known'),
+        endpoint_transit_wrap('unknown', 'abnormal', 'unknown'),
+        endpoint_transit_wrap('abnormal', 'abnormal', 'abnormal'),
+        endpoint_transit_wrap('inactive', 'abnormal', 'inactive'),
+        endpoint_transit_wrap('known', 'shutdown', 'known'),
+        endpoint_transit_wrap('unknown', 'shutdown', 'unknown'),
+        endpoint_transit_wrap('abnormal', 'shutdown', 'abnormal'),
+        endpoint_transit_wrap('inactive', 'shutdown', 'inactive'),
+        endpoint_transit_wrap('known', 'reinvestigating', 'known'),
+        endpoint_transit_wrap('unknown', 'reinvestigating', 'unknown'),
+        endpoint_transit_wrap('abnormal', 'reinvestigating', 'abnormal'),
+        endpoint_transit_wrap('inactive', 'reinvestigating', 'inactive'),
+        endpoint_transit_wrap('known', 'queued', 'known'),
+        endpoint_transit_wrap('unknown', 'queued', 'unknown'),
+        endpoint_transit_wrap('abnormal', 'queued', 'abnormal'),
+        endpoint_transit_wrap('inactive', 'queued', 'inactive'),
     ]
 
     copro_states = ['copro_unknown', 'copro_coprocessing',
                     'copro_nominal', 'copro_suspicious', 'copro_queued']
 
     copro_transitions = [
-        {'trigger': 'copro_coprocess', 'source': 'copro_unknown',
-            'dest': 'copro_coprocessing', 'before': 'update_copro_history'},
-        {'trigger': 'copro_queue', 'source': 'copro_unknown',
-            'dest': 'copro_queued', 'before': 'update_copro_history'},
-        {'trigger': 'copro_coprocess', 'source': 'copro_queued',
-            'dest': 'copro_coprocessing', 'before': 'update_copro_history'},
-        {'trigger': 'copro_nominal', 'source': 'copro_coprocessing',
-            'dest': 'copro_nominal', 'before': 'update_copro_history'},
-        {'trigger': 'copro_suspicious', 'source': 'copro_coprocessing',
-            'dest': 'copro_suspicious', 'before': 'update_copro_history'},
-        {'trigger': 'copro_queue', 'source': 'copro_nominal',
-            'dest': 'copro_queued', 'before': 'update_copro_history'},
-        {'trigger': 'copro_coprocess', 'source': 'copro_nominal',
-            'dest': 'copro_coprocessing', 'before': 'update_copro_history'},
-        {'trigger': 'copro_queue', 'source': 'copro_suspicious',
-            'dest': 'copro_queued', 'before': 'update_copro_history'},
-        {'trigger': 'copro_coprocess', 'source': 'copro_suspicious',
-            'dest': 'copro_coprocessing', 'before': 'update_copro_history'},
-
+        endpoint_copro_transit_wrap('copro_coprocess', 'copro_unknown', 'copro_coprocessing'),
+        endpoint_copro_transit_wrap('copro_queue', 'copro_unknown', 'copro_queued'),
+        endpoint_copro_transit_wrap('copro_coprocess', 'copro_queued', 'copro_coprocessing'),
+        endpoint_copro_transit_wrap('copro_nominal', 'copro_coprocessing', 'copro_nominal'),
+        endpoint_copro_transit_wrap('copro_suspicious', 'copro_coprocessing', 'copro_suspicious'),
+        endpoint_copro_transit_wrap('copro_queue', 'copro_nominal', 'copro_queued'),
+        endpoint_copro_transit_wrap('copro_coprocess', 'copro_nominal', 'copro_coprocessing'),
+        endpoint_copro_transit_wrap('copro_queue', 'copro_suspicious', 'copro_queued'),
+        endpoint_copro_transit_wrap('copro_coprocess', 'copro_suspicious', 'copro_coprocessing'),
     ]
 
     def __init__(self, hashed_val):
@@ -169,6 +134,58 @@ class Endpoint:
         }
         return str(json.dumps(endpoint_d))
 
+    def state_time(self):
+        return self.p_prev_state[1]
+
+    def state_age(self):
+        return int(time.time()) - self.state_time()
+
+    def queue_next(self, next_state):
+        self.p_next_state = next_state
+        self.queue()  # pytype: disable=attribute-error
+
+    def trigger_next(self):
+        if self.p_next_state:
+            self.trigger(self.p_next_state)  # pytype: disable=attribute-error
+            self.p_next_state = None
+
+    def reactivate(self):
+        if self.p_next_state in ['known', 'abnormal']:
+            self.trigger_next()
+        else:
+            self.unknown()  # pytype: disable=attribute-error
+
+    def deactivate(self):
+        if self.state == 'mirroring':
+            self.p_next_state = 'mirror'
+        elif self.state == 'reinvestigating':
+            self.p_next_state = 'reinvestigate'
+        elif self.state in ['known', 'abnormal']:
+            self.p_next_state = self.state
+        self.inactive()  # pytype: disable=attribute-error
+
+    def mirror_active(self):
+        return self.state in ['mirroring', 'reinvestigating']
+
+    def mirror_requested(self, next_state=None):
+        if next_state is None:
+            next_state = self.p_next_state
+        return next_state in ['mirror', 'reinvestigate']
+
+    def default(self):
+        if not self.ignore:
+            if self.state != 'inactive':
+                if self.state == 'mirroring':
+                    self.p_next_state = 'mirror'
+                elif self.state == 'reinvestigating':
+                    self.p_next_state = 'reinvestigate'
+                elif self.state == 'queued':
+                    self.p_next_state = 'queue'
+                elif self.state in ['known', 'abnormal']:
+                    self.p_next_state = self.state
+                self.endpoint_data['active'] = 0
+                self.inactive()  # pytype: disable=attribute-error
+
     def _add_history_entry(self, entry_type, timestamp, message):
         self.history.append(
             {'type': entry_type, 'timestamp': timestamp, 'message': message})
@@ -197,9 +214,11 @@ class Endpoint:
                                 'Property {0} changed from {1} to {2}'.format(field_name, old_value, new_value))
 
     def update_state_history(self, event_data):
+        self.p_prev_state = (event_data.transition.dest, int(time.time()))
         self._add_history_entry(
             HistoryTypes.STATE_CHANGE, time.time(),
-            'State changed from {0} to {1}'.format(event_data.transition.source, event_data.transition.dest))
+            'State changed from {0} to {1}'.format(
+                event_data.transition.source, event_data.transition.dest))
 
     @staticmethod
     def make_hash(machine, trunk=False):
