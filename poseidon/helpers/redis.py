@@ -117,13 +117,11 @@ class PoseidonRedisClient:
         labels = classification.get('labels', [])
         confidences = classification.get('confidences', [])
         decisions = results.get('decisions', {})
-        behavior = decisions.get('behavior', None)
         pcap_labels = results.get('pcap_labels', None)
         if labels and confidences:
             return {
                 'labels': labels,
                 'confidences': confidences,
-                'behavior': behavior,
                 'pcap_labels': pcap_labels}
         return {}
 
@@ -215,7 +213,6 @@ class PoseidonRedisClient:
     def update_history(endpoint, mac_addresses, ipv4_addresses, ipv6_addresses):
         # list of fields to make history entries for, along with entry type for that field
         fields = [
-            {'field_name': 'behavior', 'entry_type': HistoryTypes.PROPERTY_CHANGE},
             {'field_name': 'ipv4_OS', 'entry_type': HistoryTypes.PROPERTY_CHANGE},
             {'field_name': 'ipv6_OS', 'entry_type': HistoryTypes.PROPERTY_CHANGE},
         ]

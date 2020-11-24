@@ -117,21 +117,6 @@ class ACLs:
                                             match = True
                     if match:
                         matches += 1
-                elif rule_data['device_key'] == 'behavior':
-                    match = False
-                    if 'mac_addresses' in endpoint.metadata:
-                        for mac, mac_metadata in endpoint.metadata['mac_addresses'].items():
-                            most_recent = 0
-                            for record in mac_metadata:
-                                if float(record) > most_recent:
-                                    most_recent = float(record)
-                            most_recent = str(most_recent)
-                            if most_recent != '0' and most_recent in mac_metadata and 'behavior' in mac_metadata[most_recent] and mac_metadata[most_recent]['behavior'] == rule_data['value']:
-                                self.logger.info('Behavior match: {0} {1}, rule: {2}'.format(
-                                    mac, rule_data['value'], rule))
-                                match = True
-                    if match:
-                        matches += 1
         if matches == len(rules[rule]) or (force_apply_rules and rule in force_apply_rules):
             rule_acls = []
             for r in rules[rule]:

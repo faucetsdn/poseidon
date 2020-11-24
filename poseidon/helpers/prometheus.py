@@ -22,16 +22,6 @@ class Prometheus():
                                               'Number of endpoints that are inactive')
         self.prom_metrics['active'] = Gauge('poseidon_endpoint_active',
                                             'Number of endpoints that are active')
-        self.prom_metrics['behavior'] = Gauge('poseidon_endpoint_behavior',
-                                              'Behavior of an endpoint, 0 is normal, 1 is abnormal',
-                                              ['ipv4',
-                                               'mac',
-                                               'tenant',
-                                               'segment',
-                                               'port',
-                                               'role',
-                                               'ipv4_os',
-                                               'source'])
         self.prom_metrics['ipv4_table'] = Gauge('poseidon_endpoint_ip_table',
                                                 'IP Table',
                                                 ['mac',
@@ -82,7 +72,6 @@ class Prometheus():
                                       ('Poseidon', 'mirroring'): 0,
                                       ('Poseidon', 'shutdown'): 0,
                                       ('Poseidon', 'queued'): 0,
-                                      ('Poseidon', 'abnormal'): 0,
                                       ('Poseidon', 'reinvestigating'): 0},
                    'vlans': {},
                    'sources': {},
@@ -184,14 +173,6 @@ class Prometheus():
 
             try:
                 if host['active'] == 1:
-                    self.prom_metrics['behavior'].labels(ipv4=host['ipv4'],
-                                                         mac=host['mac'],
-                                                         tenant=host['tenant'],
-                                                         segment=host['segment'],
-                                                         port=host['port'],
-                                                         role=host['role'],
-                                                         ipv4_os=host['ipv4_os'],
-                                                         source=host['source']).set(host['behavior'])
                     self.prom_metrics['ipv4_table'].labels(mac=host['mac'],
                                                            tenant=host['tenant'],
                                                            segment=host['segment'],

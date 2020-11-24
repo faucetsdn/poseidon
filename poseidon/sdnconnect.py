@@ -152,7 +152,7 @@ class SDNConnect:
                         endpoints.append(endpoint)
                     elif endpoint.state == arg:
                         endpoints.append(endpoint)
-                elif show_type in ['os', 'behavior', 'role']:
+                elif show_type in ['os', 'role']:
                     mac_addresses = endpoint.metadata.get(
                         'mac_addresses', None)
                     endpoint_mac = endpoint.endpoint_data['mac']
@@ -167,9 +167,6 @@ class SDNConnect:
                         if newest:
                             if 'labels' in newest:
                                 if arg.replace('-', ' ') == newest['labels'][0].lower():
-                                    endpoints.append(endpoint)
-                            if 'behavior' in newest:
-                                if arg == newest['behavior'].lower():
                                     endpoints.append(endpoint)
 
                     # filter by operating system
