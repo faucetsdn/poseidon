@@ -81,6 +81,8 @@ class Rabbit:
     def start_channel(self, mycallback, m_queue):
         ''' handle threading for messagetype '''
         self.logger.debug('about to start channel {0}'.format(self.channel))
-        self.channel.basic_consume(self.queue_name, partial(mycallback, q=m_queue))
-        self.mq_recv_thread = threading.Thread(target=self.channel.start_consuming)
+        self.channel.basic_consume(
+            self.queue_name, partial(mycallback, q=m_queue))
+        self.mq_recv_thread = threading.Thread(
+            target=self.channel.start_consuming)
         self.mq_recv_thread.start()

@@ -93,15 +93,24 @@ class Endpoint:
                     'copro_nominal', 'copro_suspicious', 'copro_queued']
 
     copro_transitions = [
-        endpoint_copro_transit_wrap('copro_coprocess', 'copro_unknown', 'copro_coprocessing'),
-        endpoint_copro_transit_wrap('copro_queue', 'copro_unknown', 'copro_queued'),
-        endpoint_copro_transit_wrap('copro_coprocess', 'copro_queued', 'copro_coprocessing'),
-        endpoint_copro_transit_wrap('copro_nominal', 'copro_coprocessing', 'copro_nominal'),
-        endpoint_copro_transit_wrap('copro_suspicious', 'copro_coprocessing', 'copro_suspicious'),
-        endpoint_copro_transit_wrap('copro_queue', 'copro_nominal', 'copro_queued'),
-        endpoint_copro_transit_wrap('copro_coprocess', 'copro_nominal', 'copro_coprocessing'),
-        endpoint_copro_transit_wrap('copro_queue', 'copro_suspicious', 'copro_queued'),
-        endpoint_copro_transit_wrap('copro_coprocess', 'copro_suspicious', 'copro_coprocessing'),
+        endpoint_copro_transit_wrap(
+            'copro_coprocess', 'copro_unknown', 'copro_coprocessing'),
+        endpoint_copro_transit_wrap(
+            'copro_queue', 'copro_unknown', 'copro_queued'),
+        endpoint_copro_transit_wrap(
+            'copro_coprocess', 'copro_queued', 'copro_coprocessing'),
+        endpoint_copro_transit_wrap(
+            'copro_nominal', 'copro_coprocessing', 'copro_nominal'),
+        endpoint_copro_transit_wrap(
+            'copro_suspicious', 'copro_coprocessing', 'copro_suspicious'),
+        endpoint_copro_transit_wrap(
+            'copro_queue', 'copro_nominal', 'copro_queued'),
+        endpoint_copro_transit_wrap(
+            'copro_coprocess', 'copro_nominal', 'copro_coprocessing'),
+        endpoint_copro_transit_wrap(
+            'copro_queue', 'copro_suspicious', 'copro_queued'),
+        endpoint_copro_transit_wrap(
+            'copro_coprocess', 'copro_suspicious', 'copro_coprocessing'),
     ]
 
     def __init__(self, hashed_val):

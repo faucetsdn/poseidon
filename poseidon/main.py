@@ -7,6 +7,7 @@ Created on 3 December 2018
 @author: Charlie Lewis
 """
 import logging
+
 from poseidon.helpers.log import Logger
 from poseidon.helpers.rabbit import Rabbit
 from poseidon.monitor import Monitor

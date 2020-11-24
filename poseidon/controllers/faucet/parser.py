@@ -3,11 +3,12 @@
 Created on 19 November 2017
 @author: Charlie Lewis
 """
-from collections import defaultdict
 import logging
+from collections import defaultdict
 
 from poseidon.controllers.faucet.acls import ACLs
-from poseidon.controllers.faucet.config import FaucetLocalConfGetSetter, FaucetRemoteConfGetSetter
+from poseidon.controllers.faucet.config import FaucetLocalConfGetSetter
+from poseidon.controllers.faucet.config import FaucetRemoteConfGetSetter
 from poseidon.controllers.faucet.helpers import parse_rules
 from poseidon.volos.acls import Acl
 
@@ -187,7 +188,8 @@ class Parser:
             elif action == 'unmirror':
                 self.mirror_counts[mirror_key] -= 1
                 if not self.mirror_counts[mirror_key]:
-                    self.logger.info(f'removing last remaining mirror on {switch}:{mirror_port}')
+                    self.logger.info(
+                        f'removing last remaining mirror on {switch}:{mirror_port}')
                     self._unmirror_port(switch, mirror_port, port)
         else:
             self.logger.error(

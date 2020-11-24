@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 import json
 import queue
 import random
@@ -380,7 +379,8 @@ class Monitor:
                 found_work, rabbit_msg = self.get_q_item(self.m_queue)
                 if not found_work:
                     break
-                self.format_rabbit_message(rabbit_msg, faucet_event, remove_list)
+                self.format_rabbit_message(
+                    rabbit_msg, faucet_event, remove_list)
             if remove_list:
                 for endpoint_name in remove_list:
                     if endpoint_name in self.s.endpoints:
@@ -393,7 +393,8 @@ class Monitor:
                 self.logger.info('calling %s', schedule_func)
                 start_time = time.time()
                 schedule_func()
-                self.logger.debug('%s done (%.1f sec)' % (schedule_func, time.time() - start_time))
+                self.logger.debug('%s done (%.1f sec)' %
+                                  (schedule_func, time.time() - start_time))
             self.schedule_mirroring()
 
     def get_q_item(self, q, timeout=1):

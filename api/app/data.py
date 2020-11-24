@@ -125,13 +125,17 @@ class Nodes:
                                 if isinstance(ipv, str) and ipv != 'None' and ipv:
                                     subnet_key = '%s_subnet' % ip_field
                                     if subnet_key in node:
-                                        subnet = ipaddress.ip_network(ipv).supernet(new_prefix=prefix)
+                                        subnet = ipaddress.ip_network(
+                                            ipv).supernet(new_prefix=prefix)
                                         node[subnet_key] = str(subnet)
-                                    ip_info = self.r.hgetall('_'.join(('p0f', ipv)))
+                                    ip_info = self.r.hgetall(
+                                        '_'.join(('p0f', ipv)))
                                     if ip_info and 'short_os' in ip_info:
-                                        node['%s_os' % ip_field] = ip_info['short_os']
+                                        node['%s_os' %
+                                             ip_field] = ip_info['short_os']
                     except Exception as e:  # pragma: no cover
-                        print('Failed to set all poseidon info because: {0}'.format(str(e)))
+                        print(
+                            'Failed to set all poseidon info because: {0}'.format(str(e)))
 
                 # grab ml results
                 if 'role' in node:
@@ -143,15 +147,19 @@ class Nodes:
                                 '_'.join(('networkml', mac, str(timestamps[-1]))))
                             for _poseidon_hash, raw_results in ml_info.items():
                                 results = ast.literal_eval(raw_results)
-                                classification = results.get('classification', {})
+                                classification = results.get(
+                                    'classification', {})
                                 labels = classification.get('labels', None)
-                                confidences = classification.get('confidences', None)
+                                confidences = classification.get(
+                                    'confidences', None)
                                 if labels:
                                     node['role'] = labels[0]
                                 if confidences:
-                                    node['role_confidence'] = int(confidences[0] * 100)
+                                    node['role_confidence'] = int(
+                                        confidences[0] * 100)
                         except Exception as e:  # pragma: no cover
-                            print('Failed to set all ML info because: {0}'.format(str(e)))
+                            print(
+                                'Failed to set all ML info because: {0}'.format(str(e)))
                 if should_append:
                     self.nodes.append(node)
 
