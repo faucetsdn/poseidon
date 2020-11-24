@@ -298,8 +298,7 @@ class Monitor:
 
         for endpoint in queued_endpoints[:investigation_budget]:
             # pytype: disable=attribute-error
-            endpoint.trigger(endpoint.p_next_state)
-            endpoint.p_next_state = None
+            endpoint.trigger_next()
             self.s.mirror_endpoint(endpoint)
 
         for endpoint in self._not_ignored_endpoints():

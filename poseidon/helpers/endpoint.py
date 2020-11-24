@@ -137,6 +137,17 @@ class Endpoint:
     def state_time(self):
         return self.p_prev_state[1]
 
+    def trigger_next(self):
+        if self.p_next_state:
+            self.trigger(self.p_next_state)
+            self.p_next_state = None
+
+    def reactivate(self):
+        if self.p_next_state in ['known', 'abnormal']:
+            self.trigger_next()
+        else:
+            self.unknown()
+
     def default(self):
         if not self.ignore:
             if self.state != 'inactive':

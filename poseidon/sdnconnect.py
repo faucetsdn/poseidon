@@ -305,11 +305,7 @@ class SDNConnect:
                 change_acls = True
                 ep.endpoint_data = deepcopy(machine)
                 if ep.state == 'inactive' and machine['active'] == 1:
-                    if ep.p_next_state in ['known', 'abnormal']:
-                        # pytype: disable=attribute-error
-                        ep.trigger(ep.p_next_state)
-                    else:
-                        ep.unknown()  # pytype: disable=attribute-error
+                    ep.reactivate()
                 elif ep.state != 'inactive' and machine['active'] == 0:
                     if ep.state in ['mirroring', 'reinvestigating']:
                         self.unmirror_endpoint(ep)
