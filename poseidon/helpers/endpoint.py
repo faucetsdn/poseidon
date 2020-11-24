@@ -138,18 +138,18 @@ class Endpoint:
         return self.p_prev_state[1]
 
     def default(self):
-            if not self.ignore:
-                if self.state != 'inactive':
-                    if self.state == 'mirroring':
-                        self.p_next_state = 'mirror'
-                    elif self.state == 'reinvestigating':
-                        self.p_next_state = 'reinvestigate'
-                    elif self.state == 'queued':
-                        self.p_next_state = 'queue'
-                    elif self.state in ['known', 'abnormal']:
-                        self.p_next_state = self.state
-                    self.endpoint_data['active'] = 0
-                    self.inactive()  # pytype: disable=attribute-error
+        if not self.ignore:
+            if self.state != 'inactive':
+                if self.state == 'mirroring':
+                    self.p_next_state = 'mirror'
+                elif self.state == 'reinvestigating':
+                    self.p_next_state = 'reinvestigate'
+                elif self.state == 'queued':
+                    self.p_next_state = 'queue'
+                elif self.state in ['known', 'abnormal']:
+                    self.p_next_state = self.state
+                self.endpoint_data['active'] = 0
+                self.inactive()  # pytype: disable=attribute-error
 
     def _add_history_entry(self, entry_type, timestamp, message):
         self.history.append(
