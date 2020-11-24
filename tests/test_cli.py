@@ -331,9 +331,9 @@ def test_get_prev_state():
     assert prev_state == NO_DATA
     endpoint.unknown()
     GetData._get_prev_state(endpoint)
-    endpoint.queued()
+    endpoint.queue()
     GetData._get_prev_state(endpoint)
-    endpoint.queued()
+    endpoint.queue()
     GetData._get_prev_state(endpoint)
 
 

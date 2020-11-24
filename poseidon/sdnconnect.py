@@ -71,18 +71,7 @@ class SDNConnect:
         ''' set endpoints to default state. '''
         self.get_stored_endpoints()
         for endpoint in self.endpoints.values():
-            if not endpoint.ignore:
-                if endpoint.state != 'inactive':
-                    if endpoint.state == 'mirroring':
-                        endpoint.p_next_state = 'mirror'
-                    elif endpoint.state == 'reinvestigating':
-                        endpoint.p_next_state = 'reinvestigate'
-                    elif endpoint.state == 'queued':
-                        endpoint.p_next_state = 'queue'
-                    elif endpoint.state in ['known', 'abnormal']:
-                        endpoint.p_next_state = endpoint.state
-                    endpoint.endpoint_data['active'] = 0
-                    endpoint.inactive()  # pytype: disable=attribute-error
+            endpoint.default()
         self.store_endpoints()
 
     def get_stored_endpoints(self):
