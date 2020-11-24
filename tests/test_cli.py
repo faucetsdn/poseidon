@@ -33,7 +33,6 @@ def test_poseidonshell():
     shell.show_role('foo', [])
     shell.show_state('foo', [])
     shell.show_acls('foo', [])
-    shell.show_behavior('foo', [])
     shell.show_os('foo', [])
     shell.show_what('foo', [])
     shell.show_history('foo', [])
@@ -64,7 +63,7 @@ def test_check_flags():
         'State', 'Next State', 'First Seen', 'Last Seen',
         'Previous States', 'IPv4 OS\n(p0f)', 'IPv6 OS\n(p0f)', 'Previous IPv4 OSes\n(p0f)',
         'Previous IPv6 OSes\n(p0f)', 'Role\n(NetworkML)', 'Role Confidence\n(NetworkML)', 'Previous Roles\n(NetworkML)',
-        'Previous Role Confidences\n(NetworkML)', 'Behavior\n(NetworkML)', 'Previous Behaviors\n(NetworkML)',
+        'Previous Role Confidences\n(NetworkML)',
         'IPv4 rDNS', 'IPv6 rDNS', 'SDN Controller Type', 'SDN Controller URI', 'History', 'ACL History', 'Pcap labels',
     ]
     expected_fields = ['ID', 'MAC Address', 'Switch', 'Port', 'VLAN', 'IPv4']
@@ -411,19 +410,6 @@ def test_get_role_confidence():
     assert confidence == '10.0'
 
 
-def test_get_behavior():
-    endpoint = endpoint_factory('foo')
-    endpoint.endpoint_data = {
-        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
-    endpoint.metadata = {'mac_addresses': {}}
-    behavior = GetData._get_behavior(endpoint)
-    assert behavior == NO_DATA
-    endpoint.metadata = {'mac_addresses': {
-        '00:00:00:00:00:00': {'1551711125': {'behavior': 'abnormal'}}}}
-    behavior = GetData._get_behavior(endpoint)
-    assert behavior == 'abnormal'
-
-
 def test_get_prev_roles():
     endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
@@ -436,13 +422,6 @@ def test_get_prev_role_confidences():
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
     GetData._get_prev_role_confidences(endpoint)
-
-
-def test_get_prev_behaviors():
-    endpoint = endpoint_factory('foo')
-    endpoint.endpoint_data = {
-        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
-    GetData._get_prev_behaviors(endpoint)
 
 
 def test_get_prev_ipv4_oses():

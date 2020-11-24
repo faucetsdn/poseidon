@@ -42,7 +42,7 @@ def endpoint_copro_transit_wrap(trigger, source, dest):
 
 class Endpoint:
 
-    states = ['known', 'unknown', 'mirroring', 'inactive', 'abnormal',
+    states = ['known', 'unknown', 'mirroring', 'inactive',
               'shutdown', 'reinvestigating', 'queued']
 
     transitions = [
@@ -50,42 +50,28 @@ class Endpoint:
         endpoint_transit_wrap('queue', 'unknown', 'queued'),
         endpoint_transit_wrap('reinvestigate', 'known', 'reinvestigating'),
         endpoint_transit_wrap('queue', 'known', 'queued'),
-        endpoint_transit_wrap('shutdown', 'abnormal', 'shutdown'),
-        endpoint_transit_wrap('reinvestigate', 'abnormal', 'reinvestigating'),
-        endpoint_transit_wrap('queue', 'abnormal', 'queued'),
         endpoint_transit_wrap('mirror', 'queued', 'mirroring'),
         endpoint_transit_wrap('reinvestigate', 'queued', 'reinvestigating'),
         endpoint_transit_wrap('known', 'known', 'known'),
         endpoint_transit_wrap('unknown', 'known', 'unknown'),
-        endpoint_transit_wrap('abnormal', 'known', 'abnormal'),
         endpoint_transit_wrap('inactive', 'known', 'inactive'),
         endpoint_transit_wrap('known', 'unknown', 'known'),
         endpoint_transit_wrap('unknown', 'unknown', 'unknown'),
-        endpoint_transit_wrap('abnormal', 'unknown', 'abnormal'),
         endpoint_transit_wrap('inactive', 'unknown', 'inactive'),
         endpoint_transit_wrap('known', 'mirroring', 'known'),
         endpoint_transit_wrap('unknown', 'mirroring', 'unknown'),
-        endpoint_transit_wrap('abnormal', 'mirroring', 'abnormal'),
         endpoint_transit_wrap('inactive', 'mirroring', 'inactive'),
         endpoint_transit_wrap('known', 'inactive', 'known'),
         endpoint_transit_wrap('unknown', 'inactive', 'unknown'),
-        endpoint_transit_wrap('abnormal', 'inactive', 'abnormal'),
         endpoint_transit_wrap('inactive', 'inactive', 'inactive'),
-        endpoint_transit_wrap('known', 'abnormal', 'known'),
-        endpoint_transit_wrap('unknown', 'abnormal', 'unknown'),
-        endpoint_transit_wrap('abnormal', 'abnormal', 'abnormal'),
-        endpoint_transit_wrap('inactive', 'abnormal', 'inactive'),
         endpoint_transit_wrap('known', 'shutdown', 'known'),
         endpoint_transit_wrap('unknown', 'shutdown', 'unknown'),
-        endpoint_transit_wrap('abnormal', 'shutdown', 'abnormal'),
         endpoint_transit_wrap('inactive', 'shutdown', 'inactive'),
         endpoint_transit_wrap('known', 'reinvestigating', 'known'),
         endpoint_transit_wrap('unknown', 'reinvestigating', 'unknown'),
-        endpoint_transit_wrap('abnormal', 'reinvestigating', 'abnormal'),
         endpoint_transit_wrap('inactive', 'reinvestigating', 'inactive'),
         endpoint_transit_wrap('known', 'queued', 'known'),
         endpoint_transit_wrap('unknown', 'queued', 'unknown'),
-        endpoint_transit_wrap('abnormal', 'queued', 'abnormal'),
         endpoint_transit_wrap('inactive', 'queued', 'inactive'),
     ]
 
@@ -159,7 +145,7 @@ class Endpoint:
             self.p_next_state = None
 
     def reactivate(self):
-        if self.p_next_state in ['known', 'abnormal']:
+        if self.p_next_state == 'known':
             self.trigger_next()
         else:
             self.unknown()  # pytype: disable=attribute-error
@@ -169,7 +155,7 @@ class Endpoint:
             self.p_next_state = 'mirror'
         elif self.state == 'reinvestigating':
             self.p_next_state = 'reinvestigate'
-        elif self.state in ['known', 'abnormal']:
+        elif self.state == 'known':
             self.p_next_state = self.state
         self.inactive()  # pytype: disable=attribute-error
 
@@ -190,7 +176,7 @@ class Endpoint:
                     self.p_next_state = 'reinvestigate'
                 elif self.state == 'queued':
                     self.p_next_state = 'queue'
-                elif self.state in ['known', 'abnormal']:
+                elif self.state == 'known':
                     self.p_next_state = self.state
                 self.endpoint_data['active'] = 0
                 self.inactive()  # pytype: disable=attribute-error

@@ -162,18 +162,6 @@ class GetData():
         return NO_DATA
 
     @staticmethod
-    def _get_behavior(endpoint):
-        endpoint_mac = GetData._get_mac(endpoint)
-        mac_addresses = endpoint.metadata.get('mac_addresses', None)
-        if endpoint_mac and mac_addresses and endpoint_mac in mac_addresses:
-            metadata = mac_addresses[endpoint_mac]
-            newest = GetData._get_newest_metadata(metadata)
-            if newest:
-                if 'behavior' in newest:
-                    return newest['behavior']
-        return NO_DATA
-
-    @staticmethod
     def _get_pcap_labels(endpoint):
         endpoint_mac = GetData._get_mac(endpoint)
         mac_addresses = endpoint.metadata.get('mac_addresses', None)
@@ -212,11 +200,6 @@ class GetData():
 
     @staticmethod
     def _get_prev_role_confidences(_endpoint):
-        # TODO results from ML
-        return
-
-    @staticmethod
-    def _get_prev_behaviors(_endpoint):
         # TODO results from ML
         return
 
@@ -279,7 +262,7 @@ class Parser():
             'State', 'Next State', 'First Seen', 'Last Seen',
             'Previous States', 'IPv4 OS\n(p0f)', 'IPv6 OS\n(p0f)', 'Previous IPv4 OSes\n(p0f)',
             'Previous IPv6 OSes\n(p0f)', 'Role\n(NetworkML)', 'Role Confidence\n(NetworkML)', 'Previous Roles\n(NetworkML)',
-            'Previous Role Confidences\n(NetworkML)', 'Behavior\n(NetworkML)', 'Previous Behaviors\n(NetworkML)',
+            'Previous Role Confidences\n(NetworkML)',
             'IPv4 rDNS', 'IPv6 rDNS', 'SDN Controller Type', 'SDN Controller URI', 'History', 'ACL History',
             'Pcap labels'
         ]
@@ -434,17 +417,13 @@ class Parser():
                          'previous roles\n(networkml)': (GetData._get_prev_roles, 22),
                          'previous role confidences': (GetData._get_prev_role_confidences, 23),
                          'previous role confidences\n(networkml)': (GetData._get_prev_role_confidences, 23),
-                         'behavior': (GetData._get_behavior, 24),
-                         'behavior\n(networkml)': (GetData._get_behavior, 24),
-                         'previous behaviors': (GetData._get_prev_behaviors, 25),
-                         'previous behaviors\n(networkml)': (GetData._get_prev_behaviors, 25),
-                         'ipv4 rdns': (GetData._get_ipv4_rdns, 26),
-                         'ipv6 rdns': (GetData._get_ipv6_rdns, 27),
-                         'sdn controller type': (GetData._get_controller_type, 28),
-                         'sdn controller uri': (GetData._get_controller, 29),
-                         'history': (GetData._get_history, 30),
-                         'acl history': (GetData._get_acls, 31),
-                         'pcap labels': (GetData._get_pcap_labels, 32)}
+                         'ipv4 rdns': (GetData._get_ipv4_rdns, 24),
+                         'ipv6 rdns': (GetData._get_ipv6_rdns, 25),
+                         'sdn controller type': (GetData._get_controller_type, 26),
+                         'sdn controller uri': (GetData._get_controller, 27),
+                         'history': (GetData._get_history, 28),
+                         'acl history': (GetData._get_acls, 29),
+                         'pcap labels': (GetData._get_pcap_labels, 30)}
 
         records = []
         if nonzero or unique:
@@ -550,9 +529,9 @@ class PoseidonShell(cmd2.Cmd):
             'role administrator-workstation', 'role business-workstation',
             'role developer-workstation', 'role gpu-laptop', 'role pki-server',
             'role unknown', 'state active', 'state inactive', 'state known',
-            'state unknown', 'state mirroring', 'state abnormal', 'state shutdown',
+            'state unknown', 'state mirroring', 'state shutdown',
             'state reinvestigating', 'state queued', 'state ignored',
-            'behavior normal', 'behavior abnormal', 'os windows', 'os freebsd',
+            'os windows', 'os freebsd',
             'os linux', 'os mac', 'history', 'version', 'what', 'where', 'all'
         ]
 
@@ -610,22 +589,8 @@ class PoseidonShell(cmd2.Cmd):
                                                      nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
 
     @exception
-    def show_behavior(self, arg, flags):
-        '''Show all things on the network that match a behavior'''
-        fields = self.parser.default_fields + ['Behavior']
-
-        valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
-            flags, fields)
-
-        if not valid:
-            self.poutput("Unknown flag, try 'help show'")
-        else:
-            self.poutput(self.parser.display_results(Commands().show_devices(arg), fields, sort_by=sort_by, max_width=max_width, unique=unique,
-                                                     nonzero=nonzero, output_format=output_format, ipv4_only=ipv4_only, ipv6_only=ipv6_only, ipv4_and_ipv6=ipv4_and_ipv6))
-
-    @exception
     def show_os(self, arg, flags):
-        '''Show all things on the network that match a behavior'''
+        '''Show all things on the network that match an os'''
         fields = self.parser.default_fields
 
         valid, fields, sort_by, max_width, unique, nonzero, output_format, ipv4_only, ipv6_only, ipv4_and_ipv6 = self.parser._check_flags(
@@ -725,7 +690,6 @@ class PoseidonShell(cmd2.Cmd):
     def help_show(self):
         self.poutput('  acls\t\tShow ACL history of something on the network')
         self.poutput('  all\t\tShow all devices')
-        self.poutput('  behavior\tShow devices matching a particular behavior')
         self.poutput(
             '  history\tFind out the history of something on the network')
         self.poutput(
@@ -799,7 +763,6 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         Set the state of things on the network:
         SET [IP|MAC|ID] [STATE]
         SET 10.0.0.1 INACTIVE
-        SET ABNORMAL UNKNOWN (TODO - NOT IMPLEMENTED YET)
         SET 18:EF:02:2D:49:00 KNOWN
         SET 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293 SHUTDOWN
         '''
@@ -949,7 +912,6 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
                 func_calls = {'acls': self.show_acls,
                               'all': self.show_all,
                               'authors': self.show_authors,
-                              'behavior': self.show_behavior,
                               'history': self.show_history,
                               'os': self.show_os,
                               'role': self.show_role,

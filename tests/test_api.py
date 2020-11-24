@@ -49,7 +49,7 @@ def setup_redis():
              '6cd09124a66ef1bbc72c1aff4e333766d3533f82'),
             ('networkml_00:00:00:00:00:03_1527208228', '6cd09124a66ef1bbc72c1aff4e333766d3533f83')):
         r.hset(key, mapping={
-            name: "{'decisions':{'behavior': 'normal'}, 'classification': {'confidences': [0.606, 0.348, 0.015], 'labels': ['Developer workstation', 'Unknown', 'Smartphone']}}"})
+            name: "{'classification': {'confidences': [0.606, 0.348, 0.015], 'labels': ['Developer workstation', 'Unknown', 'Smartphone']}}"})
 
     r.hset('6cd09124a66ef1bbc72c1aff4e333766d3533f81',
            mapping={'transition_time': '1524623228.1019075',

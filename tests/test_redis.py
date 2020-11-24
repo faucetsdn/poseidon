@@ -26,7 +26,7 @@ def test_redis_smoke(redis_my, redis_my_proc):
     endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv6': '1212::1'}
-    endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'1551805502': {'labels': ['developer workstation'], 'behavior': 'normal'}}}, 'ipv4_addresses': {
+    endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'1551805502': {'labels': ['developer workstation']}}}, 'ipv4_addresses': {
         '0.0.0.0': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
     endpoints = {endpoint.name: endpoint}
     prc.store_endpoints(endpoints)
@@ -56,7 +56,7 @@ def test_update_networkml(redis_my, redis_my_proc):
         'data': {
             endpoint.name: {
                 'valid': 'true', 'pcap_labels': 'null',
-                'decisions': {'behavior': 'normal', 'investigate': 'false'},
+                'decisions': {'investigate': 'false'},
                 'classification': {
                     'labels': ['role1', 'role2', 'role3'],
                     'confidences': [0.9, 0.8, 0.7]},
@@ -72,7 +72,7 @@ def test_update_networkml(redis_my, redis_my_proc):
     timestamp = list(
         stored_endpoint.metadata['mac_addresses'][source_mac].keys())[0]
     correlated_metadata = {
-        'mac_addresses': {source_mac: {timestamp: {'labels': ['role1', 'role2', 'role3'], 'confidences': [0.9, 0.8, 0.7], 'behavior': 'normal', 'pcap_labels': 'null'}}},
+        'mac_addresses': {source_mac: {timestamp: {'labels': ['role1', 'role2', 'role3'], 'confidences': [0.9, 0.8, 0.7], 'pcap_labels': 'null'}}},
         'ipv4_addresses': {ipv4: {'os': 'Linux'}}, 'ipv6_addresses': {'1212::1': {}}}
     assert endpoint.metadata == correlated_metadata
     bad_pof_results = {
@@ -89,9 +89,9 @@ def test_update_history():
     endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv6': '1212::1'}
-    endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'1551805502': {'labels': ['developer workstation'], 'behavior': 'normal'}}}, 'ipv4_addresses': {
+    endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'1551805502': {'labels': ['developer workstation']}}}, 'ipv4_addresses': {
         '0.0.0.0': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
-    metadata = {123: {'behavior': 'normal'}}
+    metadata = {123: {'foo': 'bar'}}
     logger = logging.getLogger('test')
     prc = PoseidonRedisClient(logger)
     prc.update_history(endpoint, {'00:00:00:00:00:00': metadata}, {
@@ -105,12 +105,12 @@ def test_parse_networkml_metadata():
         b'poseidon_hash': 'myhash',
     }
     ml_info = {
-        'myhash': b'{"pcap_labels": "mylabels", "classification": {"labels": ["foo", "bar"], "confidences": [1.0, 2.0]}, "decisions": {"behavior": "None"}}',
+        'myhash': b'{"pcap_labels": "mylabels", "classification": {"labels": ["foo", "bar"], "confidences": [1.0, 2.0]}}',
     }
     assert prc.parse_networkml_metadata(mac_info, ml_info) == {
-        'behavior': 'None', 'confidences': [1.0, 2.0],
+        'confidences': [1.0, 2.0],
         'labels': ['foo', 'bar'], 'pcap_labels': 'mylabels'}
     ml_info = {
-        'notmyhash': b'{"pcap_labels": "mylabels", "classification": {"labels": ["foo", "bar"], "confidences": [1.0, 2.0]}, "decisions": {"behavior": "None"}}',
+        'notmyhash': b'{"pcap_labels": "mylabels", "classification": {"labels": ["foo", "bar"], "confidences": [1.0, 2.0]}}',
     }
     assert prc.parse_networkml_metadata(mac_info, ml_info) == {}

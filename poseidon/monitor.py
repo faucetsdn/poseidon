@@ -118,10 +118,10 @@ class Monitor:
             endpoint for endpoint in self.s.endpoints.values()
             if endpoint.state in ['queued']]
         if len(candidates) == 0:
-            # if no queued endpoints, then known and abnormal are candidates
+            # if no queued endpoints, then known are candidates
             candidates = [
                 endpoint for endpoint in self.s.endpoints.values()
-                if endpoint.state in ['known', 'abnormal']]
+                if endpoint.state == 'known']
             if len(candidates) > 0:
                 random.shuffle(candidates)
         if self.s.sdnc:

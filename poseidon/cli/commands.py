@@ -19,7 +19,7 @@ class Commands:
 
     def __init__(self, controller=None):
         self.states = ['active', 'inactive', 'known', 'unknown',
-                       'mirroring', 'abnormal', 'shutdown', 'reinvestigating', 'queued']
+                       'mirroring', 'shutdown', 'reinvestigating', 'queued']
         if controller is None:
             self.controller = Config().get_config()
         else:
@@ -124,7 +124,7 @@ class Commands:
     def show_devices(self, arg):
         '''
         show all devices that are of a specific filter. i.e. windows,
-        developer workstation, abnormal, mirroring, etc.
+        developer workstation, mirroring, etc.
         '''
         return self.sdnc.show_endpoints(arg)
 
