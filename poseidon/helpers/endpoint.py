@@ -142,18 +142,18 @@ class Endpoint:
 
     def queue_next(self, next_state):
         self.p_next_state = next_state
-        self.queue()
+        self.queue()  # pytype: disable=attribute-error
 
     def trigger_next(self):
         if self.p_next_state:
-            self.trigger(self.p_next_state)
+            self.trigger(self.p_next_state)  # pytype: disable=attribute-error
             self.p_next_state = None
 
     def reactivate(self):
         if self.p_next_state in ['known', 'abnormal']:
             self.trigger_next()
         else:
-            self.unknown()
+            self.unknown()  # pytype: disable=attribute-error
 
     def deactivate(self):
         if self.state == 'mirroring':
@@ -162,7 +162,7 @@ class Endpoint:
             self.p_next_state = 'reinvestigate'
         elif self.state in ['known', 'abnormal']:
             self.p_next_state = self.state
-        self.inactive()
+        self.inactive()  # pytype: disable=attribute-error
 
     def mirror_active(self):
         return self.state in ['mirroring', 'reinvestigating']
