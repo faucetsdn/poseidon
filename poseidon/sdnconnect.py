@@ -71,19 +71,7 @@ class SDNConnect:
         ''' set endpoints to default state. '''
         self.get_stored_endpoints()
         for endpoint in self.endpoints.values():
-            if not endpoint.ignore:
-                if endpoint.state != 'inactive':
-                    if endpoint.state == 'mirroring':
-                        endpoint.p_next_state = 'mirror'
-                    elif endpoint.state == 'reinvestigating':
-                        endpoint.p_next_state = 'reinvestigate'
-                    elif endpoint.state == 'queued':
-                        endpoint.p_next_state = 'queue'
-                    elif endpoint.state in ['known', 'abnormal']:
-                        endpoint.p_next_state = endpoint.state
-                    endpoint.endpoint_data['active'] = 0
-                    endpoint.inactive()  # pytype: disable=attribute-error
-                    endpoint.p_prev_state = (endpoint.state, int(time.time()))
+            endpoint.default()
         self.store_endpoints()
 
     def get_stored_endpoints(self):
@@ -303,7 +291,6 @@ class SDNConnect:
             if ep is None:
                 change_acls = True
                 m = endpoint_factory(h)
-                m.p_prev_state = (m.state, int(time.time()))
                 m.endpoint_data = deepcopy(machine)
                 self.endpoints[m.name] = m
                 self.logger.info(
@@ -318,23 +305,11 @@ class SDNConnect:
                 change_acls = True
                 ep.endpoint_data = deepcopy(machine)
                 if ep.state == 'inactive' and machine['active'] == 1:
-                    if ep.p_next_state in ['known', 'abnormal']:
-                        # pytype: disable=attribute-error
-                        ep.trigger(ep.p_next_state)
-                    else:
-                        ep.unknown()  # pytype: disable=attribute-error
-                    ep.p_prev_state = (ep.state, int(time.time()))
+                    ep.reactivate()
                 elif ep.state != 'inactive' and machine['active'] == 0:
-                    if ep.state in ['mirroring', 'reinvestigating']:
+                    if ep.mirror_active():
                         self.unmirror_endpoint(ep)
-                        if ep.state == 'mirroring':
-                            ep.p_next_state = 'mirror'
-                        elif ep.state == 'reinvestigating':
-                            ep.p_next_state = 'reinvestigate'
-                    if ep.state in ['known', 'abnormal']:
-                        ep.p_next_state = ep.state
-                    ep.inactive()  # pytype: disable=attribute-error
-                    ep.p_prev_state = (ep.state, int(time.time()))
+                    ep.deactivate()
 
         if change_acls and self.controller['AUTOMATED_ACLS']:
             status = Actions(None, self.sdnc).update_acls(
@@ -344,8 +319,7 @@ class SDNConnect:
                 self.logger.info(
                     'Automated ACLs did the following: {0}'.format(status[1]))
                 for item in status[1]:
-                    machine = {'mac': item[1],
-                               'segment': item[2], 'port': item[3]}
+                    machine = {'mac': item[1], 'segment': item[2], 'port': item[3]}
                     h = Endpoint.make_hash(machine)
                     ep = self.endpoints.get(h, None)
                     if ep:
