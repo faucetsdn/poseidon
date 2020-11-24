@@ -3,10 +3,10 @@
 Created on 31 January 2020
 @author: Ryan Ashley
 """
-
 import logging
 import os
 from pathlib import Path
+
 from poseidon.controllers.faucet.config import FaucetLocalConfGetSetter
 
 
@@ -33,7 +33,8 @@ class Acl:
         config_yaml = self._read_existing()
         self._merge_acls(config_yaml)
         try:
-            self.faucetconfgetsetter.write_faucet_conf(self.acl_file, config_yaml)
+            self.faucetconfgetsetter.write_faucet_conf(
+                self.acl_file, config_yaml)
             return True
         except (FileNotFoundError, PermissionError):
             return False
@@ -74,7 +75,8 @@ class VolosAcl(ExclusiveAcl):
         for port in port_list:
             for eth_type in (0x0800, 0x86dd):
                 ip_str = port['proto']
-                addresses = self.endpoint.metadata.get('%s_addresses' % ip_str, None)
+                addresses = self.endpoint.metadata.get(
+                    '%s_addresses' % ip_str, None)
                 if addresses:
                     for ip in addresses:
                         rule = {'rule': {

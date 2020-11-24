@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+import difflib
 import ipaddress
 import json
 import time
 from copy import deepcopy
 
-import difflib
 import pika
 
 from poseidon.constants import NO_DATA
@@ -16,8 +15,8 @@ from poseidon.helpers.endpoint import Endpoint
 from poseidon.helpers.endpoint import endpoint_factory
 from poseidon.helpers.endpoint import MACHINE_IP_FIELDS
 from poseidon.helpers.endpoint import MACHINE_IP_PREFIXES
-from poseidon.helpers.metadata import get_ether_vendor
 from poseidon.helpers.metadata import DNSResolver
+from poseidon.helpers.metadata import get_ether_vendor
 from poseidon.helpers.redis import PoseidonRedisClient
 
 
@@ -275,7 +274,8 @@ class SDNConnect:
 
         if machine_ips:
             self.logger.debug('resolving %s' % machine_ips)
-            resolved_machine_ips = self.dns_resolver.resolve_ips(list(machine_ips))
+            resolved_machine_ips = self.dns_resolver.resolve_ips(
+                list(machine_ips))
             self.logger.debug('resolver results %s', resolved_machine_ips)
             for machine in machines:
                 self._update_machine_rdns(machine, resolved_machine_ips)
@@ -319,7 +319,8 @@ class SDNConnect:
                 self.logger.info(
                     'Automated ACLs did the following: {0}'.format(status[1]))
                 for item in status[1]:
-                    machine = {'mac': item[1], 'segment': item[2], 'port': item[3]}
+                    machine = {'mac': item[1],
+                               'segment': item[2], 'port': item[3]}
                     h = Endpoint.make_hash(machine)
                     ep = self.endpoints.get(h, None)
                     if ep:

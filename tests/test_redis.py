@@ -5,9 +5,10 @@ Test module for redis.py
 Created on 28 June 2016
 @author: Charlie Lewis, dgrossman, MShel
 """
-
 import logging
+
 from pytest_redis import factories
+
 from poseidon.helpers.endpoint import endpoint_factory
 from poseidon.helpers.redis import PoseidonRedisClient
 
@@ -18,7 +19,8 @@ redis_my = factories.redisdb('redis_my_proc')
 def test_redis_smoke(redis_my, redis_my_proc):
     logger = logging.getLogger('test')
     logger.setLevel(logging.DEBUG)
-    prc = PoseidonRedisClient(logger, host='localhost', port=redis_my_proc.port)
+    prc = PoseidonRedisClient(
+        logger, host='localhost', port=redis_my_proc.port)
     prc.connect()
     prc.r.flushall()
     endpoint = endpoint_factory('foo')
@@ -30,14 +32,15 @@ def test_redis_smoke(redis_my, redis_my_proc):
     prc.store_endpoints(endpoints)
     stored_endpoints = prc.get_stored_endpoints()
     stored_endpoint = stored_endpoints[endpoint.name]
-    assert endpoint.endpoint_data  == stored_endpoint.endpoint_data
+    assert endpoint.endpoint_data == stored_endpoint.endpoint_data
     assert endpoint.metadata == stored_endpoint.metadata
 
 
 def test_update_networkml(redis_my, redis_my_proc):
     logger = logging.getLogger('test')
     logger.setLevel(logging.DEBUG)
-    prc = PoseidonRedisClient(logger, host='localhost', port=redis_my_proc.port)
+    prc = PoseidonRedisClient(
+        logger, host='localhost', port=redis_my_proc.port)
     prc.connect()
     prc.r.flushall()
     source_mac = '00:00:00:00:00:00'
@@ -48,31 +51,32 @@ def test_update_networkml(redis_my, redis_my_proc):
     endpoints = {endpoint.name: endpoint}
     prc.store_endpoints(endpoints)
     networkml_results = {
-        "id": "", "type": "metadata", "results": {"tool": "networkml", "version": "aversion"},
-        "file_path": "/files/trace_%s_05-06_23_50_49.pcap" % endpoint.name,
-        "data": {
+        'id': '', 'type': 'metadata', 'results': {'tool': 'networkml', 'version': 'aversion'},
+        'file_path': '/files/trace_%s_05-06_23_50_49.pcap' % endpoint.name,
+        'data': {
             endpoint.name: {
-                "valid": "true", "pcap_labels": "null",
-                "decisions": {"behavior": "normal", "investigate": "false"},
-                "classification": {
-                    "labels": ["role1", "role2", "role3"],
-                    "confidences": [0.9, 0.8, 0.7]},
-                "timestamp": 999.123, "source_ip": ipv4, "source_mac": source_mac},
-            "pcap": "trace_%s_2020-05-06_23_50_49.pcap" % endpoint.name}}
+                'valid': 'true', 'pcap_labels': 'null',
+                'decisions': {'behavior': 'normal', 'investigate': 'false'},
+                'classification': {
+                    'labels': ['role1', 'role2', 'role3'],
+                    'confidences': [0.9, 0.8, 0.7]},
+                'timestamp': 999.123, 'source_ip': ipv4, 'source_mac': source_mac},
+            'pcap': 'trace_%s_2020-05-06_23_50_49.pcap' % endpoint.name}}
     prc.store_tool_result(networkml_results, 'networkml')
     good_pof_results = {
-        ipv4: {"full_os": "Linux 2.2.x-3.x", "short_os": "Linux", "link": "Ethernet or modem", "raw_mtu": "1500", "mac": source_mac}}
+        ipv4: {'full_os': 'Linux 2.2.x-3.x', 'short_os': 'Linux', 'link': 'Ethernet or modem', 'raw_mtu': '1500', 'mac': source_mac}}
     prc.store_p0f_result(good_pof_results)
     prc.store_endpoints(endpoints)
     stored_endpoints = prc.get_stored_endpoints()
     stored_endpoint = stored_endpoints[endpoint.name]
-    timestamp = list(stored_endpoint.metadata['mac_addresses'][source_mac].keys())[0]
+    timestamp = list(
+        stored_endpoint.metadata['mac_addresses'][source_mac].keys())[0]
     correlated_metadata = {
         'mac_addresses': {source_mac: {timestamp: {'labels': ['role1', 'role2', 'role3'], 'confidences': [0.9, 0.8, 0.7], 'behavior': 'normal', 'pcap_labels': 'null'}}},
         'ipv4_addresses': {ipv4: {'os': 'Linux'}}, 'ipv6_addresses': {'1212::1': {}}}
     assert endpoint.metadata == correlated_metadata
     bad_pof_results = {
-        ipv4: {"full_os": "", "short_os": "", "link": "", "raw_mtu": "", "mac": source_mac}}
+        ipv4: {'full_os': '', 'short_os': '', 'link': '', 'raw_mtu': '', 'mac': source_mac}}
     prc.store_p0f_result(bad_pof_results)
     prc.store_endpoints(endpoints)
     stored_endpoints = prc.get_stored_endpoints()

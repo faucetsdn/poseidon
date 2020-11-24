@@ -1,10 +1,13 @@
-
 import logging
 import os
 import sys
+
 import yaml
 from faucetconfrpc.faucetconfrpc_client_lib import FaucetConfRpcClient
-from poseidon.controllers.faucet.helpers import get_config_file, yaml_in, yaml_out
+
+from poseidon.controllers.faucet.helpers import get_config_file
+from poseidon.controllers.faucet.helpers import yaml_in
+from poseidon.controllers.faucet.helpers import yaml_out
 
 
 class FaucetConfGetSetter:
@@ -118,7 +121,8 @@ class FaucetLocalConfGetSetter(FaucetConfGetSetter):
         self.set_port_conf(dp, mirror_port, mirror_interface_conf)
 
     def mirror_port(self, dp, mirror_port, port):
-        mirror_interface_conf, ports = self._get_mirrored_ports(dp, mirror_port)
+        mirror_interface_conf, ports = self._get_mirrored_ports(
+            dp, mirror_port)
         if ports is None:
             ports = []
         ports = set(ports)
@@ -126,13 +130,15 @@ class FaucetLocalConfGetSetter(FaucetConfGetSetter):
         self._set_mirror_config(dp, mirror_port, mirror_interface_conf, ports)
 
     def unmirror_port(self, dp, mirror_port, port):
-        mirror_interface_conf, ports = self._get_mirrored_ports(dp, mirror_port)
+        mirror_interface_conf, ports = self._get_mirrored_ports(
+            dp, mirror_port)
         if ports is None:
             ports = []
         ports = set(ports)
         if port in ports:
             ports.remove(port)
-            self._set_mirror_config(dp, mirror_port, mirror_interface_conf, ports)
+            self._set_mirror_config(
+                dp, mirror_port, mirror_interface_conf, ports)
 
     def clear_mirror_port(self, dp, mirror_port):
         mirror_interface_conf, _ = self._get_mirrored_ports(dp, mirror_port)

@@ -6,10 +6,15 @@ Test module for faucet parser.
 import os
 import shutil
 import tempfile
+
 import yaml
+
 from poseidon.controllers.faucet.faucet import FaucetProxy
-from poseidon.controllers.faucet.helpers import get_config_file, parse_rules, represent_none
-from poseidon.controllers.faucet.parser import Parser, FaucetLocalConfGetSetter
+from poseidon.controllers.faucet.helpers import get_config_file
+from poseidon.controllers.faucet.helpers import parse_rules
+from poseidon.controllers.faucet.helpers import represent_none
+from poseidon.controllers.faucet.parser import FaucetLocalConfGetSetter
+from poseidon.controllers.faucet.parser import Parser
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import endpoint_factory
 
@@ -30,7 +35,8 @@ def _get_proxy(controller=None, faucetconfgetsetter_cl=FaucetLocalConfGetSetter)
 def test_ignore_events():
     with tempfile.TemporaryDirectory() as tmpdir:
         faucetconfgetsetter_cl = FaucetLocalConfGetSetter
-        faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(tmpdir, 'faucet.yaml')
+        faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(
+            tmpdir, 'faucet.yaml')
         parser = _get_parser(
             faucetconfgetsetter_cl=faucetconfgetsetter_cl, ignore_vlans=[999], ignore_ports={'switch99': 11})
         for message_type in ('L2_LEARN', 'L2_EXPIRE', 'PORT_CHANGE'):
@@ -57,11 +63,13 @@ def test_parse_rules():
 def test_clear_mirrors():
     with tempfile.TemporaryDirectory() as tmpdir:
         faucetconfgetsetter_cl = FaucetLocalConfGetSetter
-        faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(tmpdir, 'faucet.yaml')
+        faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(
+            tmpdir, 'faucet.yaml')
         shutil.copy(SAMPLE_CONFIG, faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE)
         parser = _get_parser(
             faucetconfgetsetter_cl=faucetconfgetsetter_cl, ignore_vlans=[999], ignore_ports={'switch99': 11})
-        parser.faucetconfgetsetter.read_faucet_conf(config_file=faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE)
+        parser.faucetconfgetsetter.read_faucet_conf(
+            config_file=faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE)
         parser.clear_mirrors()
         parser.faucetconfgetsetter.write_faucet_conf()
 
@@ -101,12 +109,14 @@ dps:
 
     with tempfile.TemporaryDirectory() as tmpdir:
         faucetconfgetsetter_cl = FaucetLocalConfGetSetter
-        faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(tmpdir, 'faucet.yaml')
+        faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(
+            tmpdir, 'faucet.yaml')
         parser = _get_parser(
             faucetconfgetsetter_cl=faucetconfgetsetter_cl,
             mirror_ports={'s1': 1},
             proxy_mirror_ports={'sx': ['s1', 99]})
-        parser.faucetconfgetsetter.faucet_conf = yaml.safe_load(faucet_conf_str)
+        parser.faucetconfgetsetter.faucet_conf = yaml.safe_load(
+            faucet_conf_str)
         assert mirrors(parser) == [2]
         parser.faucetconfgetsetter.mirror_port('s1', 1, 3)
         assert mirrors(parser) == [2, 3]
@@ -215,7 +225,8 @@ acls:
     test_faucet_conf = yaml.safe_load(new_faucet_conf_str)
     with tempfile.TemporaryDirectory() as tmpdir:
         faucetconfgetsetter_cl = FaucetLocalConfGetSetter
-        faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(tmpdir, 'faucet.yaml')
+        faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(
+            tmpdir, 'faucet.yaml')
         parser = _get_parser(
             faucetconfgetsetter_cl=faucetconfgetsetter_cl,
             mirror_ports={'s1': 1, 's2': 1},
@@ -252,7 +263,8 @@ dps:
     faucet_conf = yaml.safe_load(faucet_conf_str)
     with tempfile.TemporaryDirectory() as tmpdir:
         faucetconfgetsetter_cl = FaucetLocalConfGetSetter
-        faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(tmpdir, 'faucet.yaml')
+        faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(
+            tmpdir, 'faucet.yaml')
         parser = _get_parser(
             faucetconfgetsetter_cl=faucetconfgetsetter_cl,
             mirror_ports={'s1': 1},
@@ -278,7 +290,8 @@ dps:
     faucet_conf = yaml.safe_load(faucet_conf_str)
     with tempfile.TemporaryDirectory() as tmpdir:
         faucetconfgetsetter_cl = FaucetLocalConfGetSetter
-        faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(tmpdir, 'faucet.yaml')
+        faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(
+            tmpdir, 'faucet.yaml')
         parser = _get_parser(
             faucetconfgetsetter_cl=faucetconfgetsetter_cl,
             mirror_ports={'s1': 1},
@@ -317,17 +330,21 @@ def test_Parser():
 
     with tempfile.TemporaryDirectory() as tmpdir:
         faucetconfgetsetter_cl = FaucetLocalConfGetSetter
-        faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(tmpdir, 'faucet.yaml')
+        faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(
+            tmpdir, 'faucet.yaml')
         shutil.copy(SAMPLE_CONFIG, faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE)
         parser = _get_parser(
             faucetconfgetsetter_cl=faucetconfgetsetter_cl,
             mirror_ports={'t1-1': 2},
             proxy_mirror_ports={'sx': ['s1', 99]})
-        parser.faucetconfgetsetter.faucet_conf = yaml.safe_load(faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE)
+        parser.faucetconfgetsetter.faucet_conf = yaml.safe_load(
+            faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE)
         parser2 = _get_parser(faucetconfgetsetter_cl=faucetconfgetsetter_cl)
-        parser2.faucetconfgetsetter.faucet_conf = yaml.safe_load(faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE)
+        parser2.faucetconfgetsetter.faucet_conf = yaml.safe_load(
+            faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE)
         controller = Config().get_config()
-        proxy = _get_proxy(faucetconfgetsetter_cl=faucetconfgetsetter_cl, controller=controller)
+        proxy = _get_proxy(
+            faucetconfgetsetter_cl=faucetconfgetsetter_cl, controller=controller)
         check_config(parser, endpoints)
         check_config(parser2, endpoints)
         check_config(proxy, endpoints)

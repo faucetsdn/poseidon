@@ -3,9 +3,9 @@
 Created on 19 February 2019
 @author: Charlie Lewis
 """
-from concurrent.futures import ThreadPoolExecutor
 import functools
 import socket
+from concurrent.futures import ThreadPoolExecutor
 
 from poseidon.constants import NO_DATA
 

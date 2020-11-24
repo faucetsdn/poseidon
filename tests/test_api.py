@@ -1,9 +1,8 @@
-
 import falcon
 import pytest
 import redis
-from pytest_redis import factories
 from falcon import testing
+from pytest_redis import factories
 
 from api.app.app import api
 
@@ -44,15 +43,17 @@ def setup_redis():
         '00:00:00:00:00:03', mapping={'timestamps': "['1527208220', '1527208228']", 'poseidon_hash': '6cd09124a66ef1bbc72c1aff4e333766d3533f83'})
 
     for key, name in (
-            ('networkml_00:00:00:00:00:01_1527208227', '6cd09124a66ef1bbc72c1aff4e333766d3533f81'),
-            ('networkml_00:00:00:00:00:02_1527208227', '6cd09124a66ef1bbc72c1aff4e333766d3533f82'),
+            ('networkml_00:00:00:00:00:01_1527208227',
+             '6cd09124a66ef1bbc72c1aff4e333766d3533f81'),
+            ('networkml_00:00:00:00:00:02_1527208227',
+             '6cd09124a66ef1bbc72c1aff4e333766d3533f82'),
             ('networkml_00:00:00:00:00:03_1527208228', '6cd09124a66ef1bbc72c1aff4e333766d3533f83')):
         r.hset(key, mapping={
             name: "{'decisions':{'behavior': 'normal'}, 'classification': {'confidences': [0.606, 0.348, 0.015], 'labels': ['Developer workstation', 'Unknown', 'Smartphone']}}"})
 
     r.hset('6cd09124a66ef1bbc72c1aff4e333766d3533f81',
-            mapping={'transition_time': '1524623228.1019075',
-             'endpoint_data': "{'name': None, \
+           mapping={'transition_time': '1524623228.1019075',
+                    'endpoint_data': "{'name': None, \
                                 'prev_state': None, \
                                 'mac': '00:00:00:00:00:01', \
                                 'ipv4': '10.0.0.1', \
@@ -62,11 +63,11 @@ def setup_redis():
                                 'tenant': 'VLAN100', \
                                 'state': 'UNKNOWN', \
                                 'active': 0}",
-             'next_state': 'REINVESTIGATING',
-             'state': 'KNOWN'})
+                    'next_state': 'REINVESTIGATING',
+                    'state': 'KNOWN'})
     r.hset('6cd09124a66ef1bbc72c1aff4e333766d3533f82',
-            mapping={'transition_time': '1524623228.1019075',
-             'endpoint_data': "{'name': None, \
+           mapping={'transition_time': '1524623228.1019075',
+                    'endpoint_data': "{'name': None, \
                                 'prev_state': None, \
                                 'mac': '00:00:00:00:00:02', \
                                 'ipv4': 'None', \
@@ -75,11 +76,11 @@ def setup_redis():
                                 'tenant': 'VLAN100', \
                                 'state': 'UNKNOWN', \
                                 'active': 1}",
-             'next_state': 'REINVESTIGATING',
-             'state': 'KNOWN'})
+                    'next_state': 'REINVESTIGATING',
+                    'state': 'KNOWN'})
     r.hset('6cd09124a66ef1bbc72c1aff4e333766d3533f83',
-            mapping={'transition_time': '1524623228.1019075',
-             'endpoint_data': "{'name': None, \
+           mapping={'transition_time': '1524623228.1019075',
+                    'endpoint_data': "{'name': None, \
                                 'prev_state': None, \
                                 'mac': '00:00:00:00:00:03', \
                                 'ipv6': '2601:645:8200:a571:18fd:6640:9cd9:10d3', \
@@ -89,10 +90,10 @@ def setup_redis():
                                 'tenant': 'VLAN100', \
                                 'state': 'UNKNOWN', \
                                 'active': 1}",
-             'next_state': 'REINVESTIGATING',
-             'ignore': 'False',
-             'prev_state': "('UNKNOWN', 1527208228)",
-             'state': 'KNOWN'})
+                    'next_state': 'REINVESTIGATING',
+                    'ignore': 'False',
+                    'prev_state': "('UNKNOWN', 1527208228)",
+                    'state': 'KNOWN'})
 
 
 def verify_endpoints(response):

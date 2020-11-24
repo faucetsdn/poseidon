@@ -4,6 +4,7 @@ Test module for actions
 @author: Charlie Lewis
 """
 import logging
+
 from poseidon.helpers.actions import Actions
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import endpoint_factory

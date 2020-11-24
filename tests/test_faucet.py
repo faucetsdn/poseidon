@@ -6,8 +6,10 @@ Test module for faucet.
 import os
 import shutil
 import tempfile
+
 from poseidon.controllers.faucet.faucet import FaucetProxy
-from poseidon.controllers.faucet.helpers import yaml_in, yaml_out
+from poseidon.controllers.faucet.helpers import yaml_in
+from poseidon.controllers.faucet.helpers import yaml_out
 from poseidon.controllers.faucet.parser import FaucetLocalConfGetSetter
 from poseidon.helpers.config import Config
 
@@ -31,7 +33,8 @@ def test_yaml_in():
 def test_get_endpoints():
     with tempfile.TemporaryDirectory() as tmpdir:
         faucetconfgetsetter_cl = FaucetLocalConfGetSetter
-        faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(tmpdir, 'faucet.yaml')
+        faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(
+            tmpdir, 'faucet.yaml')
         shutil.copy(SAMPLE_CONFIG, faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE)
         proxy = _get_proxy(faucetconfgetsetter_cl)
         a = proxy.get_endpoints()
@@ -49,7 +52,8 @@ def test_FaucetProxy():
     """
     with tempfile.TemporaryDirectory() as tmpdir:
         faucetconfgetsetter_cl = FaucetLocalConfGetSetter
-        faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(tmpdir, 'faucet.yaml')
+        faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(
+            tmpdir, 'faucet.yaml')
         shutil.copy(SAMPLE_CONFIG, faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE)
         proxy = _get_proxy(faucetconfgetsetter_cl)
         proxy.shutdown_ip('10.0.0.9')
@@ -68,7 +72,7 @@ def test_FaucetProxy():
         proxy.update_acls()
 
         controller = Config().get_config()
-        controller['MIRROR_PORTS'] = {"foo": 1}
+        controller['MIRROR_PORTS'] = {'foo': 1}
         controller['ignore_vlans'] = ['foo']
         controller['ignore_ports'] = [1]
         proxy = _get_proxy(faucetconfgetsetter_cl, controller)

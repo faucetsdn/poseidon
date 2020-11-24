@@ -1,6 +1,7 @@
 import ast
 import ipaddress
 import time
+
 from redis import StrictRedis
 
 from poseidon.helpers.endpoint import EndpointDecoder
@@ -98,14 +99,16 @@ class PoseidonRedisClient:
         def parse_raw_results(poseidon_hash_key):
             raw_results = ml_info.get(poseidon_hash_key, None)
             if raw_results:
-                self.logger.debug('found %s by key %s' % (raw_results, poseidon_hash_key))
+                self.logger.debug('found %s by key %s' %
+                                  (raw_results, poseidon_hash_key))
                 return ast.literal_eval(raw_results.decode('ascii'))
             return {}
 
         results = parse_raw_results(mac_info[b'poseidon_hash'])
         if not results:
             try:
-                results = parse_raw_results(mac_info[b'poseidon_hash'].decode('ascii'))
+                results = parse_raw_results(
+                    mac_info[b'poseidon_hash'].decode('ascii'))
             except AttributeError:
                 pass
         if not results:
@@ -143,7 +146,8 @@ class PoseidonRedisClient:
                             if timestamp_str not in mac_address:
                                 mac_address[timestamp_str] = {}
                             mac_address[timestamp_str].update(metadata)
-                        self.logger.debug('got stored tool data %s from %s, %s', metadata, tool_info, mac_info)
+                        self.logger.debug(
+                            'got stored tool data %s from %s, %s', metadata, tool_info, mac_info)
             except Exception as e:  # pragma: no cover
                 self.logger.error(
                     'Unable to get existing ML data from Redis because: {0} (raw_timestamps {1})'.format(
@@ -154,7 +158,8 @@ class PoseidonRedisClient:
         try:
             poseidon_info = self.r.hgetall(mac_info[b'poseidon_hash'])
             if b'endpoint_data' in poseidon_info:
-                endpoint_data = ast.literal_eval(poseidon_info[b'endpoint_data'].decode('ascii'))
+                endpoint_data = ast.literal_eval(
+                    poseidon_info[b'endpoint_data'].decode('ascii'))
                 for ip_field in MACHINE_IP_FIELDS:
                     try:
                         raw_field = endpoint_data.get(ip_field, None)
@@ -164,11 +169,13 @@ class PoseidonRedisClient:
                     if machine_ip:
                         # TODO: migrate to networkml-style results rather than just raw IP lookup.
                         try:
-                            ip_info = self.r.hgetall('_'.join(('p0f', raw_field)))
+                            ip_info = self.r.hgetall(
+                                '_'.join(('p0f', raw_field)))
                             short_os = ip_info.get(b'short_os', None)
                             ip_addresses[ip_field][raw_field] = {}
                             if short_os:
-                                ip_addresses[ip_field][raw_field]['os'] = short_os.decode('ascii')
+                                ip_addresses[ip_field][raw_field]['os'] = short_os.decode(
+                                    'ascii')
                         except Exception as e:  # pragma: no cover
                             self.logger.error(
                                 'Unable to get existing {0} data from Redis because: {1}'.format(ip_field, str(e)))
@@ -195,8 +202,10 @@ class PoseidonRedisClient:
                     mac_info = self.r.hgetall(mac)
                     if b'poseidon_hash' in mac_info and mac_info[b'poseidon_hash'] == hash_id.encode('utf-8'):
                         source_mac = mac.decode('ascii')
-                        mac_addresses[source_mac] = self.get_stored_mac_metadata(mac_info, source_mac)
-                        ip_addressses = self.get_stored_ip_metadata(mac_info, ip_addresses)
+                        mac_addresses[source_mac] = self.get_stored_mac_metadata(
+                            mac_info, source_mac)
+                        ip_addressses = self.get_stored_ip_metadata(
+                            mac_info, ip_addresses)
                 except Exception as e:  # pragma: no cover
                     self.logger.error(
                         'Unable to get existing metadata for {0} from Redis because: {1}'.format(mac, str(e)))
@@ -227,7 +236,7 @@ class PoseidonRedisClient:
                 if field['field_name'] in record and prior and field['field_name'] in prior and \
                    prior[field['field_name']] != record[field['field_name']]:
                     endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.ipv4_addresses['field_name'],
-                            prior[field['field_name']], record[field['field_name']])  # pytype: disable=unsupported-operands
+                                                     prior[field['field_name']], record[field['field_name']])  # pytype: disable=unsupported-operands
                 prior = record
 
         prior = None
@@ -236,7 +245,7 @@ class PoseidonRedisClient:
                 if field['field_name'] in record and prior and field['field_name'] in prior and \
                    prior[field['field_name']] != record[field['field_name']]:
                     endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.ipv6_addresses['field_name'],
-                            prior[field['field_name']], record[field['field_name']])  # pytype: disable=unsupported-operands
+                                                     prior[field['field_name']], record[field['field_name']])  # pytype: disable=unsupported-operands
                 prior = record
 
     def store_endpoints(self, endpoints):
@@ -276,7 +285,8 @@ class PoseidonRedisClient:
                         except ValueError:
                             machine_ip = None
                         if machine_ip:
-                            self.hmset(str(machine_ip), {'poseidon_hash': endpoint.name})
+                            self.hmset(str(machine_ip), {
+                                       'poseidon_hash': endpoint.name})
                             if not self.r.sismember('ip_addresses', str(machine_ip)):
                                 self.r.sadd('ip_addresses', str(machine_ip))
                     serialized_endpoints.append(endpoint.encode())

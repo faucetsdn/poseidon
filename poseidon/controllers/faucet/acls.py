@@ -3,9 +3,9 @@
 Created on 4 March 2020
 @author: Charlie Lewis
 """
-
 import logging
 import os
+
 from poseidon.controllers.faucet.config import FaucetLocalConfGetSetter
 
 
@@ -44,7 +44,8 @@ class ACLs:
         if conf_files:
             acls_filenames = []
             if coprocess_rules_files:
-                acls_filenames += self._config_file_paths(coprocess_rules_files)
+                acls_filenames += self._config_file_paths(
+                    coprocess_rules_files)
             for f in files:
                 if '/' in f:
                     acls_filenames.append(f.rsplit('/', 1)[1])
@@ -53,7 +54,8 @@ class ACLs:
             for conf_file in conf_files:
                 if conf_file.startswith('poseidon') and conf_file not in acls_filenames:
                     obj_doc['include'].remove(conf_file)
-                    self.logger.info('Removing {0} from config'.format(conf_file))
+                    self.logger.info(
+                        'Removing {0} from config'.format(conf_file))
         else:
             obj_doc['include'] = []
 
@@ -65,7 +67,8 @@ class ACLs:
             poseidon_acls_filename = 'poseidon_' + acls_filename
             if poseidon_acls_filename not in conf_files:
                 obj_doc['include'].append(poseidon_acls_filename)
-                self._write_conf(os.path.join(rules_path, poseidon_acls_filename), acls_doc)
+                self._write_conf(os.path.join(
+                    rules_path, poseidon_acls_filename), acls_doc)
                 self.logger.info('Adding {0} to config'.format(acls_filename))
 
         # get defined ACL names from included files
