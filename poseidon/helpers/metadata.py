@@ -4,8 +4,9 @@ Created on 19 February 2019
 @author: Charlie Lewis
 """
 import functools
+import random
 import socket
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor
 
 from poseidon.constants import NO_DATA
 
@@ -27,8 +28,6 @@ def get_ether_vendor(mac, lookup_path):
 
 class DNSResolver:
 
-    TIMEOUT = 5
-
     @staticmethod
     def _resolve_ip(ip):
         try:
@@ -40,5 +39,10 @@ class DNSResolver:
             return NO_DATA
 
     def resolve_ips(self, ips):
-        with ThreadPoolExecutor() as executor:
-            return {ip: result for ip, result in zip(ips, executor.map(DNSResolver()._resolve_ip, list(ips)))}
+        list_ips = list(ips)
+        random.shuffle(list_ips)
+        results = {}
+        with ProcessPoolExecutor(max_workers=4) as executor:
+            for ip, result in zip(list_ips, executor.map(self._resolve_ip, list_ips)):
+                results[ip] = result
+        return results
