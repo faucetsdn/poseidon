@@ -280,6 +280,7 @@ class Monitor:
         return [endpoint for endpoint in self.s.endpoints.values() if not endpoint.ignore]
 
     def schedule_mirroring(self):
+        events = 0
         queued_endpoints = [
             endpoint for endpoint in self._not_ignored_endpoints()
             if endpoint.state == 'queued' and endpoint.mirror_requested()]
@@ -301,11 +302,13 @@ class Monitor:
             # pytype: disable=attribute-error
             endpoint.trigger_next()
             self.s.mirror_endpoint(endpoint)
+            events += 1
 
         for endpoint in self._not_ignored_endpoints():
             if self.s.sdnc:
                 if endpoint.state == 'unknown':
                     endpoint.queue_next('mirror')
+                    events += 1
                 elif endpoint.mirror_active():
                     # timeout after 2 times the reinvestigation frequency
                     # in case something didn't report back, put back in an
@@ -314,9 +317,11 @@ class Monitor:
                         self.logger.debug(
                             'timing out: {0} and setting to unknown'.format(endpoint.name))
                         self._unmirror_endpoint(endpoint)
+                        events += 1
             else:
                 if endpoint.state != 'known':
                     endpoint.known()  # pytype: disable=attribute-error
+        return events
 
     def schedule_coprocessing(self):
         queued_endpoints = [
@@ -375,27 +380,32 @@ class Monitor:
         while not self.ctrl_c['STOP']:
             faucet_event = []
             remove_list = []
+            events = 0
             while True:
                 found_work, rabbit_msg = self.get_q_item(self.m_queue)
                 if not found_work:
                     break
+                events += 1
                 self.format_rabbit_message(
                     rabbit_msg, faucet_event, remove_list)
             if remove_list:
                 for endpoint_name in remove_list:
                     if endpoint_name in self.s.endpoints:
                         del self.s.endpoints[endpoint_name]
-            self.s.refresh_endpoints()
             if faucet_event:
                 self.s.check_endpoints(faucet_event)
             found_work, schedule_func = self.get_q_item(self.job_queue)
             if found_work and callable(schedule_func):
+                events += 1
                 self.logger.info('calling %s', schedule_func)
                 start_time = time.time()
                 schedule_func()
                 self.logger.debug('%s done (%.1f sec)' %
                                   (schedule_func, time.time() - start_time))
-            self.schedule_mirroring()
+            events += self.schedule_mirroring()
+            if events:
+                self.s.refresh_endpoints()
+
 
     def get_q_item(self, q, timeout=1):
         '''
