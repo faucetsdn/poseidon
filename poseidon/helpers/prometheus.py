@@ -8,6 +8,7 @@ import socket
 from binascii import hexlify
 
 from prometheus_client import Gauge
+from prometheus_client import Info
 from prometheus_client import start_http_server
 
 
@@ -18,6 +19,7 @@ class Prometheus():
         self.prom_metrics = {}
 
     def initialize_metrics(self):
+        self.prom_metrics['info'] = Info('poseidon_info', 'Info about Poseidon')
         self.prom_metrics['inactive'] = Gauge('poseidon_endpoint_inactive',
                                               'Number of endpoints that are inactive')
         self.prom_metrics['active'] = Gauge('poseidon_endpoint_active',

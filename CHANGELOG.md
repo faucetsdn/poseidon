@@ -1,3 +1,10 @@
+# v0.15.9 (2020-11-25)
+
+* Refactored RabbitMQ connections, processing Faucet events, and cleanly exiting.
+* Removed behavior from states and NetworkML results as it no longer being used in NetworkML
+* Updated NetworkML, pre-commit, event-adapter-rabbitmq, certstrap, faucetconfrpc, pytype, grafana, and docker
+* Cleaned up formatting and style
+
 # v0.15.8 (2020-11-20)
 
 * Incremental refactoring to simplify tests and main.py
