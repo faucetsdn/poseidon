@@ -22,12 +22,13 @@ from poseidon.helpers.redis import PoseidonRedisClient
 
 class SDNConnect:
 
-    def __init__(self, controller, logger, first_time=True):
+    def __init__(self, controller, logger):
         self.controller = controller
         self.r = None
-        self.first_time = first_time
         self.sdnc = None
         self.endpoints = {}
+        self.investigations = 0
+        self.coprocessing = 0
         trunk_ports = self.controller['trunk_ports']
         if isinstance(trunk_ports, str):
             self.trunk_ports = json.loads(trunk_ports)
@@ -38,12 +39,7 @@ class SDNConnect:
         self.prc = PoseidonRedisClient(self.logger)
         self.prc.connect()
         self.dns_resolver = DNSResolver()
-        if self.first_time:
-            self.endpoints = {}
-            self.investigations = 0
-            self.coprocessing = 0
-            self.clear_filters()
-            self.default_endpoints()
+        self.get_stored_endpoints()
 
     def mirror_endpoint(self, endpoint):
         ''' mirror an endpoint. '''
@@ -56,10 +52,13 @@ class SDNConnect:
 
     def unmirror_endpoint(self, endpoint):
         ''' unmirror an endpoint. '''
-        status = Actions(endpoint, self.sdnc).unmirror_endpoint()
-        if not status:
-            self.logger.warning(
-                'Unable to unmirror the endpoint: {0}'.format(endpoint.name))
+        if endpoint.mirror_active():
+            status = Actions(endpoint, self.sdnc).unmirror_endpoint()
+            if not status:
+                self.logger.warning(
+                    'Unable to unmirror the endpoint: {0}'.format(endpoint.name))
+            endpoint.unknown()
+            endpoint.p_next_state = None
 
     def clear_filters(self):
         ''' clear any exisiting filters. '''
@@ -68,6 +67,7 @@ class SDNConnect:
 
     def default_endpoints(self):
         ''' set endpoints to default state. '''
+        self.clear_filters()
         self.get_stored_endpoints()
         for endpoint in self.endpoints.values():
             endpoint.default()
@@ -90,6 +90,18 @@ class SDNConnect:
                 'Unknown SDN controller config: {0}'.format(
                     self.controller))
 
+    def not_ignored_endpoints(self, state=None):
+        endpoints = [endpoint for endpoint in self.endpoints.values() if not endpoint.ignore]
+        if state:
+            endpoints = [endpoint for endpoint in endpoints if endpoint.state == state]
+        return endpoints
+
+    def not_copro_ignored_endpoints(self, state=None):
+        endpoints = [endpoint for endpoint in self.endpoints.values() if not endpoint.copro_ignore]
+        if state:
+            endpoints = [endpoint for endpoint in endpoints if endpoint.copro_state == state]
+        return endpoints
+
     def endpoint_by_name(self, name):
         return self.endpoints.get(name, None)
 
@@ -97,17 +109,29 @@ class SDNConnect:
         return self.endpoint_by_name(hash_id)
 
     def endpoints_by_ip(self, ip):
-        endpoints = [
+        return [
             endpoint for endpoint in self.endpoints.values()
             if ip == endpoint.endpoint_data.get('ipv4', None) or
             ip == endpoint.endpoint_data.get('ipv6', None)]
-        return endpoints
 
     def endpoints_by_mac(self, mac):
-        endpoints = [
+        return [
             endpoint for endpoint in self.endpoints.values()
             if mac == endpoint.endpoint_data['mac']]
-        return endpoints
+
+    def investigation_budget(self):
+        self.investigations = len([
+            endpoint for endpoint in self.not_ignored_endpoints()
+            if endpoint.mirror_active()])
+        return max(
+            self.controller['max_concurrent_reinvestigations'] - self.investigations, 0)
+
+    def coprocessing_budget(self):
+        self.coprocessing = len([
+            endpoint for endpoint in self.not_ignored_endpoints()
+            if endpoint.copro_state == 'copro_coprocessing'])
+        return max(
+            self.controller['max_concurrent_coprocessing'] - self.coprocessing, 0)
 
     @staticmethod
     def _connect_rabbit():
@@ -292,10 +316,10 @@ class SDNConnect:
                 self.endpoints[m.name] = m
                 self.logger.info(
                     'Detected new endpoint: {0}:{1}'.format(m.name, machine))
-            else:
-                self.merge_machine_ip(ep.endpoint_data, machine)
+                continue
 
-            if ep and ep.endpoint_data != machine and not ep.ignore:
+            self.merge_machine_ip(ep.endpoint_data, machine)
+            if ep.endpoint_data != machine and not ep.ignore:
                 diff_txt = self._diff_machine(ep.endpoint_data, machine)
                 self.logger.info(
                     'Endpoint changed: {0}:{1}'.format(h, diff_txt))
@@ -323,7 +347,6 @@ class SDNConnect:
                     if ep:
                         ep.acl_data.append(
                             ((item[0], item[4], item[5]), int(time.time())))
-        self.refresh_endpoints()
 
     def store_endpoints(self):
         ''' store current endpoints in Redis. '''
@@ -333,3 +356,13 @@ class SDNConnect:
         self.logger.debug('refresh endpoints')
         self.store_endpoints()
         self.get_stored_endpoints()
+
+    @staticmethod
+    def coprocess_endpoint(_endpoint):
+        '''TODO.'''
+        return
+
+    @staticmethod
+    def uncoprocess_endpoint(_endpoint):
+        '''TODO'''
+        return
