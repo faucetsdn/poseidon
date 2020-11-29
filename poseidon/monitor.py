@@ -35,9 +35,6 @@ class Monitor:
         else:
             self.controller = controller
 
-        # timer class to call things periodically in own thread
-        self.schedule = schedule
-
         # setup prometheus
         self.prom = Prometheus()
         try:
@@ -49,12 +46,12 @@ class Monitor:
 
         # initialize sdnconnect
         self.s = SDNConnect(self.controller, self.logger)
+        self.s.default_endpoints()
 
-        # schedule periodic scan of endpoints thread
+        # timer class to call things periodically in own thread
+        self.schedule = schedule
         self.schedule.every(self.controller['scan_frequency']).seconds.do(
-            self.schedule_job_kickurl)
-
-        # schedule periodic reinvestigations thread
+            self.schedule_job_update_metrics)
         self.schedule.every(self.controller['reinvestigation_frequency']).seconds.do(
             self.schedule_job_reinvestigation)
 
@@ -85,7 +82,7 @@ class Monitor:
             self.logger.debug('poseidonMain workQueue is None')
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
-    def _update_metrics(self):
+    def job_update_metrics(self):
         self.logger.debug('updating metrics')
         try:
             # get current state
@@ -97,42 +94,59 @@ class Monitor:
         except (requests.exceptions.ConnectionError, Exception) as e:  # pragma: no cover
             self.logger.error(
                 'Unable to get current state and send it to Prometheus because: {0}'.format(str(e)))
+        return 0
 
-    def job_kickurl(self):
-        self._update_metrics()
+    def job_recoprocess(self):
+        if not self.s.sdnc:
+            for endpoint in self.s.not_copro_ignored_endpoints():
+                if endpoint.copro_state != 'copro_nominal':
+                    endpoint.copro_nominal()  # pytype: disable=attribute-error
+            return 0
+        events = 0
+        for endpoint in self.s.not_copro_ignored_endpoints():
+            if endpoint.copro_state == 'copro_unknown':
+                endpoint.copro_queue_next('copro_coprocess')
+                events += 1
+            elif endpoint.copro_state == 'copro_coprocessing':
+                if endpoint.copro_state_timeout(2*self.controller['coprocessing_frequency']):
+                    self.logger.debug(
+                        'timing out: {0} and setting to unknown'.format(endpoint.name))
+                    self.s.uncoprocess_endpoint(endpoint)
+                    endpoint.copro_unknown()  # pytype: disable=attribute-error
+                    events += 1
+        return events
 
     def job_reinvestigation(self):
-        ''' put endpoints into the reinvestigation state if possible '''
-
-        def trigger_reinvestigation(candidates):
-            # get random order of things that are known
-            for _ in range(self.controller['max_concurrent_reinvestigations'] - self.s.investigations):
-                if len(candidates) > 0:
-                    chosen = candidates.pop()
-                    self.logger.info('Starting reinvestigation on: {0} {1}'.format(
-                        chosen.name, chosen.state))
-                    chosen.reinvestigate()  # pytype: disable=attribute-error
-                    self.s.mirror_endpoint(chosen)
-
-        candidates = [
-            endpoint for endpoint in self.s.endpoints.values()
-            if endpoint.state in ['queued']]
-        if len(candidates) == 0:
-            # if no queued endpoints, then known are candidates
-            candidates = [
-                endpoint for endpoint in self.s.endpoints.values()
-                if endpoint.state == 'known']
-            if len(candidates) > 0:
-                random.shuffle(candidates)
-        if self.s.sdnc:
-            trigger_reinvestigation(candidates)
+        ''' put endpoints into the reinvestigation state if possible, and timeout investigations '''
+        if not self.s.sdnc:
+            for endpoint in self.s.not_ignored_endpoints():
+                if endpoint.state != 'known':
+                    endpoint.known()  # pytype: disable=attribute-error
+            return 0
+        events = 0
+        for endpoint in self.s.not_ignored_endpoints():
+            if endpoint.state == 'unknown':
+                endpoint.queue_next('mirror')
+                events += 1
+            elif endpoint.mirror_active():
+                if endpoint.state_timeout(2*self.controller['reinvestigation_frequency']):
+                    self.logger.debug(
+                        'timing out: {0} and setting to unknown'.format(endpoint.name))
+                    self.s.unmirror_endpoint(endpoint)
+                    events += 1
+        budget = self.s.investigation_budget()
+        candidates = self.s.not_ignored_endpoints('queued')
+        if not candidates:
+            candidates = self.s.not_ignored_endpoints('known')
+        return events + self._schedule_queued_work(
+            candidates, budget, 'reinvestigate', self.s.mirror_endpoint, shuffle=True)
 
     def queue_job(self, job):
         if self.job_queue.qsize() < 2:
             self.job_queue.put(job)
 
-    def schedule_job_kickurl(self):
-        self.queue_job(self.job_kickurl)
+    def schedule_job_update_metrics(self):
+        self.queue_job(self.job_update_metrics)
 
     def schedule_job_reinvestigation(self):
         self.queue_job(self.job_reinvestigation)
@@ -140,12 +154,6 @@ class Monitor:
     def update_routing_key_time(self, routing_key):
         self.prom.prom_metrics['last_rabbitmq_routing_key_time'].labels(
             routing_key=routing_key).set(time.time())
-
-    def _unmirror_endpoint(self, endpoint):
-        if endpoint.mirror_active():
-            self.s.unmirror_endpoint(endpoint)
-            endpoint.unknown()
-            endpoint.p_next_state = None
 
     def format_rabbit_message(self, item, faucet_event, remove_list):
         '''
@@ -173,7 +181,7 @@ class Monitor:
                         if endpoint:
                             self.logger.debug(
                                 'processing networkml results for %s', name)
-                            self._unmirror_endpoint(endpoint)
+                            self.s.unmirror_endpoint(endpoint)
                             if message.get('valid', False):
                                 return data
                             break
@@ -202,9 +210,8 @@ class Monitor:
                 if endpoint:
                     try:
                         if endpoint.mirror_active():
-                            self._unmirror_endpoint(endpoint)
-                        # pytype: disable=attribute-error
-                        endpoint.trigger(state)
+                            self.s.unmirror_endpoint(endpoint)
+                        endpoint.trigger(state)  # pytype: disable=attribute-error
                         endpoint.p_next_state = None
                         if endpoint.mirror_active():
                             self.s.mirror_endpoint(endpoint)
@@ -276,104 +283,34 @@ class Monitor:
             'no handler for routing_key {0}'.format(routing_key))
         return {}, False
 
-    def _not_ignored_endpoints(self):
-        return [endpoint for endpoint in self.s.endpoints.values() if not endpoint.ignore]
-
-    def schedule_mirroring(self):
+    def _schedule_queued_work(self, queued_endpoints, budget, endpoint_state, endpoint_work, shuffle=False):
         events = 0
-        queued_endpoints = [
-            endpoint for endpoint in self._not_ignored_endpoints()
-            if endpoint.state == 'queued' and endpoint.mirror_requested()]
-        self.s.investigations = len([
-            endpoint for endpoint in self._not_ignored_endpoints()
-            if endpoint.mirror_active()])
-        # mirror things in the order they got added to the queue
-        queued_endpoints = sorted(
-            queued_endpoints, key=lambda x: x.state_time())
-
-        investigation_budget = max(
-            self.controller['max_concurrent_reinvestigations'] -
-            self.s.investigations,
-            0)
-        self.logger.debug('investigations {0}, budget {1}, queued {2}'.format(
-            str(self.s.investigations), str(investigation_budget), str(len(queued_endpoints))))
-
-        for endpoint in queued_endpoints[:investigation_budget]:
-            # pytype: disable=attribute-error
-            endpoint.trigger_next()
-            self.s.mirror_endpoint(endpoint)
-            events += 1
-
-        for endpoint in self._not_ignored_endpoints():
-            if self.s.sdnc:
-                if endpoint.state == 'unknown':
-                    endpoint.queue_next('mirror')
-                    events += 1
-                elif endpoint.mirror_active():
-                    # timeout after 2 times the reinvestigation frequency
-                    # in case something didn't report back, put back in an
-                    # unknown state
-                    if endpoint.state_age() > 2*self.controller['reinvestigation_frequency']:
-                        self.logger.debug(
-                            'timing out: {0} and setting to unknown'.format(endpoint.name))
-                        self._unmirror_endpoint(endpoint)
-                        events += 1
-            else:
-                if endpoint.state != 'known':
-                    endpoint.known()  # pytype: disable=attribute-error
+        if self.s.sdnc:
+            if shuffle:
+                random.shuffle(queued_endpoints)
+            for endpoint in queued_endpoints[:budget]:
+                getattr(endpoint, endpoint_state)()
+                endpoint_work(endpoint)
+                events += 1
         return events
 
-    def schedule_coprocessing(self):
+    def schedule_mirroring(self):
+        budget = self.s.investigation_budget()
         queued_endpoints = [
-            endpoint for endpoint in self.s.endpoints.values()
-            if not endpoint.copro_ignore and endpoint.copro_state == 'copro_queued']  # pytype: disable=attribute-error
-        self.s.coprocessing = len([
-            endpoint for endpoint in self.s.endpoints.values()
-            if endpoint.copro_state in ['copro_coprocessing']])
-        # mirror things in the order they got added to the queue
-        queued_endpoints = sorted(
-            queued_endpoints, key=lambda x: x.p_prev_copro_states[-1][1])
+            endpoint for endpoint in self.s.not_ignored_endpoints('queued')
+            if endpoint.mirror_requested()]
+        queued_endpoints = sorted(queued_endpoints, key=lambda x: x.state_time())
+        self.logger.debug('investigations {0}, budget {1}, queued {2}'.format(
+            str(self.s.investigations), str(budget), str(len(queued_endpoints))))
+        return self._schedule_queued_work(queued_endpoints, budget, 'trigger_next', self.s.mirror_endpoint)
 
-        coprocessing_budget = max(
-            self.controller['max_concurrent_coprocessing'] -
-            self.s.coprocessing,
-            0)
+    def schedule_coprocessing(self):
+        budget = self.s.coprocessing_budget()
+        queued_endpoints = self.s.not_copro_ignored_endpoints('copro_queued')
+        queued_endpoints = sorted(queued_endpoints, key=lambda x: x.copro_state_time())
         self.logger.debug('coprocessing {0}, budget {1}, queued {2}'.format(
-            str(self.s.coprocessing), str(coprocessing_budget), str(len(queued_endpoints))))
-
-        for endpoint in queued_endpoints[:coprocessing_budget]:
-            # pytype: disable=attribute-error
-            endpoint.trigger(endpoint.p_next_copro_state)
-            endpoint.p_next_copro_state = None  # pytype: disable=attribute-error
-            endpoint.p_prev_copro_states.append(  # pytype: disable=attribute-error
-                (endpoint.copro_state, int(time.time())))
-            self.s.coprocess_endpoint(endpoint)
-
-        for endpoint in self.s.endpoints.values():
-            if not endpoint.copro_ignore:  # pytype: disable=attribute-error
-                if self.s.sdnc:
-                    if endpoint.copro_state == 'copro_unknown':  # pytype: disable=attribute-error
-                        endpoint.p_next_copro_state = 'copro_coprocessing'
-                        endpoint.copro_queue()  # pytype: disable=attribute-error
-                        endpoint.p_prev_copro_states.append(  # pytype: disable=attribute-error
-                            (endpoint.copro_state, int(time.time())))
-                    # pytype: disable=attribute-error
-                    elif endpoint.copro_state in ['copro_coprocessing']:
-                        cur_time = int(time.time())
-                        # timeout after 2 times the reinvestigation frequency
-                        # in case something didn't report back, put back in an
-                        # unknown state
-                        # pytype: disable=attribute-error
-                        if cur_time - endpoint.p_prev_copro_states[-1][1] > 2*self.controller['coprocessing_frequency']:
-                            self.logger.debug(
-                                'timing out: {0} and setting to unknown'.format(endpoint.name))
-                            self.s.uncoprocess_endpoint(endpoint)
-                            endpoint.copro_unknown()  # pytype: disable=attribute-error
-                            endpoint.p_prev_copro_states.append(  # pytype: disable=attribute-error
-                                (endpoint.copro_state, int(time.time())))  # pytype: disable=attribute-error
-                else:
-                    if endpoint.state != 'copro_nominal':
-                        endpoint.copro_nominal()  # pytype: disable=attribute-error
+            str(self.s.coprocessing), str(budget), str(len(queued_endpoints))))
+        return self._schedule_queued_work(queued_endpoints, budget, 'copro_trigger_next', self.s.coprocess_endpoint)
 
     def process(self):
         signal.signal(signal.SIGINT, partial(self.signal_handler))
@@ -394,18 +331,16 @@ class Monitor:
                         del self.s.endpoints[endpoint_name]
             if faucet_event:
                 self.s.check_endpoints(faucet_event)
+            events += self.schedule_mirroring()
             found_work, schedule_func = self.get_q_item(self.job_queue)
             if found_work and callable(schedule_func):
-                events += 1
                 self.logger.info('calling %s', schedule_func)
                 start_time = time.time()
-                schedule_func()
+                events += schedule_func()
                 self.logger.debug('%s done (%.1f sec)' %
                                   (schedule_func, time.time() - start_time))
-            events += self.schedule_mirroring()
             if events:
                 self.s.refresh_endpoints()
-
 
     def get_q_item(self, q, timeout=1):
         '''

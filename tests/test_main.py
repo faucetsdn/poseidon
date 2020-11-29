@@ -55,6 +55,7 @@ def test_unmirror_endpoint():
     endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+    endpoint.mirror()
     s.endpoints[endpoint.name] = endpoint
     s.unmirror_endpoint(endpoint)
 
@@ -142,10 +143,9 @@ def test_signal_handler():
             self.logger = logger
 
     class MockRabbitConnection:
-        connection_closed = False
 
-        def close(self):
-            self.connection_closed = True
+        @staticmethod
+        def close():
             return True
 
     class MockMonitor(Monitor):
@@ -222,11 +222,9 @@ def test_format_rabbit_message():
     class MockMonitor(Monitor):
 
         def __init__(self):
-            self.fa_rabbit_routing_key = 'foo'
             self.logger = logger
             self.controller = get_test_controller()
             self.s = SDNConnect(self.controller, logger)
-            self.faucet_event = []
             self.s.sdnc = MockParser()
             self.ctrl_c = CTRL_C
 
@@ -390,7 +388,7 @@ def test_Monitor_init():
 def test_SDNConnect_init():
     controller = get_test_controller()
     controller['trunk_ports'] = []
-    s = SDNConnect(controller, logger, first_time=False)
+    SDNConnect(controller, logger)
 
 
 def test_process():
@@ -406,8 +404,6 @@ def test_process():
 
         def __init__(self):
             self.logger = logger
-            self.fa_rabbit_routing_key = 'FAUCET.Event'
-            self.faucet_event = None
             self.controller = get_test_controller()
             self.s = SDNConnect(self.controller, logger)
             self.s.controller['TYPE'] = 'None'
@@ -425,15 +421,13 @@ def test_process():
             endpoint = endpoint_factory('foo2')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
-            endpoint.p_next_state = 'mirror'
-            endpoint.queue()
+            endpoint.queue_next('mirror')
             self.s.endpoints[endpoint.name] = endpoint
             endpoint = endpoint_factory('foo3')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
             self.s.endpoints[endpoint.name] = endpoint
-            self.s.store_endpoints()
-            self.s.get_stored_endpoints()
+            self.s.refresh_endpoints()
             self.results = 0
 
         def get_q_item(self, q, timeout=1):
@@ -450,6 +444,17 @@ def test_process():
 
     mock_monitor = MockMonitor()
 
+    assert mock_monitor.s.investigation_budget()
+    assert mock_monitor.s.coprocessing_budget()
+    handlers = [
+        mock_monitor.job_update_metrics,
+        mock_monitor.job_reinvestigation,
+        mock_monitor.job_recoprocess,
+        mock_monitor.schedule_mirroring,
+        mock_monitor.schedule_coprocessing]
+    for handler in handlers:
+        handler()
+
     t1 = Thread(target=thread1)
     t1.start()
     mock_monitor.process()
@@ -463,6 +468,10 @@ def test_process():
     mock_monitor.process()
 
     t1.join()
+
+    mock_monitor.s.sdnc = None
+    for handler in handlers:
+        handler()
 
 
 def test_show_endpoints():

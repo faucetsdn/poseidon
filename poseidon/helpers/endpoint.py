@@ -88,6 +88,8 @@ class Endpoint:
         endpoint_copro_transit_wrap(
             'copro_nominal', 'copro_coprocessing', 'copro_nominal'),
         endpoint_copro_transit_wrap(
+            'copro_nominal', 'copro_queued', 'copro_nominal'),
+        endpoint_copro_transit_wrap(
             'copro_suspicious', 'copro_coprocessing', 'copro_suspicious'),
         endpoint_copro_transit_wrap(
             'copro_queue', 'copro_nominal', 'copro_queued'),
@@ -102,12 +104,12 @@ class Endpoint:
     def __init__(self, hashed_val):
         self.name = hashed_val.strip()
         self.ignore = False
-        self.copro_ignores = False
+        self.copro_ignore = False
         self.endpoint_data = None
         self.p_next_state = None
         self.p_prev_state = None
         self.p_next_copro_state = None
-        self.p_prev_copross_states = []
+        self.p_prev_copro_states = []
         self.acl_data = []
         self.metadata = {}
         self.history = []
@@ -135,6 +137,18 @@ class Endpoint:
     def state_age(self):
         return int(time.time()) - self.state_time()
 
+    def state_timeout(self, timeout):
+        return self.state_age() > timeout
+
+    def copro_state_time(self):
+        return self.p_prev_copro_states[-1][1]
+
+    def copro_state_age(self):
+        return int(time.time()) - self.copro_state_time()
+
+    def copro_state_timeout(self, timeout):
+        return self.copro_state_age() > timeout
+
     def queue_next(self, next_state):
         self.p_next_state = next_state
         self.queue()  # pytype: disable=attribute-error
@@ -143,6 +157,15 @@ class Endpoint:
         if self.p_next_state:
             self.trigger(self.p_next_state)  # pytype: disable=attribute-error
             self.p_next_state = None
+
+    def copro_queue_next(self, next_state):
+        self.p_next_copro_state = next_state
+        self.copro_queue()  # pytype: disable=attribute-error
+
+    def copro_trigger_next(self):
+        if self.p_next_copro_state:
+            self.copro_machine.events[self.p_next_copro_state].trigger(self)  # pytype: disable=attribute-error
+            self.p_next_copro_state = None
 
     def reactivate(self):
         if self.p_next_state == 'known':
@@ -186,6 +209,8 @@ class Endpoint:
             {'type': entry_type, 'timestamp': timestamp, 'message': message})
 
     def update_copro_history(self, event_data):
+        self.p_prev_copro_states.append(  # pytype: disable=attribute-error
+                (self.copro_state, int(time.time())))
         self._add_history_entry(
             HistoryTypes.COPRO_CHANGE, time.time(),
             'Coprocessing state changed from {0} to {1}'.format(event_data.transition.source, event_data.transition.dest))
@@ -233,15 +258,16 @@ def endpoint_factory(hashed_val):
     endpoint = Endpoint(hashed_val)
     machine = Machine(
         model=endpoint,
+        model_attribute='state',
         states=Endpoint.states,
         transitions=Endpoint.transitions,
         initial='unknown',
         send_event=True)
     machine.name = endpoint.name[:8]+' '
     endpoint.machine = machine
-    copro_endpoint = Endpoint(hashed_val)
     copro_machine = Machine(
-        model=copro_endpoint,
+        model=endpoint,
+        model_attribute='copro_state',
         states=Endpoint.copro_states,
         transitions=Endpoint.copro_transitions,
         initial='copro_unknown',
