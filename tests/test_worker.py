@@ -8,7 +8,6 @@ import os
 from workers.worker import callback
 from workers.worker import load_workers
 from workers.worker import setup_docker
-from workers.worker import setup_redis
 
 WORKERS_JSON = 'workers/workers.json'
 
@@ -20,10 +19,6 @@ def test_setup_docker():
 
 def test_load_workers():
     workers = load_workers(WORKERS_JSON)
-
-
-def test_setup_redis():
-    r = setup_redis()
 
 
 def test_callback():
