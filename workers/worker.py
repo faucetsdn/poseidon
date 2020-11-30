@@ -178,7 +178,7 @@ def init_metrics(workers):
 def load_workers(workers_json='workers.json'):
     with open(workers_json) as json_file:
         workers = json.load(json_file)
-    return workers
+    return workers['workers']
 
 
 if __name__ == '__main__':  # pragma: no cover
