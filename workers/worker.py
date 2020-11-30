@@ -167,8 +167,8 @@ def start_prom(port=9305):
 def init_metrics(workers):
     global metrics
     for worker in workers:
-        metrics[worker] = Enum(worker.replace('-', '_')+'_state',
-                               'State of worker '+worker,
+        metrics[worker['name']] = Enum(worker['name'].replace('-', '_')+'_state',
+                               'State of worker '+worker['name'],
                                states=['In progress',
                                        'Queued',
                                        'Error',
