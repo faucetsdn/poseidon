@@ -181,7 +181,6 @@ def load_workers(workers_json='workers.json'):
 
 
 if __name__ == '__main__':  # pragma: no cover
-    global metrics
     queue_name = os.getenv('RABBIT_QUEUE_NAME', 'task_queue')
     host = os.getenv('RABBIT_HOST', 'messenger')
     workers = load_workers()
