@@ -11,6 +11,8 @@ from workers.worker import load_workers
 from workers.worker import setup_docker
 
 WORKERS_JSON = 'workers/workers.json'
+workers = load_workers(WORKERS_JSON)
+metrics = init_metrics(workers)
 
 
 def test_setup_docker():
@@ -31,8 +33,6 @@ def test_callback():
             self.delivery_tag = None
             self.routing_key = ''
 
-    workers = load_workers(WORKERS_JSON)
-    metrics = init_metrics(workers)
     os.environ['VOL_PREFIX'] = '/tmp'
     ch = MockChannel()
     method = MockMethod()

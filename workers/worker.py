@@ -9,7 +9,6 @@ import pika
 from prometheus_client import Enum
 from prometheus_client import start_http_server
 
-
 metrics = {}
 
 
