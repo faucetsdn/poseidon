@@ -10,10 +10,10 @@ from prometheus_client import Enum
 from prometheus_client import start_http_server
 
 
-def set_status(status, extra_workers):
+def set_status(status):
     for worker in status:
         e = Enum(worker+'_state', 'State of worker '+worker, states=['In progress', 'Queued', 'Error', 'Complete'])
-        e.state(worker['state'])
+        e.state(status[worker]['state'])
 
 
 def callback(ch, method, properties, body, workers_json='workers.json'):
@@ -24,7 +24,6 @@ def callback(ch, method, properties, body, workers_json='workers.json'):
     pipeline = json.loads(body.decode('utf-8'))
     worker_found = False
     status = {}
-    extra_workers = {}
     for worker in workers['workers']:
         file_path = pipeline['file_path']
         if file_path in ['-1', '']:
@@ -99,7 +98,8 @@ def callback(ch, method, properties, body, workers_json='workers.json'):
                 print('failed: {0}'.format(str(e)))
                 status[worker['name']] = {'state': 'Error'}
         else:
-            extra_workers[worker['name']] = {'state': 'Queued'}
+            if not worker['name'] in status:
+                status[worker['name']] = {'state': 'Queued'}
     if 'id' in pipeline and 'results' in pipeline and pipeline['type'] == 'data':
         print(' [Data] %s UTC %r:%r:%r' % (str(datetime.datetime.utcnow()),
                                            method.routing_key,
@@ -124,7 +124,7 @@ def callback(ch, method, properties, body, workers_json='workers.json'):
                                               pipeline))
 
     ch.basic_ack(delivery_tag=method.delivery_tag)
-    set_status(status, extra_workers)
+    set_status(status)
 
 
 def main(queue_name, host):  # pragma: no cover
