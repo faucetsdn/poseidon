@@ -11,6 +11,7 @@ from prometheus_client import start_http_server
 
 
 def set_status(status):
+    global metrics
     for worker in status:
         metrics[worker].state(status[worker]['state'])
 
