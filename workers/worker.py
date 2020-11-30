@@ -12,7 +12,7 @@ from prometheus_client import start_http_server
 
 def set_status(status):
     for worker in status:
-        e = Enum(worker+'_state', 'State of worker '+worker, states=['In progress', 'Queued', 'Error', 'Complete'])
+        e = Enum(worker.replace('-', '_')+'_state', 'State of worker '+worker, states=['In progress', 'Queued', 'Error', 'Complete'])
         e.state(status[worker]['state'])
 
 
