@@ -6,22 +6,14 @@ import uuid
 
 import docker
 import pika
-from redis import StrictRedis
+from prometheus_client import Enum
+from prometheus_client import start_http_server
 
 
-def set_status(r, status, extra_workers):
-    try:
-        r.hset('status', mapping=status)
-        statuses = r.hgetall('status')
-        for s in statuses:
-            statuses[s] = json.loads(statuses[s])
-        for worker in extra_workers:
-            if worker not in statuses:
-                status[worker] = extra_workers[worker]
-        r.hset('status', mapping=status)
-    except Exception as e:  # pragma: no cover
-        print(f'Failed to update Redis because: {e}')
-    return
+def set_status(prom_metrics, status, extra_workers):
+    for worker in status:
+        e = Enum(worker+'_state', 'State of worker '+worker, states=['In progress', 'Queued', 'Error', 'Complete']
+        e.state(worker['state'])
 
 
 def callback(ch, method, properties, body, workers_json='workers.json'):
@@ -33,7 +25,6 @@ def callback(ch, method, properties, body, workers_json='workers.json'):
     worker_found = False
     status = {}
     extra_workers = {}
-    r = setup_redis()
     for worker in workers['workers']:
         file_path = pipeline['file_path']
         if file_path in ['-1', '']:
@@ -102,56 +93,45 @@ def callback(ch, method, properties, body, workers_json='workers.json'):
                                                                   pipeline['id'],
                                                                   image,
                                                                   pipeline))
-                status[worker['name']] = json.dumps(
-                    {'state': 'In progress', 'timestamp': str(datetime.datetime.utcnow())})
+                status[worker['name']] = {'state': 'In progress'}
                 worker_found = True
             except Exception as e:  # pragma: no cover
                 print('failed: {0}'.format(str(e)))
-                status[worker['name']] = json.dumps(
-                    {'state': 'Error', 'timestamp': str(datetime.datetime.utcnow())})
+                status[worker['name']] = {'state': 'Error'}
         else:
-            extra_workers[worker['name']] = json.dumps(
-                {'state': 'Queued', 'timestamp': str(datetime.datetime.utcnow())})
+            extra_workers[worker['name']] = {'state': 'Queued'}
     if 'id' in pipeline and 'results' in pipeline and pipeline['type'] == 'data':
         print(' [Data] %s UTC %r:%r:%r' % (str(datetime.datetime.utcnow()),
                                            method.routing_key,
                                            pipeline['id'],
                                            pipeline['results']))
-        status[pipeline['results']['tool']] = json.dumps(
-            {'state': 'In progress', 'timestamp': str(datetime.datetime.utcnow())})
+        status[pipeline['results']['tool']] = {'state': 'In progress'}
     elif 'id' in pipeline and 'results' in pipeline and pipeline['type'] == 'metadata':
         if 'data' in pipeline and pipeline['data'] != '':
             print(' [Metadata] %s UTC %r:%r:%r' % (str(datetime.datetime.utcnow()),
                                                    method.routing_key,
                                                    pipeline['id'],
                                                    pipeline['results']))
-            status[pipeline['results']['tool']] = json.dumps(
-                {'state': 'In progress', 'timestamp': str(datetime.datetime.utcnow())})
+            status[pipeline['results']['tool']] = {'state': 'In progress'}
         else:
             print(' [Finished] %s UTC %r:%r' % (str(datetime.datetime.utcnow()),
                                                 method.routing_key,
                                                 pipeline))
-            status[pipeline['results']['tool']] = json.dumps(
-                {'state': 'Complete', 'timestamp': str(datetime.datetime.utcnow())})
+            status[pipeline['results']['tool']] = {'state': 'Complete'}
     elif not worker_found:
         print(' [X no match] %s UTC %r:%r' % (str(datetime.datetime.utcnow()),
                                               method.routing_key,
                                               pipeline))
 
     ch.basic_ack(delivery_tag=method.delivery_tag)
-
-    set_status(r, status, extra_workers)
-    try:
-        if hasattr(r, 'close'):
-            r.close()
-    except Exception as e:  # pragma: no cover
-        print('Failed to close Redis connection because: {0}'.format(str(e)))
+    set_status(status, extra_workers)
 
 
 def main(queue_name, host):  # pragma: no cover
     """Creates the connection to RabbitMQ as a consumer and binds to the queue
     waiting for messages
     """
+    start_prom()
     counter = 0
     while True:
         counter += 1
@@ -178,14 +158,8 @@ def setup_docker():
     return docker.from_env()
 
 
-def setup_redis(host='redis', port=6379, db=0):
-    r = None
-    try:
-        r = StrictRedis(host=host, port=port, db=db,
-                        socket_connect_timeout=2, decode_responses=True)
-    except Exception as e:  # pragma: no cover
-        print('Failed connect to Redis because: {0}'.format(str(e)))
-    return r
+def start_prom(port=9305):
+    start_http_server(port)
 
 
 def load_workers(workers_json='workers.json'):
