@@ -10,10 +10,11 @@ from prometheus_client import Enum
 from prometheus_client import start_http_server
 
 
+metrics = init_metrics()
+
 def set_status(status):
     for worker in status:
-        e = Enum(worker.replace('-', '_')+'_state', 'State of worker '+worker, states=['In progress', 'Queued', 'Error', 'Complete'])
-        e.state(status[worker]['state'])
+        metrics[worker].state(status[worker]['state'])
 
 
 def callback(ch, method, properties, body, workers_json='workers.json'):
@@ -160,6 +161,14 @@ def setup_docker():
 
 def start_prom(port=9305):
     start_http_server(port)
+
+
+def init_metrics():
+    metrics = {}
+    workers = load_workers()
+    for worker in workers:
+        metrics[worker] = Enum(worker.replace('-', '_')+'_state', 'State of worker '+worker, states=['In progress', 'Queued', 'Error', 'Complete'])
+    return metrics
 
 
 def load_workers(workers_json='workers.json'):
