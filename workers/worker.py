@@ -166,7 +166,7 @@ def start_prom(port=9305):
 
 
 def init_metrics(workers):
-    metrics = {}
+    global metrics
     for worker in workers:
         metrics[worker] = Enum(worker.replace('-', '_')+'_state',
                                'State of worker '+worker,
@@ -174,7 +174,6 @@ def init_metrics(workers):
                                        'Queued',
                                        'Error',
                                        'Complete'])
-    return metrics
 
 
 def load_workers(workers_json='workers.json'):
@@ -186,6 +185,6 @@ def load_workers(workers_json='workers.json'):
 if __name__ == '__main__':  # pragma: no cover
     queue_name = os.getenv('RABBIT_QUEUE_NAME', 'task_queue')
     workers = load_workers()
-    metrics = init_metrics(workers)
+    init_metrics(workers)
     host = os.getenv('RABBIT_HOST', 'messenger')
     main(queue_name, host)
