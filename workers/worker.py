@@ -10,8 +10,6 @@ from prometheus_client import Enum
 from prometheus_client import start_http_server
 
 
-metrics = init_metrics()
-
 def set_status(status):
     for worker in status:
         metrics[worker].state(status[worker]['state'])
@@ -167,7 +165,12 @@ def init_metrics():
     metrics = {}
     workers = load_workers()
     for worker in workers:
-        metrics[worker] = Enum(worker.replace('-', '_')+'_state', 'State of worker '+worker, states=['In progress', 'Queued', 'Error', 'Complete'])
+        metrics[worker] = Enum(worker.replace('-', '_')+'_state',
+                               'State of worker '+worker,
+                               states=['In progress',
+                                       'Queued',
+                                       'Error',
+                                       'Complete'])
     return metrics
 
 
@@ -177,7 +180,12 @@ def load_workers(workers_json='workers.json'):
     return workers
 
 
+# global for callback simplicity
+metrics = init_metrics()
+
+
 if __name__ == '__main__':  # pragma: no cover
     queue_name = os.getenv('RABBIT_QUEUE_NAME', 'task_queue')
     host = os.getenv('RABBIT_HOST', 'messenger')
+
     main(queue_name, host)
