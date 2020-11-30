@@ -6,6 +6,7 @@ Created on 31 Dec 2019
 import os
 
 from workers.worker import callback
+from workers.worker import init_metrics
 from workers.worker import load_workers
 from workers.worker import setup_docker
 
@@ -30,6 +31,8 @@ def test_callback():
             self.delivery_tag = None
             self.routing_key = ''
 
+    workers = load_workers(WORKERS_JSON)
+    metrics = init_metrics(workers)
     os.environ['VOL_PREFIX'] = '/tmp'
     ch = MockChannel()
     method = MockMethod()

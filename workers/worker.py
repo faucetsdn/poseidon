@@ -10,6 +10,9 @@ from prometheus_client import Enum
 from prometheus_client import start_http_server
 
 
+metrics = {}
+
+
 def set_status(status):
     global metrics
     for worker in status:
@@ -180,11 +183,9 @@ def load_workers(workers_json='workers.json'):
     return workers
 
 
-workers = load_workers()
-metrics = init_metrics(workers)
-
-
 if __name__ == '__main__':  # pragma: no cover
     queue_name = os.getenv('RABBIT_QUEUE_NAME', 'task_queue')
+    workers = load_workers()
+    metrics = init_metrics(workers)
     host = os.getenv('RABBIT_HOST', 'messenger')
     main(queue_name, host)
