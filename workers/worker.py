@@ -10,7 +10,7 @@ from prometheus_client import Enum
 from prometheus_client import start_http_server
 
 
-def set_status(prom_metrics, status, extra_workers):
+def set_status(status, extra_workers):
     for worker in status:
         e = Enum(worker+'_state', 'State of worker '+worker, states=['In progress', 'Queued', 'Error', 'Complete'])
         e.state(worker['state'])
