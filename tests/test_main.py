@@ -10,6 +10,8 @@ import logging
 import queue
 import time
 
+from prometheus_client import REGISTRY
+
 from poseidon.constants import NO_DATA
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import endpoint_factory
@@ -341,8 +343,14 @@ def test_SDNConnect_init():
     SDNConnect(controller, logger)
 
 
+def unregister_metrics():
+    for collector, names in tuple(REGISTRY._collector_to_names.items()):
+        REGISTRY.unregister(collector)
+
+
 def test_process():
 
+    unregister_metrics()
     from threading import Thread
 
     class MockMonitor(Monitor):
