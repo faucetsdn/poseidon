@@ -16,3 +16,6 @@ scrape_configs:
   - job_name: 'poseidon'
     static_configs:
       - targets: ['poseidon:9304']
+  - job_name: 'poseidon workers'
+    static_configs:
+      - targets: ['workers:9305']

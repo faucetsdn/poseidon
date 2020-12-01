@@ -66,7 +66,8 @@ class Prometheus():
 
     @staticmethod
     def get_metrics():
-        metrics = {'roles': {},
+        metrics = {'info': {},
+                   'roles': {},
                    'oses': {},
                    'current_states': {('Poseidon', 'known'): 0,
                                       ('Poseidon', 'unknown'): 0,
@@ -80,7 +81,8 @@ class Prometheus():
                    'port_tenants': {},
                    'port_hosts': {},
                    'inactives': 0,
-                   'actives': 0}
+                   'actives': 0,
+                   'last_rabbitmq_routing_key_time': 0}
         return metrics
 
     def update_metrics(self, hosts):
@@ -97,6 +99,15 @@ class Prometheus():
             return res
 
         metrics = Prometheus.get_metrics()
+
+        # get version
+        try:
+            with open('/poseidon/VERSION', 'r') as f:  # pragma: no cover
+                for line in f:
+                    metrics['info']['version'] = line.strip()
+        except Exception as e:
+            print('Unable to get version from the version file')
+
         for host in hosts:
             if host['active'] == 0:
                 metrics['inactives'] += 1
