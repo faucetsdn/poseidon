@@ -10,12 +10,14 @@ import logging
 import queue
 import time
 
+from prometheus_client import Summary
+
 from poseidon.constants import NO_DATA
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import endpoint_factory
 from poseidon.helpers.metadata import DNSResolver
+from poseidon.helpers.prometheus import Prometheus
 from poseidon.helpers.rabbit import Rabbit
-from poseidon.main import CTRL_C
 from poseidon.monitor import Monitor
 from poseidon.sdnconnect import SDNConnect
 
@@ -136,50 +138,8 @@ def test_endpoints_by_mac():
     assert [endpoint] == endpoint2
 
 
-def test_signal_handler():
-
-    class MockLogger:
-        def __init__(self):
-            self.logger = logger
-
-    class MockRabbitConnection:
-
-        @staticmethod
-        def close():
-            return True
-
-    class MockMonitor(Monitor):
-
-        def __init__(self):
-            self.logger = logger
-            self.controller = get_test_controller()
-            self.s = SDNConnect(self.controller, logger)
-            self.ctrl_c = CTRL_C
-            self.rabbits = []
-
-    class MockSchedule:
-        call_log = []
-
-        def __init__(self):
-            self.jobs = ['job1', 'job2', 'job3']
-
-        def cancel_job(self, job):
-            self.call_log.append(job + ' cancelled')
-            return job + ' cancelled'
-
-    mock_monitor = MockMonitor()
-    mock_monitor.schedule = MockSchedule()
-    mock_monitor.logger = MockLogger().logger
-    mock_monitor.rabbits.append(Rabbit())
-
-    mock_monitor.signal_handler(None, None, sig_exit=False)
-    assert ['job1 cancelled', 'job2 cancelled',
-            'job3 cancelled'] == mock_monitor.schedule.call_log
-    for rabbit in mock_monitor.rabbits:
-        assert not rabbit.connection
-
-
 def test_get_q_item():
+
     class MockMQueue:
 
         def get(self, block, timeout):
@@ -188,29 +148,22 @@ def test_get_q_item():
         def task_done(self):
             return
 
-    CTRL_C['STOP'] = False
-
     class MockMonitor(Monitor):
 
         def __init__(self):
             self.logger = logger
             self.controller = get_test_controller()
             self.s = SDNConnect(self.controller, logger)
-            self.ctrl_c = CTRL_C
 
     mock_monitor = MockMonitor()
     m_queue = MockMQueue()
     assert (True, 'Item') == mock_monitor.get_q_item(m_queue)
 
-    CTRL_C['STOP'] = True
-    m_queue = MockMQueue()
-    assert (False, None) == mock_monitor.get_q_item(m_queue)
-
 
 def test_format_rabbit_message():
-    CTRL_C['STOP'] = False
 
     class MockLogger:
+
         def __init__(self):
             self.logger = logger
 
@@ -226,7 +179,6 @@ def test_format_rabbit_message():
             self.controller = get_test_controller()
             self.s = SDNConnect(self.controller, logger)
             self.s.sdnc = MockParser()
-            self.ctrl_c = CTRL_C
 
         def update_routing_key_time(self, routing_key):
             return
@@ -372,7 +324,7 @@ def test_find_new_machines():
 
 
 def test_Monitor_init():
-    monitor = Monitor(logger, CTRL_C, controller=get_test_controller())
+    monitor = Monitor(logger, controller=get_test_controller())
     hosts = [{'active': 0, 'source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'ipv4_os': 'unknown', 'tenant': 'vlan1', 'port': 1, 'segment': 'switch1', 'ipv4': '123.123.123.123', 'mac': '00:00:00:00:00:00', 'id': 'foo1', 'ipv6': '0'},
              {'active': 1, 'source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'ipv4_os': 'unknown', 'tenant': 'vlan1',
                  'port': 1, 'segment': 'switch1', 'ipv4': '123.123.123.123', 'mac': '00:00:00:00:00:00', 'id': 'foo2', 'ipv6': '0'},
@@ -392,13 +344,8 @@ def test_SDNConnect_init():
 
 
 def test_process():
-    from threading import Thread
 
-    def thread1():
-        global CTRL_C
-        CTRL_C['STOP'] = False
-        time.sleep(5)
-        CTRL_C['STOP'] = True
+    from threading import Thread
 
     class MockMonitor(Monitor):
 
@@ -412,7 +359,12 @@ def test_process():
             self.s.get_sdn_context()
             self.job_queue = queue.Queue()
             self.m_queue = queue.Queue()
-            self.ctrl_c = CTRL_C
+            self.prom = Prometheus()
+            self.prom.prom_metrics['monitor_runtime_secs'] = Summary(
+                'mock_monitor_runtime_secs',
+                'Time spent in Monitor methods',
+                ['method'])
+            self.running = True
             endpoint = endpoint_factory('foo')
             endpoint.endpoint_data = {
                 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
@@ -455,18 +407,13 @@ def test_process():
     for handler in handlers:
         handler()
 
-    t1 = Thread(target=thread1)
-    t1.start()
-    mock_monitor.process()
-
-    t1.join()
-
-    mock_monitor.get_q_item = mock_monitor.bad_get_q_item
+    def thread1():
+        time.sleep(5)
+        mock_monitor.running = False
 
     t1 = Thread(target=thread1)
     t1.start()
     mock_monitor.process()
-
     t1.join()
 
     mock_monitor.s.sdnc = None
@@ -506,12 +453,6 @@ def test_merge_machine():
 def test_schedule_thread_worker():
     from threading import Thread
 
-    def thread1():
-        global CTRL_C
-        CTRL_C['STOP'] = False
-        time.sleep(5)
-        CTRL_C['STOP'] = True
-
     class mockSchedule():
 
         def __init__(self):
@@ -531,15 +472,19 @@ def test_schedule_thread_worker():
             self.logger = logger
             self.controller = get_test_controller()
             self.s = SDNConnect(self.controller, logger)
-            self.ctrl_c = CTRL_C
+            self.running = True
+
+    mock_monitor = MockMonitor()
+
+    def thread1():
+        time.sleep(5)
+        mock_monitor.running = False
 
     sys = mocksys()
     t1 = Thread(target=thread1)
     t1.start()
-    monitor = MockMonitor()
     try:
-        monitor.schedule_thread_worker(mockSchedule())
+        mock_monitor.schedule_thread_worker(mockSchedule())
     except SystemExit:
         pass
-
     t1.join()

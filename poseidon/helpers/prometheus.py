@@ -9,6 +9,7 @@ from binascii import hexlify
 
 from prometheus_client import Gauge
 from prometheus_client import Info
+from prometheus_client import Summary
 from prometheus_client import start_http_server
 
 
@@ -63,6 +64,9 @@ class Prometheus():
         self.prom_metrics['last_rabbitmq_routing_key_time'] = Gauge('last_rabbitmq_routing_key_time',
                                                                     'Epoch time when last received a RabbitMQ message',
                                                                     ['routing_key'])
+        self.prom_metrics['monitor_runtime_secs'] = Summary('monitor_runtime_secs',
+                                                            'Time spent in Monitor methods',
+                                                            ['method'])
 
     @staticmethod
     def get_metrics():
