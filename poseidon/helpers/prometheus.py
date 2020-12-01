@@ -7,6 +7,7 @@ import logging
 import socket
 from binascii import hexlify
 
+from prometheus_client import Counter
 from prometheus_client import Gauge
 from prometheus_client import Info
 from prometheus_client import Summary
@@ -20,7 +21,7 @@ class Prometheus():
         self.prom_metrics = {}
 
     def initialize_metrics(self):
-        self.prom_metrics['info'] = Info('poseidon_info', 'Info about Poseidon')
+        self.prom_metrics['info'] = Info('info', 'Info about Poseidon')
         self.prom_metrics['inactive'] = Gauge('poseidon_endpoint_inactive',
                                               'Number of endpoints that are inactive')
         self.prom_metrics['active'] = Gauge('poseidon_endpoint_active',
@@ -64,6 +65,7 @@ class Prometheus():
         self.prom_metrics['last_rabbitmq_routing_key_time'] = Gauge('last_rabbitmq_routing_key_time',
                                                                     'Epoch time when last received a RabbitMQ message',
                                                                     ['routing_key'])
+        self.prom_metrics['ncapture_count'] = Counter('ncapture_count', 'Number of times ncapture ran')
         self.prom_metrics['monitor_runtime_secs'] = Summary('monitor_runtime_secs',
                                                             'Time spent in Monitor methods',
                                                             ['method'])
@@ -86,7 +88,7 @@ class Prometheus():
                    'port_hosts': {},
                    'inactives': 0,
                    'actives': 0,
-                   'last_rabbitmq_routing_key_time': 0}
+                   'ncapture_count': 0}
         return metrics
 
     def update_metrics(self, hosts):
@@ -224,8 +226,10 @@ class Prometheus():
             for port_host in metrics['port_hosts']:
                 self.prom_metrics['port_hosts'].labels(
                     port=port_host).set(metrics['port_hosts'][port_host])
+            self.prom_metrics['info'].set(metrics['info'])
             self.prom_metrics['inactive'].set(metrics['inactives'])
             self.prom_metrics['active'].set(metrics['actives'])
+            self.prom_metrics['ncapture_count'].set(metrics['ncapture_count'])
         except Exception as e:  # pragma: no cover
             self.logger.error(
                 'Unable to send results to prometheus because {0}'.format(str(e)))

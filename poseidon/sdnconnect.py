@@ -44,9 +44,7 @@ class SDNConnect:
     def mirror_endpoint(self, endpoint):
         ''' mirror an endpoint. '''
         status = Actions(endpoint, self.sdnc).mirror_endpoint()
-        if status:
-            self.prc.inc_network_tools_counts()
-        else:
+        if not status:
             self.logger.warning(
                 'Unable to mirror the endpoint: {0}'.format(endpoint.name))
 

@@ -10,7 +10,7 @@ import logging
 import queue
 import time
 
-from prometheus_client import Summary
+from prometheus_client import REGISTRY
 
 from poseidon.constants import NO_DATA
 from poseidon.helpers.config import Config
@@ -343,8 +343,14 @@ def test_SDNConnect_init():
     SDNConnect(controller, logger)
 
 
+def unregister_metrics():
+    for collector, names in tuple(REGISTRY._collector_to_names.items()):
+        REGISTRY.unregister(collector)
+
+
 def test_process():
 
+    unregister_metrics()
     from threading import Thread
 
     class MockMonitor(Monitor):
@@ -360,10 +366,7 @@ def test_process():
             self.job_queue = queue.Queue()
             self.m_queue = queue.Queue()
             self.prom = Prometheus()
-            self.prom.prom_metrics['monitor_runtime_secs'] = Summary(
-                'mock_monitor_runtime_secs',
-                'Time spent in Monitor methods',
-                ['method'])
+            self.prom.initialize_metrics()
             self.running = True
             endpoint = endpoint_factory('foo')
             endpoint.endpoint_data = {
