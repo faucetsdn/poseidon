@@ -153,18 +153,24 @@ class Endpoint:
         self.p_next_state = next_state
         self.queue()  # pytype: disable=attribute-error
 
+    def machine_trigger(self, state):
+        self.machine.events[state].trigger(self)  # pytype: disable=attribute-error
+
     def trigger_next(self):
         if self.p_next_state:
-            self.trigger(self.p_next_state)  # pytype: disable=attribute-error
+            self.machine_trigger(self.p_next_state)
             self.p_next_state = None
 
     def copro_queue_next(self, next_state):
         self.p_next_copro_state = next_state
         self.copro_queue()  # pytype: disable=attribute-error
 
+    def copro_machine_trigger(self, state):
+        self.copro_machine.events[state].trigger(self)  # pytype: disable=attribute-error
+
     def copro_trigger_next(self):
         if self.p_next_copro_state:
-            self.copro_machine.events[self.p_next_copro_state].trigger(self)  # pytype: disable=attribute-error
+            self.copro_machine_trigger(self.p_next_copro_state)
             self.p_next_copro_state = None
 
     def reactivate(self):
