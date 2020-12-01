@@ -18,12 +18,12 @@ def set_status(status):
         if worker in metrics:
             metrics[worker].state(status[worker]['state'])
         else:
-            metrics[worker['name']] = Enum(worker['name'].replace('-', '_')+'_state',
-                                           'State of worker '+worker['name'],
-                                           states=['In progress',
-                                                   'Queued',
-                                                   'Error',
-                                                   'Complete'])
+            metrics[worker] = Enum(worker.replace('-', '_')+'_state',
+                                   'State of worker '+worker,
+                                   states=['In progress',
+                                           'Queued',
+                                           'Error',
+                                           'Complete'])
 
 
 def callback(ch, method, properties, body, workers_json='workers.json'):
