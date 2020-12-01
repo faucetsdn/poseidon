@@ -15,7 +15,15 @@ metrics = {}
 def set_status(status):
     global metrics
     for worker in status:
-        metrics[worker].state(status[worker]['state'])
+        if worker in metrics:
+            metrics[worker].state(status[worker]['state'])
+        else:
+            metrics[worker['name']] = Enum(worker['name'].replace('-', '_')+'_state',
+                                           'State of worker '+worker['name'],
+                                           states=['In progress',
+                                                   'Queued',
+                                                   'Error',
+                                                   'Complete'])
 
 
 def callback(ch, method, properties, body, workers_json='workers.json'):
@@ -164,17 +172,6 @@ def start_prom(port=9305):
     start_http_server(port)
 
 
-def init_metrics(workers):
-    global metrics
-    for worker in workers['workers']:
-        metrics[worker['name']] = Enum(worker['name'].replace('-', '_')+'_state',
-                               'State of worker '+worker['name'],
-                               states=['In progress',
-                                       'Queued',
-                                       'Error',
-                                       'Complete'])
-
-
 def load_workers(workers_json='workers.json'):
     with open(workers_json) as json_file:
         workers = json.load(json_file)
@@ -183,7 +180,5 @@ def load_workers(workers_json='workers.json'):
 
 if __name__ == '__main__':  # pragma: no cover
     queue_name = os.getenv('RABBIT_QUEUE_NAME', 'task_queue')
-    workers = load_workers()
-    init_metrics(workers)
     host = os.getenv('RABBIT_HOST', 'messenger')
     main(queue_name, host)

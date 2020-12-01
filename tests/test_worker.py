@@ -12,7 +12,7 @@ from workers.worker import setup_docker
 
 WORKERS_JSON = 'workers/workers.json'
 workers = load_workers(WORKERS_JSON)
-metrics = init_metrics(workers)
+init_metrics(workers)
 
 
 def test_setup_docker():
