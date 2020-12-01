@@ -291,11 +291,3 @@ class PoseidonRedisClient:
             except Exception as e:  # pragma: no cover
                 self.logger.error(
                     'Unable to store endpoints in Redis because {0}'.format(str(e)))
-
-    def inc_network_tools_counts(self):
-        if self.r is not None:
-            try:
-                self.r.hincrby('network_tools_counts', 'ncapture')
-            except Exception as e:  # pragma: no cover
-                self.logger.error(
-                    'Failed to update count of plugins because: {0}'.format(str(e)))

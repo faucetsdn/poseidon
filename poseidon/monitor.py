@@ -215,6 +215,7 @@ class Monitor:
                         endpoint.p_next_state = None
                         if endpoint.mirror_active():
                             self.s.mirror_endpoint(endpoint)
+                            self.prom.prom_metrics['ncapture_count'].inc()
                     except Exception as e:  # pragma: no cover
                         self.logger.error(
                             'Unable to change endpoint {0} because: {1}'.format(endpoint.name, str(e)))
@@ -291,6 +292,8 @@ class Monitor:
             for endpoint in queued_endpoints[:budget]:
                 getattr(endpoint, endpoint_state)()
                 endpoint_work(endpoint)
+                if endpoint_state in ['trigger_next', 'reinvestigate']:
+                    self.prom.prom_metrics['ncapture_count'].inc()
                 events += 1
         return events
 
