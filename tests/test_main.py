@@ -364,6 +364,9 @@ def test_process():
                 'mock_monitor_runtime_secs',
                 'Time spent in Monitor methods',
                 ['method'])
+            self.prom.prom_metrics['ncapture_count'] = Counter(
+                'ncapture_count',
+                'Number of times ncapture ran')
             self.running = True
             endpoint = endpoint_factory('foo')
             endpoint.endpoint_data = {
