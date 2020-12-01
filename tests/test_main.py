@@ -10,6 +10,7 @@ import logging
 import queue
 import time
 
+from prometheus_client import Counter
 from prometheus_client import Summary
 
 from poseidon.constants import NO_DATA
