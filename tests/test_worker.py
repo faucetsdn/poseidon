@@ -6,13 +6,10 @@ Created on 31 Dec 2019
 import os
 
 from workers.worker import callback
-from workers.worker import init_metrics
 from workers.worker import load_workers
 from workers.worker import setup_docker
 
 WORKERS_JSON = 'workers/workers.json'
-workers = load_workers(WORKERS_JSON)
-init_metrics(workers)
 
 
 def test_setup_docker():
