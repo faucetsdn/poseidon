@@ -72,7 +72,8 @@ class Prometheus():
 
     @staticmethod
     def get_metrics():
-        metrics = {'roles': {},
+        metrics = {'info': {},
+                   'roles': {},
                    'oses': {},
                    'current_states': {('Poseidon', 'known'): 0,
                                       ('Poseidon', 'unknown'): 0,
@@ -225,6 +226,7 @@ class Prometheus():
             for port_host in metrics['port_hosts']:
                 self.prom_metrics['port_hosts'].labels(
                     port=port_host).set(metrics['port_hosts'][port_host])
+            self.prom_metrics['info'].set(metrics['info'])
             self.prom_metrics['inactive'].set(metrics['inactives'])
             self.prom_metrics['active'].set(metrics['actives'])
             self.prom_metrics['ncapture_count'].set(metrics['ncapture_count'])
