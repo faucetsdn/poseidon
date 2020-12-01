@@ -10,9 +10,6 @@ import logging
 import queue
 import time
 
-from prometheus_client import Counter
-from prometheus_client import Summary
-
 from poseidon.constants import NO_DATA
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import endpoint_factory
@@ -361,13 +358,7 @@ def test_process():
             self.job_queue = queue.Queue()
             self.m_queue = queue.Queue()
             self.prom = Prometheus()
-            self.prom.prom_metrics['monitor_runtime_secs'] = Summary(
-                'mock_monitor_runtime_secs',
-                'Time spent in Monitor methods',
-                ['method'])
-            self.prom.prom_metrics['ncapture_count'] = Counter(
-                'ncapture_count',
-                'Number of times ncapture ran')
+            self.prom.initialize_metrics()
             self.running = True
             endpoint = endpoint_factory('foo')
             endpoint.endpoint_data = {
