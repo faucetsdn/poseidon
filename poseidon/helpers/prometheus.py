@@ -10,6 +10,7 @@ from binascii import hexlify
 from prometheus_client import Counter
 from prometheus_client import Gauge
 from prometheus_client import Info
+from prometheus_client import Summary
 from prometheus_client import start_http_server
 
 
@@ -65,6 +66,9 @@ class Prometheus():
                                                                     'Epoch time when last received a RabbitMQ message',
                                                                     ['routing_key'])
         self.prom_metrics['ncapture_count'] = Counter('ncapture_count', 'Number of times ncapture ran')
+        self.prom_metrics['monitor_runtime_secs'] = Summary('monitor_runtime_secs',
+                                                            'Time spent in Monitor methods',
+                                                            ['method'])
 
     @staticmethod
     def get_metrics():

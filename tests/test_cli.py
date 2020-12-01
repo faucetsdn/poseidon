@@ -340,9 +340,9 @@ def test_get_history():
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
     history = GetData._get_history(endpoint)
     assert history == 'No history recorded yet.'
-    endpoint.trigger('mirror')
-    endpoint.trigger('known')
-    endpoint.trigger('inactive')
+    endpoint.machine_trigger('mirror')
+    endpoint.machine_trigger('known')
+    endpoint.machine_trigger('inactive')
     history = GetData._get_history(endpoint)
     assert history != 'No history recorded yet.'
 

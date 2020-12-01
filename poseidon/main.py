@@ -12,15 +12,11 @@ from poseidon.helpers.log import Logger
 from poseidon.helpers.rabbit import Rabbit
 from poseidon.monitor import Monitor
 
-CTRL_C = dict()
-CTRL_C['STOP'] = False
-
-
 def main():  # pragma: no cover
     logging.getLogger('pika').setLevel(logging.WARNING)
     Logger()
     logger = logging.getLogger('main')
-    pmain = Monitor(logger, CTRL_C)
+    pmain = Monitor(logger)
     host = pmain.controller['FA_RABBIT_HOST']
     port = int(pmain.controller['FA_RABBIT_PORT'])
 
@@ -49,8 +45,6 @@ def main():  # pragma: no cover
         pmain.process()
     except Exception as e:
         logger.error('process() exception: {0}'.format(str(e)))
-
-    pmain.shutdown()
 
 
 if __name__ == '__main__':  # pragma: no cover

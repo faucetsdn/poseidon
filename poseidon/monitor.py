@@ -3,7 +3,7 @@
 import json
 import queue
 import random
-import signal
+import re
 import sys
 import threading
 import time
@@ -22,12 +22,12 @@ requests.packages.urllib3.disable_warnings()
 
 class Monitor:
 
-    def __init__(self, logger, ctrl_c, controller=None):
+    def __init__(self, logger, controller=None):
         self.logger = logger
-        self.ctrl_c = ctrl_c
         self.m_queue = queue.Queue()
         self.job_queue = queue.Queue()
         self.rabbits = []
+        self.running = True
 
         # get config options
         if controller is None:
@@ -65,12 +65,10 @@ class Monitor:
     def schedule_thread_worker(self, scheduler=schedule):
         ''' schedule thread, takes care of running processes in the future '''
         self.logger.debug('Starting thread_worker')
-        while not self.ctrl_c['STOP']:
+        while self.running:
             sys.stdout.flush()
             scheduler.run_pending()
             time.sleep(1)
-        self.logger.debug('Threading stop:{0}'.format(
-            threading.current_thread().getName()))
 
     def rabbit_callback(self, ch, method, _properties, body, q=None):
         ''' callback, places rabbit data into internal queue'''
@@ -104,10 +102,7 @@ class Monitor:
             return 0
         events = 0
         for endpoint in self.s.not_copro_ignored_endpoints():
-            if endpoint.copro_state == 'copro_unknown':
-                endpoint.copro_queue_next('copro_coprocess')
-                events += 1
-            elif endpoint.copro_state == 'copro_coprocessing':
+            if endpoint.copro_state == 'copro_coprocessing':
                 if endpoint.copro_state_timeout(2*self.controller['coprocessing_frequency']):
                     self.logger.debug(
                         'timing out: {0} and setting to unknown'.format(endpoint.name))
@@ -125,10 +120,7 @@ class Monitor:
             return 0
         events = 0
         for endpoint in self.s.not_ignored_endpoints():
-            if endpoint.state == 'unknown':
-                endpoint.queue_next('mirror')
-                events += 1
-            elif endpoint.mirror_active():
+            if endpoint.mirror_active():
                 if endpoint.state_timeout(2*self.controller['reinvestigation_frequency']):
                     self.logger.debug(
                         'timing out: {0} and setting to unknown'.format(endpoint.name))
@@ -211,7 +203,7 @@ class Monitor:
                     try:
                         if endpoint.mirror_active():
                             self.s.unmirror_endpoint(endpoint)
-                        endpoint.trigger(state)  # pytype: disable=attribute-error
+                        endpoint.machine_trigger(state)  # pytype: disable=attribute-error
                         endpoint.p_next_state = None
                         if endpoint.mirror_active():
                             self.s.mirror_endpoint(endpoint)
@@ -298,6 +290,8 @@ class Monitor:
         return events
 
     def schedule_mirroring(self):
+        for endpoint in self.s.not_ignored_endpoints('unknown'):
+            endpoint.queue_next('mirror')
         budget = self.s.investigation_budget()
         queued_endpoints = [
             endpoint for endpoint in self.s.not_ignored_endpoints('queued')
@@ -308,6 +302,8 @@ class Monitor:
         return self._schedule_queued_work(queued_endpoints, budget, 'trigger_next', self.s.mirror_endpoint)
 
     def schedule_coprocessing(self):
+        for endpoint in self.s.not_copro_ignored_endpoints('copro_unknown'):
+            endpoint.copro_queue_next('copro_coprocess')
         budget = self.s.coprocessing_budget()
         queued_endpoints = self.s.not_copro_ignored_endpoints('copro_queued')
         queued_endpoints = sorted(queued_endpoints, key=lambda x: x.copro_state_time())
@@ -315,35 +311,42 @@ class Monitor:
             str(self.s.coprocessing), str(budget), str(len(queued_endpoints))))
         return self._schedule_queued_work(queued_endpoints, budget, 'copro_trigger_next', self.s.coprocess_endpoint)
 
+    def monitor_callable(self, monitored_callable):
+        method_name = str(monitored_callable)
+        method_re = re.compile(r'.+bound method (\S+).+')
+        method_match = method_re.match(method_name)
+        if method_match:
+            method_name = method_match.group(1)
+        with self.prom.prom_metrics['monitor_runtime_secs'].labels(method=method_name).time():
+            return monitored_callable()
+
+    def handle_rabbit(self):
+        events = 0
+        faucet_event = []
+        remove_list = []
+        while True:
+            found_work, rabbit_msg = self.monitor_callable(partial(self.get_q_item, self.m_queue))
+            if not found_work:
+                break
+            events += 1
+            self.monitor_callable(partial(self.format_rabbit_message, rabbit_msg, faucet_event, remove_list))
+        return (events, faucet_event, remove_list)
+
     def process(self):
-        signal.signal(signal.SIGINT, partial(self.signal_handler))
-        while not self.ctrl_c['STOP']:
-            faucet_event = []
-            remove_list = []
-            events = 0
-            while True:
-                found_work, rabbit_msg = self.get_q_item(self.m_queue)
-                if not found_work:
-                    break
-                events += 1
-                self.format_rabbit_message(
-                    rabbit_msg, faucet_event, remove_list)
+        while self.running:
+            events, faucet_event, remove_list = self.monitor_callable(self.handle_rabbit)
             if remove_list:
                 for endpoint_name in remove_list:
                     if endpoint_name in self.s.endpoints:
                         del self.s.endpoints[endpoint_name]
             if faucet_event:
-                self.s.check_endpoints(faucet_event)
-            events += self.schedule_mirroring()
-            found_work, schedule_func = self.get_q_item(self.job_queue)
+                self.monitor_callable(partial(self.s.check_endpoints, faucet_event))
+            events += self.monitor_callable(self.schedule_mirroring)
+            found_work, schedule_func = self.monitor_callable(partial(self.get_q_item, self.job_queue))
             if found_work and callable(schedule_func):
-                self.logger.info('calling %s', schedule_func)
-                start_time = time.time()
-                events += schedule_func()
-                self.logger.debug('%s done (%.1f sec)' %
-                                  (schedule_func, time.time() - start_time))
+                events += self.monitor_callable(schedule_func)
             if events:
-                self.s.refresh_endpoints()
+                self.monitor_callable(self.s.refresh_endpoints)
 
     def get_q_item(self, q, timeout=1):
         '''
@@ -352,36 +355,11 @@ class Monitor:
         a read from get_q_item should be of the form
         (boolean,(routing_key, body))
         '''
-        if not self.ctrl_c['STOP']:
-            try:
-                if timeout:
-                    return(True, q.get(True, timeout=timeout))
-                return (True, q.get_nowait())
-            except queue.Empty:  # pragma: no cover
-                pass
+        try:
+            if timeout:
+                return(True, q.get(True, timeout=timeout))
+            return (True, q.get_nowait())
+        except queue.Empty:  # pragma: no cover
+            pass
 
         return (False, None)
-
-    def shutdown(self):
-        ''' gracefully shut down. '''
-        self.s.clear_filters()
-        self.s.refresh_endpoints()
-        for job in self.schedule.jobs:
-            self.logger.debug('shutdown :{0}'.format(job))
-            self.schedule.cancel_job(job)
-        for rabbit in self.rabbits:
-            rabbit.close()
-        self.logger.debug('SHUTTING DOWN')
-        self.logger.debug('EXITING')
-
-    def signal_handler(self, _signal, _frame, sig_exit=True):
-        ''' hopefully eat a CTRL_C and signal system shutdown '''
-        self.ctrl_c['STOP'] = True
-        self.logger.debug('CTRL-C: {0}'.format(self.ctrl_c))
-        try:
-            self.shutdown()
-        except Exception as e:  # pragma: no cover
-            self.logger.debug(
-                'Failed to handle signal properly because: {0}'.format(str(e)))
-        if sig_exit:
-            sys.exit(0)
