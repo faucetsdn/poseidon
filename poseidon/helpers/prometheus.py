@@ -229,7 +229,6 @@ class Prometheus():
             self.prom_metrics['info'].info(metrics['info'])
             self.prom_metrics['inactive'].set(metrics['inactives'])
             self.prom_metrics['active'].set(metrics['actives'])
-            self.prom_metrics['ncapture_count'].set(metrics['ncapture_count'])
         except Exception as e:  # pragma: no cover
             self.logger.error(
                 'Unable to send results to prometheus because {0}'.format(str(e)))
