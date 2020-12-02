@@ -359,7 +359,9 @@ class Monitor:
         (boolean,(routing_key, body))
         '''
         try:
-            return (True, q.get_nowait())
+            item = q.get_nowait()
+            q.task_done()
+            return (True, item)
         except queue.Empty:  # pragma: no cover
             pass
 
