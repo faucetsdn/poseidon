@@ -208,10 +208,10 @@ If run repeatedly over a couple of minutes this timestamp should increase.
 
 ```
 docker exec -it poseidon_poseidon_1 /bin/sh
-/poseidon # wget -q -O- localhost:9304|grep -E ^last_rabbitmq_routing_key_time.+FAUCET.Event
-last_rabbitmq_routing_key_time{routing_key="FAUCET.Event"} 1.5739482267393966e+09
-/poseidon # wget -q -O- localhost:9304|grep -E ^last_rabbitmq_routing_key_time.+FAUCET.Event
-last_rabbitmq_routing_key_time{routing_key="FAUCET.Event"} 1.5739487978768678e+09
+/poseidon # wget -q -O- localhost:9304|grep -E ^poseidon_last_rabbitmq_routing_key_time.+FAUCET.Event
+poseidon_last_rabbitmq_routing_key_time{routing_key="FAUCET.Event"} 1.5739482267393966e+09
+/poseidon # wget -q -O- localhost:9304|grep -E ^poseidon_last_rabbitmq_routing_key_time.+FAUCET.Event
+poseidon_last_rabbitmq_routing_key_time{routing_key="FAUCET.Event"} 1.5739487978768678e+09
 /poseidon # exit
 ```
 

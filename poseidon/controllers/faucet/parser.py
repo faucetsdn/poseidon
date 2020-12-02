@@ -222,24 +222,32 @@ class Parser:
         for message_type in ('L2_LEARN', 'L2_EXPIRE', 'PORT_CHANGE'):
             message_body = message.get(message_type, None)
             if message_body:
+                switch = str(message['dp_name'])
+                port_no = message_body.get('port_no', None)
+                vlan = message_body.get('vid', None)
                 # When stacking is in use, we only want to learn on switch, that a host is local to.
                 if 'stack_descr' in message_body:
                     self.logger.debug(
                         'ignoring event because learning from a stack port')
                     return True
                 if self.ignore_vlans:
-                    vlan = message_body.get('vid', None)
                     if vlan in self.ignore_vlans:
                         self.logger.debug(
                             'ignoring event because VLAN %s ignored' % vlan)
                         return True
                 if self.ignore_ports:
-                    switch = str(message['dp_name'])
-                    port_no = message_body.get('port_no', None)
                     for ignore_switch, ignore_port_no in self.ignore_ports.items():
                         if ignore_switch == switch and ignore_port_no == port_no:
                             self.logger.debug(
                                 'ignoring event because switch %s port %s is ignored' % (
+                                    switch, port_no))
+                            return True
+                if self.proxy_mirror_ports:
+                    for s in self.proxy_mirror_ports:
+                        if (switch == self.proxy_mirror_ports[s][0] and
+                            port_no == self.proxy_mirror_ports[s][1]):
+                            self.logger.debug(
+                                'ignoring event because switch %s port %s is being a proxy' % (
                                     switch, port_no))
                             return True
                 # Not on any ignore list, don't ignore.
