@@ -142,6 +142,9 @@ def test_get_q_item():
 
     class MockMQueue:
 
+        def task_done(self):
+            return
+
         def get_nowait(self):
             return 'Item'
 
