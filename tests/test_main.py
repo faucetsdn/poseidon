@@ -142,7 +142,7 @@ def test_get_q_item():
 
     class MockMQueue:
 
-        def get(self, block, timeout):
+        def get_nowait(self):
             return 'Item'
 
         def task_done(self):
