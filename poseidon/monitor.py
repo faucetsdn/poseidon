@@ -347,8 +347,11 @@ class Monitor:
                 events += self.monitor_callable(schedule_func)
             if events:
                 self.monitor_callable(self.s.refresh_endpoints)
+            else:
+                time.sleep(1)
 
-    def get_q_item(self, q, timeout=1):
+    @staticmethod
+    def get_q_item(q):
         '''
         attempt to get a work item from the queue
         m_queue -> (routing_key, body)
@@ -356,8 +359,6 @@ class Monitor:
         (boolean,(routing_key, body))
         '''
         try:
-            if timeout:
-                return(True, q.get(True, timeout=timeout))
             return (True, q.get_nowait())
         except queue.Empty:  # pragma: no cover
             pass
