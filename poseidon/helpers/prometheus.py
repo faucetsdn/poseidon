@@ -21,7 +21,7 @@ class Prometheus():
         self.prom_metrics = {}
 
     def initialize_metrics(self):
-        self.prom_metrics['info'] = Info('info', 'Info about Poseidon')
+        self.prom_metrics['info'] = Info('poseidon_version', 'Info about Poseidon')
         self.prom_metrics['inactive'] = Gauge('poseidon_endpoint_inactive',
                                               'Number of endpoints that are inactive')
         self.prom_metrics['active'] = Gauge('poseidon_endpoint_active',
@@ -62,11 +62,11 @@ class Prometheus():
         self.prom_metrics['port_hosts'] = Gauge('poseidon_endpoint_port_hosts',
                                                 'Number of hosts by port',
                                                 ['port'])
-        self.prom_metrics['last_rabbitmq_routing_key_time'] = Gauge('last_rabbitmq_routing_key_time',
+        self.prom_metrics['last_rabbitmq_routing_key_time'] = Gauge('poseidon_last_rabbitmq_routing_key_time',
                                                                     'Epoch time when last received a RabbitMQ message',
                                                                     ['routing_key'])
-        self.prom_metrics['ncapture_count'] = Counter('ncapture_count', 'Number of times ncapture ran')
-        self.prom_metrics['monitor_runtime_secs'] = Summary('monitor_runtime_secs',
+        self.prom_metrics['ncapture_count'] = Counter('poseidon_ncapture_count', 'Number of times ncapture ran')
+        self.prom_metrics['monitor_runtime_secs'] = Summary('poseidon_monitor_runtime_secs',
                                                             'Time spent in Monitor methods',
                                                             ['method'])
 

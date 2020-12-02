@@ -6,7 +6,7 @@ import uuid
 
 import docker
 import pika
-from prometheus_client import Enum
+from prometheus_client import Gauge
 from prometheus_client import start_http_server
 
 metrics = {}
@@ -15,15 +15,12 @@ metrics = {}
 def set_status(status):
     global metrics
     for worker in status:
-        if worker in metrics:
-            metrics[worker].state(status[worker]['state'])
+        if 'workers_state' in metrics:
+            metrics['workers_state'].labels(worker=worker, state=status[worker]['state']).inc()
         else:
-            metrics[worker] = Enum(worker.replace('-', '_')+'_state',
-                                   'State of worker '+worker,
-                                   states=['In progress',
-                                           'Queued',
-                                           'Error',
-                                           'Complete'])
+            metrics['workers_state'] = Gauge('workers_state',
+                                             'State of workers',
+                                             ['worker', 'state'])
 
 
 def callback(ch, method, properties, body, workers_json='workers.json'):
