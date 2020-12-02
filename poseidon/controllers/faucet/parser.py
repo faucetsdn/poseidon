@@ -153,9 +153,11 @@ class Parser:
                     self._set_port_conf(switch, mirror_port, mirror_port_conf)
 
     def proxy_mirror_port(self, switch, port):
+        self.logger.debug('checking for proxy ports')
         if self.proxy_mirror_ports and self._get_switch_conf(switch):
             proxy_ports = self.proxy_mirror_ports.get(switch, None)
             if proxy_ports:
+                self.logger.debug(f'found proxy port: {switch} port {port}')
                 switch, port = proxy_ports
         return switch, port
 
@@ -179,6 +181,7 @@ class Parser:
 
     def config_mirror(self, action, switch, port):
         switch, port = self.proxy_mirror_port(switch, port)
+        self.logger.debug(f'configuring mirror on {switch} port {port}')
         mirror_port = self.mirror_switch_port(switch)
         if mirror_port:
             mirror_key = (switch, mirror_port)
