@@ -123,7 +123,7 @@ while [[ "$COUNT" == 0 ]] ; do
         sleep 1
 done
 # Poseidon event client receiving from FAUCET
-wait_var_nonzero "last_rabbitmq_routing_key_time{routing_key=\"FAUCET.Event\"}"
+wait_var_nonzero "poseidon_last_rabbitmq_routing_key_time{routing_key=\"FAUCET.Event\"}"
 # Poseidon detected endpoints
 wait_var_nonzero "sum(poseidon_endpoint_current_states{current_state=\"mirroring\"})" "$FASTREPLAY"
 echo waiting for ncapture
@@ -141,7 +141,7 @@ done
 # Send mirror traffic
 echo $($SLOWREPLAY)
 # wait for networkml to return a result
-wait_var_nonzero "last_rabbitmq_routing_key_time{routing_key=\"poseidon.algos.decider\"}"
+wait_var_nonzero "poseidon_last_rabbitmq_routing_key_time{routing_key=\"poseidon.algos.decider\"}"
 # keep endpoints active awaiting results
 wait_var_nonzero "sum(poseidon_endpoint_roles{role!=\"NO DATA\"})" "$FASTREPLAY"
 # p0f doesn't always return a decision - but check that it returned
