@@ -344,7 +344,7 @@ def test_SDNConnect_init():
 
 
 def unregister_metrics():
-    for collector, names in tuple(REGISTRY._collector_to_names.items()):
+    for collector, _ in tuple(REGISTRY._collector_to_names.items()):
         REGISTRY.unregister(collector)
 
 
