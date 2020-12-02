@@ -210,7 +210,7 @@ function check_args()
                 sudo curl -L https://raw.githubusercontent.com/IQTLabs/poseidon/master/bin/poseidon -o /usr/local/bin/poseidon
                 sudo curl -L https://raw.githubusercontent.com/IQTLabs/poseidon/master/bin/gen_pcap_manifest -o /usr/local/bin/gen_pcap_manifest
                 sudo chmod +x /usr/local/bin/poseidon /usr/local/bin/gen_pcap_manifest
-                echo "Done updating."
+                echo "Done updating. Run 'poseidon restart' to activate."
                 exit
                 ;;
             -v|viz|visualize)
