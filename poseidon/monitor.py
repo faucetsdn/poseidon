@@ -160,8 +160,8 @@ class Monitor:
             for mac in self.s.endpoints[endpoint].metadata['mac_addresses']:
                 newest = 0
                 for timestamp in self.s.endpoints[endpoint].metadata['mac_addresses'][mac]:
-                    if timestamp > newest:
-                        newest = timestamp
+                    if float(timestamp) > newest:
+                        newest = float(timestamp)
                         top_role = self.s.endpoints[endpoint].metadata['mac_addresses'][mac][timestamp]['labels'][0]
                         second_role = self.s.endpoints[endpoint].metadata['mac_addresses'][mac][timestamp]['labels'][1]
                         third_role = self.s.endpoints[endpoint].metadata['mac_addresses'][mac][timestamp]['labels'][2]
