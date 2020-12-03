@@ -157,21 +157,23 @@ class Monitor:
             second_conf = '0'
             third_conf = '0'
             ipv4_os = 'NO DATA'
-            for mac in self.s.endpoints[endpoint].metadata['mac_addresses']:
-                newest = 0
-                for timestamp in self.s.endpoints[endpoint].metadata['mac_addresses'][mac]:
-                    if float(timestamp) > newest:
-                        newest = float(timestamp)
-                        top_role = self.s.endpoints[endpoint].metadata['mac_addresses'][mac][timestamp]['labels'][0]
-                        second_role = self.s.endpoints[endpoint].metadata['mac_addresses'][mac][timestamp]['labels'][1]
-                        third_role = self.s.endpoints[endpoint].metadata['mac_addresses'][mac][timestamp]['labels'][2]
-                        top_conf = self.s.endpoints[endpoint].metadata['mac_addresses'][mac][timestamp]['confidences'][0]
-                        second_conf = self.s.endpoints[endpoint].metadata['mac_addresses'][mac][timestamp]['confidences'][1]
-                        third_conf = self.s.endpoints[endpoint].metadata['mac_addresses'][mac][timestamp]['confidences'][2]
-            for ip in self.s.endpoints[endpoint].metadata['ipv4_addresses']:
-                if ip == self.s.endpoints[endpoint].endpoint_data['ipv4']:
-                    if 'os' in self.s.endpoints[endpoint].metadata['ipv4_addresses'][ip]:
-                        ipv4_os = self.s.endpoints[endpoint].metadata['ipv4_addresses'][ip]['os']
+            if 'mac_addresses' in self.s.endpoints[endpoint].metadata:
+                for mac in self.s.endpoints[endpoint].metadata['mac_addresses']:
+                    newest = 0
+                    for timestamp in self.s.endpoints[endpoint].metadata['mac_addresses'][mac]:
+                        if float(timestamp) > newest:
+                            newest = float(timestamp)
+                            top_role = self.s.endpoints[endpoint].metadata['mac_addresses'][mac][timestamp]['labels'][0]
+                            second_role = self.s.endpoints[endpoint].metadata['mac_addresses'][mac][timestamp]['labels'][1]
+                            third_role = self.s.endpoints[endpoint].metadata['mac_addresses'][mac][timestamp]['labels'][2]
+                            top_conf = self.s.endpoints[endpoint].metadata['mac_addresses'][mac][timestamp]['confidences'][0]
+                            second_conf = self.s.endpoints[endpoint].metadata['mac_addresses'][mac][timestamp]['confidences'][1]
+                            third_conf = self.s.endpoints[endpoint].metadata['mac_addresses'][mac][timestamp]['confidences'][2]
+            if 'ipv4_addresses' in self.s.endpoints[endpoint].metadata:
+                for ip in self.s.endpoints[endpoint].metadata['ipv4_addresses']:
+                    if ip == self.s.endpoints[endpoint].endpoint_data['ipv4']:
+                        if 'os' in self.s.endpoints[endpoint].metadata['ipv4_addresses'][ip]:
+                            ipv4_os = self.s.endpoints[endpoint].metadata['ipv4_addresses'][ip]['os']
             self.prom.prom_metrics['endpoint_role_confidence_top'].labels(
                 mac=self.s.endpoints[endpoint].endpoint_data['mac'],
                 role=top_role,
