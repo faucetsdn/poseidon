@@ -98,7 +98,7 @@ class Nodes:
                             node['ignored'] = poseidon_info['ignore']
 
                         if 'prev_state' in poseidon_info:
-                            prev_state = ast.literal_eval(
+                            prev_state = ast.literal_eval(  # pytype: disable=wrong-arg-types
                                 poseidon_info['prev_state'])
                             if 'first_seen' in node:
                                 node['first_seen'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
@@ -108,7 +108,7 @@ class Nodes:
                                     prev_state[1])) + ' (' + duration(prev_state[1]) + ')'
 
                         if 'endpoint_data' in poseidon_info:
-                            endpoint_data = ast.literal_eval(
+                            endpoint_data = ast.literal_eval(  # pytype: disable=wrong-arg-types
                                 poseidon_info['endpoint_data'])
                             for key in node:
                                 if key in endpoint_data:
@@ -141,12 +141,12 @@ class Nodes:
                 if 'role' in node:
                     if 'timestamps' in mac_info:
                         try:
-                            timestamps = ast.literal_eval(
+                            timestamps = ast.literal_eval(  # pytype: disable=wrong-arg-types
                                 mac_info['timestamps'])
                             ml_info = self.r.hgetall(
                                 '_'.join(('networkml', mac, str(timestamps[-1]))))
                             for _poseidon_hash, raw_results in ml_info.items():
-                                results = ast.literal_eval(raw_results)
+                                results = ast.literal_eval(raw_results)  # pytype: disable=wrong-arg-types
                                 classification = results.get(
                                     'classification', {})
                                 labels = classification.get('labels', None)
