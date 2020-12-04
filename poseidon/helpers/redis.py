@@ -199,7 +199,7 @@ class PoseidonRedisClient:
                 try:
                     mac_info = self.r.hgetall(mac)
                     if b'poseidon_hash' in mac_info and mac_info[b'poseidon_hash'] == hash_id.encode('utf-8'):
-                        source_mac = mac.decode('ascii')
+                        source_mac = mac.decode('ascii')  # pytype: disable=attribute-error
                         mac_addresses[source_mac] = self.get_stored_mac_metadata(
                             mac_info, source_mac)
                         ip_addressses = self.get_stored_ip_metadata(
