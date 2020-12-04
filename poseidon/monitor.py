@@ -213,8 +213,6 @@ class Monitor:
                 tenant=self.s.endpoints[endpoint].endpoint_data['tenant'],
                 segment=self.s.endpoints[endpoint].endpoint_data['segment'],
                 ether_vendor=self.s.endpoints[endpoint].endpoint_data['ether_vendor'],
-                controller_type=self.s.endpoints[endpoint].endpoint_data['controller_type'],
-                controller=self.s.endpoints[endpoint].endpoint_data['controller'],
                 name=self.s.endpoints[endpoint].endpoint_data['name'],
                 state=self.s.endpoints[endpoint].state,
                 port=self.s.endpoints[endpoint].endpoint_data['port'],
