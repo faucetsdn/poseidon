@@ -46,7 +46,6 @@ class Monitor:
 
         # initialize sdnconnect
         self.s = SDNConnect(self.controller, self.logger)
-        self.s.default_endpoints()
 
         # timer class to call things periodically in own thread
         self.schedule = schedule

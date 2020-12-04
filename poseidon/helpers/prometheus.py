@@ -3,7 +3,9 @@
 Created on 5 December 2018
 @author: Charlie Lewis
 """
+import datetime
 import logging
+import requests
 import socket
 from binascii import hexlify
 
@@ -338,6 +340,42 @@ class Prometheus():
         except Exception as e:  # pragma: no cover
             self.logger.error(
                 'Unable to send results to prometheus because {0}'.format(str(e)))
+
+    def get_stored_endpoints(self):
+        ''' load existing endpoints from Prometheus. '''
+        endpoints = {}
+        r = None
+        current_time = datetime.datetime.utcnow()
+        start_time = current_time - datetime.timedelta(hours=6)
+        end_time = current_time + datetime.timedelta(hours=2)
+        start_time_str = start_time.isoformat()[:-4]+"Z"
+        end_time_str = end_time.isoformat()[:-4]+"Z"
+        try:
+            payload = {'query': 'poseidon_endpoint_metadata', 'start': start_time_str, 'end': end_time_str, 'step': '30s'}
+            # hardcoded endpoint ok because Docker networking
+            r = requests.get('http://prometheus:9090/api/v1/query_range', params=payload)
+
+        except Exception as e:
+            self.logger.error(f'Unable to get endpoints from Prometheus because: {e}')
+        if r:
+            results = r.json()
+            if 'data' in results:
+                if 'result' in results['data'] and results['data']['result']:
+                    hashes = {}
+                    for metric in results['data']['result']:
+                        if metric['metric']['hash_id'] in hashes:
+                            if float(metric['values'][-1][1]) > hashes[metric['metric']['hash_id']]['latest']:
+                                hashes[metric['metric']['hash_id']] = metric['metric']
+                                hashes[metric['metric']['hash_id']]['latest'] = float(metric['values'][-1][1])
+                        else:
+                            hashes[metric['metric']['hash_id']] = metric['metric']
+                            hashes[metric['metric']['hash_id']]['latest'] = float(metric['values'][-1][1])
+                    # TODO
+                    # format hash metrics into endpoints
+            else:
+                self.logger.error(f'Bad request: {results}')
+        return endpoints
+
 
     @staticmethod
     def start(port=9304):
