@@ -198,6 +198,57 @@ class Monitor:
                 ipv4_address=self.s.endpoints[endpoint].endpoint_data['ipv4'],
                 ipv6_address=self.s.endpoints[endpoint].endpoint_data['ipv6'],
                 hash_id=self.s.endpoints[endpoint].name).set(third_conf)
+            self.prom.prom_metrics['endpoints'].labels(
+                mac=self.s.endpoints[endpoint].endpoint_data['mac'],
+                tenant=self.s.endpoints[endpoint].endpoint_data['tenant'],
+                segment=self.s.endpoints[endpoint].endpoint_data['segment'],
+                ether_vendor=self.s.endpoints[endpoint].endpoint_data['ether_vendor'],
+                controller_type=self.s.endpoints[endpoint].endpoint_data['controller_type'],
+                controller=self.s.endpoints[endpoint].endpoint_data['controller'],
+                name=self.s.endpoints[endpoint].endpoint_data['name'],
+                port=self.s.endpoints[endpoint].endpoint_data['port'],
+                hash_id=self.s.endpoints[endpoint].name).set(update_time)
+            self.prom.prom_metrics['endpoint_state'].labels(
+                mac=self.s.endpoints[endpoint].endpoint_data['mac'],
+                tenant=self.s.endpoints[endpoint].endpoint_data['tenant'],
+                segment=self.s.endpoints[endpoint].endpoint_data['segment'],
+                ether_vendor=self.s.endpoints[endpoint].endpoint_data['ether_vendor'],
+                name=self.s.endpoints[endpoint].endpoint_data['name'],
+                state=self.s.endpoints[endpoint].state,
+                port=self.s.endpoints[endpoint].endpoint_data['port'],
+                hash_id=self.s.endpoints[endpoint].name).set(update_time)
+            self.prom.prom_metrics['endpoint_os'].labels(
+                mac=self.s.endpoints[endpoint].endpoint_data['mac'],
+                tenant=self.s.endpoints[endpoint].endpoint_data['tenant'],
+                segment=self.s.endpoints[endpoint].endpoint_data['segment'],
+                ether_vendor=self.s.endpoints[endpoint].endpoint_data['ether_vendor'],
+                name=self.s.endpoints[endpoint].endpoint_data['name'],
+                port=self.s.endpoints[endpoint].endpoint_data['port'],
+                ipv4_os=ipv4_os,
+                hash_id=self.s.endpoints[endpoint].name).set(update_time)
+            self.prom.prom_metrics['endpoint_role'].labels(
+                mac=self.s.endpoints[endpoint].endpoint_data['mac'],
+                tenant=self.s.endpoints[endpoint].endpoint_data['tenant'],
+                segment=self.s.endpoints[endpoint].endpoint_data['segment'],
+                ether_vendor=self.s.endpoints[endpoint].endpoint_data['ether_vendor'],
+                name=self.s.endpoints[endpoint].endpoint_data['name'],
+                port=self.s.endpoints[endpoint].endpoint_data['port'],
+                top_role=top_role,
+                hash_id=self.s.endpoints[endpoint].name).set(update_time)
+            self.prom.prom_metrics['endpoint_ip'].labels(
+                mac=self.s.endpoints[endpoint].endpoint_data['mac'],
+                tenant=self.s.endpoints[endpoint].endpoint_data['tenant'],
+                segment=self.s.endpoints[endpoint].endpoint_data['segment'],
+                ether_vendor=self.s.endpoints[endpoint].endpoint_data['ether_vendor'],
+                ipv4_subnet=self.s.endpoints[endpoint].endpoint_data['ipv4_subnet'],
+                ipv6_subnet=self.s.endpoints[endpoint].endpoint_data['ipv6_subnet'],
+                ipv4_rdns=self.s.endpoints[endpoint].endpoint_data['ipv4_rdns'],
+                ipv6_rdns=self.s.endpoints[endpoint].endpoint_data['ipv6_rdns'],
+                name=self.s.endpoints[endpoint].endpoint_data['name'],
+                port=self.s.endpoints[endpoint].endpoint_data['port'],
+                ipv4_address=self.s.endpoints[endpoint].endpoint_data['ipv4'],
+                ipv6_address=self.s.endpoints[endpoint].endpoint_data['ipv6'],
+                hash_id=self.s.endpoints[endpoint].name).set(update_time)
             self.prom.prom_metrics['endpoint_metadata'].labels(
                 mac=self.s.endpoints[endpoint].endpoint_data['mac'],
                 tenant=self.s.endpoints[endpoint].endpoint_data['tenant'],
