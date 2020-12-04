@@ -198,7 +198,7 @@ class Monitor:
                 ipv4_address=self.s.endpoints[endpoint].endpoint_data['ipv4'],
                 ipv6_address=self.s.endpoints[endpoint].endpoint_data['ipv6'],
                 hash_id=self.s.endpoints[endpoint].name).set(third_conf)
-            self.prom.prom_metrics['endpoint'].labels(
+            self.prom.prom_metrics['endpoints'].labels(
                 mac=self.s.endpoints[endpoint].endpoint_data['mac'],
                 tenant=self.s.endpoints[endpoint].endpoint_data['tenant'],
                 segment=self.s.endpoints[endpoint].endpoint_data['segment'],
