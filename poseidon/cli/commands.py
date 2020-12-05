@@ -25,7 +25,6 @@ class Commands:
         else:
             self.controller = controller
         self.sdnc = SDNConnect(self.controller, logger)
-        self.sdnc.default_endpoints()
 
     def _publish_action(self, address, payload):
         if payload:

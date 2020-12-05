@@ -289,7 +289,10 @@ class EndpointDecoder:
         e = json.loads(endpoint)
         self.endpoint = endpoint_factory(e['name'])
         self.endpoint.state = e['state']
-        self.endpoint.copro_state = e['copro_state']
+        if 'copro_state' in e:
+            self.endpoint.copro_state = e['copro_state']
+        else:
+            self.endpoint.copro_state = None
         if 'ignore' in e:
             if e['ignore']:
                 self.endpoint.ignore = True
@@ -311,7 +314,10 @@ class EndpointDecoder:
             self.endpoint.acl_data = []
         self.endpoint.endpoint_data = e['endpoint_data']
         self.endpoint.p_next_state = e['p_next_state']
-        self.endpoint.p_prev_state = e['p_prev_state']
+        if 'p_prev_state' in e:
+            self.endpoint.p_prev_state = e['p_prev_state']
+        else:
+            self.endpoint.p_prev_state = None
 
     def get_endpoint(self):
         return self.endpoint

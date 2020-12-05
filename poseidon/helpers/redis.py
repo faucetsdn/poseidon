@@ -84,6 +84,7 @@ class PoseidonRedisClient:
                     new_endpoints = {}
                     p_endpoints = ast.literal_eval(
                         p_endpoints.decode('ascii'))
+                    self.logger.debug(f'found existing endpoints: {p_endpoints}')
                     for p_endpoint in p_endpoints:
                         endpoint = EndpointDecoder(
                             p_endpoint).get_endpoint()
