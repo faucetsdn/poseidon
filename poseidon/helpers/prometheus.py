@@ -374,7 +374,6 @@ class Prometheus():
                         else:
                             hashes[metric['metric']['hash_id']] = metric['metric']
                             hashes[metric['metric']['hash_id']]['latest'] = float(metric['values'][-1][1])
-                    # TODO
                     # format hash metrics into endpoints
                     for h in hashes:
                         self.logger.debug(f'prom getting stored endpoints: {hashes}')
@@ -384,8 +383,9 @@ class Prometheus():
                             p_endpoint['endpoint_data'] = {}
                             if 'next_state' in p_endpoint:
                                 p_endpoint['p_next_state'] = p_endpoint['next_state']
-                            endpoint = EndpointDecoder(p_endpoint).get_endpoint()
-                            endpoints[endpoint.name] = endpoint
+                            # TODO
+                            #endpoint = EndpointDecoder(p_endpoint).get_endpoint()
+                            #endpoints[endpoint.name] = endpoint
             else:
                 self.logger.error(f'Bad request: {results}')
         return endpoints
