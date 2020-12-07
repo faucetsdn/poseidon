@@ -5,7 +5,6 @@ import time
 from redis import StrictRedis
 
 from poseidon.helpers.endpoint import EndpointDecoder
-from poseidon.helpers.endpoint import HistoryTypes
 from poseidon.helpers.endpoint import MACHINE_IP_FIELDS
 
 
@@ -84,7 +83,6 @@ class PoseidonRedisClient:
                     new_endpoints = {}
                     p_endpoints = ast.literal_eval(
                         p_endpoints.decode('ascii'))
-                    self.logger.debug(f'found existing endpoints: {p_endpoints}')
                     for p_endpoint in p_endpoints:
                         endpoint = EndpointDecoder(
                             p_endpoint).get_endpoint()
@@ -210,42 +208,6 @@ class PoseidonRedisClient:
                         'Unable to get existing metadata for {0} from Redis because: {1}'.format(mac, str(e)))
         return mac_addresses, ip_addresses['ipv4'], ip_addresses['ipv6']
 
-    @staticmethod
-    def update_history(endpoint, mac_addresses, ipv4_addresses, ipv6_addresses):
-        # list of fields to make history entries for, along with entry type for that field
-        fields = [
-            {'field_name': 'ipv4_OS', 'entry_type': HistoryTypes.PROPERTY_CHANGE},
-            {'field_name': 'ipv6_OS', 'entry_type': HistoryTypes.PROPERTY_CHANGE},
-        ]
-        # make history entries for any changed prop
-        prior = None
-        for record in mac_addresses.values():
-            for field in fields:
-                if field['field_name'] in record and prior and field['field_name'] in prior and \
-                   prior[field['field_name']] != record[field['field_name']]:
-                    endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.mac_addresses['field_name'],
-                                                     prior[field['field_name']], record[field['field_name']])
-                prior = record
-
-        # TODO: history for IP address changes isn't accumulated yet (see get_stored_metadata()).
-        prior = None
-        for record in ipv4_addresses.values():
-            for field in fields:
-                if field['field_name'] in record and prior and field['field_name'] in prior and \
-                   prior[field['field_name']] != record[field['field_name']]:
-                    endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.ipv4_addresses['field_name'],
-                                                     prior[field['field_name']], record[field['field_name']])  # pytype: disable=unsupported-operands
-                prior = record
-
-        prior = None
-        for record in ipv6_addresses.values():
-            for field in fields:
-                if field['field_name'] in record and prior and field['field_name'] in prior and \
-                   prior[field['field_name']] != record[field['field_name']]:
-                    endpoint.update_property_history(field['entry_type'], field['field_name'], endpoint.endpoint_data.ipv6_addresses['field_name'],
-                                                     prior[field['field_name']], record[field['field_name']])  # pytype: disable=unsupported-operands
-                prior = record
-
     def store_endpoints(self, endpoints):
         ''' store current endpoints in Redis. '''
         if self.r:
@@ -255,8 +217,6 @@ class PoseidonRedisClient:
                     # set metadata
                     mac_addresses, ipv4_addresses, ipv6_addresses = self.get_stored_metadata(
                         str(endpoint.name))
-                    self.update_history(
-                        endpoint, mac_addresses, ipv4_addresses, ipv6_addresses)
                     endpoint.metadata = {
                         'mac_addresses': mac_addresses,
                         'ipv4_addresses': ipv4_addresses,

@@ -85,19 +85,6 @@ def test_update_networkml(redis_my, redis_my_proc):
     assert endpoint.metadata == correlated_metadata
 
 
-def test_update_history():
-    endpoint = endpoint_factory('foo')
-    endpoint.endpoint_data = {
-        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv6': '1212::1'}
-    endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'1551805502': {'labels': ['developer workstation']}}}, 'ipv4_addresses': {
-        '0.0.0.0': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
-    metadata = {123: {'foo': 'bar'}}
-    logger = logging.getLogger('test')
-    prc = PoseidonRedisClient(logger)
-    prc.update_history(endpoint, {'00:00:00:00:00:00': metadata}, {
-                       '0.0.0.0': metadata}, {'1212::1': metadata})
-
-
 def test_parse_networkml_metadata():
     logger = logging.getLogger('test')
     prc = PoseidonRedisClient(logger)

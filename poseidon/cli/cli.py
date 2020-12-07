@@ -240,14 +240,7 @@ class GetData():
 
     @staticmethod
     def _get_history(endpoint):
-        hist = ''
-        if len(endpoint.history) > 0:
-            for entry in endpoint.history:
-                hist += '{0} - {1} : {2} \r\n'.format(entry['type'], time.strftime(
-                    '%Y-%m-%d %H:%M:%S', time.localtime(entry['timestamp'])), entry['message'])
-        else:
-            hist = 'No history recorded yet.'
-        return hist
+        return 'No history recorded yet.'
 
 
 class Parser():
