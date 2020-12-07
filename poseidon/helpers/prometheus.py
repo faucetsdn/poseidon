@@ -379,11 +379,13 @@ class Prometheus():
                     for h in hashes:
                         self.logger.debug(f'prom getting stored endpoints: {hashes}')
                         p_endpoint = hashes[h]
-                        p_endpoint['name'] = p_endpoint.hash_id
-                        p_endpoint['endpoint_data'] = {}
-                        p_endpoint['p_next_state'] = p_endpoint.next_state
-                        endpoint = EndpointDecoder(p_endpoint).get_endpoint()
-                        endpoints[endpoint.name] = endpoint
+                        if 'hash_id' in p_endpoint:
+                            p_endpoint['name'] = p_endpoint['hash_id']
+                            p_endpoint['endpoint_data'] = {}
+                            if 'next_state' in p_endpoint:
+                                p_endpoint['p_next_state'] = p_endpoint['next_state']
+                            endpoint = EndpointDecoder(p_endpoint).get_endpoint()
+                            endpoints[endpoint.name] = endpoint
             else:
                 self.logger.error(f'Bad request: {results}')
         return endpoints
