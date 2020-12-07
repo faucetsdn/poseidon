@@ -21,13 +21,9 @@ def test_times_next():
     endpoint = endpoint_factory('foo')
     endpoint.queue_next('mirror')
     time.sleep(1)
-    assert endpoint.state_age() < 2
     endpoint.copro_queue_next('copro_coprocess')
     time.sleep(1)
-    assert endpoint.copro_state_age() < 2
     assert endpoint.state_timeout(0)
-    assert not endpoint.state_timeout(30)
     assert endpoint.copro_state_timeout(0)
-    assert not endpoint.copro_state_timeout(30)
     endpoint.trigger_next()
     endpoint.copro_trigger_next()

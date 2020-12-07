@@ -16,13 +16,6 @@ MACHINE_IP_PREFIXES = {
     'ipv4': 24, 'ipv6': 64}
 
 
-class HistoryTypes():
-    STATE_CHANGE = 'State Change'
-    ACL_CHANGE = 'ACL Change'
-    PROPERTY_CHANGE = 'Property Change'
-    COPRO_CHANGE = 'Coprocessor Change'
-
-
 def transit_wrap(trigger, source, dest, before=None, after=None):
     transit_dict = {'trigger': trigger, 'source': source, 'dest': dest}
     if before is not None:
@@ -33,11 +26,11 @@ def transit_wrap(trigger, source, dest, before=None, after=None):
 
 
 def endpoint_transit_wrap(trigger, source, dest):
-    return transit_wrap(trigger, source, dest, before='update_state_history')
+    return transit_wrap(trigger, source, dest)
 
 
 def endpoint_copro_transit_wrap(trigger, source, dest):
-    return transit_wrap(trigger, source, dest, before='update_copro_history')
+    return transit_wrap(trigger, source, dest)
 
 
 class Endpoint:
@@ -107,12 +100,11 @@ class Endpoint:
         self.copro_ignore = False
         self.endpoint_data = None
         self.p_next_state = None
-        self.p_prev_state = None
+        self.p_prev_state = [None, 0]
         self.p_next_copro_state = None
-        self.p_prev_copro_states = []
+        self.p_prev_copro_state = [None, 0]
         self.acl_data = []
         self.metadata = {}
-        self.history = []
         self.state = None
         self.copro_state = None
 
@@ -127,7 +119,6 @@ class Endpoint:
             'p_prev_state': self.p_prev_state,
             'acl_data': self.acl_data,
             'metadata': self.metadata,
-            'history': self.history,
         }
         return str(json.dumps(endpoint_d))
 
@@ -141,7 +132,7 @@ class Endpoint:
         return self.state_age() > timeout
 
     def copro_state_time(self):
-        return self.p_prev_copro_states[-1][1]
+        return self.p_prev_copro_state[1]
 
     def copro_state_age(self):
         return int(time.time()) - self.copro_state_time()
@@ -210,42 +201,6 @@ class Endpoint:
                 self.endpoint_data['active'] = 0
                 self.inactive()  # pytype: disable=attribute-error
 
-    def _add_history_entry(self, entry_type, timestamp, message):
-        self.history.append(
-            {'type': entry_type, 'timestamp': timestamp, 'message': message})
-
-    def update_copro_history(self, event_data):
-        self.p_prev_copro_states.append(  # pytype: disable=attribute-error
-                (self.copro_state, int(time.time())))
-        self._add_history_entry(
-            HistoryTypes.COPRO_CHANGE, time.time(),
-            'Coprocessing state changed from {0} to {1}'.format(event_data.transition.source, event_data.transition.dest))
-
-    def update_acl_history(self, event_data, added_acls, removed_acls):
-        message = ''
-        if added_acls and len(added_acls) > 0:
-            message += 'Added the following ACLs: ' + \
-                ', '.join(added_acls) + '\r\n'
-        if len(message) > 0:
-            message += 'and r'
-        if removed_acls and len(removed_acls) > 0:
-            message += 'R' if len(message) == 0 else ''
-            message += 'emoved the following ACLs:' + ', '.join(removed_acls)
-
-        self._add_history_entry(HistoryTypes.ACL_CHANGE, time.time(),
-                                'State changed from {0} to {1}'.format(event_data.transition.source, event_data.transition.dest))
-
-    def update_property_history(self, entry_type, timestamp, field_name, old_value, new_value):
-        self._add_history_entry(entry_type, timestamp,
-                                'Property {0} changed from {1} to {2}'.format(field_name, old_value, new_value))
-
-    def update_state_history(self, event_data):
-        self.p_prev_state = (event_data.transition.dest, int(time.time()))
-        self._add_history_entry(
-            HistoryTypes.STATE_CHANGE, time.time(),
-            'State changed from {0} to {1}'.format(
-                event_data.transition.source, event_data.transition.dest))
-
     @staticmethod
     def make_hash(machine, trunk=False):
         ''' hash the unique metadata parts of an endpoint '''
@@ -304,10 +259,6 @@ class EndpointDecoder:
             self.endpoint.metadata = e['metadata']
         else:
             self.endpoint.metadata = {}
-        if 'history' in e:
-            self.endpoint.history = e['history']
-        else:
-            self.endpoint.history = []
         if 'acl_data' in e:
             self.endpoint.acl_data = e['acl_data']
         else:
@@ -317,7 +268,7 @@ class EndpointDecoder:
         if 'p_prev_state' in e:
             self.endpoint.p_prev_state = e['p_prev_state']
         else:
-            self.endpoint.p_prev_state = None
+            self.endpoint.p_prev_state = [None, 0]
 
     def get_endpoint(self):
         return self.endpoint

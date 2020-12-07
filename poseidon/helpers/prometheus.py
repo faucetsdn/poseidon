@@ -15,6 +15,8 @@ from prometheus_client import Info
 from prometheus_client import Summary
 from prometheus_client import start_http_server
 
+from poseidon.helpers.endpoint import EndpointDecoder
+
 
 class Prometheus():
 
@@ -160,7 +162,9 @@ class Prometheus():
                                                         'tenant',
                                                         'segment',
                                                         'ether_vendor',
+                                                        'prev_state',
                                                         'next_state',
+                                                        'acls',
                                                         'ignore',
                                                         'active',
                                                         'ipv4_subnet',
@@ -370,12 +374,21 @@ class Prometheus():
                         else:
                             hashes[metric['metric']['hash_id']] = metric['metric']
                             hashes[metric['metric']['hash_id']]['latest'] = float(metric['values'][-1][1])
-                    # TODO
                     # format hash metrics into endpoints
+                    for h in hashes:
+                        self.logger.debug(f'prom getting stored endpoints: {hashes}')
+                        p_endpoint = hashes[h]
+                        if 'hash_id' in p_endpoint:
+                            p_endpoint['name'] = p_endpoint['hash_id']
+                            p_endpoint['endpoint_data'] = {}
+                            if 'next_state' in p_endpoint:
+                                p_endpoint['p_next_state'] = p_endpoint['next_state']
+                            # TODO
+                            #endpoint = EndpointDecoder(p_endpoint).get_endpoint()
+                            #endpoints[endpoint.name] = endpoint
             else:
                 self.logger.error(f'Bad request: {results}')
         return endpoints
-
 
     @staticmethod
     def start(port=9304):
