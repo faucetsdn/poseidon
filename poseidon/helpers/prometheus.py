@@ -15,6 +15,8 @@ from prometheus_client import Info
 from prometheus_client import Summary
 from prometheus_client import start_http_server
 
+from poseidon.helpers.endpoint import EndpointDecoder
+
 
 class Prometheus():
 
