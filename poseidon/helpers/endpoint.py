@@ -125,10 +125,7 @@ class Endpoint:
         return str(json.dumps(endpoint_d))
 
     def mac_addresses(self):
-        try:
-            return self.metadata['mac_addresses']
-        except KeyError:
-            return {}
+        return self.metadata.get('mac_addresses', {})
 
     def touch(self):
         self.observed_time = time.time()
