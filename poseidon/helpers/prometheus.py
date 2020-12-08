@@ -376,16 +376,31 @@ class Prometheus():
                             hashes[metric['metric']['hash_id']]['latest'] = float(metric['values'][-1][1])
                     # format hash metrics into endpoints
                     for h in hashes:
-                        self.logger.debug(f'prom getting stored endpoints: {hashes}')
                         p_endpoint = hashes[h]
-                        if 'hash_id' in p_endpoint:
-                            p_endpoint['name'] = p_endpoint['hash_id']
-                            p_endpoint['endpoint_data'] = {}
-                            if 'next_state' in p_endpoint:
-                                p_endpoint['p_next_state'] = p_endpoint['next_state']
-                            # TODO
-                            #endpoint = EndpointDecoder(p_endpoint).get_endpoint()
-                            #endpoints[endpoint.name] = endpoint
+                        p_endpoint['name'] = p_endpoint['hash_id']
+                        p_endpoint['endpoint_data'] = {'mac': p_endpoint['mac'],
+                                                       'segment': p_endpoint['segment'],
+                                                       'port': p_endpoint['port'],
+                                                       'vlan': p_endpoint['tenant'],
+                                                       'tenant': p_endpoint['tenant'],
+                                                       'active': p_endpoint['active'],
+                                                       'ipv4': p_endpoint.get('ipv4_address', ''),
+                                                       'ipv6': p_endpoint.get('ipv6_address', ''),
+                                                       'controller_type': p_endpoint['controller_type'],
+                                                       'controller': p_endpoint.get('controller', ''),
+                                                       'name': p_endpoint['name'],
+                                                       'ether_vendor': p_endpoint['ether_vendor'],
+                                                       'ipv4_subnet': p_endpoint.get('ipv4_subnet', ''),
+                                                       'ipv4_rdns': p_endpoint.get('ipv4_rdns', ''),
+                                                       'ipv6_rdns': p_endpoint.get('ipv6_rdns', ''),
+                                                       'ipv6_subnet': p_endpoint.get('ipv6_subnet', '')}
+                        p_endpoint['p_next_state'] = p_endpoint.get('next_state', None)
+                        p_endpoint['p_prev_state'] = list(p_endpoint.get('prev_state', []))
+                        # TODO acl_data, metadata
+                        p_endpoint['acl_data'] = []
+                        p_endpoint['metadata'] = {'mac_addresses': {}, 'ipv4_addresses': {}, 'ipv6_addresses': {}}
+                        endpoint = EndpointDecoder(p_endpoint).get_endpoint()
+                        endpoints[endpoint.name] = endpoint
             else:
                 self.logger.error(f'Bad request: {results}')
         return endpoints

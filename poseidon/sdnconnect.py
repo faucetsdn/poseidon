@@ -77,10 +77,8 @@ class SDNConnect:
         # NEW WAY
         ''' load existing endpoints from Prometheus. '''
         new_endpoints = self.prom.get_stored_endpoints()
-        # OLD WAY - TO BE REMOVED
-        ''' load existing endpoints from Redis. '''
-        new_endpoints = self.prc.get_stored_endpoints()
         if new_endpoints:
+            self.logger.info(f'Loaded {len(new_endpoints)} endpoints previously learned.')
             self.endpoints = new_endpoints
 
     def get_sdn_context(self):

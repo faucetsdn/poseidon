@@ -252,7 +252,10 @@ def endpoint_factory(hashed_val):
 class EndpointDecoder:
 
     def __init__(self, endpoint):
-        e = json.loads(endpoint)
+        if isinstance(endpoint, dict):
+            e = endpoint
+        else:
+            e = json.loads(endpoint)
         self.endpoint = endpoint_factory(e['name'])
         self.endpoint.state = e['state']
         self.endpoint.copro_state = e.get('copro_state', None)
