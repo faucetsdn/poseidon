@@ -439,7 +439,7 @@ class Prometheus():
                             if not role_hashes[e]['mac'] in p_endpoint['metadata']['mac_addresses']:
                                 p_endpoint['metadata']['mac_addresses'][role_hashes[e]['mac']] = {role_hashes[e]['timestamp']: {'labels': [role_hashes[e]['top_role'], role_hashes[e]['second_role'], role_hashes[e]['third_role']], 'confidences': [role_hashes[e]['top_confidence'], role_hashes[e]['second_confidence'], role_hashes[e]['third_confidence']], 'pcap_labels': ''}}
                             if not role_hashes[e]['ipv4_address'] in p_endpoint['metadata']['ipv4_addresses']:
-                                p_endpoint['metadata']['ipv4_addresses'][role_hashes[e]['ipv4_address']] = {'os': role_hashes[e]['ipv4_os']
+                                p_endpoint['metadata']['ipv4_addresses'][role_hashes[e]['ipv4_address']] = {'os': role_hashes[e]['ipv4_os']}
                         endpoint = EndpointDecoder(p_endpoint).get_endpoint()
                         endpoints[endpoint.name] = endpoint
             else:
