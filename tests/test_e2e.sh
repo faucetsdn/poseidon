@@ -20,7 +20,9 @@ SLOWREPLAY="sudo tcpreplay -q -M5 -i sw1b $TMPDIR/test.pcap"
 wait_var_nonzero () {
 	var=$1
         cmd=$2
-	query="http://0.0.0.0:9090/api/v1/query?query=$var>0"
+        failvar=$3
+	API="http://0.0.0.0:9090/api/v1/query?query="
+	query="$API$var>0"
 	echo waiting for $query to be non-zero
         RC="[]"
         TRIES=0
@@ -30,8 +32,12 @@ wait_var_nonzero () {
                 if [[ "$TRIES" == "180" ]] ; then
 			echo FAIL: $query did not return results: $RC
 			echo Diagnostic logs follow
+			if [[ "$failvar" != "" ]] ; then
+				echo "$API$failvar" | wget -q -O- -i -
+			fi
                         grep -v store /var/log/poseidon/poseidon.log |tail -500
                         docker ps -a
+			echo FAIL: $query did not return results: $RC
                         exit 1
                 fi
                 if [[ "$cmd" == "" ]] ; then
@@ -45,7 +51,7 @@ wait_var_nonzero () {
 
 wait_job_up () {
 	instance=$1
-	wait_var_nonzero "up{instance=\"$instance\"}"
+	wait_var_nonzero "up{instance=\"$instance\"}" up
 }
 
 # TODO: push test capture into switch1:1 to ensure networkml is called
@@ -109,14 +115,14 @@ wget https://github.com/IQTLabs/NetworkML/raw/master/tests/test_data/trace_ab12_
 poseidon -s
 wait_job_up faucetconfrpc:59998
 wait_job_up faucet:9302
-wait_var_nonzero "port_status{port=\"3\"}"
+wait_var_nonzero "port_statusxx{port=\"3\"}" port_status
 wait_job_up gauge:9303
-wait_var_nonzero "dp_status{dp_name=\"switch1\"}"
+wait_var_nonzero "dp_status{dp_name=\"switch1\"}" dp_status
 wait_job_up poseidon:9304
 for i in sw1a sw1b ; do
 	sudo ip link set $i up
 done
-wait_var_nonzero "port_status{port=\"1\"}"
+wait_var_nonzero "port_status{port=\"1\"}" port_status
 echo waiting for FAUCET to recognize test port
 COUNT="0"
 while [[ "$COUNT" == 0 ]] ; do
@@ -124,9 +130,9 @@ while [[ "$COUNT" == 0 ]] ; do
         sleep 1
 done
 # Poseidon event client receiving from FAUCET
-wait_var_nonzero "poseidon_last_rabbitmq_routing_key_time{routing_key=\"FAUCET.Event\"}"
+wait_var_nonzero "poseidon_last_rabbitmq_routing_key_time{routing_key=\"FAUCET.Event\"}" poseidon_last_rabbitmq_routing_key_time
 # Poseidon detected endpoints
-wait_var_nonzero "sum(poseidon_endpoint_current_states{current_state=\"mirroring\"})" "$FASTREPLAY"
+wait_var_nonzero "sum(poseidon_endpoint_current_states{current_state=\"mirroring\"})" "$FASTREPLAY" poseidon_endpoint_current_states
 echo waiting for ncapture
 COUNT="0"
 while [[ "$COUNT" == "0" ]] ; do
@@ -142,14 +148,14 @@ done
 # Send mirror traffic
 echo $($SLOWREPLAY)
 # wait for networkml to return a result
-wait_var_nonzero "poseidon_last_rabbitmq_routing_key_time{routing_key=\"poseidon.algos.decider\"}"
+wait_var_nonzero "poseidon_last_rabbitmq_routing_key_time{routing_key=\"poseidon.algos.decider\"}" poseidon_last_rabbitmq_routing_key_time
 # keep endpoints active awaiting results
-wait_var_nonzero "sum(poseidon_endpoint_roles{role!=\"NO DATA\"})" "$FASTREPLAY"
+wait_var_nonzero "sum(poseidon_endpoint_roles{role!=\"NO DATA\"})" "$FASTREPLAY" poseidon_endpoint_roles
 # p0f doesn't always return a decision - but check that it returned
 # TODO: determine why p0f not deterministic.
-wait_var_nonzero "sum(poseidon_endpoint_oses)"
+wait_var_nonzero "sum(poseidon_endpoint_oses)" poseidon_endpoint_oses
 # TODO: fix certstrap to allow creating multiple named client keys.
-wait_var_nonzero "sum(faucetconfrpc_ok_total{peer_id=\"poseidon\"})"
+wait_var_nonzero "sum(faucetconfrpc_ok_total{peer_id=\"poseidon\"})" faucetconfrpc_ok_total
 poseidon -S
 poseidon -d
 COMPOSE_PROJECT_NAME=ovs docker-compose -f tests/test-e2e-ovs.yml stop
