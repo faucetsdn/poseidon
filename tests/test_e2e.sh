@@ -28,7 +28,8 @@ wait_var_nonzero () {
                 RC=$(echo "$query" | wget -q -O- -i -|jq .data.result)
                 TRIES=$((TRIES+1))
                 if [[ "$TRIES" == "180" ]] ; then
-			echo $query timed out: $RC
+			echo FAIL: $query did not return results: $RC
+			echo Diagnostic logs follow
                         grep -v store /var/log/poseidon/poseidon.log |tail -500
                         docker ps -a
                         exit 1
