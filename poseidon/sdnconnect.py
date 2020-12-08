@@ -317,6 +317,7 @@ class SDNConnect:
                 change_acls = True
                 m = endpoint_factory(h)
                 m.endpoint_data = deepcopy(machine)
+                m.touch()
                 self.endpoints[m.name] = m
                 self.logger.info(
                     'Detected new endpoint: {0}:{1}'.format(m.name, machine))
@@ -335,6 +336,7 @@ class SDNConnect:
                     if ep.mirror_active():
                         self.unmirror_endpoint(ep)
                     ep.deactivate()
+            ep.touch()
 
         if change_acls and self.controller['AUTOMATED_ACLS']:
             status = Actions(None, self.sdnc).update_acls(
