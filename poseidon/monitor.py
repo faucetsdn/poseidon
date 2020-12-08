@@ -178,69 +178,72 @@ class Monitor:
                     if ip == endpoint.endpoint_data['ipv4']:
                         if 'os' in endpoint.metadata['ipv4_addresses'][ip]:
                             ipv4_os = endpoint.metadata['ipv4_addresses'][ip]['os']
-            self.prom.prom_metrics['endpoint_role_confidence_top'].labels(
-                mac=endpoint.endpoint_data['mac'],
+
+            def set_prom(var, val, **prom_labels):
+                prom_labels.update({
+                    'mac': endpoint.endpoint_data['mac'],
+                    'name': endpoint.endpoint_data['name'],
+                    'hash_id': hash_id,
+                })
+                self.prom.prom_metrics[var].labels(**prom_labels).set(val)
+
+            set_prom(
+                'endpoint_role_confidence_top',
+                top_conf,
                 role=top_role,
-                name=endpoint.endpoint_data['name'],
                 ipv4_os=ipv4_os,
                 ipv4_address=endpoint.endpoint_data['ipv4'],
-                ipv6_address=endpoint.endpoint_data['ipv6'],
-                hash_id=hash_id).set(top_conf)
-            self.prom.prom_metrics['endpoint_role_confidence_second'].labels(
-                mac=endpoint.endpoint_data['mac'],
+                ipv6_address=endpoint.endpoint_data['ipv6'])
+            set_prom(
+                'endpoint_role_confidence_second',
+                second_conf,
                 role=second_role,
-                name=endpoint.endpoint_data['name'],
                 ipv4_os=ipv4_os,
                 ipv4_address=endpoint.endpoint_data['ipv4'],
-                ipv6_address=endpoint.endpoint_data['ipv6'],
-                hash_id=hash_id).set(second_conf)
-            self.prom.prom_metrics['endpoint_role_confidence_third'].labels(
-                mac=endpoint.endpoint_data['mac'],
+                ipv6_address=endpoint.endpoint_data['ipv6'])
+            set_prom(
+                'endpoint_role_confidence_third',
+                third_conf,
                 role=third_role,
-                name=endpoint.endpoint_data['name'],
                 ipv4_os=ipv4_os,
                 ipv4_address=endpoint.endpoint_data['ipv4'],
-                ipv6_address=endpoint.endpoint_data['ipv6'],
-                hash_id=hash_id).set(third_conf)
-            self.prom.prom_metrics['endpoints'].labels(
-                mac=endpoint.endpoint_data['mac'],
+                ipv6_address=endpoint.endpoint_data['ipv6'])
+            set_prom(
+                'endpoints',
+                update_time,
                 tenant=endpoint.endpoint_data['tenant'],
                 segment=endpoint.endpoint_data['segment'],
                 ether_vendor=endpoint.endpoint_data['ether_vendor'],
                 controller_type=endpoint.endpoint_data['controller_type'],
                 controller=endpoint.endpoint_data['controller'],
-                name=endpoint.endpoint_data['name'],
-                port=endpoint.endpoint_data['port'],
-                hash_id=endpoint.name).set(update_time)
-            self.prom.prom_metrics['endpoint_state'].labels(
-                mac=endpoint.endpoint_data['mac'],
+                port=endpoint.endpoint_data['port'])
+            set_prom(
+                'endpoint_state',
+                update_time,
                 tenant=endpoint.endpoint_data['tenant'],
                 segment=endpoint.endpoint_data['segment'],
                 ether_vendor=endpoint.endpoint_data['ether_vendor'],
-                name=endpoint.endpoint_data['name'],
                 state=endpoint.state,
-                port=endpoint.endpoint_data['port'],
-                hash_id=hash_id).set(update_time)
-            self.prom.prom_metrics['endpoint_os'].labels(
-                mac=endpoint.endpoint_data['mac'],
+                port=endpoint.endpoint_data['port'])
+            set_prom(
+                'endpoint_os',
+                update_time,
                 tenant=endpoint.endpoint_data['tenant'],
                 segment=endpoint.endpoint_data['segment'],
                 ether_vendor=endpoint.endpoint_data['ether_vendor'],
-                name=endpoint.endpoint_data['name'],
                 port=endpoint.endpoint_data['port'],
-                ipv4_os=ipv4_os,
-                hash_id=hash_id).set(update_time)
-            self.prom.prom_metrics['endpoint_role'].labels(
-                mac=endpoint.endpoint_data['mac'],
+                ipv4_os=ipv4_os)
+            set_prom(
+                'endpoint_role',
+                update_time,
                 tenant=endpoint.endpoint_data['tenant'],
                 segment=endpoint.endpoint_data['segment'],
                 ether_vendor=endpoint.endpoint_data['ether_vendor'],
-                name=endpoint.endpoint_data['name'],
                 port=endpoint.endpoint_data['port'],
-                top_role=top_role,
-                hash_id=hash_id).set(update_time)
-            self.prom.prom_metrics['endpoint_ip'].labels(
-                mac=endpoint.endpoint_data['mac'],
+                top_role=top_role)
+            set_prom(
+                'endpoint_ip',
+                update_time,
                 tenant=endpoint.endpoint_data['tenant'],
                 segment=endpoint.endpoint_data['segment'],
                 ether_vendor=endpoint.endpoint_data['ether_vendor'],
@@ -248,13 +251,12 @@ class Monitor:
                 ipv6_subnet=endpoint.endpoint_data['ipv6_subnet'],
                 ipv4_rdns=endpoint.endpoint_data['ipv4_rdns'],
                 ipv6_rdns=endpoint.endpoint_data['ipv6_rdns'],
-                name=endpoint.endpoint_data['name'],
                 port=endpoint.endpoint_data['port'],
                 ipv4_address=endpoint.endpoint_data['ipv4'],
-                ipv6_address=endpoint.endpoint_data['ipv6'],
-                hash_id=hash_id).set(update_time)
-            self.prom.prom_metrics['endpoint_metadata'].labels(
-                mac=endpoint.endpoint_data['mac'],
+                ipv6_address=endpoint.endpoint_data['ipv6'])
+            set_prom(
+                'endpoint_metadata',
+                update_time,
                 tenant=endpoint.endpoint_data['tenant'],
                 segment=endpoint.endpoint_data['segment'],
                 ether_vendor=endpoint.endpoint_data['ether_vendor'],
@@ -269,14 +271,12 @@ class Monitor:
                 ipv6_rdns=endpoint.endpoint_data['ipv6_rdns'],
                 controller_type=endpoint.endpoint_data['controller_type'],
                 controller=endpoint.endpoint_data['controller'],
-                name=endpoint.endpoint_data['name'],
                 state=endpoint.state,
                 port=endpoint.endpoint_data['port'],
                 top_role=top_role,
                 ipv4_os=ipv4_os,
                 ipv4_address=endpoint.endpoint_data['ipv4'],
-                ipv6_address=endpoint.endpoint_data['ipv6'],
-                hash_id=hash_id).set(update_time)
+                ipv6_address=endpoint.endpoint_data['ipv6'])
 
     def format_rabbit_message(self, item, faucet_event, remove_list):
         '''
