@@ -395,8 +395,8 @@ class Prometheus():
                 if 'result' in results['data'] and results['data']['result']:
                     for metric in results['data']['result']:
                         if metric['metric']['hash_id'] in role_hashes:
-                            role_hashes[metric[['metric']['hash_id']]['third_role'] = metric['metric']['role']
-                            role_hashes[metric[['metric']['hash_id']]['third_confidence'] = float(metric['values'][-1][1])
+                            role_hashes[metric['metric']['hash_id']]['third_role'] = metric['metric']['role']
+                            role_hashes[metric['metric']['hash_id']]['third_confidence'] = float(metric['values'][-1][1])
         if mr:
             results = mr.json()
             if 'data' in results:
