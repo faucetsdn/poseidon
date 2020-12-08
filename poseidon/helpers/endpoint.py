@@ -107,6 +107,7 @@ class Endpoint:
         self.metadata = {}
         self.state = None
         self.copro_state = None
+        self.observed_time = 0
 
     def encode(self):
         endpoint_d = {
@@ -119,8 +120,18 @@ class Endpoint:
             'p_prev_state': self.p_prev_state,
             'acl_data': self.acl_data,
             'metadata': self.metadata,
+            'observed_time': self.observed_time,
         }
         return str(json.dumps(endpoint_d))
+
+    def mac_addresses(self):
+        return self.metadata.get('mac_addresses', {})
+
+    def touch(self):
+        self.observed_time = time.time()
+
+    def observed_timeout(self, timeout):
+        return time.time() - self.observed_time > timeout
 
     def state_time(self):
         return self.p_prev_state[1]
@@ -244,31 +255,14 @@ class EndpointDecoder:
         e = json.loads(endpoint)
         self.endpoint = endpoint_factory(e['name'])
         self.endpoint.state = e['state']
-        if 'copro_state' in e:
-            self.endpoint.copro_state = e['copro_state']
-        else:
-            self.endpoint.copro_state = None
-        if 'ignore' in e:
-            if e['ignore']:
-                self.endpoint.ignore = True
-            else:
-                self.endpoint.ignore = False
-        else:
-            self.endpoint.ignore = False
-        if 'metadata' in e:
-            self.endpoint.metadata = e['metadata']
-        else:
-            self.endpoint.metadata = {}
-        if 'acl_data' in e:
-            self.endpoint.acl_data = e['acl_data']
-        else:
-            self.endpoint.acl_data = []
+        self.endpoint.copro_state = e.get('copro_state', None)
+        self.endpoint.ignore = bool(e.get('ignore', False))
+        self.endpoint.metadata = e.get('metadata', {})
+        self.endpoint.acl_data = e.get('acl_data', [])
         self.endpoint.endpoint_data = e['endpoint_data']
         self.endpoint.p_next_state = e['p_next_state']
-        if 'p_prev_state' in e:
-            self.endpoint.p_prev_state = e['p_prev_state']
-        else:
-            self.endpoint.p_prev_state = [None, 0]
+        self.endpoint.p_prev_state = e.get('p_prev_state', [None, 0])
+        self.endpoint.observed_time = e.get('observed_time', 0)
 
     def get_endpoint(self):
         return self.endpoint
