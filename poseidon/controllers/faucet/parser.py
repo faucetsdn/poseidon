@@ -222,7 +222,7 @@ class Parser:
             self.logger.warning('Unknown action: {0}'.format(action))
 
     def ignore_event(self, message):
-        for message_type in ('L2_LEARN', 'L2_EXPIRE', 'PORT_CHANGE'):
+        for message_type in ('L2_LEARN', 'PORT_CHANGE'):
             message_body = message.get(message_type, None)
             if message_body:
                 switch = str(message['dp_name'])
@@ -258,12 +258,12 @@ class Parser:
         # Not a message we are interested in, ignore it.
         return True
 
+    def make_mac_inactive(self, mac):
+        if mac in self.mac_table:
+            self.mac_table[mac][0]['active'] = 0
+
     def event(self, message):
         dp_name = str(message['dp_name'])
-
-        def make_mac_inactive(mac):
-            if mac in self.mac_table:
-                self.mac_table[mac][0]['active'] = 0
 
         if 'L2_LEARN' in message:
             self.logger.debug(
@@ -287,11 +287,6 @@ class Parser:
                 self.mac_table[eth_src].insert(0, data)
             else:
                 self.mac_table[eth_src] = [data]
-        elif 'L2_EXPIRE' in message:
-            self.logger.debug(
-                'got faucet message for l2_expire: {0}'.format(message))
-            message = message['L2_EXPIRE']
-            make_mac_inactive(message['eth_src'])
         elif 'PORT_CHANGE' in message:
             self.logger.debug(
                 'got faucet message for port_change: {0}'.format(message))
@@ -302,4 +297,4 @@ class Parser:
                 for mac in m_table:
                     for data in m_table[mac]:
                         if port_no_str == data['port'] and dp_name == data['segment']:
-                            make_mac_inactive(mac)
+                            self.make_mac_inactive(mac)

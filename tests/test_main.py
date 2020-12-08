@@ -412,7 +412,7 @@ def test_process():
     assert mock_monitor.s.coprocessing_budget()
     handlers = [
         mock_monitor.job_update_metrics,
-        mock_monitor.job_reinvestigation,
+        mock_monitor.job_reinvestigation_timeout,
         mock_monitor.job_recoprocess,
         mock_monitor.schedule_mirroring,
         mock_monitor.schedule_coprocessing]
