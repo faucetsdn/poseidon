@@ -348,7 +348,10 @@ class Prometheus():
     def get_stored_endpoints(self):
         ''' load existing endpoints from Prometheus. '''
         endpoints = {}
-        r = None
+        r1 = None
+        r2 = None
+        r3 = None
+        mr = None
         current_time = datetime.datetime.utcnow()
         # 6 hours in the past and 2 hours in the future
         start_time = current_time - datetime.timedelta(hours=6)
@@ -381,6 +384,8 @@ class Prometheus():
                                                                     'timestamp': str(metric['values'][-1][0]),
                                                                     'top_role': metric['metric']['role'],
                                                                     'top_confidence': float(metric['values'][-1][1])}
+            else:
+                self.logger.error(f'Bad request: {results}')
         if r2:
             results = r2.json()
             if 'data' in results:
@@ -389,6 +394,8 @@ class Prometheus():
                         if metric['metric']['hash_id'] in role_hashes:
                             role_hashes[metric['metric']['hash_id']]['second_role'] = metric['metric']['role']
                             role_hashes[metric['metric']['hash_id']]['second_confidence'] = float(metric['values'][-1][1])
+            else:
+                self.logger.error(f'Bad request: {results}')
         if r3:
             results = r3.json()
             if 'data' in results:
@@ -397,6 +404,8 @@ class Prometheus():
                         if metric['metric']['hash_id'] in role_hashes:
                             role_hashes[metric['metric']['hash_id']]['third_role'] = metric['metric']['role']
                             role_hashes[metric['metric']['hash_id']]['third_confidence'] = float(metric['values'][-1][1])
+            else:
+                self.logger.error(f'Bad request: {results}')
         if mr:
             results = mr.json()
             if 'data' in results:
@@ -440,53 +449,6 @@ class Prometheus():
                                 p_endpoint['metadata']['mac_addresses'][role_hashes[e]['mac']] = {role_hashes[e]['timestamp']: {'labels': [role_hashes[e]['top_role'], role_hashes[e]['second_role'], role_hashes[e]['third_role']], 'confidences': [role_hashes[e]['top_confidence'], role_hashes[e]['second_confidence'], role_hashes[e]['third_confidence']], 'pcap_labels': ''}}
                             if not role_hashes[e]['ipv4_address'] in p_endpoint['metadata']['ipv4_addresses']:
                                 p_endpoint['metadata']['ipv4_addresses'][role_hashes[e]['ipv4_address']] = {'os': role_hashes[e]['ipv4_os']}
-                        endpoint = EndpointDecoder(p_endpoint).get_endpoint()
-                        endpoints[endpoint.name] = endpoint
-            else:
-                self.logger.error(f'Bad request: {results}')
-        return endpoints
-
-    @staticmethod
-    def start(port=9304):
-        start_http_server(port)
-        if mr:
-            results = mr.json()
-            if 'data' in results:
-                if 'result' in results['data'] and results['data']['result']:
-                    hashes = {}
-                    for metric in results['data']['result']:
-                        if metric['metric']['hash_id'] in hashes:
-                            if float(metric['values'][-1][1]) > hashes[metric['metric']['hash_id']]['latest']:
-                                hashes[metric['metric']['hash_id']] = metric['metric']
-                                hashes[metric['metric']['hash_id']]['latest'] = float(metric['values'][-1][1])
-                        else:
-                            hashes[metric['metric']['hash_id']] = metric['metric']
-                            hashes[metric['metric']['hash_id']]['latest'] = float(metric['values'][-1][1])
-                    # format hash metrics into endpoints
-                    for h in hashes:
-                        p_endpoint = hashes[h]
-                        p_endpoint['name'] = p_endpoint['hash_id']
-                        p_endpoint['endpoint_data'] = {'mac': p_endpoint['mac'],
-                                                       'segment': p_endpoint['segment'],
-                                                       'port': p_endpoint['port'],
-                                                       'vlan': p_endpoint['tenant'],
-                                                       'tenant': p_endpoint['tenant'],
-                                                       'active': p_endpoint['active'],
-                                                       'ipv4': p_endpoint.get('ipv4_address', ''),
-                                                       'ipv6': p_endpoint.get('ipv6_address', ''),
-                                                       'controller_type': p_endpoint['controller_type'],
-                                                       'controller': p_endpoint.get('controller', ''),
-                                                       'name': p_endpoint['name'],
-                                                       'ether_vendor': p_endpoint['ether_vendor'],
-                                                       'ipv4_subnet': p_endpoint.get('ipv4_subnet', ''),
-                                                       'ipv4_rdns': p_endpoint.get('ipv4_rdns', ''),
-                                                       'ipv6_rdns': p_endpoint.get('ipv6_rdns', ''),
-                                                       'ipv6_subnet': p_endpoint.get('ipv6_subnet', '')}
-                        p_endpoint['p_next_state'] = p_endpoint.get('next_state', None)
-                        p_endpoint['p_prev_state'] = list(p_endpoint.get('prev_state', []))
-                        # TODO acl_data, metadata
-                        p_endpoint['acl_data'] = []
-                        p_endpoint['metadata'] = {'mac_addresses': {}, 'ipv4_addresses': {}, 'ipv6_addresses': {}}
                         endpoint = EndpointDecoder(p_endpoint).get_endpoint()
                         endpoints[endpoint.name] = endpoint
             else:
