@@ -391,7 +391,6 @@ def test_process():
             endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'1551805502': {'labels': ['developer workstation', 'foo', 'bar'], 'confidences': [0.8, 0.2, 0.0]}}}, 'ipv4_addresses': {
                 '12.12.12.12': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
             self.s.endpoints[endpoint.name] = endpoint
-            self.s.refresh_endpoints()
             self.results = 0
 
         def get_q_item(self, q, timeout=1):

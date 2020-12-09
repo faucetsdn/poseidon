@@ -46,6 +46,8 @@ class Monitor:
 
         # initialize sdnconnect
         self.s = SDNConnect(self.controller, self.logger)
+        self.s.default_endpoints()
+        self.update_endpoint_metadata()
 
         # timer class to call things periodically in own thread
         self.schedule = schedule
@@ -479,7 +481,6 @@ class Monitor:
                 events += self.monitor_callable(schedule_func)
             if events:
                 self.monitor_callable(self.update_endpoint_metadata)
-                self.monitor_callable(self.s.refresh_endpoints)
             else:
                 time.sleep(1)
 

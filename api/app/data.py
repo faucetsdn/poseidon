@@ -31,7 +31,7 @@ class Info:
 
     @staticmethod
     def on_get(_req, resp):
-        resp.body = json.dumps({'version': 'v0.1.2'})
+        resp.body = json.dumps({'version': 'v0.2.0'})
         resp.content_type = falcon.MEDIA_TEXT
         resp.status = falcon.HTTP_200
 

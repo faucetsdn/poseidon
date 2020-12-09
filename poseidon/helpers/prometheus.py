@@ -362,7 +362,6 @@ class Prometheus():
         start_time_str = start_time.isoformat()[:-4]+"Z"
         end_time_str = end_time.isoformat()[:-4]+"Z"
         try:
-            # hardcoded endpoint ok because Docker networking
             payload = {'query': 'poseidon_endpoint_metadata', 'start': start_time_str, 'end': end_time_str, 'step': '30s'}
             mr = requests.get('http://'+self.prometheus_addr+'/api/v1/query_range', params=payload)
             payload = {'query': 'poseidon_role_confidence_top', 'start': start_time_str, 'end': end_time_str, 'step': '30s'}

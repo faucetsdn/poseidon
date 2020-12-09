@@ -117,8 +117,8 @@ function check_args()
                 fi
                 echo "Starting Poseidon..."
                 pushd "$(pwd)" && cd "$POSEIDON_PREFIX"/opt/poseidon || exit
-                sudo mkdir -p "$POSEIDON_PREFIX"/opt/redis "$POSEIDON_PREFIX"/opt/poseidon_files
-                sudo chmod 777 "$POSEIDON_PREFIX"/opt/redis "$POSEIDON_PREFIX"/opt/poseidon_files
+                sudo mkdir -p "$POSEIDON_PREFIX"/opt/poseidon_files
+                sudo chmod 777 "$POSEIDON_PREFIX"/opt/poseidon_files
                 sudo touch "$POSEIDON_PREFIX"/opt/poseidon/.poseidon_history
                 sudo chmod 777 "$POSEIDON_PREFIX"/opt/poseidon/.poseidon_history
                 rpcdir="$POSEIDON_PREFIX"/opt/faucetconfrpc
