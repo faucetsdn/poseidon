@@ -41,6 +41,7 @@ class SDNConnect:
         self.prc.connect()
         self.prom = Prometheus()
         self.dns_resolver = DNSResolver()
+        self.get_stored_endpoints()
         self.default_endpoints()
 
     def mirror_endpoint(self, endpoint):
@@ -68,19 +69,15 @@ class SDNConnect:
     def default_endpoints(self):
         ''' set endpoints to default state. '''
         self.clear_filters()
-        self.get_stored_endpoints()
         for endpoint in self.endpoints.values():
             endpoint.default()
         self.store_endpoints()
 
     def get_stored_endpoints(self):
-        # NEW WAY
         ''' load existing endpoints from Prometheus. '''
         new_endpoints = self.prom.get_stored_endpoints()
-        # OLD WAY - TO BE REMOVED
-        ''' load existing endpoints from Redis. '''
-        new_endpoints = self.prc.get_stored_endpoints()
         if new_endpoints:
+            self.logger.info(f'Loaded {len(new_endpoints)} endpoints previously learned.')
             self.endpoints = new_endpoints
 
     def get_sdn_context(self):
@@ -361,7 +358,6 @@ class SDNConnect:
     def refresh_endpoints(self):
         self.logger.debug('refresh endpoints')
         self.store_endpoints()
-        self.get_stored_endpoints()
 
     @staticmethod
     def coprocess_endpoint(_endpoint):
