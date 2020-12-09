@@ -379,10 +379,10 @@ class Prometheus():
                     for metric in results['data']['result']:
                         if not metric['metric']['hash_id'] in role_hashes:
                             role_hashes[metric['metric']['hash_id']] = {'mac': metric['metric']['mac'],
-                                                                    'ipv4_address': metric['metric']['ipv4_address'],
-                                                                    'ipv4_os': metric['metric']['ipv4_os'],
+                                                                    'ipv4_address': metric['metric'].get('ipv4_address', ''),
+                                                                    'ipv4_os': metric['metric'].get('ipv4_os', 'NO DATA'),
                                                                     'timestamp': str(metric['values'][-1][0]),
-                                                                    'top_role': metric['metric']['role'],
+                                                                    'top_role': metric['metric'].get('role', 'NO DATA'),
                                                                     'top_confidence': float(metric['values'][-1][1])}
             else:
                 self.logger.error(f'Bad request: {results}')
@@ -392,7 +392,7 @@ class Prometheus():
                 if 'result' in results['data'] and results['data']['result']:
                     for metric in results['data']['result']:
                         if metric['metric']['hash_id'] in role_hashes:
-                            role_hashes[metric['metric']['hash_id']]['second_role'] = metric['metric']['role']
+                            role_hashes[metric['metric']['hash_id']]['second_role'] = metric['metric'].get('role', 'NO DATA')
                             role_hashes[metric['metric']['hash_id']]['second_confidence'] = float(metric['values'][-1][1])
             else:
                 self.logger.error(f'Bad request: {results}')
@@ -402,7 +402,7 @@ class Prometheus():
                 if 'result' in results['data'] and results['data']['result']:
                     for metric in results['data']['result']:
                         if metric['metric']['hash_id'] in role_hashes:
-                            role_hashes[metric['metric']['hash_id']]['third_role'] = metric['metric']['role']
+                            role_hashes[metric['metric']['hash_id']]['third_role'] = metric['metric'].get('role', 'NO DATA')
                             role_hashes[metric['metric']['hash_id']]['third_confidence'] = float(metric['values'][-1][1])
             else:
                 self.logger.error(f'Bad request: {results}')
