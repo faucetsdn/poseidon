@@ -132,7 +132,7 @@ def test_network_by_ip(client):
 def test_network_full(client):
     setup_redis()
     response = client.simulate_get('/v1/network_full')
-    assert len(response.json) == 0
+    assert len(response.json) == 1
     assert response.status == falcon.HTTP_OK
     #verify_endpoints(response)
 
