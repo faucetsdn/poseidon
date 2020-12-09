@@ -18,7 +18,6 @@ from poseidon.helpers.endpoint import MACHINE_IP_PREFIXES
 from poseidon.helpers.metadata import DNSResolver
 from poseidon.helpers.metadata import get_ether_vendor
 from poseidon.helpers.prometheus import Prometheus
-from poseidon.helpers.redis import PoseidonRedisClient
 
 
 class SDNConnect:
@@ -37,12 +36,9 @@ class SDNConnect:
             self.trunk_ports = trunk_ports
         self.logger = logger
         self.get_sdn_context()
-        self.prc = PoseidonRedisClient(self.logger)
-        self.prc.connect()
         self.prom = Prometheus()
         self.dns_resolver = DNSResolver()
         self.get_stored_endpoints()
-        self.default_endpoints()
 
     def mirror_endpoint(self, endpoint):
         ''' mirror an endpoint. '''
@@ -71,7 +67,6 @@ class SDNConnect:
         self.clear_filters()
         for endpoint in self.endpoints.values():
             endpoint.default()
-        self.store_endpoints()
 
     def get_stored_endpoints(self):
         ''' load existing endpoints from Prometheus. '''
@@ -350,14 +345,6 @@ class SDNConnect:
                     if ep:
                         ep.acl_data.append(
                             ((item[0], item[4], item[5]), int(time.time())))
-
-    def store_endpoints(self):
-        ''' store current endpoints in Redis. '''
-        self.prc.store_endpoints(self.endpoints)
-
-    def refresh_endpoints(self):
-        self.logger.debug('refresh endpoints')
-        self.store_endpoints()
 
     @staticmethod
     def coprocess_endpoint(_endpoint):

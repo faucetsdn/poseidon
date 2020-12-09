@@ -1,12 +1,5 @@
 version: '3.7'
 services:
-    redis:
-        restart: always
-        image: 'iqtlabs/redis:latest'
-        volumes:
-            - '${POSEIDON_PREFIX}/opt/redis:/data'
-        networks:
-            poseidon:
     rabbit:
         restart: always
         image: 'iqtlabs/rabbitmq:latest'
@@ -68,7 +61,6 @@ services:
             - poseidon
         depends_on:
             - rabbit
-            - redis
         build:
             context: .
             dockerfile: Dockerfile
