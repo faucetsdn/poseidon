@@ -37,6 +37,8 @@ class Config():
             'logger_level': 'INFO',
             'faucetconfrpc_address': 'faucetconfrpc:59999',
             'faucetconfrpc_client': 'faucetconfrpc',
+            'prometheus_ip': 'prometheus',
+            'prometheus_port': 9090,
         }
 
         config_map = {
