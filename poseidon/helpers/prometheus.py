@@ -15,6 +15,7 @@ from prometheus_client import Info
 from prometheus_client import Summary
 from prometheus_client import start_http_server
 
+from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import EndpointDecoder
 
 
@@ -23,6 +24,8 @@ class Prometheus():
     def __init__(self):
         self.logger = logging.getLogger('prometheus')
         self.prom_metrics = {}
+        self.controller = Config().get_config()
+        self.prometheus_addr = self.controller['prometheus_ip'] + ':' + self.controller['prometheus_port']
 
     def initialize_metrics(self):
         self.prom_metrics['info'] = Info('poseidon_version', 'Info about Poseidon')
@@ -361,13 +364,13 @@ class Prometheus():
         try:
             # hardcoded endpoint ok because Docker networking
             payload = {'query': 'poseidon_endpoint_metadata', 'start': start_time_str, 'end': end_time_str, 'step': '30s'}
-            mr = requests.get('http://prometheus:9090/api/v1/query_range', params=payload)
+            mr = requests.get('http://'+self.prometheus_addr+'/api/v1/query_range', params=payload)
             payload = {'query': 'poseidon_role_confidence_top', 'start': start_time_str, 'end': end_time_str, 'step': '30s'}
-            r1 = requests.get('http://prometheus:9090/api/v1/query_range', params=payload)
+            r1 = requests.get('http://'+self.prometheus_addr+'/api/v1/query_range', params=payload)
             payload = {'query': 'poseidon_role_confidence_second', 'start': start_time_str, 'end': end_time_str, 'step': '30s'}
-            r2 = requests.get('http://prometheus:9090/api/v1/query_range', params=payload)
+            r2 = requests.get('http://'+self.prometheus_addr+'/api/v1/query_range', params=payload)
             payload = {'query': 'poseidon_role_confidence_third', 'start': start_time_str, 'end': end_time_str, 'step': '30s'}
-            r3 = requests.get('http://prometheus:9090/api/v1/query_range', params=payload)
+            r3 = requests.get('http://'+self.prometheus_addr+'/api/v1/query_range', params=payload)
 
         except Exception as e:
             self.logger.error(f'Unable to get endpoints from Prometheus because: {e}')
