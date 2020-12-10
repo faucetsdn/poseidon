@@ -81,14 +81,42 @@ class Monitor:
             self.logger.debug('poseidonMain workQueue is None')
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
+    def get_hosts(self):
+        # TODO consolidate with update_endpoint_metadata
+        hosts = []
+        for hash_id, endpoint in self.s.endpoints.items():
+            host = {}
+            ipv4_os = 'NO DATA'
+            role = 'NO DATA'
+            if 'mac_addresses' in endpoint.metadata:
+                for mac in endpoint.metadata['mac_addresses']:
+                    newest = 0
+                    for timestamp in endpoint.metadata['mac_addresses'][mac]:
+                        if float(timestamp) > newest:
+                            newest = float(timestamp)
+                            role = endpoint.metadata['mac_addresses'][mac][timestamp]['labels'][0]
+            if 'ipv4_addresses' in endpoint.metadata:
+                for ip in endpoint.metadata['ipv4_addresses']:
+                    if ip == endpoint.endpoint_data['ipv4']:
+                        if 'os' in endpoint.metadata['ipv4_addresses'][ip]:
+                            ipv4_os = endpoint.metadata['ipv4_addresses'][ip]['os']
+            host['mac'] = endpoint.endpoint_data['mac']
+            host['id'] = hash_id
+            host['active'] = endpoint.endpoint_data['active']
+            host['role'] = role
+            host['ipv4_os'] = ipv4_os
+            host['state'] = endpoint.state
+            host['tenant'] = endpoint.endpoint_data['tenant']
+            host['port'] = endpoint.endpoint_data['port']
+            host['segment'] = endpoint.endpoint_data['segment']
+            host['ipv4'] = endpoint.endpoint_data['ipv4']
+            hosts.append(host)
+        return hosts
+
     def job_update_metrics(self):
         self.logger.debug('updating metrics')
         try:
-            # get current state
-            req = requests.get(
-                'http://poseidon-api:8000/v1/network_full', timeout=10)
-            # send results to prometheus
-            hosts = req.json()['dataset']
+            hosts = self.get_host()
             self.prom.update_metrics(hosts)
         except (requests.exceptions.ConnectionError, Exception) as e:  # pragma: no cover
             self.logger.error(

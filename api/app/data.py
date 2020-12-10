@@ -6,7 +6,7 @@ import time
 from copy import deepcopy
 
 import falcon
-import redis
+import requests
 from natural.date import duration
 
 from .constants import NO_DATA
@@ -46,7 +46,7 @@ class Nodes:
         for field in fields:
             self.node[field] = fields[field]
 
-    def connect_redis(self):
+    def scrape_prometheus(self):
         self.r = None
         try:
             self.r = redis.StrictRedis(host=os.getenv('REDIS_HOST', 'redis'),
