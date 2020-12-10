@@ -116,7 +116,7 @@ class Monitor:
     def job_update_metrics(self):
         self.logger.debug('updating metrics')
         try:
-            hosts = self.get_host()
+            hosts = self.get_hosts()
             self.prom.update_metrics(hosts)
         except (requests.exceptions.ConnectionError, Exception) as e:  # pragma: no cover
             self.logger.error(
