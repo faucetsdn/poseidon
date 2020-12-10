@@ -89,6 +89,7 @@ class Monitor:
             host = {}
             ipv4_os = 'NO DATA'
             role = 'NO DATA'
+            self.logger.debug(f'endpoint metadata: {endpoint.metadata}')
             if 'mac_addresses' in endpoint.metadata:
                 for mac in endpoint.metadata['mac_addresses']:
                     newest = 0
