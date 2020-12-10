@@ -325,10 +325,8 @@ class Monitor:
             tool = results.get('tool', None)
             if isinstance(data, dict):
                 if tool == 'p0f':
-                    if self.s.prc.store_p0f_result(data):
-                        return data
+                    return data
                 elif tool == 'networkml':
-                    self.s.prc.store_tool_result(my_obj, 'networkml')
                     for name, message in data.items():
                         endpoint = self.s.endpoints.get(name, None)
                         if endpoint:
