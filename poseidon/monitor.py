@@ -338,6 +338,7 @@ class Monitor:
                                             if not 'ipv4_addresses' in ep.metadata:
                                                 ep.metadata['ipv4_addresses'] = {}
                                             ep.metadata['ipv4_addresses'][ip] = ip_data
+                    self.job_update_metrics()
                     return data
                 elif tool == 'networkml':
                     for name, message in data.items():
@@ -350,6 +351,7 @@ class Monitor:
                                 if not 'mac_addresses' in endpoint.metadata:
                                     endpoint.metadata['mac_addresses'] = {}
                                 endpoint.metadata['mac_addresses'][message['source_mac']] = message
+                                self.job_update_metrics()
                                 return data
                             break
                         else:
