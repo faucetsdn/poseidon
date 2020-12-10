@@ -328,6 +328,14 @@ class Monitor:
             tool = results.get('tool', None)
             if isinstance(data, dict):
                 if tool == 'p0f':
+                    if data:
+                        for ip, ip_data in data.items():
+                            if ip_data and ip_data.get('full_os', None):
+                                for endpoint in self.s.endpoints.item():
+                                    if endpoint.endpoint_data['ipv4'] == ip:
+                                        ep = self.s.endpoints.get(endpoint.name, None):
+                                        if ep:
+                                            ep.metadata['ipv4_addresses'][ip] = ip_data
                     return data
                 elif tool == 'networkml':
                     for name, message in data.items():
@@ -337,6 +345,7 @@ class Monitor:
                                 'processing networkml results for %s', name)
                             self.s.unmirror_endpoint(endpoint)
                             if message.get('valid', False):
+                                endpoint.metadata['mac_addresses'][message['source_mac']] = message
                                 return data
                             break
                         else:
