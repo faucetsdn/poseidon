@@ -56,6 +56,9 @@ class SDNConnect:
                     'Unable to unmirror the endpoint: {0}'.format(endpoint.name))
             endpoint.unknown()  # pytype: disable=attribute-error
             endpoint.p_next_state = None
+        else:
+            self.logger.info('Not unmirroring endpoint {0} in state {1}'.format(
+                endpoint.name, endpoint.state))
 
     def clear_filters(self):
         ''' clear any exisiting filters. '''
@@ -325,8 +328,7 @@ class SDNConnect:
                 if ep.state == 'inactive' and machine['active'] == 1:
                     ep.reactivate()
                 elif ep.state != 'inactive' and machine['active'] == 0:
-                    if ep.mirror_active():
-                        self.unmirror_endpoint(ep)
+                    self.unmirror_endpoint(ep)
                     ep.deactivate()
             ep.touch()
 

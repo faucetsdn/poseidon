@@ -172,31 +172,36 @@ class Parser:
 
     def clear_mirrors(self):
         dps = self._get_dps()
-        if not dps:
-            return False
-        for switch in dps:
-            mirror_port = self.mirror_switch_port(switch)
-            if mirror_port:
-                self._clear_mirror_port(switch, mirror_port)
+        if dps:
+            for switch in dps:
+                mirror_port = self.mirror_switch_port(switch)
+                if mirror_port:
+                    self._clear_mirror_port(switch, mirror_port)
 
     def config_mirror(self, action, switch, port):
         switch, port = self.proxy_mirror_port(switch, port)
-        self.logger.debug(f'configuring mirror on {switch} port {port}')
         mirror_port = self.mirror_switch_port(switch)
         if mirror_port:
-            mirror_key = (switch, mirror_port)
-            if action == 'mirror':
-                self._mirror_port(switch, mirror_port, port)
-                self.mirror_counts[mirror_key] += 1
-            elif action == 'unmirror':
-                self.mirror_counts[mirror_key] -= 1
-                if not self.mirror_counts[mirror_key]:
-                    self.logger.info(
-                        f'removing last remaining mirror on {switch}:{mirror_port}')
-                    self._unmirror_port(switch, mirror_port, port)
+            mirror_key = (switch, port)
+            if action in ('mirror', 'unmirror'):
+                self.logger.info(f'request {action} of {mirror_key}')
+                if action == 'mirror':
+                    self._mirror_port(switch, mirror_port, port)
+                    self.mirror_counts[mirror_key] += 1
+                elif action == 'unmirror':
+                    if self.mirror_counts[mirror_key]:
+                        self.mirror_counts[mirror_key] -= 1
+                        if not self.mirror_counts[mirror_key]:
+                            self.logger.info(
+                                f'removing last remaining mirror on {mirror_key}')
+                            self._unmirror_port(switch, mirror_port, port)
+                count = self.mirror_counts[mirror_key]
+                self.logger.info(f'mirroring {count} MACs on {mirror_key}')
+            else:
+                self.logger.error(f'Unknown mirror action {action} for {mirror_key}')
         else:
             self.logger.error(
-                f'Unable to mirror {switch}:{port} due to warnings')
+                f'Unable to configure mirror/unmirror {switch}:{port} due to warnings')
 
     def config_acls(self, rules_file, endpoints, force_apply_rules, force_remove_rules, coprocess_rules_files):
         rules_doc = parse_rules(rules_file)
