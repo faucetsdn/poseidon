@@ -335,6 +335,8 @@ class Monitor:
                                     if endpoint.endpoint_data['ipv4'] == ip:
                                         ep = self.s.endpoints.get(endpoint.name, None)
                                         if ep:
+                                            if not 'ipv4_addresses' in ep.metadata:
+                                                ep.metadata['ipv4_addresses'] = {}
                                             ep.metadata['ipv4_addresses'][ip] = ip_data
                     return data
                 elif tool == 'networkml':
@@ -345,6 +347,8 @@ class Monitor:
                                 'processing networkml results for %s', name)
                             self.s.unmirror_endpoint(endpoint)
                             if message.get('valid', False):
+                                if not 'mac_addresses' in endpoint.metadata:
+                                    endpoint.metadata['mac_addresses'] = {}
                                 endpoint.metadata['mac_addresses'][message['source_mac']] = message
                                 return data
                             break
