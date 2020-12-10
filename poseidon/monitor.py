@@ -333,7 +333,7 @@ class Monitor:
                             if ip_data and ip_data.get('full_os', None):
                                 for endpoint in self.s.endpoints.item():
                                     if endpoint.endpoint_data['ipv4'] == ip:
-                                        ep = self.s.endpoints.get(endpoint.name, None):
+                                        ep = self.s.endpoints.get(endpoint.name, None)
                                         if ep:
                                             ep.metadata['ipv4_addresses'][ip] = ip_data
                     return data
