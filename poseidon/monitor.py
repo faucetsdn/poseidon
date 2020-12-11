@@ -327,6 +327,7 @@ class Monitor:
                         for ip, ip_data in data.items():
                             if ip_data and ip_data.get('full_os', None):
                                 for endpoint in self.s.endpoints.item():
+                                    self.logger.debug(f'endpoint name and ip: {endpoint.name}, {endpoint.endpoint_data["ipv4"]}')
                                     if endpoint.endpoint_data['ipv4'] == ip:
                                         ep = self.s.endpoints.get(endpoint.name, None)
                                         if ep:
@@ -340,6 +341,7 @@ class Monitor:
                 elif tool == 'networkml':
                     for name, message in data.items():
                         endpoint = self.s.endpoints.get(name, None)
+                        self.logger.debug(f'endpoint name: {endpoint.name}')
                         if endpoint:
                             self.logger.debug(
                                 'processing networkml results for %s', name)
