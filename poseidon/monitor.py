@@ -113,6 +113,7 @@ class Monitor:
         return hosts
 
     def job_update_metrics(self):
+        print(f'self')
         self.logger.debug('updating metrics')
         try:
             hosts = self.get_hosts()
@@ -366,7 +367,9 @@ class Monitor:
                                         self.logger.debug('end loop')
                                         updates = True
                 if updates:
+                    self.logger.debug('updating metrics...')
                     self.job_update_metrics()
+                    self.logger.debug('done updating metrics...')
                     for hash_id, endpoint in self.s.endpoints.items():
                         self.logger.debug(f'after endpoints: {endpoint.name}, {endpoint.metadata}')
                     return data
