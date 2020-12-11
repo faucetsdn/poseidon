@@ -97,8 +97,8 @@ class Monitor:
             if 'ipv4_addresses' in endpoint.metadata:
                 for ip in endpoint.metadata['ipv4_addresses']:
                     if ip == endpoint.endpoint_data['ipv4']:
-                        if 'os' in endpoint.metadata['ipv4_addresses'][ip]:
-                            ipv4_os = endpoint.metadata['ipv4_addresses'][ip]['os']
+                        if 'short_os' in endpoint.metadata['ipv4_addresses'][ip]:
+                            ipv4_os = endpoint.metadata['ipv4_addresses'][ip]['short_os']
             host['mac'] = endpoint.endpoint_data['mac']
             host['id'] = hash_id
             host['active'] = endpoint.endpoint_data['active']
@@ -336,9 +336,7 @@ class Monitor:
                                             'processing p0f results for %s', hash_id)
                                         if not 'ipv4_addresses' in ep.metadata:
                                             ep.metadata['ipv4_addresses'] = {}
-                                        self.logger.debug(f'ip: {ip}, {ip_data}')
                                         ep.metadata['ipv4_addresses'][ip] = ip_data
-                                        self.logger.debug(f'got it: {ep.metadata["ipv4_addresses"]}')
                                         updates = True
                 elif tool == 'networkml':
                     for name, message in data.items():
