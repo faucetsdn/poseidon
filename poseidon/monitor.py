@@ -322,12 +322,12 @@ class Monitor:
             results = my_obj.get('results', {})
             tool = results.get('tool', None)
             if isinstance(data, dict):
+                updates = False
                 if tool == 'p0f':
                     if data:
                         for ip, ip_data in data.items():
                             if ip_data and ip_data.get('full_os', None):
                                 for endpoint in self.s.endpoints.item():
-                                    self.logger.debug(f'endpoint name and ip: {endpoint.name}, {endpoint.endpoint_data["ipv4"]}')
                                     if endpoint.endpoint_data['ipv4'] == ip:
                                         ep = self.s.endpoints.get(endpoint.name, None)
                                         if ep:
@@ -336,26 +336,24 @@ class Monitor:
                                             if not 'ipv4_addresses' in ep.metadata:
                                                 ep.metadata['ipv4_addresses'] = {}
                                             ep.metadata['ipv4_addresses'][ip] = ip_data
-                    self.job_update_metrics()
-                    return data
+                                            updates = True
                 elif tool == 'networkml':
                     for name, message in data.items():
-                        endpoint = self.s.endpoints.get(name, None)
-                        self.logger.debug(f'endpoint name: {endpoint.name}')
-                        if endpoint:
-                            self.logger.debug(
-                                'processing networkml results for %s', name)
-                            self.s.unmirror_endpoint(endpoint)
-                            if message.get('valid', False):
-                                if not 'mac_addresses' in endpoint.metadata:
-                                    endpoint.metadata['mac_addresses'] = {}
-                                endpoint.metadata['mac_addresses'][message['source_mac']] = message
-                                self.job_update_metrics()
-                                return data
-                            break
-                        else:
-                            self.logger.debug(
-                                'endpoint %s from networkml not found', name)
+                        for endpoint in self.s.endpoints.item():
+                            if endpoint.endpoint_data['mac'] == message['source_mac']:
+                                ep = self.s.endpoints.get(name, None)
+                                if ep:
+                                    self.logger.debug(
+                                        'processing networkml results for %s', name)
+                                    self.s.unmirror_endpoint(endpoint)
+                                    if message.get('valid', False):
+                                        if not 'mac_addresses' in endpoint.metadata:
+                                            endpoint.metadata['mac_addresses'] = {}
+                                        endpoint.metadata['mac_addresses'][message['source_mac']] = message
+                                        updates = True
+                if updates:
+                    self.job_update_metrics()
+                    return data
             return {}
 
         def handler_action_ignore(my_obj):
