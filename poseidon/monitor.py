@@ -321,7 +321,7 @@ class Monitor:
             data = my_obj.get('data', None)
             results = my_obj.get('results', {})
             tool = results.get('tool', None)
-            for endpoint in self.s.endpoints.items():
+            for hash_id, endpoint in self.s.endpoints.items():
                 self.logger.debug(f'prev endpoints: {endpoint.name}, {endpoint.metadata}')
             if isinstance(data, dict):
                 updates = False
@@ -329,12 +329,12 @@ class Monitor:
                     if data:
                         for ip, ip_data in data.items():
                             if ip_data and ip_data.get('full_os', None):
-                                for endpoint in self.s.endpoints.items():
+                                for hash_id, endpoint in self.s.endpoints.items():
                                     if endpoint.endpoint_data['ipv4'] == ip:
-                                        ep = self.s.endpoints.get(endpoint.name, None)
+                                        ep = self.s.endpoints.get(hash_id, None)
                                         if ep:
                                             self.logger.debug(
-                                                'processing p0f results for %s', endpoint.name)
+                                                'processing p0f results for %s', hash_id)
                                             if not 'ipv4_addresses' in ep.metadata:
                                                 ep.metadata['ipv4_addresses'] = {}
                                             self.logger.debug(f'updating endpoint: {endpoint.name}, {endpooint.metadata}')
@@ -342,12 +342,12 @@ class Monitor:
                                             updates = True
                 elif tool == 'networkml':
                     for name, message in data.items():
-                        for endpoint in self.s.endpoints.items():
+                        for hash_id, endpoint in self.s.endpoints.items():
                             if endpoint.endpoint_data['mac'] == message['source_mac']:
-                                ep = self.s.endpoints.get(name, None)
+                                ep = self.s.endpoints.get(hash_id, None)
                                 if ep:
                                     self.logger.debug(
-                                        'processing networkml results for %s', name)
+                                        'processing networkml results for %s', hash_id)
                                     self.s.unmirror_endpoint(endpoint)
                                     if message.get('valid', False):
                                         if not 'mac_addresses' in endpoint.metadata:
@@ -357,7 +357,7 @@ class Monitor:
                                         updates = True
                 if updates:
                     self.job_update_metrics()
-                    for endpoint in self.s.endpoints.items():
+                    for hash_id, endpoint in self.s.endpoints.items():
                         self.logger.debug(f'after endpoints: {endpoint.name}, {endpoint.metadata}')
                     return data
             return {}
