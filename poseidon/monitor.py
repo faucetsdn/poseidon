@@ -193,12 +193,14 @@ class Monitor:
             ipv4_os = 'NO DATA'
             if 'mac_addresses' in endpoint.metadata:
                 for mac in endpoint.metadata['mac_addresses']:
-                    top_role = endpoint.metadata['mac_addresses'][mac]['labels'][0]
-                    second_role = endpoint.metadata['mac_addresses'][mac]['labels'][1]
-                    third_role = endpoint.metadata['mac_addresses'][mac]['labels'][2]
-                    top_conf = endpoint.metadata['mac_addresses'][mac]['confidences'][0]
-                    second_conf = endpoint.metadata['mac_addresses'][mac]['confidences'][1]
-                    third_conf = endpoint.metadata['mac_addresses'][mac]['confidences'][2]
+                    if 'labels' in endpoint.metadata['mac_addresses'][mac]:
+                        top_role = endpoint.metadata['mac_addresses'][mac]['labels'][0]
+                        second_role = endpoint.metadata['mac_addresses'][mac]['labels'][1]
+                        third_role = endpoint.metadata['mac_addresses'][mac]['labels'][2]
+                    if 'confidences' in endpoint.metadata['mac_addresses'][mac]:
+                        top_conf = endpoint.metadata['mac_addresses'][mac]['confidences'][0]
+                        second_conf = endpoint.metadata['mac_addresses'][mac]['confidences'][1]
+                        third_conf = endpoint.metadata['mac_addresses'][mac]['confidences'][2]
             if 'ipv4_addresses' in endpoint.metadata:
                 for ip in endpoint.metadata['ipv4_addresses']:
                     if ip == endpoint.endpoint_data['ipv4']:
