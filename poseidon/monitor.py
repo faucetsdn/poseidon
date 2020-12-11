@@ -353,6 +353,7 @@ class Monitor:
                                         if not 'mac_addresses' in ep.metadata:
                                             ep.metadata['mac_addresses'] = {}
                                         self.logger.debug(f'updating endpoint: {ep.name}, {ep.metadata}')
+                                        self.logger.debug(f'{type(message)}, {message}')
                                         ep.metadata['mac_addresses'][message['source_mac']] = message
                                         updates = True
                 if updates:
