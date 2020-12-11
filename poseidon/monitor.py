@@ -354,8 +354,16 @@ class Monitor:
                                             ep.metadata['mac_addresses'] = {}
                                         self.logger.debug(f'updating endpoint: {ep.name}, {ep.metadata}')
                                         self.logger.debug(f'{type(message)}, {message}')
+                                        self.logger.debug('0')
                                         self.logger.debug(f'{message["source_mac"]}')
+                                        self.logger.debug(f'{ep.metadata["mac_addresses"]}')
+                                        self.logger.debug('1')
+                                        ep.metadata['mac_addresses']['foo'] = 'bar'
+                                        self.logger.debug(f'{ep.metadata["mac_addresses"]}')
+                                        self.logger.debug('2')
                                         ep.metadata['mac_addresses'][message['source_mac']] = message
+                                        self.logger.debug(f'{ep.metadata["mac_addresses"]}')
+                                        self.logger.debug('end loop')
                                         updates = True
                 if updates:
                     self.job_update_metrics()
