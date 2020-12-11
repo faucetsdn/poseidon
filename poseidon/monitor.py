@@ -92,8 +92,8 @@ class Monitor:
             self.logger.debug(f'endpoint metadata: {endpoint.metadata}')
             if 'mac_addresses' in endpoint.metadata:
                 for mac in endpoint.metadata['mac_addresses']:
-                    if 'labels' in endpoint.metadata['mac_addresses'][mac]:
-                        role = endpoint.metadata['mac_addresses'][mac]['labels'][0]
+                    if 'classification' in endpoint.metadata['mac_addresses'][mac]:
+                        role = endpoint.metadata['mac_addresses'][mac]['classification']['labels'][0]
             if 'ipv4_addresses' in endpoint.metadata:
                 for ip in endpoint.metadata['ipv4_addresses']:
                     if ip == endpoint.endpoint_data['ipv4']:
@@ -113,7 +113,6 @@ class Monitor:
         return hosts
 
     def job_update_metrics(self):
-        print(f'self')
         self.logger.debug('updating metrics')
         try:
             hosts = self.get_hosts()
@@ -322,32 +321,30 @@ class Monitor:
             data = my_obj.get('data', None)
             results = my_obj.get('results', {})
             tool = results.get('tool', None)
-            for hash_id, endpoint in self.s.endpoints.items():
-                self.logger.debug(f'prev endpoints: {endpoint.name}, {endpoint.metadata}')
             if isinstance(data, dict):
                 updates = False
+                if not data:
+                    return {}
                 if tool == 'p0f':
-                    if data:
-                        for ip, ip_data in data.items():
-                            if ip_data and ip_data.get('full_os', None):
-                                for hash_id, endpoint in self.s.endpoints.items():
-                                    if endpoint.endpoint_data['ipv4'] == ip:
-                                        ep = self.s.endpoints.get(hash_id, None)
-                                        if ep:
-                                            self.logger.debug(
-                                                'processing p0f results for %s', hash_id)
-                                            if not 'ipv4_addresses' in ep.metadata:
-                                                ep.metadata['ipv4_addresses'] = {}
-                                            self.logger.debug(f'updating endpoint: {ep.name}, {ep.metadata}')
-                                            ep.metadata['ipv4_addresses'][ip] = ip_data
-                                            updates = True
+                    for ip, ip_data in data.items():
+                        if ip_data and ip_data.get('full_os', None):
+                            for hash_id, endpoint in self.s.endpoints.items():
+                                if endpoint.endpoint_data['ipv4'] == ip:
+                                    ep = self.s.endpoints.get(hash_id, None)
+                                    if ep:
+                                        self.logger.debug(
+                                            'processing p0f results for %s', hash_id)
+                                        if not 'ipv4_addresses' in ep.metadata:
+                                            ep.metadata['ipv4_addresses'] = {}
+                                        self.logger.debug(f'ip: {ip}, {ip_data}')
+                                        ep.metadata['ipv4_addresses'][ip] = ip_data
+                                        self.logger.debug(f'got it: {ep.metadata["ipv4_addresses"]}')
+                                        updates = True
                 elif tool == 'networkml':
                     for name, message in data.items():
                         if name == 'pcap':
                             continue
-                        self.logger.debug(f'00:name {name}')
                         for hash_id, endpoint in self.s.endpoints.items():
-                            self.logger.debug(f'11:endpoint {hash_id}')
                             if endpoint.endpoint_data['mac'] == message['source_mac']:
                                 ep = self.s.endpoints.get(hash_id, None)
                                 if ep:
@@ -357,25 +354,10 @@ class Monitor:
                                     if message.get('valid', False):
                                         if not 'mac_addresses' in ep.metadata:
                                             ep.metadata['mac_addresses'] = {}
-                                        self.logger.debug(f'updating endpoint: {ep.name}, {ep.metadata}')
-                                        self.logger.debug(f'{type(message)}, {message}')
-                                        self.logger.debug('0')
-                                        self.logger.debug(f'{message["source_mac"]}')
-                                        self.logger.debug(f'{ep.metadata["mac_addresses"]}')
-                                        self.logger.debug('1')
-                                        ep.metadata['mac_addresses']['foo'] = 'bar'
-                                        self.logger.debug(f'{ep.metadata["mac_addresses"]}')
-                                        self.logger.debug('2')
                                         ep.metadata['mac_addresses'][message['source_mac']] = message
-                                        self.logger.debug(f'{ep.metadata["mac_addresses"]}')
-                                        self.logger.debug('end loop')
                                         updates = True
                 if updates:
-                    self.logger.debug('updating metrics...')
                     self.job_update_metrics()
-                    self.logger.debug('done updating metrics...')
-                    for hash_id, endpoint in self.s.endpoints.items():
-                        self.logger.debug(f'after endpoints: {endpoint.name}, {endpoint.metadata}')
                     return data
             return {}
 
