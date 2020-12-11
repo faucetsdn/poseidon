@@ -337,7 +337,7 @@ class Monitor:
                                                 'processing p0f results for %s', hash_id)
                                             if not 'ipv4_addresses' in ep.metadata:
                                                 ep.metadata['ipv4_addresses'] = {}
-                                            self.logger.debug(f'updating endpoint: {endpoint.name}, {endpooint.metadata}')
+                                            self.logger.debug(f'updating endpoint: {ep.name}, {ep.metadata}')
                                             ep.metadata['ipv4_addresses'][ip] = ip_data
                                             updates = True
                 elif tool == 'networkml':
@@ -348,12 +348,12 @@ class Monitor:
                                 if ep:
                                     self.logger.debug(
                                         'processing networkml results for %s', hash_id)
-                                    self.s.unmirror_endpoint(endpoint)
+                                    self.s.unmirror_endpoint(ep)
                                     if message.get('valid', False):
-                                        if not 'mac_addresses' in endpoint.metadata:
-                                            endpoint.metadata['mac_addresses'] = {}
-                                        self.logger.debug(f'updating endpoint: {endpoint.name}, {endpooint.metadata}')
-                                        endpoint.metadata['mac_addresses'][message['source_mac']] = message
+                                        if not 'mac_addresses' in ep.metadata:
+                                            ep.metadata['mac_addresses'] = {}
+                                        self.logger.debug(f'updating endpoint: {ep.name}, {ep.metadata}')
+                                        ep.metadata['mac_addresses'][message['source_mac']] = message
                                         updates = True
                 if updates:
                     self.job_update_metrics()
