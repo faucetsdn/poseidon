@@ -92,9 +92,7 @@ class Monitor:
             self.logger.debug(f'endpoint metadata: {endpoint.metadata}')
             if 'mac_addresses' in endpoint.metadata:
                 for mac in endpoint.metadata['mac_addresses']:
-                    newest = 0
-                    for m in endpoint.metadata['mac_addresses'][mac]:
-                        role = endpoint.metadata['mac_addresses'][mac][m]['labels'][0]
+                    role = endpoint.metadata['mac_addresses'][mac]['labels'][0]
             if 'ipv4_addresses' in endpoint.metadata:
                 for ip in endpoint.metadata['ipv4_addresses']:
                     if ip == endpoint.endpoint_data['ipv4']:
