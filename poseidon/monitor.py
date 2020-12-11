@@ -343,6 +343,8 @@ class Monitor:
                                             updates = True
                 elif tool == 'networkml':
                     for name, message in data.items():
+                        if name == 'pcap':
+                            continue
                         self.logger.debug(f'00:name {name}')
                         for hash_id, endpoint in self.s.endpoints.items():
                             self.logger.debug(f'11:endpoint {hash_id}')
