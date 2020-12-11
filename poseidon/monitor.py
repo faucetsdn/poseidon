@@ -85,11 +85,9 @@ class Monitor:
         # TODO consolidate with update_endpoint_metadata
         hosts = []
         for hash_id, endpoint in self.s.endpoints.items():
-            self.logger.debug(f'endpoint: {hash_id}')
             host = {}
             ipv4_os = 'NO DATA'
             role = 'NO DATA'
-            self.logger.debug(f'endpoint metadata: {endpoint.metadata}')
             if 'mac_addresses' in endpoint.metadata:
                 for mac in endpoint.metadata['mac_addresses']:
                     if 'classification' in endpoint.metadata['mac_addresses'][mac]:
@@ -116,7 +114,6 @@ class Monitor:
         self.logger.debug('updating metrics')
         try:
             hosts = self.get_hosts()
-            self.logger.debug(f'sending hosts: {hosts}')
             self.prom.update_metrics(hosts)
         except (requests.exceptions.ConnectionError, Exception) as e:  # pragma: no cover
             self.logger.error(
