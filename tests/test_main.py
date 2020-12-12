@@ -374,21 +374,21 @@ def test_process():
             endpoint = endpoint_factory('foo')
             endpoint.endpoint_data = {
                 'active': 0, 'ipv4_subnet': '12.12.12.12/24', 'ipv6_subnet': '', 'ipv4_rdns': '', 'ipv6_rdns': '', 'controller_type': 'faucet', 'controller': '', 'name': '', 'ipv4': '12.12.12.12', 'ipv6': '', 'ether_vendor': 'foo', 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
-            endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'labels': ['developer workstation', 'foo', 'bar'], 'confidences': [0.8, 0.2, 0.0]}}, 'ipv4_addresses': {
+            endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'classification': {'labels': ['developer workstation', 'foo', 'bar'], 'confidences': [0.8, 0.2, 0.0]}}}, 'ipv4_addresses': {
                 '12.12.12.12': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
             endpoint.mirror()
             self.s.endpoints[endpoint.name] = endpoint
             endpoint = endpoint_factory('foo2')
             endpoint.endpoint_data = {
                 'active': 0, 'ipv4_subnet': '12.12.12.12/24', 'ipv6_subnet': '', 'ipv4_rdns': '', 'ipv6_rdns': '', 'controller_type': 'faucet', 'controller': '', 'name': '', 'ipv4': '12.12.12.12', 'ipv6': '', 'ether_vendor': 'foo', 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
-            endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'labels': ['developer workstation', 'foo', 'bar'], 'confidences': [0.8, 0.2, 0.0]}}, 'ipv4_addresses': {
+            endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'classification': {'labels': ['developer workstation', 'foo', 'bar'], 'confidences': [0.8, 0.2, 0.0]}}}, 'ipv4_addresses': {
                 '12.12.12.12': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
             endpoint.queue_next('mirror')
             self.s.endpoints[endpoint.name] = endpoint
             endpoint = endpoint_factory('foo3')
             endpoint.endpoint_data = {
                 'active': 0, 'ipv4_subnet': '12.12.12.12/24', 'ipv6_subnet': '', 'ipv4_rdns': '', 'ipv6_rdns': '', 'controller_type': 'faucet', 'controller': '', 'name': '', 'ipv4': '12.12.12.12', 'ipv6': '', 'ether_vendor': 'foo', 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
-            endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'labels': ['developer workstation', 'foo', 'bar'], 'confidences': [0.8, 0.2, 0.0]}}, 'ipv4_addresses': {
+            endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'classification': {'labels': ['developer workstation', 'foo', 'bar'], 'confidences': [0.8, 0.2, 0.0]}}}, 'ipv4_addresses': {
                 '12.12.12.12': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
             self.s.endpoints[endpoint.name] = endpoint
             self.results = 0
@@ -436,7 +436,7 @@ def test_show_endpoints():
     endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv6': '1212::1'}
-    endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'labels': ['developer workstation']}}, 'ipv4_addresses': {
+    endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'classification': {'labels': ['developer workstation']}}}, 'ipv4_addresses': {
         '0.0.0.0': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
     controller = get_test_controller()
     s = SDNConnect(controller, logger)

@@ -134,7 +134,7 @@ class GetData():
         if endpoint_mac and mac_addresses and endpoint_mac in mac_addresses:
             metadata = mac_addresses[endpoint_mac]
             try:
-                labels = metadata['classifications'].get('labels', None)
+                labels = metadata['classification'].get('labels', None)
                 if labels:
                     return labels[0]
             except:
@@ -148,7 +148,7 @@ class GetData():
         if endpoint_mac and mac_addresses and endpoint_mac in mac_addresses:
             metadata = mac_addresses[endpoint_mac]
             try:
-                confidences = metadata['classifications'].get('confidences', None)
+                confidences = metadata['classification'].get('confidences', None)
                 if confidences:
                     return str(confidences[0])
             except:
