@@ -191,18 +191,18 @@ class Monitor:
             if 'mac_addresses' in endpoint.metadata:
                 for mac in endpoint.metadata['mac_addresses']:
                     if 'labels' in endpoint.metadata['mac_addresses'][mac]:
-                        top_role = endpoint.metadata['mac_addresses'][mac]['labels'][0]
-                        second_role = endpoint.metadata['mac_addresses'][mac]['labels'][1]
-                        third_role = endpoint.metadata['mac_addresses'][mac]['labels'][2]
+                        top_role = endpoint.metadata['mac_addresses'][mac]['classifications']['labels'][0]
+                        second_role = endpoint.metadata['mac_addresses'][mac]['classifications']['labels'][1]
+                        third_role = endpoint.metadata['mac_addresses'][mac]['classifications']['labels'][2]
                     if 'confidences' in endpoint.metadata['mac_addresses'][mac]:
-                        top_conf = endpoint.metadata['mac_addresses'][mac]['confidences'][0]
-                        second_conf = endpoint.metadata['mac_addresses'][mac]['confidences'][1]
-                        third_conf = endpoint.metadata['mac_addresses'][mac]['confidences'][2]
+                        top_conf = endpoint.metadata['mac_addresses'][mac]['classifications']['confidences'][0]
+                        second_conf = endpoint.metadata['mac_addresses'][mac]['classifications']['confidences'][1]
+                        third_conf = endpoint.metadata['mac_addresses'][mac]['classifications']['confidences'][2]
             if 'ipv4_addresses' in endpoint.metadata:
                 for ip in endpoint.metadata['ipv4_addresses']:
                     if ip == endpoint.endpoint_data['ipv4']:
                         if 'os' in endpoint.metadata['ipv4_addresses'][ip]:
-                            ipv4_os = endpoint.metadata['ipv4_addresses'][ip]['os']
+                            ipv4_os = endpoint.metadata['ipv4_addresses'][ip]['short_os']
 
             def set_prom(var, val, **prom_labels):
                 prom_labels.update({

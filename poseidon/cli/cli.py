@@ -128,24 +128,17 @@ class GetData():
             endpoint.state_time())) + ' (' + duration(endpoint.state_time()) + ')'
 
     @staticmethod
-    def _get_newest_metadata(metadata):
-        try:
-            newest = sorted([timestamp for timestamp in metadata])[-1]
-            return metadata[newest]
-        except IndexError:
-            return None
-
-    @staticmethod
     def _get_role(endpoint):
         endpoint_mac = GetData._get_mac(endpoint)
         mac_addresses = endpoint.metadata.get('mac_addresses', None)
         if endpoint_mac and mac_addresses and endpoint_mac in mac_addresses:
             metadata = mac_addresses[endpoint_mac]
-            newest = GetData._get_newest_metadata(metadata)
-            if newest:
-                labels = newest.get('labels', None)
+            try:
+                labels = metadata['classifications'].get('labels', None)
                 if labels:
                     return labels[0]
+            except:
+                return NO_DATA
         return NO_DATA
 
     @staticmethod
@@ -154,9 +147,8 @@ class GetData():
         mac_addresses = endpoint.metadata.get('mac_addresses', None)
         if endpoint_mac and mac_addresses and endpoint_mac in mac_addresses:
             metadata = mac_addresses[endpoint_mac]
-            newest = GetData._get_newest_metadata(metadata)
-            if newest:
-                confidences = newest.get('confidences', None)
+            try:
+                confidences = metadata['classifications'].get('confidences', None)
                 if confidences:
                     return str(confidences[0])
         return NO_DATA
@@ -167,10 +159,8 @@ class GetData():
         mac_addresses = endpoint.metadata.get('mac_addresses', None)
         if endpoint_mac and mac_addresses and endpoint_mac in mac_addresses:
             metadata = mac_addresses[endpoint_mac]
-            newest = GetData._get_newest_metadata(metadata)
-            if newest:
-                if 'pcap_labels' in newest:
-                    return newest['pcap_labels']
+            if 'pcap_labels' in metadata:
+                    return metadata['pcap_labels']
         return NO_DATA
 
     @staticmethod
@@ -179,8 +169,8 @@ class GetData():
         ipv4_addresses = endpoint.metadata.get('ipv4_addresses', None)
         if endpoint_ip and ipv4_addresses and endpoint_ip in ipv4_addresses:
             metadata = ipv4_addresses[endpoint_ip]
-            if 'os' in metadata:
-                return metadata['os']
+            if 'short_os' in metadata:
+                return metadata['short_os']
         return NO_DATA
 
     @staticmethod
