@@ -151,6 +151,8 @@ class GetData():
                 confidences = metadata['classifications'].get('confidences', None)
                 if confidences:
                     return str(confidences[0])
+            except:
+                return NO_DATA
         return NO_DATA
 
     @staticmethod
@@ -160,7 +162,7 @@ class GetData():
         if endpoint_mac and mac_addresses and endpoint_mac in mac_addresses:
             metadata = mac_addresses[endpoint_mac]
             if 'pcap_labels' in metadata:
-                    return metadata['pcap_labels']
+                return metadata['pcap_labels']
         return NO_DATA
 
     @staticmethod
@@ -179,8 +181,8 @@ class GetData():
         ipv6_addresses = endpoint.metadata.get('ipv6_addresses', None)
         if endpoint_ip and ipv6_addresses and endpoint_ip in ipv6_addresses:
             metadata = ipv6_addresses[endpoint_ip]
-            if 'os' in metadata:
-                return metadata['os']
+            if 'short_os' in metadata:
+                return metadata['short_os']
         return NO_DATA
 
     @staticmethod
