@@ -201,7 +201,7 @@ class Monitor:
             if 'ipv4_addresses' in endpoint.metadata:
                 for ip in endpoint.metadata['ipv4_addresses']:
                     if ip == endpoint.endpoint_data['ipv4']:
-                        if 'os' in endpoint.metadata['ipv4_addresses'][ip]:
+                        if 'short_os' in endpoint.metadata['ipv4_addresses'][ip]:
                             ipv4_os = endpoint.metadata['ipv4_addresses'][ip]['short_os']
 
             def set_prom(var, val, **prom_labels):
