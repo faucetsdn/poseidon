@@ -340,7 +340,7 @@ class Monitor:
                         if name == 'pcap':
                             continue
                         for hash_id, endpoint in self.s.endpoints.items():
-                            if endpoint.endpoint_data['mac'] == message['source_mac']:
+                            if 'source_mac' in message and endpoint.endpoint_data['mac'] == message['source_mac']:
                                 ep = self.s.endpoints.get(hash_id, None)
                                 if ep:
                                     self.logger.debug(
