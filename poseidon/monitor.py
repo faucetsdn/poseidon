@@ -81,14 +81,39 @@ class Monitor:
             self.logger.debug('poseidonMain workQueue is None')
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
+    def get_hosts(self):
+        # TODO consolidate with update_endpoint_metadata
+        hosts = []
+        for hash_id, endpoint in self.s.endpoints.items():
+            host = {}
+            ipv4_os = 'NO DATA'
+            role = 'NO DATA'
+            if 'mac_addresses' in endpoint.metadata:
+                for mac in endpoint.metadata['mac_addresses']:
+                    if 'classification' in endpoint.metadata['mac_addresses'][mac]:
+                        role = endpoint.metadata['mac_addresses'][mac]['classification']['labels'][0]
+            if 'ipv4_addresses' in endpoint.metadata:
+                for ip in endpoint.metadata['ipv4_addresses']:
+                    if ip == endpoint.endpoint_data['ipv4']:
+                        if 'short_os' in endpoint.metadata['ipv4_addresses'][ip]:
+                            ipv4_os = endpoint.metadata['ipv4_addresses'][ip]['short_os']
+            host['mac'] = endpoint.endpoint_data['mac']
+            host['id'] = hash_id
+            host['active'] = endpoint.endpoint_data['active']
+            host['role'] = role
+            host['ipv4_os'] = ipv4_os
+            host['state'] = endpoint.state
+            host['tenant'] = endpoint.endpoint_data['tenant']
+            host['port'] = endpoint.endpoint_data['port']
+            host['segment'] = endpoint.endpoint_data['segment']
+            host['ipv4'] = endpoint.endpoint_data['ipv4']
+            hosts.append(host)
+        return hosts
+
     def job_update_metrics(self):
         self.logger.debug('updating metrics')
         try:
-            # get current state
-            req = requests.get(
-                'http://poseidon-api:8000/v1/network_full', timeout=10)
-            # send results to prometheus
-            hosts = req.json()['dataset']
+            hosts = self.get_hosts()
             self.prom.update_metrics(hosts)
         except (requests.exceptions.ConnectionError, Exception) as e:  # pragma: no cover
             self.logger.error(
@@ -165,21 +190,19 @@ class Monitor:
             ipv4_os = 'NO DATA'
             if 'mac_addresses' in endpoint.metadata:
                 for mac in endpoint.metadata['mac_addresses']:
-                    newest = 0
-                    for timestamp in endpoint.metadata['mac_addresses'][mac]:
-                        if float(timestamp) > newest:
-                            newest = float(timestamp)
-                            top_role = endpoint.metadata['mac_addresses'][mac][timestamp]['labels'][0]
-                            second_role = endpoint.metadata['mac_addresses'][mac][timestamp]['labels'][1]
-                            third_role = endpoint.metadata['mac_addresses'][mac][timestamp]['labels'][2]
-                            top_conf = endpoint.metadata['mac_addresses'][mac][timestamp]['confidences'][0]
-                            second_conf = endpoint.metadata['mac_addresses'][mac][timestamp]['confidences'][1]
-                            third_conf = endpoint.metadata['mac_addresses'][mac][timestamp]['confidences'][2]
+                    if 'labels' in endpoint.metadata['mac_addresses'][mac]:
+                        top_role = endpoint.metadata['mac_addresses'][mac]['classification']['labels'][0]
+                        second_role = endpoint.metadata['mac_addresses'][mac]['classification']['labels'][1]
+                        third_role = endpoint.metadata['mac_addresses'][mac]['classification']['labels'][2]
+                    if 'confidences' in endpoint.metadata['mac_addresses'][mac]:
+                        top_conf = endpoint.metadata['mac_addresses'][mac]['classification']['confidences'][0]
+                        second_conf = endpoint.metadata['mac_addresses'][mac]['classification']['confidences'][1]
+                        third_conf = endpoint.metadata['mac_addresses'][mac]['classification']['confidences'][2]
             if 'ipv4_addresses' in endpoint.metadata:
                 for ip in endpoint.metadata['ipv4_addresses']:
                     if ip == endpoint.endpoint_data['ipv4']:
-                        if 'os' in endpoint.metadata['ipv4_addresses'][ip]:
-                            ipv4_os = endpoint.metadata['ipv4_addresses'][ip]['os']
+                        if 'short_os' in endpoint.metadata['ipv4_addresses'][ip]:
+                            ipv4_os = endpoint.metadata['ipv4_addresses'][ip]['short_os']
 
             def set_prom(var, val, **prom_labels):
                 prom_labels.update({
@@ -296,23 +319,41 @@ class Monitor:
             results = my_obj.get('results', {})
             tool = results.get('tool', None)
             if isinstance(data, dict):
+                updates = False
+                if not data:
+                    return {}
                 if tool == 'p0f':
-                    if self.s.prc.store_p0f_result(data):
-                        return data
+                    for ip, ip_data in data.items():
+                        if ip_data and ip_data.get('full_os', None):
+                            for hash_id, endpoint in self.s.endpoints.items():
+                                if endpoint.endpoint_data['ipv4'] == ip:
+                                    ep = self.s.endpoints.get(hash_id, None)
+                                    if ep:
+                                        self.logger.debug(
+                                            'processing p0f results for %s', hash_id)
+                                        if not 'ipv4_addresses' in ep.metadata:
+                                            ep.metadata['ipv4_addresses'] = {}
+                                        ep.metadata['ipv4_addresses'][ip] = ip_data
+                                        updates = True
                 elif tool == 'networkml':
-                    self.s.prc.store_tool_result(my_obj, 'networkml')
                     for name, message in data.items():
-                        endpoint = self.s.endpoints.get(name, None)
-                        if endpoint:
-                            self.logger.debug(
-                                'processing networkml results for %s', name)
-                            self.s.unmirror_endpoint(endpoint)
-                            if message.get('valid', False):
-                                return data
-                            break
-                        else:
-                            self.logger.debug(
-                                'endpoint %s from networkml not found', name)
+                        if name == 'pcap':
+                            continue
+                        for hash_id, endpoint in self.s.endpoints.items():
+                            if 'source_mac' in message and endpoint.endpoint_data['mac'] == message['source_mac']:
+                                ep = self.s.endpoints.get(hash_id, None)
+                                if ep:
+                                    self.logger.debug(
+                                        'processing networkml results for %s', hash_id)
+                                    self.s.unmirror_endpoint(ep)
+                                    if message.get('valid', False):
+                                        if not 'mac_addresses' in ep.metadata:
+                                            ep.metadata['mac_addresses'] = {}
+                                        ep.metadata['mac_addresses'][message['source_mac']] = message
+                                        updates = True
+                if updates:
+                    self.job_update_metrics()
+                    return data
             return {}
 
         def handler_action_ignore(my_obj):

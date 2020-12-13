@@ -1,6 +1,5 @@
 import falcon
 import pytest
-import redis
 from falcon import testing
 
 from api.app.app import api
