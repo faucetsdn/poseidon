@@ -156,7 +156,7 @@ wait_var_nonzero "sum(poseidon_endpoint_roles{role!=\"NO DATA\"})" "$FASTREPLAY"
 wait_var_nonzero "sum(poseidon_endpoint_oses)" "" poseidon_endpoint_oses
 # TODO: fix certstrap to allow creating multiple named client keys.
 wait_var_nonzero "sum(faucetconfrpc_ok_total{peer_id=\"poseidon\"})" "" faucetconfrpc_ok_total
-for rpc in GetConfigFile SetConfigFile SetDpInterfaces ClearPortMirror AddPortMirror RemovePortMirror ; do
+for rpc in GetConfigFile SetConfigFile ClearPortMirror AddPortMirror RemovePortMirror ; do
         wait_var_nonzero "faucetconfrpc_ok_total{peer_id=\"poseidon\",request=\"$rpc\"}" "" faucetconfrpc_ok_total
 done
 poseidon -S
