@@ -6,7 +6,7 @@ import time
 from copy import deepcopy
 
 import falcon
-import redis
+import requests
 from natural.date import duration
 
 from .constants import NO_DATA
@@ -46,19 +46,19 @@ class Nodes:
         for field in fields:
             self.node[field] = fields[field]
 
-    def connect_redis(self):
+    def scrape_prometheus(self):
         self.r = None
-        try:
-            self.r = redis.StrictRedis(host=os.getenv('REDIS_HOST', 'redis'),
-                                       port=6379,
-                                       db=0,
-                                       decode_responses=True)
-        except Exception as e:  # pragma: no cover
-            return (False, 'unable to connect to redis because: ' + str(e))
+        #try:
+        #    self.r = redis.StrictRedis(host=os.getenv('REDIS_HOST', 'redis'),
+        #                               port=6379,
+        #                               db=0,
+        #                               decode_responses=True)
+        #except Exception as e:  # pragma: no cover
+        #    return (False, 'unable to connect to redis because: ' + str(e))
         return (True, 'connected')
 
     def build_nodes(self):
-        status = self.connect_redis()
+        status = self.scrape_prometheus()
         if status[0] and self.r:
             mac_addresses = []
             try:
