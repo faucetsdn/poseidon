@@ -7,5 +7,5 @@ netifaces==0.10.9
 ruamel.yaml==0.16.12
 pylint==2.6.0
 pytest-cov==2.10.1
-pytest==6.1.2
+pytest==6.2.0
 pytype==2020.12.2
