@@ -349,7 +349,7 @@ def test_get_ipv4_os():
     endpoint.metadata = {'ipv4_addresses': {}}
     ipv4_os = GetData._get_ipv4_os(endpoint)
     assert ipv4_os == NO_DATA
-    endpoint.metadata = {'ipv4_addresses': {'0.0.0.0': {'os': 'foo'}}}
+    endpoint.metadata = {'ipv4_addresses': {'0.0.0.0': {'short_os': 'foo'}}}
     ipv4_os = GetData._get_ipv4_os(endpoint)
     assert ipv4_os == 'foo'
 
@@ -361,7 +361,7 @@ def test_get_ipv6_os():
     endpoint.metadata = {'ipv6_addresses': {}}
     ipv6_os = GetData._get_ipv6_os(endpoint)
     assert ipv6_os == NO_DATA
-    endpoint.metadata = {'ipv6_addresses': {'1212::1': {'os': 'foo'}}}
+    endpoint.metadata = {'ipv6_addresses': {'1212::1': {'short_os': 'foo'}}}
     ipv6_os = GetData._get_ipv6_os(endpoint)
     assert ipv6_os == 'foo'
 
@@ -374,7 +374,7 @@ def test_get_pcap_labels():
     pcap_labels = GetData._get_pcap_labels(endpoint)
     assert pcap_labels == NO_DATA
     endpoint.metadata = {'mac_addresses': {
-        '00:00:00:00:00:00': {'1551711125': {'pcap_labels': 'foo'}}}}
+        '00:00:00:00:00:00': {'pcap_labels': 'foo'}}}
     pcap_labels = GetData._get_pcap_labels(endpoint)
     assert pcap_labels == 'foo'
 
@@ -387,7 +387,7 @@ def test_get_role():
     role = GetData._get_role(endpoint)
     assert role == NO_DATA
     endpoint.metadata = {'mac_addresses': {
-        '00:00:00:00:00:00': {'1551711125': {'labels': ['foo']}}}}
+        '00:00:00:00:00:00': {'classification': {'labels': ['foo']}}}}
     role = GetData._get_role(endpoint)
     assert role == 'foo'
 
@@ -400,7 +400,7 @@ def test_get_role_confidence():
     confidence = GetData._get_role_confidence(endpoint)
     assert confidence == NO_DATA
     endpoint.metadata = {'mac_addresses': {
-        '00:00:00:00:00:00': {'1551711125': {'confidences': [10.0]}}}}
+        '00:00:00:00:00:00': {'classification': {'confidences': [10.0]}}}}
     confidence = GetData._get_role_confidence(endpoint)
     assert confidence == '10.0'
 
