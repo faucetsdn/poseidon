@@ -2,10 +2,10 @@
 -r api/requirements.txt
 -r workers/requirements.txt
 httmock==1.4.0
-mock==4.0.2
+mock==4.0.3
 netifaces==0.10.9
 ruamel.yaml==0.16.12
 pylint==2.6.0
 pytest-cov==2.10.1
-pytest==6.1.2
+pytest==6.2.0
 pytype==2020.12.2
