@@ -183,6 +183,10 @@ class Endpoint:
             next_state = self.p_next_state
         return next_state in ['mirror', 'reinvestigate']
 
+    def force_unknown(self):
+        self.unknown()  # pytype: disable=attribute-error
+        self.p_next_state = None
+
     def default(self):
         if not self.ignore:
             if self.state != 'inactive':

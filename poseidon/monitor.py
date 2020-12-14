@@ -147,14 +147,11 @@ class Monitor:
         timeout = 2*self.controller['reinvestigation_frequency']
         for endpoint in self.s.not_ignored_endpoints():
             if endpoint.observed_timeout(timeout):
-                self.logger.info(
-                    'observation timing out: {0} and setting to inactive'.format(endpoint.name))
-                for mac in endpoint.mac_addresses():
-                    self.s.sdnc.make_mac_inactive(mac)
+                self.logger.info('observation timing out: {0}'.format(endpoint.name))
+                endpoint.force_unknown()
                 events += 1
             elif endpoint.mirror_active() and endpoint.state_timeout(timeout):
-                self.logger.info(
-                    'timing out: {0} and setting to unknown'.format(endpoint.name))
+                self.logger.info('mirror timing out: {0}'.format(endpoint.name))
                 self.s.unmirror_endpoint(endpoint)
                 events += 1
         budget = self.s.investigation_budget()

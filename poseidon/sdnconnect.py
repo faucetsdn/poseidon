@@ -54,8 +54,7 @@ class SDNConnect:
             if not status:
                 self.logger.warning(
                     'Unable to unmirror the endpoint: {0}'.format(endpoint.name))
-            endpoint.unknown()  # pytype: disable=attribute-error
-            endpoint.p_next_state = None
+            endpoint.force_unknown()
         else:
             self.logger.info('Not unmirroring endpoint {0} in state {1}'.format(
                 endpoint.name, endpoint.state))

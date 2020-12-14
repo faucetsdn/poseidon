@@ -263,10 +263,6 @@ class Parser:
         # Not a message we are interested in, ignore it.
         return True
 
-    def make_mac_inactive(self, mac):
-        if mac in self.mac_table:
-            self.mac_table[mac][0]['active'] = 0
-
     def event(self, message):
         dp_name = str(message['dp_name'])
 
