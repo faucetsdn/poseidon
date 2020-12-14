@@ -51,6 +51,8 @@ services:
     poseidon:
         restart: always
         image: 'iqtlabs/poseidon:latest'
+        ports:
+            - '9304:9304'
         environment:
             PYTHONUNBUFFERED: '1'
         volumes:
