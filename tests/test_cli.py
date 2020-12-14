@@ -45,7 +45,6 @@ def test_poseidonshell():
     shell.task_clear('foo', [])
     shell.task_remove('foo', [])
     shell.task_remove('ignored', [])
-    shell.task_remove('inactive', [])
     shell.help_task()
     shell.emptyline()
     shell.do_shell('ls')

@@ -54,8 +54,7 @@ class SDNConnect:
             if not status:
                 self.logger.warning(
                     'Unable to unmirror the endpoint: {0}'.format(endpoint.name))
-            endpoint.unknown()  # pytype: disable=attribute-error
-            endpoint.p_next_state = None
+            endpoint.force_unknown()
         else:
             self.logger.info('Not unmirroring endpoint {0} in state {1}'.format(
                 endpoint.name, endpoint.state))
@@ -169,7 +168,7 @@ class SDNConnect:
             show_type, arg = arg.split(' ', 1)
             for endpoint in self.endpoints.values():
                 if show_type == 'state':
-                    if arg == 'active' and endpoint.state != 'inactive':
+                    if arg == 'active':
                         endpoints.append(endpoint)
                     elif arg == 'ignored' and endpoint.ignore:
                         endpoints.append(endpoint)
@@ -325,11 +324,6 @@ class SDNConnect:
                     'Endpoint changed: {0}:{1}'.format(h, diff_txt))
                 change_acls = True
                 ep.endpoint_data = deepcopy(machine)
-                if ep.state == 'inactive' and machine['active'] == 1:
-                    ep.reactivate()
-                elif ep.state != 'inactive' and machine['active'] == 0:
-                    self.unmirror_endpoint(ep)
-                    ep.deactivate()
             ep.touch()
 
         if change_acls and self.controller['AUTOMATED_ACLS']:

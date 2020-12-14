@@ -39,7 +39,7 @@ def test_ignore_events():
             tmpdir, 'faucet.yaml')
         parser = _get_parser(
             faucetconfgetsetter_cl=faucetconfgetsetter_cl, ignore_vlans=[999], ignore_ports={'switch99': 11})
-        for message_type in ('L2_LEARN', 'PORT_CHANGE'):
+        for message_type in ('L2_LEARN',):
             assert parser.ignore_event(
                 {'dp_name': 'switch123', message_type: {'vid': 999, 'port_no': 123}})
             assert not parser.ignore_event(

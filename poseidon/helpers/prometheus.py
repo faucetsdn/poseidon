@@ -29,10 +29,6 @@ class Prometheus():
 
     def initialize_metrics(self):
         self.prom_metrics['info'] = Info('poseidon_version', 'Info about Poseidon')
-        self.prom_metrics['inactive'] = Gauge('poseidon_endpoint_inactive',
-                                              'Number of endpoints that are inactive')
-        self.prom_metrics['active'] = Gauge('poseidon_endpoint_active',
-                                            'Number of endpoints that are active')
         self.prom_metrics['ipv4_table'] = Gauge('poseidon_endpoint_ip_table',
                                                 'IP Table',
                                                 ['mac',
@@ -161,7 +157,6 @@ class Prometheus():
                                                         'next_state',
                                                         'acls',
                                                         'ignore',
-                                                        'active',
                                                         'ipv4_subnet',
                                                         'ipv6_subnet',
                                                         'ipv4_rdns',
@@ -184,7 +179,6 @@ class Prometheus():
                    'oses': {},
                    'current_states': {'known': 0,
                                       'unknown': 0,
-                                      'inactive': 0,
                                       'mirroring': 0,
                                       'shutdown': 0,
                                       'queued': 0,
@@ -192,8 +186,6 @@ class Prometheus():
                    'vlans': {},
                    'port_tenants': {},
                    'port_hosts': {},
-                   'inactives': 0,
-                   'actives': 0,
                    'ncapture_count': 0}
         return metrics
 
@@ -221,74 +213,44 @@ class Prometheus():
             print('Unable to get version from the version file')
 
         for host in hosts:
-            if host['active'] == 0:
-                metrics['inactives'] += 1
-            if host['active'] == 1:
-                metrics['actives'] += 1
             if host['role'] in metrics['roles']:
-                if host['active'] == 1:
-                    metrics['roles'][host['role']] += 1
+                metrics['roles'][host['role']] += 1
             else:
-                if host['active'] == 1:
-                    metrics['roles'][host['role']] = 1
-                else:
-                    metrics['roles'][host['role']] = 0
-
+                metrics['roles'][host['role']] = 1
             if host['ipv4_os'] in metrics['oses']:
-                if host['active'] == 1:
-                    metrics['oses'][host['ipv4_os']] += 1
+                metrics['oses'][host['ipv4_os']] += 1
             else:
-                if host['active'] == 1:
-                    metrics['oses'][host['ipv4_os']] = 1
-                else:
-                    metrics['oses'][host['ipv4_os']] = 0
+                metrics['oses'][host['ipv4_os']] = 1
 
             if host['state'] in metrics['current_states']:
-                if host['active'] == 1:
-                    metrics['current_states'][host['state']] += 1
+                metrics['current_states'][host['state']] += 1
             else:
-                if host['active'] == 1:
-                    metrics['current_states'][host['state']] = 1
-                else:
-                    metrics['current_states'][host['state']] = 0
+                metrics['current_states'][host['state']] = 1
 
             if host['tenant'] in metrics['vlans']:
-                if host['active'] == 1:
-                    metrics['vlans'][host['tenant']] += 1
+                metrics['vlans'][host['tenant']] += 1
             else:
-                if host['active'] == 1:
-                    metrics['vlans'][host['tenant']] = 1
-                else:
-                    metrics['vlans'][host['tenant']] = 0
+                metrics['vlans'][host['tenant']] = 1
 
             if (host['port'], host['tenant']) in metrics['port_tenants']:
-                if host['active'] == 1:
-                    metrics['port_tenants'][(
-                        host['port'], host['tenant'])] += 1
+                metrics['port_tenants'][(
+                    host['port'], host['tenant'])] += 1
             else:
-                if host['active'] == 1:
-                    metrics['port_tenants'][(host['port'], host['tenant'])] = 1
-                else:
-                    metrics['port_tenants'][(host['port'], host['tenant'])] = 0
+                metrics['port_tenants'][(host['port'], host['tenant'])] = 1
 
             if host['port'] in metrics['port_hosts']:
-                if host['active'] == 1:
-                    metrics['port_hosts'][host['port']] += 1
+                metrics['port_hosts'][host['port']] += 1
             else:
-                if host['active'] == 1:
-                    metrics['port_hosts'][host['port']] = 1
-                else:
-                    metrics['port_hosts'][host['port']] = 0
+                metrics['port_hosts'][host['port']] = 1
 
             try:
-                if host['active'] == 1:
-                    self.prom_metrics['ipv4_table'].labels(mac=host['mac'],
-                                                           tenant=host['tenant'],
-                                                           segment=host['segment'],
-                                                           port=host['port'],
-                                                           role=host['role'],
-                                                           ipv4_os=host['ipv4_os'],
-                                                           hash_id=host['id']).set(ip2int(host['ipv4']))
+                self.prom_metrics['ipv4_table'].labels(mac=host['mac'],
+                                                       tenant=host['tenant'],
+                                                       segment=host['segment'],
+                                                       port=host['port'],
+                                                       role=host['role'],
+                                                       ipv4_os=host['ipv4_os'],
+                                                       hash_id=host['id']).set(ip2int(host['ipv4']))
             except Exception as e:  # pragma: no cover
                 self.logger.error(
                     'Unable to send {0} results to prometheus because {1}'.format(host, str(e)))
@@ -309,8 +271,6 @@ class Prometheus():
                 self.prom_metrics['port_hosts'].labels(
                     port=port_host).set(metrics['port_hosts'][port_host])
             self.prom_metrics['info'].info(metrics['info'])
-            self.prom_metrics['inactive'].set(metrics['inactives'])
-            self.prom_metrics['active'].set(metrics['actives'])
         except Exception as e:  # pragma: no cover
             self.logger.error(
                 'Unable to send results to prometheus because {0}'.format(str(e)))
@@ -397,7 +357,6 @@ class Prometheus():
                                                        'port': p_endpoint['port'],
                                                        'vlan': p_endpoint['tenant'],
                                                        'tenant': p_endpoint['tenant'],
-                                                       'active': p_endpoint['active'],
                                                        'ipv4': p_endpoint.get('ipv4_address', ''),
                                                        'ipv6': p_endpoint.get('ipv6_address', ''),
                                                        'controller_type': p_endpoint['controller_type'],

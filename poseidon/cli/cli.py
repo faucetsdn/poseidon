@@ -513,7 +513,7 @@ class PoseidonShell(cmd2.Cmd):
             'role active-directory-controller', 'role administrator-server',
             'role administrator-workstation', 'role business-workstation',
             'role developer-workstation', 'role gpu-laptop', 'role pki-server',
-            'role unknown', 'state active', 'state inactive', 'state known',
+            'role unknown', 'state active', 'state known',
             'state unknown', 'state mirroring', 'state shutdown',
             'state reinvestigating', 'state queued', 'state ignored',
             'os windows', 'os freebsd',
@@ -747,7 +747,6 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         '''
         Set the state of things on the network:
         SET [IP|MAC|ID] [STATE]
-        SET 10.0.0.1 INACTIVE
         SET 18:EF:02:2D:49:00 KNOWN
         SET 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293 SHUTDOWN
         '''
@@ -781,7 +780,6 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         IGNORE 10.0.0.1
         IGNORE 18:EF:02:2D:49:00
         IGNORE 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
-        IGNORE INACTIVE
         '''
         # defaults
         fields = self.parser.default_fields
@@ -829,7 +827,6 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         REMOVE 18:EF:02:2D:49:00
         REMOVE 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293
         REMOVE IGNORED
-        REMOVE INACTIVE
         '''
         # defaults
         fields = self.parser.default_fields
@@ -843,8 +840,6 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
             endpoints = []
             if arg.startswith('ignored'):
                 endpoints = Commands().remove_ignored(arg)
-            elif arg.startswith('inactive'):
-                endpoints = Commands().remove_inactives(arg)
             else:
                 endpoints = Commands().remove(arg)
             self.poutput('Removed the following devices:')

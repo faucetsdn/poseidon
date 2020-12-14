@@ -12,6 +12,7 @@ from functools import partial
 import requests
 import schedule
 
+from poseidon.constants import NO_DATA
 from poseidon.helpers.actions import Actions
 from poseidon.helpers.config import Config
 from poseidon.helpers.prometheus import Prometheus
@@ -85,9 +86,8 @@ class Monitor:
         # TODO consolidate with update_endpoint_metadata
         hosts = []
         for hash_id, endpoint in self.s.endpoints.items():
-            host = {}
-            ipv4_os = 'NO DATA'
-            role = 'NO DATA'
+            ipv4_os = NO_DATA
+            role = NO_DATA
             if 'mac_addresses' in endpoint.metadata:
                 for mac in endpoint.metadata['mac_addresses']:
                     if 'classification' in endpoint.metadata['mac_addresses'][mac]:
@@ -97,16 +97,16 @@ class Monitor:
                     if ip == endpoint.endpoint_data['ipv4']:
                         if 'short_os' in endpoint.metadata['ipv4_addresses'][ip]:
                             ipv4_os = endpoint.metadata['ipv4_addresses'][ip]['short_os']
-            host['mac'] = endpoint.endpoint_data['mac']
-            host['id'] = hash_id
-            host['active'] = endpoint.endpoint_data['active']
-            host['role'] = role
-            host['ipv4_os'] = ipv4_os
-            host['state'] = endpoint.state
-            host['tenant'] = endpoint.endpoint_data['tenant']
-            host['port'] = endpoint.endpoint_data['port']
-            host['segment'] = endpoint.endpoint_data['segment']
-            host['ipv4'] = endpoint.endpoint_data['ipv4']
+            host = {
+                'mac': endpoint.endpoint_data['mac'],
+                'id': hash_id,
+                'role': role,
+                'ipv4_os': ipv4_os,
+                'state': endpoint.state,
+                'tenant': endpoint.endpoint_data['tenant'],
+                'port': endpoint.endpoint_data['port'],
+                'segment': endpoint.endpoint_data['segment'],
+                'ipv4': endpoint.endpoint_data['ipv4']}
             hosts.append(host)
         return hosts
 
@@ -147,14 +147,11 @@ class Monitor:
         timeout = 2*self.controller['reinvestigation_frequency']
         for endpoint in self.s.not_ignored_endpoints():
             if endpoint.observed_timeout(timeout):
-                self.logger.info(
-                    'observation timing out: {0} and setting to inactive'.format(endpoint.name))
-                for mac in endpoint.mac_addresses():
-                    self.s.sdnc.make_mac_inactive(mac)
+                self.logger.info('observation timing out: {0}'.format(endpoint.name))
+                endpoint.force_unknown()
                 events += 1
             elif endpoint.mirror_active() and endpoint.state_timeout(timeout):
-                self.logger.info(
-                    'timing out: {0} and setting to unknown'.format(endpoint.name))
+                self.logger.info('mirror timing out: {0}'.format(endpoint.name))
                 self.s.unmirror_endpoint(endpoint)
                 events += 1
         budget = self.s.investigation_budget()
@@ -181,13 +178,26 @@ class Monitor:
     def update_endpoint_metadata(self):
         update_time = time.time()
         for hash_id, endpoint in self.s.endpoints.items():
-            top_role = 'NO DATA'
-            second_role = 'NO DATA'
-            third_role = 'NO DATA'
+            top_role = NO_DATA
+            second_role = NO_DATA
+            third_role = NO_DATA
             top_conf = '0'
             second_conf = '0'
             third_conf = '0'
-            ipv4_os = 'NO DATA'
+            ipv4_os = NO_DATA
+            ipv4 = endpoint.endpoint_data['ipv4']
+            ipv6 = endpoint.endpoint_data['ipv6']
+            ipv4_subnet = endpoint.endpoint_data['ipv4_subnet']
+            ipv6_subnet = endpoint.endpoint_data['ipv6_subnet']
+            ipv4_rdns = endpoint.endpoint_data['ipv4_rdns']
+            ipv6_rdns = endpoint.endpoint_data['ipv6_rdns']
+            port = endpoint.endpoint_data['port']
+            tenant = endpoint.endpoint_data['tenant']
+            segment = endpoint.endpoint_data['segment']
+            ether_vendor = endpoint.endpoint_data['ether_vendor']
+            controller = endpoint.endpoint_data['controller']
+            controller_type = endpoint.endpoint_data['controller_type']
+
             if 'mac_addresses' in endpoint.metadata:
                 for mac in endpoint.metadata['mac_addresses']:
                     if 'labels' in endpoint.metadata['mac_addresses'][mac]:
@@ -200,7 +210,7 @@ class Monitor:
                         third_conf = endpoint.metadata['mac_addresses'][mac]['classification']['confidences'][2]
             if 'ipv4_addresses' in endpoint.metadata:
                 for ip in endpoint.metadata['ipv4_addresses']:
-                    if ip == endpoint.endpoint_data['ipv4']:
+                    if ip == ipv4:
                         if 'short_os' in endpoint.metadata['ipv4_addresses'][ip]:
                             ipv4_os = endpoint.metadata['ipv4_addresses'][ip]['short_os']
 
@@ -212,96 +222,74 @@ class Monitor:
                 })
                 self.prom.prom_metrics[var].labels(**prom_labels).set(val)
 
-            set_prom(
+            def set_prom_role(var, val, role):
+                set_prom(
+                    var,
+                    val,
+                    role=role,
+                    ipv4_os=ipv4_os,
+                    ipv4_address=ipv4,
+                    ipv6_address=ipv6)
+
+            def update_prom(var, **prom_labels):
+                prom_labels.update({
+                    'tenant': tenant,
+                    'segment': segment,
+                    'ether_vendor': ether_vendor,
+                    'port': port,
+                })
+                set_prom(var, update_time, **prom_labels)
+
+            set_prom_role(
                 'endpoint_role_confidence_top',
                 top_conf,
-                role=top_role,
-                ipv4_os=ipv4_os,
-                ipv4_address=endpoint.endpoint_data['ipv4'],
-                ipv6_address=endpoint.endpoint_data['ipv6'])
-            set_prom(
+                top_role)
+            set_prom_role(
                 'endpoint_role_confidence_second',
                 second_conf,
-                role=second_role,
-                ipv4_os=ipv4_os,
-                ipv4_address=endpoint.endpoint_data['ipv4'],
-                ipv6_address=endpoint.endpoint_data['ipv6'])
-            set_prom(
+                second_role)
+            set_prom_role(
                 'endpoint_role_confidence_third',
                 third_conf,
-                role=third_role,
-                ipv4_os=ipv4_os,
-                ipv4_address=endpoint.endpoint_data['ipv4'],
-                ipv6_address=endpoint.endpoint_data['ipv6'])
-            set_prom(
+                third_role)
+            update_prom(
                 'endpoints',
-                update_time,
-                tenant=endpoint.endpoint_data['tenant'],
-                segment=endpoint.endpoint_data['segment'],
-                ether_vendor=endpoint.endpoint_data['ether_vendor'],
-                controller_type=endpoint.endpoint_data['controller_type'],
-                controller=endpoint.endpoint_data['controller'],
-                port=endpoint.endpoint_data['port'])
-            set_prom(
+                controller_type=controller_type,
+                controller=controller)
+            update_prom(
                 'endpoint_state',
-                update_time,
-                tenant=endpoint.endpoint_data['tenant'],
-                segment=endpoint.endpoint_data['segment'],
-                ether_vendor=endpoint.endpoint_data['ether_vendor'],
-                state=endpoint.state,
-                port=endpoint.endpoint_data['port'])
-            set_prom(
+                state=endpoint.state)
+            update_prom(
                 'endpoint_os',
-                update_time,
-                tenant=endpoint.endpoint_data['tenant'],
-                segment=endpoint.endpoint_data['segment'],
-                ether_vendor=endpoint.endpoint_data['ether_vendor'],
-                port=endpoint.endpoint_data['port'],
                 ipv4_os=ipv4_os)
-            set_prom(
+            update_prom(
                 'endpoint_role',
-                update_time,
-                tenant=endpoint.endpoint_data['tenant'],
-                segment=endpoint.endpoint_data['segment'],
-                ether_vendor=endpoint.endpoint_data['ether_vendor'],
-                port=endpoint.endpoint_data['port'],
                 top_role=top_role)
-            set_prom(
+            update_prom(
                 'endpoint_ip',
-                update_time,
-                tenant=endpoint.endpoint_data['tenant'],
-                segment=endpoint.endpoint_data['segment'],
-                ether_vendor=endpoint.endpoint_data['ether_vendor'],
-                ipv4_subnet=endpoint.endpoint_data['ipv4_subnet'],
-                ipv6_subnet=endpoint.endpoint_data['ipv6_subnet'],
-                ipv4_rdns=endpoint.endpoint_data['ipv4_rdns'],
-                ipv6_rdns=endpoint.endpoint_data['ipv6_rdns'],
-                port=endpoint.endpoint_data['port'],
-                ipv4_address=endpoint.endpoint_data['ipv4'],
-                ipv6_address=endpoint.endpoint_data['ipv6'])
-            set_prom(
+                ipv4_subnet=ipv4_subnet,
+                ipv6_subnet=ipv6_subnet,
+                ipv4_rdns=ipv4_rdns,
+                ipv6_rdns=ipv6_rdns,
+                ipv4_address=ipv4,
+                ipv6_address=ipv6)
+            update_prom(
                 'endpoint_metadata',
-                update_time,
-                tenant=endpoint.endpoint_data['tenant'],
-                segment=endpoint.endpoint_data['segment'],
-                ether_vendor=endpoint.endpoint_data['ether_vendor'],
                 prev_state=endpoint.p_prev_state,
                 next_state=endpoint.p_next_state,
                 acls=endpoint.acl_data,
                 ignore=str(endpoint.ignore),
-                active=endpoint.endpoint_data['active'],
-                ipv4_subnet=endpoint.endpoint_data['ipv4_subnet'],
-                ipv6_subnet=endpoint.endpoint_data['ipv6_subnet'],
-                ipv4_rdns=endpoint.endpoint_data['ipv4_rdns'],
-                ipv6_rdns=endpoint.endpoint_data['ipv6_rdns'],
-                controller_type=endpoint.endpoint_data['controller_type'],
-                controller=endpoint.endpoint_data['controller'],
+                ipv4_subnet=ipv4_subnet,
+                ipv6_subnet=ipv6_subnet,
+                ipv4_rdns=ipv4_rdns,
+                ipv6_rdns=ipv6_rdns,
+                controller_type=controller_type,
+                controller=controller,
                 state=endpoint.state,
-                port=endpoint.endpoint_data['port'],
                 top_role=top_role,
                 ipv4_os=ipv4_os,
-                ipv4_address=endpoint.endpoint_data['ipv4'],
-                ipv6_address=endpoint.endpoint_data['ipv6'])
+                ipv4_address=ipv4,
+                ipv6_address=ipv6)
 
     def format_rabbit_message(self, item, faucet_event, remove_list):
         '''
@@ -415,12 +403,6 @@ class Monitor:
                 if endpoint.ignore])
             return {}
 
-        def handler_action_remove_inactives(_my_obj):
-            remove_list.extend([
-                endpoint.name for endpoint in self.s.endpoints.values()
-                if endpoint.state == 'inactive'])
-            return {}
-
         def handler_faucet_event(my_obj):
             if self.s and self.s.sdnc:
                 if not self.s.sdnc.ignore_event(my_obj):
@@ -436,7 +418,6 @@ class Monitor:
             'poseidon.action.update_acls': handler_action_update_acls,
             'poseidon.action.remove': handler_action_remove,
             'poseidon.action.remove.ignored': handler_action_remove_ignored,
-            'poseidon.action.remove.inactives': handler_action_remove_inactives,
             self.controller['FA_RABBIT_ROUTING_KEY']: handler_faucet_event,
         }
 
