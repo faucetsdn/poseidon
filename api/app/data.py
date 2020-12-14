@@ -1,4 +1,5 @@
 import ast
+import configparser
 import ipaddress
 import json
 import os
@@ -46,122 +47,101 @@ class Nodes:
         for field in fields:
             self.node[field] = fields[field]
 
+    def get_prom_addr(self):
+        prometheus_ip = 'prometheus'
+        prometheus_port = '9090'
+        try:
+            config = configparser.RawConfigParser()
+            config.optionxform = str
+            config_path = '/opt/poseidon/poseidon.config'
+            config.read_file(open(config_path, 'r'))
+            if 'Poseidon' in config:
+                if 'prometheus_ip' in config['Poseidon']:
+                    prometheus_ip = config['Poseidon']['prometheus_ip']
+                if 'prometheus_port' in config['Poseidon']:
+                    prometheus_port = config['Poseidon']['prometheus_port']
+        except Exception as e:
+            print(f'Failed to get config options because {e}, using defaults')
+        self.prometheus_addr = prometheus_ip + ':' + prometheus_port
+
     def scrape_prometheus(self):
-        self.r = None
-        #try:
-        #    self.r = redis.StrictRedis(host=os.getenv('REDIS_HOST', 'redis'),
-        #                               port=6379,
-        #                               db=0,
-        #                               decode_responses=True)
-        #except Exception as e:  # pragma: no cover
-        #    return (False, 'unable to connect to redis because: ' + str(e))
-        return (True, 'connected')
+        self.get_prom_addr()
+        r1 = None
+        r2 = None
+        r3 = None
+        mr = None
+        current_time = datetime.datetime.utcnow()
+        # 6 hours in the past and 2 hours in the future
+        start_time = current_time - datetime.timedelta(hours=6)
+        end_time = current_time + datetime.timedelta(hours=2)
+        start_time_str = start_time.isoformat()[:-4]+"Z"
+        end_time_str = end_time.isoformat()[:-4]+"Z"
+        try:
+            payload = {'query': 'poseidon_endpoint_metadata', 'start': start_time_str, 'end': end_time_str, 'step': '30s'}
+            mr = requests.get('http://'+self.prometheus_addr+'/api/v1/query_range', params=payload)
+            payload = {'query': 'poseidon_role_confidence_top', 'start': start_time_str, 'end': end_time_str, 'step': '30s'}
+            r1 = requests.get('http://'+self.prometheus_addr+'/api/v1/query_range', params=payload)
+            payload = {'query': 'poseidon_role_confidence_second', 'start': start_time_str, 'end': end_time_str, 'step': '30s'}
+            r2 = requests.get('http://'+self.prometheus_addr+'/api/v1/query_range', params=payload)
+            payload = {'query': 'poseidon_role_confidence_third', 'start': start_time_str, 'end': end_time_str, 'step': '30s'}
+            r3 = requests.get('http://'+self.prometheus_addr+'/api/v1/query_range', params=payload)
+        except Exception as e:
+            print(f'Unable to get endpoints from Prometheus because: {e}')
+        role_hashes = {}
+        if r1:
+            results = r1.json()
+            if 'result' in results['data'] and results['data']['result']:
+                    for metric in results['data']['result']:
+                        if not metric['metric']['hash_id'] in role_hashes:
+                            role_hashes[metric['metric']['hash_id']] = {'mac': metric['metric']['mac'],
+                                                                    'ipv4_address': metric['metric'].get('ipv4_address', ''),
+                                                                    'ipv4_os': metric['metric'].get('ipv4_os', 'NO DATA'),
+                                                                    'timestamp': str(metric['values'][-1][0]),
+                                                                    'top_role': metric['metric'].get('role', 'NO DATA'),
+                                                                    'top_confidence': float(metric['values'][-1][1])}
+        if r2:
+            results = r2.json()
+            if 'data' in results:
+                if 'result' in results['data'] and results['data']['result']:
+                    for metric in results['data']['result']:
+                        if metric['metric']['hash_id'] in role_hashes:
+                            role_hashes[metric['metric']['hash_id']]['second_role'] = metric['metric'].get('role', 'NO DATA')
+                            role_hashes[metric['metric']['hash_id']]['second_confidence'] = float(metric['values'][-1][1])
+        if r3:
+            results = r3.json()
+            if 'data' in results:
+                if 'result' in results['data'] and results['data']['result']:
+                    for metric in results['data']['result']:
+                        if metric['metric']['hash_id'] in role_hashes:
+                            role_hashes[metric['metric']['hash_id']]['third_role'] = metric['metric'].get('role', 'NO DATA')
+                            role_hashes[metric['metric']['hash_id']]['third_confidence'] = float(metric['values'][-1][1])
+        if mr:
+            results = mr.json()
+            if 'data' in results:
+                if 'result' in results['data'] and results['data']['result']:
+                    hashes = {}
+                    for metric in results['data']['result']:
+                        if metric['metric']['hash_id'] in hashes:
+                            if float(metric['values'][-1][1]) > hashes[metric['metric']['hash_id']]['latest']:
+                                hashes[metric['metric']['hash_id']] = metric['metric']
+                                hashes[metric['metric']['hash_id']]['latest'] = float(metric['values'][-1][1])
+                        else:
+                            hashes[metric['metric']['hash_id']] = metric['metric']
+                            hashes[metric['metric']['hash_id']]['latest'] = float(metric['values'][-1][1])
+        return role_hashes, hashes
 
     def build_nodes(self):
-        status = self.scrape_prometheus()
-        if status[0] and self.r:
-            mac_addresses = []
-            try:
-                mac_addresses = self.r.smembers('mac_addresses')
-            except Exception as e:  # pragma: no cover
-                print(
-                    'Unable to retrieve any endpoints because: {0}'.format(str(e)))
-
-            for mac in mac_addresses:
-                node = deepcopy(self.node)
-                # special cases
-                if 'mac' in node:
-                    node['mac'] = mac
-
-                # grab from mac info
-                mac_info = {}
-                try:
-                    mac_info = self.r.hgetall(mac)
-                except Exception as e:  # pragma: no cover
-                    print(
-                        'Unable to retrieve endpoint metadata because: {0}'.format(str(e)))
-
-                should_append = self.ip is None
-                # grab from endpoint data
-                if 'poseidon_hash' in mac_info:
-                    if 'id' in node:
-                        node['id'] = mac_info['poseidon_hash']
-                    try:
-                        poseidon_info = self.r.hgetall(
-                            mac_info['poseidon_hash'])
-
-                        for key in node:
-                            if key in poseidon_info:
-                                node[key] = poseidon_info[key]
-
-                        if 'ignored' in node and 'ignore' in poseidon_info:
-                            node['ignored'] = poseidon_info['ignore']
-
-                        if 'prev_state' in poseidon_info:
-                            prev_state = ast.literal_eval(  # pytype: disable=wrong-arg-types
-                                poseidon_info['prev_state'])
-                            if 'first_seen' in node:
-                                node['first_seen'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
-                                    prev_state[1])) + ' (' + duration(prev_state[1]) + ')'
-                            if 'last_seen' in node:
-                                node['last_seen'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
-                                    prev_state[1])) + ' (' + duration(prev_state[1]) + ')'
-
-                        if 'endpoint_data' in poseidon_info:
-                            endpoint_data = ast.literal_eval(  # pytype: disable=wrong-arg-types
-                                poseidon_info['endpoint_data'])
-                            for key in node:
-                                if key in endpoint_data:
-                                    node[key] = endpoint_data[key]
-                            for ip_field, prefix in (
-                                    ('ipv4', 24),
-                                    ('ipv6', 64)):
-                                if ip_field not in node:
-                                    continue
-                                ipv = endpoint_data.get(ip_field, None)
-                                if ipv is None:
-                                    continue
-                                should_append = ipv == self.ip or should_append
-                                if isinstance(ipv, str) and ipv != 'None' and ipv:
-                                    subnet_key = '%s_subnet' % ip_field
-                                    if subnet_key in node:
-                                        subnet = ipaddress.ip_network(
-                                            ipv).supernet(new_prefix=prefix)
-                                        node[subnet_key] = str(subnet)
-                                    ip_info = self.r.hgetall(
-                                        '_'.join(('p0f', ipv)))
-                                    if ip_info and 'short_os' in ip_info:
-                                        node['%s_os' %
-                                             ip_field] = ip_info['short_os']
-                    except Exception as e:  # pragma: no cover
-                        print(
-                            'Failed to set all poseidon info because: {0}'.format(str(e)))
-
-                # grab ml results
-                if 'role' in node:
-                    if 'timestamps' in mac_info:
-                        try:
-                            timestamps = ast.literal_eval(  # pytype: disable=wrong-arg-types
-                                mac_info['timestamps'])
-                            ml_info = self.r.hgetall(
-                                '_'.join(('networkml', mac, str(timestamps[-1]))))
-                            for _poseidon_hash, raw_results in ml_info.items():
-                                results = ast.literal_eval(raw_results)  # pytype: disable=wrong-arg-types
-                                classification = results.get(
-                                    'classification', {})
-                                labels = classification.get('labels', None)
-                                confidences = classification.get(
-                                    'confidences', None)
-                                if labels:
-                                    node['role'] = labels[0]
-                                if confidences:
-                                    node['role_confidence'] = int(
-                                        confidences[0] * 100)
-                        except Exception as e:  # pragma: no cover
-                            print(
-                                'Failed to set all ML info because: {0}'.format(str(e)))
-                if should_append:
-                    self.nodes.append(node)
+        role_hashes, hashes = self.scrape_prometheus()
+        for h in hashes:
+            node = deepcopy(self.node)
+            print(f'{node}')
+            print(f'{hashes[h]}')
+            for field in hashes[h]:
+                if field in node:
+                    nodes[field] = hashes[h][field]
+                else:
+                    print(f'ignoring {field}')
+            self.nodes.append(node)
 
 
 class NetworkFull:

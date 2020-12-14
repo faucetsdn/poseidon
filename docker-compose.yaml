@@ -39,6 +39,8 @@ services:
             - '5000:8000'
         environment:
             PYTHONUNBUFFERED: '1'
+        volumes:
+            - '${POSEIDON_PREFIX}/opt/poseidon:/opt/poseidon'
         networks:
             poseidon:
                 aliases:
