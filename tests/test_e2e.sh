@@ -54,8 +54,7 @@ wait_job_up () {
         wait_var_nonzero "up{instance=\"$instance\"}" "" up
 }
 
-# TODO: push test capture into switch1:1 to ensure networkml is called
-sudo rm -rf /etc/faucet
+sudo rm -rf /etc/faucet /opt/prometheus/
 sudo mkdir -p /etc/faucet
 cat >$TMPDIR/faucet.yaml<<EOF
 # compatible with default poseidon config.
