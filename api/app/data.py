@@ -45,12 +45,13 @@ class Nodes:
         self.node = {}
         self.ip = ip
         self.r = None
+        self.prometheus_addr = 'prometheus:9090'
         for field in fields:
             self.node[field] = fields[field]
 
     def get_prom_addr(self):
-        prometheus_ip = 'prometheus'
-        prometheus_port = '9090'
+        prometheus_ip = None
+        prometheus_poort = None
         try:
             config = configparser.RawConfigParser()
             config.optionxform = str
@@ -63,7 +64,8 @@ class Nodes:
                     prometheus_port = config['Poseidon']['prometheus_port']
         except Exception as e:
             print(f'Failed to get config options because {e}, using defaults')
-        self.prometheus_addr = prometheus_ip + ':' + prometheus_port
+        if prometheus_ip and prometheus_port:
+            self.prometheus_addr = prometheus_ip + ':' + prometheus_port
 
     def scrape_prometheus(self):
         self.get_prom_addr()
