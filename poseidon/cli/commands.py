@@ -18,7 +18,7 @@ logger = logging.getLogger('commands')
 class Commands:
 
     def __init__(self, controller=None):
-        self.states = ['active', 'inactive', 'known', 'unknown',
+        self.states = ['active', 'known', 'unknown',
                        'mirroring', 'shutdown', 'reinvestigating', 'queued']
         if controller is None:
             self.controller = Config().get_config()
@@ -49,11 +49,6 @@ class Commands:
                 if not match_all:
                     break
         return endpoints.values()
-
-    def _inactive_endpoints(self):
-        return [
-            endpoint for endpoint in self.sdnc.endpoints.values()
-            if endpoint.state == 'inactive']
 
     def _ignored_endpoints(self):
         return [
@@ -86,10 +81,7 @@ class Commands:
     def ignore(self, args):
         ''' ignore a specific thing '''
         device = args.rsplit(' ', 1)[0]
-        if device == 'inactive':
-            endpoints = self._inactive_endpoints()
-        else:
-            endpoints = self._get_endpoints(args, 0, match_all=True)
+        endpoints = self._get_endpoints(args, 0, match_all=True)
         endpoint_names = [endpoint.name for endpoint in endpoints]
         self._publish_action('poseidon.action.ignore', endpoint_names)
         return endpoints

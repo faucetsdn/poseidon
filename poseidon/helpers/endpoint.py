@@ -35,7 +35,7 @@ def endpoint_copro_transit_wrap(trigger, source, dest):
 
 class Endpoint:
 
-    states = ['known', 'unknown', 'mirroring', 'inactive',
+    states = ['known', 'unknown', 'mirroring',
               'shutdown', 'reinvestigating', 'queued']
 
     transitions = [
@@ -47,25 +47,16 @@ class Endpoint:
         endpoint_transit_wrap('reinvestigate', 'queued', 'reinvestigating'),
         endpoint_transit_wrap('known', 'known', 'known'),
         endpoint_transit_wrap('unknown', 'known', 'unknown'),
-        endpoint_transit_wrap('inactive', 'known', 'inactive'),
         endpoint_transit_wrap('known', 'unknown', 'known'),
         endpoint_transit_wrap('unknown', 'unknown', 'unknown'),
-        endpoint_transit_wrap('inactive', 'unknown', 'inactive'),
         endpoint_transit_wrap('known', 'mirroring', 'known'),
         endpoint_transit_wrap('unknown', 'mirroring', 'unknown'),
-        endpoint_transit_wrap('inactive', 'mirroring', 'inactive'),
-        endpoint_transit_wrap('known', 'inactive', 'known'),
-        endpoint_transit_wrap('unknown', 'inactive', 'unknown'),
-        endpoint_transit_wrap('inactive', 'inactive', 'inactive'),
         endpoint_transit_wrap('known', 'shutdown', 'known'),
         endpoint_transit_wrap('unknown', 'shutdown', 'unknown'),
-        endpoint_transit_wrap('inactive', 'shutdown', 'inactive'),
         endpoint_transit_wrap('known', 'reinvestigating', 'known'),
         endpoint_transit_wrap('unknown', 'reinvestigating', 'unknown'),
-        endpoint_transit_wrap('inactive', 'reinvestigating', 'inactive'),
         endpoint_transit_wrap('known', 'queued', 'known'),
         endpoint_transit_wrap('unknown', 'queued', 'unknown'),
-        endpoint_transit_wrap('inactive', 'queued', 'inactive'),
     ]
 
     copro_states = ['copro_unknown', 'copro_coprocessing',
@@ -189,7 +180,7 @@ class Endpoint:
 
     def default(self):
         if not self.ignore:
-            if self.state != 'inactive':
+            if self.state != 'unknown':
                 if self.state == 'mirroring':
                     self.p_next_state = 'mirror'
                 elif self.state == 'reinvestigating':
@@ -198,7 +189,7 @@ class Endpoint:
                     self.p_next_state = 'queue'
                 elif self.state == 'known':
                     self.p_next_state = self.state
-                self.inactive()  # pytype: disable=attribute-error
+                self.unknown()  # pytype: disable=attribute-error
 
     @staticmethod
     def make_hash(machine, trunk=False):

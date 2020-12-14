@@ -179,7 +179,6 @@ class Prometheus():
                    'oses': {},
                    'current_states': {'known': 0,
                                       'unknown': 0,
-                                      'inactive': 0,
                                       'mirroring': 0,
                                       'shutdown': 0,
                                       'queued': 0,

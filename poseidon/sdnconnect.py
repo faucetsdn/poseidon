@@ -168,7 +168,7 @@ class SDNConnect:
             show_type, arg = arg.split(' ', 1)
             for endpoint in self.endpoints.values():
                 if show_type == 'state':
-                    if arg == 'active' and endpoint.state != 'inactive':
+                    if arg == 'active':
                         endpoints.append(endpoint)
                     elif arg == 'ignored' and endpoint.ignore:
                         endpoints.append(endpoint)
