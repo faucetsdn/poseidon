@@ -139,7 +139,7 @@ class Nodes:
             print(f'{hashes[h]}')
             for field in hashes[h]:
                 if field in node:
-                    nodes[field] = hashes[h][field]
+                    node[field] = hashes[h][field]
                 else:
                     print(f'ignoring {field}')
             self.nodes.append(node)
