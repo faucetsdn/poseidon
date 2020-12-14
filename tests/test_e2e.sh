@@ -100,7 +100,7 @@ for i in mirrora mirrorb switch1 ; do
 done
 export POSEIDON_PREFIX=/
 export PATH=bin:$PATH
-sudo rm -rf /opt/poseidon* /var/log/poseidon* /opt/redis
+sudo rm -rf /opt/poseidon* /var/log/poseidon*
 tar cvf $TMPDIR/current.tar .
 poseidon -i $TMPDIR/current.tar
 sudo sed -i -E \

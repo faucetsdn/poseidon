@@ -368,7 +368,7 @@ class Prometheus():
                                                        'ipv6_rdns': p_endpoint.get('ipv6_rdns', ''),
                                                        'ipv6_subnet': p_endpoint.get('ipv6_subnet', '')}
                         p_endpoint['p_next_state'] = p_endpoint.get('next_state', None)
-                        p_endpoint['p_prev_state'] = list(p_endpoint.get('prev_state', []))
+                        p_endpoint['p_prev_state'] = list(p_endpoint.get('prev_state', [None, 0]))
                         # TODO acl_data
                         p_endpoint['acl_data'] = []
                         p_endpoint['metadata'] = {'mac_addresses': {}, 'ipv4_addresses': {}, 'ipv6_addresses': {}}
