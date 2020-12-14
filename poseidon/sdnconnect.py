@@ -325,8 +325,6 @@ class SDNConnect:
                     'Endpoint changed: {0}:{1}'.format(h, diff_txt))
                 change_acls = True
                 ep.endpoint_data = deepcopy(machine)
-                if ep.state != 'inactive' and machine['active'] == 0:
-                    self.unmirror_endpoint(ep)
             ep.touch()
 
         if change_acls and self.controller['AUTOMATED_ACLS']:

@@ -194,7 +194,6 @@ class Endpoint:
                     self.p_next_state = 'queue'
                 elif self.state == 'known':
                     self.p_next_state = self.state
-                self.endpoint_data['active'] = 0
                 self.inactive()  # pytype: disable=attribute-error
 
     @staticmethod
