@@ -35,7 +35,6 @@ def test_commands():
     commands.clear_ignored('ignored')
     commands.ignore('foo')
     commands.ignore('inactive')
-    commands.remove_inactives('foo')
     commands.remove_ignored('foo')
 
     endpoint2 = endpoint_factory('foo2')

@@ -175,21 +175,6 @@ class Endpoint:
             self.copro_machine_trigger(self.p_next_copro_state)
             self.p_next_copro_state = None
 
-    def reactivate(self):
-        if self.p_next_state == 'known':
-            self.trigger_next()
-        else:
-            self.unknown()  # pytype: disable=attribute-error
-
-    def deactivate(self):
-        if self.state == 'mirroring':
-            self.p_next_state = 'mirror'
-        elif self.state == 'reinvestigating':
-            self.p_next_state = 'reinvestigate'
-        elif self.state == 'known':
-            self.p_next_state = self.state
-        self.inactive()  # pytype: disable=attribute-error
-
     def mirror_active(self):
         return self.state in ['mirroring', 'reinvestigating']
 

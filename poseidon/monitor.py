@@ -415,12 +415,6 @@ class Monitor:
                 if endpoint.ignore])
             return {}
 
-        def handler_action_remove_inactives(_my_obj):
-            remove_list.extend([
-                endpoint.name for endpoint in self.s.endpoints.values()
-                if endpoint.state == 'inactive'])
-            return {}
-
         def handler_faucet_event(my_obj):
             if self.s and self.s.sdnc:
                 if not self.s.sdnc.ignore_event(my_obj):
@@ -436,7 +430,6 @@ class Monitor:
             'poseidon.action.update_acls': handler_action_update_acls,
             'poseidon.action.remove': handler_action_remove,
             'poseidon.action.remove.ignored': handler_action_remove_ignored,
-            'poseidon.action.remove.inactives': handler_action_remove_inactives,
             self.controller['FA_RABBIT_ROUTING_KEY']: handler_faucet_event,
         }
 

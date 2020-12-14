@@ -236,12 +236,6 @@ def test_format_rabbit_message():
     assert retval == {}
     assert msg_valid
 
-    message = ('poseidon.action.remove.inactives', json.dumps(data))
-    retval, msg_valid = mockMonitor.format_rabbit_message(
-        message, faucet_event, remove_list)
-    assert retval == {}
-    assert msg_valid
-
     ip_data = dict({'10.0.0.1': ['rule1']})
     message = ('poseidon.action.update_acls', json.dumps(ip_data))
     retval, msg_valid = mockMonitor.format_rabbit_message(

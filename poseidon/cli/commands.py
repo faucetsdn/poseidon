@@ -76,14 +76,6 @@ class Commands:
         ''' where topologically is a specific thing '''
         return self._get_endpoints(args, -1)
 
-    def remove_inactives(self, args):
-        ''' remove all inactive devices '''
-        endpoints = self._inactive_endpoints()
-        endpoint_names = [endpoint.name for endpoint in endpoints]
-        self._publish_action(
-            'poseidon.action.remove.inactives', endpoint_names)
-        return endpoints
-
     def remove_ignored(self, args):
         ''' remove all ignored devices '''
         endpoints = self._ignored_endpoints()

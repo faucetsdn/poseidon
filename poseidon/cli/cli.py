@@ -843,8 +843,6 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
             endpoints = []
             if arg.startswith('ignored'):
                 endpoints = Commands().remove_ignored(arg)
-            elif arg.startswith('inactive'):
-                endpoints = Commands().remove_inactives(arg)
             else:
                 endpoints = Commands().remove(arg)
             self.poutput('Removed the following devices:')
