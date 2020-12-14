@@ -89,6 +89,7 @@ class Nodes:
         except Exception as e:
             print(f'Unable to get endpoints from Prometheus because: {e}')
         role_hashes = {}
+        hashes = {}
         if r1:
             results = r1.json()
             if 'result' in results['data'] and results['data']['result']:
@@ -120,7 +121,6 @@ class Nodes:
             results = mr.json()
             if 'data' in results:
                 if 'result' in results['data'] and results['data']['result']:
-                    hashes = {}
                     for metric in results['data']['result']:
                         if metric['metric']['hash_id'] in hashes:
                             if float(metric['values'][-1][1]) > hashes[metric['metric']['hash_id']]['latest']:
