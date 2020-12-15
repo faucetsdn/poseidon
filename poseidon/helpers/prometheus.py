@@ -372,11 +372,23 @@ class Prometheus():
                         # TODO acl_data
                         p_endpoint['acl_data'] = []
                         p_endpoint['metadata'] = {'mac_addresses': {}, 'ipv4_addresses': {}, 'ipv6_addresses': {}}
-                        for e in role_hashes:
-                            if not role_hashes[e]['mac'] in p_endpoint['metadata']['mac_addresses']:
-                                p_endpoint['metadata']['mac_addresses'][role_hashes[e]['mac']] = {role_hashes[e]['timestamp']: {'labels': [role_hashes[e]['top_role'], role_hashes[e]['second_role'], role_hashes[e]['third_role']], 'confidences': [role_hashes[e]['top_confidence'], role_hashes[e]['second_confidence'], role_hashes[e]['third_confidence']], 'pcap_labels': ''}}
-                            if not role_hashes[e]['ipv4_address'] in p_endpoint['metadata']['ipv4_addresses']:
-                                p_endpoint['metadata']['ipv4_addresses'][role_hashes[e]['ipv4_address']] = {'os': role_hashes[e]['ipv4_os']}
+                        mac = p_endpoint['mac']
+                        for role_hash in role_hashes.values():
+                            role_mac = role_hash['mac']
+                            if mac != role_mac:
+                                continue
+                            if not mac in p_endpoint['metadata']['mac_addresses']:
+                                roles = [role_hash['top_role'], role_hash['second_role'], role_hash['third_role']]
+                                confidences = [role_hash['top_confidence'], role_hash['second_confidence'], role_hash['third_confidence']]
+                                p_endpoint['metadata']['mac_addresses'][mac] = {
+                                    'classification': {
+                                        'labels': roles,
+                                        'confidences': confidences,
+                                     },
+                                    'pcap_labels': ''}
+                            ipv4 = role_hash['ipv4_address']
+                            if not ipv4 in p_endpoint['metadata']['ipv4_addresses']:
+                                p_endpoint['metadata']['ipv4_addresses'][ipv4] = {'short_os': role_hash['ipv4_os']}
                         endpoint = EndpointDecoder(p_endpoint).get_endpoint()
                         endpoints[endpoint.name] = endpoint
             else:

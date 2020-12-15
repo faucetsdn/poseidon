@@ -386,7 +386,7 @@ def test_get_role():
     role = GetData._get_role(endpoint)
     assert role == NO_DATA
     endpoint.metadata = {'mac_addresses': {
-        '00:00:00:00:00:00': {'classification': {'labels': ['foo']}}}}
+        '00:00:00:00:00:00': {'classification': {'labels': ['foo', 'bar', 'baz']}}}}
     role = GetData._get_role(endpoint)
     assert role == 'foo'
 
@@ -397,9 +397,9 @@ def test_get_role_confidence():
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
     endpoint.metadata = {'mac_addresses': {}}
     confidence = GetData._get_role_confidence(endpoint)
-    assert confidence == NO_DATA
+    assert confidence == '0'
     endpoint.metadata = {'mac_addresses': {
-        '00:00:00:00:00:00': {'classification': {'confidences': [10.0]}}}}
+        '00:00:00:00:00:00': {'classification': {'confidences': [10.0, 9.0, 8.0]}}}}
     confidence = GetData._get_role_confidence(endpoint)
     assert confidence == '10.0'
 
