@@ -189,28 +189,7 @@ class GetData():
 
     @staticmethod
     def _get_prev_state(endpoint):
-        # TODO needs to be rewritten now that prev_state is no longer a history of state changes
-        prev_state = endpoint.p_prev_state
-        oldest_state = []
-        output = NO_DATA
-        if prev_state:
-            current_state = oldest_state = prev_state
-        else:
-            return output
-
-        output = 'First seen: ' + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
-            oldest_state[1])) + ' (' + duration(oldest_state[1]) + ') and put into state: ' + oldest_state[0] + '\n'
-        delay = delta(prev_state[1], oldest_state[1])[0]
-        if delay == 'just now':
-            delay = 'immediately'
-        else:
-            delay += ' later'
-        output += 'then ' + delay + ' it changed into state: ' + prev_state[0] + \
-            ' (' + time.strftime('%Y-%m-%d %H:%M:%S',
-                                 time.localtime(prev_state[1])) + ')\n'
-        output += 'Finally it was last seen: ' + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
-            current_state[1])) + ' (' + duration(current_state[1]) + ')'
-        return output
+        return endpoint.p_prev_state
 
     @staticmethod
     def _get_history(endpoint):

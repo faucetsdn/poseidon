@@ -326,7 +326,7 @@ def test_get_prev_state():
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
     endpoint.p_prev_state = None
     prev_state = GetData._get_prev_state(endpoint)
-    assert prev_state == NO_DATA
+    assert prev_state == None
     endpoint.unknown()
     GetData._get_prev_state(endpoint)
     endpoint.queue()

@@ -93,9 +93,9 @@ class Endpoint:
         self.copro_ignore = False
         self.endpoint_data = None
         self.p_next_state = None
-        self.p_prev_state = [None, 0]
+        self.p_prev_state = None
         self.p_next_copro_state = None
-        self.p_prev_copro_state = [None, 0]
+        self.p_prev_copro_state = None
         self.acl_data = []
         self.metadata = {}
         self.state = None
@@ -151,7 +151,8 @@ class Endpoint:
         return time.time() - self.observed_time > timeout
 
     def state_time(self):
-        return self.p_prev_state[1]
+        # TODO this was already broken, just making it obvious
+        return 0
 
     def state_age(self):
         return int(time.time()) - self.state_time()
@@ -160,7 +161,8 @@ class Endpoint:
         return self.state_age() > timeout
 
     def copro_state_time(self):
-        return self.p_prev_copro_state[1]
+        # TODO this was already broken, just making it obvious
+        return 0
 
     def copro_state_age(self):
         return int(time.time()) - self.copro_state_time()
@@ -176,6 +178,7 @@ class Endpoint:
         self.machine.events[state].trigger(self)  # pytype: disable=attribute-error
 
     def trigger_next(self):
+        self.p_prev_state = self.state
         if self.p_next_state:
             self.machine_trigger(self.p_next_state)
             self.p_next_state = None
@@ -269,7 +272,7 @@ class EndpointDecoder:
         self.endpoint.acl_data = e.get('acl_data', [])
         self.endpoint.endpoint_data = e['endpoint_data']
         self.endpoint.p_next_state = e['p_next_state']
-        self.endpoint.p_prev_state = e.get('p_prev_state', [None, 0])
+        self.endpoint.p_prev_state = e.get('p_prev_state', None)
         self.endpoint.observed_time = e.get('observed_time', 0)
 
     def get_endpoint(self):

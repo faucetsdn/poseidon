@@ -154,14 +154,12 @@ class NetworkFull:
         return {'hash_id': NO_DATA, 'mac': 0, 'ipv4_address': 0,
                 'ipv6_address': 0, 'ipv4_subnet': NO_DATA,
                 'ipv6_subnet': NO_DATA, 'segment': 0, 'port': 0,
-                'vlan': 0, 'active': 0, 'next_state': NO_DATA,
-                'state': NO_DATA, 'prev_state': NO_DATA,
-                'ignore': 'False', 'top_role': NO_DATA,
-                'top_confidence': 0,
-                'ipv4_os': NO_DATA, 'ipv6_os': NO_DATA,
-                'source': NO_DATA, 'ipv4_rdns': NO_DATA,
-                'ipv6_rdns': NO_DATA, 'ether_vendor': NO_DATA,
-                'controller_type': NO_DATA, 'acls': NO_DATA}
+                'tenant': 0, 'next_state': NO_DATA, 'state': NO_DATA,
+                'prev_state': NO_DATA, 'ignore': 'False', 'top_role': NO_DATA,
+                'top_confidence': 0, 'ipv4_os': NO_DATA, 'ipv6_os': NO_DATA,
+                'ipv4_rdns': NO_DATA, 'ipv6_rdns': NO_DATA,
+                'ether_vendor': NO_DATA, 'controller_type': NO_DATA,
+                'acls': NO_DATA}
 
     @staticmethod
     def get_dataset():
@@ -187,7 +185,7 @@ class Network:
     def get_fields():
         return {'hash_id': NO_DATA, 'mac': 0, 'ipv4_address': 0, 'ipv6_address': 0,
                 'ipv4_subnet': NO_DATA, 'ipv6_subnet': NO_DATA,
-                'vlan': 0, 'segment': 0, 'port': 0,
+                'tenant': 0, 'segment': 0, 'port': 0,
                 'state': NO_DATA, 'ignore': 'False',
                 'top_role': NO_DATA, 'top_confidence': 0,
                 'ipv4_os': NO_DATA, 'ipv6_os': NO_DATA,
@@ -198,7 +196,7 @@ class Network:
     @staticmethod
     def field_mapping():
         return {'hash_id': 'ID', 'mac': 'MAC Address', 'segment': 'Switch',
-                'port': 'Port', 'vlan': 'VLAN', 'ipv4_address': 'IPv4',
+                'port': 'Port', 'tenant': 'VLAN', 'ipv4_address': 'IPv4',
                 'ipv4_subnet': 'IPv4 Subnet', 'ipv6_subnet': 'IPv6 Subnet',
                 'ipv6_address': 'IPv6', 'ignore': 'Ignored', 'state': 'State',
                 'next_state': 'Next State', 'prev_state': 'Previous State',
