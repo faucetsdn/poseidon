@@ -86,7 +86,7 @@ class Monitor:
         # TODO consolidate with update_endpoint_metadata
         hosts = []
         for hash_id, endpoint in self.s.endpoints.items():
-            roles, _ = endpoint.get_roles_confidences()
+            roles, _, _ = endpoint.get_roles_confidences_pcap_labels()
             role = roles[0]
             ipv4_os = endpoint.get_ipv4_os()
             host = {
@@ -182,7 +182,7 @@ class Monitor:
             ether_vendor = endpoint.endpoint_data['ether_vendor']
             controller = endpoint.endpoint_data['controller']
             controller_type = endpoint.endpoint_data['controller_type']
-            roles, confidences = endpoint.get_roles_confidences()
+            roles, confidences, pcap_labels = endpoint.get_roles_confidences_pcap_labels()
             top_role, second_role, third_role = roles
             top_conf, second_conf, third_conf = confidences
             ipv4_os = endpoint.get_ipv4_os()
@@ -202,7 +202,8 @@ class Monitor:
                     role=role,
                     ipv4_os=ipv4_os,
                     ipv4_address=ipv4,
-                    ipv6_address=ipv6)
+                    ipv6_address=ipv6,
+                    pcap_labels=pcap_labels)
 
             def update_prom(var, **prom_labels):
                 prom_labels.update({

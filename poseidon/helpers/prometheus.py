@@ -70,6 +70,7 @@ class Prometheus():
                                                                   ['mac',
                                                                    'name',
                                                                    'role',
+                                                                   'pcap_labels',
                                                                    'ipv4_os',
                                                                    'ipv4_address',
                                                                    'ipv6_address',
@@ -79,6 +80,7 @@ class Prometheus():
                                                                   ['mac',
                                                                    'name',
                                                                    'role',
+                                                                   'pcap_labels',
                                                                    'ipv4_os',
                                                                    'ipv4_address',
                                                                    'ipv6_address',
@@ -88,6 +90,7 @@ class Prometheus():
                                                                   ['mac',
                                                                    'name',
                                                                    'role',
+                                                                   'pcap_labels',
                                                                    'ipv4_os',
                                                                    'ipv4_address',
                                                                    'ipv6_address',
@@ -320,7 +323,9 @@ class Prometheus():
                         'ipv4_os': self.metric_label(metric, 'ipv4_os'),
                         'timestamp': str(self.latest_timestamp(metric)),
                         'top_role': self.metric_label(metric, 'role'),
-                        'top_confidence': self.latest_value(metric)}
+                        'top_confidence': self.latest_value(metric),
+                        'pcap_labels': self.metric_label(metric, 'pcap_labels', ''),
+                        'state': self.metric_label(metric, 'state')}
         if r2:
             for metric in r2:
                 hash_id = self.metric_label(metric, 'hash_id')
@@ -337,20 +342,14 @@ class Prometheus():
             for metric in mr:
                 latest = self.latest_value(metric)
                 hash_id = self.metric_label(metric, 'hash_id')
-                if hash_id in hashes:
-                    if latest > hashes[hash_id]['latest']:
-                        hashes[hash_id] = metric['metric']
-                        hashes[hash_id]['latest'] = latest
-                else:
-                    hashes[hash_id] = metric['metric']
-                    hashes[hash_id]['latest'] = latest
+                if hash_id in hashes and latest < hashes[hash_id]['latest']:
+                    continue
+                hashes[hash_id] = metric['metric']
+                hashes[hash_id]['latest'] = latest
         return hashes, role_hashes
 
-    def get_stored_endpoints(self):
-        ''' load existing endpoints from Prometheus. '''
+    def prom_endpoints(self, hashes, role_hashes):
         endpoints = {}
-        hashes, role_hashes = self.scrape_prom()
-        # format hash metrics into endpoints
         for h in hashes:
             p_endpoint = hashes[h]
             p_endpoint.update({
@@ -359,6 +358,7 @@ class Prometheus():
                 'p_prev_state': p_endpoint.get('prev_state', None),
                 'acl_data': [],  # TODO: acl_data
                 'metadata': {'mac_addresses': {}, 'ipv4_addresses': {}, 'ipv6_addresses': {}},
+                'state': '',
                 'endpoint_data': {
                     'mac': p_endpoint['mac'],
                     'segment': p_endpoint['segment'],
@@ -380,21 +380,30 @@ class Prometheus():
                 role_mac = role_hash['mac']
                 if mac != role_mac:
                     continue
-                if not mac in p_endpoint['metadata']['mac_addresses']:
+                p_endpoint['state'] = role_hash['state']
+                if role_hash['top_role'] != NO_DATA or not mac in p_endpoint['metadata']['mac_addresses']:
                     roles = [role_hash['top_role'], role_hash['second_role'], role_hash['third_role']]
                     confidences = [role_hash['top_confidence'], role_hash['second_confidence'], role_hash['third_confidence']]
+                    pcap_labels = role_hash['pcap_labels']
                     p_endpoint['metadata']['mac_addresses'][mac] = {
                         'classification': {
                             'labels': roles,
                             'confidences': confidences,
                          },
-                        'pcap_labels': ''}
+                        'pcap_labels': pcap_labels}
                 ipv4 = role_hash['ipv4_address']
-                if not ipv4 in p_endpoint['metadata']['ipv4_addresses']:
-                    p_endpoint['metadata']['ipv4_addresses'][ipv4] = {'short_os': role_hash['ipv4_os']}
+                if ipv4:
+                    ipv4_os = role_hash['ipv4_os']
+                    if not ipv4 in p_endpoint['metadata']['ipv4_addresses'] or ipv4_os != NO_DATA:
+                        p_endpoint['metadata']['ipv4_addresses'][ipv4] = {'short_os': ipv4_os}
             endpoint = EndpointDecoder(p_endpoint).get_endpoint()
             endpoints[endpoint.name] = endpoint
         return endpoints
+
+    def get_stored_endpoints(self):
+        ''' load existing endpoints from Prometheus. '''
+        hashes, role_hashes = self.scrape_prom()
+        return self.prom_endpoints(hashes, role_hashes)
 
     @staticmethod
     def start(port=9304):

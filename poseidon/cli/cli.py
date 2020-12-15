@@ -129,23 +129,18 @@ class GetData():
 
     @staticmethod
     def _get_role(endpoint):
-        roles, _ = endpoint.get_roles_confidences()
+        roles, _, _ = endpoint.get_roles_confidences_pcap_labels()
         return roles[0]
 
     @staticmethod
     def _get_role_confidence(endpoint):
-        _, confidences = endpoint.get_roles_confidences()
+        _, confidences, _ = endpoint.get_roles_confidences_pcap_labels()
         return str(confidences[0])
 
     @staticmethod
     def _get_pcap_labels(endpoint):
-        endpoint_mac = GetData._get_mac(endpoint)
-        mac_addresses = endpoint.metadata.get('mac_addresses', None)
-        if endpoint_mac and mac_addresses and endpoint_mac in mac_addresses:
-            metadata = mac_addresses[endpoint_mac]
-            if 'pcap_labels' in metadata:
-                return metadata['pcap_labels']
-        return NO_DATA
+        _, _, pcap_labels = endpoint.get_roles_confidences_pcap_labels()
+        return pcap_labels
 
     @staticmethod
     def _get_ipv4_os(endpoint):
