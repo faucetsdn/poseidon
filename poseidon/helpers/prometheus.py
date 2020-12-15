@@ -275,37 +275,31 @@ class Prometheus():
             self.logger.error(
                 'Unable to send results to prometheus because {0}'.format(str(e)))
 
+    def prom_query(self, var, start_time_str, end_time_str, step='30s'):
+        payload = {'query': var, 'start': start_time_str, 'end': end_time_str, 'step': step}
+        try:
+            response = requests.get('http://%s/api/v1/query_range' % self.prometheus_addr, params=payload)
+            return response.json()['data']['result']
+        except Exception:
+            return None
+
     def get_stored_endpoints(self):
         ''' load existing endpoints from Prometheus. '''
         endpoints = {}
-        r1 = None
-        r2 = None
-        r3 = None
-        mr = None
         current_time = datetime.datetime.utcnow()
         # 6 hours in the past and 2 hours in the future
         start_time = current_time - datetime.timedelta(hours=6)
         end_time = current_time + datetime.timedelta(hours=2)
         start_time_str = start_time.isoformat()[:-4]+"Z"
         end_time_str = end_time.isoformat()[:-4]+"Z"
-        try:
-            payload = {'query': 'poseidon_endpoint_metadata', 'start': start_time_str, 'end': end_time_str, 'step': '30s'}
-            mr = requests.get('http://'+self.prometheus_addr+'/api/v1/query_range', params=payload)
-            payload = {'query': 'poseidon_role_confidence_top', 'start': start_time_str, 'end': end_time_str, 'step': '30s'}
-            r1 = requests.get('http://'+self.prometheus_addr+'/api/v1/query_range', params=payload)
-            payload = {'query': 'poseidon_role_confidence_second', 'start': start_time_str, 'end': end_time_str, 'step': '30s'}
-            r2 = requests.get('http://'+self.prometheus_addr+'/api/v1/query_range', params=payload)
-            payload = {'query': 'poseidon_role_confidence_third', 'start': start_time_str, 'end': end_time_str, 'step': '30s'}
-            r3 = requests.get('http://'+self.prometheus_addr+'/api/v1/query_range', params=payload)
+        mr = self.prom_query('poseidon_endpoint_metadata', start_time_str, end_time_str)
+        r1 = self.prom_query('poseidon_role_confidence_top', start_time_str, end_time_str)
+        r2 = self.prom_query('poseidon_role_confidence_second', start_time_str, end_time_str)
+        r3 = self.prom_query('poseidon_role_confidence_third', start_time_str, end_time_str)
 
-        except Exception as e:
-            self.logger.error(f'Unable to get endpoints from Prometheus because: {e}')
         role_hashes = {}
         if r1:
-            results = r1.json()
-            if 'data' in results:
-                if 'result' in results['data'] and results['data']['result']:
-                    for metric in results['data']['result']:
+                    for metric in r1:
                         if not metric['metric']['hash_id'] in role_hashes:
                             role_hashes[metric['metric']['hash_id']] = {'mac': metric['metric']['mac'],
                                                                     'ipv4_address': metric['metric'].get('ipv4_address', ''),
@@ -313,34 +307,19 @@ class Prometheus():
                                                                     'timestamp': str(metric['values'][-1][0]),
                                                                     'top_role': metric['metric'].get('role', 'NO DATA'),
                                                                     'top_confidence': float(metric['values'][-1][1])}
-            else:
-                self.logger.error(f'Bad request: {results}')
         if r2:
-            results = r2.json()
-            if 'data' in results:
-                if 'result' in results['data'] and results['data']['result']:
-                    for metric in results['data']['result']:
+                    for metric in r2:
                         if metric['metric']['hash_id'] in role_hashes:
                             role_hashes[metric['metric']['hash_id']]['second_role'] = metric['metric'].get('role', 'NO DATA')
                             role_hashes[metric['metric']['hash_id']]['second_confidence'] = float(metric['values'][-1][1])
-            else:
-                self.logger.error(f'Bad request: {results}')
         if r3:
-            results = r3.json()
-            if 'data' in results:
-                if 'result' in results['data'] and results['data']['result']:
-                    for metric in results['data']['result']:
+                    for metric in r3:
                         if metric['metric']['hash_id'] in role_hashes:
                             role_hashes[metric['metric']['hash_id']]['third_role'] = metric['metric'].get('role', 'NO DATA')
                             role_hashes[metric['metric']['hash_id']]['third_confidence'] = float(metric['values'][-1][1])
-            else:
-                self.logger.error(f'Bad request: {results}')
         if mr:
-            results = mr.json()
-            if 'data' in results:
-                if 'result' in results['data'] and results['data']['result']:
                     hashes = {}
-                    for metric in results['data']['result']:
+                    for metric in mr:
                         if metric['metric']['hash_id'] in hashes:
                             if float(metric['values'][-1][1]) > hashes[metric['metric']['hash_id']]['latest']:
                                 hashes[metric['metric']['hash_id']] = metric['metric']
@@ -391,8 +370,6 @@ class Prometheus():
                                 p_endpoint['metadata']['ipv4_addresses'][ipv4] = {'short_os': role_hash['ipv4_os']}
                         endpoint = EndpointDecoder(p_endpoint).get_endpoint()
                         endpoints[endpoint.name] = endpoint
-            else:
-                self.logger.error(f'Bad request: {results}')
         return endpoints
 
     @staticmethod
