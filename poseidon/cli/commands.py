@@ -32,6 +32,7 @@ class Commands:
 
     def _get_endpoints(self, args, idx, match_all=False):
         ''' get endpoints that match '''
+        self.sdnc.get_stored_endpoints()
         device = args.rsplit(' ', 1)[idx]
         endpoints = {}
         for match_func in (
