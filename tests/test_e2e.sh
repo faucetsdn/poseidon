@@ -150,6 +150,7 @@ echo $($SLOWREPLAY)
 wait_var_nonzero "poseidon_last_rabbitmq_routing_key_time{routing_key=\"poseidon.algos.decider\"}" "" poseidon_last_rabbitmq_routing_key_time
 # keep endpoints active awaiting results
 wait_var_nonzero "sum(poseidon_endpoint_roles{role!=\"NO DATA\"})" "$FASTREPLAY" poseidon_endpoint_roles
+wait_var_nonzero "sum(poseidon_endpoint_metadata{role!=\"NO DATA\"})" "" poseidon_endpoint_metadata
 # p0f doesn't always return a decision - but check that it returned
 # TODO: determine why p0f not deterministic.
 wait_var_nonzero "sum(poseidon_endpoint_oses)" "" poseidon_endpoint_oses
