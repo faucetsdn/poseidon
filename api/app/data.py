@@ -137,13 +137,9 @@ class Nodes:
         role_hashes, hashes = self.scrape_prometheus()
         for h in hashes:
             node = deepcopy(self.node)
-            print(f'{node}')
-            print(f'{hashes[h]}')
             for field in hashes[h]:
                 if field in node:
                     node[field] = hashes[h][field]
-                else:
-                    print(f'ignoring {field}')
             if h in role_hashes:
                 for field in role_hashes[h]:
                     if field in node:
