@@ -129,31 +129,13 @@ class GetData():
 
     @staticmethod
     def _get_role(endpoint):
-        endpoint_mac = GetData._get_mac(endpoint)
-        mac_addresses = endpoint.metadata.get('mac_addresses', None)
-        if endpoint_mac and mac_addresses and endpoint_mac in mac_addresses:
-            metadata = mac_addresses[endpoint_mac]
-            try:
-                labels = metadata['classification'].get('labels', None)
-                if labels:
-                    return labels[0]
-            except:
-                return NO_DATA
-        return NO_DATA
+        roles, _ = endpoint.get_roles_confidences()
+        return roles[0]
 
     @staticmethod
     def _get_role_confidence(endpoint):
-        endpoint_mac = GetData._get_mac(endpoint)
-        mac_addresses = endpoint.metadata.get('mac_addresses', None)
-        if endpoint_mac and mac_addresses and endpoint_mac in mac_addresses:
-            metadata = mac_addresses[endpoint_mac]
-            try:
-                confidences = metadata['classification'].get('confidences', None)
-                if confidences:
-                    return str(confidences[0])
-            except:
-                return NO_DATA
-        return NO_DATA
+        _, confidences = endpoint.get_roles_confidences()
+        return str(confidences[0])
 
     @staticmethod
     def _get_pcap_labels(endpoint):

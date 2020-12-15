@@ -17,6 +17,26 @@ TMPDIR=$(mktemp -d)
 FASTREPLAY="sudo tcpreplay -q -t -i sw1b $TMPDIR/test.pcap"
 SLOWREPLAY="sudo tcpreplay -q -M5 -i sw1b $TMPDIR/test.pcap"
 
+wait_show_all () {
+        match=$1
+        TRIES=0
+        MATCHED=""
+        PID=$(docker ps -q --filter "label=com.docker.compose.service=poseidon")
+        CMD="docker exec $PID python3 poseidon/cli/cli.py"
+        echo waiting for $match in show all
+        while [[ "$MATCHED" == "" ]] ; do
+                MATCHED=$($CMD 'show all' | grep -E "$match" | cat)
+                TRIES=$((TRIES+1))
+                if [[ "$TRIES" == "60" ]] ; then
+                     echo FAIL: show all did not contain $match
+                     echo $($CMD 'show all')
+                     exit 1
+                fi
+                sleep 1
+        done
+        echo $MATCHED
+}
+
 wait_var_nonzero () {
         var=$1
         cmd=$2
@@ -26,7 +46,7 @@ wait_var_nonzero () {
         echo waiting for $query to be non-zero
         RC="[]"
         TRIES=0
-        while [[ "$RC" == "[]" ]] || [[ $RC == "" ]] ; do
+        while [[ "$RC" == "[]" ]] || [[ "$RC" == "" ]] ; do
                 RC=$(echo "$query" | wget -q -O- -i -|jq .data.result)
                 TRIES=$((TRIES+1))
                 if [[ "$TRIES" == "180" ]] ; then
@@ -150,6 +170,9 @@ echo $($SLOWREPLAY)
 wait_var_nonzero "poseidon_last_rabbitmq_routing_key_time{routing_key=\"poseidon.algos.decider\"}" "" poseidon_last_rabbitmq_routing_key_time
 # keep endpoints active awaiting results
 wait_var_nonzero "sum(poseidon_endpoint_roles{role!=\"NO DATA\"})" "$FASTREPLAY" poseidon_endpoint_roles
+wait_var_nonzero "sum(poseidon_endpoint_metadata{role!=\"NO DATA\"})" "" poseidon_endpoint_metadata
+# ensure CLI results reported.
+wait_show_all "orkstation.+00:1a:8c:15:f9:80"
 # p0f doesn't always return a decision - but check that it returned
 # TODO: determine why p0f not deterministic.
 wait_var_nonzero "sum(poseidon_endpoint_oses)" "" poseidon_endpoint_oses

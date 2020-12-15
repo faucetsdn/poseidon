@@ -9,6 +9,8 @@ import time
 
 from transitions import Machine
 
+from poseidon.constants import NO_DATA
+
 MACHINE_IP_FIELDS = {
     'ipv4': ('ipv4_rdns', 'ipv4_subnet'),
     'ipv6': ('ipv6_rdns', 'ipv6_subnet')}
@@ -117,6 +119,30 @@ class Endpoint:
 
     def mac_addresses(self):
         return self.metadata.get('mac_addresses', {})
+
+    def get_roles_confidences(self):
+        top_role = NO_DATA
+        second_role = NO_DATA
+        third_role = NO_DATA
+        top_conf = '0'
+        second_conf = '0'
+        third_conf = '0'
+        for metadata in self.mac_addresses().values():
+            classification = metadata.get('classification', {})
+            if 'labels' in classification:
+                top_role, second_role, third_role = classification['labels'][:3]
+            if 'confidences' in classification:
+                top_conf, second_conf, third_conf = classification['confidences'][:3]
+        return (top_role, second_role, third_role), (top_conf, second_conf, third_conf)
+
+    def get_ipv4_os(self):
+        if 'ipv4_addresses' in self.metadata:
+            ipv4 = self.endpoint_data['ipv4']
+            for ip, ip_metadata in self.metadata['ipv4_addresses'].items():
+                if ip == ipv4:
+                    if 'short_os' in ip_metadata:
+                        return ip_metadata['short_os']
+        return NO_DATA
 
     def touch(self):
         self.observed_time = time.time()
