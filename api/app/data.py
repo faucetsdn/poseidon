@@ -137,13 +137,13 @@ class Nodes:
         role_hashes, hashes = self.scrape_prometheus()
         for h in hashes:
             node = deepcopy(self.node)
-            print(f'{node}')
-            print(f'{hashes[h]}')
             for field in hashes[h]:
                 if field in node:
                     node[field] = hashes[h][field]
-                else:
-                    print(f'ignoring {field}')
+            if h in role_hashes:
+                for field in role_hashes[h]:
+                    if field in node:
+                        node[field] = role_hashes[h][field]
             self.nodes.append(node)
 
 
@@ -151,19 +151,17 @@ class NetworkFull:
 
     @staticmethod
     def get_fields():
-        return {'id': NO_DATA, 'mac': 0, 'ipv4': 0,
-                'ipv6': 0, 'ipv4_subnet': NO_DATA,
+        return {'hash_id': NO_DATA, 'mac': 0, 'ipv4_address': 0,
+                'ipv6_address': 0, 'ipv4_subnet': NO_DATA,
                 'ipv6_subnet': NO_DATA, 'segment': 0, 'port': 0,
-                'tenant': 0, 'active': 0, 'next_state': NO_DATA,
+                'vlan': 0, 'active': 0, 'next_state': NO_DATA,
                 'state': NO_DATA, 'prev_state': NO_DATA,
-                'ignored': 'False', 'first_seen': NO_DATA,
-                'last_seen': NO_DATA, 'role': NO_DATA,
-                'role_confidence': 0,
+                'ignore': 'False', 'top_role': NO_DATA,
+                'top_confidence': 0,
                 'ipv4_os': NO_DATA, 'ipv6_os': NO_DATA,
                 'source': NO_DATA, 'ipv4_rdns': NO_DATA,
                 'ipv6_rdns': NO_DATA, 'ether_vendor': NO_DATA,
-                'controller_type': NO_DATA, 'controller': NO_DATA,
-                'acl_data': NO_DATA}
+                'controller_type': NO_DATA, 'acls': NO_DATA}
 
     @staticmethod
     def get_dataset():
@@ -187,31 +185,30 @@ class Network:
 
     @staticmethod
     def get_fields():
-        return {'id': NO_DATA, 'mac': 0, 'ipv4': 0, 'ipv6': 0,
+        return {'hash_id': NO_DATA, 'mac': 0, 'ipv4_address': 0, 'ipv6_address': 0,
                 'ipv4_subnet': NO_DATA, 'ipv6_subnet': NO_DATA,
                 'vlan': 0, 'segment': 0, 'port': 0,
-                'state': NO_DATA, 'ignored': 'False',
-                'first_seen': NO_DATA, 'last_seen': NO_DATA,
-                'role': NO_DATA, 'role_confidence': 0,
+                'state': NO_DATA, 'ignore': 'False',
+                'top_role': NO_DATA, 'top_confidence': 0,
                 'ipv4_os': NO_DATA, 'ipv6_os': NO_DATA,
                 'ipv4_rdns': NO_DATA, 'ipv6_rdns': NO_DATA,
                 'ether_vendor': NO_DATA, 'controller_type': NO_DATA,
-                'controller': NO_DATA, 'acl_data': NO_DATA}
+                'acls': NO_DATA}
 
     @staticmethod
     def field_mapping():
-        return {'id': 'ID', 'mac': 'MAC Address', 'segment': 'Switch',
-                'port': 'Port', 'vlan': 'VLAN', 'ipv4': 'IPv4',
+        return {'hash_id': 'ID', 'mac': 'MAC Address', 'segment': 'Switch',
+                'port': 'Port', 'vlan': 'VLAN', 'ipv4_address': 'IPv4',
                 'ipv4_subnet': 'IPv4 Subnet', 'ipv6_subnet': 'IPv6 Subnet',
-                'ipv6': 'IPv6', 'ignored': 'Ignored', 'state': 'State',
-                'first_seen': 'First Seen', 'last_seen': 'Last Seen',
+                'ipv6_address': 'IPv6', 'ignore': 'Ignored', 'state': 'State',
+                'next_state': 'Next State', 'prev_state': 'Previous State',
                 'ipv4_os': 'IPv4 OS (p0f)', 'ipv6_os': 'IPv6 OS (p0f)',
-                'role': 'Role (NetworkML)',
-                'role_confidence': 'Role Confidence (NetworkML)',
+                'top_role': 'Role (NetworkML)',
+                'top_confidence': 'Role Confidence (NetworkML)',
                 'ipv4_rdns': 'IPv4 rDNS',
                 'ipv6_rdns': 'IPv6 rDNS', 'ether_vendor': 'Ethernet Vendor',
                 'controller_type': 'SDN Controller Type',
-                'controller': 'SDN Controller URI', 'acl_data': 'ACL History'}
+                'acls': 'ACL History'}
 
     @staticmethod
     def get_dataset():
