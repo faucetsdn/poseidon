@@ -86,17 +86,9 @@ class Monitor:
         # TODO consolidate with update_endpoint_metadata
         hosts = []
         for hash_id, endpoint in self.s.endpoints.items():
-            ipv4_os = NO_DATA
-            role = NO_DATA
-            if 'mac_addresses' in endpoint.metadata:
-                for mac in endpoint.metadata['mac_addresses']:
-                    if 'classification' in endpoint.metadata['mac_addresses'][mac]:
-                        role = endpoint.metadata['mac_addresses'][mac]['classification']['labels'][0]
-            if 'ipv4_addresses' in endpoint.metadata:
-                for ip in endpoint.metadata['ipv4_addresses']:
-                    if ip == endpoint.endpoint_data['ipv4']:
-                        if 'short_os' in endpoint.metadata['ipv4_addresses'][ip]:
-                            ipv4_os = endpoint.metadata['ipv4_addresses'][ip]['short_os']
+            roles, _ = endpoint.get_roles_confidences()
+            role = roles[0]
+            ipv4_os = endpoint.get_ipv4_os()
             host = {
                 'mac': endpoint.endpoint_data['mac'],
                 'id': hash_id,
@@ -178,13 +170,6 @@ class Monitor:
     def update_endpoint_metadata(self):
         update_time = time.time()
         for hash_id, endpoint in self.s.endpoints.items():
-            top_role = NO_DATA
-            second_role = NO_DATA
-            third_role = NO_DATA
-            top_conf = '0'
-            second_conf = '0'
-            third_conf = '0'
-            ipv4_os = NO_DATA
             ipv4 = endpoint.endpoint_data['ipv4']
             ipv6 = endpoint.endpoint_data['ipv6']
             ipv4_subnet = endpoint.endpoint_data['ipv4_subnet']
@@ -197,22 +182,10 @@ class Monitor:
             ether_vendor = endpoint.endpoint_data['ether_vendor']
             controller = endpoint.endpoint_data['controller']
             controller_type = endpoint.endpoint_data['controller_type']
-
-            if 'mac_addresses' in endpoint.metadata:
-                for mac in endpoint.metadata['mac_addresses']:
-                    if 'labels' in endpoint.metadata['mac_addresses'][mac]:
-                        top_role = endpoint.metadata['mac_addresses'][mac]['classification']['labels'][0]
-                        second_role = endpoint.metadata['mac_addresses'][mac]['classification']['labels'][1]
-                        third_role = endpoint.metadata['mac_addresses'][mac]['classification']['labels'][2]
-                    if 'confidences' in endpoint.metadata['mac_addresses'][mac]:
-                        top_conf = endpoint.metadata['mac_addresses'][mac]['classification']['confidences'][0]
-                        second_conf = endpoint.metadata['mac_addresses'][mac]['classification']['confidences'][1]
-                        third_conf = endpoint.metadata['mac_addresses'][mac]['classification']['confidences'][2]
-            if 'ipv4_addresses' in endpoint.metadata:
-                for ip in endpoint.metadata['ipv4_addresses']:
-                    if ip == ipv4:
-                        if 'short_os' in endpoint.metadata['ipv4_addresses'][ip]:
-                            ipv4_os = endpoint.metadata['ipv4_addresses'][ip]['short_os']
+            roles, confidences = endpoint.get_roles_confidences()
+            top_role, second_role, third_role = roles
+            top_conf, second_conf, third_conf = confidences
+            ipv4_os = endpoint.get_ipv4_os()
 
             def set_prom(var, val, **prom_labels):
                 prom_labels.update({
