@@ -142,8 +142,9 @@ class Endpoint:
                 top_role, second_role, third_role = classification['labels'][:3]
             if 'confidences' in classification:
                 top_conf, second_conf, third_conf = classification['confidences'][:3]
-            if 'pcap_labels' in metadata:
-                pcap_labels = metadata['pcap_labels']
+            metadata_pcap_labels = metadata.get('pcap_labels', None)
+            if metadata_pcap_labels:
+                pcap_labels = metadata_pcap_labels
         return (top_role, second_role, third_role), (top_conf, second_conf, third_conf), pcap_labels
 
     def get_ipv4_os(self):
