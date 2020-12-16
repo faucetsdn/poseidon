@@ -6,7 +6,6 @@ Created on 5 December 2018
 import datetime
 import logging
 import ipaddress
-from binascii import hexlify
 import requests
 
 from prometheus_client import Counter
@@ -280,7 +279,8 @@ class Prometheus():
         except Exception:
             return None
 
-    def latest_metric(self, metric):
+    @staticmethod
+    def latest_metric(metric):
         return metric['values'][-1]
 
     def latest_value(self, metric):
@@ -289,7 +289,8 @@ class Prometheus():
     def latest_timestamp(self, metric):
         return self.latest_metric(metric)[0]
 
-    def metric_label(self, metric, label, default_value=NO_DATA):
+    @staticmethod
+    def metric_label(metric, label, default_value=NO_DATA):
         return metric['metric'].get(label, default_value)
 
     def scrape_prom(self):
@@ -341,7 +342,8 @@ class Prometheus():
 
         return hashes, role_hashes
 
-    def prom_endpoints(self, hashes, role_hashes):
+    @staticmethod
+    def prom_endpoints(hashes, role_hashes):
         endpoints = {}
         for p_endpoint in hashes.values():
             p_endpoint.update({
