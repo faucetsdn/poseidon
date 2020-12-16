@@ -5,7 +5,7 @@ Created on 5 December 2018
 """
 import datetime
 import logging
-import socket
+import ipaddress
 from binascii import hexlify
 import requests
 
@@ -197,14 +197,7 @@ class Prometheus():
 
         def ip2int(ip):
             ''' convert ip quad octet string to an int '''
-            if not ip or ip in ['None', '::']:
-                res = 0
-            elif ':' in ip:
-                res = int(hexlify(socket.inet_pton(socket.AF_INET6, ip)), 16)
-            else:
-                o = list(map(int, ip.split('.')))
-                res = (16777216 * o[0]) + (65536 * o[1]) + (256 * o[2]) + o[3]
-            return res
+            return int(ipaddress.ip_address(ip))
 
         metrics = Prometheus.get_metrics()
 
@@ -307,9 +300,9 @@ class Prometheus():
         start_time_str = start_time.isoformat()[:-4]+"Z"
         end_time_str = end_time.isoformat()[:-4]+"Z"
         mr = self.prom_query('poseidon_endpoint_metadata', start_time_str, end_time_str)
-        r1 = self.prom_query('poseidon_role_confidence_top', start_time_str, end_time_str)
-        r2 = self.prom_query('poseidon_role_confidence_second', start_time_str, end_time_str)
-        r3 = self.prom_query('poseidon_role_confidence_third', start_time_str, end_time_str)
+        r1 = self.prom_query('poseidon_role_confidence_top{role!="%s"}' % NO_DATA, start_time_str, end_time_str)
+        r2 = self.prom_query('poseidon_role_confidence_second{role!="%s"}' % NO_DATA, start_time_str, end_time_str)
+        r3 = self.prom_query('poseidon_role_confidence_third{role!="%s"} % NO_DATA', start_time_str, end_time_str)
 
         hashes = {}
         if mr:
@@ -335,14 +328,17 @@ class Prometheus():
             for metric in r2:
                 hash_id = self.metric_label(metric, 'hash_id')
                 if hash_id in role_hashes:
-                    role_hashes[hash_id]['second_role'] = self.metric_label(metric, 'role')
-                    role_hashes[hash_id]['second_confidence'] = self.latest_value(metric)
+                    role_hashes[hash_id].update({
+                        'second_role': self.metric_label(metric, 'role'),
+                        'second_confidence': self.latest_value(metric)})
         if r3:
             for metric in r3:
                 hash_id = self.metric_label(metric, 'hash_id')
                 if hash_id in role_hashes:
-                    role_hashes[hash_id]['third_role'] = self.metric_label(metric, 'role')
-                    role_hashes[hash_id]['third_confidence'] = self.latest_value(metric)
+                    role_hashes[hash_id].update({
+                        'third_role': self.metric_label(metric, 'role'),
+                        'third_confidence': self.latest_value(metric)})
+
         return hashes, role_hashes
 
     def prom_endpoints(self, hashes, role_hashes):
@@ -381,9 +377,15 @@ class Prometheus():
                 role_mac = role_hash['mac']
                 if mac != role_mac:
                     continue
-                if role_hash['top_role'] != NO_DATA or not mac in p_endpoint['metadata']['mac_addresses']:
-                    roles = [role_hash['top_role'], role_hash['second_role'], role_hash['third_role']]
-                    confidences = [role_hash['top_confidence'], role_hash['second_confidence'], role_hash['third_confidence']]
+                if not mac in p_endpoint['metadata']['mac_addresses']:
+                    roles = [
+                        role_hash.get('top_role', NO_DATA),
+                        role_hash.get('second_role', NO_DATA),
+                        role_hash.get('third_role', NO_DATA)]
+                    confidences = [
+                        role_hash.get('top_confidence', NO_DATA),
+                        role_hash.get('second_confidence', NO_DATA),
+                        role_hash.get('third_confidence', NO_DATA)]
                     pcap_labels = role_hash['pcap_labels']
                     p_endpoint['metadata']['mac_addresses'][mac] = {
                         'classification': {
