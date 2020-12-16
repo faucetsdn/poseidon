@@ -211,13 +211,14 @@ class Prometheus():
 
         if self.prom_metrics:
             for host in hosts:
-                self.prom_metrics['ipv4_table'].labels(mac=host['mac'],
-                                                       tenant=host['tenant'],
-                                                       segment=host['segment'],
-                                                       port=host['port'],
-                                                       role=host['role'],
-                                                       ipv4_os=host['ipv4_os'],
-                                                       hash_id=host['id']).set(int(ipaddress.ip_address(host['ipv4'])))
+                if host['ipv4']:
+                    self.prom_metrics['ipv4_table'].labels(mac=host['mac'],
+                                                           tenant=host['tenant'],
+                                                           segment=host['segment'],
+                                                           port=host['port'],
+                                                           role=host['role'],
+                                                           ipv4_os=host['ipv4_os'],
+                                                           hash_id=host['id']).set(int(ipaddress.ip_address(host['ipv4'])))
             for role in metrics['roles']:
                 self.prom_metrics['roles'].labels(role=role).set(metrics['roles'][role])
             for os_t in metrics['oses']:
