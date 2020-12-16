@@ -120,12 +120,12 @@ class GetData():
     def _get_first_seen(endpoint):
         # TODO this needs to be rewritten after history moves to prometheus
         return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
-            endpoint.state_time())) + ' (' + duration(endpoint.state_time()) + ')'
+            endpoint.state_time)) + ' (' + duration(endpoint.state_time) + ')'
 
     @staticmethod
     def _get_last_seen(endpoint):
         return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
-            endpoint.state_time())) + ' (' + duration(endpoint.state_time()) + ')'
+            endpoint.state_time)) + ' (' + duration(endpoint.state_time) + ')'
 
     @staticmethod
     def _get_role(endpoint):

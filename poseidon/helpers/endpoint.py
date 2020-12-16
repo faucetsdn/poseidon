@@ -28,11 +28,11 @@ def transit_wrap(trigger, source, dest, before=None, after=None):
 
 
 def endpoint_transit_wrap(trigger, source, dest):
-    return transit_wrap(trigger, source, dest)
+    return transit_wrap(trigger, source, dest, after='_update_state_time')
 
 
 def endpoint_copro_transit_wrap(trigger, source, dest):
-    return transit_wrap(trigger, source, dest)
+    return transit_wrap(trigger, source, dest, after='_update_copro_state_time')
 
 
 class Endpoint:
@@ -100,7 +100,15 @@ class Endpoint:
         self.metadata = {}
         self.state = None
         self.copro_state = None
+        self.state_time = 0
+        self.copro_state_time = 0
         self.observed_time = 0
+
+    def _update_state_time(self, *args, **kwargs):
+        self.state_time = time.time()
+
+    def _update_copro_state_time(self, *args, **kwargs):
+        self.copro_state_time = time.time()
 
     def encode(self):
         endpoint_d = {
@@ -153,22 +161,14 @@ class Endpoint:
     def observed_timeout(self, timeout):
         return time.time() - self.observed_time > timeout
 
-    def state_time(self):
-        # TODO this was already broken, just making it obvious
-        return 0
-
     def state_age(self):
-        return int(time.time()) - self.state_time()
+        return int(time.time()) - self.state_time
 
     def state_timeout(self, timeout):
         return self.state_age() > timeout
 
-    def copro_state_time(self):
-        # TODO this was already broken, just making it obvious
-        return 0
-
     def copro_state_age(self):
-        return int(time.time()) - self.copro_state_time()
+        return int(time.time()) - self.copro_state_time
 
     def copro_state_timeout(self, timeout):
         return self.copro_state_age() > timeout

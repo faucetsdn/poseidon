@@ -343,8 +343,7 @@ class Prometheus():
 
     def prom_endpoints(self, hashes, role_hashes):
         endpoints = {}
-        for h in hashes:
-            p_endpoint = hashes[h]
+        for p_endpoint in hashes.values():
             p_endpoint.update({
                 'name': p_endpoint['hash_id'],
                 'p_next_state': p_endpoint.get('next_state', None),
