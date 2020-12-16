@@ -192,7 +192,10 @@ class Monitor:
                     'name': endpoint.endpoint_data['name'],
                     'hash_id': hash_id,
                 })
-                self.prom.prom_metrics[var].labels(**prom_labels).set(val)
+                try:
+                    self.prom.prom_metrics[var].labels(**prom_labels).set(val)
+                except ValueError:
+                    pass
 
             def set_prom_role(var, val, role):
                 set_prom(

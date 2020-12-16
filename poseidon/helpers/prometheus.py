@@ -17,7 +17,7 @@ from prometheus_client import start_http_server
 
 from poseidon.constants import NO_DATA
 from poseidon.helpers.config import Config
-from poseidon.helpers.endpoint import EndpointDecoder
+from poseidon.helpers.endpoint import EndpointDecoder, Endpoint
 
 
 class Prometheus():
@@ -314,13 +314,21 @@ class Prometheus():
     def prom_endpoints(hashes, role_hashes):
         endpoints = {}
         for p_endpoint in hashes.values():
+            prev_state = p_endpoint.get('prev_state', None)
+            if prev_state not in Endpoint.transitions:
+                prev_state = None
+            next_state = p_endpoint.get('next_state', None)
+            if next_state not in Endpoint.transitions:
+                next_state = None
+            state = p_endpoint['state']
             p_endpoint.update({
                 'name': p_endpoint['hash_id'],
-                'p_next_state': p_endpoint.get('next_state', None),
-                'p_prev_state': p_endpoint.get('prev_state', None),
+                'p_next_state': next_state,
+                'p_prev_state': prev_state,
                 'acl_data': [],  # TODO: acl_data
                 'metadata': {'mac_addresses': {}, 'ipv4_addresses': {}, 'ipv6_addresses': {}},
-                'state': p_endpoint['state'],
+                'state': state,
+                'ignore': False,  # TODO: force ignore off
                 'endpoint_data': {
                     'mac': p_endpoint['mac'],
                     'segment': p_endpoint['segment'],
