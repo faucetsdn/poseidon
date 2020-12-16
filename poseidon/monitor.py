@@ -12,7 +12,6 @@ from functools import partial
 import requests
 import schedule
 
-from poseidon.constants import NO_DATA
 from poseidon.helpers.actions import Actions
 from poseidon.helpers.config import Config
 from poseidon.helpers.prometheus import Prometheus
@@ -280,39 +279,41 @@ class Monitor:
             data = my_obj.get('data', None)
             results = my_obj.get('results', {})
             tool = results.get('tool', None)
-            if isinstance(data, dict):
+            if isinstance(data, dict) and data:
                 updates = False
-                if not data:
-                    return {}
                 if tool == 'p0f':
                     for ip, ip_data in data.items():
                         if ip_data and ip_data.get('full_os', None):
-                            for hash_id, endpoint in self.s.endpoints.items():
-                                if endpoint.endpoint_data['ipv4'] == ip:
-                                    ep = self.s.endpoints.get(hash_id, None)
-                                    if ep:
-                                        self.logger.debug(
-                                            'processing p0f results for %s', hash_id)
-                                        if not 'ipv4_addresses' in ep.metadata:
-                                            ep.metadata['ipv4_addresses'] = {}
-                                        ep.metadata['ipv4_addresses'][ip] = ip_data
-                                        updates = True
+                            endpoints = self.s.endpoints_by_ip(ip)
+                            if endpoints:
+                                endpoint = endpoints[0]
+                                if not 'ipv4_addresses' in endpoint.metadata:
+                                    endpoint.metadata['ipv4_addresses'] = {}
+                                endpoint.metadata['ipv4_addresses'][ip] = ip_data
+                                updates = True
+                                self.logger.debug(
+                                    'processing p0f results for %s', endpoint.metadata)
+                            else:
+                                self.logger.debug('no endpoint for p0f IP %s', ip)
                 elif tool == 'networkml':
                     for name, message in data.items():
                         if name == 'pcap':
                             continue
-                        for hash_id, endpoint in self.s.endpoints.items():
-                            if 'source_mac' in message and endpoint.endpoint_data['mac'] == message['source_mac']:
-                                ep = self.s.endpoints.get(hash_id, None)
-                                if ep:
-                                    self.logger.debug(
-                                        'processing networkml results for %s', hash_id)
-                                    self.s.unmirror_endpoint(ep)
-                                    if message.get('valid', False):
-                                        if not 'mac_addresses' in ep.metadata:
-                                            ep.metadata['mac_addresses'] = {}
-                                        ep.metadata['mac_addresses'][message['source_mac']] = message
-                                        updates = True
+                        source_mac = message.get('source_mac', None)
+                        endpoints = self.s.endpoints_by_mac(source_mac)
+                        if endpoints:
+                            endpoint = endpoints[0]
+                            self.s.unmirror_endpoint(endpoint)
+                            if message.get('valid', False):
+                                if not 'mac_addresses' in endpoint.metadata:
+                                    endpoint.metadata['mac_addresses'] = {}
+                                endpoint.metadata['mac_addresses'][source_mac] = message
+                                updates = True
+                                self.logger.debug(
+                                    'processing networkml results for %s', endpoint.metadata)
+                        else:
+                            self.logger.debug(
+                                'no endpoint for networkml MAC %s', source_mac)
                 if updates:
                     self.job_update_metrics()
                     return data

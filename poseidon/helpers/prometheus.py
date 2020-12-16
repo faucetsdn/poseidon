@@ -6,6 +6,7 @@ Created on 5 December 2018
 import datetime
 import logging
 import ipaddress
+from collections import defaultdict
 import requests
 
 from prometheus_client import Counter
@@ -177,81 +178,46 @@ class Prometheus():
 
     @staticmethod
     def get_metrics():
-        metrics = {'info': {},
-                   'roles': {},
-                   'oses': {},
-                   'current_states': {'known': 0,
-                                      'unknown': 0,
-                                      'mirroring': 0,
-                                      'shutdown': 0,
-                                      'queued': 0,
-                                      'reinvestigating': 0},
-                   'vlans': {},
-                   'port_tenants': {},
-                   'port_hosts': {},
+        metrics = {'info': defaultdict(int),
+                   'roles': defaultdict(int),
+                   'oses': defaultdict(int),
+                   'current_states': defaultdict(int),
+                   'vlans': defaultdict(int),
+                   'port_tenants': defaultdict(int),
+                   'port_hosts': defaultdict(int),
                    'ncapture_count': 0}
         return metrics
 
-    def update_metrics(self, hosts):
-
-        def ip2int(ip):
-            ''' convert ip quad octet string to an int '''
-            return int(ipaddress.ip_address(ip))
-
-        metrics = Prometheus.get_metrics()
-
-        # get version
+    def get_version(self):
         try:
             with open('/poseidon/VERSION', 'r') as f:  # pragma: no cover
                 for line in f:
-                    metrics['info']['version'] = line.strip()
-        except Exception as e:
-            print('Unable to get version from the version file')
+                    return line.strip()
+        except FileNotFoundError:
+            return 'unknown'
+
+    def update_metrics(self, hosts):
+
+        metrics = Prometheus.get_metrics()
+        metrics['info']['version'] = self.get_version()
 
         for host in hosts:
-            if host['role'] in metrics['roles']:
-                metrics['roles'][host['role']] += 1
-            else:
-                metrics['roles'][host['role']] = 1
-            if host['ipv4_os'] in metrics['oses']:
-                metrics['oses'][host['ipv4_os']] += 1
-            else:
-                metrics['oses'][host['ipv4_os']] = 1
+            metrics['roles'][host['role']] += 1
+            metrics['oses'][host['ipv4_os']] += 1
+            metrics['vlans'][host['tenant']] += 1
+            metrics['port_hosts'][host['port']] += 1
+            metrics['port_tenants'][(host['port'], host['tenant'])] += 1
+            metrics['current_states'][host['state']] += 1
 
-            if host['state'] in metrics['current_states']:
-                metrics['current_states'][host['state']] += 1
-            else:
-                metrics['current_states'][host['state']] = 1
-
-            if host['tenant'] in metrics['vlans']:
-                metrics['vlans'][host['tenant']] += 1
-            else:
-                metrics['vlans'][host['tenant']] = 1
-
-            if (host['port'], host['tenant']) in metrics['port_tenants']:
-                metrics['port_tenants'][(
-                    host['port'], host['tenant'])] += 1
-            else:
-                metrics['port_tenants'][(host['port'], host['tenant'])] = 1
-
-            if host['port'] in metrics['port_hosts']:
-                metrics['port_hosts'][host['port']] += 1
-            else:
-                metrics['port_hosts'][host['port']] = 1
-
-            try:
+        if self.prom_metrics:
+            for host in hosts:
                 self.prom_metrics['ipv4_table'].labels(mac=host['mac'],
                                                        tenant=host['tenant'],
                                                        segment=host['segment'],
                                                        port=host['port'],
                                                        role=host['role'],
                                                        ipv4_os=host['ipv4_os'],
-                                                       hash_id=host['id']).set(ip2int(host['ipv4']))
-            except Exception as e:  # pragma: no cover
-                self.logger.error(
-                    'Unable to send {0} results to prometheus because {1}'.format(host, str(e)))
-
-        try:
+                                                       hash_id=host['id']).set(int(ipaddress.ip_address(host['ipv4'])))
             for role in metrics['roles']:
                 self.prom_metrics['roles'].labels(role=role).set(metrics['roles'][role])
             for os_t in metrics['oses']:
@@ -267,17 +233,6 @@ class Prometheus():
                 self.prom_metrics['port_hosts'].labels(
                     port=port_host).set(metrics['port_hosts'][port_host])
             self.prom_metrics['info'].info(metrics['info'])
-        except Exception as e:  # pragma: no cover
-            self.logger.error(
-                'Unable to send results to prometheus because {0}'.format(str(e)))
-
-    def prom_query(self, var, start_time_str, end_time_str, step='30s'):
-        payload = {'query': var, 'start': start_time_str, 'end': end_time_str, 'step': step}
-        try:
-            response = requests.get('http://%s/api/v1/query_range' % self.prometheus_addr, params=payload)
-            return response.json()['data']['result']
-        except Exception:
-            return None
 
     @staticmethod
     def latest_metric(metric):
@@ -293,28 +248,28 @@ class Prometheus():
     def metric_label(metric, label, default_value=NO_DATA):
         return metric['metric'].get(label, default_value)
 
-    def scrape_prom(self):
-        current_time = datetime.datetime.utcnow()
-        # 6 hours in the past and 2 hours in the future
-        start_time = current_time - datetime.timedelta(hours=6)
-        end_time = current_time + datetime.timedelta(hours=2)
-        start_time_str = start_time.isoformat()[:-4]+"Z"
-        end_time_str = end_time.isoformat()[:-4]+"Z"
-        mr = self.prom_query('poseidon_endpoint_metadata', start_time_str, end_time_str)
-        r1 = self.prom_query('poseidon_role_confidence_top{role!="%s"}' % NO_DATA, start_time_str, end_time_str)
-        r2 = self.prom_query('poseidon_role_confidence_second{role!="%s"}' % NO_DATA, start_time_str, end_time_str)
-        r3 = self.prom_query('poseidon_role_confidence_third{role!="%s"} % NO_DATA', start_time_str, end_time_str)
+    def sorted_metrics(self, response):
+        ''' return timeseries in order, most recently asserted, first. '''
+        return sorted([
+            {'metric': result['metric'], 'values': [self.latest_metric(result)]}
+            for result in response.json()['data']['result']],
+            key=lambda x: self.latest_value(x), reverse=True)
 
+    def prom_query(self, var, start_time_str, end_time_str, step='30s'):
+        payload = {'query': var, 'start': start_time_str, 'end': end_time_str, 'step': step}
+        try:
+            response = requests.get('http://%s/api/v1/query_range' % self.prometheus_addr, params=payload)
+        except Exception:
+            return []
+        return self.sorted_metrics(response)
+
+    def consolidate_prom(self, mr, r1, r2, r3):
         hashes = {}
         if mr:
             for metric in mr:
-                latest = self.latest_value(metric)
                 hash_id = self.metric_label(metric, 'hash_id')
-                if hash_id in hashes and latest < hashes[hash_id]['latest']:
-                    continue
-                hashes[hash_id] = metric['metric']
-                hashes[hash_id]['latest'] = latest
-
+                if hash_id not in hashes:
+                    hashes[hash_id] = metric['metric']
         role_hashes = {}
         if r1:
             for metric in r1:
@@ -341,6 +296,19 @@ class Prometheus():
                         'third_confidence': self.latest_value(metric)})
 
         return hashes, role_hashes
+
+    def scrape_prom(self):
+        current_time = datetime.datetime.utcnow()
+        # 6 hours in the past and 2 hours in the future
+        start_time = current_time - datetime.timedelta(hours=6)
+        end_time = current_time + datetime.timedelta(hours=2)
+        start_time_str = start_time.isoformat()[:-4]+"Z"
+        end_time_str = end_time.isoformat()[:-4]+"Z"
+        mr = self.prom_query('poseidon_endpoint_metadata', start_time_str, end_time_str)
+        r1 = self.prom_query('poseidon_role_confidence_top{role!="%s"}' % NO_DATA, start_time_str, end_time_str)
+        r2 = self.prom_query('poseidon_role_confidence_second{role!="%s"}' % NO_DATA, start_time_str, end_time_str)
+        r3 = self.prom_query('poseidon_role_confidence_third{role!="%s"} % NO_DATA', start_time_str, end_time_str)
+        return self.consolidate_prom(mr, r1, r2, r3)
 
     @staticmethod
     def prom_endpoints(hashes, role_hashes):
@@ -392,7 +360,7 @@ class Prometheus():
                         'classification': {
                             'labels': roles,
                             'confidences': confidences,
-                         },
+                        },
                         'pcap_labels': pcap_labels}
             endpoint = EndpointDecoder(p_endpoint).get_endpoint()
             endpoints[endpoint.name] = endpoint
