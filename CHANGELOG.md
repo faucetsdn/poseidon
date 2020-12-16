@@ -1,3 +1,9 @@
+# v0.16.0 (2020-12-17)
+
+* Remove Redis storage, move to Prometheus
+* Remove active/inactive endpoint states (endpoints now will expire over time if not observed)
+* Updated NetworkML, faucet, gauge, event-adapter-rabbitmq, faucetconfrpc, certstrap, prometheus, grafana, requests, pytype, mock, pytest
+
 # v0.15.9 (2020-11-25)
 
 * Refactored RabbitMQ connections, processing Faucet events, and cleanly exiting.
