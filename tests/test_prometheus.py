@@ -21,3 +21,14 @@ def test_Prometheus():
              {'active': 1, 'source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'ipv4_os': 'unknown', 'tenant': 'vlan1', 'port': 1, 'segment': 'switch1', 'ipv4': '::', 'mac': '00:00:00:00:00:00', 'id': 'foo5'}]
     p = Prometheus()
     p.update_metrics(hosts)
+
+
+def test_decode_endpoints():
+    p = Prometheus()
+    hashes = {
+        '6b33db53faf33c77d694ecab2e3fefadc7dacc70': {'__name__': 'poseidon_endpoint_metadata', 'acls': '[]', 'controller_type': 'faucet', 'ether_vendor': 'Micro-Star', 'hash_id': '6b33db53faf33c77d694ecab2e3fefadc7dacc70', 'ignore': 'False', 'instance': 'poseidon:9304', 'ipv4_address': '192.168.3.131', 'ipv4_os': 'Windows', 'ipv4_rdns': 'NO DATA', 'ipv4_subnet': '192.168.3.0/24', 'ipv6_subnet': 'NO DATA', 'job': 'poseidon', 'mac': '40:61:86:9a:f1:f5', 'name': 'None', 'next_state': 'None', 'port': '1', 'prev_state': 'queued', 'segment': 'switch1', 'state': 'mirroring', 'tenant': 'VLAN100', 'top_role': 'Administrator workstation', 'latest': 1608078518.7278435}}
+    role_hashes = {
+        '6b33db53faf33c77d694ecab2e3fefadc7dacc70': {'mac': '40:61:86:9a:f1:f5', 'top_confidence': 1.0, 'pcap_labels': 'NO DATA', 'state': 'mirroring', 'top_role': 'Administrator workstation', 'second_role': 'GPU laptop', 'second_confidence': 0.0006269307506632729, 'third_role': 'Developer workstation', 'third_confidence': 0.000399485844886532}}
+    endpoints = p.prom_endpoints(hashes, role_hashes)
+    endpoint = endpoints['6b33db53faf33c77d694ecab2e3fefadc7dacc70']
+    assert endpoint.state == 'mirroring'

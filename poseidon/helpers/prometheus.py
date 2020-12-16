@@ -5,9 +5,8 @@ Created on 5 December 2018
 """
 import datetime
 import logging
+import ipaddress
 import requests
-import socket
-from binascii import hexlify
 
 from prometheus_client import Counter
 from prometheus_client import Gauge
@@ -15,6 +14,7 @@ from prometheus_client import Info
 from prometheus_client import Summary
 from prometheus_client import start_http_server
 
+from poseidon.constants import NO_DATA
 from poseidon.helpers.config import Config
 from poseidon.helpers.endpoint import EndpointDecoder
 
@@ -69,6 +69,7 @@ class Prometheus():
                                                                   ['mac',
                                                                    'name',
                                                                    'role',
+                                                                   'pcap_labels',
                                                                    'ipv4_os',
                                                                    'ipv4_address',
                                                                    'ipv6_address',
@@ -78,6 +79,7 @@ class Prometheus():
                                                                   ['mac',
                                                                    'name',
                                                                    'role',
+                                                                   'pcap_labels',
                                                                    'ipv4_os',
                                                                    'ipv4_address',
                                                                    'ipv6_address',
@@ -87,6 +89,7 @@ class Prometheus():
                                                                   ['mac',
                                                                    'name',
                                                                    'role',
+                                                                   'pcap_labels',
                                                                    'ipv4_os',
                                                                    'ipv4_address',
                                                                    'ipv6_address',
@@ -193,14 +196,7 @@ class Prometheus():
 
         def ip2int(ip):
             ''' convert ip quad octet string to an int '''
-            if not ip or ip in ['None', '::']:
-                res = 0
-            elif ':' in ip:
-                res = int(hexlify(socket.inet_pton(socket.AF_INET6, ip)), 16)
-            else:
-                o = list(map(int, ip.split('.')))
-                res = (16777216 * o[0]) + (65536 * o[1]) + (256 * o[2]) + o[3]
-            return res
+            return int(ipaddress.ip_address(ip))
 
         metrics = Prometheus.get_metrics()
 
@@ -275,125 +271,137 @@ class Prometheus():
             self.logger.error(
                 'Unable to send results to prometheus because {0}'.format(str(e)))
 
-    def get_stored_endpoints(self):
-        ''' load existing endpoints from Prometheus. '''
-        endpoints = {}
-        r1 = None
-        r2 = None
-        r3 = None
-        mr = None
+    def prom_query(self, var, start_time_str, end_time_str, step='30s'):
+        payload = {'query': var, 'start': start_time_str, 'end': end_time_str, 'step': step}
+        try:
+            response = requests.get('http://%s/api/v1/query_range' % self.prometheus_addr, params=payload)
+            return response.json()['data']['result']
+        except Exception:
+            return None
+
+    @staticmethod
+    def latest_metric(metric):
+        return metric['values'][-1]
+
+    def latest_value(self, metric):
+        return float(self.latest_metric(metric)[1])
+
+    def latest_timestamp(self, metric):
+        return self.latest_metric(metric)[0]
+
+    @staticmethod
+    def metric_label(metric, label, default_value=NO_DATA):
+        return metric['metric'].get(label, default_value)
+
+    def scrape_prom(self):
         current_time = datetime.datetime.utcnow()
         # 6 hours in the past and 2 hours in the future
         start_time = current_time - datetime.timedelta(hours=6)
         end_time = current_time + datetime.timedelta(hours=2)
         start_time_str = start_time.isoformat()[:-4]+"Z"
         end_time_str = end_time.isoformat()[:-4]+"Z"
-        try:
-            payload = {'query': 'poseidon_endpoint_metadata', 'start': start_time_str, 'end': end_time_str, 'step': '30s'}
-            mr = requests.get('http://'+self.prometheus_addr+'/api/v1/query_range', params=payload)
-            payload = {'query': 'poseidon_role_confidence_top', 'start': start_time_str, 'end': end_time_str, 'step': '30s'}
-            r1 = requests.get('http://'+self.prometheus_addr+'/api/v1/query_range', params=payload)
-            payload = {'query': 'poseidon_role_confidence_second', 'start': start_time_str, 'end': end_time_str, 'step': '30s'}
-            r2 = requests.get('http://'+self.prometheus_addr+'/api/v1/query_range', params=payload)
-            payload = {'query': 'poseidon_role_confidence_third', 'start': start_time_str, 'end': end_time_str, 'step': '30s'}
-            r3 = requests.get('http://'+self.prometheus_addr+'/api/v1/query_range', params=payload)
+        mr = self.prom_query('poseidon_endpoint_metadata', start_time_str, end_time_str)
+        r1 = self.prom_query('poseidon_role_confidence_top{role!="%s"}' % NO_DATA, start_time_str, end_time_str)
+        r2 = self.prom_query('poseidon_role_confidence_second{role!="%s"}' % NO_DATA, start_time_str, end_time_str)
+        r3 = self.prom_query('poseidon_role_confidence_third{role!="%s"} % NO_DATA', start_time_str, end_time_str)
 
-        except Exception as e:
-            self.logger.error(f'Unable to get endpoints from Prometheus because: {e}')
+        hashes = {}
+        if mr:
+            for metric in mr:
+                latest = self.latest_value(metric)
+                hash_id = self.metric_label(metric, 'hash_id')
+                if hash_id in hashes and latest < hashes[hash_id]['latest']:
+                    continue
+                hashes[hash_id] = metric['metric']
+                hashes[hash_id]['latest'] = latest
+
         role_hashes = {}
         if r1:
-            results = r1.json()
-            if 'data' in results:
-                if 'result' in results['data'] and results['data']['result']:
-                    for metric in results['data']['result']:
-                        if not metric['metric']['hash_id'] in role_hashes:
-                            role_hashes[metric['metric']['hash_id']] = {'mac': metric['metric']['mac'],
-                                                                    'ipv4_address': metric['metric'].get('ipv4_address', ''),
-                                                                    'ipv4_os': metric['metric'].get('ipv4_os', 'NO DATA'),
-                                                                    'timestamp': str(metric['values'][-1][0]),
-                                                                    'top_role': metric['metric'].get('role', 'NO DATA'),
-                                                                    'top_confidence': float(metric['values'][-1][1])}
-            else:
-                self.logger.error(f'Bad request: {results}')
+            for metric in r1:
+                hash_id = self.metric_label(metric, 'hash_id')
+                if not hash_id in role_hashes:
+                    role_hashes[hash_id] = {
+                        'mac': self.metric_label(metric, 'mac'),
+                        'top_role': self.metric_label(metric, 'role'),
+                        'top_confidence': self.latest_value(metric),
+                        'pcap_labels': self.metric_label(metric, 'pcap_labels', '')}
         if r2:
-            results = r2.json()
-            if 'data' in results:
-                if 'result' in results['data'] and results['data']['result']:
-                    for metric in results['data']['result']:
-                        if metric['metric']['hash_id'] in role_hashes:
-                            role_hashes[metric['metric']['hash_id']]['second_role'] = metric['metric'].get('role', 'NO DATA')
-                            role_hashes[metric['metric']['hash_id']]['second_confidence'] = float(metric['values'][-1][1])
-            else:
-                self.logger.error(f'Bad request: {results}')
+            for metric in r2:
+                hash_id = self.metric_label(metric, 'hash_id')
+                if hash_id in role_hashes:
+                    role_hashes[hash_id].update({
+                        'second_role': self.metric_label(metric, 'role'),
+                        'second_confidence': self.latest_value(metric)})
         if r3:
-            results = r3.json()
-            if 'data' in results:
-                if 'result' in results['data'] and results['data']['result']:
-                    for metric in results['data']['result']:
-                        if metric['metric']['hash_id'] in role_hashes:
-                            role_hashes[metric['metric']['hash_id']]['third_role'] = metric['metric'].get('role', 'NO DATA')
-                            role_hashes[metric['metric']['hash_id']]['third_confidence'] = float(metric['values'][-1][1])
-            else:
-                self.logger.error(f'Bad request: {results}')
-        if mr:
-            results = mr.json()
-            if 'data' in results:
-                if 'result' in results['data'] and results['data']['result']:
-                    hashes = {}
-                    for metric in results['data']['result']:
-                        if metric['metric']['hash_id'] in hashes:
-                            if float(metric['values'][-1][1]) > hashes[metric['metric']['hash_id']]['latest']:
-                                hashes[metric['metric']['hash_id']] = metric['metric']
-                                hashes[metric['metric']['hash_id']]['latest'] = float(metric['values'][-1][1])
-                        else:
-                            hashes[metric['metric']['hash_id']] = metric['metric']
-                            hashes[metric['metric']['hash_id']]['latest'] = float(metric['values'][-1][1])
-                    # format hash metrics into endpoints
-                    for h in hashes:
-                        p_endpoint = hashes[h]
-                        p_endpoint['name'] = p_endpoint['hash_id']
-                        p_endpoint['endpoint_data'] = {'mac': p_endpoint['mac'],
-                                                       'segment': p_endpoint['segment'],
-                                                       'port': p_endpoint['port'],
-                                                       'vlan': p_endpoint['tenant'],
-                                                       'tenant': p_endpoint['tenant'],
-                                                       'ipv4': p_endpoint.get('ipv4_address', ''),
-                                                       'ipv6': p_endpoint.get('ipv6_address', ''),
-                                                       'controller_type': p_endpoint['controller_type'],
-                                                       'controller': p_endpoint.get('controller', ''),
-                                                       'name': p_endpoint['name'],
-                                                       'ether_vendor': p_endpoint['ether_vendor'],
-                                                       'ipv4_subnet': p_endpoint.get('ipv4_subnet', ''),
-                                                       'ipv4_rdns': p_endpoint.get('ipv4_rdns', ''),
-                                                       'ipv6_rdns': p_endpoint.get('ipv6_rdns', ''),
-                                                       'ipv6_subnet': p_endpoint.get('ipv6_subnet', '')}
-                        p_endpoint['p_next_state'] = p_endpoint.get('next_state', None)
-                        p_endpoint['p_prev_state'] = p_endpoint.get('prev_state', None)
-                        # TODO acl_data
-                        p_endpoint['acl_data'] = []
-                        p_endpoint['metadata'] = {'mac_addresses': {}, 'ipv4_addresses': {}, 'ipv6_addresses': {}}
-                        mac = p_endpoint['mac']
-                        for role_hash in role_hashes.values():
-                            role_mac = role_hash['mac']
-                            if mac != role_mac:
-                                continue
-                            if not mac in p_endpoint['metadata']['mac_addresses']:
-                                roles = [role_hash['top_role'], role_hash['second_role'], role_hash['third_role']]
-                                confidences = [role_hash['top_confidence'], role_hash['second_confidence'], role_hash['third_confidence']]
-                                p_endpoint['metadata']['mac_addresses'][mac] = {
-                                    'classification': {
-                                        'labels': roles,
-                                        'confidences': confidences,
-                                     },
-                                    'pcap_labels': ''}
-                            ipv4 = role_hash['ipv4_address']
-                            if not ipv4 in p_endpoint['metadata']['ipv4_addresses']:
-                                p_endpoint['metadata']['ipv4_addresses'][ipv4] = {'short_os': role_hash['ipv4_os']}
-                        endpoint = EndpointDecoder(p_endpoint).get_endpoint()
-                        endpoints[endpoint.name] = endpoint
-            else:
-                self.logger.error(f'Bad request: {results}')
+            for metric in r3:
+                hash_id = self.metric_label(metric, 'hash_id')
+                if hash_id in role_hashes:
+                    role_hashes[hash_id].update({
+                        'third_role': self.metric_label(metric, 'role'),
+                        'third_confidence': self.latest_value(metric)})
+
+        return hashes, role_hashes
+
+    @staticmethod
+    def prom_endpoints(hashes, role_hashes):
+        endpoints = {}
+        for p_endpoint in hashes.values():
+            p_endpoint.update({
+                'name': p_endpoint['hash_id'],
+                'p_next_state': p_endpoint.get('next_state', None),
+                'p_prev_state': p_endpoint.get('prev_state', None),
+                'acl_data': [],  # TODO: acl_data
+                'metadata': {'mac_addresses': {}, 'ipv4_addresses': {}, 'ipv6_addresses': {}},
+                'state': p_endpoint['state'],
+                'endpoint_data': {
+                    'mac': p_endpoint['mac'],
+                    'segment': p_endpoint['segment'],
+                    'port': p_endpoint['port'],
+                    'vlan': p_endpoint['tenant'],
+                    'tenant': p_endpoint['tenant'],
+                    'ipv4': p_endpoint.get('ipv4_address', ''),
+                    'ipv6': p_endpoint.get('ipv6_address', ''),
+                    'controller_type': p_endpoint['controller_type'],
+                    'controller': p_endpoint.get('controller', ''),
+                    'name': p_endpoint['name'],
+                    'ether_vendor': p_endpoint['ether_vendor'],
+                    'ipv4_subnet': p_endpoint.get('ipv4_subnet', ''),
+                    'ipv4_rdns': p_endpoint.get('ipv4_rdns', ''),
+                    'ipv6_rdns': p_endpoint.get('ipv6_rdns', ''),
+                    'ipv6_subnet': p_endpoint.get('ipv6_subnet', '')}})
+            ipv4 = p_endpoint.get('ipv4_address', '')
+            ipv4_os = p_endpoint.get('ipv4_os', '')
+            if ipv4 and ipv4_os:
+                p_endpoint['metadata']['ipv4_addresses'][ipv4] = {'short_os': ipv4_os}
+            mac = p_endpoint['mac']
+            for role_hash in role_hashes.values():
+                role_mac = role_hash['mac']
+                if mac != role_mac:
+                    continue
+                if not mac in p_endpoint['metadata']['mac_addresses']:
+                    roles = [
+                        role_hash.get('top_role', NO_DATA),
+                        role_hash.get('second_role', NO_DATA),
+                        role_hash.get('third_role', NO_DATA)]
+                    confidences = [
+                        role_hash.get('top_confidence', NO_DATA),
+                        role_hash.get('second_confidence', NO_DATA),
+                        role_hash.get('third_confidence', NO_DATA)]
+                    pcap_labels = role_hash['pcap_labels']
+                    p_endpoint['metadata']['mac_addresses'][mac] = {
+                        'classification': {
+                            'labels': roles,
+                            'confidences': confidences,
+                         },
+                        'pcap_labels': pcap_labels}
+            endpoint = EndpointDecoder(p_endpoint).get_endpoint()
+            endpoints[endpoint.name] = endpoint
         return endpoints
+
+    def get_stored_endpoints(self):
+        ''' load existing endpoints from Prometheus. '''
+        hashes, role_hashes = self.scrape_prom()
+        return self.prom_endpoints(hashes, role_hashes)
 
     @staticmethod
     def start(port=9304):

@@ -28,11 +28,11 @@ def transit_wrap(trigger, source, dest, before=None, after=None):
 
 
 def endpoint_transit_wrap(trigger, source, dest):
-    return transit_wrap(trigger, source, dest)
+    return transit_wrap(trigger, source, dest, after='_update_state_time')
 
 
 def endpoint_copro_transit_wrap(trigger, source, dest):
-    return transit_wrap(trigger, source, dest)
+    return transit_wrap(trigger, source, dest, after='_update_copro_state_time')
 
 
 class Endpoint:
@@ -100,7 +100,15 @@ class Endpoint:
         self.metadata = {}
         self.state = None
         self.copro_state = None
+        self.state_time = 0
+        self.copro_state_time = 0
         self.observed_time = 0
+
+    def _update_state_time(self, *args, **kwargs):
+        self.state_time = time.time()
+
+    def _update_copro_state_time(self, *args, **kwargs):
+        self.copro_state_time = time.time()
 
     def encode(self):
         endpoint_d = {
@@ -120,20 +128,23 @@ class Endpoint:
     def mac_addresses(self):
         return self.metadata.get('mac_addresses', {})
 
-    def get_roles_confidences(self):
+    def get_roles_confidences_pcap_labels(self):
         top_role = NO_DATA
         second_role = NO_DATA
         third_role = NO_DATA
         top_conf = '0'
         second_conf = '0'
         third_conf = '0'
+        pcap_labels = NO_DATA
         for metadata in self.mac_addresses().values():
             classification = metadata.get('classification', {})
             if 'labels' in classification:
                 top_role, second_role, third_role = classification['labels'][:3]
             if 'confidences' in classification:
                 top_conf, second_conf, third_conf = classification['confidences'][:3]
-        return (top_role, second_role, third_role), (top_conf, second_conf, third_conf)
+            if 'pcap_labels' in metadata:
+                pcap_labels = metadata['pcap_labels']
+        return (top_role, second_role, third_role), (top_conf, second_conf, third_conf), pcap_labels
 
     def get_ipv4_os(self):
         if 'ipv4_addresses' in self.metadata:
@@ -150,22 +161,14 @@ class Endpoint:
     def observed_timeout(self, timeout):
         return time.time() - self.observed_time > timeout
 
-    def state_time(self):
-        # TODO this was already broken, just making it obvious
-        return 0
-
     def state_age(self):
-        return int(time.time()) - self.state_time()
+        return int(time.time()) - self.state_time
 
     def state_timeout(self, timeout):
         return self.state_age() > timeout
 
-    def copro_state_time(self):
-        # TODO this was already broken, just making it obvious
-        return 0
-
     def copro_state_age(self):
-        return int(time.time()) - self.copro_state_time()
+        return int(time.time()) - self.copro_state_time
 
     def copro_state_timeout(self, timeout):
         return self.copro_state_age() > timeout
