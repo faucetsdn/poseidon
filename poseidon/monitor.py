@@ -12,7 +12,6 @@ from functools import partial
 import requests
 import schedule
 
-from poseidon.constants import NO_DATA
 from poseidon.helpers.actions import Actions
 from poseidon.helpers.config import Config
 from poseidon.helpers.prometheus import Prometheus
@@ -86,7 +85,7 @@ class Monitor:
         # TODO consolidate with update_endpoint_metadata
         hosts = []
         for hash_id, endpoint in self.s.endpoints.items():
-            roles, _ = endpoint.get_roles_confidences()
+            roles, _, _ = endpoint.get_roles_confidences_pcap_labels()
             role = roles[0]
             ipv4_os = endpoint.get_ipv4_os()
             host = {
@@ -182,7 +181,7 @@ class Monitor:
             ether_vendor = endpoint.endpoint_data['ether_vendor']
             controller = endpoint.endpoint_data['controller']
             controller_type = endpoint.endpoint_data['controller_type']
-            roles, confidences = endpoint.get_roles_confidences()
+            roles, confidences, pcap_labels = endpoint.get_roles_confidences_pcap_labels()
             top_role, second_role, third_role = roles
             top_conf, second_conf, third_conf = confidences
             ipv4_os = endpoint.get_ipv4_os()
@@ -193,7 +192,10 @@ class Monitor:
                     'name': endpoint.endpoint_data['name'],
                     'hash_id': hash_id,
                 })
-                self.prom.prom_metrics[var].labels(**prom_labels).set(val)
+                try:
+                    self.prom.prom_metrics[var].labels(**prom_labels).set(val)
+                except ValueError:
+                    pass
 
             def set_prom_role(var, val, role):
                 set_prom(
@@ -202,7 +204,8 @@ class Monitor:
                     role=role,
                     ipv4_os=ipv4_os,
                     ipv4_address=ipv4,
-                    ipv6_address=ipv6)
+                    ipv6_address=ipv6,
+                    pcap_labels=pcap_labels)
 
             def update_prom(var, **prom_labels):
                 prom_labels.update({
@@ -279,39 +282,41 @@ class Monitor:
             data = my_obj.get('data', None)
             results = my_obj.get('results', {})
             tool = results.get('tool', None)
-            if isinstance(data, dict):
+            if isinstance(data, dict) and data:
                 updates = False
-                if not data:
-                    return {}
                 if tool == 'p0f':
                     for ip, ip_data in data.items():
                         if ip_data and ip_data.get('full_os', None):
-                            for hash_id, endpoint in self.s.endpoints.items():
-                                if endpoint.endpoint_data['ipv4'] == ip:
-                                    ep = self.s.endpoints.get(hash_id, None)
-                                    if ep:
-                                        self.logger.debug(
-                                            'processing p0f results for %s', hash_id)
-                                        if not 'ipv4_addresses' in ep.metadata:
-                                            ep.metadata['ipv4_addresses'] = {}
-                                        ep.metadata['ipv4_addresses'][ip] = ip_data
-                                        updates = True
+                            endpoints = self.s.endpoints_by_ip(ip)
+                            if endpoints:
+                                endpoint = endpoints[0]
+                                if not 'ipv4_addresses' in endpoint.metadata:
+                                    endpoint.metadata['ipv4_addresses'] = {}
+                                endpoint.metadata['ipv4_addresses'][ip] = ip_data
+                                updates = True
+                                self.logger.debug(
+                                    'processing p0f results for %s', endpoint.metadata)
+                            else:
+                                self.logger.debug('no endpoint for p0f IP %s', ip)
                 elif tool == 'networkml':
                     for name, message in data.items():
                         if name == 'pcap':
                             continue
-                        for hash_id, endpoint in self.s.endpoints.items():
-                            if 'source_mac' in message and endpoint.endpoint_data['mac'] == message['source_mac']:
-                                ep = self.s.endpoints.get(hash_id, None)
-                                if ep:
-                                    self.logger.debug(
-                                        'processing networkml results for %s', hash_id)
-                                    self.s.unmirror_endpoint(ep)
-                                    if message.get('valid', False):
-                                        if not 'mac_addresses' in ep.metadata:
-                                            ep.metadata['mac_addresses'] = {}
-                                        ep.metadata['mac_addresses'][message['source_mac']] = message
-                                        updates = True
+                        source_mac = message.get('source_mac', None)
+                        endpoints = self.s.endpoints_by_mac(source_mac)
+                        if endpoints:
+                            endpoint = endpoints[0]
+                            self.s.unmirror_endpoint(endpoint)
+                            if message.get('valid', False):
+                                if not 'mac_addresses' in endpoint.metadata:
+                                    endpoint.metadata['mac_addresses'] = {}
+                                endpoint.metadata['mac_addresses'][source_mac] = message
+                                updates = True
+                                self.logger.debug(
+                                    'processing networkml results for %s', endpoint.metadata)
+                        else:
+                            self.logger.debug(
+                                'no endpoint for networkml MAC %s', source_mac)
                 if updates:
                     self.job_update_metrics()
                     return data
@@ -424,7 +429,7 @@ class Monitor:
         queued_endpoints = [
             endpoint for endpoint in self.s.not_ignored_endpoints('queued')
             if endpoint.mirror_requested()]
-        queued_endpoints = sorted(queued_endpoints, key=lambda x: x.state_time())
+        queued_endpoints = sorted(queued_endpoints, key=lambda x: x.state_time)
         self.logger.debug('investigations {0}, budget {1}, queued {2}'.format(
             str(self.s.investigations), str(budget), str(len(queued_endpoints))))
         return self._schedule_queued_work(queued_endpoints, budget, 'trigger_next', self.s.mirror_endpoint)
@@ -434,7 +439,7 @@ class Monitor:
             endpoint.copro_queue_next('copro_coprocess')
         budget = self.s.coprocessing_budget()
         queued_endpoints = self.s.not_copro_ignored_endpoints('copro_queued')
-        queued_endpoints = sorted(queued_endpoints, key=lambda x: x.copro_state_time())
+        queued_endpoints = sorted(queued_endpoints, key=lambda x: x.copro_state_time)
         self.logger.debug('coprocessing {0}, budget {1}, queued {2}'.format(
             str(self.s.coprocessing), str(budget), str(len(queued_endpoints))))
         return self._schedule_queued_work(queued_endpoints, budget, 'copro_trigger_next', self.s.coprocess_endpoint)
