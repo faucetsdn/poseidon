@@ -302,33 +302,32 @@ class Monitor:
             data = my_obj.get('data', None)
             results = my_obj.get('results', {})
             tool = results.get('tool', None)
-            updated = set()
             if isinstance(data, dict) and data:
+                new_metadata = data
                 if tool == 'p0f':
-                    new_metadata = {}
+                    ip_metadata = {}
                     for ip, ip_data in data.items():
                         if ip_data and ip_data.get('full_os', None):
-                            new_metadata[ip] = ip_data
-                    updated.update(self.merge_metadata({'ipv4_addresses': new_metadata}))
+                            ip_metadata[ip] = ip_data
+                    new_metadata = {'ipv4_addresses': ip_metadata}
                 elif tool == 'networkml':
-                    new_metadata = {}
+                    mac_metadata = {}
                     for name, message in data.items():
                         if name == 'pcap':
                             continue
                         if message.get('valid', False):
                             source_mac = message.get('source_mac', None)
                             if source_mac:
-                                new_metadata[source_mac] = message
-                    updated.update(self.merge_metadata({'mac_addresses': new_metadata}))
-                else:
-                    # Generic handler for future tools.
-                    updated.update(self.merge_metadata(data))
-            if updated:
-                for endpoint in updated:
-                    if endpoint.mirror_active():
-                        self.s.unmirror_endpoint(endpoint)
-                self.job_update_metrics()
-                return data
+                                mac_metadata[source_mac] = message
+                    new_metadata = {'mac_addresses': mac_metadata}
+                # Generic handler for future tools.
+                updated = self.merge_metadata(new_metadata)
+                if updated:
+                    for endpoint in updated:
+                        if endpoint.mirror_active():
+                            self.s.unmirror_endpoint(endpoint)
+                    self.job_update_metrics()
+                    return data
             return {}
 
         def handler_action_ignore(my_obj):
