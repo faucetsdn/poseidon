@@ -7,6 +7,7 @@ import re
 import sys
 import threading
 import time
+from collections import defaultdict
 from functools import partial
 
 import requests
@@ -267,6 +268,25 @@ class Monitor:
                 ipv4_address=ipv4,
                 ipv6_address=ipv6)
 
+    def merge_metadata(self, new_metadata):
+        updated = set()
+        metadata_types = {
+            'mac_addresses': self.s.endpoints_by_mac,
+            'ipv4_addresses': self.s.endpoints_by_ip,
+            'ipv6_addresses': self.s.endpoints_by_ip,
+        }
+        for metadata_type, metadata_lookup in metadata_types.items():
+            type_new_metadata = new_metadata.get(metadata_type, {})
+            for key, data in type_new_metadata.items():
+                endpoints = metadata_lookup(key)
+                if endpoints:
+                    endpoint = endpoints[0]
+                    if metadata_type not in endpoint.metadata:
+                        endpoint.metadata[metadata_type] = defaultdict(dict)
+                    endpoint.metadata[metadata_type][key].update(data)
+                    updated.add(endpoint)
+        return updated
+
     def format_rabbit_message(self, item, faucet_event, remove_list):
         '''
         read a message off the rabbit_q
@@ -282,44 +302,33 @@ class Monitor:
             data = my_obj.get('data', None)
             results = my_obj.get('results', {})
             tool = results.get('tool', None)
+            updated = set()
             if isinstance(data, dict) and data:
-                updates = False
                 if tool == 'p0f':
+                    new_metadata = {}
                     for ip, ip_data in data.items():
                         if ip_data and ip_data.get('full_os', None):
-                            endpoints = self.s.endpoints_by_ip(ip)
-                            if endpoints:
-                                endpoint = endpoints[0]
-                                if not 'ipv4_addresses' in endpoint.metadata:
-                                    endpoint.metadata['ipv4_addresses'] = {}
-                                endpoint.metadata['ipv4_addresses'][ip] = ip_data
-                                updates = True
-                                self.logger.debug(
-                                    'processing p0f results for %s', endpoint.metadata)
-                            else:
-                                self.logger.debug('no endpoint for p0f IP %s', ip)
+                            new_metadata[ip] = ip_data
+                    updated.update(self.merge_metadata({'ipv4_addresses': new_metadata}))
                 elif tool == 'networkml':
+                    new_metadata = {}
                     for name, message in data.items():
                         if name == 'pcap':
                             continue
-                        source_mac = message.get('source_mac', None)
-                        endpoints = self.s.endpoints_by_mac(source_mac)
-                        if endpoints:
-                            endpoint = endpoints[0]
-                            self.s.unmirror_endpoint(endpoint)
-                            if message.get('valid', False):
-                                if not 'mac_addresses' in endpoint.metadata:
-                                    endpoint.metadata['mac_addresses'] = {}
-                                endpoint.metadata['mac_addresses'][source_mac] = message
-                                updates = True
-                                self.logger.debug(
-                                    'processing networkml results for %s', endpoint.metadata)
-                        else:
-                            self.logger.debug(
-                                'no endpoint for networkml MAC %s', source_mac)
-                if updates:
-                    self.job_update_metrics()
-                    return data
+                        if message.get('valid', False):
+                            source_mac = message.get('source_mac', None)
+                            if source_mac:
+                                new_metadata[source_mac] = message
+                    updated.update(self.merge_metadata({'mac_addresses': new_metadata}))
+                else:
+                    # Generic handler for future tools.
+                    updated.update(self.merge_metadata(data))
+            if updated:
+                for endpoint in updated:
+                    if endpoint.mirror_active():
+                        self.s.unmirror_endpoint(endpoint)
+                self.job_update_metrics()
+                return data
             return {}
 
         def handler_action_ignore(my_obj):
