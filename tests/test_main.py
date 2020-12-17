@@ -191,13 +191,21 @@ def test_format_rabbit_message():
     faucet_event = []
     remove_list = []
 
-    data = dict({'Key1': 'Val1'})
+    data = {"id": "", "type": "metadata", "file_path": "/files/foo.pcap", "data": {"10.0.2.15": {"full_os": "Windows NT kernel", "short_os": "Windows", "link": "Ethernet or modem", "raw_mtu": "1500", "mac": "08:00:27:cc:3f:1b"}, "results": {"tool": "p0f", "version": "0.11.17"}}}
     message = ('poseidon.algos.decider', json.dumps(data))
     retval, msg_valid = mockMonitor.format_rabbit_message(
         message, faucet_event, remove_list)
-    assert retval == {}
+    assert not retval
     assert msg_valid
 
+    data = {'id': '', 'type': 'metadata', 'file_path': '/files/foo', 'data': {'6b33db53faf33c77d694ecab2e3fefadc7dacc70': {'valid': True, 'pcap_labels': None, 'decisions': {'investigate': False}, 'classification': {'labels': ['Administrator workstation', 'Developer workstation', 'Active Directory controller'], 'confidences': [0.9955250173194201, 0.004474982679786006, 7.939512151303659e-13]}, 'timestamp': 1608179739.839953, 'source_ip': '208.50.77.134', 'source_mac': '00:1a:8c:15:f9:80'}, 'pcap': 'trace_foo.pcap'}, 'results': {'tool': 'networkml', 'version': '0.6.7.dev4'}}
+    message = ('poseidon.algos.decider', json.dumps(data))
+    retval, msg_valid = mockMonitor.format_rabbit_message(
+        message, faucet_event, remove_list)
+    assert not retval
+    assert msg_valid
+
+    data = dict({'Key1': 'Val1'})
     message = ('FAUCET.Event', json.dumps(data))
     retval, msg_valid = mockMonitor.format_rabbit_message(
         message, faucet_event, remove_list)

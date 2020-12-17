@@ -173,9 +173,7 @@ wait_var_nonzero "sum(poseidon_endpoint_roles{role!=\"NO DATA\"})" "$FASTREPLAY"
 wait_var_nonzero "sum(poseidon_endpoint_metadata{role!=\"NO DATA\"})" "" poseidon_endpoint_metadata
 # ensure CLI results reported.
 wait_show_all "orkstation.+00:1a:8c:15:f9:80"
-# p0f doesn't always return a decision - but check that it returned
-# TODO: determine why p0f not deterministic.
-wait_var_nonzero "sum(poseidon_endpoint_oses)" "" poseidon_endpoint_oses
+wait_var_nonzero "sum(poseidon_endpoint_oses{ipv4_os!=\"NO DATA\"})" "" poseidon_endpoint_oses
 # TODO: fix certstrap to allow creating multiple named client keys.
 wait_var_nonzero "sum(faucetconfrpc_ok_total{peer_id=\"poseidon\"})" "" faucetconfrpc_ok_total
 for rpc in GetConfigFile SetConfigFile ClearPortMirror AddPortMirror RemovePortMirror ; do
