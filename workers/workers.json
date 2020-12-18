@@ -39,7 +39,8 @@
         "RABBIT_EXCHANGE": "topic-poseidon-internal",
         "RABBIT_HOST": "messenger",
         "RABBIT_QUEUE_NAME": "topic-poseidon-internal",
-        "RABBIT_ROUTING_KEY": "poseidon.algos.decider"
+        "RABBIT_ROUTING_KEY": "poseidon.algos.decider",
+        "RESULT_PATH": "/tmp/predict.json"
       },
       "image": "iqtlabs/networkml",
       "inputs": [
@@ -51,7 +52,7 @@
         "rabbitmq"
       ],
       "stage": "poseidon_poseidon",
-      "version": "v0.6.6",
+      "version": "latest",
       "viewableOutput": true
     },
     {
@@ -61,7 +62,8 @@
         "RABBIT_HOST": "messenger",
         "RABBIT_QUEUE_NAME": "topic-poseidon-internal",
         "RABBIT_ROUTING_KEY": "poseidon.algos.decider",
-        "rabbit": "true"
+        "rabbit": "true",
+        "RESULT_PATH": "/tmp/result.json"
       },
       "image": "iqtlabs/p0f",
       "inputs": [
