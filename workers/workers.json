@@ -52,7 +52,7 @@
         "rabbitmq"
       ],
       "stage": "poseidon_poseidon",
-      "version": "v0.6.6",
+      "version": "latest",
       "viewableOutput": true
     },
     {
