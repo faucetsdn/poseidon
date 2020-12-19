@@ -12,14 +12,14 @@ import time
 
 from prometheus_client import REGISTRY
 
-from poseidon.constants import NO_DATA
-from poseidon.helpers.config import Config
-from poseidon.helpers.endpoint import endpoint_factory
-from poseidon.helpers.metadata import DNSResolver
-from poseidon.helpers.prometheus import Prometheus
-from poseidon.helpers.rabbit import Rabbit
-from poseidon.monitor import Monitor
-from poseidon.sdnconnect import SDNConnect
+from poseidon_core.constants import NO_DATA
+from poseidon_core.helpers.config import Config
+from poseidon_core.helpers.endpoint import endpoint_factory
+from poseidon_core.helpers.metadata import DNSResolver
+from poseidon_core.helpers.prometheus import Prometheus
+from poseidon_core.helpers.rabbit import Rabbit
+from poseidon_core.monitor import Monitor
+from poseidon_core.sdnconnect import SDNConnect
 
 logger = logging.getLogger('test')
 

@@ -4,9 +4,9 @@ Test module for endpoints.
 @author: Charlie Lewis
 """
 import time
-from poseidon.helpers.endpoint import Endpoint
-from poseidon.helpers.endpoint import endpoint_factory
-from poseidon.helpers.endpoint import EndpointDecoder
+from poseidon_core.helpers.endpoint import Endpoint
+from poseidon_core.helpers.endpoint import endpoint_factory
+from poseidon_core.helpers.endpoint import EndpointDecoder
 
 
 def test_Endpoint():

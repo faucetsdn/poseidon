@@ -3,7 +3,7 @@
 Test module for prometheus
 @author: Charlie Lewis
 """
-from poseidon.helpers.prometheus import Prometheus
+from poseidon_core.helpers.prometheus import Prometheus
 
 
 def test_Prometheus():

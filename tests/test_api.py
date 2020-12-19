@@ -2,7 +2,7 @@ import falcon
 import pytest
 from falcon import testing
 
-from api.app.app import api
+from poseidon_api.api import api
 
 
 @pytest.fixture

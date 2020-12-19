@@ -20,13 +20,11 @@ OWN_VERSIONED_SERVICES = {
 }
 # For dev versions, add this config.
 DEV_SERVICE_OVERRIDE = {
-    'poseidon_api': {'build': {'context': 'api', 'dockerfile': 'Dockerfile'}},
     'poseidon': {'build': {'context': '.', 'dockerfile': 'Dockerfile'}},
     'workers': {'build': {'context': 'workers', 'dockerfile': 'Dockerfile'}},
 }
 # For non-dev versions, delete this config.
 NON_DEV_SERVICE_DELETE = {
-    'poseidon_api': ['build'],
     'poseidon': ['build'],
     'workers': ['build'],
 }

@@ -3,9 +3,9 @@
 Created on 18 Jan 2019
 @author: Charlie Lewis
 """
-from poseidon.cli.commands import Commands
-from poseidon.helpers.config import Config
-from poseidon.helpers.endpoint import endpoint_factory
+from poseidon_cli.commands import Commands
+from poseidon_core.helpers.config import Config
+from poseidon_core.helpers.endpoint import endpoint_factory
 
 
 def get_test_controller():

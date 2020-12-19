@@ -1,11 +1,8 @@
-.coveragerc
 .gitignore
-.git
 .pre-commit-config.yaml
 CHANGELOG.md
 CODE_OF_CONDUCT.md
 CONTRIBUTING.md
-Dockerfile.dpkg
 Dockerfile.test
 Dockerfile
 LICENSE
