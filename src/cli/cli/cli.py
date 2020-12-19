@@ -15,7 +15,6 @@ import sys
 import time
 
 import cmd2
-from natural.date import delta
 from natural.date import duration
 from texttable import Texttable
 

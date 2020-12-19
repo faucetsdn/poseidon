@@ -81,7 +81,6 @@ class Commands:
 
     def ignore(self, args):
         ''' ignore a specific thing '''
-        device = args.rsplit(' ', 1)[0]
         endpoints = self._get_endpoints(args, 0, match_all=True)
         endpoint_names = [endpoint.name for endpoint in endpoints]
         self._publish_action('poseidon.action.ignore', endpoint_names)

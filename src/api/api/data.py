@@ -1,15 +1,11 @@
-import ast
 import configparser
 import datetime
-import ipaddress
 import json
 import os
-import time
 from copy import deepcopy
 
 import falcon
 import requests
-from natural.date import duration
 
 from .constants import NO_DATA
 from .routes import paths
@@ -51,7 +47,7 @@ class Nodes:
 
     def get_prom_addr(self):
         prometheus_ip = None
-        prometheus_poort = None
+        prometheus_port = None
         try:
             config = configparser.RawConfigParser()
             config.optionxform = str
