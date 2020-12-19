@@ -22,7 +22,7 @@ wait_show_all () {
         TRIES=0
         MATCHED=""
         PID=$(docker ps -q --filter "label=com.docker.compose.service=poseidon")
-        CMD="docker exec $PID python3 poseidon/cli/cli.py"
+        CMD="docker exec $PID poseidon-cli"
         echo waiting for $match in show all
         while [[ "$MATCHED" == "" ]] ; do
                 MATCHED=$($CMD 'show all' | grep -E "$match" | cat)
