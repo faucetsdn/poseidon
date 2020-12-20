@@ -7,11 +7,11 @@ import os
 import shutil
 import tempfile
 
-from poseidon.controllers.faucet.faucet import FaucetProxy
-from poseidon.controllers.faucet.helpers import yaml_in
-from poseidon.controllers.faucet.helpers import yaml_out
-from poseidon.controllers.faucet.parser import FaucetLocalConfGetSetter
-from poseidon.helpers.config import Config
+from poseidon_core.controllers.faucet.faucet import FaucetProxy
+from poseidon_core.controllers.faucet.helpers import yaml_in
+from poseidon_core.controllers.faucet.helpers import yaml_out
+from poseidon_core.controllers.faucet.parser import FaucetLocalConfGetSetter
+from poseidon_core.helpers.config import Config
 
 SAMPLE_CONFIG = 'tests/sample_faucet_config.yaml'
 

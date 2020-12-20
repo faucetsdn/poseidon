@@ -1,0 +1,56 @@
+name: release
+
+on:
+  push:
+    branches: master
+    tags: 'v*'
+
+jobs:
+  release:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build core package
+      id: build_core_package
+      run: |
+        sudo apt-get update && \
+        sudo apt-get install -yq --no-install-recommends python3-pip python3.7 python3.7-dev python3-setuptools && \
+        pip3 install wheel && \
+        cd src/core && python3 setup.py sdist bdist_wheel --universal
+      if: github.repository == 'iqtlabs/poseidon' && github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+    - name: Publish package
+      if: github.repository == 'iqtlabs/poseidon' && github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        user: ${{ secrets.PYPI_USERNAME }}
+        password: ${{ secrets.PYPI_TOKEN }}
+    - name: Build CLI package
+      id: build_cli_package
+      run: |
+        sudo apt-get update && \
+        sudo apt-get install -yq --no-install-recommends python3-pip python3.7 python3.7-dev python3-setuptools && \
+        pip3 install wheel && \
+        cd src/cli && python3 setup.py sdist bdist_wheel --universal
+      if: github.repository == 'iqtlabs/poseidon' && github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+    - name: Publish package
+      if: github.repository == 'iqtlabs/poseidon' && github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        user: ${{ secrets.PYPI_USERNAME }}
+        password: ${{ secrets.PYPI_TOKEN }}
+    - name: Build API package
+      id: build_api_package
+      run: |
+        sudo apt-get update && \
+        sudo apt-get install -yq --no-install-recommends python3-pip python3.7 python3.7-dev python3-setuptools && \
+        pip3 install wheel && \
+        cd src/api && python3 setup.py sdist bdist_wheel --universal
+      if: github.repository == 'iqtlabs/poseidon' && github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+    - name: Publish package
+      if: github.repository == 'iqtlabs/poseidon' && github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        user: ${{ secrets.PYPI_USERNAME }}
+        password: ${{ secrets.PYPI_TOKEN }}

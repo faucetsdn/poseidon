@@ -5,10 +5,10 @@ Test module for actions
 """
 import logging
 
-from poseidon.helpers.actions import Actions
-from poseidon.helpers.config import Config
-from poseidon.helpers.endpoint import endpoint_factory
-from poseidon.sdnconnect import SDNConnect
+from poseidon_core.helpers.actions import Actions
+from poseidon_core.helpers.config import Config
+from poseidon_core.helpers.endpoint import endpoint_factory
+from poseidon_core.sdnconnect import SDNConnect
 
 logger = logging.getLogger('test')
 

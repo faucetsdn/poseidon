@@ -104,7 +104,7 @@ function check_args()
                 ;;
             -e|shell)
                 if [ "$(docker ps -q --filter "label=com.docker.compose.service=poseidon" | wc -l)" -eq 1 ]; then
-                    docker exec -it "$(docker ps -q --filter "label=com.docker.compose.service=poseidon")" python3 poseidon/cli/cli.py "${@:2}"
+                    docker exec -it "$(docker ps -q --filter "label=com.docker.compose.service=poseidon")" poseidon-cli "${@:2}"
                 else
                     echo "Poseidon isn't running, you must first start Poseidon to use the shell."
                 fi

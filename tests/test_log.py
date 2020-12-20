@@ -3,7 +3,7 @@
 Created on 25 Oct 2017
 @author: dgrossman
 """
-from poseidon.helpers.log import Logger
+from poseidon_core.helpers.log import Logger
 
 
 def test_logger_base():

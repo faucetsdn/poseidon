@@ -30,7 +30,10 @@ jobs:
         pip3 install codecov scikit-build docker-compose && \
         find . -name requirements.txt -type f -exec pip3 install -r {} \; && \
         find . -name test-requirements.txt -type f -exec pip3 install -r {} \; && \
-        PATH=/home/runner/.local/bin:$PATH py.test -v -vv --cov-report term-missing --cov=. -c .coveragerc && \
+        cd src/core && sudo python3 setup.py sdist install && cd ../../ && \
+        cd src/cli && sudo python3 setup.py sdist install && cd ../../ && \
+        cd src/api && sudo python3 setup.py sdist install && cd ../../ && \
+        PATH=/home/runner/.local/bin:$PATH py.test -v -vv --cov-report term-missing --cov=. --cov=poseidon_core --cov=poseidon_api --cov=poseidon_cli -c .coveragerc && \
         PATH=/home/runner/.local/bin:$PATH coverage report && \
         PATH=/home/runner/.local/bin:$PATH coverage xml
     - name: docker_test

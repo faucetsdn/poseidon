@@ -9,14 +9,14 @@ import tempfile
 
 import yaml
 
-from poseidon.controllers.faucet.faucet import FaucetProxy
-from poseidon.controllers.faucet.helpers import get_config_file
-from poseidon.controllers.faucet.helpers import parse_rules
-from poseidon.controllers.faucet.helpers import represent_none
-from poseidon.controllers.faucet.parser import FaucetLocalConfGetSetter
-from poseidon.controllers.faucet.parser import Parser
-from poseidon.helpers.config import Config
-from poseidon.helpers.endpoint import endpoint_factory
+from poseidon_core.controllers.faucet.faucet import FaucetProxy
+from poseidon_core.controllers.faucet.helpers import get_config_file
+from poseidon_core.controllers.faucet.helpers import parse_rules
+from poseidon_core.controllers.faucet.helpers import represent_none
+from poseidon_core.controllers.faucet.parser import FaucetLocalConfGetSetter
+from poseidon_core.controllers.faucet.parser import Parser
+from poseidon_core.helpers.config import Config
+from poseidon_core.helpers.endpoint import endpoint_factory
 
 
 SAMPLE_CONFIG = 'tests/sample_faucet_config.yaml'
@@ -318,7 +318,7 @@ def test_Parser():
         obj.config('shutdown', None, None)
         obj.config('apply_acls', None, None)
         obj.config('apply_acls', 1, 't1-1', endpoints=endpoints,
-                   rules_file=os.path.join(os.getcwd(), 'rules.yaml'))
+                   rules_file=os.path.join(os.getcwd(), 'config/rules.yaml'))
         obj.config('unknown', None, None)
 
     endpoint = endpoint_factory('foo')

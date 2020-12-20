@@ -3,8 +3,8 @@
 Test module for collector.
 @author: Charlie Lewis
 """
-from poseidon.helpers.collector import Collector
-from poseidon.helpers.endpoint import endpoint_factory
+from poseidon_core.helpers.collector import Collector
+from poseidon_core.helpers.endpoint import endpoint_factory
 
 
 def test_Collector():

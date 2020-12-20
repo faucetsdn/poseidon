@@ -1,10 +1,10 @@
 import logging
 
-from poseidon.helpers.config import Config
-from poseidon.helpers.endpoint import endpoint_factory
-from poseidon.volos.acls import VolosAcl
-from poseidon.volos.coprocessor import Coprocessor
-from poseidon.volos.volos import Volos
+from poseidon_core.helpers.config import Config
+from poseidon_core.helpers.endpoint import endpoint_factory
+from poseidon_core.volos.acls import VolosAcl
+from poseidon_core.volos.coprocessor import Coprocessor
+from poseidon_core.volos.volos import Volos
 
 logger = logging.getLogger('test')
 

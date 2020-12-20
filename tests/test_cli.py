@@ -3,11 +3,11 @@
 Created on 14 Jan 2019
 @author: Charlie Lewis
 """
-from poseidon.cli.cli import GetData
-from poseidon.cli.cli import Parser
-from poseidon.cli.cli import PoseidonShell
-from poseidon.constants import NO_DATA
-from poseidon.helpers.endpoint import endpoint_factory
+from poseidon_cli.cli import GetData
+from poseidon_cli.cli import Parser
+from poseidon_cli.cli import PoseidonShell
+from poseidon_core.constants import NO_DATA
+from poseidon_core.helpers.endpoint import endpoint_factory
 
 
 def test_poseidonshell():
