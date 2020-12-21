@@ -1,4 +1,4 @@
-# Poseidon API: Simple RESTful API for querying information about nodes that Poseidon detects.
+# Poseidon
 
 > Software Defined Network Situational Awareness
 

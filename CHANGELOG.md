@@ -1,3 +1,9 @@
+# v0.17.0 (2020-12-21)
+
+* Move to PBR/package for posiedon core, api, cli
+* Add generic receive of pcap tool parsing support.
+* Upgrade grafana, pytype
+
 # v0.16.0 (2020-12-17)
 
 * Remove Redis storage, move to Prometheus
