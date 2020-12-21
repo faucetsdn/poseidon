@@ -192,67 +192,67 @@ def test_format_rabbit_message():
     remove_list = []
 
     data = {"id": "", "type": "metadata", "file_path": "/files/foo.pcap", "data": {"10.0.2.15": {"full_os": "Windows NT kernel", "short_os": "Windows", "link": "Ethernet or modem", "raw_mtu": "1500", "mac": "08:00:27:cc:3f:1b"}, "results": {"tool": "p0f", "version": "0.11.17"}}}
-    message = ('poseidon.algos.decider', json.dumps(data))
+    message = ('poseidon.algos.decider', data)
     retval, msg_valid = mockMonitor.format_rabbit_message(
         message, faucet_event, remove_list)
     assert not retval
     assert msg_valid
 
     data = {'id': '', 'type': 'metadata', 'file_path': '/files/foo', 'data': {'6b33db53faf33c77d694ecab2e3fefadc7dacc70': {'valid': True, 'pcap_labels': None, 'decisions': {'investigate': False}, 'classification': {'labels': ['Administrator workstation', 'Developer workstation', 'Active Directory controller'], 'confidences': [0.9955250173194201, 0.004474982679786006, 7.939512151303659e-13]}, 'timestamp': 1608179739.839953, 'source_ip': '208.50.77.134', 'source_mac': '00:1a:8c:15:f9:80'}, 'pcap': 'trace_foo.pcap'}, 'results': {'tool': 'networkml', 'version': '0.6.7.dev4'}}
-    message = ('poseidon.algos.decider', json.dumps(data))
+    message = ('poseidon.algos.decider', data)
     retval, msg_valid = mockMonitor.format_rabbit_message(
         message, faucet_event, remove_list)
     assert not retval
     assert msg_valid
 
     data = dict({'Key1': 'Val1'})
-    message = ('FAUCET.Event', json.dumps(data))
+    message = ('FAUCET.Event', data)
     retval, msg_valid = mockMonitor.format_rabbit_message(
         message, faucet_event, remove_list)
     assert retval == {'Key1': 'Val1'}
     assert msg_valid
     assert faucet_event == [{'Key1': 'Val1'}]
 
-    message = (None, json.dumps(data))
+    message = (None, data)
     retval, msg_valid = mockMonitor.format_rabbit_message(
         message, faucet_event, remove_list)
     assert retval == {}
     assert not msg_valid
 
     data = dict({'foo': 'bar'})
-    message = ('poseidon.action.ignore', json.dumps(data))
+    message = ('poseidon.action.ignore', data)
     retval, msg_valid = mockMonitor.format_rabbit_message(
         message, faucet_event, remove_list)
     assert retval == {}
     assert msg_valid
 
-    message = ('poseidon.action.clear.ignored', json.dumps(data))
+    message = ('poseidon.action.clear.ignored', data)
     retval, msg_valid = mockMonitor.format_rabbit_message(
         message, faucet_event, remove_list)
     assert retval == {}
     assert msg_valid
 
-    message = ('poseidon.action.remove', json.dumps(data))
+    message = ('poseidon.action.remove', data)
     retval, msg_valid = mockMonitor.format_rabbit_message(
         message, faucet_event, remove_list)
     assert retval == {}
     assert msg_valid
 
-    message = ('poseidon.action.remove.ignored', json.dumps(data))
+    message = ('poseidon.action.remove.ignored', data)
     retval, msg_valid = mockMonitor.format_rabbit_message(
         message, faucet_event, remove_list)
     assert retval == {}
     assert msg_valid
 
     ip_data = dict({'10.0.0.1': ['rule1']})
-    message = ('poseidon.action.update_acls', json.dumps(ip_data))
+    message = ('poseidon.action.update_acls', ip_data)
     retval, msg_valid = mockMonitor.format_rabbit_message(
         message, faucet_event, remove_list)
     assert retval == {}
     assert msg_valid
 
     data = [('foo', 'unknown')]
-    message = ('poseidon.action.change', json.dumps(data))
+    message = ('poseidon.action.change', data)
     retval, msg_valid = mockMonitor.format_rabbit_message(
         message, faucet_event, remove_list)
     assert retval == {}
@@ -288,6 +288,9 @@ def test_rabbit_callback():
 
         def __init__(self):
             self.logger = logger
+            self.controller = {'FA_RABBIT_ROUTING_KEY': mock_method.routing_key}
+            self.s = None
+            self.prom = None
 
     mock_channel = MockChannel()
     mock_queue = MockQueue()
@@ -298,15 +301,15 @@ def test_rabbit_callback():
         mock_channel,
         mock_method,
         'properties',
-        'body',
+        '{"body": 0}',
         mock_queue)
-    assert mock_queue.get_item() == (mock_method.routing_key, 'body')
+    assert mock_queue.get_item() == (mock_method.routing_key, {'body': 0})
 
     rabbit_callback(
         mock_channel,
         mock_method,
         'properties',
-        'body',
+        '{"body": 0}',
         mock_queue)
 
 
