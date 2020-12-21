@@ -1,4 +1,4 @@
-FROM iqtlabs/poseidon:v0.17.0
+FROM iqtlabs/poseidon:latest
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
 LABEL poseidon.namespace="api"
 
