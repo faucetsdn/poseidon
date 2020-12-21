@@ -72,14 +72,23 @@ class Monitor:
             scheduler.run_pending()
             time.sleep(1)
 
+    def ignore_rabbit(self, routing_key, body):
+        ''' drop ignored messages. '''
+        if routing_key == self.controller['FA_RABBIT_ROUTING_KEY']:
+            if self.s and self.s.sdnc:
+                if self.s.sdnc.ignore_event(body):
+                    return True
+        return False
+
     def rabbit_callback(self, ch, method, _properties, body, q=None):
         ''' callback, places rabbit data into internal queue'''
-        self.logger.debug('got a message: {0}:{1}:{2} (qsize {3})'.format(
-            method.routing_key, body, type(body), q.qsize()))
+        body = json.loads(body)
+        self.logger.debug('got a message: {0}:{1} (qsize {2})'.format(
+            method.routing_key, body, q.qsize()))
         if q is not None:
-            q.put((method.routing_key, body))
-        else:
-            self.logger.debug('poseidonMain workQueue is None')
+            self.update_routing_key_time(method.routing_key)
+            if not self.ignore_rabbit(method.routing_key, body):
+                q.put((method.routing_key, body))
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
     def get_hosts(self):
@@ -164,8 +173,9 @@ class Monitor:
         self.queue_job(self.job_reinvestigation_timeout)
 
     def update_routing_key_time(self, routing_key):
-        self.prom.prom_metrics['last_rabbitmq_routing_key_time'].labels(
-            routing_key=routing_key).set(time.time())
+        if self.prom:
+            self.prom.prom_metrics['last_rabbitmq_routing_key_time'].labels(
+                routing_key=routing_key).set(time.time())
 
     def update_endpoint_metadata(self):
         update_time = time.time()
@@ -295,7 +305,6 @@ class Monitor:
         routing_key, my_obj = item
         self.logger.debug(
             'routing_key: {0} rabbit_message: {1}'.format(routing_key, my_obj))
-        my_obj = json.loads(my_obj)
 
         def handler_algos_decider(my_obj):
             self.logger.debug('decider value:{0}'.format(my_obj))
@@ -326,7 +335,6 @@ class Monitor:
                     for endpoint in updated:
                         if endpoint.mirror_active():
                             self.s.unmirror_endpoint(endpoint)
-                    self.job_update_metrics()
                     return data
             return {}
 
@@ -391,9 +399,8 @@ class Monitor:
 
         def handler_faucet_event(my_obj):
             if self.s and self.s.sdnc:
-                if not self.s.sdnc.ignore_event(my_obj):
-                    faucet_event.append(my_obj)
-                    return my_obj
+                faucet_event.append(my_obj)
+                return my_obj
             return {}
 
         handlers = {
@@ -410,7 +417,6 @@ class Monitor:
         handler = handlers.get(routing_key, None)
         if handler is not None:
             ret_val = handler(my_obj)
-            self.update_routing_key_time(routing_key)
             return ret_val, True
 
         self.logger.error(
@@ -489,8 +495,7 @@ class Monitor:
                 events += self.monitor_callable(schedule_func)
             if events:
                 self.monitor_callable(self.update_endpoint_metadata)
-            else:
-                time.sleep(1)
+            time.sleep(1)
 
     @staticmethod
     def get_q_item(q):
