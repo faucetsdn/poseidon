@@ -10,6 +10,8 @@ COPY workers/requirements.txt workers-requirements.txt
 COPY healthcheck /healthcheck
 
 RUN apt-get update && apt-get install -y --no-install-recommends curl gcc git g++ tini libyaml-dev && \
+  python3 -m pip install -U pip && \
+  pip3 install --no-cache-dir --upgrade setuptools && \
   pip3 install --no-cache-dir -r core-requirements.txt && \
   pip3 install --no-cache-dir -r api-requirements.txt && \
   pip3 install --no-cache-dir -r cli-requirements.txt && \
