@@ -1,3 +1,5 @@
-Simple RESTful API for querying information about nodes that Poseidon detects.
+# Poseidon (API)
 
-For a list of available API endpoints to the service browse to `/v1` where the service is running.
+> Software Defined Network Situational Awareness
+
+See the [GitHub home page](https://github.com/IQTLabs/poseidon)
