@@ -16,7 +16,7 @@ jobs:
       id: build_core_package
       run: |
         sudo apt-get update && \
-        sudo apt-get install -yq --no-install-recommends python3-pip python3.7 python3.7-dev python3-setuptools && \
+        sudo apt-get install -yq --no-install-recommends python3-pip python3.8 python3.8-dev python3-setuptools && \
         pip3 install wheel && \
         cd src/core && python3 setup.py sdist bdist_wheel --universal
       if: github.repository == 'iqtlabs/poseidon' && github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
@@ -30,7 +30,7 @@ jobs:
       id: build_cli_package
       run: |
         sudo apt-get update && \
-        sudo apt-get install -yq --no-install-recommends python3-pip python3.7 python3.7-dev python3-setuptools && \
+        sudo apt-get install -yq --no-install-recommends python3-pip python3.8 python3.8-dev python3-setuptools && \
         pip3 install wheel && \
         cd src/cli && python3 setup.py sdist bdist_wheel --universal
       if: github.repository == 'iqtlabs/poseidon' && github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
@@ -44,7 +44,7 @@ jobs:
       id: build_api_package
       run: |
         sudo apt-get update && \
-        sudo apt-get install -yq --no-install-recommends python3-pip python3.7 python3.7-dev python3-setuptools && \
+        sudo apt-get install -yq --no-install-recommends python3-pip python3.8 python3.8-dev python3-setuptools && \
         pip3 install wheel && \
         cd src/api && python3 setup.py sdist bdist_wheel --universal
       if: github.repository == 'iqtlabs/poseidon' && github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
