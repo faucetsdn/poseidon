@@ -9,7 +9,7 @@ COPY src/cli/requirements.txt cli-requirements.txt
 COPY workers/requirements.txt workers-requirements.txt
 COPY healthcheck /healthcheck
 
-RUN apt-get update && apt-get install -y --no-install-recommends curl gcc git g++ tini libyaml-dev && \
+RUN apt-get update && apt-get install -y --no-install-recommends curl gcc git g++ tini libyaml-dev libffi-dev && \
   python3 -m pip install -U pip && \
   pip3 install --no-cache-dir --upgrade setuptools && \
   pip3 install --no-cache-dir -r core-requirements.txt && \
@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl gcc git g+
   pip3 install --no-cache-dir -r cli-requirements.txt && \
   pip3 install --no-cache-dir -r workers-requirements.txt && \
   pip3 install --no-cache-dir -r /healthcheck/requirements.txt && \
-  apt-get purge -y gcc g++ && apt -y autoremove --purge && rm -rf /var/cache/* /root/.cache/*
+  apt-get purge -y gcc g++ libyaml-dev libffi-dev && apt -y autoremove --purge && rm -rf /var/cache/* /root/.cache/*
 
 # healthcheck
 ENV FLASK_APP /healthcheck/hc.py

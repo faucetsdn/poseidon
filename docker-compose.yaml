@@ -12,6 +12,9 @@ services:
                     - RABBIT_SERVER
                     - rabbitmq
                     - messenger
+        build:
+            context: helpers/rabbitmq
+            dockerfile: Dockerfile
     network_tap:
         restart: always
         image: 'iqtlabs/network_tap:v0.11.17'
@@ -32,6 +35,24 @@ services:
             poseidon:
         depends_on:
             - poseidon
+    poseidon_api:
+        restart: always
+        image: 'iqtlabs/poseidon-api:latest'
+        ports:
+            - '5000:8000'
+        environment:
+            PYTHONUNBUFFERED: '1'
+        volumes:
+            - '${POSEIDON_PREFIX}/opt/poseidon:/opt/poseidon'
+        networks:
+            poseidon:
+                aliases:
+                    - poseidon-api
+        depends_on:
+            - poseidon
+        build:
+            context: helpers/api
+            dockerfile: Dockerfile
     poseidon:
         restart: always
         image: 'iqtlabs/poseidon:latest'

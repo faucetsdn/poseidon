@@ -41,5 +41,9 @@ jobs:
         docker buildx build \
           --platform linux/amd64,linux/arm/v7,linux/arm64 \
           --push \
-          -t iqtlabs/rabbitmq:${{ steps.change_version.outputs.VERSION }} helpers/rabbitmq
+          -t iqtlabs/rabbitmq:${{ steps.change_version.outputs.VERSION }} helpers/rabbitmq && \
+        docker buildx build \
+          --platform linux/amd64,linux/arm/v7,linux/arm64 \
+          --push \
+          -t iqtlabs/poseidon-api:${{ steps.change_version.outputs.VERSION }} helpers/api
       if: github.repository == 'iqtlabs/poseidon' && github.event_name == 'push'
