@@ -9,7 +9,7 @@ COPY src/cli/requirements.txt cli-requirements.txt
 COPY workers/requirements.txt workers-requirements.txt
 COPY healthcheck /healthcheck
 
-RUN apt-get update && apt-get install -y --no-install-recommends curl gcc git g++ tini libyaml-dev python-gevent libffi-dev && \
+RUN apt-get update && apt-get install -y --no-install-recommends curl gcc git g++ tini libyaml-dev && \
   python3 -m pip install -U pip && \
   pip3 install --no-cache-dir --upgrade setuptools && \
   pip3 install --no-cache-dir -r core-requirements.txt && \

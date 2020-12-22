@@ -9,7 +9,7 @@ def main():
     args = parser.parse_args()
 
     os.environ['PROM_ADDR'] = args.prom_addr
-    process = subprocess.Popen(['gunicorn', '-b :'+str(args.port), '-k gevent', '-w 4', '--reload', 'poseidon_api.api'],
+    process = subprocess.Popen(['gunicorn', '-b :'+str(args.port), '-k eventlet', '-w 4', '--reload', 'poseidon_api.api'],
                                stdout=subprocess.PIPE,
                                universal_newlines=True)
 
