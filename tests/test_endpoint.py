@@ -19,7 +19,7 @@ def test_Endpoint():
 
 def test_times_next():
     endpoint = endpoint_factory('foo')
-    endpoint.queue_next('mirror')
+    endpoint.queue_next('operate')
     time.sleep(1)
     endpoint.copro_queue_next('copro_coprocess')
     time.sleep(1)

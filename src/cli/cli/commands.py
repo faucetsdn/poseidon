@@ -18,8 +18,7 @@ logger = logging.getLogger('commands')
 class Commands:
 
     def __init__(self, controller=None):
-        self.states = ['active', 'known', 'unknown',
-                       'mirroring', 'reinvestigating', 'queued']
+        self.states = ['known', 'unknown', 'operating', 'queued']
         if controller is None:
             self.controller = Config().get_config()
         else:

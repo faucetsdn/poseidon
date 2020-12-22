@@ -151,7 +151,7 @@ class Monitor:
                 self.logger.info('observation timing out: {0}'.format(endpoint.name))
                 endpoint.force_unknown()
                 events += 1
-            elif endpoint.mirror_active() and endpoint.state_timeout(timeout):
+            elif endpoint.operation_active() and endpoint.state_timeout(timeout):
                 self.logger.info('mirror timing out: {0}'.format(endpoint.name))
                 self.s.unmirror_endpoint(endpoint)
                 events += 1
@@ -160,7 +160,7 @@ class Monitor:
         if not candidates:
             candidates = self.s.not_ignored_endpoints('known')
         return events + self._schedule_queued_work(
-            candidates, budget, 'reinvestigate', self.s.mirror_endpoint, shuffle=True)
+            candidates, budget, 'operate', self.s.mirror_endpoint, shuffle=True)
 
     def queue_job(self, job):
         if self.job_queue.qsize() < 2:
@@ -333,7 +333,7 @@ class Monitor:
                 updated = self.merge_metadata(new_metadata)
                 if updated:
                     for endpoint in updated:
-                        if endpoint.mirror_active():
+                        if endpoint.operation_active():
                             self.s.unmirror_endpoint(endpoint)
                     return data
             return {}
@@ -357,11 +357,11 @@ class Monitor:
                 endpoint = self.s.endpoints.get(name, None)
                 if endpoint:
                     try:
-                        if endpoint.mirror_active():
+                        if endpoint.operation_active():
                             self.s.unmirror_endpoint(endpoint)
                         endpoint.machine_trigger(state)  # pytype: disable=attribute-error
                         endpoint.p_next_state = None
-                        if endpoint.mirror_active():
+                        if endpoint.operation_active():
                             self.s.mirror_endpoint(endpoint)
                             self.prom.prom_metrics['ncapture_count'].inc()
                     except Exception as e:  # pragma: no cover
@@ -431,20 +431,20 @@ class Monitor:
             for endpoint in queued_endpoints[:budget]:
                 getattr(endpoint, endpoint_state)()
                 endpoint_work(endpoint)
-                if endpoint_state in ['trigger_next', 'reinvestigate']:
+                if endpoint_state in ['trigger_next', 'operate']:
                     self.prom.prom_metrics['ncapture_count'].inc()
                 events += 1
         return events
 
     def schedule_mirroring(self):
         for endpoint in self.s.not_ignored_endpoints('unknown'):
-            endpoint.queue_next('mirror')
+            endpoint.queue_next('operate')
         budget = self.s.investigation_budget()
         queued_endpoints = [
             endpoint for endpoint in self.s.not_ignored_endpoints('queued')
-            if endpoint.mirror_requested()]
+            if endpoint.operation_requested()]
         queued_endpoints = sorted(queued_endpoints, key=lambda x: x.state_time)
-        self.logger.debug('investigations {0}, budget {1}, queued {2}'.format(
+        self.logger.debug('operations {0}, budget {1}, queued {2}'.format(
             str(self.s.investigations), str(budget), str(len(queued_endpoints))))
         return self._schedule_queued_work(queued_endpoints, budget, 'trigger_next', self.s.mirror_endpoint)
 

@@ -57,7 +57,7 @@ def test_unmirror_endpoint():
     endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
-    endpoint.mirror()
+    endpoint.operate()
     s.endpoints[endpoint.name] = endpoint
     s.unmirror_endpoint(endpoint)
 
@@ -381,14 +381,14 @@ def test_process():
                 'active': 0, 'ipv4_subnet': '12.12.12.12/24', 'ipv6_subnet': '', 'ipv4_rdns': '', 'ipv6_rdns': '', 'controller_type': 'faucet', 'controller': '', 'name': '', 'ipv4': '12.12.12.12', 'ipv6': '', 'ether_vendor': 'foo', 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
             endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'classification': {'labels': ['developer workstation', 'foo', 'bar'], 'confidences': [0.8, 0.2, 0.0]}}}, 'ipv4_addresses': {
                 '12.12.12.12': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
-            endpoint.mirror()
+            endpoint.operate()
             self.s.endpoints[endpoint.name] = endpoint
             endpoint = endpoint_factory('foo2')
             endpoint.endpoint_data = {
                 'active': 0, 'ipv4_subnet': '12.12.12.12/24', 'ipv6_subnet': '', 'ipv4_rdns': '', 'ipv6_rdns': '', 'controller_type': 'faucet', 'controller': '', 'name': '', 'ipv4': '12.12.12.12', 'ipv6': '', 'ether_vendor': 'foo', 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
             endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'classification': {'labels': ['developer workstation', 'foo', 'bar'], 'confidences': [0.8, 0.2, 0.0]}}}, 'ipv4_addresses': {
                 '12.12.12.12': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
-            endpoint.queue_next('mirror')
+            endpoint.queue_next('operate')
             self.s.endpoints[endpoint.name] = endpoint
             endpoint = endpoint_factory('foo3')
             endpoint.endpoint_data = {

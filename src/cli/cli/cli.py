@@ -468,10 +468,8 @@ class PoseidonShell(cmd2.Cmd):
             'role active-directory-controller', 'role administrator-server',
             'role administrator-workstation', 'role business-workstation',
             'role developer-workstation', 'role gpu-laptop', 'role pki-server',
-            'role unknown', 'state active', 'state known',
-            'state unknown', 'state mirroring',
-            'state reinvestigating', 'state queued', 'state ignored',
-            'os windows', 'os freebsd',
+            'role unknown', 'state known', 'state unknown', 'state operating',
+            'state queued', 'os windows', 'os freebsd',
             'os linux', 'os mac', 'history', 'version', 'what', 'where', 'all'
         ]
 
