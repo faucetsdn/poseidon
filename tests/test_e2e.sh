@@ -151,7 +151,7 @@ done
 # Poseidon event client receiving from FAUCET
 wait_var_nonzero "poseidon_last_rabbitmq_routing_key_time{routing_key=\"FAUCET.Event\"}" "" poseidon_last_rabbitmq_routing_key_time
 # Poseidon detected endpoints
-wait_var_nonzero "sum(poseidon_endpoint_current_states{current_state=\"mirroring\"})" "$FASTREPLAY" poseidon_endpoint_current_states
+wait_var_nonzero "sum(poseidon_endpoint_current_states{current_state=\"operating\"})" "$FASTREPLAY" poseidon_endpoint_current_states
 echo waiting for ncapture
 COUNT="0"
 while [[ "$COUNT" == "0" ]] ; do
