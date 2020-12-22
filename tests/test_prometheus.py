@@ -31,7 +31,7 @@ def test_decode_endpoints():
         '6b33db53faf33c77d694ecab2e3fefadc7dacc70': {'mac': '40:61:86:9a:f1:f5', 'pcap_labels': 'foo', 'top_confidence': 1.0, 'state': 'mirroring', 'top_role': 'Administrator workstation', 'second_role': 'GPU laptop', 'second_confidence': 0.0006269307506632729, 'third_role': 'Developer workstation', 'third_confidence': 0.000399485844886532}}
     endpoints = p.prom_endpoints(hashes, role_hashes)
     endpoint = endpoints['6b33db53faf33c77d694ecab2e3fefadc7dacc70']
-    assert endpoint.state == 'mirroring'
+    assert endpoint.state == 'operating'
     assert endpoint.get_ipv4_os() == 'Windows'
     roles, confidences, pcap_labels = endpoint.get_roles_confidences_pcap_labels()
     assert roles == ('Administrator workstation', 'GPU laptop', 'Developer workstation')

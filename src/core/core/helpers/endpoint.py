@@ -37,24 +37,20 @@ def endpoint_copro_transit_wrap(trigger, source, dest):
 
 class Endpoint:
 
-    states = ['known', 'unknown', 'mirroring',
-              'reinvestigating', 'queued']
+    states = ['known', 'unknown', 'operating', 'queued']
 
     transitions = [
-        endpoint_transit_wrap('mirror', 'unknown', 'mirroring'),
+        endpoint_transit_wrap('operate', 'unknown', 'operating'),
         endpoint_transit_wrap('queue', 'unknown', 'queued'),
-        endpoint_transit_wrap('reinvestigate', 'known', 'reinvestigating'),
+        endpoint_transit_wrap('operate', 'known', 'operating'),
         endpoint_transit_wrap('queue', 'known', 'queued'),
-        endpoint_transit_wrap('mirror', 'queued', 'mirroring'),
-        endpoint_transit_wrap('reinvestigate', 'queued', 'reinvestigating'),
+        endpoint_transit_wrap('operate', 'queued', 'operating'),
         endpoint_transit_wrap('known', 'known', 'known'),
         endpoint_transit_wrap('unknown', 'known', 'unknown'),
         endpoint_transit_wrap('known', 'unknown', 'known'),
         endpoint_transit_wrap('unknown', 'unknown', 'unknown'),
-        endpoint_transit_wrap('known', 'mirroring', 'known'),
-        endpoint_transit_wrap('unknown', 'mirroring', 'unknown'),
-        endpoint_transit_wrap('known', 'reinvestigating', 'known'),
-        endpoint_transit_wrap('unknown', 'reinvestigating', 'unknown'),
+        endpoint_transit_wrap('known', 'operating', 'known'),
+        endpoint_transit_wrap('unknown', 'operating', 'unknown'),
         endpoint_transit_wrap('known', 'queued', 'known'),
         endpoint_transit_wrap('unknown', 'queued', 'unknown'),
     ]
@@ -197,13 +193,13 @@ class Endpoint:
             self.copro_machine_trigger(self.p_next_copro_state)
             self.p_next_copro_state = None
 
-    def mirror_active(self):
-        return self.state in ['mirroring', 'reinvestigating']
+    def operation_active(self):
+        return self.state == 'operating'
 
-    def mirror_requested(self, next_state=None):
+    def operation_requested(self, next_state=None):
         if next_state is None:
             next_state = self.p_next_state
-        return next_state in ['mirror', 'reinvestigate']
+        return next_state == 'operating']
 
     def force_unknown(self):
         self.unknown()  # pytype: disable=attribute-error
@@ -212,10 +208,8 @@ class Endpoint:
     def default(self):
         if not self.ignore:
             if self.state != 'unknown':
-                if self.state == 'mirroring':
-                    self.p_next_state = 'mirror'
-                elif self.state == 'reinvestigating':
-                    self.p_next_state = 'reinvestigate'
+                if self.state == 'operating':
+                    self.p_next_state = 'operate'
                 elif self.state == 'queued':
                     self.p_next_state = 'queue'
                 elif self.state == 'known':

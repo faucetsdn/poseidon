@@ -49,7 +49,7 @@ class SDNConnect:
 
     def unmirror_endpoint(self, endpoint):
         ''' unmirror an endpoint. '''
-        if endpoint.mirror_active():
+        if endpoint.operation_active():
             status = Actions(endpoint, self.sdnc).unmirror_endpoint()
             if not status:
                 self.logger.warning(
@@ -120,7 +120,7 @@ class SDNConnect:
     def investigation_budget(self):
         self.investigations = len([
             endpoint for endpoint in self.not_ignored_endpoints()
-            if endpoint.mirror_active()])
+            if endpoint.operation_active()])
         return max(
             self.controller['max_concurrent_reinvestigations'] - self.investigations, 0)
 
