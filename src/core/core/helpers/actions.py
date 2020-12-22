@@ -13,11 +13,6 @@ class Actions:
         self.endpoint = endpoint
         self.sdnc = sdnc
 
-    def shutdown_endpoint(self):
-        ''' tell the controller to shutdown an endpoint '''
-        if self.sdnc:
-            self.sdnc.shutdown_endpoint()
-
     def mirror_endpoint(self):
         '''
         tell network_tap to start a collector and the controller to begin

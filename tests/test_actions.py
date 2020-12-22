@@ -34,7 +34,6 @@ def test_Actions():
     a.unmirror_endpoint()
     a.coprocess_endpoint()
     a.uncoprocess_endpoint()
-    a.shutdown_endpoint()
 
 
 def test_Actions_nosdn():
@@ -52,4 +51,3 @@ def test_Actions_nosdn():
     a.unmirror_endpoint()
     a.coprocess_endpoint()
     a.uncoprocess_endpoint()
-    a.shutdown_endpoint()

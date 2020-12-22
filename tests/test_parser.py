@@ -315,7 +315,6 @@ def test_Parser():
         obj.config('unmirror', None, None)
         obj.config('unmirror', 1, 't1-1')
         obj.config('unmirror', 1, 't1-1')
-        obj.config('shutdown', None, None)
         obj.config('apply_acls', None, None)
         obj.config('apply_acls', 1, 't1-1', endpoints=endpoints,
                    rules_file=os.path.join(os.getcwd(), 'config/rules.yaml'))

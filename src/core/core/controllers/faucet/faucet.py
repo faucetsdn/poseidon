@@ -119,20 +119,6 @@ class FaucetProxy(Parser):
         # TODO check if config was successfully updated
         return True
 
-    def shutdown_ip(self, ip_addr, shutdown=True, mac_addr=None):
-        shutdowns = []
-        port = 0
-        switch = None
-        self.config('shutdown', int(port), switch)
-        # TODO check if config was successfully updated
-        return shutdowns
-
-    def shutdown_endpoint(self):
-        port = 0
-        switch = None
-        self.config('shutdown', int(port), switch)
-        # TODO check if config was successfully updated
-
     def _mac_switch_port(self, my_mac):
         try:
             entry = self.mac_table[my_mac][0]

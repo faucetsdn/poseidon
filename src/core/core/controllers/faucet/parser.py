@@ -215,10 +215,7 @@ class Parser:
     def config(self, action, port, switch, rules_file=None,
                endpoints=None, force_apply_rules=None, force_remove_rules=None,
                coprocess_rules_files=None):
-        if action in ('shutdown', 'apply_routes'):
-            # TODO: not implemented.
-            pass
-        elif action in ('mirror', 'unmirror'):
+        if action in ('mirror', 'unmirror'):
             self.config_mirror(action, switch, port)
         elif action == 'apply_acls':
             self.config_acls(

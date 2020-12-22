@@ -469,7 +469,7 @@ class PoseidonShell(cmd2.Cmd):
             'role administrator-workstation', 'role business-workstation',
             'role developer-workstation', 'role gpu-laptop', 'role pki-server',
             'role unknown', 'state active', 'state known',
-            'state unknown', 'state mirroring', 'state shutdown',
+            'state unknown', 'state mirroring',
             'state reinvestigating', 'state queued', 'state ignored',
             'os windows', 'os freebsd',
             'os linux', 'os mac', 'history', 'version', 'what', 'where', 'all'
@@ -703,7 +703,6 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
         Set the state of things on the network:
         SET [IP|MAC|ID] [STATE]
         SET 18:EF:02:2D:49:00 KNOWN
-        SET 8579d412f787432c1a3864c1833e48efb6e61dd466e39038a674f64652129293 SHUTDOWN
         '''
         # defaults
         fields = self.parser.default_fields + ['State', 'Next State']
