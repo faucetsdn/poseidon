@@ -199,7 +199,7 @@ class Endpoint:
     def operation_requested(self, next_state=None):
         if next_state is None:
             next_state = self.p_next_state
-        return next_state == 'operating'
+        return next_state == 'operate'
 
     def force_unknown(self):
         self.unknown()  # pytype: disable=attribute-error
