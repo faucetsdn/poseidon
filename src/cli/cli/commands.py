@@ -19,7 +19,7 @@ class Commands:
 
     def __init__(self, controller=None):
         self.states = ['active', 'known', 'unknown',
-                       'mirroring', 'shutdown', 'reinvestigating', 'queued']
+                       'mirroring', 'reinvestigating', 'queued']
         if controller is None:
             self.controller = Config().get_config()
         else:

@@ -38,7 +38,7 @@ def endpoint_copro_transit_wrap(trigger, source, dest):
 class Endpoint:
 
     states = ['known', 'unknown', 'mirroring',
-              'shutdown', 'reinvestigating', 'queued']
+              'reinvestigating', 'queued']
 
     transitions = [
         endpoint_transit_wrap('mirror', 'unknown', 'mirroring'),
@@ -53,8 +53,6 @@ class Endpoint:
         endpoint_transit_wrap('unknown', 'unknown', 'unknown'),
         endpoint_transit_wrap('known', 'mirroring', 'known'),
         endpoint_transit_wrap('unknown', 'mirroring', 'unknown'),
-        endpoint_transit_wrap('known', 'shutdown', 'known'),
-        endpoint_transit_wrap('unknown', 'shutdown', 'unknown'),
         endpoint_transit_wrap('known', 'reinvestigating', 'known'),
         endpoint_transit_wrap('unknown', 'reinvestigating', 'unknown'),
         endpoint_transit_wrap('known', 'queued', 'known'),
