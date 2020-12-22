@@ -1,3 +1,9 @@
+# v0.17.1 (2020-12-22)
+
+* Reduce overhead of processing unneed Faucet events.
+* Fix arm releases
+* Upgrade codecov
+
 # v0.17.0 (2020-12-21)
 
 * Move to PBR/package for posiedon core, api, cli
