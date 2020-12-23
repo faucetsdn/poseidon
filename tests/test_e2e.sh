@@ -17,15 +17,21 @@ TMPDIR=$(mktemp -d)
 FASTREPLAY="sudo tcpreplay -q -t -i sw1b $TMPDIR/test.pcap"
 SLOWREPLAY="sudo tcpreplay -q -M5 -i sw1b $TMPDIR/test.pcap"
 
+cli_cmd () {
+        PID=$(docker ps -q --filter "label=com.docker.compose.service=poseidon")
+        CLICMD="docker exec $PID poseidon-cli"
+}
+
 wait_show_all () {
         match=$1
         TRIES=0
         MATCHED=""
+        cli_cmd
         PID=$(docker ps -q --filter "label=com.docker.compose.service=poseidon")
         CMD="docker exec $PID poseidon-cli"
         echo waiting for $match in show all
         while [[ "$MATCHED" == "" ]] ; do
-                MATCHED=$($CMD 'show all' | grep -E "$match" | cat)
+                MATCHED=$($CLICMD 'show all' | grep -E "$match" | cat)
                 TRIES=$((TRIES+1))
                 if [[ "$TRIES" == "60" ]] ; then
                      echo FAIL: show all did not contain $match
@@ -179,6 +185,10 @@ wait_var_nonzero "sum(faucetconfrpc_ok_total{peer_id=\"poseidon\"})" "" faucetco
 for rpc in GetConfigFile SetConfigFile ClearPortMirror AddPortMirror RemovePortMirror ; do
         wait_var_nonzero "faucetconfrpc_ok_total{peer_id=\"poseidon\",request=\"$rpc\"}" "" faucetconfrpc_ok_total
 done
+docker run -i iqtlabs/poseidon python3 -c "from poseidon_core import __version__ ; print(__version__) ;"
+cli_cmd
+$CLICMD "show version"
+poseidon -V
 poseidon -S
 poseidon -d
 COMPOSE_PROJECT_NAME=ovs docker-compose -f tests/test-e2e-ovs.yml stop
