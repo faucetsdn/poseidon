@@ -7,8 +7,8 @@ import ipaddress
 import logging
 
 from poseidon_core.controllers.faucet.parser import Parser
-from poseidon_core.volos.coprocessor import Coprocessor
-from poseidon_core.volos.volos import Volos
+from poseidon_core.operations.primitives.coprocess import Coprocess
+from poseidon_core.operations.volos.volos import Volos
 
 
 class FaucetProxy(Parser):
@@ -46,7 +46,7 @@ class FaucetProxy(Parser):
 
         # parse volos config
         self.volos = Volos(controller)
-        self.coprocessor = Coprocessor(controller)
+        self.coprocessor = Coprocess(controller)
         self.logger = logging.getLogger('faucet')
         self.mac_table = {}
 

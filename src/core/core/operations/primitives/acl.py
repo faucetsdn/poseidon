@@ -9,10 +9,10 @@ import os
 from poseidon_core.controllers.faucet.config import FaucetLocalConfGetSetter
 
 
-class ACLs:
+class ACL:
 
     def __init__(self):
-        self.logger = logging.getLogger('acls')
+        self.logger = logging.getLogger('acl')
         self.faucetconfgetsetter = FaucetLocalConfGetSetter()
 
     def _read_conf(self, config_file):

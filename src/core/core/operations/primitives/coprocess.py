@@ -6,7 +6,7 @@ Created on 30 January 2020
 import logging
 
 
-class Coprocessor(object):
+class Coprocess:
 
     def __init__(self, controller):
         self.logger = logging.getLogger('coprocessor')

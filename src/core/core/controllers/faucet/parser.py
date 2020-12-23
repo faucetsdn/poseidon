@@ -6,11 +6,11 @@ Created on 19 November 2017
 import logging
 from collections import defaultdict
 
-from poseidon_core.controllers.faucet.acls import ACLs
 from poseidon_core.controllers.faucet.config import FaucetLocalConfGetSetter
 from poseidon_core.controllers.faucet.config import FaucetRemoteConfGetSetter
 from poseidon_core.controllers.faucet.helpers import parse_rules
-from poseidon_core.volos.acls import Acl
+from poseidon_core.operations.primitives.acl import ACL
+from poseidon_core.operations.volos.acls import Acl
 
 
 class Parser:
@@ -207,7 +207,7 @@ class Parser:
     def config_acls(self, rules_file, endpoints, force_apply_rules, force_remove_rules, coprocess_rules_files):
         rules_doc = parse_rules(rules_file)
         self._read_faucet_conf()
-        self.faucetconfgetsetter.faucet_conf = ACLs().apply_acls(
+        self.faucetconfgetsetter.faucet_conf = ACL().apply_acls(
             rules_file, endpoints,
             force_apply_rules, force_remove_rules,
             coprocess_rules_files, self.faucetconfgetsetter.faucet_conf, rules_doc)

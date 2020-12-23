@@ -2,9 +2,9 @@ import logging
 
 from poseidon_core.helpers.config import Config
 from poseidon_core.helpers.endpoint import endpoint_factory
-from poseidon_core.volos.acls import VolosAcl
-from poseidon_core.volos.coprocessor import Coprocessor
-from poseidon_core.volos.volos import Volos
+from poseidon_core.operations.primitives.coprocess import Coprocess
+from poseidon_core.operations.volos.acls import VolosAcl
+from poseidon_core.operations.volos.volos import Volos
 
 logger = logging.getLogger('test')
 
@@ -26,6 +26,6 @@ def test_Acl():
     a = VolosAcl(endpoint, controller['acl_dir'])
 
 
-def test_Coprocessor():
+def test_Coprocess():
     controller = Config().get_config()
-    c = Coprocessor(controller)
+    c = Coprocess(controller)
