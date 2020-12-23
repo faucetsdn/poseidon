@@ -16,12 +16,11 @@ import time
 
 import cmd2
 from natural.date import duration
-from texttable import Texttable
-
 from poseidon_cli import __version__
 from poseidon_cli.commands import Commands
 from poseidon_core.constants import NO_DATA
 from poseidon_core.helpers.exception_decor import exception
+from texttable import Texttable
 
 
 readline.parse_and_bind('?: complete')

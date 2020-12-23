@@ -198,7 +198,8 @@ class Parser:
                 count = self.mirror_counts[mirror_key]
                 self.logger.info(f'mirroring {count} MACs on {mirror_key}')
             else:
-                self.logger.error(f'Unknown mirror action {action} for {mirror_key}')
+                self.logger.error(
+                    f'Unknown mirror action {action} for {mirror_key}')
         else:
             self.logger.error(
                 f'Unable to configure mirror/unmirror {switch}:{port} due to warnings')
@@ -250,7 +251,7 @@ class Parser:
                 if self.proxy_mirror_ports:
                     for s in self.proxy_mirror_ports:
                         if (switch == self.proxy_mirror_ports[s][0] and
-                            port_no == self.proxy_mirror_ports[s][1]):
+                                port_no == self.proxy_mirror_ports[s][1]):
                             self.logger.debug(
                                 'ignoring event because switch %s port %s is being a proxy' % (
                                     switch, port_no))

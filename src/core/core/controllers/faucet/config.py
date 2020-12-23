@@ -4,7 +4,6 @@ import sys
 
 import yaml
 from faucetconfrpc.faucetconfrpc_client_lib import FaucetConfRpcClient
-
 from poseidon_core.controllers.faucet.helpers import get_config_file
 from poseidon_core.controllers.faucet.helpers import yaml_in
 from poseidon_core.controllers.faucet.helpers import yaml_out

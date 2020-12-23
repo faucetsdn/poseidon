@@ -8,7 +8,6 @@ import shutil
 import tempfile
 
 import yaml
-
 from poseidon_core.controllers.faucet.faucet import FaucetProxy
 from poseidon_core.controllers.faucet.helpers import get_config_file
 from poseidon_core.controllers.faucet.helpers import parse_rules

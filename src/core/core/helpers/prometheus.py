@@ -4,21 +4,21 @@ Created on 5 December 2018
 @author: Charlie Lewis
 """
 import datetime
-import logging
 import ipaddress
+import logging
 from collections import defaultdict
+
 import requests
-
-from prometheus_client import Counter
-from prometheus_client import Gauge
-from prometheus_client import Info
-from prometheus_client import Summary
-from prometheus_client import start_http_server
-
 from poseidon_core import __version__
 from poseidon_core.constants import NO_DATA
 from poseidon_core.helpers.config import Config
-from poseidon_core.helpers.endpoint import EndpointDecoder, Endpoint
+from poseidon_core.helpers.endpoint import Endpoint
+from poseidon_core.helpers.endpoint import EndpointDecoder
+from prometheus_client import Counter
+from prometheus_client import Gauge
+from prometheus_client import Info
+from prometheus_client import start_http_server
+from prometheus_client import Summary
 
 
 class Prometheus():
@@ -27,10 +27,12 @@ class Prometheus():
         self.logger = logging.getLogger('prometheus')
         self.prom_metrics = {}
         self.controller = Config().get_config()
-        self.prometheus_addr = self.controller['prometheus_ip'] + ':' + self.controller['prometheus_port']
+        self.prometheus_addr = self.controller['prometheus_ip'] + \
+            ':' + self.controller['prometheus_port']
 
     def initialize_metrics(self):
-        self.prom_metrics['info'] = Info('poseidon_version', 'Info about Poseidon')
+        self.prom_metrics['info'] = Info(
+            'poseidon_version', 'Info about Poseidon')
         self.prom_metrics['ipv4_table'] = Gauge('poseidon_endpoint_ip_table',
                                                 'IP Table',
                                                 ['mac',
@@ -62,7 +64,8 @@ class Prometheus():
         self.prom_metrics['last_rabbitmq_routing_key_time'] = Gauge('poseidon_last_rabbitmq_routing_key_time',
                                                                     'Epoch time when last received a RabbitMQ message',
                                                                     ['routing_key'])
-        self.prom_metrics['ncapture_count'] = Counter('poseidon_ncapture_count', 'Number of times ncapture ran')
+        self.prom_metrics['ncapture_count'] = Counter(
+            'poseidon_ncapture_count', 'Number of times ncapture ran')
         self.prom_metrics['monitor_runtime_secs'] = Summary('poseidon_monitor_runtime_secs',
                                                             'Time spent in Monitor methods',
                                                             ['method'])
@@ -77,25 +80,25 @@ class Prometheus():
                                                                    'ipv6_address',
                                                                    'hash_id'])
         self.prom_metrics['endpoint_role_confidence_second'] = Gauge('poseidon_role_confidence_second',
-                                                                  'Confidence of second role prediction',
-                                                                  ['mac',
-                                                                   'name',
-                                                                   'role',
-                                                                   'pcap_labels',
-                                                                   'ipv4_os',
-                                                                   'ipv4_address',
-                                                                   'ipv6_address',
-                                                                   'hash_id'])
+                                                                     'Confidence of second role prediction',
+                                                                     ['mac',
+                                                                      'name',
+                                                                      'role',
+                                                                      'pcap_labels',
+                                                                      'ipv4_os',
+                                                                      'ipv4_address',
+                                                                      'ipv6_address',
+                                                                      'hash_id'])
         self.prom_metrics['endpoint_role_confidence_third'] = Gauge('poseidon_role_confidence_third',
-                                                                  'Confidence of third role prediction',
-                                                                  ['mac',
-                                                                   'name',
-                                                                   'role',
-                                                                   'pcap_labels',
-                                                                   'ipv4_os',
-                                                                   'ipv4_address',
-                                                                   'ipv6_address',
-                                                                   'hash_id'])
+                                                                    'Confidence of third role prediction',
+                                                                    ['mac',
+                                                                     'name',
+                                                                     'role',
+                                                                     'pcap_labels',
+                                                                     'ipv4_os',
+                                                                     'ipv4_address',
+                                                                     'ipv6_address',
+                                                                     'hash_id'])
         self.prom_metrics['endpoints'] = Gauge('poseidon_endpoints',
                                                'All endpoints',
                                                ['mac',
@@ -128,15 +131,15 @@ class Prometheus():
                                                   'ipv4_os',
                                                   'hash_id'])
         self.prom_metrics['endpoint_role'] = Gauge('poseidon_endpoint_role',
-                                                 'Top role for all endpoints',
-                                                 ['mac',
-                                                  'tenant',
-                                                  'segment',
-                                                  'ether_vendor',
-                                                  'name',
-                                                  'port',
-                                                  'top_role',
-                                                  'hash_id'])
+                                                   'Top role for all endpoints',
+                                                   ['mac',
+                                                    'tenant',
+                                                    'segment',
+                                                    'ether_vendor',
+                                                    'name',
+                                                    'port',
+                                                    'top_role',
+                                                    'hash_id'])
         self.prom_metrics['endpoint_ip'] = Gauge('poseidon_endpoint_ip',
                                                  'IP Address for all endpoints',
                                                  ['mac',
@@ -213,13 +216,17 @@ class Prometheus():
                                                            ipv4_os=host['ipv4_os'],
                                                            hash_id=host['id']).set(int(ipaddress.ip_address(host['ipv4'])))
             for role in metrics['roles']:
-                self.prom_metrics['roles'].labels(role=role).set(metrics['roles'][role])
+                self.prom_metrics['roles'].labels(
+                    role=role).set(metrics['roles'][role])
             for os_t in metrics['oses']:
-                self.prom_metrics['oses'].labels(ipv4_os=os_t).set(metrics['oses'][os_t])
+                self.prom_metrics['oses'].labels(
+                    ipv4_os=os_t).set(metrics['oses'][os_t])
             for current_state in metrics['current_states']:
-                self.prom_metrics['current_states'].labels(current_state=current_state).set(metrics['current_states'][current_state])
+                self.prom_metrics['current_states'].labels(current_state=current_state).set(
+                    metrics['current_states'][current_state])
             for vlan in metrics['vlans']:
-                self.prom_metrics['vlans'].labels(tenant=vlan).set(metrics['vlans'][vlan])
+                self.prom_metrics['vlans'].labels(
+                    tenant=vlan).set(metrics['vlans'][vlan])
             for port_tenant in metrics['port_tenants']:
                 self.prom_metrics['port_tenants'].labels(port=port_tenant[0],
                                                          tenant=port_tenant[1]).set(metrics['port_tenants'][port_tenant])
@@ -245,14 +252,17 @@ class Prometheus():
     def sorted_metrics(self, response):
         ''' return timeseries in order, most recently asserted, first. '''
         return sorted([
-            {'metric': result['metric'], 'values': [self.latest_metric(result)]}
+            {'metric': result['metric'], 'values': [
+                self.latest_metric(result)]}
             for result in response.json()['data']['result']],
             key=lambda x: self.latest_value(x), reverse=True)
 
     def prom_query(self, var, start_time_str, end_time_str, step='30s'):
-        payload = {'query': var, 'start': start_time_str, 'end': end_time_str, 'step': step}
+        payload = {'query': var, 'start': start_time_str,
+                   'end': end_time_str, 'step': step}
         try:
-            response = requests.get('http://%s/api/v1/query_range' % self.prometheus_addr, params=payload)
+            response = requests.get(
+                'http://%s/api/v1/query_range' % self.prometheus_addr, params=payload)
         except Exception:
             return []
         return self.sorted_metrics(response)
@@ -296,12 +306,16 @@ class Prometheus():
         # 6 hours in the past and 2 hours in the future
         start_time = current_time - datetime.timedelta(hours=6)
         end_time = current_time + datetime.timedelta(hours=2)
-        start_time_str = start_time.isoformat()[:-4]+"Z"
-        end_time_str = end_time.isoformat()[:-4]+"Z"
-        mr = self.prom_query('poseidon_endpoint_metadata', start_time_str, end_time_str)
-        r1 = self.prom_query('poseidon_role_confidence_top{role!="%s"}' % NO_DATA, start_time_str, end_time_str)
-        r2 = self.prom_query('poseidon_role_confidence_second{role!="%s"}' % NO_DATA, start_time_str, end_time_str)
-        r3 = self.prom_query('poseidon_role_confidence_third{role!="%s"} % NO_DATA', start_time_str, end_time_str)
+        start_time_str = start_time.isoformat()[:-4]+'Z'
+        end_time_str = end_time.isoformat()[:-4]+'Z'
+        mr = self.prom_query('poseidon_endpoint_metadata',
+                             start_time_str, end_time_str)
+        r1 = self.prom_query(
+            'poseidon_role_confidence_top{role!="%s"}' % NO_DATA, start_time_str, end_time_str)
+        r2 = self.prom_query(
+            'poseidon_role_confidence_second{role!="%s"}' % NO_DATA, start_time_str, end_time_str)
+        r3 = self.prom_query(
+            'poseidon_role_confidence_third{role!="%s"} % NO_DATA', start_time_str, end_time_str)
         return self.consolidate_prom(mr, r1, r2, r3)
 
     @staticmethod
@@ -342,7 +356,8 @@ class Prometheus():
             ipv4 = p_endpoint.get('ipv4_address', '')
             ipv4_os = p_endpoint.get('ipv4_os', '')
             if ipv4 and ipv4_os:
-                p_endpoint['metadata']['ipv4_addresses'][ipv4] = {'short_os': ipv4_os}
+                p_endpoint['metadata']['ipv4_addresses'][ipv4] = {
+                    'short_os': ipv4_os}
             mac = p_endpoint['mac']
             for role_hash in role_hashes.values():
                 role_mac = role_hash['mac']

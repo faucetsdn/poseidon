@@ -7,9 +7,8 @@ import hashlib
 import json
 import time
 
-from transitions import Machine
-
 from poseidon_core.constants import NO_DATA
+from transitions import Machine
 
 MACHINE_IP_FIELDS = {
     'ipv4': ('ipv4_rdns', 'ipv4_subnet'),
@@ -173,7 +172,8 @@ class Endpoint:
         self.queue()  # pytype: disable=attribute-error
 
     def machine_trigger(self, state):
-        self.machine.events[state].trigger(self)  # pytype: disable=attribute-error
+        # pytype: disable=attribute-error
+        self.machine.events[state].trigger(self)
 
     def trigger_next(self):
         self.p_prev_state = self.state
@@ -186,7 +186,8 @@ class Endpoint:
         self.copro_queue()  # pytype: disable=attribute-error
 
     def copro_machine_trigger(self, state):
-        self.copro_machine.events[state].trigger(self)  # pytype: disable=attribute-error
+        self.copro_machine.events[state].trigger(
+            self)  # pytype: disable=attribute-error
 
     def copro_trigger_next(self):
         if self.p_next_copro_state:

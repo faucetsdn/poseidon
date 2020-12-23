@@ -7,7 +7,6 @@ import time
 from copy import deepcopy
 
 import pika
-
 from poseidon_core.constants import NO_DATA
 from poseidon_core.controllers.faucet.faucet import FaucetProxy
 from poseidon_core.helpers.actions import Actions
@@ -74,7 +73,8 @@ class SDNConnect:
         ''' load existing endpoints from Prometheus. '''
         new_endpoints = self.prom.get_stored_endpoints()
         if new_endpoints:
-            self.logger.info(f'Loaded {len(new_endpoints)} endpoints previously learned.')
+            self.logger.info(
+                f'Loaded {len(new_endpoints)} endpoints previously learned.')
             self.endpoints = new_endpoints
 
     def get_sdn_context(self):
@@ -89,15 +89,19 @@ class SDNConnect:
                     self.controller))
 
     def not_ignored_endpoints(self, state=None):
-        endpoints = [endpoint for endpoint in self.endpoints.values() if not endpoint.ignore]
+        endpoints = [endpoint for endpoint in self.endpoints.values()
+                     if not endpoint.ignore]
         if state:
-            endpoints = [endpoint for endpoint in endpoints if endpoint.state == state]
+            endpoints = [
+                endpoint for endpoint in endpoints if endpoint.state == state]
         return endpoints
 
     def not_copro_ignored_endpoints(self, state=None):
-        endpoints = [endpoint for endpoint in self.endpoints.values() if not endpoint.copro_ignore]
+        endpoints = [endpoint for endpoint in self.endpoints.values()
+                     if not endpoint.copro_ignore]
         if state:
-            endpoints = [endpoint for endpoint in endpoints if endpoint.copro_state == state]
+            endpoints = [
+                endpoint for endpoint in endpoints if endpoint.copro_state == state]
         return endpoints
 
     def endpoint_by_name(self, name):

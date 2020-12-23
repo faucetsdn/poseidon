@@ -12,6 +12,7 @@ from poseidon_core.helpers.log import Logger
 from poseidon_core.helpers.rabbit import Rabbit
 from poseidon_core.monitor import Monitor
 
+
 def main():  # pragma: no cover
     logging.getLogger('pika').setLevel(logging.WARNING)
     Logger()

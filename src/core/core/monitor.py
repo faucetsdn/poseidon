@@ -12,7 +12,6 @@ from functools import partial
 
 import requests
 import schedule
-
 from poseidon_core.helpers.actions import Actions
 from poseidon_core.helpers.config import Config
 from poseidon_core.helpers.prometheus import Prometheus
@@ -148,11 +147,13 @@ class Monitor:
         timeout = 2*self.controller['reinvestigation_frequency']
         for endpoint in self.s.not_ignored_endpoints():
             if endpoint.observed_timeout(timeout):
-                self.logger.info('observation timing out: {0}'.format(endpoint.name))
+                self.logger.info(
+                    'observation timing out: {0}'.format(endpoint.name))
                 endpoint.force_unknown()
                 events += 1
             elif endpoint.operation_active() and endpoint.state_timeout(timeout):
-                self.logger.info('mirror timing out: {0}'.format(endpoint.name))
+                self.logger.info(
+                    'mirror timing out: {0}'.format(endpoint.name))
                 self.s.unmirror_endpoint(endpoint)
                 events += 1
         budget = self.s.investigation_budget()
@@ -359,7 +360,8 @@ class Monitor:
                     try:
                         if endpoint.operation_active():
                             self.s.unmirror_endpoint(endpoint)
-                        endpoint.machine_trigger(state)  # pytype: disable=attribute-error
+                        # pytype: disable=attribute-error
+                        endpoint.machine_trigger(state)
                         endpoint.p_next_state = None
                         if endpoint.operation_active():
                             self.s.mirror_endpoint(endpoint)
@@ -453,7 +455,8 @@ class Monitor:
             endpoint.copro_queue_next('copro_coprocess')
         budget = self.s.coprocessing_budget()
         queued_endpoints = self.s.not_copro_ignored_endpoints('copro_queued')
-        queued_endpoints = sorted(queued_endpoints, key=lambda x: x.copro_state_time)
+        queued_endpoints = sorted(
+            queued_endpoints, key=lambda x: x.copro_state_time)
         self.logger.debug('coprocessing {0}, budget {1}, queued {2}'.format(
             str(self.s.coprocessing), str(budget), str(len(queued_endpoints))))
         return self._schedule_queued_work(queued_endpoints, budget, 'copro_trigger_next', self.s.coprocess_endpoint)
@@ -472,25 +475,30 @@ class Monitor:
         faucet_event = []
         remove_list = []
         while True:
-            found_work, rabbit_msg = self.monitor_callable(partial(self.get_q_item, self.m_queue))
+            found_work, rabbit_msg = self.monitor_callable(
+                partial(self.get_q_item, self.m_queue))
             if not found_work:
                 break
             events += 1
             # faucet_event and remove_list get updated as references because partial()
-            self.monitor_callable(partial(self.format_rabbit_message, rabbit_msg, faucet_event, remove_list))
+            self.monitor_callable(
+                partial(self.format_rabbit_message, rabbit_msg, faucet_event, remove_list))
         return (events, faucet_event, remove_list)
 
     def process(self):
         while self.running:
-            events, faucet_event, remove_list = self.monitor_callable(self.handle_rabbit)
+            events, faucet_event, remove_list = self.monitor_callable(
+                self.handle_rabbit)
             if remove_list:
                 for endpoint_name in remove_list:
                     if endpoint_name in self.s.endpoints:
                         del self.s.endpoints[endpoint_name]
             if faucet_event:
-                self.monitor_callable(partial(self.s.check_endpoints, faucet_event))
+                self.monitor_callable(
+                    partial(self.s.check_endpoints, faucet_event))
             events += self.monitor_callable(self.schedule_mirroring)
-            found_work, schedule_func = self.monitor_callable(partial(self.get_q_item, self.job_queue))
+            found_work, schedule_func = self.monitor_callable(
+                partial(self.get_q_item, self.job_queue))
             if found_work and callable(schedule_func):
                 events += self.monitor_callable(schedule_func)
             if events:

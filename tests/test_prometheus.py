@@ -34,6 +34,7 @@ def test_decode_endpoints():
     assert endpoint.state == 'operating'
     assert endpoint.get_ipv4_os() == 'Windows'
     roles, confidences, pcap_labels = endpoint.get_roles_confidences_pcap_labels()
-    assert roles == ('Administrator workstation', 'GPU laptop', 'Developer workstation')
+    assert roles == ('Administrator workstation',
+                     'GPU laptop', 'Developer workstation')
     assert confidences == (1.0, 0.0006269307506632729, 0.000399485844886532)
     assert pcap_labels == 'foo'

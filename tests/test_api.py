@@ -1,7 +1,6 @@
 import falcon
 import pytest
 from falcon import testing
-
 from poseidon_api.api import api
 
 
