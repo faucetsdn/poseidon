@@ -4,6 +4,7 @@ Test module for endpoints.
 @author: Charlie Lewis
 """
 import time
+
 from poseidon_core.helpers.endpoint import Endpoint
 from poseidon_core.helpers.endpoint import endpoint_factory
 from poseidon_core.helpers.endpoint import EndpointDecoder
@@ -16,6 +17,7 @@ def test_Endpoint():
     c = EndpointDecoder(b).get_endpoint()
     a = {'tenant': 'foo', 'mac': '00:00:00:00:00:00'}
     assert Endpoint.make_hash(a)
+
 
 def test_times_next():
     endpoint = endpoint_factory('foo')

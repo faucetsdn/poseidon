@@ -7,8 +7,6 @@ import logging
 import os
 
 import yaml
-
-
 from poseidon_core.constants import PROTOCOL_MAP
 
 

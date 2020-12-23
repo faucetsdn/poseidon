@@ -16,7 +16,8 @@ def set_status(status):
     global metrics
     for worker in status:
         if 'workers_state' in metrics:
-            metrics['workers_state'].labels(worker=worker, state=status[worker]['state']).inc()
+            metrics['workers_state'].labels(
+                worker=worker, state=status[worker]['state']).inc()
         else:
             metrics['workers_state'] = Gauge('workers_state',
                                              'State of workers',

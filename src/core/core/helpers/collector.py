@@ -8,7 +8,6 @@ import json
 import logging
 
 import requests
-
 from poseidon_core.helpers.config import Config
 
 

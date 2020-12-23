@@ -7,7 +7,6 @@ import os
 import tempfile
 
 import yaml
-
 from poseidon_core.helpers.exception_decor import exception
 
 

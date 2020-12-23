@@ -6,7 +6,6 @@ from copy import deepcopy
 
 import falcon
 import requests
-
 from poseidon_core.constants import NO_DATA
 
 from .__init__ import __version__
@@ -75,17 +74,25 @@ class Nodes:
         # 6 hours in the past and 2 hours in the future
         start_time = current_time - datetime.timedelta(hours=6)
         end_time = current_time + datetime.timedelta(hours=2)
-        start_time_str = start_time.isoformat()[:-4]+"Z"
-        end_time_str = end_time.isoformat()[:-4]+"Z"
+        start_time_str = start_time.isoformat()[:-4]+'Z'
+        end_time_str = end_time.isoformat()[:-4]+'Z'
         try:
-            payload = {'query': 'poseidon_endpoint_metadata', 'start': start_time_str, 'end': end_time_str, 'step': '30s'}
-            mr = requests.get('http://'+self.prometheus_addr+'/api/v1/query_range', params=payload)
-            payload = {'query': 'poseidon_role_confidence_top', 'start': start_time_str, 'end': end_time_str, 'step': '30s'}
-            r1 = requests.get('http://'+self.prometheus_addr+'/api/v1/query_range', params=payload)
-            payload = {'query': 'poseidon_role_confidence_second', 'start': start_time_str, 'end': end_time_str, 'step': '30s'}
-            r2 = requests.get('http://'+self.prometheus_addr+'/api/v1/query_range', params=payload)
-            payload = {'query': 'poseidon_role_confidence_third', 'start': start_time_str, 'end': end_time_str, 'step': '30s'}
-            r3 = requests.get('http://'+self.prometheus_addr+'/api/v1/query_range', params=payload)
+            payload = {'query': 'poseidon_endpoint_metadata',
+                       'start': start_time_str, 'end': end_time_str, 'step': '30s'}
+            mr = requests.get('http://'+self.prometheus_addr +
+                              '/api/v1/query_range', params=payload)
+            payload = {'query': 'poseidon_role_confidence_top',
+                       'start': start_time_str, 'end': end_time_str, 'step': '30s'}
+            r1 = requests.get('http://'+self.prometheus_addr +
+                              '/api/v1/query_range', params=payload)
+            payload = {'query': 'poseidon_role_confidence_second',
+                       'start': start_time_str, 'end': end_time_str, 'step': '30s'}
+            r2 = requests.get('http://'+self.prometheus_addr +
+                              '/api/v1/query_range', params=payload)
+            payload = {'query': 'poseidon_role_confidence_third',
+                       'start': start_time_str, 'end': end_time_str, 'step': '30s'}
+            r3 = requests.get('http://'+self.prometheus_addr +
+                              '/api/v1/query_range', params=payload)
         except Exception as e:
             print(f'Unable to get endpoints from Prometheus because: {e}')
         role_hashes = {}
@@ -107,16 +114,20 @@ class Nodes:
                 if 'result' in results['data'] and results['data']['result']:
                     for metric in results['data']['result']:
                         if metric['metric']['hash_id'] in role_hashes:
-                            role_hashes[metric['metric']['hash_id']]['second_role'] = metric['metric'].get('role', NO_DATA)
-                            role_hashes[metric['metric']['hash_id']]['second_confidence'] = float(metric['values'][-1][1])
+                            role_hashes[metric['metric']['hash_id']]['second_role'] = metric['metric'].get(
+                                'role', NO_DATA)
+                            role_hashes[metric['metric']['hash_id']]['second_confidence'] = float(
+                                metric['values'][-1][1])
         if r3:
             results = r3.json()
             if 'data' in results:
                 if 'result' in results['data'] and results['data']['result']:
                     for metric in results['data']['result']:
                         if metric['metric']['hash_id'] in role_hashes:
-                            role_hashes[metric['metric']['hash_id']]['third_role'] = metric['metric'].get('role', NO_DATA)
-                            role_hashes[metric['metric']['hash_id']]['third_confidence'] = float(metric['values'][-1][1])
+                            role_hashes[metric['metric']['hash_id']]['third_role'] = metric['metric'].get(
+                                'role', NO_DATA)
+                            role_hashes[metric['metric']['hash_id']]['third_confidence'] = float(
+                                metric['values'][-1][1])
         if mr:
             results = mr.json()
             if 'data' in results:
@@ -124,11 +135,15 @@ class Nodes:
                     for metric in results['data']['result']:
                         if metric['metric']['hash_id'] in hashes:
                             if float(metric['values'][-1][1]) > hashes[metric['metric']['hash_id']]['latest']:
-                                hashes[metric['metric']['hash_id']] = metric['metric']
-                                hashes[metric['metric']['hash_id']]['latest'] = float(metric['values'][-1][1])
+                                hashes[metric['metric']['hash_id']
+                                       ] = metric['metric']
+                                hashes[metric['metric']['hash_id']]['latest'] = float(
+                                    metric['values'][-1][1])
                         else:
-                            hashes[metric['metric']['hash_id']] = metric['metric']
-                            hashes[metric['metric']['hash_id']]['latest'] = float(metric['values'][-1][1])
+                            hashes[metric['metric']['hash_id']
+                                   ] = metric['metric']
+                            hashes[metric['metric']['hash_id']]['latest'] = float(
+                                metric['values'][-1][1])
         return role_hashes, hashes
 
     def build_nodes(self):

@@ -4,8 +4,10 @@ def main():
     import subprocess
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--port', '-p', help='Port to run the API webserver on', type=int, default=8000)
-    parser.add_argument('--prom_addr', '-a', help='Prometheus address connected to Poseidon, i.e. "prometheus:9090"', default='prometheus:9090')
+    parser.add_argument(
+        '--port', '-p', help='Port to run the API webserver on', type=int, default=8000)
+    parser.add_argument(
+        '--prom_addr', '-a', help='Prometheus address connected to Poseidon, i.e. "prometheus:9090"', default='prometheus:9090')
     args = parser.parse_args()
 
     os.environ['PROM_ADDR'] = args.prom_addr

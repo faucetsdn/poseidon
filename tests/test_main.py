@@ -10,8 +10,6 @@ import logging
 import queue
 import time
 
-from prometheus_client import REGISTRY
-
 from poseidon_core.constants import NO_DATA
 from poseidon_core.helpers.config import Config
 from poseidon_core.helpers.endpoint import endpoint_factory
@@ -20,6 +18,7 @@ from poseidon_core.helpers.prometheus import Prometheus
 from poseidon_core.helpers.rabbit import Rabbit
 from poseidon_core.monitor import Monitor
 from poseidon_core.sdnconnect import SDNConnect
+from prometheus_client import REGISTRY
 
 logger = logging.getLogger('test')
 
@@ -191,14 +190,16 @@ def test_format_rabbit_message():
     faucet_event = []
     remove_list = []
 
-    data = {"id": "", "type": "metadata", "file_path": "/files/foo.pcap", "data": {"10.0.2.15": {"full_os": "Windows NT kernel", "short_os": "Windows", "link": "Ethernet or modem", "raw_mtu": "1500", "mac": "08:00:27:cc:3f:1b"}, "results": {"tool": "p0f", "version": "0.11.17"}}}
+    data = {'id': '', 'type': 'metadata', 'file_path': '/files/foo.pcap', 'data': {'10.0.2.15': {'full_os': 'Windows NT kernel', 'short_os': 'Windows',
+                                                                                                 'link': 'Ethernet or modem', 'raw_mtu': '1500', 'mac': '08:00:27:cc:3f:1b'}, 'results': {'tool': 'p0f', 'version': '0.11.17'}}}
     message = ('poseidon.algos.decider', data)
     retval, msg_valid = mockMonitor.format_rabbit_message(
         message, faucet_event, remove_list)
     assert not retval
     assert msg_valid
 
-    data = {'id': '', 'type': 'metadata', 'file_path': '/files/foo', 'data': {'6b33db53faf33c77d694ecab2e3fefadc7dacc70': {'valid': True, 'pcap_labels': None, 'decisions': {'investigate': False}, 'classification': {'labels': ['Administrator workstation', 'Developer workstation', 'Active Directory controller'], 'confidences': [0.9955250173194201, 0.004474982679786006, 7.939512151303659e-13]}, 'timestamp': 1608179739.839953, 'source_ip': '208.50.77.134', 'source_mac': '00:1a:8c:15:f9:80'}, 'pcap': 'trace_foo.pcap'}, 'results': {'tool': 'networkml', 'version': '0.6.7.dev4'}}
+    data = {'id': '', 'type': 'metadata', 'file_path': '/files/foo', 'data': {'6b33db53faf33c77d694ecab2e3fefadc7dacc70': {'valid': True, 'pcap_labels': None, 'decisions': {'investigate': False}, 'classification': {'labels': ['Administrator workstation', 'Developer workstation', 'Active Directory controller'], 'confidences': [
+        0.9955250173194201, 0.004474982679786006, 7.939512151303659e-13]}, 'timestamp': 1608179739.839953, 'source_ip': '208.50.77.134', 'source_mac': '00:1a:8c:15:f9:80'}, 'pcap': 'trace_foo.pcap'}, 'results': {'tool': 'networkml', 'version': '0.6.7.dev4'}}
     message = ('poseidon.algos.decider', data)
     retval, msg_valid = mockMonitor.format_rabbit_message(
         message, faucet_event, remove_list)
@@ -288,7 +289,8 @@ def test_rabbit_callback():
 
         def __init__(self):
             self.logger = logger
-            self.controller = {'FA_RABBIT_ROUTING_KEY': mock_method.routing_key}
+            self.controller = {
+                'FA_RABBIT_ROUTING_KEY': mock_method.routing_key}
             self.s = None
             self.prom = None
 
