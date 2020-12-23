@@ -4,7 +4,7 @@ Created on 9 December 2018
 @author: Charlie Lewis
 """
 from poseidon_core.helpers.collector import Collector
-from poseidon_core.volos.acls import VolosAcl
+from poseidon_core.operations.volos.acls import VolosAcl
 
 
 class Actions:
