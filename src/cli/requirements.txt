@@ -1,4 +1,5 @@
 cmd2==1.4.0
 natural==0.2.0
 pbr==5.5.1
+poseidon_core=0.17.1
 texttable==1.6.3
