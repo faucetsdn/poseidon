@@ -15,6 +15,7 @@ from prometheus_client import Info
 from prometheus_client import Summary
 from prometheus_client import start_http_server
 
+from poseidon_core import __version__
 from poseidon_core.constants import NO_DATA
 from poseidon_core.helpers.config import Config
 from poseidon_core.helpers.endpoint import EndpointDecoder, Endpoint
@@ -188,18 +189,10 @@ class Prometheus():
                    'ncapture_count': 0}
         return metrics
 
-    def get_version(self):
-        try:
-            with open('/poseidon/VERSION', 'r') as f:  # pragma: no cover
-                for line in f:
-                    return line.strip()
-        except FileNotFoundError:
-            return 'unknown'
-
     def update_metrics(self, hosts):
 
         metrics = Prometheus.get_metrics()
-        metrics['info']['version'] = self.get_version()
+        metrics['info']['version'] = __version__
 
         for host in hosts:
             metrics['roles'][host['role']] += 1

@@ -18,6 +18,7 @@ import cmd2
 from natural.date import duration
 from texttable import Texttable
 
+from poseidon_cli import __version__
 from poseidon_cli.commands import Commands
 from poseidon_core.constants import NO_DATA
 from poseidon_core.helpers.exception_decor import exception
@@ -26,7 +27,7 @@ from poseidon_core.helpers.exception_decor import exception
 readline.parse_and_bind('?: complete')
 
 
-class GetData():
+class GetData:
 
     @staticmethod
     def _get_name(endpoint):
@@ -190,7 +191,7 @@ class GetData():
         return 'No history recorded yet.'
 
 
-class Parser():
+class Parser:
 
     def __init__(self):
         self.default_fields = [
@@ -691,9 +692,7 @@ oyyyyy.       oyyyyyyyy`-yyyyyyyyyyyyyysyyyyyyyyyyyyyo /yyyyyyy/
 
     @exception
     def show_version(self, _arg, _flags):
-        with open('/poseidon/VERSION', 'r') as f:  # pragma: no cover
-            for line in f:
-                self.poutput(line.strip())
+        self.poutput(__version__)
 
     @exception
     def task_set(self, arg, flags):

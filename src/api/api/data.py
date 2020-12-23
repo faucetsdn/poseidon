@@ -7,6 +7,7 @@ from copy import deepcopy
 import falcon
 import requests
 
+from .__init__ import __version__
 from .constants import NO_DATA
 from .routes import paths
 from .routes import version
@@ -29,7 +30,7 @@ class Info:
 
     @staticmethod
     def on_get(_req, resp):
-        resp.body = json.dumps({'version': 'v0.2.0'})
+        resp.body = json.dumps({'version': __version__})
         resp.content_type = falcon.MEDIA_TEXT
         resp.status = falcon.HTTP_200
 
@@ -91,9 +92,9 @@ class Nodes:
         if r1:
             results = r1.json()
             if 'result' in results['data'] and results['data']['result']:
-                    for metric in results['data']['result']:
-                        if not metric['metric']['hash_id'] in role_hashes:
-                            role_hashes[metric['metric']['hash_id']] = {'mac': metric['metric']['mac'],
+                for metric in results['data']['result']:
+                    if not metric['metric']['hash_id'] in role_hashes:
+                        role_hashes[metric['metric']['hash_id']] = {'mac': metric['metric']['mac'],
                                                                     'ipv4_address': metric['metric'].get('ipv4_address', ''),
                                                                     'ipv4_os': metric['metric'].get('ipv4_os', 'NO DATA'),
                                                                     'timestamp': str(metric['values'][-1][0]),
