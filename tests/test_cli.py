@@ -37,6 +37,7 @@ def test_poseidonshell():
     shell.show_what('foo', [])
     shell.show_history('foo', [])
     shell.show_where('foo', [])
+    shell.show_version('foo', [])
     shell.help_show()
     shell.show_authors('foo', [])
     shell.task_set('foo', [])
