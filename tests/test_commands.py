@@ -3,6 +3,7 @@
 Created on 18 Jan 2019
 @author: Charlie Lewis
 """
+from faucetconfgetsetter import FaucetLocalConfGetSetter
 from poseidon_cli.commands import Commands
 from poseidon_core.helpers.config import Config
 from poseidon_core.helpers.endpoint import endpoint_factory
@@ -16,7 +17,7 @@ def get_test_controller():
 
 
 def test_commands():
-    commands = Commands(controller=get_test_controller())
+    commands = Commands(controller=get_test_controller(), faucetconfgetsetter_cl=FaucetLocalConfGetSetter)
     endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
