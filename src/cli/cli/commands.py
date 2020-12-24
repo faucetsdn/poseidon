@@ -17,13 +17,13 @@ logger = logging.getLogger('commands')
 
 class Commands:
 
-    def __init__(self, controller=None):
+    def __init__(self, controller=None, faucetconfgetsetter_cl=None):
         self.states = ['known', 'unknown', 'operating', 'queued']
         if controller is None:
             self.controller = Config().get_config()
         else:
             self.controller = controller
-        self.sdnc = SDNConnect(self.controller, logger)
+        self.sdnc = SDNConnect(self.controller, logger, faucetconfgetsetter_cl=faucetconfgetsetter_cl)
 
     def _publish_action(self, address, payload):
         if payload:

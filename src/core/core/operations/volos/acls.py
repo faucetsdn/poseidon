@@ -7,14 +7,12 @@ import logging
 import os
 from pathlib import Path
 
-from poseidon_core.controllers.faucet.config import FaucetLocalConfGetSetter
-
 # TODO merge with primitives/acl.py
 
 
 class Acl:
 
-    def __init__(self, acl_file=None, faucetconfgetsetter=FaucetLocalConfGetSetter()):
+    def __init__(self, acl_file=None, faucetconfgetsetter=None):
         self.acls = {}
         self.acl_file = acl_file
         self.faucetconfgetsetter = faucetconfgetsetter

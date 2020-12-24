@@ -22,7 +22,7 @@ requests.packages.urllib3.disable_warnings()
 
 class Monitor:
 
-    def __init__(self, logger, controller=None):
+    def __init__(self, logger, controller=None, faucetconfgetsetter_cl=None):
         self.logger = logger
         self.m_queue = queue.Queue()
         self.job_queue = queue.Queue()
@@ -45,7 +45,7 @@ class Monitor:
         Prometheus.start()
 
         # initialize sdnconnect
-        self.s = SDNConnect(self.controller, self.logger)
+        self.s = SDNConnect(self.controller, self.logger, faucetconfgetsetter_cl=faucetconfgetsetter_cl)
         self.s.default_endpoints()
         self.update_endpoint_metadata()
 

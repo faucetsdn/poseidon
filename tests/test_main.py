@@ -10,6 +10,7 @@ import logging
 import queue
 import time
 
+from faucetconfgetsetter import FaucetLocalConfGetSetter, get_sdn_connect
 from poseidon_core.constants import NO_DATA
 from poseidon_core.helpers.config import Config
 from poseidon_core.helpers.endpoint import endpoint_factory
@@ -41,8 +42,7 @@ def get_test_controller():
 
 
 def test_mirror_endpoint():
-    controller = get_test_controller()
-    s = SDNConnect(controller, logger)
+    s = get_sdn_connect(logger)
     endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
@@ -51,8 +51,7 @@ def test_mirror_endpoint():
 
 
 def test_unmirror_endpoint():
-    controller = get_test_controller()
-    s = SDNConnect(controller, logger)
+    s = get_sdn_connect(logger)
     endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
@@ -62,15 +61,13 @@ def test_unmirror_endpoint():
 
 
 def test_clear_filters():
-    controller = get_test_controller()
-    s = SDNConnect(controller, logger)
+    s = get_sdn_connect(logger)
     endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
     s.endpoints[endpoint.name] = endpoint
     s.clear_filters()
-    controller = get_test_controller()
-    s = SDNConnect(controller, logger)
+    s = get_sdn_connect(logger)
     endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
@@ -79,15 +76,13 @@ def test_clear_filters():
 
 
 def test_check_endpoints():
-    controller = get_test_controller()
-    s = SDNConnect(controller, logger)
+    s = get_sdn_connect(logger)
     s.sdnc = None
     s.check_endpoints([])
 
 
 def test_endpoint_by_name():
-    controller = get_test_controller()
-    s = SDNConnect(controller, logger)
+    s = get_sdn_connect(logger)
     endpoint = s.endpoint_by_name('foo')
     assert endpoint == None
     endpoint = endpoint_factory('foo')
@@ -99,8 +94,7 @@ def test_endpoint_by_name():
 
 
 def test_endpoint_by_hash():
-    controller = get_test_controller()
-    s = SDNConnect(controller, logger)
+    s = get_sdn_connect(logger)
     endpoint = s.endpoint_by_hash('foo')
     assert endpoint == None
     endpoint = endpoint_factory('foo')
@@ -112,8 +106,7 @@ def test_endpoint_by_hash():
 
 
 def test_endpoints_by_ip():
-    controller = get_test_controller()
-    s = SDNConnect(controller, logger)
+    s = get_sdn_connect(logger)
     endpoints = s.endpoints_by_ip('10.0.0.1')
     assert endpoints == []
     endpoint = endpoint_factory('foo')
@@ -125,8 +118,7 @@ def test_endpoints_by_ip():
 
 
 def test_endpoints_by_mac():
-    controller = get_test_controller()
-    s = SDNConnect(controller, logger)
+    s = get_sdn_connect(logger)
     endpoints = s.endpoints_by_mac('00:00:00:00:00:01')
     assert endpoints == []
     endpoint = endpoint_factory('foo')
@@ -153,9 +145,9 @@ def test_get_q_item():
     class MockMonitor(Monitor):
 
         def __init__(self):
-            self.logger = logger
-            self.controller = get_test_controller()
-            self.s = SDNConnect(self.controller, logger)
+            self.s = get_sdn_connect(logger)
+            self.controller = self.s.controller
+            self.logger = self.s.logger
 
     mock_monitor = MockMonitor()
     m_queue = MockMQueue()
@@ -178,9 +170,9 @@ def test_format_rabbit_message():
 
         def __init__(self):
             self.logger = logger
-            self.controller = get_test_controller()
-            self.s = SDNConnect(self.controller, logger)
+            self.s = get_sdn_connect(logger)
             self.s.sdnc = MockParser()
+            self.controller = self.s.controller
 
         def update_routing_key_time(self, routing_key):
             return
@@ -316,8 +308,7 @@ def test_rabbit_callback():
 
 
 def test_find_new_machines():
-    controller = get_test_controller()
-    s = SDNConnect(controller, logger)
+    s = get_sdn_connect(logger)
     machines = [{'active': 0, 'source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'ipv4_os': 'unknown', 'tenant': 'vlan1', 'port': 1, 'segment': 'switch1', 'ipv4': '123.123.123.123', 'mac': '00:00:00:00:00:00', 'id': 'foo1', 'ipv6': '0'},
                 {'active': 1, 'source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'ipv4_os': 'unknown', 'tenant': 'vlan1',
                     'port': 1, 'segment': 'switch1', 'ipv4': '123.123.123.123', 'mac': '00:00:00:00:00:00', 'id': 'foo2', 'ipv6': '0'},
@@ -334,7 +325,7 @@ def test_find_new_machines():
 
 
 def test_Monitor_init():
-    monitor = Monitor(logger, controller=get_test_controller())
+    monitor = Monitor(logger, controller=get_test_controller(), faucetconfgetsetter_cl=FaucetLocalConfGetSetter)
     hosts = [{'active': 0, 'source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'ipv4_os': 'unknown', 'tenant': 'vlan1', 'port': 1, 'segment': 'switch1', 'ipv4': '123.123.123.123', 'mac': '00:00:00:00:00:00', 'id': 'foo1', 'ipv6': '0'},
              {'active': 1, 'source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'ipv4_os': 'unknown', 'tenant': 'vlan1',
                  'port': 1, 'segment': 'switch1', 'ipv4': '123.123.123.123', 'mac': '00:00:00:00:00:00', 'id': 'foo2', 'ipv6': '0'},
@@ -348,9 +339,7 @@ def test_Monitor_init():
 
 
 def test_SDNConnect_init():
-    controller = get_test_controller()
-    controller['trunk_ports'] = []
-    SDNConnect(controller, logger)
+    get_sdn_connect(logger)
 
 
 def unregister_metrics():
@@ -366,9 +355,9 @@ def test_process():
     class MockMonitor(Monitor):
 
         def __init__(self):
-            self.logger = logger
-            self.controller = get_test_controller()
-            self.s = SDNConnect(self.controller, logger)
+            self.s = get_sdn_connect(logger)
+            self.logger = self.s.logger
+            self.controller = self.s.controller
             self.s.controller['TYPE'] = 'None'
             self.s.get_sdn_context()
             self.s.controller['TYPE'] = 'faucet'
@@ -445,8 +434,7 @@ def test_show_endpoints():
         'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv6': '1212::1'}
     endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'classification': {'labels': ['developer workstation']}}}, 'ipv4_addresses': {
         '0.0.0.0': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
-    controller = get_test_controller()
-    s = SDNConnect(controller, logger)
+    s = get_sdn_connect(logger)
     s.endpoints[endpoint.name] = endpoint
     s.show_endpoints('all')
     s.show_endpoints('state active')
@@ -457,8 +445,7 @@ def test_show_endpoints():
 
 
 def test_merge_machine():
-    controller = get_test_controller()
-    s = SDNConnect(controller, logger)
+    s = get_sdn_connect(logger)
     old_machine = {'tenant': 'foo', 'mac': '00:00:00:00:00:00',
                    'segment': 'foo', 'port': '1', 'ipv4': '0.0.0.0', 'ipv6': '1212::1'}
     new_machine = {'tenant': 'foo', 'mac': '00:00:00:00:00:00',
@@ -487,9 +474,9 @@ def test_schedule_thread_worker():
     class MockMonitor(Monitor):
 
         def __init__(self):
-            self.logger = logger
-            self.controller = get_test_controller()
-            self.s = SDNConnect(self.controller, logger)
+            self.s = get_sdn_connect(logger)
+            self.logger = self.s.logger
+            self.controller = self.s.controller
             self.running = True
 
     mock_monitor = MockMonitor()

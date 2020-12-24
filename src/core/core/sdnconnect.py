@@ -21,13 +21,14 @@ from poseidon_core.helpers.prometheus import Prometheus
 
 class SDNConnect:
 
-    def __init__(self, controller, logger):
+    def __init__(self, controller, logger, faucetconfgetsetter_cl=None):
         self.controller = controller
         self.r = None
         self.sdnc = None
         self.endpoints = {}
         self.investigations = 0
         self.coprocessing = 0
+        self.faucetconfgetsetter_cl = faucetconfgetsetter_cl
         trunk_ports = self.controller['trunk_ports']
         if isinstance(trunk_ports, str):
             self.trunk_ports = json.loads(trunk_ports)
@@ -80,7 +81,7 @@ class SDNConnect:
     def get_sdn_context(self):
         controller_type = self.controller.get('TYPE', None)
         if controller_type == 'faucet':
-            self.sdnc = FaucetProxy(self.controller)
+            self.sdnc = FaucetProxy(self.controller, faucetconfgetsetter_cl=self.faucetconfgetsetter_cl)
         elif controller_type == 'None':
             self.sdnc = None
         else:
