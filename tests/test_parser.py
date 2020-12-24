@@ -10,7 +10,6 @@ import tempfile
 import yaml
 from faucetconfgetsetter import FaucetLocalConfGetSetter
 from poseidon_core.controllers.faucet.faucet import FaucetProxy
-from poseidon_core.controllers.faucet.helpers import get_config_file
 from poseidon_core.controllers.faucet.helpers import parse_rules
 from poseidon_core.controllers.faucet.helpers import represent_none
 from poseidon_core.controllers.faucet.parser import Parser
@@ -79,11 +78,6 @@ def test_represent_none():
 
     foo = MockDumper()
     represent_none(foo, '')
-
-
-def test_get_config_file():
-    config = get_config_file(None)
-    assert config == '/etc/faucet/faucet.yaml'
 
 
 def test_set_mirror_config():

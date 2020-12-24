@@ -1,5 +1,4 @@
 from poseidon_core.controllers.faucet.config import FaucetConfGetSetter
-from poseidon_core.controllers.faucet.helpers import get_config_file
 from poseidon_core.controllers.faucet.helpers import yaml_in
 from poseidon_core.controllers.faucet.helpers import yaml_out
 from poseidon_core.helpers.config import Config
@@ -11,7 +10,6 @@ class FaucetLocalConfGetSetter(FaucetConfGetSetter):
     def read_faucet_conf(self, config_file):
         if not config_file:
             config_file = self.DEFAULT_CONFIG_FILE
-        config_file = get_config_file(config_file)
         faucet_conf = yaml_in(config_file)
         if faucet_conf is None:
             logging.error('Faucet config is empty, exiting.')
@@ -26,7 +24,6 @@ class FaucetLocalConfGetSetter(FaucetConfGetSetter):
         if faucet_conf is None:
             faucet_conf = self.faucet_conf
         self.faucet_conf = faucet_conf
-        config_file = get_config_file(config_file)
         return yaml_out(config_file, self.faucet_conf)
 
     def get_dps(self):

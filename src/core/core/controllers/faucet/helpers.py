@@ -14,17 +14,7 @@ def represent_none(dumper, _):
     return dumper.represent_scalar('tag:yaml.org,2002:null', '')
 
 
-@exception
-def get_config_file(config_file):
-    # TODO check for other files
-    if not config_file:
-        # default to FAUCET default
-        config_file = '/etc/faucet/faucet.yaml'
-    return config_file
-
-
 def parse_rules(config_file):
-    config_file = get_config_file(config_file)
     obj_doc = yaml_in(config_file)
     return obj_doc
 
