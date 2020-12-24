@@ -12,6 +12,7 @@ from functools import partial
 
 import requests
 import schedule
+from poseidon_core.controllers.faucet.config import FaucetRemoteConfGetSetter
 from poseidon_core.helpers.actions import Actions
 from poseidon_core.helpers.config import Config
 from poseidon_core.helpers.prometheus import Prometheus
@@ -22,7 +23,7 @@ requests.packages.urllib3.disable_warnings()
 
 class Monitor:
 
-    def __init__(self, logger, controller=None, faucetconfgetsetter_cl=None):
+    def __init__(self, logger, controller=None, faucetconfgetsetter_cl=FaucetRemoteConfGetSetter):
         self.logger = logger
         self.m_queue = queue.Queue()
         self.job_queue = queue.Queue()
@@ -30,10 +31,10 @@ class Monitor:
         self.running = True
 
         # get config options
-        if controller is None:
-            self.controller = Config().get_config()
-        else:
+        if controller:
             self.controller = controller
+        else:
+            self.controller = Config().get_config()
 
         # setup prometheus
         self.prom = Prometheus()
@@ -45,7 +46,9 @@ class Monitor:
         Prometheus.start()
 
         # initialize sdnconnect
-        self.s = SDNConnect(self.controller, self.logger, faucetconfgetsetter_cl=faucetconfgetsetter_cl)
+        self.s = SDNConnect(controller=self.controller, logger=self.logger,
+                            faucetconfgetsetter_cl=faucetconfgetsetter_cl)
+        # TODO check self.s.sdnc here so it doesn't require if statements everywhere
         self.s.default_endpoints()
         self.update_endpoint_metadata()
 
@@ -434,10 +437,12 @@ class Monitor:
                 getattr(endpoint, endpoint_state)()
                 endpoint_work(endpoint)
                 if endpoint_state in ['trigger_next', 'operate']:
+                    # TODO this may not be necessarily true going forward
                     self.prom.prom_metrics['ncapture_count'].inc()
                 events += 1
         return events
 
+    # TODO make generic
     def schedule_mirroring(self):
         for endpoint in self.s.not_ignored_endpoints('unknown'):
             endpoint.queue_next('operate')
@@ -450,6 +455,7 @@ class Monitor:
             str(self.s.investigations), str(budget), str(len(queued_endpoints))))
         return self._schedule_queued_work(queued_endpoints, budget, 'trigger_next', self.s.mirror_endpoint)
 
+    # TODO make generic
     def schedule_coprocessing(self):
         for endpoint in self.s.not_copro_ignored_endpoints('copro_unknown'):
             endpoint.copro_queue_next('copro_coprocess')
@@ -460,15 +466,6 @@ class Monitor:
         self.logger.debug('coprocessing {0}, budget {1}, queued {2}'.format(
             str(self.s.coprocessing), str(budget), str(len(queued_endpoints))))
         return self._schedule_queued_work(queued_endpoints, budget, 'copro_trigger_next', self.s.coprocess_endpoint)
-
-    def monitor_callable(self, monitored_callable):
-        method_name = str(monitored_callable)
-        method_re = re.compile(r'.+bound method (\S+).+')
-        method_match = method_re.match(method_name)
-        if method_match:
-            method_name = method_match.group(1)
-        with self.prom.prom_metrics['monitor_runtime_secs'].labels(method=method_name).time():
-            return monitored_callable()
 
     def handle_rabbit(self):
         events = 0
@@ -504,6 +501,15 @@ class Monitor:
             if events:
                 self.monitor_callable(self.update_endpoint_metadata)
             time.sleep(1)
+
+    def monitor_callable(self, monitored_callable):
+        method_name = str(monitored_callable)
+        method_re = re.compile(r'.+bound method (\S+).+')
+        method_match = method_re.match(method_name)
+        if method_match:
+            method_name = method_match.group(1)
+        with self.prom.prom_metrics['monitor_runtime_secs'].labels(method=method_name).time():
+            return monitored_callable()
 
     @staticmethod
     def get_q_item(q):

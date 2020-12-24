@@ -27,7 +27,7 @@ class Parser:
                  faucetconfrpc_client=None,
                  copro_port=None,
                  copro_vlan=None,
-                 faucetconfgetsetter_cl=None):
+                 faucetconfgetsetter_cl=FaucetRemoteConfGetSetter):
         self.logger = logging.getLogger('parser')
         self.mirror_ports = mirror_ports
         self.proxy_mirror_ports = proxy_mirror_ports
@@ -39,8 +39,6 @@ class Parser:
         self.copro_vlan = copro_vlan
         self.tunnel_vlan = tunnel_vlan
         self.tunnel_name = tunnel_name
-        if faucetconfgetsetter_cl is None:
-            faucetconfgetsetter_cl = FaucetRemoteConfGetSetter
         if faucetconfrpc_address:
             server = faucetconfrpc_address.split(':')[0]
         else:
@@ -205,6 +203,10 @@ class Parser:
 
     def config_acls(self, rules_file, endpoints, force_apply_rules, force_remove_rules, coprocess_rules_files):
         rules_doc = parse_rules(rules_file)
+        if not rules_doc:
+            self.logger.error(
+                'Unable to read or parse rules file, not applying ACLs')
+            return
         self._read_faucet_conf()
         self.faucetconfgetsetter.faucet_conf = ACL(self.faucetconfgetsetter).apply_acls(
             rules_file, endpoints,

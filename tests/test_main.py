@@ -10,7 +10,9 @@ import logging
 import queue
 import time
 
-from faucetconfgetsetter import FaucetLocalConfGetSetter, get_sdn_connect
+from faucetconfgetsetter import FaucetLocalConfGetSetter
+from faucetconfgetsetter import get_sdn_connect
+from faucetconfgetsetter import get_test_controller
 from poseidon_core.constants import NO_DATA
 from poseidon_core.helpers.config import Config
 from poseidon_core.helpers.endpoint import endpoint_factory
@@ -32,13 +34,6 @@ def test_rdns():
             if name != NO_DATA:
                 return
     assert not res
-
-
-def get_test_controller():
-    controller = Config().get_config()
-    controller['faucetconfrpc_address'] = None
-    controller['TYPE'] = 'faucet'
-    return controller
 
 
 def test_mirror_endpoint():
@@ -325,7 +320,8 @@ def test_find_new_machines():
 
 
 def test_Monitor_init():
-    monitor = Monitor(logger, controller=get_test_controller(), faucetconfgetsetter_cl=FaucetLocalConfGetSetter)
+    monitor = Monitor(logger, controller=get_test_controller(),
+                      faucetconfgetsetter_cl=FaucetLocalConfGetSetter)
     hosts = [{'active': 0, 'source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'ipv4_os': 'unknown', 'tenant': 'vlan1', 'port': 1, 'segment': 'switch1', 'ipv4': '123.123.123.123', 'mac': '00:00:00:00:00:00', 'id': 'foo1', 'ipv6': '0'},
              {'active': 1, 'source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'ipv4_os': 'unknown', 'tenant': 'vlan1',
                  'port': 1, 'segment': 'switch1', 'ipv4': '123.123.123.123', 'mac': '00:00:00:00:00:00', 'id': 'foo2', 'ipv6': '0'},
