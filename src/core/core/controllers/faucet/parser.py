@@ -6,7 +6,6 @@ Created on 19 November 2017
 import logging
 from collections import defaultdict
 
-from poseidon_core.controllers.faucet.config import FaucetLocalConfGetSetter
 from poseidon_core.controllers.faucet.config import FaucetRemoteConfGetSetter
 from poseidon_core.controllers.faucet.helpers import parse_rules
 from poseidon_core.operations.primitives.acl import ACL
@@ -28,7 +27,7 @@ class Parser:
                  faucetconfrpc_client=None,
                  copro_port=None,
                  copro_vlan=None,
-                 faucetconfgetsetter_cl=FaucetRemoteConfGetSetter):
+                 faucetconfgetsetter_cl=None):
         self.logger = logging.getLogger('parser')
         self.mirror_ports = mirror_ports
         self.proxy_mirror_ports = proxy_mirror_ports
@@ -40,8 +39,8 @@ class Parser:
         self.copro_vlan = copro_vlan
         self.tunnel_vlan = tunnel_vlan
         self.tunnel_name = tunnel_name
-        if faucetconfrpc_address is None:
-            faucetconfgetsetter_cl = FaucetLocalConfGetSetter
+        if faucetconfgetsetter_cl is None:
+            faucetconfgetsetter_cl = FaucetRemoteConfGetSetter
         if faucetconfrpc_address:
             server = faucetconfrpc_address.split(':')[0]
         else:
@@ -207,7 +206,7 @@ class Parser:
     def config_acls(self, rules_file, endpoints, force_apply_rules, force_remove_rules, coprocess_rules_files):
         rules_doc = parse_rules(rules_file)
         self._read_faucet_conf()
-        self.faucetconfgetsetter.faucet_conf = ACL().apply_acls(
+        self.faucetconfgetsetter.faucet_conf = ACL(self.faucetconfgetsetter).apply_acls(
             rules_file, endpoints,
             force_apply_rules, force_remove_rules,
             coprocess_rules_files, self.faucetconfgetsetter.faucet_conf, rules_doc)

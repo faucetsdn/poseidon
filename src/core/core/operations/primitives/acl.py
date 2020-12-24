@@ -6,14 +6,12 @@ Created on 4 March 2020
 import logging
 import os
 
-from poseidon_core.controllers.faucet.config import FaucetLocalConfGetSetter
-
 
 class ACL:
 
-    def __init__(self):
+    def __init__(self, faucetconfgetsetter):
         self.logger = logging.getLogger('acl')
-        self.faucetconfgetsetter = FaucetLocalConfGetSetter()
+        self.faucetconfgetsetter = faucetconfgetsetter
 
     def _read_conf(self, config_file):
         return self.faucetconfgetsetter.read_faucet_conf(config_file)
