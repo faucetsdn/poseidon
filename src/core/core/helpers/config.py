@@ -7,6 +7,7 @@ import configparser
 import json
 import logging
 import os
+from distutils import util
 
 
 class Config():
@@ -42,14 +43,14 @@ class Config():
 
         config_map = {
             'controller_type': ('TYPE', []),
-            'learn_public_addresses': ('LEARN_PUBLIC_ADDRESSES', [bool]),
+            'learn_public_addresses': ('LEARN_PUBLIC_ADDRESSES', [util.strtobool]),
             'rules_file': ('RULES_FILE', []),
             'collector_nic': ('collector_nic', []),
             'controller_mirror_ports': ('MIRROR_PORTS', [json.loads]),
             'controller_proxy_mirror_ports': ('controller_proxy_mirror_ports', [json.loads]),
             'tunnel_vlan': ('tunnel_vlan', [int]),
             'tunnel_name': ('tunnel_name', []),
-            'automated_acls': ('AUTOMATED_ACLS', [bool]),
+            'automated_acls': ('AUTOMATED_ACLS', [util.strtobool]),
             'FA_RABBIT_PORT': ('FA_RABBIT_PORT', [int]),
             'scan_frequency': ('scan_frequency', [int]),
             'reinvestigation_frequency': ('reinvestigation_frequency', [int]),
