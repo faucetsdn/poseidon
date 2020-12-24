@@ -9,6 +9,7 @@ Created on 18 January 2019
 import json
 import logging
 
+from poseidon_core.controllers.faucet.config import FaucetRemoteConfGetSetter
 from poseidon_core.helpers.config import Config
 from poseidon_core.sdnconnect import SDNConnect
 
@@ -17,13 +18,14 @@ logger = logging.getLogger('commands')
 
 class Commands:
 
-    def __init__(self, controller=None, faucetconfgetsetter_cl=None):
+    def __init__(self, controller=None, faucetconfgetsetter_cl=FaucetRemoteConfGetSetter):
         self.states = ['known', 'unknown', 'operating', 'queued']
-        if controller is None:
-            self.controller = Config().get_config()
-        else:
+        if controller:
             self.controller = controller
-        self.sdnc = SDNConnect(self.controller, logger, faucetconfgetsetter_cl=faucetconfgetsetter_cl)
+        else:
+            self.controller = Config().get_config()
+        self.sdnc = SDNConnect(self.controller, logger,
+                               faucetconfgetsetter_cl=faucetconfgetsetter_cl)
 
     def _publish_action(self, address, payload):
         if payload:

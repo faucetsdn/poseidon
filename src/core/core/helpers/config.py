@@ -3,11 +3,11 @@
 Created on 5 December 2018
 @author: Charlie Lewis
 """
-import ast
 import configparser
 import json
 import logging
 import os
+from distutils import util
 
 
 class Config():
@@ -26,7 +26,7 @@ class Config():
     def get_config(self):
         # set some defaults
         controller = {
-            'TYPE': None,
+            'TYPE': 'faucet',
             'RULES_FILE': None,
             'MIRROR_PORTS': None,
             'AUTOMATED_ACLS': False,
@@ -43,14 +43,14 @@ class Config():
 
         config_map = {
             'controller_type': ('TYPE', []),
-            'learn_public_addresses': ('LEARN_PUBLIC_ADDRESSES', [ast.literal_eval]),
+            'learn_public_addresses': ('LEARN_PUBLIC_ADDRESSES', [util.strtobool]),
             'rules_file': ('RULES_FILE', []),
             'collector_nic': ('collector_nic', []),
             'controller_mirror_ports': ('MIRROR_PORTS', [json.loads]),
             'controller_proxy_mirror_ports': ('controller_proxy_mirror_ports', [json.loads]),
             'tunnel_vlan': ('tunnel_vlan', [int]),
             'tunnel_name': ('tunnel_name', []),
-            'automated_acls': ('AUTOMATED_ACLS', [ast.literal_eval]),
+            'automated_acls': ('AUTOMATED_ACLS', [util.strtobool]),
             'FA_RABBIT_PORT': ('FA_RABBIT_PORT', [int]),
             'scan_frequency': ('scan_frequency', [int]),
             'reinvestigation_frequency': ('reinvestigation_frequency', [int]),

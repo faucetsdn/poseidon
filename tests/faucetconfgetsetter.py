@@ -89,7 +89,6 @@ class FaucetLocalConfGetSetter(FaucetConfGetSetter):
 def get_test_controller():
     controller = Config().get_config()
     controller['faucetconfrpc_address'] = None
-    controller['TYPE'] = 'faucet'
     return controller
 
 

@@ -8,6 +8,7 @@ from copy import deepcopy
 
 import pika
 from poseidon_core.constants import NO_DATA
+from poseidon_core.controllers.faucet.config import FaucetRemoteConfGetSetter
 from poseidon_core.controllers.faucet.faucet import FaucetProxy
 from poseidon_core.helpers.actions import Actions
 from poseidon_core.helpers.endpoint import Endpoint
@@ -21,20 +22,20 @@ from poseidon_core.helpers.prometheus import Prometheus
 
 class SDNConnect:
 
-    def __init__(self, controller, logger, faucetconfgetsetter_cl=None):
+    def __init__(self, controller, logger, faucetconfgetsetter_cl=FaucetRemoteConfGetSetter):
         self.controller = controller
         self.r = None
         self.sdnc = None
         self.endpoints = {}
         self.investigations = 0
         self.coprocessing = 0
-        self.faucetconfgetsetter_cl = faucetconfgetsetter_cl
         trunk_ports = self.controller['trunk_ports']
         if isinstance(trunk_ports, str):
             self.trunk_ports = json.loads(trunk_ports)
         else:
             self.trunk_ports = trunk_ports
         self.logger = logger
+        self.faucetconfgetsetter_cl = faucetconfgetsetter_cl
         self.get_sdn_context()
         self.prom = Prometheus()
         self.dns_resolver = DNSResolver()
@@ -81,9 +82,8 @@ class SDNConnect:
     def get_sdn_context(self):
         controller_type = self.controller.get('TYPE', None)
         if controller_type == 'faucet':
-            self.sdnc = FaucetProxy(self.controller, faucetconfgetsetter_cl=self.faucetconfgetsetter_cl)
-        elif controller_type == 'None':
-            self.sdnc = None
+            self.sdnc = FaucetProxy(
+                self.controller, faucetconfgetsetter_cl=self.faucetconfgetsetter_cl)
         else:
             self.logger.error(
                 'Unknown SDN controller config: {0}'.format(
