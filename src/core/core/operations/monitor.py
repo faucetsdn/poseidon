@@ -12,29 +12,21 @@ from functools import partial
 
 import requests
 import schedule
-from poseidon_core.controllers.faucet.config import FaucetRemoteConfGetSetter
 from poseidon_core.helpers.actions import Actions
-from poseidon_core.helpers.config import Config
 from poseidon_core.helpers.prometheus import Prometheus
-from poseidon_core.sdnconnect import SDNConnect
 
 requests.packages.urllib3.disable_warnings()
 
 
 class Monitor:
 
-    def __init__(self, logger, controller=None, faucetconfgetsetter_cl=FaucetRemoteConfGetSetter):
+    def __init__(self, logger, config, sdnc=None):
         self.logger = logger
         self.m_queue = queue.Queue()
         self.job_queue = queue.Queue()
         self.rabbits = []
         self.running = True
-
-        # get config options
-        if controller:
-            self.controller = controller
-        else:
-            self.controller = Config().get_config()
+        self.config = config
 
         # setup prometheus
         self.prom = Prometheus()
@@ -45,18 +37,16 @@ class Monitor:
                 'Prometheus metrics are already initialized: {0}'.format(str(e)))
         Prometheus.start()
 
-        # initialize sdnconnect
-        self.s = SDNConnect(controller=self.controller, logger=self.logger,
-                            faucetconfgetsetter_cl=faucetconfgetsetter_cl)
+        self.s = sdnc
         # TODO check self.s.sdnc here so it doesn't require if statements everywhere
         self.s.default_endpoints()
         self.update_endpoint_metadata()
 
         # timer class to call things periodically in own thread
         self.schedule = schedule
-        self.schedule.every(self.controller['scan_frequency']).seconds.do(
+        self.schedule.every(self.config['scan_frequency']).seconds.do(
             self.schedule_job_update_metrics)
-        self.schedule.every(self.controller['reinvestigation_frequency']).seconds.do(
+        self.schedule.every(self.config['reinvestigation_frequency']).seconds.do(
             self.schedule_job_reinvestigation_timeout)
 
         # schedule all threads
@@ -76,7 +66,7 @@ class Monitor:
 
     def ignore_rabbit(self, routing_key, body):
         ''' drop ignored messages. '''
-        if routing_key == self.controller['FA_RABBIT_ROUTING_KEY']:
+        if routing_key == self.config['FA_RABBIT_ROUTING_KEY']:
             if self.s and self.s.sdnc:
                 if self.s.sdnc.ignore_event(body):
                     return True
@@ -131,7 +121,7 @@ class Monitor:
             return 0
         events = 0
         for endpoint in self.s.not_copro_ignored_endpoints('copro_coprocessing'):
-            if endpoint.copro_state_timeout(2*self.controller['coprocessing_frequency']):
+            if endpoint.copro_state_timeout(2*self.config['coprocessing_frequency']):
                 self.logger.debug(
                     'timing out: {0} and setting to unknown'.format(endpoint.name))
                 self.s.uncoprocess_endpoint(endpoint)
@@ -147,7 +137,7 @@ class Monitor:
                     endpoint.known()  # pytype: disable=attribute-error
             return 0
         events = 0
-        timeout = 2*self.controller['reinvestigation_frequency']
+        timeout = 2*self.config['reinvestigation_frequency']
         for endpoint in self.s.not_ignored_endpoints():
             if endpoint.observed_timeout(timeout):
                 self.logger.info(
@@ -383,7 +373,7 @@ class Monitor:
                     try:
                         status = Actions(
                             endpoint, self.s.sdnc).update_acls(
-                                rules_file=self.controller['RULES_FILE'], endpoints=endpoints, force_apply_rules=rules)
+                                rules_file=self.config['RULES_FILE'], endpoints=endpoints, force_apply_rules=rules)
                         if not status:
                             self.logger.warning(
                                 'Unable to apply rules: {0} to endpoint: {1}'.format(rules, endpoint.name))
@@ -416,7 +406,7 @@ class Monitor:
             'poseidon.action.update_acls': handler_action_update_acls,
             'poseidon.action.remove': handler_action_remove,
             'poseidon.action.remove.ignored': handler_action_remove_ignored,
-            self.controller['FA_RABBIT_ROUTING_KEY']: handler_faucet_event,
+            self.config['FA_RABBIT_ROUTING_KEY']: handler_faucet_event,
         }
 
         handler = handlers.get(routing_key, None)
