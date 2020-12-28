@@ -43,7 +43,7 @@ def main():  # pragma: no cover
     logging.getLogger('pika').setLevel(logging.WARNING)
     Logger()
     logger = logging.getLogger('main')
-    config = Config.get_config()
+    config = Config().get_config()
     sdnc = SDNConnect(config=config, logger=logger,
                       faucetconfgetsetter_cl=FaucetRemoteConfGetSetter)
     pmain = Monitor(logger, config, sdnc=sdnc)
