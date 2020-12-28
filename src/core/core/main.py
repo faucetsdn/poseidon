@@ -16,7 +16,7 @@ from poseidon_core.helpers.rabbit import Rabbit
 from poseidon_core.operations.monitor import Monitor
 
 
-def create_message_queues(host, port, exchange, binding_key, pmain):
+def create_message_queue(host, port, exchange, binding_key, pmain):
     rabbit = Rabbit()
     rabbit.make_rabbit_connection(
         host, port, exchange, binding_key)
