@@ -4,14 +4,14 @@ Created on 18 Jan 2019
 @author: Charlie Lewis
 """
 from faucetconfgetsetter import FaucetLocalConfGetSetter
-from faucetconfgetsetter import get_test_controller
+from faucetconfgetsetter import get_test_config
 from poseidon_cli.commands import Commands
 from poseidon_core.helpers.config import Config
 from poseidon_core.helpers.endpoint import endpoint_factory
 
 
 def test_commands():
-    commands = Commands(controller=get_test_controller(),
+    commands = Commands(config=get_test_config(),
                         faucetconfgetsetter_cl=FaucetLocalConfGetSetter)
     endpoint = endpoint_factory('foo')
     endpoint.endpoint_data = {

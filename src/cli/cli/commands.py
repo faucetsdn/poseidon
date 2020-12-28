@@ -10,21 +10,21 @@ import json
 import logging
 
 from poseidon_core.controllers.faucet.config import FaucetRemoteConfGetSetter
+from poseidon_core.controllers.sdnconnect import SDNConnect
 from poseidon_core.helpers.config import Config
-from poseidon_core.sdnconnect import SDNConnect
 
 logger = logging.getLogger('commands')
 
 
 class Commands:
 
-    def __init__(self, controller=None, faucetconfgetsetter_cl=FaucetRemoteConfGetSetter):
+    def __init__(self, config=None, faucetconfgetsetter_cl=FaucetRemoteConfGetSetter):
         self.states = ['known', 'unknown', 'operating', 'queued']
-        if controller:
-            self.controller = controller
+        if config:
+            self.config = config
         else:
-            self.controller = Config().get_config()
-        self.sdnc = SDNConnect(self.controller, logger,
+            self.config = Config().get_config()
+        self.sdnc = SDNConnect(self.config, logger,
                                faucetconfgetsetter_cl=faucetconfgetsetter_cl)
 
     def _publish_action(self, address, payload):
