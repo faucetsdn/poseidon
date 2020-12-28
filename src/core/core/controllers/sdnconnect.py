@@ -22,14 +22,14 @@ from poseidon_core.helpers.prometheus import Prometheus
 
 class SDNConnect:
 
-    def __init__(self, controller, logger, faucetconfgetsetter_cl=FaucetRemoteConfGetSetter):
-        self.controller = controller
+    def __init__(self, config, logger, faucetconfgetsetter_cl=FaucetRemoteConfGetSetter):
+        self.config = config
         self.r = None
         self.sdnc = None
         self.endpoints = {}
         self.investigations = 0
         self.coprocessing = 0
-        trunk_ports = self.controller['trunk_ports']
+        trunk_ports = self.config['trunk_ports']
         if isinstance(trunk_ports, str):
             self.trunk_ports = json.loads(trunk_ports)
         else:
@@ -80,14 +80,14 @@ class SDNConnect:
             self.endpoints = new_endpoints
 
     def get_sdn_context(self):
-        controller_type = self.controller.get('TYPE', None)
+        controller_type = self.config.get('TYPE', None)
         if controller_type == 'faucet':
             self.sdnc = FaucetProxy(
-                self.controller, faucetconfgetsetter_cl=self.faucetconfgetsetter_cl)
+                self.config, faucetconfgetsetter_cl=self.faucetconfgetsetter_cl)
         else:
             self.logger.error(
                 'Unknown SDN controller config: {0}'.format(
-                    self.controller))
+                    self.config))
 
     def not_ignored_endpoints(self, state=None):
         endpoints = [endpoint for endpoint in self.endpoints.values()
@@ -127,14 +127,14 @@ class SDNConnect:
             endpoint for endpoint in self.not_ignored_endpoints()
             if endpoint.operation_active()])
         return max(
-            self.controller['max_concurrent_reinvestigations'] - self.investigations, 0)
+            self.config['max_concurrent_reinvestigations'] - self.investigations, 0)
 
     def coprocessing_budget(self):
         self.coprocessing = len([
             endpoint for endpoint in self.not_ignored_endpoints()
             if endpoint.copro_state == 'copro_coprocessing'])
         return max(
-            self.controller['max_concurrent_coprocessing'] - self.coprocessing, 0)
+            self.config['max_concurrent_coprocessing'] - self.coprocessing, 0)
 
     @staticmethod
     def _connect_rabbit():
@@ -331,9 +331,9 @@ class SDNConnect:
                 ep.endpoint_data = deepcopy(machine)
             ep.touch()
 
-        if change_acls and self.controller['AUTOMATED_ACLS']:
+        if change_acls and self.config['AUTOMATED_ACLS']:
             status = Actions(None, self.sdnc).update_acls(
-                rules_file=self.controller['RULES_FILE'],
+                rules_file=self.config['RULES_FILE'],
                 endpoints=self.endpoints.values())
             if isinstance(status, list):
                 self.logger.info(

@@ -1,8 +1,8 @@
 from poseidon_core.controllers.faucet.config import FaucetConfGetSetter
 from poseidon_core.controllers.faucet.helpers import yaml_in
 from poseidon_core.controllers.faucet.helpers import yaml_out
+from poseidon_core.controllers.sdnconnect import SDNConnect
 from poseidon_core.helpers.config import Config
-from poseidon_core.sdnconnect import SDNConnect
 
 
 class FaucetLocalConfGetSetter(FaucetConfGetSetter):
@@ -86,12 +86,12 @@ class FaucetLocalConfGetSetter(FaucetConfGetSetter):
         self._set_mirror_config(dp, mirror_port, mirror_interface_conf)
 
 
-def get_test_controller():
-    controller = Config().get_config()
-    controller['faucetconfrpc_address'] = None
-    return controller
+def get_test_config():
+    config = Config().get_config()
+    config['faucetconfrpc_address'] = None
+    return config
 
 
 def get_sdn_connect(logger):
-    controller = get_test_controller()
-    return SDNConnect(controller, logger, faucetconfgetsetter_cl=FaucetLocalConfGetSetter)
+    config = get_test_config()
+    return SDNConnect(config, logger, faucetconfgetsetter_cl=FaucetLocalConfGetSetter)

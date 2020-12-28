@@ -12,15 +12,15 @@ import time
 
 from faucetconfgetsetter import FaucetLocalConfGetSetter
 from faucetconfgetsetter import get_sdn_connect
-from faucetconfgetsetter import get_test_controller
+from faucetconfgetsetter import get_test_config
 from poseidon_core.constants import NO_DATA
+from poseidon_core.controllers.sdnconnect import SDNConnect
 from poseidon_core.helpers.config import Config
 from poseidon_core.helpers.endpoint import endpoint_factory
 from poseidon_core.helpers.metadata import DNSResolver
 from poseidon_core.helpers.prometheus import Prometheus
 from poseidon_core.helpers.rabbit import Rabbit
-from poseidon_core.monitor import Monitor
-from poseidon_core.sdnconnect import SDNConnect
+from poseidon_core.operations.monitor import Monitor
 from prometheus_client import REGISTRY
 
 logger = logging.getLogger('test')
@@ -141,7 +141,7 @@ def test_get_q_item():
 
         def __init__(self):
             self.s = get_sdn_connect(logger)
-            self.controller = self.s.controller
+            self.config = self.s.config
             self.logger = self.s.logger
 
     mock_monitor = MockMonitor()
@@ -167,7 +167,7 @@ def test_format_rabbit_message():
             self.logger = logger
             self.s = get_sdn_connect(logger)
             self.s.sdnc = MockParser()
-            self.controller = self.s.controller
+            self.config = self.s.config
 
         def update_routing_key_time(self, routing_key):
             return
@@ -276,7 +276,7 @@ def test_rabbit_callback():
 
         def __init__(self):
             self.logger = logger
-            self.controller = {
+            self.config = {
                 'FA_RABBIT_ROUTING_KEY': mock_method.routing_key}
             self.s = None
             self.prom = None
@@ -320,8 +320,10 @@ def test_find_new_machines():
 
 
 def test_Monitor_init():
-    monitor = Monitor(logger, controller=get_test_controller(),
-                      faucetconfgetsetter_cl=FaucetLocalConfGetSetter)
+    config = get_test_config()
+    sdnc = SDNConnect(
+        config, logger, faucetconfgetsetter_cl=FaucetLocalConfGetSetter)
+    monitor = Monitor(logger, config, sdnc=sdnc)
     hosts = [{'active': 0, 'source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'ipv4_os': 'unknown', 'tenant': 'vlan1', 'port': 1, 'segment': 'switch1', 'ipv4': '123.123.123.123', 'mac': '00:00:00:00:00:00', 'id': 'foo1', 'ipv6': '0'},
              {'active': 1, 'source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'ipv4_os': 'unknown', 'tenant': 'vlan1',
                  'port': 1, 'segment': 'switch1', 'ipv4': '123.123.123.123', 'mac': '00:00:00:00:00:00', 'id': 'foo2', 'ipv6': '0'},
@@ -353,10 +355,10 @@ def test_process():
         def __init__(self):
             self.s = get_sdn_connect(logger)
             self.logger = self.s.logger
-            self.controller = self.s.controller
-            self.s.controller['TYPE'] = 'None'
+            self.config = self.s.config
+            self.s.config['TYPE'] = 'None'
             self.s.get_sdn_context()
-            self.s.controller['TYPE'] = 'faucet'
+            self.s.config['TYPE'] = 'faucet'
             self.s.get_sdn_context()
             self.job_queue = queue.Queue()
             self.m_queue = queue.Queue()
@@ -472,7 +474,7 @@ def test_schedule_thread_worker():
         def __init__(self):
             self.s = get_sdn_connect(logger)
             self.logger = self.s.logger
-            self.controller = self.s.controller
+            self.config = self.s.config
             self.running = True
 
     mock_monitor = MockMonitor()

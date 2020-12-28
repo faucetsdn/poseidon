@@ -15,12 +15,12 @@ class Collector(object):
 
     def __init__(self, endpoint, switch, iterations=1):
         self.logger = logging.getLogger('collector')
-        self.controller = Config().get_config()
+        self.config = Config().get_config()
         self.endpoint = endpoint
         self.id = endpoint.name
         self.mac = endpoint.endpoint_data['mac']
         self.nic = None
-        nic = self.controller['collector_nic']
+        nic = self.config['collector_nic']
         try:
             eval_nic = ast.literal_eval(nic)
             if switch in eval_nic:
@@ -30,7 +30,7 @@ class Collector(object):
                     'Failed to get collector nic for the switch: {0}'.format(switch))
         except ValueError:
             self.nic = nic
-        self.interval = str(self.controller['reinvestigation_frequency'])
+        self.interval = str(self.config['reinvestigation_frequency'])
         self.iterations = str(iterations)
 
     def start_collector(self):
@@ -49,8 +49,8 @@ class Collector(object):
 
         self.logger.debug('Payload: {0}'.format(str(payload)))
 
-        network_tap_addr = self.controller['network_tap_ip'] + \
-            ':' + self.controller['network_tap_port']
+        network_tap_addr = self.config['network_tap_ip'] + \
+            ':' + self.config['network_tap_port']
         uri = 'http://' + network_tap_addr + '/create'
 
         try:
@@ -86,8 +86,8 @@ class Collector(object):
         payload = {'id': [self.endpoint.endpoint_data['container_id']]}
         self.logger.debug('Payload: {0}'.format(str(payload)))
 
-        network_tap_addr = self.controller['network_tap_ip'] + \
-            ':' + self.controller['network_tap_port']
+        network_tap_addr = self.config['network_tap_ip'] + \
+            ':' + self.config['network_tap_port']
         uri = 'http://' + network_tap_addr + '/stop'
 
         try:
@@ -109,8 +109,8 @@ class Collector(object):
 
     # returns a dictionary of existing collectors keyed on dev_hash
     def get_collectors(self):
-        network_tap_addr = self.controller['network_tap_ip'] + \
-            ':' + self.controller['network_tap_port']
+        network_tap_addr = self.config['network_tap_ip'] + \
+            ':' + self.config['network_tap_port']
         uri = 'http://' + network_tap_addr + '/list'
         collectors = {}
         try:

@@ -23,6 +23,8 @@ services:
             - /opt/faucetconfrpc
             - faucetconfrpc
             - poseidon
+        networks:
+            - poseidon
     faucetconfrpc:
         restart: always
         image: 'iqtlabs/faucetconfrpc:v0.22.13'

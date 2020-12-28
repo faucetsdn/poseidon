@@ -26,9 +26,9 @@ class Prometheus():
     def __init__(self):
         self.logger = logging.getLogger('prometheus')
         self.prom_metrics = {}
-        self.controller = Config().get_config()
-        self.prometheus_addr = self.controller['prometheus_ip'] + \
-            ':' + self.controller['prometheus_port']
+        self.config = Config().get_config()
+        self.prometheus_addr = self.config['prometheus_ip'] + \
+            ':' + self.config['prometheus_port']
 
     def initialize_metrics(self):
         self.prom_metrics['info'] = Info(
