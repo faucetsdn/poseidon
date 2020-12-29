@@ -16,11 +16,6 @@ class FaucetLocalConfGetSetter(FaucetRemoteConfGetSetter):
     def config_file_path(config_file):
         return config_file
 
-    def set_acls(self, acls):
-        self.read_faucet_conf(config_file=None)
-        self.faucet_conf['acls'] = acls
-        self.write_faucet_conf(config_file=None)
-
     def read_faucet_conf(self, config_file):
         if not config_file:
             config_file = self.DEFAULT_CONFIG_FILE
@@ -39,19 +34,6 @@ class FaucetLocalConfGetSetter(FaucetRemoteConfGetSetter):
             faucet_conf = self.faucet_conf
         self.faucet_conf = faucet_conf
         return yaml_out(config_file, self.faucet_conf)
-
-    def get_dps(self):
-        self.read_faucet_conf(config_file=None)
-        return self.faucet_conf.get('dps', {})
-
-    def get_switch_conf(self, dp):
-        return self.get_dps().get(dp, None)
-
-    def get_port_conf(self, dp, port):
-        switch_conf = self.get_switch_conf(dp)
-        if not switch_conf:
-            return None
-        return switch_conf['interfaces'].get(port, None)
 
     def set_port_conf(self, dp, port, port_conf):
         switch_conf = self.get_switch_conf(dp)

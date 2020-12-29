@@ -42,6 +42,20 @@ class FaucetRemoteConfGetSetter:
         self.read_faucet_conf(config_file=None)
         return self.faucet_conf.get('dps', {})
 
+    def set_acls(self, acls):
+        self.read_faucet_conf(config_file=None)
+        self.faucet_conf['acls'] = acls
+        self.write_faucet_conf(config_file=None)
+
+    def get_port_conf(self, dp, port):
+        switch_conf = self.get_switch_conf(dp)
+        if not switch_conf:
+            return None
+        return switch_conf['interfaces'].get(port, None)
+
+    def get_switch_conf(self, dp):
+        return self.get_dps().get(dp, None)
+
     def get_stack_root_switch(self):
         root_stack_switch = [
             switch for switch, switch_conf in self.get_dps().items()
