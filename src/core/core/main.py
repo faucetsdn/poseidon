@@ -7,7 +7,9 @@ Created on 3 December 2018
 @author: Charlie Lewis
 """
 import logging
+import sys
 
+from pika.exceptions import AMQPConnectionError
 from poseidon_core.controllers.faucet.config import FaucetRemoteConfGetSetter
 from poseidon_core.controllers.sdnconnect import SDNConnect
 from poseidon_core.helpers.config import Config
@@ -52,5 +54,8 @@ def main():  # pragma: no cover
     # loop here until told not to
     try:
         pmain.process()
-    except Exception as e:
+    except AMQPConnectionError:
         logger.info('Waiting for connection to RabbitMQ...')
+    except Exception as e:
+        logger.error(f'Something went wrong, exiting because: {e}')
+        sys.exit(1)
