@@ -7,8 +7,6 @@ from poseidon_core.helpers.config import Config
 
 class FaucetLocalConfGetSetter(FaucetRemoteConfGetSetter):
 
-    DEFAULT_CONFIG_FILE = ''
-
     def __init__(self, **_kwargs):
         self.faucet_conf = {}
 

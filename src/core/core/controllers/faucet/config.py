@@ -8,6 +8,8 @@ from faucetconfrpc.faucetconfrpc_client_lib import FaucetConfRpcClient
 
 class FaucetRemoteConfGetSetter:
 
+    DEFAULT_CONFIG_FILE = ''
+
     def __init__(self, client_key=None, client_cert=None,
                  ca_cert=None, server_addr=None):
         self.client = FaucetConfRpcClient(
