@@ -1,11 +1,25 @@
-from poseidon_core.controllers.faucet.config import FaucetConfGetSetter
+from poseidon_core.controllers.faucet.config import FaucetRemoteConfGetSetter
 from poseidon_core.controllers.faucet.helpers import yaml_in
 from poseidon_core.controllers.faucet.helpers import yaml_out
 from poseidon_core.controllers.sdnconnect import SDNConnect
 from poseidon_core.helpers.config import Config
 
 
-class FaucetLocalConfGetSetter(FaucetConfGetSetter):
+class FaucetLocalConfGetSetter(FaucetRemoteConfGetSetter):
+
+    DEFAULT_CONFIG_FILE = ''
+
+    def __init__(self, **_kwargs):
+        self.faucet_conf = {}
+
+    @staticmethod
+    def config_file_path(config_file):
+        return config_file
+
+    def set_acls(self, acls):
+        self.read_faucet_conf(config_file=None)
+        self.faucet_conf['acls'] = acls
+        self.write_faucet_conf(config_file=None)
 
     def read_faucet_conf(self, config_file):
         if not config_file:
@@ -29,6 +43,15 @@ class FaucetLocalConfGetSetter(FaucetConfGetSetter):
     def get_dps(self):
         self.read_faucet_conf(config_file=None)
         return self.faucet_conf.get('dps', {})
+
+    def get_switch_conf(self, dp):
+        return self.get_dps().get(dp, None)
+
+    def get_port_conf(self, dp, port):
+        switch_conf = self.get_switch_conf(dp)
+        if not switch_conf:
+            return None
+        return switch_conf['interfaces'].get(port, None)
 
     def set_port_conf(self, dp, port, port_conf):
         switch_conf = self.get_switch_conf(dp)
