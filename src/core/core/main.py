@@ -18,25 +18,33 @@ from poseidon_core.helpers.rabbit import Rabbit
 from poseidon_core.operations.monitor import Monitor
 
 
-def create_message_queue(host, port, exchange, binding_key, pmain):
-    rabbit = Rabbit()
-    rabbit.make_rabbit_connection(
-        host, port, exchange, binding_key)
-    rabbit.start_channel(
-        pmain.rabbit_callback, pmain.m_queue)
+def create_message_queue(logger, host, port, exchange, binding_key, pmain):
+    waiting = True
+    while waiting:
+        try:
+            rabbit = Rabbit()
+            rabbit.make_rabbit_connection(
+                host, port, exchange, binding_key)
+            rabbit.start_channel(
+                pmain.rabbit_callback, pmain.m_queue)
+            waiting = False
+        except AMQPConnectionError:
+            logger.info('Waiting for connection to RabbitMQ...')
     pmain.rabbits.append(rabbit)
     return pmain
 
 
-def start_message_queues(config, pmain):
+def start_message_queues(logger, config, pmain):
     host = config['FA_RABBIT_HOST']
     port = int(config['FA_RABBIT_PORT'])
     exchange = 'topic-poseidon-internal'
     binding_key = ['poseidon.algos.#', 'poseidon.action.#']
-    pmain = create_message_queue(host, port, exchange, binding_key, pmain)
+    pmain = create_message_queue(
+        logger, host, port, exchange, binding_key, pmain)
     exchange = config['FA_RABBIT_EXCHANGE']
     binding_key = [config['FA_RABBIT_ROUTING_KEY']+'.#']
-    pmain = create_message_queue(host, port, exchange, binding_key, pmain)
+    pmain = create_message_queue(
+        logger, host, port, exchange, binding_key, pmain)
     pmain.schedule_thread.start()
     return pmain
 
@@ -49,13 +57,10 @@ def main():  # pragma: no cover
     sdnc = SDNConnect(config=config, logger=logger,
                       faucetconfgetsetter_cl=FaucetRemoteConfGetSetter)
     pmain = Monitor(logger, config, sdnc=sdnc)
-    pmain = start_message_queues(config, pmain)
+    pmain = start_message_queues(logger, config, pmain)
 
-    # loop here until told not to
     try:
         pmain.process()
-    except AMQPConnectionError:
-        logger.info('Waiting for connection to RabbitMQ...')
     except Exception as e:
-        logger.error(f'Something went wrong, exiting because: {e}')
+        logger.error(f'Something went wrong, restarting because: {e}')
         sys.exit(1)

@@ -266,7 +266,7 @@ class FaucetProxy:
     def _mac_switch_port(self, my_mac):
         try:
             entry = self.mac_table[my_mac][0]
-            return (entry['segment'], entry['port'])
+            return (entry['segment'], int(entry['port']))
         except (KeyError, IndexError):
             return (None, None)
 
