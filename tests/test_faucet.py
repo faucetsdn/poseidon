@@ -15,7 +15,6 @@ from poseidon_core.controllers.faucet.helpers import represent_none
 from poseidon_core.controllers.faucet.helpers import yaml_in
 from poseidon_core.controllers.faucet.helpers import yaml_out
 from poseidon_core.helpers.config import Config
-from poseidon_core.helpers.endpoint import endpoint_factory
 
 
 SAMPLE_CONFIG = 'tests/sample_faucet_config.yaml'
