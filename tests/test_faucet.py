@@ -15,6 +15,7 @@ from poseidon_core.controllers.faucet.helpers import represent_none
 from poseidon_core.controllers.faucet.helpers import yaml_in
 from poseidon_core.controllers.faucet.helpers import yaml_out
 from poseidon_core.helpers.config import Config
+from poseidon_core.helpers.endpoint import endpoint_factory
 
 
 SAMPLE_CONFIG = 'tests/sample_faucet_config.yaml'
@@ -347,3 +348,57 @@ dps:
         port = faucet.mirror_switch_port('s1')
         faucet.frpc.write_faucet_conf()
         assert port == 1
+
+
+def test_config():
+    """
+    Tests Config Operations
+    """
+    def check_config(obj, endpoints):
+        obj.mirror_mac('00:00:00:00:00:00', 't1-1', 1)
+        obj.mirror_mac('00:00:00:00:00:00', 0x1, 2)
+        obj.mirror_mac('00:00:00:00:00:00', 't1-1', 2)
+        obj.mirror_mac('00:00:00:00:00:00', 't1-1', 3)
+        obj.mirror_mac('00:00:00:00:00:00', 't2-1', 5)
+        obj.mirror_mac('00:00:00:00:00:00', 'bad', 6)
+        obj.unmirror_mac('00:00:00:00:00:00', None, None)
+        obj.unmirror_mac('00:00:00:00:00:00', 't1-1', 1)
+        obj.unmirror_mac('00:00:00:00:00:00', 't1-1', 3)
+        obj.mirror_mac('00:00:00:00:00:00', 't1-1', 3)
+        obj.unmirror_mac('00:00:00:00:00:00', 't1-1', 3)
+        obj.update_acls()
+        obj.update_acls(endpoints=endpoints,
+                        rules_file=os.path.join(os.getcwd(), 'config/rules.yaml'))
+
+    endpoint = endpoint_factory('foo')
+    endpoint.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 't1-1', 'port': '1', 'ipv4': '0.0.0.0', 'ipv6': '1212::1'}
+    endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'1551805502.0': {'labels': ['developer workstation']}}}, 'ipv4_addresses': {
+        '0.0.0.0': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
+    endpoint2 = endpoint_factory('foo')
+    endpoint2.endpoint_data = {
+        'tenant': 'foo', 'mac': '00:00:00:00:00:01', 'segment': 't1-1', 'port': '3', 'ipv4': '0.0.0.0', 'ipv6': '1212::1'}
+    endpoint2.metadata = {'mac_addresses': {'00:00:00:00:00:01': {'1551805502.0': {'labels': ['developer workstation']}}}, 'ipv4_addresses': {
+        '0.0.0.0': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
+    endpoints = [endpoint, endpoint2]
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        faucetconfgetsetter_cl = FaucetLocalConfGetSetter
+        faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(
+            tmpdir, 'faucet.yaml')
+        shutil.copy(SAMPLE_CONFIG, faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE)
+        parser = _get_proxy(
+            faucetconfgetsetter_cl=faucetconfgetsetter_cl,
+            mirror_ports={'t1-1': 2},
+            proxy_mirror_ports={'sx': ['s1', 99]})
+        parser.frpc.faucet_conf = yaml.safe_load(
+            faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE)
+        parser2 = _get_proxy(faucetconfgetsetter_cl=faucetconfgetsetter_cl)
+        parser2.frpc.faucet_conf = yaml.safe_load(
+            faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE)
+        config = Config().get_config()
+        proxy = _get_proxy(
+            faucetconfgetsetter_cl=faucetconfgetsetter_cl, config=config)
+        check_config(parser, endpoints)
+        check_config(parser2, endpoints)
+        check_config(proxy, endpoints)

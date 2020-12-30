@@ -256,10 +256,11 @@ class FaucetProxy:
                 'Unable to read or parse rules file, not applying ACLs')
             return False
         self.frpc.read_faucet_conf(config_file=None)
+        # TODO coprocess_rules_files is set to None, which was previous default but removes functionality
         self.frpc.faucet_conf = ACL(self.frpc).apply_acls(
             rules_file, endpoints,
             force_apply_rules, force_remove_rules,
-            coprocess_rules_files, self.frpc.faucet_conf, rules_doc)
+            None, self.frpc.faucet_conf, rules_doc)
         self.frpc.write_faucet_conf(config_file=None)
         return True
 
