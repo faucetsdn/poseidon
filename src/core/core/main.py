@@ -46,7 +46,7 @@ def start_message_queues(logger, config, pmain):
 
 
 def main():  # pragma: no cover
-    logging.getLogger('pika').setLevel(logging.WARNING)
+    logging.getLogger('pika').setLevel(logging.CRITICAL)
     Logger()
     logger = logging.getLogger('main')
     config = Config().get_config()
