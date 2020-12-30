@@ -1,17 +1,8 @@
-import logging
-
 from poseidon_core.helpers.config import Config
 from poseidon_core.helpers.endpoint import endpoint_factory
 from poseidon_core.operations.primitives.coprocess import Coprocess
 from poseidon_core.operations.volos.acls import VolosAcl
 from poseidon_core.operations.volos.volos import Volos
-
-logger = logging.getLogger('test')
-
-
-class MockLogger:
-    def __init__(self):
-        self.logger = logger
 
 
 def test_Volos():

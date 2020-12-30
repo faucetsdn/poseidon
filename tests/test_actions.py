@@ -13,7 +13,7 @@ from poseidon_core.helpers.endpoint import endpoint_factory
 logger = logging.getLogger('test')
 
 
-def test_Actions():
+def test_actions():
     """
     Tests Actions
     """
@@ -28,7 +28,7 @@ def test_Actions():
     a.uncoprocess_endpoint()
 
 
-def test_Actions_nosdn():
+def test_actions_nosdn():
     """
     Tests Actions with no SDN controller
     """
