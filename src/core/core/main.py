@@ -9,7 +9,6 @@ Created on 3 December 2018
 import logging
 import sys
 
-from pika.exceptions import AMQPConnectionError
 from poseidon_core.controllers.faucet.config import FaucetRemoteConfGetSetter
 from poseidon_core.controllers.sdnconnect import SDNConnect
 from poseidon_core.helpers.config import Config
@@ -21,15 +20,12 @@ from poseidon_core.operations.monitor import Monitor
 def create_message_queue(logger, host, port, exchange, binding_key, pmain):
     waiting = True
     while waiting:
-        try:
-            rabbit = Rabbit()
-            rabbit.make_rabbit_connection(
-                host, port, exchange, binding_key)
-            rabbit.start_channel(
-                pmain.rabbit_callback, pmain.m_queue)
-            waiting = False
-        except AMQPConnectionError:
-            logger.info('Waiting for connection to RabbitMQ...')
+        rabbit = Rabbit()
+        rabbit.make_rabbit_connection(
+            host, port, exchange, binding_key)
+        rabbit.start_channel(
+            pmain.rabbit_callback, pmain.m_queue)
+        waiting = False
     pmain.rabbits.append(rabbit)
     return pmain
 
