@@ -355,17 +355,20 @@ def test_config():
     Tests Config Operations
     """
     def check_config(obj, endpoints):
+        for endpoint in endpoints:
+            obj.mac_table[endpoint.endpoint_data['mac']] = [
+                endpoint.endpoint_data]
         obj.mirror_mac('00:00:00:00:00:00', 't1-1', 1)
         obj.mirror_mac('00:00:00:00:00:00', 0x1, 2)
         obj.mirror_mac('00:00:00:00:00:00', 't1-1', 2)
         obj.mirror_mac('00:00:00:00:00:00', 't1-1', 3)
         obj.mirror_mac('00:00:00:00:00:00', 't2-1', 5)
         obj.mirror_mac('00:00:00:00:00:00', 'bad', 6)
-        obj.unmirror_mac('00:00:00:00:00:00', None, None)
-        obj.unmirror_mac('00:00:00:00:00:00', 't1-1', 1)
-        obj.unmirror_mac('00:00:00:00:00:00', 't1-1', 3)
-        obj.mirror_mac('00:00:00:00:00:00', 't1-1', 3)
-        obj.unmirror_mac('00:00:00:00:00:00', 't1-1', 3)
+        obj.unmirror_mac('00:00:00:00:00:01', None, None)
+        obj.unmirror_mac('00:00:00:00:00:01', 't1-1', 1)
+        obj.unmirror_mac('00:00:00:00:00:01', 't1-1', 3)
+        obj.mirror_mac('00:00:00:00:00:01', 't1-1', 3)
+        obj.unmirror_mac('00:00:00:00:00:01', 't1-1', 3)
         obj.update_acls()
         obj.update_acls(endpoints=endpoints,
                         rules_file=os.path.join(os.getcwd(), 'config/rules.yaml'))
