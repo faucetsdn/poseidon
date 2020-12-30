@@ -31,9 +31,7 @@ def test_rdns():
     for _ in range(3):
         res = resolver.resolve_ips({'8.8.8.8', '8.8.4.4', '1.1.1.1'})
         for name in res.values():
-            if name != NO_DATA:
-                return
-    assert not res
+            assert name != NO_DATA
 
 
 def test_mirror_endpoint():
@@ -128,9 +126,6 @@ def test_get_q_item():
 
     class MockMQueue:
 
-        def task_done(self):
-            return
-
         def get_nowait(self):
             return 'Item'
 
@@ -157,9 +152,7 @@ def test_format_rabbit_message():
             self.logger = logger
 
     class MockParser:
-
-        def ignore_event(self, _):
-            return False
+        pass
 
     class MockMonitor(Monitor):
 
@@ -168,9 +161,6 @@ def test_format_rabbit_message():
             self.s = get_sdn_connect(logger)
             self.s.sdnc = MockParser()
             self.config = self.s.config
-
-        def update_routing_key_time(self, routing_key):
-            return
 
     mockMonitor = MockMonitor()
     mockMonitor.logger = MockLogger().logger
@@ -393,9 +383,6 @@ def test_process():
                 return (True, ('foo', {'data': {}}))
             return (False, None)
 
-        def bad_get_q_item(self, q, timeout=1):
-            return (False, ('bar', {'data': {}}))
-
         def format_rabbit_message(self, item, faucet_event, remove_list):
             return ({'data': {}}, False)
 
@@ -486,8 +473,5 @@ def test_schedule_thread_worker():
     sys = mocksys()
     t1 = Thread(target=thread1)
     t1.start()
-    try:
-        mock_monitor.schedule_thread_worker(mockSchedule())
-    except SystemExit:
-        pass
+    mock_monitor.schedule_thread_worker(mockSchedule())
     t1.join()
