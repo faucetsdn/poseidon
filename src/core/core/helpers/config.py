@@ -7,7 +7,11 @@ import configparser
 import json
 import logging
 import os
+import tempfile
 from distutils import util
+
+import yaml
+from poseidon_core.helpers.exception_decor import exception
 
 
 class Config():
@@ -76,3 +80,35 @@ class Config():
                             'Unable to set configuration option {0} {1} because {2}'.format(key, val, str(e)))
                 controller[controller_key] = val
         return controller
+
+
+def represent_none(dumper, _):
+    return dumper.represent_scalar('tag:yaml.org,2002:null', '')
+
+
+def parse_rules(config_file):
+    obj_doc = yaml_in(config_file)
+    return obj_doc
+
+
+@exception
+def yaml_in(config_file):
+    try:
+        with open(config_file, 'r') as stream:
+            return yaml.safe_load(stream)
+    except Exception as e:  # pragma: no cover
+        return False
+
+
+@exception
+def yaml_out(config_file, obj_doc):
+    stream = tempfile.NamedTemporaryFile(
+        prefix=os.path.basename(config_file),
+        dir=os.path.dirname(config_file),
+        mode='w',
+        delete=False)
+    yaml.add_representer(type(None), represent_none)
+    yaml.dump(obj_doc, stream, default_flow_style=False)
+    stream.close()
+    os.replace(stream.name, config_file)
+    return True

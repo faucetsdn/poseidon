@@ -1,8 +1,8 @@
 from poseidon_core.controllers.faucet.config import FaucetRemoteConfGetSetter
-from poseidon_core.controllers.faucet.helpers import yaml_in
-from poseidon_core.controllers.faucet.helpers import yaml_out
 from poseidon_core.controllers.sdnconnect import SDNConnect
 from poseidon_core.helpers.config import Config
+from poseidon_core.helpers.config import yaml_in
+from poseidon_core.helpers.config import yaml_out
 
 
 class FaucetLocalConfGetSetter(FaucetRemoteConfGetSetter):
