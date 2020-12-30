@@ -8,7 +8,7 @@ import logging
 from collections import defaultdict
 
 from poseidon_core.controllers.faucet.config import FaucetRemoteConfGetSetter
-from poseidon_core.controllers.faucet.helpers import parse_rules
+from poseidon_core.helpers.config import parse_rules
 from poseidon_core.operations.primitives.acl import ACL
 from poseidon_core.operations.primitives.coprocess import Coprocess
 from poseidon_core.operations.volos.acls import Acl

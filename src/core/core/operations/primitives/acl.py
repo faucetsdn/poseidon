@@ -11,16 +11,10 @@ class ACL:
 
     def __init__(self, faucetconfgetsetter):
         self.logger = logging.getLogger('acl')
-        self.faucetconfgetsetter = faucetconfgetsetter
-
-    def _read_conf(self, config_file):
-        return self.faucetconfgetsetter.read_faucet_conf(config_file)
-
-    def _write_conf(self, config_file, faucet_conf):
-        return self.faucetconfgetsetter.write_faucet_conf(config_file, faucet_conf)
+        self.frpc = faucetconfgetsetter
 
     def _config_file_paths(self, file_paths):
-        return [self.faucetconfgetsetter.config_file_path(f) for f in file_paths]
+        return [self.frpc.config_file_path(f) for f in file_paths]
 
     def include_acl_files(self, rules_doc, rules_file, coprocess_rules_files, obj_doc):
         files = self._config_file_paths(rules_doc['include'])
@@ -30,9 +24,10 @@ class ACL:
         acls_docs = {}
         for f in files:
             if f.startswith('/'):
-                acls_doc = self._read_conf(f)
+                acls_doc = self.frpc.read_faucet_conf(f)
             else:
-                acls_doc = self._read_conf(os.path.join(rules_path, f))
+                acls_doc = self.frpc.read_faucet_conf(
+                    os.path.join(rules_path, f))
             if isinstance(acls_doc, bool):
                 self.logger.warning(
                     'Include file {0} was not found, ACLs may not be working as expected'.format(f))
@@ -65,7 +60,7 @@ class ACL:
             poseidon_acls_filename = 'poseidon_' + acls_filename
             if poseidon_acls_filename not in conf_files:
                 obj_doc['include'].append(poseidon_acls_filename)
-                self._write_conf(os.path.join(
+                self.frpc.write_faucet_conf(os.path.join(
                     rules_path, poseidon_acls_filename), acls_doc)
                 self.logger.info('Adding {0} to config'.format(acls_filename))
 

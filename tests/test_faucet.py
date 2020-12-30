@@ -10,11 +10,11 @@ import tempfile
 import yaml
 from faucetconfgetsetter import FaucetLocalConfGetSetter
 from poseidon_core.controllers.faucet.faucet import FaucetProxy
-from poseidon_core.controllers.faucet.helpers import parse_rules
-from poseidon_core.controllers.faucet.helpers import represent_none
-from poseidon_core.controllers.faucet.helpers import yaml_in
-from poseidon_core.controllers.faucet.helpers import yaml_out
 from poseidon_core.helpers.config import Config
+from poseidon_core.helpers.config import parse_rules
+from poseidon_core.helpers.config import represent_none
+from poseidon_core.helpers.config import yaml_in
+from poseidon_core.helpers.config import yaml_out
 from poseidon_core.helpers.endpoint import endpoint_factory
 
 
