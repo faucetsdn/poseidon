@@ -8,41 +8,37 @@ Created on 3 December 2018
 """
 import logging
 import sys
+import time
 
+import schedule
 from poseidon_core.controllers.faucet.config import FaucetRemoteConfGetSetter
 from poseidon_core.controllers.sdnconnect import SDNConnect
+from poseidon_core.controllers.sdnevents import SDNEvents
 from poseidon_core.helpers.config import Config
 from poseidon_core.helpers.log import Logger
+from poseidon_core.helpers.prometheus import Prometheus
 from poseidon_core.helpers.rabbit import Rabbit
 from poseidon_core.operations.monitor import Monitor
 
 
-def create_message_queue(logger, host, port, exchange, binding_key, pmain):
-    waiting = True
-    while waiting:
-        rabbit = Rabbit()
-        rabbit.make_rabbit_connection(
-            host, port, exchange, binding_key)
-        rabbit.start_channel(
-            pmain.rabbit_callback, pmain.m_queue)
-        waiting = False
-    pmain.rabbits.append(rabbit)
-    return pmain
+def start_prometheus(logger):
+    prom = Prometheus()
+    try:
+        prom.initialize_metrics()
+    except Exception as e:  # pragma: no cover
+        logger.debug(
+            f'Prometheus metrics are already initialized: {e}')
+    Prometheus.start()
+    return prom
 
 
-def start_message_queues(logger, config, pmain):
-    host = config['FA_RABBIT_HOST']
-    port = int(config['FA_RABBIT_PORT'])
-    exchange = 'topic-poseidon-internal'
-    binding_key = ['poseidon.algos.#', 'poseidon.action.#']
-    pmain = create_message_queue(
-        logger, host, port, exchange, binding_key, pmain)
-    exchange = config['FA_RABBIT_EXCHANGE']
-    binding_key = [config['FA_RABBIT_ROUTING_KEY']+'.#']
-    pmain = create_message_queue(
-        logger, host, port, exchange, binding_key, pmain)
-    pmain.schedule_thread.start()
-    return pmain
+def schedule_thread_worker(self, scheduler=schedule):
+    ''' schedule thread, takes care of running processes in the future '''
+    self.logger.debug('Starting thread_worker')
+    while True:
+        sys.stdout.flush()
+        scheduler.run_pending()
+        time.sleep(1)
 
 
 def main():  # pragma: no cover
@@ -50,13 +46,29 @@ def main():  # pragma: no cover
     Logger()
     logger = logging.getLogger('main')
     config = Config().get_config()
-    sdnc = SDNConnect(config=config, logger=logger,
+    prom = start_prometheus(logger)
+
+    # TODO option that doesn't require an sdn connection?
+    sdnc = SDNConnect(config=config, logger=logger, prom=prom,
                       faucetconfgetsetter_cl=FaucetRemoteConfGetSetter)
-    pmain = Monitor(logger, config, sdnc=sdnc)
-    pmain = start_message_queues(logger, config, pmain)
+
+    sdne = SDNEvents(logger, prom, sdnc)
+    sdne.start_message_queues()
+
+    # TODO this should be the default operation, but can be overridden with config to do other operations instead or additionally
+    monitor = Monitor(logger, config, schedule, sdne.job_queue, sdnc, prom)
+
+    # schedule all threads
+    schedule_thread = threading.Thread(
+        target=partial(
+            schedule_thread_worker,
+            scheduler=schedule),
+        name='st_worker')
+    schedule_thread.start()
 
     try:
-        pmain.process()
+        # TODO each operation should have its own thread running its own "process" and this is just a main infinite loop
+        sdne.process()
     except Exception as e:
         logger.error(f'Something went wrong, restarting because: {e}')
         sys.exit(1)

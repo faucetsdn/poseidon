@@ -6,6 +6,7 @@ Created on 5 December 2018
 import datetime
 import ipaddress
 import logging
+import time
 from collections import defaultdict
 
 import requests
@@ -387,6 +388,116 @@ class Prometheus():
         ''' load existing endpoints from Prometheus. '''
         hashes, role_hashes = self.scrape_prom()
         return self.prom_endpoints(hashes, role_hashes)
+
+    def runtime_callable(self, method):
+        method_name = str(method)
+        method_re = re.compile(r'.+bound method (\S+).+')
+        method_match = method_re.match(method_name)
+        if method_match:
+            method_name = method_match.group(1)
+        with self.prom_metrics['method_runtime_secs'].labels(method=method_name).time():
+            return method()
+
+    def update_endpoint_metadata(self, endpoints):
+        update_time = time.time()
+        for hash_id, endpoint in endpoints.items():
+            ipv4 = endpoint.endpoint_data['ipv4']
+            ipv6 = endpoint.endpoint_data['ipv6']
+            ipv4_subnet = endpoint.endpoint_data['ipv4_subnet']
+            ipv6_subnet = endpoint.endpoint_data['ipv6_subnet']
+            ipv4_rdns = endpoint.endpoint_data['ipv4_rdns']
+            ipv6_rdns = endpoint.endpoint_data['ipv6_rdns']
+            port = endpoint.endpoint_data['port']
+            tenant = endpoint.endpoint_data['tenant']
+            segment = endpoint.endpoint_data['segment']
+            ether_vendor = endpoint.endpoint_data['ether_vendor']
+            controller = endpoint.endpoint_data['controller']
+            controller_type = endpoint.endpoint_data['controller_type']
+            roles, confidences, pcap_labels = endpoint.get_roles_confidences_pcap_labels()
+            top_role, second_role, third_role = roles
+            top_conf, second_conf, third_conf = confidences
+            ipv4_os = endpoint.get_ipv4_os()
+
+            def set_prom(var, val, **prom_labels):
+                prom_labels.update({
+                    'mac': endpoint.endpoint_data['mac'],
+                    'name': endpoint.endpoint_data['name'],
+                    'hash_id': hash_id,
+                })
+                try:
+                    self.prom_metrics[var].labels(**prom_labels).set(val)
+                except ValueError:
+                    pass
+
+            def set_prom_role(var, val, role):
+                set_prom(
+                    var,
+                    val,
+                    role=role,
+                    ipv4_os=ipv4_os,
+                    ipv4_address=ipv4,
+                    ipv6_address=ipv6,
+                    pcap_labels=pcap_labels)
+
+            def update_prom(var, **prom_labels):
+                prom_labels.update({
+                    'tenant': tenant,
+                    'segment': segment,
+                    'ether_vendor': ether_vendor,
+                    'port': port,
+                })
+                set_prom(var, update_time, **prom_labels)
+
+            set_prom_role(
+                'endpoint_role_confidence_top',
+                top_conf,
+                top_role)
+            set_prom_role(
+                'endpoint_role_confidence_second',
+                second_conf,
+                second_role)
+            set_prom_role(
+                'endpoint_role_confidence_third',
+                third_conf,
+                third_role)
+            update_prom(
+                'endpoints',
+                controller_type=controller_type,
+                controller=controller)
+            update_prom(
+                'endpoint_state',
+                state=endpoint.state)
+            update_prom(
+                'endpoint_os',
+                ipv4_os=ipv4_os)
+            update_prom(
+                'endpoint_role',
+                top_role=top_role)
+            update_prom(
+                'endpoint_ip',
+                ipv4_subnet=ipv4_subnet,
+                ipv6_subnet=ipv6_subnet,
+                ipv4_rdns=ipv4_rdns,
+                ipv6_rdns=ipv6_rdns,
+                ipv4_address=ipv4,
+                ipv6_address=ipv6)
+            update_prom(
+                'endpoint_metadata',
+                prev_state=endpoint.p_prev_state,
+                next_state=endpoint.p_next_state,
+                acls=endpoint.acl_data,
+                ignore=str(endpoint.ignore),
+                ipv4_subnet=ipv4_subnet,
+                ipv6_subnet=ipv6_subnet,
+                ipv4_rdns=ipv4_rdns,
+                ipv6_rdns=ipv6_rdns,
+                controller_type=controller_type,
+                controller=controller,
+                state=endpoint.state,
+                top_role=top_role,
+                ipv4_os=ipv4_os,
+                ipv4_address=ipv4,
+                ipv6_address=ipv6)
 
     @staticmethod
     def start(port=9304):

@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import difflib
 import ipaddress
 import json
@@ -22,7 +20,7 @@ from poseidon_core.helpers.prometheus import Prometheus
 
 class SDNConnect:
 
-    def __init__(self, config, logger, faucetconfgetsetter_cl=FaucetRemoteConfGetSetter):
+    def __init__(self, config, logger, prom, faucetconfgetsetter_cl=FaucetRemoteConfGetSetter):
         self.config = config
         self.r = None
         self.sdnc = None
@@ -35,9 +33,9 @@ class SDNConnect:
         else:
             self.trunk_ports = trunk_ports
         self.logger = logger
+        self.prom = prom
         self.faucetconfgetsetter_cl = faucetconfgetsetter_cl
         self.get_sdn_context()
-        self.prom = Prometheus()
         self.dns_resolver = DNSResolver()
         self.get_stored_endpoints()
 
