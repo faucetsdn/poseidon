@@ -69,24 +69,27 @@ function check_args()
                 exit
                 ;;
             -i|install)
-                tardir=$(tmpdir)
-                tarfile=$tardir/poseidon.tar.gz
+                poseidondir="$POSEIDON_PREFIX"/opt/poseidon
+                sudo mkdir -p "$poseidondir"
+                sudo chmod -R 755 "$poseidondir"
                 if [ -z "$2" ]; then
-                    curl -s https://api.github.com/repos/iqtlabs/poseidon/releases/latest | jq '.["tarball_url"]' | xargs curl -L > "$tarfile"
+                    sudo git clone https://github.com/iqtlabs/poseidon "$poseidondir"
+                    pushd "$poseidondir" || exit
+                    sudo git checkout "$(git describe --tags --abbrev=0)"
+                    popd || exit
                 else
                     if [ -f "$2" ] ; then
-                        tarfile=$2
+                        sudo tar -C "$poseidondir" -xvf "$2" --strip=1
                     else
-                        curl -L https://github.com/iqtlabs/poseidon/tarball/"$2" > "$tarfile"
+                        sudo git clone https://github.com/iqtlabs/poseidon "$poseidondir"
+                        pushd "$poseidondir" || exit
+                        sudo git checkout "$2"
+                        popd || exit
                     fi
                 fi
-                sudo mkdir -p "$POSEIDON_PREFIX"/opt/poseidon
-                sudo tar -C "$POSEIDON_PREFIX"/opt/poseidon -xvf "$tarfile" --strip=1
-                sudo chmod -R 755 "$POSEIDON_PREFIX"/opt/poseidon
-                sudo cp -n "$POSEIDON_PREFIX"/opt/poseidon/config/poseidon.config "$POSEIDON_PREFIX"/opt/poseidon/poseidon.config
-                sudo cp -n "$POSEIDON_PREFIX"/opt/poseidon/bin/gen_pcap_manifest /usr/local/bin/gen_pcap_manifest
+                sudo cp -n "$poseidondir"/config/poseidon.config "$poseidondir"/poseidon.config
+                sudo cp -n "$poseidondir"/bin/gen_pcap_manifest /usr/local/bin/gen_pcap_manifest
                 sudo chmod +x /usr/local/bin/gen_pcap_manifest
-                sudo rm -rf "$tardir"
                 exit
                 ;;
             -l|logs)
