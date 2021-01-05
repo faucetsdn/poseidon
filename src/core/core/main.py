@@ -33,9 +33,9 @@ def start_prometheus(logger):
     return prom
 
 
-def schedule_thread_worker(self, scheduler=schedule):
+def schedule_thread_worker(logger, scheduler=schedule):
     ''' schedule thread, takes care of running processes in the future '''
-    self.logger.debug('Starting thread_worker')
+    logger.debug('Starting thread_worker')
     while True:
         sys.stdout.flush()
         scheduler.run_pending()
@@ -63,7 +63,7 @@ def main():  # pragma: no cover
     schedule_thread = threading.Thread(
         target=partial(
             schedule_thread_worker,
-            scheduler=schedule),
+            logger, scheduler=schedule),
         name='st_worker')
     schedule_thread.start()
 
