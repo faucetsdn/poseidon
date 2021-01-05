@@ -69,9 +69,15 @@ function check_args()
                 exit
                 ;;
             -i|install)
+                confdir=$(tmpdir)
                 poseidondir="$POSEIDON_PREFIX"/opt/poseidon
                 sudo mkdir -p "$poseidondir"
                 sudo chmod -R 755 "$poseidondir"
+                poseidonconfig="$poseidondir"/config/poseidon.config
+                if [ -f "$poseidondir"/poseidon.config ] ; then
+                    sudo cp "$poseidondir"/poseidon.config "$confdir"/poseidon.config
+                    poseidonconfig="$confdir"/poseidon.config
+                fi
                 if [ -z "$2" ]; then
                     sudo git clone https://github.com/iqtlabs/poseidon "$poseidondir"
                     pushd "$poseidondir" || exit
@@ -87,7 +93,8 @@ function check_args()
                         popd || exit
                     fi
                 fi
-                sudo cp -n "$poseidondir"/config/poseidon.config "$poseidondir"/poseidon.config
+                sudo cp -n "$poseidonconfig" "$poseidondir"/poseidon.config
+                sudo rm -rf "confdir"
                 sudo cp -n "$poseidondir"/bin/gen_pcap_manifest /usr/local/bin/gen_pcap_manifest
                 sudo chmod +x /usr/local/bin/gen_pcap_manifest
                 exit
