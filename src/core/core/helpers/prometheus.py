@@ -68,9 +68,9 @@ class Prometheus():
                                                                     ['routing_key'])
         self.prom_metrics['ncapture_count'] = Counter(
             'poseidon_ncapture_count', 'Number of times ncapture ran')
-        self.prom_metrics['monitor_runtime_secs'] = Summary('poseidon_monitor_runtime_secs',
-                                                            'Time spent in Monitor methods',
-                                                            ['method'])
+        self.prom_metrics['method_runtime_secs'] = Summary('poseidon_method_runtime_secs',
+                                                           'Time spent in Monitor methods',
+                                                           ['method'])
         self.prom_metrics['endpoint_role_confidence_top'] = Gauge('poseidon_role_confidence_top',
                                                                   'Confidence of top role prediction',
                                                                   ['mac',
