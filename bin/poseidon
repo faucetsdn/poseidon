@@ -75,7 +75,7 @@ function check_args()
                 if [ -z "$2" ]; then
                     sudo git clone https://github.com/iqtlabs/poseidon "$poseidondir"
                     pushd "$poseidondir" || exit
-                    sudo git checkout $(git describe --tags --abbrev=0)
+                    sudo git checkout "$(git describe --tags --abbrev=0)"
                     popd || exit
                 else
                     if [ -f "$2" ] ; then
