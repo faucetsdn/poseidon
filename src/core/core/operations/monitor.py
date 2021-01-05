@@ -6,7 +6,6 @@ import random
 import re
 import sys
 import time
-from collections import defaultdict
 
 import requests
 

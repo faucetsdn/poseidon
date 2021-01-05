@@ -1,6 +1,7 @@
 import json
 import queue
 import time
+from collections import defaultdict
 from functools import partial
 
 from poseidon_core.helpers.actions import Actions

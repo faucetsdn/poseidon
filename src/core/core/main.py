@@ -10,6 +10,7 @@ import logging
 import sys
 import threading
 import time
+from functools import partial
 
 import schedule
 from poseidon_core.controllers.faucet.config import FaucetRemoteConfGetSetter
