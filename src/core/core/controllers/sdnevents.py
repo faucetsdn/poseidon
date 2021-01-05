@@ -5,6 +5,7 @@ from functools import partial
 
 from poseidon_core.helpers.actions import Actions
 from poseidon_core.helpers.config import Config
+from poseidon_core.helpers.rabbit import Rabbit
 
 
 class SDNEvents:

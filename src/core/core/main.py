@@ -17,7 +17,6 @@ from poseidon_core.controllers.sdnevents import SDNEvents
 from poseidon_core.helpers.config import Config
 from poseidon_core.helpers.log import Logger
 from poseidon_core.helpers.prometheus import Prometheus
-from poseidon_core.helpers.rabbit import Rabbit
 from poseidon_core.operations.monitor import Monitor
 
 
