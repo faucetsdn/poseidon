@@ -5,7 +5,6 @@ import queue
 import random
 import re
 import sys
-import threading
 import time
 from collections import defaultdict
 
