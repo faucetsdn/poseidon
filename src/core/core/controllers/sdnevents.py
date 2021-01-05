@@ -230,7 +230,7 @@ class SDNEvents:
                 q.put((method.routing_key, body))
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
-    def process(self):
+    def process(self, monitor):
         while True:
             events, faucet_event, remove_list = self.prom.runtime_callable(
                 self.handle_rabbit)
@@ -241,7 +241,8 @@ class SDNEvents:
             if faucet_event:
                 self.prom.runtime_callable(
                     partial(self.sdnc.check_endpoints, faucet_event))
-            events += self.prom.runtime_callable(self.schedule_mirroring)
+            # schedule_mirroring should be abstracted out
+            events += self.prom.runtime_callable(monitor.schedule_mirroring)
             found_work, schedule_func = self.prom.runtime_callable(
                 partial(self.get_q_item, self.job_queue))
             if found_work and callable(schedule_func):

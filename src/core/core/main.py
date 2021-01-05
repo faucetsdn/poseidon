@@ -69,7 +69,7 @@ def main():  # pragma: no cover
 
     try:
         # TODO each operation should have its own thread running its own "process" and this is just a main infinite loop
-        sdne.process()
+        sdne.process(monitor)
     except Exception as e:
         logger.error(f'Something went wrong, restarting because: {e}')
         sys.exit(1)
