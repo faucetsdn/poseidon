@@ -3,7 +3,6 @@
 import json
 import queue
 import random
-import re
 import sys
 import time
 
