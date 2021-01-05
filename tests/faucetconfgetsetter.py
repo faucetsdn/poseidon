@@ -3,6 +3,7 @@ from poseidon_core.controllers.sdnconnect import SDNConnect
 from poseidon_core.helpers.config import Config
 from poseidon_core.helpers.config import yaml_in
 from poseidon_core.helpers.config import yaml_out
+from poseidon_core.helpers.prometheus import Prometheus
 
 
 class FaucetLocalConfGetSetter(FaucetRemoteConfGetSetter):
@@ -86,4 +87,5 @@ def get_test_config():
 
 def get_sdn_connect(logger):
     config = get_test_config()
-    return SDNConnect(config, logger, faucetconfgetsetter_cl=FaucetLocalConfGetSetter)
+    prom = Prometheus()
+    return SDNConnect(config, logger, prom, faucetconfgetsetter_cl=FaucetLocalConfGetSetter)

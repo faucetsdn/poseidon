@@ -10,11 +10,13 @@ import logging
 import queue
 import time
 
+import schedule
 from faucetconfgetsetter import FaucetLocalConfGetSetter
 from faucetconfgetsetter import get_sdn_connect
 from faucetconfgetsetter import get_test_config
 from poseidon_core.constants import NO_DATA
 from poseidon_core.controllers.sdnconnect import SDNConnect
+from poseidon_core.controllers.sdnevents import SDNEvents
 from poseidon_core.helpers.config import Config
 from poseidon_core.helpers.endpoint import endpoint_factory
 from poseidon_core.helpers.metadata import DNSResolver
@@ -24,6 +26,10 @@ from poseidon_core.operations.monitor import Monitor
 from prometheus_client import REGISTRY
 
 logger = logging.getLogger('test')
+
+# initialize here since prometheus keeps a global registry
+prom = Prometheus()
+prom.initialize_metrics()
 
 
 def test_rdns():
@@ -132,45 +138,20 @@ def test_get_q_item():
         def task_done(self):
             return
 
-    class MockMonitor(Monitor):
-
-        def __init__(self):
-            self.s = get_sdn_connect(logger)
-            self.config = self.s.config
-            self.logger = self.s.logger
-
-    mock_monitor = MockMonitor()
+    sdne = SDNEvents(logger, prom, get_sdn_connect(logger))
     m_queue = MockMQueue()
-    assert (True, 'Item') == mock_monitor.get_q_item(m_queue)
+    assert (True, 'Item') == sdne.get_q_item(m_queue)
 
 
 def test_format_rabbit_message():
-
-    class MockLogger:
-
-        def __init__(self):
-            self.logger = logger
-
-    class MockParser:
-        pass
-
-    class MockMonitor(Monitor):
-
-        def __init__(self):
-            self.logger = logger
-            self.s = get_sdn_connect(logger)
-            self.s.sdnc = MockParser()
-            self.config = self.s.config
-
-    mockMonitor = MockMonitor()
-    mockMonitor.logger = MockLogger().logger
+    sdne = SDNEvents(logger, prom, get_sdn_connect(logger))
     faucet_event = []
     remove_list = []
 
     data = {'id': '', 'type': 'metadata', 'file_path': '/files/foo.pcap', 'data': {'10.0.2.15': {'full_os': 'Windows NT kernel', 'short_os': 'Windows',
                                                                                                  'link': 'Ethernet or modem', 'raw_mtu': '1500', 'mac': '08:00:27:cc:3f:1b'}, 'results': {'tool': 'p0f', 'version': '0.11.17'}}}
     message = ('poseidon.algos.decider', data)
-    retval, msg_valid = mockMonitor.format_rabbit_message(
+    retval, msg_valid = sdne.format_rabbit_message(
         message, faucet_event, remove_list)
     assert not retval
     assert msg_valid
@@ -178,60 +159,60 @@ def test_format_rabbit_message():
     data = {'id': '', 'type': 'metadata', 'file_path': '/files/foo', 'data': {'6b33db53faf33c77d694ecab2e3fefadc7dacc70': {'valid': True, 'pcap_labels': None, 'decisions': {'investigate': False}, 'classification': {'labels': ['Administrator workstation', 'Developer workstation', 'Active Directory controller'], 'confidences': [
         0.9955250173194201, 0.004474982679786006, 7.939512151303659e-13]}, 'timestamp': 1608179739.839953, 'source_ip': '208.50.77.134', 'source_mac': '00:1a:8c:15:f9:80'}, 'pcap': 'trace_foo.pcap'}, 'results': {'tool': 'networkml', 'version': '0.6.7.dev4'}}
     message = ('poseidon.algos.decider', data)
-    retval, msg_valid = mockMonitor.format_rabbit_message(
+    retval, msg_valid = sdne.format_rabbit_message(
         message, faucet_event, remove_list)
     assert not retval
     assert msg_valid
 
     data = dict({'Key1': 'Val1'})
     message = ('FAUCET.Event', data)
-    retval, msg_valid = mockMonitor.format_rabbit_message(
+    retval, msg_valid = sdne.format_rabbit_message(
         message, faucet_event, remove_list)
     assert retval == {'Key1': 'Val1'}
     assert msg_valid
     assert faucet_event == [{'Key1': 'Val1'}]
 
     message = (None, data)
-    retval, msg_valid = mockMonitor.format_rabbit_message(
+    retval, msg_valid = sdne.format_rabbit_message(
         message, faucet_event, remove_list)
     assert retval == {}
     assert not msg_valid
 
     data = dict({'foo': 'bar'})
     message = ('poseidon.action.ignore', data)
-    retval, msg_valid = mockMonitor.format_rabbit_message(
+    retval, msg_valid = sdne.format_rabbit_message(
         message, faucet_event, remove_list)
     assert retval == {}
     assert msg_valid
 
     message = ('poseidon.action.clear.ignored', data)
-    retval, msg_valid = mockMonitor.format_rabbit_message(
+    retval, msg_valid = sdne.format_rabbit_message(
         message, faucet_event, remove_list)
     assert retval == {}
     assert msg_valid
 
     message = ('poseidon.action.remove', data)
-    retval, msg_valid = mockMonitor.format_rabbit_message(
+    retval, msg_valid = sdne.format_rabbit_message(
         message, faucet_event, remove_list)
     assert retval == {}
     assert msg_valid
 
     message = ('poseidon.action.remove.ignored', data)
-    retval, msg_valid = mockMonitor.format_rabbit_message(
+    retval, msg_valid = sdne.format_rabbit_message(
         message, faucet_event, remove_list)
     assert retval == {}
     assert msg_valid
 
     ip_data = dict({'10.0.0.1': ['rule1']})
     message = ('poseidon.action.update_acls', ip_data)
-    retval, msg_valid = mockMonitor.format_rabbit_message(
+    retval, msg_valid = sdne.format_rabbit_message(
         message, faucet_event, remove_list)
     assert retval == {}
     assert msg_valid
 
     data = [('foo', 'unknown')]
     message = ('poseidon.action.change', data)
-    retval, msg_valid = mockMonitor.format_rabbit_message(
+    retval, msg_valid = sdne.format_rabbit_message(
         message, faucet_event, remove_list)
     assert retval == {}
     assert msg_valid
@@ -262,19 +243,10 @@ def test_rabbit_callback():
         def get_item(self):
             return self.item
 
-    class MockMonitor(Monitor):
-
-        def __init__(self):
-            self.logger = logger
-            self.config = {
-                'FA_RABBIT_ROUTING_KEY': mock_method.routing_key}
-            self.s = None
-            self.prom = None
-
     mock_channel = MockChannel()
     mock_queue = MockQueue()
-    monitor = MockMonitor()
-    rabbit_callback = monitor.rabbit_callback
+    sdne = SDNEvents(logger, prom, get_sdn_connect(logger))
+    rabbit_callback = sdne.rabbit_callback
 
     rabbit_callback(
         mock_channel,
@@ -312,8 +284,9 @@ def test_find_new_machines():
 def test_Monitor_init():
     config = get_test_config()
     sdnc = SDNConnect(
-        config, logger, faucetconfgetsetter_cl=FaucetLocalConfGetSetter)
-    monitor = Monitor(logger, config, sdnc=sdnc)
+        config, logger, prom, faucetconfgetsetter_cl=FaucetLocalConfGetSetter)
+    sdne = SDNEvents(logger, prom, sdnc)
+    monitor = Monitor(logger, config, schedule, sdne.job_queue, sdnc, prom)
     hosts = [{'active': 0, 'source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'ipv4_os': 'unknown', 'tenant': 'vlan1', 'port': 1, 'segment': 'switch1', 'ipv4': '123.123.123.123', 'mac': '00:00:00:00:00:00', 'id': 'foo1', 'ipv6': '0'},
              {'active': 1, 'source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'ipv4_os': 'unknown', 'tenant': 'vlan1',
                  'port': 1, 'segment': 'switch1', 'ipv4': '123.123.123.123', 'mac': '00:00:00:00:00:00', 'id': 'foo2', 'ipv6': '0'},
@@ -323,7 +296,7 @@ def test_Monitor_init():
                  'port': 2, 'segment': 'switch1', 'ipv4': '2106::1', 'mac': '00:00:00:00:00:00', 'id': 'foo4', 'ipv6': '0'},
              {'active': 1, 'source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'ipv4_os': 'unknown', 'tenant': 'vlan1', 'port': 1, 'segment': 'switch1', 'ipv4': '::', 'mac': '00:00:00:00:00:00', 'id': 'foo5', 'ipv6': '0'}]
     monitor.prom.update_metrics(hosts)
-    monitor.update_routing_key_time('foo')
+    sdne.update_routing_key_time('foo')
 
 
 def test_SDNConnect_init():
@@ -336,45 +309,40 @@ def unregister_metrics():
 
 
 def test_process():
-
-    unregister_metrics()
     from threading import Thread
 
     class MockMonitor(Monitor):
 
         def __init__(self):
-            self.s = get_sdn_connect(logger)
-            self.logger = self.s.logger
-            self.config = self.s.config
-            self.s.config['TYPE'] = 'None'
-            self.s.get_sdn_context()
-            self.s.config['TYPE'] = 'faucet'
-            self.s.get_sdn_context()
+            self.sdnc = get_sdn_connect(logger)
+            self.logger = self.sdnc.logger
+            self.config = self.sdnc.config
+            self.sdnc.config['TYPE'] = 'None'
+            self.sdnc.get_sdn_context()
+            self.sdnc.config['TYPE'] = 'faucet'
+            self.sdnc.get_sdn_context()
             self.job_queue = queue.Queue()
-            self.m_queue = queue.Queue()
-            self.prom = Prometheus()
-            self.prom.initialize_metrics()
-            self.running = True
+            self.prom = prom
             endpoint = endpoint_factory('foo')
             endpoint.endpoint_data = {
                 'active': 0, 'ipv4_subnet': '12.12.12.12/24', 'ipv6_subnet': '', 'ipv4_rdns': '', 'ipv6_rdns': '', 'controller_type': 'faucet', 'controller': '', 'name': '', 'ipv4': '12.12.12.12', 'ipv6': '', 'ether_vendor': 'foo', 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
             endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'classification': {'labels': ['developer workstation', 'foo', 'bar'], 'confidences': [0.8, 0.2, 0.0]}}}, 'ipv4_addresses': {
                 '12.12.12.12': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
             endpoint.operate()
-            self.s.endpoints[endpoint.name] = endpoint
+            self.sdnc.endpoints[endpoint.name] = endpoint
             endpoint = endpoint_factory('foo2')
             endpoint.endpoint_data = {
                 'active': 0, 'ipv4_subnet': '12.12.12.12/24', 'ipv6_subnet': '', 'ipv4_rdns': '', 'ipv6_rdns': '', 'controller_type': 'faucet', 'controller': '', 'name': '', 'ipv4': '12.12.12.12', 'ipv6': '', 'ether_vendor': 'foo', 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
             endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'classification': {'labels': ['developer workstation', 'foo', 'bar'], 'confidences': [0.8, 0.2, 0.0]}}}, 'ipv4_addresses': {
                 '12.12.12.12': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
             endpoint.queue_next('operate')
-            self.s.endpoints[endpoint.name] = endpoint
+            self.sdnc.endpoints[endpoint.name] = endpoint
             endpoint = endpoint_factory('foo3')
             endpoint.endpoint_data = {
                 'active': 0, 'ipv4_subnet': '12.12.12.12/24', 'ipv6_subnet': '', 'ipv4_rdns': '', 'ipv6_rdns': '', 'controller_type': 'faucet', 'controller': '', 'name': '', 'ipv4': '12.12.12.12', 'ipv6': '', 'ether_vendor': 'foo', 'tenant': 'foo', 'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
             endpoint.metadata = {'mac_addresses': {'00:00:00:00:00:00': {'classification': {'labels': ['developer workstation', 'foo', 'bar'], 'confidences': [0.8, 0.2, 0.0]}}}, 'ipv4_addresses': {
                 '12.12.12.12': {'os': 'windows'}}, 'ipv6_addresses': {'1212::1': {'os': 'windows'}}}
-            self.s.endpoints[endpoint.name] = endpoint
+            self.sdnc.endpoints[endpoint.name] = endpoint
             self.results = 0
 
         def get_q_item(self, q, timeout=1):
@@ -388,8 +356,8 @@ def test_process():
 
     mock_monitor = MockMonitor()
 
-    assert mock_monitor.s.investigation_budget()
-    assert mock_monitor.s.coprocessing_budget()
+    assert mock_monitor.sdnc.investigation_budget()
+    assert mock_monitor.sdnc.coprocessing_budget()
     handlers = [
         mock_monitor.job_update_metrics,
         mock_monitor.job_reinvestigation_timeout,
@@ -405,10 +373,10 @@ def test_process():
 
     t1 = Thread(target=thread1)
     t1.start()
-    mock_monitor.process()
+    # mock_monitor.process()
     t1.join()
 
-    mock_monitor.s.sdnc = None
+    mock_monitor.sdnc.sdnc = None
     for handler in handlers:
         handler()
 
@@ -438,40 +406,3 @@ def test_merge_machine():
     s.merge_machine_ip(old_machine, new_machine)
     assert old_machine['ipv4'] == new_machine['ipv4']
     assert new_machine['ipv6'] == new_machine['ipv6']
-
-
-def test_schedule_thread_worker():
-    from threading import Thread
-
-    class mockSchedule():
-
-        def __init__(self):
-            pass
-
-        def run_pending(self):
-            pass
-
-    class mocksys():
-
-        def __init__(self):
-            pass
-
-    class MockMonitor(Monitor):
-
-        def __init__(self):
-            self.s = get_sdn_connect(logger)
-            self.logger = self.s.logger
-            self.config = self.s.config
-            self.running = True
-
-    mock_monitor = MockMonitor()
-
-    def thread1():
-        time.sleep(5)
-        mock_monitor.running = False
-
-    sys = mocksys()
-    t1 = Thread(target=thread1)
-    t1.start()
-    mock_monitor.schedule_thread_worker(mockSchedule())
-    t1.join()

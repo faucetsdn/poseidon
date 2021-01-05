@@ -12,6 +12,7 @@ import logging
 from poseidon_core.controllers.faucet.config import FaucetRemoteConfGetSetter
 from poseidon_core.controllers.sdnconnect import SDNConnect
 from poseidon_core.helpers.config import Config
+from poseidon_core.helpers.prometheus import Prometheus
 
 logger = logging.getLogger('commands')
 
@@ -24,7 +25,8 @@ class Commands:
             self.config = config
         else:
             self.config = Config().get_config()
-        self.sdnc = SDNConnect(self.config, logger,
+        prom = Prometheus()
+        self.sdnc = SDNConnect(self.config, logger, prom,
                                faucetconfgetsetter_cl=faucetconfgetsetter_cl)
 
     def _publish_action(self, address, payload):
