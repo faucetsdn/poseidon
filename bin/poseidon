@@ -166,7 +166,7 @@ function check_args()
                     composefiles+=(-f helpers/faucet/docker-compose-faucet.yaml -f helpers/faucet/docker-compose-monitoring.yaml)
                 fi
                 sudo chown "$USER" -R "$POSEIDON_PREFIX"/opt/faucetconfrpc
-                docker-compose "${composefiles[@]}" up -d --build --quiet-pull || die "docker-compose returned an error"
+                docker-compose "${composefiles[@]}" up --force-recreate -d --build --quiet-pull || die "docker-compose returned an error"
                 echo -n "Waiting for Poseidon to become healthy..."
                 until [ "$(docker ps -q --filter "label=com.docker.compose.service=poseidon")" ] && [ "$(docker inspect poseidon_poseidon_1 -f \{\{.State.Health.Status\}\})" = "healthy" ]
                 do
