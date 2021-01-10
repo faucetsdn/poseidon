@@ -22,7 +22,7 @@ class Logger:
     level_int = {'CRITICAL': 50, 'ERROR': 40, 'WARNING': 30,
                  'INFO': 20, 'DEBUG': 10}
 
-    controller = Config().get_config()
+    config = Config().get_config()
 
     # setup existing loggers
     logging.getLogger('schedule').setLevel(logging.ERROR)
@@ -36,7 +36,7 @@ class Logger:
             with open('/var/log/poseidon/poseidon.log', 'w'):
                 pass
         # set up logging to file
-        level_str = controller.get('logger_level', None)
+        level_str = config.get('logger_level', None)
         level = 0
         if isinstance(level_str, str):
             level = level_int.get(level_str.upper(), 0)
