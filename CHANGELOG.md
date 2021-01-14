@@ -1,3 +1,7 @@
+# v0.17.3 (2020-01-15)
+
+* Fix networkml no results.
+
 # v0.17.2 (2020-01-14)
 
 * Major restructuring of codebase, maintaining same functionality
