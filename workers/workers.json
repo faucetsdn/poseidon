@@ -31,7 +31,6 @@
     {
       "command": [
         "--no-srcmacid",
-        "-r",
         "-o/tmp"
       ],
       "contentType": "application/json",
