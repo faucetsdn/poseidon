@@ -1,3 +1,10 @@
+# v0.17.2 (2020-01-14)
+
+* Major restructuring of codebase, maintaining same functionality
+* Updated poseidon script to use git clone instead of tar file from releases for pbr
+* Added certstrap to the same poseidon network for docker-compose, so there is only one network instead of two
+* Updated docker, transitions, codecov, prometheus, faucetconfrpc, network_tap, certstrap, greenlet, and grafana
+
 # v0.17.1 (2020-12-22)
 
 * Reduce overhead of processing unneed Faucet events.
