@@ -71,5 +71,6 @@ def main():  # pragma: no cover
         # TODO each operation should have its own thread running its own "process" and this is just a main infinite loop
         sdne.process(monitor)
     except Exception as e:
-        logger.error(f'Something went wrong, restarting because: {e}')
+        logger.exception(e)
+        logger.error('restarting because of exception')
         sys.exit(1)
