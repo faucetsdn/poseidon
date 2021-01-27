@@ -28,7 +28,7 @@ services:
             poseidon:
     crviz:
         restart: always
-        image: 'iqtlabs/crviz:v0.3.25'
+        image: 'iqtlabs/crviz:v0.3.26'
         ports:
             - '5001:5000'
         networks:
