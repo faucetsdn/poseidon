@@ -1,3 +1,8 @@
+# v0.17.4 (2020-01-29)
+
+* fix metadata merge keyerror
+* Updated crviz, urlib3, certstrap, faucetconfrpc, prometheus, networkml, net-tools
+
 # v0.17.3 (2020-01-15)
 
 * Fix networkml no results.
