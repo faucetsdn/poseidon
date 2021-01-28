@@ -76,8 +76,7 @@ class SDNEvents:
         def handler_algos_decider(my_obj):
             self.logger.debug('decider value:{0}'.format(my_obj))
             data = my_obj.get('data', None)
-            results = my_obj.get('results', {})
-            tool = results.get('tool', None)
+            tool = my_obj.get('tool', None)
             if isinstance(data, dict) and data:
                 new_metadata = data
                 if tool == 'p0f':
