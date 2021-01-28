@@ -60,7 +60,10 @@ class SDNEvents:
                     endpoint = endpoints[0]
                     if metadata_type not in endpoint.metadata:
                         endpoint.metadata[metadata_type] = defaultdict(dict)
-                    endpoint.metadata[metadata_type][key].update(data)
+                    if key in endpoint.metadata[metadata_type]:
+                        endpoint.metadata[metadata_type][key].update(data)
+                    else:
+                        endpoint.metadata[metadata_type][key] = data
                     updated.add(endpoint)
         return updated
 
@@ -79,22 +82,23 @@ class SDNEvents:
             tool = my_obj.get('tool', None)
             if isinstance(data, dict) and data:
                 new_metadata = data
-                if tool == 'p0f':
-                    ip_metadata = {}
-                    for ip, ip_data in data.items():
-                        if ip_data and ip_data.get('full_os', None):
-                            ip_metadata[ip] = ip_data
-                    new_metadata = {'ipv4_addresses': ip_metadata}
-                elif tool == 'networkml':
-                    mac_metadata = {}
-                    for name, message in data.items():
-                        if name == 'pcap':
-                            continue
-                        if message.get('valid', False):
-                            source_mac = message.get('source_mac', None)
-                            if source_mac:
-                                mac_metadata[source_mac] = message
-                    new_metadata = {'mac_addresses': mac_metadata}
+                # this is obsolete
+                # if tool == 'p0f':
+                #    ip_metadata = {}
+                #    for ip, ip_data in data.items():
+                #        if ip_data and ip_data.get('full_os', None):
+                #            ip_metadata[ip] = ip_data
+                #    new_metadata = {'ipv4_addresses': ip_metadata}
+                # elif tool == 'networkml':
+                #    mac_metadata = {}
+                #    for name, message in data.items():
+                #        if name == 'pcap':
+                #            continue
+                #        if message.get('valid', False):
+                #            source_mac = message.get('source_mac', None)
+                #            if source_mac:
+                #                mac_metadata[source_mac] = message
+                #    new_metadata = {'mac_addresses': mac_metadata}
                 # Generic handler for future tools.
                 updated = self.merge_metadata(new_metadata)
                 if updated:
