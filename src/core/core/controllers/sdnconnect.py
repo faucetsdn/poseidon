@@ -324,7 +324,7 @@ class SDNConnect:
             if ep.endpoint_data != machine and not ep.ignore:
                 diff_txt = self._diff_machine(ep.endpoint_data, machine)
                 self.logger.info(
-                    'Endpoint changed: {0}:{1}'.format(h, diff_txt))
+                    'Endpoint changed: {0}:\n{1}'.format(h, diff_txt))
                 change_acls = True
                 ep.endpoint_data = deepcopy(machine)
             ep.touch()
