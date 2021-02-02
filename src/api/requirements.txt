@@ -1,4 +1,4 @@
-eventlet==0.30.0
+eventlet==0.30.1
 falcon==2.0.0
 falcon-cors==1.1.7
 greenlet==1.0.0
