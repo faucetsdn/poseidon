@@ -1,6 +1,6 @@
 faucetconfrpc==0.22.16
 netaddr==0.8.0
-pika==1.1.0
+pika==1.2.0
 prometheus_client==0.9.0
 pyyaml==5.3.1
 requests==2.25.1
