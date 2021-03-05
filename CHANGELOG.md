@@ -1,3 +1,7 @@
+# v0.17.6 (2021-03-05)
+
+* Upgrade transitions, docker, grafana, prometheus, crviz, eventlet, faucetconfrpc, network_tap.
+
 # v0.17.5 (2021-02-12)
 
 * Upgrade net-tools, networkml, cmd2, eventlet, grafana, pika, rabbitmq
