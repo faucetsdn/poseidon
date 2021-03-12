@@ -17,6 +17,6 @@ repos:
     hooks:
     -   id: reorder-python-imports
 -   repo: https://github.com/pre-commit/mirrors-autopep8
-    rev: v1.5.4
+    rev: v1.5.5
     hooks:
     -   id: autopep8
