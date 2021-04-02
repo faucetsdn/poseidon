@@ -5,6 +5,7 @@ class Mirror:
 
     def __init__(self, logger):
         config = Config().get_config()
+        self.logger = logger
         self.mirror_ports = config['MIRROR_PORTS']
         self.proxy_mirror_ports = config['controller_proxy_mirror_ports']
         self.tunnel_vlan = config['tunnel_vlan']
