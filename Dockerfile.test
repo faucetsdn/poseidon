@@ -11,5 +11,5 @@ ENV PYTHONPATH /poseidon:$PYTHONPATH
 
 RUN cat .coveragerc
 CMD py.test -v -vv --cov-report term-missing --cov=. --cov=poseidon_core --cov=poseidon_api --cov=poseidon_cli -c .coveragerc && \
-    #pytype src/*/*/*py workers/*py src/core/*/*/*py src/core/*/*/*/*py && \
+    pytype src/*/*/*py workers/*py src/core/*/*/*py src/core/*/*/*/*py && \
     ./tests/api_smoke_test.sh
