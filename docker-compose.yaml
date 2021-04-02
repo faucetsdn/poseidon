@@ -17,7 +17,7 @@ services:
             dockerfile: Dockerfile
     network_tap:
         restart: always
-        image: 'iqtlabs/network_tap:v0.11.18'
+        image: 'iqtlabs/network_tap:v0.11.21'
         volumes:
             - '/var/run/docker.sock:/var/run/docker.sock'
             - '${POSEIDON_PREFIX}/opt/poseidon_files:/files'
@@ -28,7 +28,7 @@ services:
             poseidon:
     crviz:
         restart: always
-        image: 'iqtlabs/crviz:v0.3.26'
+        image: 'iqtlabs/crviz:v0.3.27'
         ports:
             - '5001:5000'
         networks:

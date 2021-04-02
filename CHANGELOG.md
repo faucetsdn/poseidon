@@ -1,8 +1,21 @@
-# v0.17.3 (2020-01-15)
+# v0.17.6 (2021-03-05)
+
+* Upgrade transitions, docker, grafana, prometheus, crviz, eventlet, faucetconfrpc, network_tap.
+
+# v0.17.5 (2021-02-12)
+
+* Upgrade net-tools, networkml, cmd2, eventlet, grafana, pika, rabbitmq
+
+# v0.17.4 (2021-01-29)
+
+* fix metadata merge keyerror
+* Updated crviz, urlib3, certstrap, faucetconfrpc, prometheus, networkml, net-tools
+
+# v0.17.3 (2021-01-15)
 
 * Fix networkml no results.
 
-# v0.17.2 (2020-01-14)
+# v0.17.2 (2021-01-14)
 
 * Major restructuring of codebase, maintaining same functionality
 * Updated poseidon script to use git clone instead of tar file from releases for pbr
