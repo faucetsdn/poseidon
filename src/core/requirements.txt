@@ -5,5 +5,5 @@ prometheus_client==0.9.0
 pyyaml==5.3.1
 requests==2.25.1
 schedule==1.0.0
-transitions==0.8.7
+transitions==0.8.8
 urllib3==1.26.4
