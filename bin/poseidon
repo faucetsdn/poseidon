@@ -18,7 +18,6 @@ Options:
     -s,  start         start the Poseidon service (uses sudo)
     -S,  stop          stop the Poseidon service (uses sudo)
     -u,  update        update Poseidon repo, optionally supply a version or 'master' (uses sudo)
-    -v,  viz/visualize get url to visualize Poseidon with CRviz
     -V,  version       get the version installed"
 }
 
@@ -221,22 +220,6 @@ function check_args()
                 sudo curl -L https://raw.githubusercontent.com/IQTLabs/poseidon/master/bin/gen_pcap_manifest -o /usr/local/bin/gen_pcap_manifest
                 sudo chmod +x /usr/local/bin/poseidon /usr/local/bin/gen_pcap_manifest
                 echo "Done updating. Run 'poseidon restart' to activate."
-                exit
-                ;;
-            -v|viz|visualize)
-                if [ "$(docker ps -q --filter "label=com.docker.compose.service=crviz" | wc -l)" -eq 1 ]; then
-                    port_map=$(docker port "$(docker ps -q --filter "label=com.docker.compose.service=crviz")" 5000/tcp)
-                    api_port_map=$(docker port "$(docker ps -q --filter "label=com.docker.compose.service=poseidon_api")" 8000/tcp)
-                    port=$(echo "$port_map" | cut -d':' -f2)
-                    api_port=$(echo "$api_port_map" | cut -d':' -f2)
-                    default_iface=$(awk '$2 == 00000000 { print $1 }' /proc/net/route)
-                    # TODO `ip` is not a command on OSX
-                    default_ip=$(ip addr show dev "$default_iface" | awk '$1 ~ /^inet/ { sub("/.*", "", $2); print $2 }' | head -1)
-                    echo "CRviz is connected to Poseidon and accessible here:"
-                    echo "http://$default_ip:$port/?dataSourceName=Poseidon Network&dataSourceUrl=http://$default_ip:$api_port/v1/network"
-                else
-                    echo "CRviz is not running."
-                fi
                 exit
                 ;;
             -V|version)

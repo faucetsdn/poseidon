@@ -26,15 +26,6 @@ services:
             KEEPIMAGES: '0'
         networks:
             poseidon:
-    crviz:
-        restart: always
-        image: 'iqtlabs/crviz:v0.3.27'
-        ports:
-            - '5001:5000'
-        networks:
-            poseidon:
-        depends_on:
-            - poseidon
     poseidon_api:
         restart: always
         image: 'iqtlabs/poseidon-api:latest'

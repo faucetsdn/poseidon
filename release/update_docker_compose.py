@@ -15,7 +15,6 @@ DEV = RELEASE_VER.endswith('.dev')
 
 # These services have their own versions - update automatically.
 OWN_VERSIONED_SERVICES = {
-    'crviz': 'iqtlabs/crviz',
     'network_tap': 'iqtlabs/network-tools',
 }
 # For dev versions, add this config.
