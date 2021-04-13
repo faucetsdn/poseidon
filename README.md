@@ -124,7 +124,6 @@ Options:
     -s,  start         start the Poseidon service (uses sudo)
     -S,  stop          stop the Poseidon service (uses sudo)
     -u,  update        update Poseidon repo, optionally supply a version (uses sudo)
-    -v,  viz/visualize get url to visualize Poseidon with CRviz
     -V,  version       get the version installed
 ```
 
@@ -263,7 +262,6 @@ The second type of logging is host based pcap captures, with most of the applica
 
 ## Related Components
 
-- [CRviz](https://github.com/IQTLabs/CRviz)
 - [NetworkML](https://github.com/IQTLabs/NetworkML)
 - [network-tools](https://github.com/IQTLabs/network-tools)
 
