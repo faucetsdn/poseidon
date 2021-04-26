@@ -21,7 +21,7 @@ class Endpoints:
         for path in paths():
             endpoints.append(version()+path)
 
-        resp.body = json.dumps(endpoints)
+        resp.text = json.dumps(endpoints)
         resp.content_type = falcon.MEDIA_TEXT
         resp.status = falcon.HTTP_200
 
@@ -30,7 +30,7 @@ class Info:
 
     @staticmethod
     def on_get(_req, resp):
-        resp.body = json.dumps({'version': __version__})
+        resp.text = json.dumps({'version': __version__})
         resp.content_type = falcon.MEDIA_TEXT
         resp.status = falcon.HTTP_200
 
@@ -187,7 +187,7 @@ class NetworkFull:
         dataset = NetworkFull.get_dataset()
         network['dataset'] = dataset
 
-        resp.body = json.dumps(network, indent=2)
+        resp.text = json.dumps(network, indent=2)
         resp.content_type = falcon.MEDIA_JSON
         resp.status = falcon.HTTP_200
 
@@ -244,7 +244,7 @@ class Network:
 
         network['dataset'] = dataset
         network['configuration'] = configuration
-        resp.body = json.dumps(network, indent=2)
+        resp.text = json.dumps(network, indent=2)
         resp.content_type = falcon.MEDIA_JSON
         resp.status = falcon.HTTP_200
 
@@ -274,6 +274,6 @@ class NetworkByIp:
 
         network['dataset'] = dataset
         network['configuration'] = configuration
-        resp.body = json.dumps(network, indent=2)
+        resp.text = json.dumps(network, indent=2)
         resp.content_type = falcon.MEDIA_JSON
         resp.status = falcon.HTTP_200
