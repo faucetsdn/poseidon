@@ -17,7 +17,7 @@ Options:
     -r,  restart       restart the Poseidon service (uses sudo)
     -s,  start         start the Poseidon service (uses sudo)
     -S,  stop          stop the Poseidon service (uses sudo)
-    -u,  update        update Poseidon repo, optionally supply a version or 'master' (uses sudo)
+    -u,  update        update Poseidon repo, optionally supply a version or 'main' (uses sudo)
     -V,  version       get the version installed"
 }
 
@@ -216,8 +216,8 @@ function check_args()
                 sudo cp -a "$configdir"/* "$POSEIDON_PREFIX"/opt/poseidon
                 sudo rm -rf "$configdir"
                 # update this script
-                sudo curl -L https://raw.githubusercontent.com/IQTLabs/poseidon/master/bin/poseidon -o /usr/local/bin/poseidon
-                sudo curl -L https://raw.githubusercontent.com/IQTLabs/poseidon/master/bin/gen_pcap_manifest -o /usr/local/bin/gen_pcap_manifest
+                sudo curl -L https://raw.githubusercontent.com/IQTLabs/poseidon/main/bin/poseidon -o /usr/local/bin/poseidon
+                sudo curl -L https://raw.githubusercontent.com/IQTLabs/poseidon/main/bin/gen_pcap_manifest -o /usr/local/bin/gen_pcap_manifest
                 sudo chmod +x /usr/local/bin/poseidon /usr/local/bin/gen_pcap_manifest
                 echo "Done updating. Run 'poseidon restart' to activate."
                 exit

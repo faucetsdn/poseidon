@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 ![Build Status](https://github.com/IQTLabs/poseidon/workflows/test/badge.svg)
-[![codecov](https://codecov.io/gh/IQTLabs/poseidon/branch/master/graph/badge.svg?token=ORXmFYC3MM)](https://codecov.io/gh/IQTLabs/poseidon)
+[![codecov](https://codecov.io/gh/IQTLabs/poseidon/branch/main/graph/badge.svg?token=ORXmFYC3MM)](https://codecov.io/gh/IQTLabs/poseidon)
 [![Docker Hub Downloads](https://img.shields.io/docker/pulls/iqtlabs/poseidon.svg)](https://hub.docker.com/r/iqtlabs/poseidon/)
 
 > Software Defined Network Situational Awareness
@@ -58,7 +58,7 @@ Followed by closing the existing shell and starting a new one.
 Install the poseidon script which we will use to install and manage Poseidon.
 
 ```
-curl -L https://raw.githubusercontent.com/IQTLabs/poseidon/master/bin/poseidon -o /usr/local/bin/poseidon
+curl -L https://raw.githubusercontent.com/IQTLabs/poseidon/main/bin/poseidon -o /usr/local/bin/poseidon
 chmod +x /usr/local/bin/poseidon
 ```
 
@@ -257,7 +257,7 @@ There are two main types of logging at the lowest level. The first is FAUCET eve
 2019-11-21 20:18:41,909 [DEBUG] faucet - got faucet message for l2_learn: {'version': 1, 'time': 1574367516.3555572, 'dp_id': 1, 'dp_name': 'x930', 'event_id': 172760, 'L2_LEARN': {'port_no': 22, 'previous_port_no': None, 'vid': 254, 'eth_src': '0e:00:00:00:00:99', 'eth_dst': '0e:00:00:00:00:01', 'eth_type': 2048, 'l3_src_ip': '192.168.254.3', 'l3_dst_ip': '192.168.254.254'}}
 ```
 
-The second type of logging is host based pcap captures, with most of the application (L4) payload removed. Poseidon causes the `ncapture` component (https://github.com/IQTLabs/network-tools/tree/master/network_tap/ncapture) to capture traffic, which is logged in `/opt/poseidon_files`. These are used in turn to learn host roles, etc.
+The second type of logging is host based pcap captures, with most of the application (L4) payload removed. Poseidon causes the `ncapture` component (https://github.com/IQTLabs/network-tools/tree/main/network_tap/ncapture) to capture traffic, which is logged in `/opt/poseidon_files`. These are used in turn to learn host roles, etc.
 
 
 ## Related Components
