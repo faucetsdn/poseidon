@@ -1,3 +1,13 @@
+# v0.17.7 (2021-05-21)
+
+* IMPORTANT: Due to moving from a default branch name of 'master' to 'main', when upgrading you'll first need to do the following (then proceed with the normal upgrade process `poseidon update`:
+```
+curl -L https://raw.githubusercontent.com/IQTLabs/poseidon/main/bin/poseidon -o /usr/local/bin/poseidon
+chmod +x /usr/local/bin/poseidon
+```
+* Updated codecov, pre-commit, reorder_python_imports, autopep8, pytype, network_tap, flask, faucet, gauge, prometheus, grafana, event_adapter_rabbitmq, faucet-certstrap, faucetconfrpc, falcon, greenlet, gunicorn, pbr, schedule, transitions, urllib3, python3.9, docker, six, network-tools, and networkml
+* Removed CRviz
+
 # v0.17.6 (2021-03-05)
 
 * Upgrade transitions, docker, grafana, prometheus, crviz, eventlet, faucetconfrpc, network_tap.
