@@ -1,3 +1,7 @@
+# v0.17.8 (2021-05-21)
+
+* Same as v0.17.7, but with the correct version number
+
 # v0.17.7 (2021-05-21)
 
 * IMPORTANT: Due to moving from a default branch name of 'master' to 'main', when upgrading you'll first need to do the following (then proceed with the normal upgrade process `poseidon update`):
