@@ -1,6 +1,6 @@
 # v0.17.7 (2021-05-21)
 
-* IMPORTANT: Due to moving from a default branch name of 'master' to 'main', when upgrading you'll first need to do the following (then proceed with the normal upgrade process `poseidon update`:
+* IMPORTANT: Due to moving from a default branch name of 'master' to 'main', when upgrading you'll first need to do the following (then proceed with the normal upgrade process `poseidon update`):
 ```
 curl -L https://raw.githubusercontent.com/IQTLabs/poseidon/main/bin/poseidon -o /usr/local/bin/poseidon
 chmod +x /usr/local/bin/poseidon
