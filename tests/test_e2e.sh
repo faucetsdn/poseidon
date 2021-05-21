@@ -66,11 +66,10 @@ wait_var_nonzero () {
                         echo FAIL: $query returned no results: $RC
                         exit 1
                 fi
-                if [[ "$cmd" == "" ]] ; then
-                        sleep 1
-                else
+                if [[ "$cmd" != "" ]] ; then
                         echo $($cmd)
                 fi
+                sleep 1
         done
         echo $RC
 }
