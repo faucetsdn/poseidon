@@ -2,7 +2,7 @@ version: '3.7'
 services:
     rabbit:
         restart: always
-        image: 'iqtlabs/rabbitmq:v0.17.9'
+        image: 'iqtlabs/rabbitmq:v0.17.10'
         ports:
             - '127.0.0.1:15672:15672'
             - '5672:5672'
@@ -25,7 +25,7 @@ services:
             poseidon:
     poseidon_api:
         restart: always
-        image: 'iqtlabs/poseidon-api:v0.17.9'
+        image: 'iqtlabs/poseidon-api:v0.17.10'
         ports:
             - '5000:8000'
         environment:
@@ -40,7 +40,7 @@ services:
             - poseidon
     poseidon:
         restart: always
-        image: 'iqtlabs/poseidon:v0.17.9'
+        image: 'iqtlabs/poseidon:v0.17.10'
         ports:
             - '9304:9304'
         environment:
@@ -55,7 +55,7 @@ services:
             - rabbit
     workers:
         restart: always
-        image: 'iqtlabs/poseidon-workers:v0.17.9'
+        image: 'iqtlabs/poseidon-workers:v0.17.10'
         environment:
             PYTHONUNBUFFERED: '1'
             KEEPIMAGES: '0'
