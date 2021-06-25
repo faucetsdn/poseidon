@@ -6,4 +6,4 @@ pyyaml==5.3.1
 requests==2.25.1
 schedule==1.1.0
 transitions==0.8.8
-urllib3==1.26.5
+urllib3==1.26.6
