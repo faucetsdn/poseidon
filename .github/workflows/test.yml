@@ -45,8 +45,4 @@ jobs:
         docker system prune -a -f && ./tests/test_e2e.sh
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1.5.2
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
       if: github.repository == 'iqtlabs/poseidon'
