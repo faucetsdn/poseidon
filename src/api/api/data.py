@@ -5,7 +5,7 @@ import os
 from copy import deepcopy
 
 import falcon
-import requests
+import httpx
 from poseidon_core.constants import NO_DATA
 
 from .__init__ import __version__
@@ -79,20 +79,20 @@ class Nodes:
         try:
             payload = {'query': 'poseidon_endpoint_metadata',
                        'start': start_time_str, 'end': end_time_str, 'step': '30s'}
-            mr = requests.get('http://'+self.prometheus_addr +
-                              '/api/v1/query_range', params=payload)
+            mr = httpx.get('http://'+self.prometheus_addr +
+                           '/api/v1/query_range', params=payload)
             payload = {'query': 'poseidon_role_confidence_top',
                        'start': start_time_str, 'end': end_time_str, 'step': '30s'}
-            r1 = requests.get('http://'+self.prometheus_addr +
-                              '/api/v1/query_range', params=payload)
+            r1 = httpx.get('http://'+self.prometheus_addr +
+                           '/api/v1/query_range', params=payload)
             payload = {'query': 'poseidon_role_confidence_second',
                        'start': start_time_str, 'end': end_time_str, 'step': '30s'}
-            r2 = requests.get('http://'+self.prometheus_addr +
-                              '/api/v1/query_range', params=payload)
+            r2 = httpx.get('http://'+self.prometheus_addr +
+                           '/api/v1/query_range', params=payload)
             payload = {'query': 'poseidon_role_confidence_third',
                        'start': start_time_str, 'end': end_time_str, 'step': '30s'}
-            r3 = requests.get('http://'+self.prometheus_addr +
-                              '/api/v1/query_range', params=payload)
+            r3 = httpx.get('http://'+self.prometheus_addr +
+                           '/api/v1/query_range', params=payload)
         except Exception as e:
             print(f'Unable to get endpoints from Prometheus because: {e}')
         role_hashes = {}

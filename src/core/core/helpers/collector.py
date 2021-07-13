@@ -7,7 +7,7 @@ import ast
 import json
 import logging
 
-import requests
+import httpx
 from poseidon_core.helpers.config import Config
 
 
@@ -54,7 +54,7 @@ class Collector(object):
         uri = 'http://' + network_tap_addr + '/create'
 
         try:
-            resp = requests.post(uri, data=json.dumps(payload))
+            resp = httpx.post(uri, json=payload)
             # TODO improve logged output
             self.logger.debug(
                 'Collector response: {0}'.format(resp.text))
@@ -91,7 +91,7 @@ class Collector(object):
         uri = 'http://' + network_tap_addr + '/stop'
 
         try:
-            resp = requests.post(uri, data=json.dumps(payload))
+            resp = httpx.post(uri, json=payload)
             self.logger.debug(
                 'Collector response: {0}'.format(resp.text))
             response = ast.literal_eval(resp.text)
@@ -114,7 +114,7 @@ class Collector(object):
         uri = 'http://' + network_tap_addr + '/list'
         collectors = {}
         try:
-            resp = requests.get(uri)
+            resp = httpx.get(uri)
             text = resp.text
             # TODO need to parse out text
             self.logger.debug('collector list response: ' + text)

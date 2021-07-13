@@ -6,10 +6,6 @@ import random
 import sys
 import time
 
-import requests
-
-requests.packages.urllib3.disable_warnings()
-
 
 class Monitor:
 
@@ -52,7 +48,7 @@ class Monitor:
         try:
             hosts = self.get_hosts()
             self.prom.update_metrics(hosts)
-        except (requests.exceptions.ConnectionError, Exception) as e:  # pragma: no cover
+        except Exception as e:  # pragma: no cover
             self.logger.error(
                 'Unable to get current state and send it to Prometheus because: {0}'.format(str(e)))
         return 0
