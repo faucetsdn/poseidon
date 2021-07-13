@@ -1,3 +1,7 @@
+# v0.17.10 (2021-06-18)
+
+* Upgrade faucetconfrpc, certstrap, cmd2, grafana, codecov, urllib3, flask 
+
 # v0.17.9 (2021-05-21)
 
 * Recut for pypi packages
