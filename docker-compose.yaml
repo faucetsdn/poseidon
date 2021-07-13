@@ -17,7 +17,7 @@ services:
             dockerfile: Dockerfile
     network_tap:
         restart: always
-        image: 'iqtlabs/network_tap:v0.11.22'
+        image: 'iqtlabs/network_tap:v0.11.23'
         volumes:
             - '/var/run/docker.sock:/var/run/docker.sock'
             - '${POSEIDON_PREFIX}/opt/poseidon_files:/files'
