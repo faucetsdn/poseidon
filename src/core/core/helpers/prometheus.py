@@ -10,7 +10,7 @@ import re
 import time
 from collections import defaultdict
 
-import requests
+import httpx
 from poseidon_core import __version__
 from poseidon_core.constants import NO_DATA
 from poseidon_core.helpers.config import Config
@@ -263,7 +263,7 @@ class Prometheus():
         payload = {'query': var, 'start': start_time_str,
                    'end': end_time_str, 'step': step}
         try:
-            response = requests.get(
+            response = httpx.get(
                 'http://%s/api/v1/query_range' % self.prometheus_addr, params=payload)
         except Exception:
             return []
