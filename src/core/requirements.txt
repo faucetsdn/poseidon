@@ -1,4 +1,4 @@
-faucetconfrpc==0.22.20
+faucetconfrpc==0.22.21
 httpx==0.18.2
 netaddr==0.8.0
 pika==1.2.0
