@@ -1,3 +1,7 @@
+# v0.17.11 (2021-07-16)
+
+* Upgrade grafana, cm2, prometheus, urllib3, requests, httpx, texttable, network_tap, networkml, faucetconfrpc, .
+
 # v0.17.10 (2021-06-18)
 
 * Upgrade faucetconfrpc, certstrap, cmd2, grafana, codecov, urllib3, flask 
