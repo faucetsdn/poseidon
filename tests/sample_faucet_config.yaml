@@ -1,9 +1,10 @@
+---
 vlans:
     office:
         vid: 100
 
 include:
-- sample_acls.yaml
+    - sample_acls.yaml
 
 dps:
     t1-1:
@@ -19,12 +20,12 @@ dps:
                     dp: t2-1
                     port: 1
             2:
-                output_only: True
+                output_only: true
                 mirror:
-                - 3
+                    - 3
             3:
                 native_vlan: office
-                loop_protect_external: True
+                loop_protect_external: true
     t1-2:
         dp_id: 0x2
         hardware: "Open vSwitch"
@@ -39,7 +40,7 @@ dps:
                 native_vlan: office
             3:
                 native_vlan: office
-                loop_protect_external: True
+                loop_protect_external: true
     t2-1:
         dp_id: 0x3
         hardware: "Open vSwitch"
@@ -54,4 +55,4 @@ dps:
                     port: 1
             3:
                 native_vlan: office
-                loop_protect_external: False
+                loop_protect_external: false
