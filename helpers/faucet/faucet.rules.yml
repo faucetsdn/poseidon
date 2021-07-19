@@ -1,6 +1,7 @@
+---
 groups:
-- name: faucet.rules
-  rules:
+  - name: faucet.rules
+    rules:
 
   # Convert OF stats to rates
   - record: instance_dpid:of_packet_ins:rate1m

@@ -44,8 +44,6 @@ class Volos(object):
                         item['repo'] = repo
                         item['name'] = name
                         item['branch'] = cfg[repo][name]['branch']
-                        item['build'] = cfg[repo][name]['build']
-                        item['start'] = cfg[repo][name]['start']
                         item['ports'] = []
                         for port in cfg[repo][name]['ports']:
                             cfg_p = {}

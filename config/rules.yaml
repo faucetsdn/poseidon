@@ -1,17 +1,18 @@
+---
 include:
-    - acls.yaml
+  - acls.yaml
 
 rules:
-    rule-name-1:
-        - rule:
-            device_key: os
-            value: Mac
-            acls: [office-vlan-protect, foo]
-        - rule:
-            device_key: role
-            value: Printer
-            min_confidence: 50
-            acls: [no-external]
-    no-internal:
-        - rule:
-            acls: [no-internal]
+  rule-name-1:
+    - rule:
+      device_key: os
+      value: Mac
+      acls: [office-vlan-protect, foo]
+    - rule:
+      device_key: role
+      value: Printer
+      min_confidence: 50
+      acls: [no-external]
+  no-internal:
+    - rule:
+      acls: [no-internal]
