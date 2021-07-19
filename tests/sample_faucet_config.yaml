@@ -22,7 +22,7 @@ dps:
             2:
                 output_only: true
                 mirror:
-                - 3
+                    - 3
             3:
                 native_vlan: office
                 loop_protect_external: true
