@@ -23,7 +23,9 @@ groups:
       - record: port_dpid:port_vlan_hosts_learned:sum
         expr: sum(port_vlan_hosts_learned) BY (instance, port, dp_id, dp_name)
       - record: port_vlan_dpid:port_vlan_hosts_learned:sum
-        expr: sum(port_vlan_hosts_learned) BY (instance, port, vlan, dp_id, dp_name)
+        expr: >-
+          sum(port_vlan_hosts_learned)
+          BY (instance, port, vlan, dp_id, dp_name)
 
       # Convert Port stats to rates
       - record: instance_port:of_port_rx_packets:rate1m
