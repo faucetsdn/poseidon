@@ -143,6 +143,8 @@ wait_var_nonzero "port_status{port=\"3\"}" "" port_status
 wait_job_up gauge:9303
 wait_var_nonzero "dp_status{dp_name=\"switch1\"}" "" dp_status
 wait_job_up poseidon:9304
+docker logs poseidon_prometheus_1 2>&1 | grep yml
+docker logs poseidon_prometheus_1 2>&1 | grep -i error
 for i in sw1a sw1b ; do
         sudo ip link set $i up
 done
