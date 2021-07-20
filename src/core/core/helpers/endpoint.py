@@ -174,6 +174,7 @@ class Endpoint:
     def machine_trigger(self, state):
         # pytype: disable=attribute-error
         self.machine.events[state].trigger(self)
+        # pytype: enable=attribute-error
 
     def trigger_next(self):
         self.p_prev_state = self.state
@@ -186,8 +187,9 @@ class Endpoint:
         self.copro_queue()  # pytype: disable=attribute-error
 
     def copro_machine_trigger(self, state):
-        self.copro_machine.events[state].trigger(
-            self)  # pytype: disable=attribute-error
+        # pytype: disable=attribute-error
+        self.copro_machine.events[state].trigger(self)
+        # pytype: enable=attribute-error
 
     def copro_trigger_next(self):
         if self.p_next_copro_state:
