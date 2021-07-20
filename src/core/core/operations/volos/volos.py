@@ -46,15 +46,18 @@ class Volos(object):
                         item['branch'] = cfg[repo][name]['branch']
                         item['ports'] = []
                         for port in cfg[repo][name]['ports']:
-                            cfg_p = {}
-                            cfg_p['proto'] = port['port']['protocol']
-                            cfg_p['proto_id'] = PROTOCOL_MAP[port['port']
-                                                             ['protocol']]
-                            mapping = port['port']['mapping']
-                            cfg_p['host'] = mapping[:mapping.index(':')]
-                            cfg_p['dest'] = mapping[mapping.index(':'):]
-                            item['ports'].append(cfg_p)
-
+                            if port:
+                                cfg_port = port.get('port', None)
+                                if cfg_port:
+                                    mapping = cfg_port['mapping']
+                                    protocol = cfg_port['protocol']
+                                    cfg_p = {
+                                        'proto': protocol,
+                                        'proto_id': PROTOCOL_MAP[protocol],
+                                        'host': mapping[:mapping.index(':')],
+                                        'dest': mapping[mapping.index(':'):]
+                                    }
+                                    item['ports'].append(cfg_p)
                     container_cfg.append(item)
 
             else:

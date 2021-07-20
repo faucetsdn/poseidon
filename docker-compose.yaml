@@ -1,9 +1,8 @@
----
 version: '3.7'
 services:
     rabbit:
         restart: always
-        image: 'iqtlabs/rabbitmq:v0.17.11'
+        image: 'iqtlabs/rabbitmq:latest'
         ports:
             - '127.0.0.1:15672:15672'
             - '5672:5672'
@@ -13,6 +12,9 @@ services:
                     - RABBIT_SERVER
                     - rabbitmq
                     - messenger
+        build:
+            context: helpers/rabbitmq
+            dockerfile: Dockerfile
     network_tap:
         restart: always
         image: 'iqtlabs/network_tap:v0.11.23'
@@ -26,7 +28,7 @@ services:
             poseidon:
     poseidon_api:
         restart: always
-        image: 'iqtlabs/poseidon-api:v0.17.11'
+        image: 'iqtlabs/poseidon-api:latest'
         ports:
             - '5000:8000'
         environment:
@@ -39,9 +41,12 @@ services:
                     - poseidon-api
         depends_on:
             - poseidon
+        build:
+            context: helpers/api
+            dockerfile: Dockerfile
     poseidon:
         restart: always
-        image: 'iqtlabs/poseidon:v0.17.11'
+        image: 'iqtlabs/poseidon:latest'
         ports:
             - '9304:9304'
         environment:
@@ -54,9 +59,12 @@ services:
             - poseidon
         depends_on:
             - rabbit
+        build:
+            context: .
+            dockerfile: Dockerfile
     workers:
         restart: always
-        image: 'iqtlabs/poseidon-workers:v0.17.11'
+        image: 'iqtlabs/poseidon-workers:latest'
         environment:
             PYTHONUNBUFFERED: '1'
             KEEPIMAGES: '0'
@@ -68,6 +76,9 @@ services:
             - '/var/run/docker.sock:/var/run/docker.sock'
         depends_on:
             - poseidon
+        build:
+            context: workers
+            dockerfile: Dockerfile
 networks:
     poseidon:
         driver: overlay
