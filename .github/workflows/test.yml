@@ -42,7 +42,7 @@ jobs:
       run: make run_tests
     - name: e2e_test
       run: |
-        docker system prune -a -f && ./tests/test_e2e.sh
+        docker system prune -a -f --volumes && ./tests/test_e2e.sh
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2.0.1
       if: github.repository == 'iqtlabs/poseidon'
