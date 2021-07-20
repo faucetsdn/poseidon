@@ -84,14 +84,14 @@ sudo mkdir -p /etc/faucet
 cat >$TMPDIR/faucet.yaml<<EOF
 # compatible with default poseidon config.
 dps:
-  switch1:
-    dp_id: 0x1
-    hardware: Open vSwitch
-    interfaces:
-        1:
-           native_vlan: 100
-        3:
-           output_only: true
+    switch1:
+        dp_id: 0x1
+        hardware: Open vSwitch
+        interfaces:
+            1:
+                native_vlan: 100
+            3:
+                output_only: true
 EOF
 sudo mv $TMPDIR/faucet.yaml /etc/faucet
 
@@ -143,6 +143,8 @@ wait_var_nonzero "port_status{port=\"3\"}" "" port_status
 wait_job_up gauge:9303
 wait_var_nonzero "dp_status{dp_name=\"switch1\"}" "" dp_status
 wait_job_up poseidon:9304
+docker logs poseidon_prometheus_1 2>&1 | grep yml || true
+docker logs poseidon_prometheus_1 2>&1 | grep -i error || true
 for i in sw1a sw1b ; do
         sudo ip link set $i up
 done
