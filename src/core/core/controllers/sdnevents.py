@@ -131,6 +131,7 @@ class SDNEvents:
                             self.sdnc.unmirror_endpoint(endpoint)
                         # pytype: disable=attribute-error
                         endpoint.machine_trigger(state)
+                        # pytype: enable=attribute-error
                         endpoint.p_next_state = None
                         if endpoint.operation_active():
                             self.sdnc.mirror_endpoint(endpoint)

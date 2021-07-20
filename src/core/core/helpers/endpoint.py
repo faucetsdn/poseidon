@@ -174,6 +174,7 @@ class Endpoint:
     def machine_trigger(self, state):
         # pytype: disable=attribute-error
         self.machine.events[state].trigger(self)
+        # pytype: enable=attribute-error
 
     def trigger_next(self):
         self.p_prev_state = self.state
