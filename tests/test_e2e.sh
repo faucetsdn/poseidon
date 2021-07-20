@@ -84,14 +84,14 @@ sudo mkdir -p /etc/faucet
 cat >$TMPDIR/faucet.yaml<<EOF
 # compatible with default poseidon config.
 dps:
-  switch1:
-    dp_id: 0x1
-    hardware: Open vSwitch
-    interfaces:
-        1:
-           native_vlan: 100
-        3:
-           output_only: true
+    switch1:
+        dp_id: 0x1
+        hardware: Open vSwitch
+        interfaces:
+            1:
+                native_vlan: 100
+            3:
+                output_only: true
 EOF
 sudo mv $TMPDIR/faucet.yaml /etc/faucet
 
