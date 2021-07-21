@@ -4,8 +4,8 @@ https://github.com/yeasy/simple-web:
     branch: master
     ports:
       - port:
-        protocol: tcp
-        mapping: "80:80"
+          protocol: tcp
+          mapping: "80:80"
       - port:
-        protocol: tcp
-        mapping: "443:443"
+          protocol: tcp
+          mapping: "443:443"
