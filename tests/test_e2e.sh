@@ -63,6 +63,7 @@ wait_var_nonzero () {
                         fi
                         grep -v store /var/log/poseidon/poseidon.log |tail -500
                         docker ps -a
+                        wget -q -O- 0.0.0.0:9304
                         echo FAIL: $query returned no results: $RC
                         exit 1
                 fi
