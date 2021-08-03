@@ -9,13 +9,15 @@ from .routes import routes
 from .routes import version
 
 
-def main():
-    cors = CORS(allow_all_origins=True)
-    api = application = falcon.App(middleware=[cors.middleware])
+cors = CORS(allow_all_origins=True)
+api = application = falcon.App(middleware=[cors.middleware])
 
-    r = routes()
-    for route in r:
-        api.add_route(version()+route, r[route])
+r = routes()
+for route in r:
+    api.add_route(version()+route, r[route])
+
+
+def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
