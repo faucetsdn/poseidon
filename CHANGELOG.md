@@ -1,3 +1,11 @@
+# v0.17.12 (2021-08-05)
+
+* tshark parsing/reliability fixes in dependencies
+* replace eventlet/greenlet/unicorn with bjoern
+* yaml cleanup
+* precommits
+* upgrade network-tools, network_tap, networkml, ovs, pytype, pep8, codecov, faucet, gauge, event_adapter_rabbitmq
+
 # v0.17.11 (2021-07-16)
 
 * Upgrade grafana, cm2, prometheus, urllib3, requests, httpx, texttable, network_tap, networkml, faucetconfrpc, .
