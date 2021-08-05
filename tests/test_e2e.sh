@@ -15,7 +15,7 @@ fi
 TMPDIR=$(mktemp -d)
 
 FASTREPLAY="sudo tcpreplay -q -t -i sw1b $TMPDIR/test.pcap"
-SLOWREPLAY="sudo tcpreplay -q -M5 -i sw1b $TMPDIR/test.pcap"
+SLOWREPLAY="sudo tcpreplay -q -M1 -i sw1b $TMPDIR/test.pcap"
 
 cli_cmd () {
         PID=$(docker ps -q --filter "label=com.docker.compose.service=poseidon")
@@ -61,7 +61,7 @@ wait_var_nonzero () {
                         if [[ "$failvar" != "" ]] ; then
                                 echo "$api$failvar" | wget -q -O- -i -
                         fi
-                        grep -v store /var/log/poseidon/poseidon.log |tail -500
+                        grep -v -E "(main - operations|transitions.core)" /var/log/poseidon/poseidon.log |tail -500
                         docker ps -a
                         wget -q -O- 0.0.0.0:9304
                         echo FAIL: $query returned no results: $RC
@@ -132,7 +132,7 @@ poseidon -i $TMPDIR/current.tar
 sudo sed -i -E \
   -e "s/logger_level.+/logger_level = DEBUG/;" \
   -e "s/collector_nic.+/collector_nic = mirrorb/;" \
-  -e "s/reinvestigation_frequency.+/reinvestigation_frequency = 60/" \
+  -e "s/reinvestigation_frequency.+/reinvestigation_frequency = 90/" \
   -e "s/max_concurrent_reinvestigations.+/max_concurrent_reinvestigations = 1/" \
   /opt/poseidon/poseidon.config
 sudo cat /opt/poseidon/poseidon.config
@@ -158,27 +158,32 @@ while [[ "$COUNT" == 0 ]] ; do
 done
 # Poseidon event client receiving from FAUCET
 wait_var_nonzero "poseidon_last_rabbitmq_routing_key_time{routing_key=\"FAUCET.Event\"}" "" poseidon_last_rabbitmq_routing_key_time
-# Poseidon detected endpoints
-wait_var_nonzero "sum(poseidon_endpoint_current_states{current_state=\"operating\"})" "$FASTREPLAY" poseidon_endpoint_current_states
 echo waiting for ncapture
 COUNT="0"
 while [[ "$COUNT" == "0" ]] ; do
         COUNT=$(docker ps -a --filter=status=running|grep -c ncapture|cat)
+        echo $($FASTREPLAY)
         sleep 1
+        echo -n .
 done
 echo waiting for FAUCET mirror to be applied
 COUNT="0"
 while [[ "$COUNT" == 0 ]] ; do
         COUNT=$(docker exec -t $OVSID ovs-ofctl dump-flows -OOpenFlow13 switch1 table=0,in_port=1|grep -c output:|cat)
         sleep 1
+        echo -n .
 done
+echo Sending test traffic to be mirrored
+# TODO: come up with a better way to stimulate p0f and/or ensure most test traffic is sent within the capture window.
 # Send mirror traffic
 echo $($SLOWREPLAY)
+# Poseidon detected endpoints
+wait_var_nonzero "sum(poseidon_endpoint_current_states{current_state=\"operating\"})" "$FASTREPLAY" poseidon_endpoint_current_states
 # wait for networkml to return a result
 wait_var_nonzero "poseidon_last_rabbitmq_routing_key_time{routing_key=\"poseidon.algos.decider\"}" "" poseidon_last_rabbitmq_routing_key_time
 # keep endpoints active awaiting results
 wait_var_nonzero "sum(poseidon_endpoint_roles{role!=\"NO DATA\"})" "$FASTREPLAY" poseidon_endpoint_roles
-wait_var_nonzero "sum(poseidon_endpoint_metadata{role!=\"NO DATA\"})" "" poseidon_endpoint_metadata
+wait_var_nonzero "sum(poseidon_endpoint_metadata{role!=\"NO DATA\"})" "$FASTREPLAY" poseidon_endpoint_metadata
 # ensure CLI results reported.
 wait_show_all "orkstation.+00:1a:8c:15:f9:80"
 wait_var_nonzero "sum(poseidon_endpoint_oses{ipv4_os!=\"NO DATA\"})" "" poseidon_endpoint_oses
