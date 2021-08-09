@@ -66,6 +66,9 @@ class Prometheus():
         self.prom_metrics['last_rabbitmq_routing_key_time'] = Gauge('poseidon_last_rabbitmq_routing_key_time',
                                                                     'Epoch time when last received a RabbitMQ message',
                                                                     ['routing_key'])
+        self.prom_metrics['last_tool_result_time'] = Gauge('poseidon_last_tool_result_time',
+                                                           'Epoch time when last received a tool result message',
+                                                           ['tool'])
         self.prom_metrics['ncapture_count'] = Counter(
             'poseidon_ncapture_count', 'Number of times ncapture ran')
         self.prom_metrics['method_runtime_secs'] = Summary('poseidon_method_runtime_secs',
