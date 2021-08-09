@@ -182,7 +182,9 @@ wait_var_nonzero "sum(poseidon_endpoint_current_states{current_state=\"operating
 # wait for networkml to return a result
 wait_var_nonzero "poseidon_last_rabbitmq_routing_key_time{routing_key=\"poseidon.algos.decider\"}" "" poseidon_last_rabbitmq_routing_key_time
 # keep endpoints active awaiting results
+wait_var_nonzero "sum(poseidon_last_tool_result_time{tool=\"networkml\"})" "$FASTREPLAY" poseidon_last_tool_result_time
 wait_var_nonzero "sum(poseidon_endpoint_roles{role!=\"NO DATA\"})" "$FASTREPLAY" poseidon_endpoint_roles
+wait_var_nonzero "sum(poseidon_last_tool_result_time{tool=\"p0f\"})" "$FASTREPLAY" poseidon_last_tool_result_time
 wait_var_nonzero "sum(poseidon_endpoint_metadata{role!=\"NO DATA\"})" "$FASTREPLAY" poseidon_endpoint_metadata
 # ensure CLI results reported.
 wait_show_all "orkstation.+00:1a:8c:15:f9:80"

@@ -78,29 +78,12 @@ class SDNEvents:
 
         def handler_algos_decider(my_obj):
             self.logger.debug('decider value:{0}'.format(my_obj))
+            tool = my_obj.get('tool', 'unknown')
+            self.update_prom_var_time(
+                'last_tool_result_time', 'tool', tool)
             data = my_obj.get('data', None)
-            tool = my_obj.get('tool', None)
             if isinstance(data, dict) and data:
-                new_metadata = data
-                # this is obsolete
-                # if tool == 'p0f':
-                #    ip_metadata = {}
-                #    for ip, ip_data in data.items():
-                #        if ip_data and ip_data.get('full_os', None):
-                #            ip_metadata[ip] = ip_data
-                #    new_metadata = {'ipv4_addresses': ip_metadata}
-                # elif tool == 'networkml':
-                #    mac_metadata = {}
-                #    for name, message in data.items():
-                #        if name == 'pcap':
-                #            continue
-                #        if message.get('valid', False):
-                #            source_mac = message.get('source_mac', None)
-                #            if source_mac:
-                #                mac_metadata[source_mac] = message
-                #    new_metadata = {'mac_addresses': mac_metadata}
-                # Generic handler for future tools.
-                updated = self.merge_metadata(new_metadata)
+                updated = self.merge_metadata(data)
                 if updated:
                     for endpoint in updated:
                         if endpoint.operation_active():
@@ -195,10 +178,9 @@ class SDNEvents:
             'no handler for routing_key {0}'.format(routing_key))
         return {}, False
 
-    def update_routing_key_time(self, routing_key):
+    def update_prom_var_time(self, var, label_name, label_value):
         if self.prom:
-            self.prom.prom_metrics['last_rabbitmq_routing_key_time'].labels(
-                routing_key=routing_key).set(time.time())
+            self.prom.prom_metrics[var].labels(**{label_name: label_value}).set(time.time())
 
     def handle_rabbit(self):
         events = 0
@@ -229,7 +211,8 @@ class SDNEvents:
         self.logger.debug('got a message: {0}:{1} (qsize {2})'.format(
             method.routing_key, body, q.qsize()))
         if q is not None:
-            self.update_routing_key_time(method.routing_key)
+            self.update_prom_var_time(
+                'last_rabbitmq_routing_key_time', 'routing_key', method.routing_key)
             if not self.ignore_rabbit(method.routing_key, body):
                 q.put((method.routing_key, body))
         ch.basic_ack(delivery_tag=method.delivery_tag)
