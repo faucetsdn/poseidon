@@ -296,7 +296,7 @@ def test_Monitor_init():
                  'port': 2, 'segment': 'switch1', 'ipv4': '2106::1', 'mac': '00:00:00:00:00:00', 'id': 'foo4', 'ipv6': '0'},
              {'active': 1, 'source': 'poseidon', 'role': 'unknown', 'state': 'unknown', 'ipv4_os': 'unknown', 'tenant': 'vlan1', 'port': 1, 'segment': 'switch1', 'ipv4': '::', 'mac': '00:00:00:00:00:00', 'id': 'foo5', 'ipv6': '0'}]
     monitor.prom.update_metrics(hosts)
-    sdne.update_routing_key_time('foo')
+    sdne.update_prom_var_time('last_rabbitmq_routing_key_time', 'routing_key', 'foo')
 
 
 def test_SDNConnect_init():
