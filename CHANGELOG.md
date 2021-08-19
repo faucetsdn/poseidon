@@ -1,3 +1,8 @@
+# v0.17.13 (2021-08-20)
+
+* upgrade network-tools, network_tap, networkml, grafana, httpx, prometheus
+* test reliability
+
 # v0.17.12 (2021-08-05)
 
 * tshark parsing/reliability fixes in dependencies
