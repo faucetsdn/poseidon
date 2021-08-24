@@ -1,4 +1,4 @@
 docker==5.0.0
 pika==1.2.0
-prometheus_client==0.9.0
+prometheus_client==0.11.0
 six==1.16.0
