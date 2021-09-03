@@ -1,3 +1,7 @@
+# v0.17.14 (2021-09-04)
+
+* upgrade network-tools, network_tap, faucetconfrpc, codecov-action, prometheus, docker, transitions
+
 # v0.17.13 (2021-08-20)
 
 * upgrade network-tools, network_tap, networkml, grafana, httpx, prometheus
@@ -13,7 +17,7 @@
 
 # v0.17.11 (2021-07-16)
 
-* Upgrade grafana, cm2, prometheus, urllib3, requests, httpx, texttable, network_tap, networkml, faucetconfrpc, .
+* Upgrade grafana, cm2, prometheus, urllib3, requests, httpx, texttable, network_tap, networkml, faucetconfrpc
 
 # v0.17.10 (2021-06-18)
 
