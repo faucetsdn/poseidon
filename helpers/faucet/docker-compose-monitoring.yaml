@@ -3,7 +3,7 @@ version: '3.7'
 services:
     prometheus:
         restart: always
-        image: 'prom/prometheus:v2.29.2'
+        image: 'prom/prometheus:v2.30.0'
         user: 'root'
         ports:
             - '9090:9090'
