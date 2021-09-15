@@ -1,3 +1,8 @@
+# v0.17.15 (2021-09-16)
+
+* Use c65sdn
+* Upgrade grafana, OVS, codecov, prometheus, cmd2, pyyaml, faucetconfrpc, docker
+
 # v0.17.14 (2021-09-04)
 
 * upgrade network-tools, network_tap, faucetconfrpc, codecov-action, prometheus, docker, transitions
