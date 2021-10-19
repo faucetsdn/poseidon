@@ -28,7 +28,7 @@ services:
             - poseidon
     faucetconfrpc:
         restart: always
-        image: 'iqtlabs/faucetconfrpc:v0.22.25'
+        image: 'iqtlabs/faucetconfrpc:v0.22.26'
         environment:
             PYTHONUNBUFFERED: '1'
         volumes:
