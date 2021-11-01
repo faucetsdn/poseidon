@@ -2,6 +2,8 @@
 
 set -e
 
+TESTHOST="00:1e:68:51:4f:a9"
+
 POSEIDON_IMAGE=$(grep -Eo "image:.+poseidon:[^\']+" docker-compose.yaml |grep -Eo ':\S+')
 if [[ "$POSEIDON_IMAGE" == "" ]] ; then
         echo error: cannot detect poseidon docker image name.
@@ -136,7 +138,8 @@ sudo sed -i -E \
   -e "s/max_concurrent_reinvestigations.+/max_concurrent_reinvestigations = 1/" \
   /opt/poseidon/poseidon.config
 sudo cat /opt/poseidon/poseidon.config
-wget https://github.com/IQTLabs/NetworkML/raw/main/tests/test_data/trace_ab12_2001-01-01_02_03-client-ip-1-2-3-4.pcap -O$TMPDIR/test.pcap
+wget https://github.com/IQTLabs/NetworkML/raw/main/tests/test_data/trace_ab12_2001-01-01_02_03-client-ip-1-2-3-4.pcap -O$TMPDIR/raw.pcap
+tcpdump -nevr $TMPDIR/raw.pcap -w $TMPDIR/test.pcap ether host "${TESTHOST}"
 poseidon -s
 wait_job_up faucetconfrpc:59998
 wait_job_up faucet:9302
@@ -187,7 +190,7 @@ wait_var_nonzero "sum(poseidon_endpoint_roles{role!=\"NO DATA\"})" "$FASTREPLAY"
 wait_var_nonzero "sum(poseidon_last_tool_result_time{tool=\"p0f\"})" "$FASTREPLAY" poseidon_last_tool_result_time
 wait_var_nonzero "sum(poseidon_endpoint_metadata{role!=\"NO DATA\"})" "$FASTREPLAY" poseidon_endpoint_metadata
 # ensure CLI results reported.
-wait_show_all "orkstation.+00:1a:8c:15:f9:80"
+wait_show_all "orkstation.+${TESTHOST}"
 wait_var_nonzero "sum(poseidon_endpoint_oses{ipv4_os!=\"NO DATA\"})" "" poseidon_endpoint_oses
 # TODO: fix certstrap to allow creating multiple named client keys.
 wait_var_nonzero "sum(faucetconfrpc_ok_total{peer_id=\"poseidon\"})" "" faucetconfrpc_ok_total
