@@ -1,3 +1,7 @@
+# v0.17.16 (2021-11-05)
+
+* Upgrade c65sdn, prometheus, faucetconfrpc, docker, networkml, pylint, pytype, httpx, grafana, pbr
+
 # v0.17.15 (2021-09-16)
 
 * Use c65sdn
