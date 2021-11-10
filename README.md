@@ -32,7 +32,7 @@ The Poseidon project originally began as an experiment to test the merits of lev
 ## Prerequisites
 
 - [Docker](https://www.docker.com/) - Poseidon and related components run on top of Docker, so understanding the fundamentals will be useful for troubleshooting as well.  Note: installing via Snap is currently unsupported. [A Good Ubuntu Docker Quick-Start](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04)
-- [Compose](https://docs.docker.com/compose/) - Poseidon is orchestrated with [docker-compose](https://docs.docker.com/compose/install/). You will need a version that supports compose file format version 3.
+- [Compose](https://docs.docker.com/compose/) - Poseidon is orchestrated with [docker-compose](https://docs.docker.com/compose/install/). You will need a version that supports compose file format version 3 and health check conditions (minimum 1.29.2).
 - [Curl](https://curl.haxx.se/download.html) - command-line for transferring data with URLs.
 - [git](https://git-scm.com/downloads) - distributed version control system.
 - [jq](https://stedolan.github.io/jq/download/) - command-line JSON processor.
