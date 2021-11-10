@@ -38,6 +38,9 @@ services:
             - 59999:59999
         networks:
             - poseidon
+        depends_on:
+            faucet_certstrap:
+                condition: service_completed_successfully
         command:
             - --key=/certs/faucetconfrpc.key
             - --cert=/certs/faucetconfrpc.crt

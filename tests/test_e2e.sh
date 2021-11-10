@@ -139,7 +139,7 @@ sudo sed -i -E \
   /opt/poseidon/poseidon.config
 sudo cat /opt/poseidon/poseidon.config
 wget https://github.com/IQTLabs/NetworkML/raw/main/tests/test_data/trace_ab12_2001-01-01_02_03-client-ip-1-2-3-4.pcap -O$TMPDIR/raw.pcap
-tcpdump -nevr $TMPDIR/raw.pcap -w $TMPDIR/test.pcap ether host "${TESTHOST}"
+tcpdump -nevr $TMPDIR/raw.pcap -c 100 -w $TMPDIR/test.pcap ether host "${TESTHOST}"
 poseidon -s
 wait_job_up faucetconfrpc:59998
 wait_job_up faucet:9302

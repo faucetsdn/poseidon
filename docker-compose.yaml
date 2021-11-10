@@ -58,7 +58,10 @@ services:
         networks:
             - poseidon
         depends_on:
-            - rabbit
+            faucetconfrpc:
+                condition: service_healthy
+            rabbitmq_adapter:
+                condition: service_started
         build:
             context: .
             dockerfile: Dockerfile
