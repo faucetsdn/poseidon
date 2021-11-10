@@ -1,3 +1,9 @@
+# v0.17.17 (2021-11-11)
+
+* Use health checks for faucetconfrpc, better handle faucetconfrpc not being available yet at startup (req. min docker-compose 1.29.2).
+* Workaround typed_ast.
+* Upgrade c65sdn, network-tools, prometheus.
+
 # v0.17.16 (2021-11-05)
 
 * Upgrade c65sdn, prometheus, faucetconfrpc, docker, networkml, pylint, pytype, httpx, grafana, pbr
