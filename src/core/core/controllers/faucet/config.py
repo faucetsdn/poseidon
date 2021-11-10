@@ -1,9 +1,12 @@
 import logging
 import os
-import sys
 
 import yaml
 from faucetconfrpc.faucetconfrpc_client_lib import FaucetConfRpcClient
+
+
+class EmptyFaucetConf(Exception):
+    pass
 
 
 class FaucetRemoteConfGetSetter:
@@ -27,7 +30,7 @@ class FaucetRemoteConfGetSetter:
             config_filename=self.config_file_path(config_file))
         if self.faucet_conf is None:
             logging.error('Faucet config is empty, exiting.')
-            sys.exit(1)
+            raise EmptyFaucetConf
         return self.faucet_conf
 
     def write_faucet_conf(self, config_file=None, faucet_conf=None, merge=False):
