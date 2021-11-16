@@ -1,5 +1,5 @@
 faucetconfrpc==0.22.27
-httpx==0.21.0
+httpx==0.21.1
 netaddr==0.8.0
 pika==1.2.0
 prometheus_client==0.12.0
