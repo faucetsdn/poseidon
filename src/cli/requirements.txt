@@ -1,4 +1,4 @@
-cmd2==2.3.0
+cmd2==2.3.1
 natural==0.2.0
 pbr==5.8.0
 texttable==1.6.4
