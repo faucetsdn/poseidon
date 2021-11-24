@@ -7,12 +7,12 @@ import os
 import shutil
 import tempfile
 
-import yaml
 from faucetconfgetsetter import FaucetLocalConfGetSetter
 from poseidon_core.controllers.faucet.faucet import FaucetProxy
 from poseidon_core.helpers.config import Config
 from poseidon_core.helpers.config import parse_rules
 from poseidon_core.helpers.config import represent_none
+from poseidon_core.helpers.config import yaml_load
 from poseidon_core.helpers.config import yaml_in
 from poseidon_core.helpers.config import yaml_out
 from poseidon_core.helpers.endpoint import endpoint_factory
@@ -163,7 +163,7 @@ dps:
             faucetconfgetsetter_cl=faucetconfgetsetter_cl,
             mirror_ports={'s1': 1},
             proxy_mirror_ports={'sx': ['s1', 99]})
-        faucet.frpc.faucet_conf = yaml.safe_load(
+        faucet.frpc.faucet_conf = yaml_load(
             faucet_conf_str)
         assert mirrors(faucet) == [2]
         faucet.frpc.mirror_port('s1', 1, 3)
@@ -269,8 +269,8 @@ acls:
                         dp: s1
                         port: 1
 """
-    orig_faucet_conf = yaml.safe_load(faucet_conf_str)
-    test_faucet_conf = yaml.safe_load(new_faucet_conf_str)
+    orig_faucet_conf = yaml_load(faucet_conf_str)
+    test_faucet_conf = yaml_load(new_faucet_conf_str)
     with tempfile.TemporaryDirectory() as tmpdir:
         faucetconfgetsetter_cl = FaucetLocalConfGetSetter
         faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(
@@ -308,7 +308,7 @@ dps:
             1:
                 native_vlan: 100
 """
-    faucet_conf = yaml.safe_load(faucet_conf_str)
+    faucet_conf = yaml_load(faucet_conf_str)
     with tempfile.TemporaryDirectory() as tmpdir:
         faucetconfgetsetter_cl = FaucetLocalConfGetSetter
         faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(
@@ -335,7 +335,7 @@ dps:
             3:
                 native_vlan: 100
 """
-    faucet_conf = yaml.safe_load(faucet_conf_str)
+    faucet_conf = yaml_load(faucet_conf_str)
     with tempfile.TemporaryDirectory() as tmpdir:
         faucetconfgetsetter_cl = FaucetLocalConfGetSetter
         faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE = os.path.join(
@@ -394,10 +394,10 @@ def test_config():
             faucetconfgetsetter_cl=faucetconfgetsetter_cl,
             mirror_ports={'t1-1': 2},
             proxy_mirror_ports={'sx': ['s1', 99]})
-        parser.frpc.faucet_conf = yaml.safe_load(
+        parser.frpc.faucet_conf = yaml_load(
             faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE)
         parser2 = _get_proxy(faucetconfgetsetter_cl=faucetconfgetsetter_cl)
-        parser2.frpc.faucet_conf = yaml.safe_load(
+        parser2.frpc.faucet_conf = yaml_load(
             faucetconfgetsetter_cl.DEFAULT_CONFIG_FILE)
         config = Config().get_config()
         proxy = _get_proxy(
