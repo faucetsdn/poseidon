@@ -91,24 +91,31 @@ def parse_rules(config_file):
     return obj_doc
 
 
+def yaml_load(yaml_str):
+    return yaml.safe_load(yaml_str)
+
+
+def yaml_dump(yaml_str):
+    return yaml.dump(yaml_str)
+
+
 @exception
 def yaml_in(config_file):
     try:
         with open(config_file, 'r') as stream:
-            return yaml.safe_load(stream)
+            return yaml_load(stream)
     except Exception as e:  # pragma: no cover
         return False
 
 
 @exception
 def yaml_out(config_file, obj_doc):
-    stream = tempfile.NamedTemporaryFile(
-        prefix=os.path.basename(config_file),
-        dir=os.path.dirname(config_file),
-        mode='w',
-        delete=False)
-    yaml.add_representer(type(None), represent_none)
-    yaml.dump(obj_doc, stream, default_flow_style=False)
-    stream.close()
+    with tempfile.NamedTemporaryFile(
+            prefix=os.path.basename(config_file),
+            dir=os.path.dirname(config_file),
+            mode='w',
+            delete=False) as stream:
+        yaml.add_representer(type(None), represent_none)
+        yaml.dump(obj_doc, stream, default_flow_style=False)
     os.replace(stream.name, config_file)
     return True

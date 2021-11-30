@@ -1,8 +1,8 @@
 import logging
 import os
 
-import yaml
 from faucetconfrpc.faucetconfrpc_client_lib import FaucetConfRpcClient
+from poseidon_core.helpers.config import yaml_dump
 
 
 class EmptyFaucetConf(Exception):
@@ -71,7 +71,7 @@ class FaucetRemoteConfGetSetter:
 
     def set_port_conf(self, dp, port, port_conf):
         return self.client.set_dp_interfaces(
-            [(dp, {port: yaml.dump(port_conf)})])
+            [(dp, {port: yaml_dump(port_conf)})])
 
     def update_switch_conf(self, dp, switch_conf):
         return self.write_faucet_conf(

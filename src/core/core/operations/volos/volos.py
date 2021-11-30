@@ -6,8 +6,8 @@ Created on 05 February 2020
 import logging
 import os
 
-import yaml
 from poseidon_core.constants import PROTOCOL_MAP
+from poseidon_core.helpers.config import yaml_load
 
 
 class Volos(object):
@@ -29,7 +29,7 @@ class Volos(object):
         if os.path.exists(volos_cfg_file):
             try:
                 with open(volos_cfg_file, 'r') as f:
-                    cfg = yaml.safe_load(f)
+                    cfg = yaml_load(f)
             except Exception as e:  # pragma: no cover
                 self.logger.warning(
                     'Volos configuration could not be loaded, disabling Volos')
