@@ -1,7 +1,7 @@
 # v0.17.18 (2022-01-01)
 
 * Upgrade to OVS 2.16.2
-* Upgrade network-tools
+* Upgrade network-tools, networkml
 * Upgrade faucetconfrpc, faucet, gauge, httpx, ruamel.yaml, prometheus, grafana, cmd2, pbr, pylint, pytype
 
 # v0.17.17 (2021-11-11)
