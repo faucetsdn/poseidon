@@ -1,3 +1,9 @@
+# v0.17.18 (2022-01-01)
+
+* Upgrade to OVS 2.16.2
+* Upgrade network-tools, networkml
+* Upgrade faucetconfrpc, faucet, gauge, httpx, ruamel.yaml, prometheus, grafana, cmd2, pbr, pylint, pytype
+
 # v0.17.17 (2021-11-11)
 
 * Use health checks for faucetconfrpc, better handle faucetconfrpc not being available yet at startup (req. min docker-compose 1.29.2).
