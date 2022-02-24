@@ -5,4 +5,4 @@ pika==1.2.0
 prometheus_client==0.13.1
 pyyaml==6.0
 schedule==1.1.0
-transitions==0.8.10
+transitions==0.8.11
