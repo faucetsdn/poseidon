@@ -1,3 +1,9 @@
+# v0.17.19 (2022-03-25)
+
+* Upgrade to OVS 2.17.0
+* Upgrade network-tools, networkml
+* Upgrade faucetconfrpc, faucet, gauge, prometheus, grafana, pylint, pytype, transitions, cmd2, pytest
+
 # v0.17.18 (2022-01-01)
 
 * Upgrade to OVS 2.16.2
