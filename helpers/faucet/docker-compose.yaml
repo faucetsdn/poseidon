@@ -3,7 +3,7 @@ version: '3.7'
 services:
     rabbitmq_adapter:
         restart: always
-        image: 'c65sdn/event-adapter-rabbitmq:1.0.29'
+        image: 'c65sdn/event-adapter-rabbitmq:1.0.30'
         volumes:
             - '${POSEIDON_PREFIX}/var/run/faucet:/var/run/faucet'
         environment:
