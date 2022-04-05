@@ -44,5 +44,5 @@ jobs:
       run: |
         docker system prune -a -f --volumes && pip3 install -U docker-compose && ./tests/test_e2e.sh
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v2.1.0
+      uses: codecov/codecov-action@v3.0.0
       if: github.repository == 'iqtlabs/poseidon'
