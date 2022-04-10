@@ -1,8 +1,8 @@
-faucetconfrpc==0.22.33
+faucetconfrpc==0.22.34
 httpx==0.22.0
 netaddr==0.8.0
 pika==1.2.0
-prometheus_client==0.13.1
+prometheus_client==0.14.1
 pyyaml==6.0
 schedule==1.1.0
 transitions==0.8.11
