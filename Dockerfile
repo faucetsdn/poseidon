@@ -1,5 +1,4 @@
 FROM python:3.10-slim
-# TODO: upgrade to > 3.8 when typed_ast no longer needed by pytype (https://github.com/python/typed_ast/issues/170)
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
 LABEL poseidon.namespace="primary"
 
