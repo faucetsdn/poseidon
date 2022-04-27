@@ -1,4 +1,4 @@
 docker==5.0.3
-pika==1.2.0
+pika==1.2.1
 prometheus_client==0.14.1
 six==1.16.0
