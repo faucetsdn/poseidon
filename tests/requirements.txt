@@ -2,7 +2,7 @@ httmock==1.4.0
 mock==4.0.3
 netifaces==0.11.0
 ruamel.yaml==0.17.21
-pylint==2.13.7
+pylint==2.13.8
 pytest-cov==3.0.0
 pytest==7.1.2
 pytype==2022.4.26
