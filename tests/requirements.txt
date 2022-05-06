@@ -5,4 +5,4 @@ ruamel.yaml==0.17.21
 pylint==2.13.8
 pytest-cov==3.0.0
 pytest==7.1.2
-pytype==2022.4.26
+pytype==2022.5.5
