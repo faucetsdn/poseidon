@@ -1,7 +1,7 @@
 # v0.17.21
 
 * Upgrade to OVS 2.17.2
-* Upgrade faucetconfrpc, faucet, gauge, pylint, pytype, cmd2, grafana, prometheus, pika
+* Upgrade faucetconfrpc, faucet, gauge, pylint, pytype, cmd2, grafana, prometheus, pika, flask
 
 # v0.17.20 (2022-06-13)
 
