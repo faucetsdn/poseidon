@@ -1,9 +1,9 @@
-name: test
+name: shell test
 
 on: [push, pull_request]
 
 jobs:
-  test:
+  shell_test:
 
     runs-on: ubuntu-latest
 
@@ -18,31 +18,3 @@ jobs:
         shellcheck() { "shellcheck-stable/shellcheck" "$@"; } && \
         shellcheck --version && \
         /bin/bash --version && /bin/bash -n bin/poseidon && shellcheck -x -e SC2016 -e SC2119 -e SC2129 -e SC2001 -e SC2038 -e SC2044 bin/poseidon
-    - name: unit_test
-      run: |
-        export DEBIAN_FRONTEND=noninteractive && \
-        echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections
-        export PYTHONPATH=$PWD/poseidon:$PYTHONPATH
-        export POSEIDON_CONFIG=$PWD/config/poseidon.config
-        sudo apt-get update && \
-        sudo apt-get install -yq --no-install-recommends python3.8 python3.8-dev && \
-        sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 3 && \
-        sudo apt-get install libev-dev tshark wget jq tcpreplay tcpdump && \
-        pip3 install -U setuptools pybind11 && \
-        pip3 install codecov scikit-build && \
-        find . -name requirements.txt -type f -exec pip3 install -r {} \; && \
-        find . -name test-requirements.txt -type f -exec pip3 install -r {} \; && \
-        cd src/core && sudo python3 setup.py sdist install && cd ../../ && \
-        cd src/cli && sudo python3 setup.py sdist install && cd ../../ && \
-        cd src/api && sudo python3 setup.py sdist install && cd ../../ && \
-        PATH=/home/runner/.local/bin:$PATH py.test -v -vv --cov-report term-missing --cov=. --cov=poseidon_core --cov=poseidon_api --cov=poseidon_cli -c .coveragerc && \
-        PATH=/home/runner/.local/bin:$PATH coverage report && \
-        PATH=/home/runner/.local/bin:$PATH coverage xml
-    - name: docker_test
-      run: make run_tests
-    - name: e2e_test
-      run: |
-        docker system prune -a -f --volumes && pip3 install -U docker-compose && ./tests/test_e2e.sh
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3.1.0
-      if: github.repository == 'iqtlabs/poseidon'

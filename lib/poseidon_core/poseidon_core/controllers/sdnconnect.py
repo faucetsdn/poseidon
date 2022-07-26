@@ -287,7 +287,7 @@ class SDNConnect:
 
         for machine in machines:
             machine['ether_vendor'] = get_ether_vendor(
-                machine['mac'], '/poseidon/src/core/core/metadata/nmap-mac-prefixes.txt')
+                machine['mac'], '/poseidon/lib/core/core/metadata/nmap-mac-prefixes.txt')
             machine_ips.update(self._parse_machine_ip(machine))
             if 'controller_type' not in machine:
                 machine.update({

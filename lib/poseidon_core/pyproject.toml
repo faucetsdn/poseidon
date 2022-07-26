@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "poseidon-core"
+version = "0.17.22.dev"
+description = "Poseidon core package, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of analytic tools."
+authors = ["cglewis <clewis@iqt.org>"]
+license = "Apache-2.0"
+packages = [
+    { include = "poseidon_core" },
+]
+
+[tool.poetry.dependencies]
+python = ">=3.8 <3.11"
+faucetconfrpc = "0.22.38"
+httpx = "0.23.0"
+netaddr = "0.8.0"
+pika = "1.3.0"
+prometheus_client = "0.14.1"
+pyyaml = "6.0"
+schedule = "1.1.0"
+transitions = "0.8.11"
+
+[tool.poetry.scripts]
+poseidon-core = 'poseidon_core.__main__:main'
+
+[tool.poetry.urls]
+homepage = "https://github.com/IQTLabs/poseidon"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

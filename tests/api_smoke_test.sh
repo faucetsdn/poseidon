@@ -2,7 +2,7 @@
 
 SCRIPTPATH=$(readlink -f "$0")
 TESTDIR=$(dirname $SCRIPTPATH)
-APIDIR=$(readlink -f $TESTDIR/../src/api)
+APIDIR=$(readlink -f $TESTDIR/../lib/poseidon_api)
 pushd $APIDIR && python3 setup.py install && popd
 PYTHONPATH=$APIDIR timeout -s2 5s poseidon-api
 X=$?
