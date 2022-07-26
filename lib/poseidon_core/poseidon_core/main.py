@@ -27,15 +27,14 @@ def start_prometheus(logger):
     try:
         prom.initialize_metrics()
     except Exception as e:  # pragma: no cover
-        logger.debug(
-            f'Prometheus metrics are already initialized: {e}')
+        logger.debug(f"Prometheus metrics are already initialized: {e}")
     Prometheus.start()
     return prom
 
 
 def schedule_thread_worker(logger, scheduler=schedule):
-    ''' schedule thread, takes care of running processes in the future '''
-    logger.debug('Starting thread_worker')
+    """schedule thread, takes care of running processes in the future"""
+    logger.debug("Starting thread_worker")
     while True:
         sys.stdout.flush()
         scheduler.run_pending()
@@ -43,15 +42,19 @@ def schedule_thread_worker(logger, scheduler=schedule):
 
 
 def main():  # pragma: no cover
-    logging.getLogger('pika').setLevel(logging.CRITICAL)
+    logging.getLogger("pika").setLevel(logging.CRITICAL)
     Logger()
-    logger = logging.getLogger('main')
+    logger = logging.getLogger("main")
     config = Config().get_config()
     prom = start_prometheus(logger)
 
     # TODO option that doesn't require an sdn connection?
-    sdnc = SDNConnect(config=config, logger=logger, prom=prom,
-                      faucetconfgetsetter_cl=FaucetRemoteConfGetSetter)
+    sdnc = SDNConnect(
+        config=config,
+        logger=logger,
+        prom=prom,
+        faucetconfgetsetter_cl=FaucetRemoteConfGetSetter,
+    )
 
     sdne = SDNEvents(logger, prom, sdnc)
     sdne.start_message_queues()
@@ -61,10 +64,9 @@ def main():  # pragma: no cover
 
     # schedule all threads
     schedule_thread = threading.Thread(
-        target=partial(
-            schedule_thread_worker,
-            logger, scheduler=schedule),
-        name='st_worker')
+        target=partial(schedule_thread_worker, logger, scheduler=schedule),
+        name="st_worker",
+    )
     schedule_thread.start()
 
     try:
@@ -72,5 +74,5 @@ def main():  # pragma: no cover
         sdne.process(monitor)
     except Exception as e:
         logger.exception(e)
-        logger.error('restarting because of exception')
+        logger.error("restarting because of exception")
         sys.exit(1)

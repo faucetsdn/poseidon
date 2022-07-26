@@ -1,5 +1,6 @@
 def routes():
     from .data import Endpoints, Info, Network, NetworkByIp, NetworkFull
+
     endpoints = Endpoints()
     p = paths()
     info = Info()
@@ -11,8 +12,8 @@ def routes():
 
 
 def paths():
-    return ['', '/info', '/network', '/network/{ip}', '/network_full']
+    return ["", "/info", "/network", "/network/{ip}", "/network_full"]
 
 
 def version():
-    return '/v1'
+    return "/v1"

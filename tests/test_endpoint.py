@@ -12,18 +12,18 @@ from poseidon_core.helpers.endpoint import EndpointDecoder
 
 def test_Endpoint():
     """Tests Endpoint."""
-    endpoint = endpoint_factory('foo')
+    endpoint = endpoint_factory("foo")
     b = endpoint.encode()
     c = EndpointDecoder(b).get_endpoint()
-    a = {'tenant': 'foo', 'mac': '00:00:00:00:00:00'}
+    a = {"tenant": "foo", "mac": "00:00:00:00:00:00"}
     assert Endpoint.make_hash(a)
 
 
 def test_times_next():
-    endpoint = endpoint_factory('foo')
-    endpoint.queue_next('operate')
+    endpoint = endpoint_factory("foo")
+    endpoint.queue_next("operate")
     time.sleep(1)
-    endpoint.copro_queue_next('copro_coprocess')
+    endpoint.copro_queue_next("copro_coprocess")
     time.sleep(1)
     assert endpoint.state_timeout(0)
     assert endpoint.copro_state_timeout(0)

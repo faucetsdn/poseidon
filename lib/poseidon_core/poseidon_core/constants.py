@@ -1,7 +1,3 @@
+NO_DATA = "NO DATA"
 
-NO_DATA = 'NO DATA'
-
-PROTOCOL_MAP = {
-    'tcp': 6,
-    'udp': 17
-}
+PROTOCOL_MAP = {"tcp": 6, "udp": 17}

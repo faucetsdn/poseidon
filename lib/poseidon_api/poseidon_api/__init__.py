@@ -1,4 +1,4 @@
 from importlib import metadata
 
 
-__version__ = metadata.version('poseidon_api')
+__version__ = metadata.version("poseidon_api")

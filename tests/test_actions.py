@@ -10,16 +10,15 @@ from poseidon_core.helpers.actions import Actions
 from poseidon_core.helpers.config import Config
 from poseidon_core.helpers.endpoint import endpoint_factory
 
-logger = logging.getLogger('test')
+logger = logging.getLogger("test")
 
 
 def test_actions():
     """
     Tests Actions
     """
-    endpoint = endpoint_factory('foo')
-    endpoint.endpoint_data = {
-        'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+    endpoint = endpoint_factory("foo")
+    endpoint.endpoint_data = {"mac": "00:00:00:00:00:00", "segment": "foo", "port": "1"}
     s = get_sdn_connect(logger)
     a = Actions(endpoint, s.sdnc)
     a.mirror_endpoint()
@@ -32,9 +31,8 @@ def test_actions_nosdn():
     """
     Tests Actions with no SDN controller
     """
-    endpoint = endpoint_factory('foo')
-    endpoint.endpoint_data = {
-        'mac': '00:00:00:00:00:00', 'segment': 'foo', 'port': '1'}
+    endpoint = endpoint_factory("foo")
+    endpoint.endpoint_data = {"mac": "00:00:00:00:00:00", "segment": "foo", "port": "1"}
     s = get_sdn_connect(logger)
     s.sdnc = None
     a = Actions(endpoint, s.sdnc)

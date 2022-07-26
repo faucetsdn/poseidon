@@ -12,9 +12,9 @@ def test_Volos():
 
 def test_Acl():
     controller = Config().get_config()
-    endpoint = endpoint_factory('foo')
-    endpoint.endpoint_data = {'mac': '00:00:00:00:00:00'}
-    a = VolosAcl(endpoint, controller['acl_dir'])
+    endpoint = endpoint_factory("foo")
+    endpoint.endpoint_data = {"mac": "00:00:00:00:00:00"}
+    a = VolosAcl(endpoint, controller["acl_dir"])
 
 
 def test_Coprocess():

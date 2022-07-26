@@ -15,9 +15,9 @@ def get_ether_vendor(mac, lookup_path):
     """
     Takes a MAC address and looks up and returns the vendor for it.
     """
-    mac = ''.join(mac.split(':'))[:6].upper()
+    mac = "".join(mac.split(":"))[:6].upper()
     try:
-        with open(lookup_path, 'r') as f:
+        with open(lookup_path, "r") as f:
             for line in f:
                 if line.startswith(mac):
                     return line.split()[1].strip()
@@ -41,4 +41,9 @@ class DNSResolver:
 
     def resolve_ips(self, ips):
         with ThreadPoolExecutor() as executor:
-            return {ip: result for ip, result in zip(ips, executor.map(DNSResolver()._resolve_ip, list(ips)))}
+            return {
+                ip: result
+                for ip, result in zip(
+                    ips, executor.map(DNSResolver()._resolve_ip, list(ips))
+                )
+            }
