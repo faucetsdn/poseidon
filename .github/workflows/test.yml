@@ -1,9 +1,9 @@
-name: shell test
+name: test
 
 on: [push, pull_request]
 
 jobs:
-  shell_test:
+  test:
 
     runs-on: ubuntu-latest
 
