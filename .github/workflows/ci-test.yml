@@ -59,7 +59,7 @@ jobs:
           export POSEIDON_CONFIG=$PWD/config/poseidon.config
           cd lib/poseidon_api && poetry run pytest --cov-report term-missing --cov=. --cov-report=xml && cd ../../
           cd lib/poseidon_cli && poetry run pytest --cov-report term-missing --cov=. --cov-report=xml && cd ../../
-          cd lib/poseidon_core && poetry run pytest --cov-report term-missing --cov=. --cov-report=xml && cd ../../
+          cd lib/poseidon_core && poetry run pytest --cov-report term-missing --cov=. --cov-report=xml && ls -lah && pwd && cd ../../
       - name: Upload coverage
         uses: codecov/codecov-action@v3
         with:
