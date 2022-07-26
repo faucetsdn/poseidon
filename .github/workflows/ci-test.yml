@@ -42,11 +42,17 @@ jobs:
           cd lib/poseidon_cli && poetry run black . --check && cd ../../
           cd lib/poseidon_core && poetry run black . --check && cd ../../
 
+      - name: Code Quality - Pytype
+        run: |
+          cd lib/poseidon_api && poetry run pytype && cd ../../
+          cd lib/poseidon_cli && poetry run pytype && cd ../../
+          cd lib/poseidon_core && poetry run pytype && cd ../../
+
       - name: Code Quality - Pylint
         run: |
-          cd lib/poseidon_api && poetry run pylint . && cd ../../
-          cd lib/poseidon_cli && poetry run pylint . && cd ../../
-          cd lib/poseidon_core && poetry run pylint . && cd ../../
+          cd lib/poseidon_api && poetry run pylint poseidon_api/ && cd ../../
+          cd lib/poseidon_cli && poetry run pylint poseidon_cli/ && cd ../../
+          cd lib/poseidon_core && poetry run pylint poseidon_core/ && cd ../../
 
       - name: Test with pytest
         run: |
