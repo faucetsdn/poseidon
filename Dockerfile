@@ -16,6 +16,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl gcc git g+
   cd lib/poseidon_core && poetry install --no-interaction --no-ansi && poetry build && cd ../../ && \
   apt-get purge -y gcc g++ && apt -y autoremove --purge && rm -rf /var/cache/* /root/.cache/*
 
+HEALTHCHECK --interval=15s --timeout=15s \
+ CMD curl --silent --fail http://localhost:9304/ || exit 1
+
 RUN mkdir -p /opt/poseidon
 RUN mv /poseidon/config/poseidon.config /opt/poseidon/poseidon.config
 ENV POSEIDON_CONFIG /opt/poseidon/poseidon.config
