@@ -61,7 +61,7 @@ jobs:
           cd lib/poseidon_cli && poetry run pytest --cov-report term-missing -c .coveragerc --cov=. --cov-report=xml && cd ../../
           cd lib/poseidon_core && poetry run pytest --cov-report term-missing -c .coveragerc --cov=. --cov-report=xml && cd ../../
       - name: Upload coverage
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v3
         with:
-          file: ./coverage.xml
+          file: ./lib/poseidon_api/coverage.xml,./lib/poseidon_cli/coverage.xml,./lib/poseidon_core/coverage.xml
           fail_ci_if_error: true
