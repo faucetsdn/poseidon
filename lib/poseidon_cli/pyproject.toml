@@ -12,6 +12,7 @@ packages = [
 python = ">=3.8 <3.11"
 cmd2 = "2.4.2"
 natural = "0.2.0"
+poseidon-core = "0.17.21"
 texttable = "1.6.4"
 
 [tool.poetry.dev-dependencies]
