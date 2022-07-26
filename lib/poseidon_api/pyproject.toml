@@ -15,6 +15,7 @@ falcon = "3.1.0"
 falcon-cors = "1.1.7"
 httpx = "0.23.0"
 natural = "0.2.0"
+poseidon-core = "0.17.21"
 
 [tool.poetry.dev-dependencies]
 black = "22.6.0"
