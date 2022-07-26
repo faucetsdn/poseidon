@@ -1,5 +1,0 @@
-bjoern==3.2.1
-falcon==3.1.0
-falcon-cors==1.1.7
-httpx==0.23.0
-natural==0.2.0

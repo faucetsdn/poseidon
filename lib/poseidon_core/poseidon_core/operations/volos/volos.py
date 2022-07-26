@@ -1,0 +1,113 @@
+# -*- coding: utf-8 -*-
+"""
+Created on 05 February 2020
+@author: Ryan Ashley
+"""
+import logging
+import os
+
+from poseidon_core.constants import PROTOCOL_MAP
+from poseidon_core.helpers.config import yaml_load
+
+
+class Volos(object):
+    def __init__(self, controller):
+        self.logger = logging.getLogger("volos")
+        self.enabled = controller["enable_volos"]
+        self.coprocessor_nic = controller["coprocessor_nic"]
+        self.coprocessor_port = controller["coprocessor_port"]
+        self.coprocessor_vlans = controller["coprocessor_vlans"]
+        self.coprocessing_frequency = controller["coprocessing_frequency"]
+        self.ignore_copro_ports = controller["ignore_copro_ports"]
+        self.acl_dir = controller["acl_dir"]
+        volos_cfg_file = controller["volos_cfg_file"]
+        self.container_config = self.parse_volos_cfg(volos_cfg_file)
+
+    def parse_volos_cfg(self, volos_cfg_file):
+        cfg = None
+        container_cfg = None
+        if os.path.exists(volos_cfg_file):
+            try:
+                with open(volos_cfg_file, "r") as f:
+                    cfg = yaml_load(f)
+            except Exception as e:  # pragma: no cover
+                self.logger.warning(
+                    "Volos configuration could not be loaded, disabling Volos"
+                )
+                self.logger.error(
+                    "Failed to load Volos config with error: {0}".format(str(e))
+                )
+                self.enabled = False
+            container_cfg = []
+            if cfg:
+                for repo in cfg:
+                    item = {}
+                    for name in cfg[repo]:
+                        item["repo"] = repo
+                        item["name"] = name
+                        item["branch"] = cfg[repo][name]["branch"]
+                        item["ports"] = []
+                        for port in cfg[repo][name]["ports"]:
+                            if port:
+                                cfg_port = port.get("port", None)
+                                if cfg_port:
+                                    mapping = cfg_port["mapping"]
+                                    protocol = cfg_port["protocol"]
+                                    cfg_p = {
+                                        "proto": protocol,
+                                        "proto_id": PROTOCOL_MAP[protocol],
+                                        "host": mapping[: mapping.index(":")],
+                                        "dest": mapping[mapping.index(":") :],
+                                    }
+                                    item["ports"].append(cfg_p)
+                    container_cfg.append(item)
+
+            else:
+                self.enabled = False
+        else:
+            self.logger.debug("Volos configuration could not be found. disabling volos")
+            self.enabled = False
+
+        return container_cfg
+
+    """
+    build structure of the form
+    {
+    'mac1': {
+        'ip': {
+         'v4': "ipv4_1",
+         'v6': "ipv6_1",
+        },
+        'ports': [
+            {
+                'proto': 'tcp',
+                'proto_id': 6,
+                'port': 25,
+            },
+            {
+                'proto': 'tcp',
+                'proto_id': 6,
+                'port': 26,
+            },
+            {
+                'proto': 'udp',
+                'proto_id': 17,
+                'port': 27,
+            }
+        ]
+    },
+    """
+
+    def get_port_list(self, mac, ipv4=None, ipv6=None):
+        port_list = {}
+        port_list[mac] = {"ip": {"v4": ipv4, "v6": ipv6}, "ports": []}
+        for i in self.container_config:
+            for port in i["ports"]:
+                p = {}
+                p["proto"] = port["proto"]
+                p["proto_id"] = port["proto_id"]
+                p["port"] = port["dest"]
+
+                port_list[mac]["ports"].append(p)
+
+        return port_list

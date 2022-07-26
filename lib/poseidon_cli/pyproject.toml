@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "poseidon-cli"
+version = "0.17.22.dev"
+description = "Commandline tool for querying Poseidon via Prometheus"
+authors = ["cglewis <clewis@iqt.org>"]
+license = "Apache-2.0"
+packages = [
+    { include = "poseidon_cli" },
+]
+
+[tool.poetry.dependencies]
+python = ">=3.8 <3.11"
+cmd2 = "2.4.2"
+natural = "0.2.0"
+poseidon-core = "0.17.21"
+texttable = "1.6.4"
+
+[tool.poetry.dev-dependencies]
+black = "22.6.0"
+docker = "5.0.3"
+httmock = "1.4.0"
+mock = "4.0.3"
+netifaces = "0.11.0"
+pylint = "2.14.5"
+pytest-cov = "3.0.0"
+pytest = "7.1.2"
+pytype = "2022.7.18"
+"ruamel.yaml" = "0.17.21"
+
+[tool.poetry.scripts]
+poseidon-cli = 'poseidon_cli.__main__:main'
+
+[tool.poetry.urls]
+homepage = "https://github.com/IQTLabs/poseidon"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
