@@ -50,9 +50,9 @@ jobs:
 
       - name: Code Quality - Pylint
         run: |
-          cd lib/poseidon_api && poetry run pylint poseidon_api/ && cd ../../
-          cd lib/poseidon_cli && poetry run pylint poseidon_cli/ && cd ../../
-          cd lib/poseidon_core && poetry run pylint poseidon_core/ && cd ../../
+          cd lib/poseidon_api && poetry run pylint --fail-under=4 poseidon_api/ && cd ../../
+          cd lib/poseidon_cli && poetry run pylint --fail-under=4 poseidon_cli/ && cd ../../
+          cd lib/poseidon_core && poetry run pylint --fail-under=4 poseidon_core/ && cd ../../
 
       - name: Test with pytest
         run: |
