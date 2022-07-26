@@ -31,6 +31,7 @@ jobs:
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: |
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends gcc git g++ libev-dev libyaml-dev
           cd lib/poseidon_api && poetry install --no-interaction
           cd lib/poseidon_cli && poetry install --no-interaction
           cd lib/poseidon_core && poetry install --no-interaction
