@@ -7,10 +7,10 @@ from collections import OrderedDict
 
 import ruamel.yaml
 
-VERSION_FILE = "../VERSION"
+
 # TODO: only updates to Poseidon's main docker-compose.yaml are currently handled.
 DOCKER_COMPOSE = "../docker-compose.yaml"
-RELEASE_VER = open(VERSION_FILE).read().strip()
+RELEASE_VER = sys.argv[1]
 DEV = RELEASE_VER.endswith(".dev")
 
 # These services have their own versions - update automatically.
