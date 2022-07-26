@@ -18,3 +18,8 @@ jobs:
         shellcheck() { "shellcheck-stable/shellcheck" "$@"; } && \
         shellcheck --version && \
         /bin/bash --version && /bin/bash -n bin/poseidon && shellcheck -x -e SC2016 -e SC2119 -e SC2129 -e SC2001 -e SC2038 -e SC2044 bin/poseidon
+    - name: docker_test
+      run: make run_tests
+    - name: e2e_test
+      run: |
+        docker system prune -a -f --volumes && pip3 install -U docker-compose && ./tests/test_e2e.sh

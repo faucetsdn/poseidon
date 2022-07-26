@@ -36,11 +36,17 @@ jobs:
           cd lib/poseidon_cli && poetry install --no-interaction && cd ../../
           cd lib/poseidon_core && poetry install --no-interaction && cd ../../
 
-      - name: Code Quality
+      - name: Code Quality - Black
         run: |
           cd lib/poseidon_api && poetry run black . --check && cd ../../
           cd lib/poseidon_cli && poetry run black . --check && cd ../../
           cd lib/poseidon_core && poetry run black . --check && cd ../../
+
+      - name: Code Quality - Pylint
+        run: |
+          cd lib/poseidon_api && poetry run pylint . && cd ../../
+          cd lib/poseidon_cli && poetry run pylint . && cd ../../
+          cd lib/poseidon_core && poetry run pylint . && cd ../../
 
       - name: Test with pytest
         run: |
