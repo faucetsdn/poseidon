@@ -44,9 +44,9 @@ jobs:
 
       - name: Code Quality - Pytype
         run: |
-          cd lib/poseidon_api && poetry run pytype && cd ../../
-          cd lib/poseidon_cli && poetry run pytype && cd ../../
-          cd lib/poseidon_core && poetry run pytype && cd ../../
+          cd lib/poseidon_api && poetry run pytype poseidon_api/ && cd ../../
+          cd lib/poseidon_cli && poetry run pytype poseidon_cli/ && cd ../../
+          cd lib/poseidon_core && poetry run pytype poseidon_core/ && cd ../../
 
       - name: Code Quality - Pylint
         run: |
