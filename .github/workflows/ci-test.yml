@@ -32,21 +32,21 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: |
           sudo apt-get update && sudo apt-get install -y --no-install-recommends gcc git g++ libev-dev libyaml-dev
-          cd lib/poseidon_api && poetry install --no-interaction
-          cd lib/poseidon_cli && poetry install --no-interaction
-          cd lib/poseidon_core && poetry install --no-interaction
+          cd lib/poseidon_api && poetry install --no-interaction && cd ../../
+          cd lib/poseidon_cli && poetry install --no-interaction && cd ../../
+          cd lib/poseidon_core && poetry install --no-interaction && cd ../../
 
       - name: Code Quality
         run: |
-          cd lib/poseidon_api && poetry run black . --check
-          cd lib/poseidon_cli && poetry run black . --check
-          cd lib/poseidon_core && poetry run black . --check
+          cd lib/poseidon_api && poetry run black . --check && cd ../../
+          cd lib/poseidon_cli && poetry run black . --check && cd ../../
+          cd lib/poseidon_core && poetry run black . --check && cd ../../
 
       - name: Test with pytest
         run: |
-          cd lib/poseidon_api && poetry run pytest --cov-report term-missing -c .coveragerc --cov=. --cov-report=xml
-          cd lib/poseidon_cli && poetry run pytest --cov-report term-missing -c .coveragerc --cov=. --cov-report=xml
-          cd lib/poseidon_core && poetry run pytest --cov-report term-missing -c .coveragerc --cov=. --cov-report=xml
+          cd lib/poseidon_api && poetry run pytest --cov-report term-missing -c .coveragerc --cov=. --cov-report=xml && cd ../../
+          cd lib/poseidon_cli && poetry run pytest --cov-report term-missing -c .coveragerc --cov=. --cov-report=xml && cd ../../
+          cd lib/poseidon_core && poetry run pytest --cov-report term-missing -c .coveragerc --cov=. --cov-report=xml && cd ../../
       - name: Upload coverage
         uses: codecov/codecov-action@v1
         with:
