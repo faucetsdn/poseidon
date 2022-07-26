@@ -63,5 +63,5 @@ jobs:
       - name: Upload coverage
         uses: codecov/codecov-action@v3
         with:
-          file: /home/runner/work/poseidon/poseidon/lib/poseidon_api/coverage.xml,/home/runner/work/poseidon/poseidon/lib/poseidon_cli/coverage.xml,/home/runner/work/poseidon/poseidon/lib/poseidon_core/coverage.xml
+          files: /home/runner/work/poseidon/poseidon/lib/poseidon_api/coverage.xml,/home/runner/work/poseidon/poseidon/lib/poseidon_cli/coverage.xml,/home/runner/work/poseidon/poseidon/lib/poseidon_core/coverage.xml
           fail_ci_if_error: true
