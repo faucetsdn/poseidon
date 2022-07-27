@@ -1,3 +1,10 @@
+# v0.18.0
+
+* Moved to poetry for package management and dependencies
+* Restructured components to work with poetry
+* Upgraded dependencies
+* Require at least python3.8
+
 # v0.17.21
 
 * Upgrade to OVS 2.17.2

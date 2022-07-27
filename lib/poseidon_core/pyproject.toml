@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "poseidon-core"
-version = "0.17.22.dev"
+version = "0.18.0"
 description = "Poseidon core package, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of analytic tools."
 authors = ["cglewis <clewis@iqt.org>"]
 license = "Apache-2.0"
