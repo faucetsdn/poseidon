@@ -23,5 +23,5 @@ jobs:
         poetry config virtualenvs.create false && \
         cd lib/poseidon_api && poetry build && poetry publish -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_TOKEN }} && cd ../../ && \
         cd lib/poseidon_cli && poetry build && poetry publish -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_TOKEN }} && cd ../../ && \
-        cd lib/poseidon_core && poetry build && poetry publish -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_TOKEN }} && cd ../../ && \
+        cd lib/poseidon_core && poetry build && poetry publish -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_TOKEN }} && cd ../../
       if: github.repository == 'iqtlabs/poseidon' && github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
