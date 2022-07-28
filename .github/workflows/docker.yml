@@ -41,11 +41,11 @@ jobs:
         DOCKER_CLI_EXPERIMENTAL: enabled
       run: |
         docker buildx build \
-          --platform linux/amd64,linux/arm/v7,linux/arm64 \
+          --platform linux/amd64,linux/arm64 \
           --push \
           -t iqtlabs/poseidon:${{ steps.change_version.outputs.VERSION }} . && \
         docker buildx build \
-          --platform linux/amd64,linux/arm/v7,linux/arm64 \
+          --platform linux/amd64,linux/arm64 \
           --push \
           -t iqtlabs/poseidon-workers:${{ steps.change_version.outputs.VERSION }} workers
       if: github.repository == 'iqtlabs/poseidon' && github.event_name == 'push'

@@ -678,18 +678,18 @@ dev = ["tox", "pre-commit"]
 
 [[package]]
 name = "poseidon-core"
-version = "0.17.21"
+version = "0.18.0"
 description = "Poseidon core package, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of analytic tools."
 category = "main"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.8,<3.11"
 
 [package.dependencies]
 faucetconfrpc = "0.22.38"
 httpx = "0.23.0"
 netaddr = "0.8.0"
 pika = "1.3.0"
-prometheus-client = "0.14.1"
+prometheus_client = "0.14.1"
 pyyaml = "6.0"
 schedule = "1.1.0"
 transitions = "0.8.11"
@@ -1108,7 +1108,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8 <3.11"
-content-hash = "29212f76d2267112494d0e270ba92b8ba9a52b999cd2f69d4213d5a8dda3da3d"
+content-hash = "ac0ea6e26993e37ca60d02d1e1cc9ad107afab753e06fff516bead5af53eea40"
 
 [metadata.files]
 anyio = [
@@ -1701,8 +1701,8 @@ pluggy = [
     {file = "pluggy-1.0.0.tar.gz", hash = "sha256:4224373bacce55f955a878bf9cfa763c1e360858e330072059e10bad68531159"},
 ]
 poseidon-core = [
-    {file = "poseidon_core-0.17.21-py2.py3-none-any.whl", hash = "sha256:e7954adbcca5a040d71e642ce3d975b917dab99480f1223f66bc402c81c82347"},
-    {file = "poseidon_core-0.17.21.tar.gz", hash = "sha256:e53d4e902e37531b2c0a5a9557f9dcfdcb66eac42a66681a3842628c1dc0ad77"},
+    {file = "poseidon-core-0.18.0.tar.gz", hash = "sha256:ec2e146a71556e780bee96e614c318b4d924dabf74a0e12c5bed19734dceea3e"},
+    {file = "poseidon_core-0.18.0-py3-none-any.whl", hash = "sha256:ce2842a018ab4297f5a643cf66cae16b266bde0abef22ec063461b272f2a9558"},
 ]
 prometheus-client = [
     {file = "prometheus_client-0.14.1-py3-none-any.whl", hash = "sha256:522fded625282822a89e2773452f42df14b5a8e84a86433e3f8a189c1d54dc01"},
