@@ -1,3 +1,7 @@
+# v0.18.1
+
+* Remove build for arm v7 due to ninja not being able to compile anymore
+
 # v0.18.0
 
 * Moved to poetry for package management and dependencies
