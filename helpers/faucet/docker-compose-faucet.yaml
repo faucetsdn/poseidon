@@ -3,7 +3,7 @@ version: '3.7'
 services:
     gauge:
         restart: always
-        image: 'c65sdn/gauge:1.0.36'
+        image: 'c65sdn/gauge:1.0.37'
         environment:
             GAUGE_CONFIG: '/etc/faucet/gauge.yaml'
             GAUGE_CONFIG_STAT_RELOAD: '1'
