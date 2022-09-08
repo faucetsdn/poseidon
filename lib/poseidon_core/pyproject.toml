@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "poseidon-core"
-version = "0.18.2.dev"
+version = "0.18.2"
 description = "Poseidon core package, an application that leverages software defined networks (SDN) to acquire and then feed network traffic to a number of analytic tools."
 authors = ["cglewis <clewis@iqt.org>"]
 license = "Apache-2.0"
@@ -28,7 +28,7 @@ netifaces = "0.11.0"
 pylint = "2.15.2"
 pytest-cov = "3.0.0"
 pytest = "7.1.3"
-pytype = "2022.8.30"
+pytype = "2022.9.8"
 "ruamel.yaml" = "0.17.21"
 
 [tool.poetry.scripts]

@@ -1,3 +1,7 @@
+# v0.18.2
+
+* Upgrade faucetconfrpc, faucet, gauge, grafana, pylint, pytype
+
 # v0.18.1
 
 * Remove build for arm v7 due to ninja not being able to compile anymore
