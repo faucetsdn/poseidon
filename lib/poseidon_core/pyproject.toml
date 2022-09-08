@@ -20,7 +20,7 @@ schedule = "1.1.0"
 transitions = "0.8.11"
 
 [tool.poetry.dev-dependencies]
-black = "22.6.0"
+black = "22.8.0"
 docker = "6.0.0"
 httmock = "1.4.0"
 mock = "4.0.3"
