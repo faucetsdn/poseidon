@@ -10,7 +10,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.8 <3.11"
-bjoern = "3.2.1"
+bjoern = "3.2.2"
 falcon = "3.1.0"
 falcon-cors = "1.1.7"
 httpx = "0.23.0"
