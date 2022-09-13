@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "poseidon-cli"
-version = "0.18.2.dev"
+version = "0.18.2"
 description = "Commandline tool for querying Poseidon via Prometheus"
 authors = ["cglewis <clewis@iqt.org>"]
 license = "Apache-2.0"
