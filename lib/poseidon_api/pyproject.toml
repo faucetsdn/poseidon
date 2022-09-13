@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "poseidon-api"
-version = "0.18.2"
+version = "0.18.3.dev"
 description = "RESTful API for querying Poseidon"
 authors = ["cglewis <clewis@iqt.org>"]
 license = "Apache-2.0"
