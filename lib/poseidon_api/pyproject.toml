@@ -36,5 +36,5 @@ poseidon-api = 'poseidon_api.api:main'
 homepage = "https://github.com/IQTLabs/poseidon"
 
 [build-system]
-requires = ["poetry-core>=1.0.0","setuptools<=65.0.0"]
+requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
