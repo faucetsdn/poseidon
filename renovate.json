@@ -1,7 +1,4 @@
 {
-  "constraints": {
-    "poetry": "1.1.15"
-  },
   "extends": [
     "config:base",
     "docker:enableMajor"
