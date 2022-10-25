@@ -9,7 +9,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8 <3.12"
+python = ">=3.8 <3.11"
 faucetconfrpc = "0.22.43"
 httpx = "0.23.0"
 netaddr = "0.8.0"
