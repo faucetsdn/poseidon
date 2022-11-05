@@ -17,7 +17,7 @@ texttable = "1.6.4"
 
 [tool.poetry.dev-dependencies]
 black = "22.10.0"
-docker = "6.0.0"
+docker = "6.0.1"
 httmock = "1.4.0"
 mock = "4.0.3"
 netifaces = "0.11.0"
