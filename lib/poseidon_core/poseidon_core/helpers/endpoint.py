@@ -233,7 +233,7 @@ class Endpoint:
     @staticmethod
     def make_hash(machine, trunk=False):
         """hash the unique metadata parts of an endpoint"""
-        h = hashlib.new("ripemd160")
+        h = hashlib.sha256()
         words = ["tenant", "mac", "segment"]
         if trunk:
             words.append("ipv4")
