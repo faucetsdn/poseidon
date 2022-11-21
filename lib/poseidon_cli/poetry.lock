@@ -1006,8 +1006,8 @@ widechars = ["wcwidth"]
 
 [[package]]
 name = "texttable"
-version = "1.6.4"
-description = "module for creating simple ASCII tables"
+version = "1.6.5"
+description = "module to create simple ASCII tables"
 category = "main"
 optional = false
 python-versions = "*"
@@ -1128,7 +1128,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8 <3.11"
-content-hash = "c4620fdd897f55d857087d044824d8f65178be6e1a4c6de9346b600248846d4c"
+content-hash = "fc928453c55a3cb1806dbc1f9146dbc660a0e62899d5717beae7207b7d6e9acc"
 
 [metadata.files]
 anyio = [
@@ -1917,8 +1917,8 @@ tabulate = [
     {file = "tabulate-0.8.10.tar.gz", hash = "sha256:6c57f3f3dd7ac2782770155f3adb2db0b1a269637e42f27599925e64b114f519"},
 ]
 texttable = [
-    {file = "texttable-1.6.4-py2.py3-none-any.whl", hash = "sha256:dd2b0eaebb2a9e167d1cefedab4700e5dcbdb076114eed30b58b97ed6b37d6f2"},
-    {file = "texttable-1.6.4.tar.gz", hash = "sha256:42ee7b9e15f7b225747c3fa08f43c5d6c83bc899f80ff9bae9319334824076e9"},
+    {file = "texttable-1.6.5-py2.py3-none-any.whl", hash = "sha256:a169c9a3598f2ef3721123c2951fdaa954dae4593a4adef0a855eb02955f83ff"},
+    {file = "texttable-1.6.5.tar.gz", hash = "sha256:fc3f763a89796ae03789a02343bd4e8fed9735935123b1bfb9537a5935852315"},
 ]
 toml = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
