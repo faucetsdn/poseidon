@@ -15,7 +15,7 @@ services:
             - poseidon
     grafana:
         restart: always
-        image: 'grafana/grafana:9.2.5'
+        image: 'grafana/grafana:9.2.6'
         user: 'root'
         ports:
             - '3000:3000'
