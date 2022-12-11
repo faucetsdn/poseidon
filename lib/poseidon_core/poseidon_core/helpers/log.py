@@ -63,7 +63,7 @@ class Logger:
     if host != "NOT_CONFIGURED":  # pragma: no cover
         # if a syslog address was supplied, log to it
         syslog = logging.handlers.SysLogHandler(
-            address=(host, port), socktype=socket.SOCK_STREAM
+            address=(host, port), facility=1, socktype=socket.SOCK_STREAM
         )
         f_format = "%(asctime)s [%(levelname)s] %(name)s - %(message)s"
         f_formatter = logging.Formatter(f_format)
