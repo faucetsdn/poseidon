@@ -62,7 +62,7 @@ class Logger:
     # don't try to connect to a syslog address if one was not supplied
     if host != "NOT_CONFIGURED":  # pragma: no cover
         # if a syslog address was supplied, log to it
-        syslog = logging.handlers.SysLogHandler(
+        syslog = logging.handlers.SysLogHandler(  # pytype: disable=wrong-arg-types
             address=(host, port), facility=1, socktype=socket.SOCK_STREAM
         )
         f_format = "%(asctime)s [%(levelname)s] %(name)s - %(message)s"
