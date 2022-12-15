@@ -2,7 +2,7 @@
 version: '3.7'
 services:
   ovs:
-    image: iqtlabs/openvswitch:v2.17.2
+    image: iqtlabs/openvswitch:v3.0.2
     network_mode: host
     devices:
       - "/dev/net/tun:/dev/net/tun"
