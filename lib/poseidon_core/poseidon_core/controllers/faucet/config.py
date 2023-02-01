@@ -10,7 +10,6 @@ class EmptyFaucetConf(Exception):
 
 
 class FaucetRemoteConfGetSetter:
-
     DEFAULT_CONFIG_FILE = ""
 
     def __init__(

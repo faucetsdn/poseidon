@@ -18,7 +18,6 @@ for route in r:
 
 
 def main():
-
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--port", "-p", help="Port to run the API webserver on", type=int, default=8000
