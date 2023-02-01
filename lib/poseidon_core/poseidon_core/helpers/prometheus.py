@@ -239,7 +239,6 @@ class Prometheus:
         return metrics
 
     def update_metrics(self, hosts):
-
         metrics = Prometheus.get_metrics()
         metrics["info"]["version"] = __version__
 

@@ -35,7 +35,6 @@ def endpoint_copro_transit_wrap(trigger, source, dest):
 
 
 class Endpoint:
-
     states = ["known", "unknown", "operating", "queued"]
 
     transitions = [

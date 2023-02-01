@@ -26,7 +26,6 @@ def get_ether_vendor(mac, lookup_path):
 
 
 class DNSResolver:
-
     TIMEOUT = 5
 
     @staticmethod
