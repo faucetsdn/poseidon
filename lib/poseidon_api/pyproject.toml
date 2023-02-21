@@ -26,7 +26,7 @@ netifaces = "0.11.0"
 pylint = "2.16.2"
 pytest-cov = "4.0.0"
 pytest = "7.2.1"
-pytype = "2023.2.14"
+pytype = "2023.2.17"
 "ruamel.yaml" = "0.17.21"
 
 [tool.poetry.scripts]
