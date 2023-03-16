@@ -103,9 +103,9 @@ for i in $(jq < workers/workers.json '.workers[] | .image + ":" + .version' | se
         docker pull $i
 done
 
-COMPOSE_PROJECT_NAME=ovs docker-compose -f tests/test-e2e-ovs.yml down
-COMPOSE_PROJECT_NAME=ovs docker-compose -f tests/test-e2e-ovs.yml rm -f
-COMPOSE_PROJECT_NAME=ovs docker-compose -f tests/test-e2e-ovs.yml up -d
+COMPOSE_PROJECT_NAME=ovs docker compose -f tests/test-e2e-ovs.yml down
+COMPOSE_PROJECT_NAME=ovs docker compose -f tests/test-e2e-ovs.yml rm -f
+COMPOSE_PROJECT_NAME=ovs docker compose -f tests/test-e2e-ovs.yml up -d
 OVSID="$(docker ps -q --filter name=ovs)"
 while ! docker exec -t $OVSID ovs-vsctl show ; do
         echo waiting for OVS
@@ -203,5 +203,5 @@ $CLICMD "show version"
 poseidon -V
 poseidon -S
 poseidon -d
-COMPOSE_PROJECT_NAME=ovs docker-compose -f tests/test-e2e-ovs.yml stop
+COMPOSE_PROJECT_NAME=ovs docker compose -f tests/test-e2e-ovs.yml stop
 rm -rf $TMPDIR
