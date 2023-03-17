@@ -14,7 +14,7 @@ WORKERS_JSON = "workers/workers.json"
 
 def test_setup_docker():
     d = setup_docker()
-    d.networks.create("poseidon_poseidon")
+    d.networks.create("poseidon-poseidon")
 
 
 def test_load_workers():

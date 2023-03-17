@@ -103,9 +103,9 @@ for i in $(jq < workers/workers.json '.workers[] | .image + ":" + .version' | se
         docker pull $i
 done
 
-COMPOSE_PROJECT_NAME=ovs docker-compose -f tests/test-e2e-ovs.yml down
-COMPOSE_PROJECT_NAME=ovs docker-compose -f tests/test-e2e-ovs.yml rm -f
-COMPOSE_PROJECT_NAME=ovs docker-compose -f tests/test-e2e-ovs.yml up -d
+COMPOSE_PROJECT_NAME=ovs docker compose -f tests/test-e2e-ovs.yml down
+COMPOSE_PROJECT_NAME=ovs docker compose -f tests/test-e2e-ovs.yml rm -f
+COMPOSE_PROJECT_NAME=ovs docker compose -f tests/test-e2e-ovs.yml up -d
 OVSID="$(docker ps -q --filter name=ovs)"
 while ! docker exec -t $OVSID ovs-vsctl show ; do
         echo waiting for OVS
@@ -147,8 +147,8 @@ wait_var_nonzero "port_status{port=\"3\"}" "" port_status
 wait_job_up gauge:9303
 wait_var_nonzero "dp_status{dp_name=\"switch1\"}" "" dp_status
 wait_job_up poseidon:9304
-docker logs poseidon_prometheus_1 2>&1 | grep yml || true
-docker logs poseidon_prometheus_1 2>&1 | grep -i error || true
+docker logs poseidon-prometheus-1 2>&1 | grep yml || true
+docker logs poseidon-prometheus-1 2>&1 | grep -i error || true
 for i in sw1a sw1b ; do
         sudo ip link set $i up
 done
@@ -203,5 +203,5 @@ $CLICMD "show version"
 poseidon -V
 poseidon -S
 poseidon -d
-COMPOSE_PROJECT_NAME=ovs docker-compose -f tests/test-e2e-ovs.yml stop
+COMPOSE_PROJECT_NAME=ovs docker compose -f tests/test-e2e-ovs.yml stop
 rm -rf $TMPDIR
