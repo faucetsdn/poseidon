@@ -36,7 +36,7 @@ function tmpdir()
 
 function check_args()
 {
-    for req_cmd in curl docker docker-compose jq wget git ; do
+    for req_cmd in curl docker jq wget git ; do
             $req_cmd --help > /dev/null || die "$req_cmd must be installed"
     done
 
@@ -165,9 +165,9 @@ function check_args()
                     composefiles+=(-f helpers/faucet/docker-compose-faucet.yaml -f helpers/faucet/docker-compose-monitoring.yaml)
                 fi
                 sudo chown "$USER" -R "$POSEIDON_PREFIX"/opt/faucetconfrpc
-                docker-compose "${composefiles[@]}" up --force-recreate -d --build --quiet-pull || die "docker-compose returned an error"
+                docker compose "${composefiles[@]}" up --force-recreate -d --build --quiet-pull || die "docker compose returned an error"
                 echo -n "Waiting for Poseidon to become healthy..."
-                until [ "$(docker ps -q --filter "label=com.docker.compose.service=poseidon")" ] && [ "$(docker inspect poseidon_poseidon_1 -f \{\{.State.Health.Status\}\})" = "healthy" ]
+                until [ "$(docker ps -q --filter "label=com.docker.compose.service=poseidon")" ] && [ "$(docker inspect poseidon-poseidon-1 -f \{\{.State.Health.Status\}\})" = "healthy" ]
                 do
                     echo -n "\\"
                     echo -en "\\b"
@@ -196,7 +196,7 @@ function check_args()
                 else
                     echo "Poseidon is not running."
                 fi
-                docker network rm poseidon_poseidon || true
+                docker network rm poseidon-poseidon || true
                 exit
                 ;;
             -u|update)

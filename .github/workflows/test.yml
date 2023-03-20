@@ -23,4 +23,4 @@ jobs:
         export DEBIAN_FRONTEND=noninteractive && \
         echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections
         sudo apt-get update && sudo apt-get install -y libev-dev tshark wget jq tcpreplay tcpdump
-        docker system prune -a -f --volumes && pip3 install -U docker-compose && ./tests/test_e2e.sh
+        docker system prune -a -f --volumes && ./tests/test_e2e.sh
