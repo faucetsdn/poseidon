@@ -13,7 +13,7 @@ python = ">=3.8 <3.11"
 bjoern = "3.2.2"
 falcon = "3.1.1"
 falcon-cors = "1.1.7"
-httpx = "0.23.3"
+httpx = "0.24.0"
 natural = "0.2.0"
 poseidon-core = { path="../poseidon_core", develop=true }
 
@@ -27,7 +27,7 @@ pylint = "2.17.3"
 pytest-cov = "4.0.0"
 pytest = "7.3.1"
 pytype = "2023.4.27"
-"ruamel.yaml" = "0.17.21"
+"ruamel.yaml" = "0.17.22"
 
 [tool.poetry.scripts]
 poseidon-api = 'poseidon_api.api:main'
