@@ -55,25 +55,27 @@ class Collector(object):
         )
         uri = "http://" + network_tap_addr + "/create"
 
-        try:
-            resp = httpx.post(uri, json=payload)
-            # TODO improve logged output
-            self.logger.debug("Collector response: {0}".format(resp.text))
-            response = ast.literal_eval(resp.text)
-            if response[0]:
-                self.logger.info(
-                    "Successfully started the collector for: {0}".format(self.id)
-                )
-                self.endpoint.endpoint_data["container_id"] = (
-                    response[1].rsplit(":", 1)[-1].strip()
-                )
-                status = True
-            else:
-                self.logger.error(
-                    "Failed to start collector because: {0}".format(response[1])
-                )
-        except Exception as e:  # pragma: no cover
-            self.logger.error("Failed to start collector because: {0}".format(str(e)))
+        for i in range(3):
+            try:
+                resp = httpx.post(uri, json=payload, timeout=10)
+                # TODO improve logged output
+                self.logger.debug("Collector response: {0}".format(resp.text))
+                response = ast.literal_eval(resp.text)
+                if response[0]:
+                    self.logger.info(
+                        "Successfully started the collector for: {0}".format(self.id)
+                    )
+                    self.endpoint.endpoint_data["container_id"] = (
+                        response[1].rsplit(":", 1)[-1].strip()
+                    )
+                    status = True
+                    break
+                else:
+                    self.logger.error(
+                        "Failed to start collector try {0} because: {1}".format(i, response[1])
+                    )
+            except Exception as e:  # pragma: no cover
+                self.logger.error("Failed to start collector try {0} because: {1}".format(i, str(e)))
         return status
 
     def stop_collector(self):
