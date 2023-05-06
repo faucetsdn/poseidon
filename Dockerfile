@@ -9,15 +9,16 @@ ENV POSEIDON_CONFIG /opt/poseidon/poseidon.config
 COPY . /poseidon
 WORKDIR /poseidon
 
-RUN apt-get update && apt-get install -y --no-install-recommends curl && \
+RUN apt-get update && apt-get install -y --no-install-recommends curl tini && \
     curl -sSL https://install.python-poetry.org | python3 - --version 1.4.2 && \
     poetry config virtualenvs.create false && \
     apt -y autoremove --purge && rm -rf /var/cache/* /root/.cache/*
-
 WORKDIR /poseidon/lib/poseidon_cli
-RUN poetry install --no-interaction --no-ansi && poetry build
+RUN apt-get update && apt-get install -y --no-install-recommends gcc g++ && \
+    poetry install --no-interaction --no-ansi && poetry build && \
+    apt-get purge -y gcc g++ && apt -y autoremove --purge && rm -rf /var/cache/* /root/.cache/*
 WORKDIR /poseidon/lib/poseidon_core
-RUN apt-get update && apt-get install -y --no-install-recommends gcc git g++ libev-dev libyaml-dev tini && \
+RUN apt-get update && apt-get install -y --no-install-recommends git gcc g++ libev-dev libyaml-dev && \
     poetry run pip install 'setuptools==64.0.3' && poetry install --no-interaction --no-ansi && poetry build && \
     apt-get purge -y gcc g++ && apt -y autoremove --purge && rm -rf /var/cache/* /root/.cache/*
 WORKDIR /poseidon/lib/poseidon_api
