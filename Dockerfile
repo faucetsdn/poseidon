@@ -9,7 +9,7 @@ WORKDIR /poseidon
 
 ENV PATH="${PATH}:/root/.local/bin"
 RUN apt-get update && apt-get install -y --no-install-recommends curl gcc git g++ libev-dev libyaml-dev tini && \
-  curl -sSL https://install.python-poetry.org | python3 - --version 1.1.15 && \
+  curl -sSL https://install.python-poetry.org | python3 - --version 1.4.2 && \
   poetry config virtualenvs.create false && \
   cd lib/poseidon_api && poetry install --no-interaction --no-ansi && poetry build && cd ../../ && \
   cd lib/poseidon_cli && poetry install --no-interaction --no-ansi && poetry build && cd ../../ && \
