@@ -18,7 +18,7 @@ prometheus_client = "0.16.0"
 pyyaml = "6.0"
 schedule = "1.2.0"
 transitions = "0.9.0"
-requests = "<2.29.0"
+requests = "<2.30.1"
 urllib3 = "<2.0.0"
 
 [tool.poetry.dev-dependencies]
