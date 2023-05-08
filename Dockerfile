@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl gcc git g+
   poetry config virtualenvs.create false && \
   cd lib/poseidon_api && poetry install --no-interaction --no-ansi && poetry build && cd ../../ && \
   cd lib/poseidon_cli && poetry install --no-interaction --no-ansi && poetry build && cd ../../ && \
-  cd lib/poseidon_core && poetry run pip install 'setuptools==64.0.3' && poetry install --no-interaction --no-ansi && poetry build && cd ../../ && \
+  cd lib/poseidon_core && poetry install --no-interaction --no-ansi && poetry build && cd ../../ && \
   apt-get purge -y gcc g++ && apt -y autoremove --purge && rm -rf /var/cache/* /root/.cache/*
 
 HEALTHCHECK --interval=15s --timeout=15s \
