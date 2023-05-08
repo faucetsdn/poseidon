@@ -3,7 +3,7 @@ version: '3.7'
 services:
     gauge:
         restart: always
-        image: 'c65sdn/gauge:1.0.50'
+        image: 'c65sdn/gauge:1.0.52'
         environment:
             GAUGE_CONFIG: '/etc/faucet/gauge.yaml'
             GAUGE_CONFIG_STAT_RELOAD: '1'
@@ -16,7 +16,7 @@ services:
             - poseidon
     faucet:
         restart: always
-        image: 'c65sdn/faucet:1.0.50'
+        image: 'c65sdn/faucet:1.0.52'
         volumes:
             - '${POSEIDON_PREFIX}/var/log/faucet:/var/log/faucet'
             - '${POSEIDON_PREFIX}/var/run/faucet:/var/run/faucet'
