@@ -21,7 +21,7 @@ poseidon-core = { path="../poseidon_core", develop=true }
 
 [tool.poetry.dev-dependencies]
 black = "23.3.0"
-docker = "6.1.1"
+docker = "6.1.2"
 httmock = "1.4.0"
 mock = "5.0.2"
 netifaces = "0.11.0"
