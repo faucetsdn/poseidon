@@ -133,9 +133,9 @@ class Nodes:
                 if "result" in results["data"] and results["data"]["result"]:
                     for metric in results["data"]["result"]:
                         if metric["metric"]["hash_id"] in role_hashes:
-                            role_hashes[metric["metric"]["hash_id"]][
-                                "second_role"
-                            ] = metric["metric"].get("role", NO_DATA)
+                            role_hashes[metric["metric"]["hash_id"]]["second_role"] = (
+                                metric["metric"].get("role", NO_DATA)
+                            )
                             role_hashes[metric["metric"]["hash_id"]][
                                 "second_confidence"
                             ] = float(metric["values"][-1][1])
@@ -145,9 +145,9 @@ class Nodes:
                 if "result" in results["data"] and results["data"]["result"]:
                     for metric in results["data"]["result"]:
                         if metric["metric"]["hash_id"] in role_hashes:
-                            role_hashes[metric["metric"]["hash_id"]][
-                                "third_role"
-                            ] = metric["metric"].get("role", NO_DATA)
+                            role_hashes[metric["metric"]["hash_id"]]["third_role"] = (
+                                metric["metric"].get("role", NO_DATA)
+                            )
                             role_hashes[metric["metric"]["hash_id"]][
                                 "third_confidence"
                             ] = float(metric["values"][-1][1])
