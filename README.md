@@ -1,8 +1,8 @@
 # Poseidon
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-![Build Status](https://github.com/IQTLabs/poseidon/workflows/test/badge.svg)
-[![codecov](https://codecov.io/gh/IQTLabs/poseidon/branch/main/graph/badge.svg?token=ORXmFYC3MM)](https://codecov.io/gh/IQTLabs/poseidon)
+![Build Status](https://github.com/faucetsdn/poseidon/workflows/test/badge.svg)
+[![codecov](https://codecov.io/github/faucetsdn/poseidon/graph/badge.svg?token=PJmRKQMk1P)](https://codecov.io/github/faucetsdn/poseidon)
 [![Docker Hub Downloads](https://img.shields.io/docker/pulls/iqtlabs/poseidon.svg)](https://hub.docker.com/r/iqtlabs/poseidon/)
 
 > Software Defined Network Situational Awareness

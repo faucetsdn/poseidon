@@ -67,7 +67,8 @@ jobs:
           cd lib/poseidon_cli && poetry run pip install 'setuptools==64.0.3' && poetry run pytest --cov-report term-missing --cov=. --cov-report=xml && cd ../../
           cd lib/poseidon_core && poetry run pip install 'setuptools==64.0.3' && poetry run pytest --cov-report term-missing --cov=. --cov-report=xml && cd ../../
       - name: Upload coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           files: /home/runner/work/poseidon/poseidon/lib/poseidon_api/coverage.xml,/home/runner/work/poseidon/poseidon/lib/poseidon_cli/coverage.xml,/home/runner/work/poseidon/poseidon/lib/poseidon_core/coverage.xml
           fail_ci_if_error: true
