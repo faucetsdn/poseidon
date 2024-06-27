@@ -15,7 +15,7 @@ natural = "0.2.0"
 poseidon-core = { path="../poseidon_core", develop=true }
 texttable = "1.6.7"
 requests = "<2.31.1"
-urllib3 = "<2.0.8"
+urllib3 = "<2.2.3"
 
 [tool.poetry.dev-dependencies]
 black = "24.3.0"
