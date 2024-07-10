@@ -14,7 +14,7 @@ cmd2 = "2.4.3"
 natural = "0.2.0"
 poseidon-core = { path="../poseidon_core", develop=true }
 texttable = "1.6.7"
-requests = "<2.31.1"
+requests = "<2.32.3"
 urllib3 = "<2.2.3"
 
 [tool.poetry.dev-dependencies]
